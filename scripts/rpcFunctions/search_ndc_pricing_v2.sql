@@ -34,9 +34,10 @@ BEGIN
   
   -- Main query that replicates optimization service logic EXACTLY
   WITH 
-  -- Step 1: Get ALL return_reports with joins (same as optimization service lines 219-234)
-  -- This mirrors: db.from('return_reports').select(selectFields)
-  all_reports AS (
+  -- Step 1: Get ALL return_reports EXACTLY like optimization service
+  -- CRITICAL: No NDC filtering here - get ALL records first, then sort, then filter
+  -- This matches optimization service: db.from('return_reports').select(selectFields)
+  all_reports_unfiltered AS (
     SELECT 
       rr.id,
       rr.data,
@@ -49,7 +50,7 @@ BEGIN
       rd.contact_email,
       rd.contact_phone,
       rd.address,
-      -- Extract NDC (same as optimization service line 509: item.ndcCode || item.ndc)
+      -- Extract NDC (same as optimization service line 509)
       COALESCE(rr.data->>'ndcCode', rr.data->>'ndc') AS ndc_code,
       -- Normalize NDC (same as optimization service line 519)
       LOWER(REPLACE(COALESCE(rr.data->>'ndcCode', rr.data->>'ndc', ''), '-', '')) AS ndc_normalized,
@@ -60,11 +61,10 @@ BEGIN
         rr.data->'reverseDistributorInfo'->>'name',
         'Unknown Distributor'
       )) AS distributor_name,
-      -- Get full and partial counts (same as optimization service lines 522-523)
+      -- Get full and partial counts
       COALESCE((rr.data->>'full')::INTEGER, 0) AS item_full,
       COALESCE((rr.data->>'partial')::INTEGER, 0) AS item_partial,
-      -- Calculate price per unit (same as optimization service line 689)
-      -- pricePerUnit = item.pricePerUnit || (creditAmount / quantity when valid)
+      -- Calculate price per unit
       COALESCE(
         (rr.data->>'pricePerUnit')::DECIMAL,
         CASE 
@@ -74,7 +74,7 @@ BEGIN
           ELSE 0 
         END
       ) AS price_per_unit,
-      -- Get product name (same priority as optimization service line 622)
+      -- Get product name
       COALESCE(
         NULLIF(TRIM(rr.data->>'itemName'), ''),
         NULLIF(TRIM(rr.data->>'productName'), ''),
@@ -84,36 +84,40 @@ BEGIN
         NULLIF(TRIM(rr.data->>'drugName'), ''),
         NULLIF(TRIM(rr.data->>'name'), '')
       ) AS product_name,
-      -- Sort date calculation (same as optimization service lines 716-721, 340-352)
-      -- Priority: report_date > uploaded_at > created_at
+      -- JavaScript equivalent timestamp
+      CASE 
+        WHEN ud.report_date IS NOT NULL THEN EXTRACT(EPOCH FROM ud.report_date::TIMESTAMP WITH TIME ZONE) * 1000
+        WHEN ud.uploaded_at IS NOT NULL THEN EXTRACT(EPOCH FROM ud.uploaded_at) * 1000
+        WHEN rr.created_at IS NOT NULL THEN EXTRACT(EPOCH FROM rr.created_at) * 1000
+        ELSE 0
+      END AS sort_date_ms,
       COALESCE(ud.report_date::TIMESTAMP WITH TIME ZONE, ud.uploaded_at, rr.created_at) AS sort_date
     FROM return_reports rr
     JOIN uploaded_documents ud ON rr.document_id = ud.id
     LEFT JOIN reverse_distributors rd ON ud.reverse_distributor_id = rd.id
-    WHERE 
-      -- Must have valid NDC
-      COALESCE(rr.data->>'ndcCode', rr.data->>'ndc') IS NOT NULL
-      AND TRIM(COALESCE(rr.data->>'ndcCode', rr.data->>'ndc', '')) != ''
-      -- Must have valid distributor name (same check as optimization service lines 464-465)
-      AND TRIM(COALESCE(
-        rd.name,
-        rr.data->>'reverseDistributor',
-        rr.data->'reverseDistributorInfo'->>'name',
-        'Unknown Distributor'
-      )) != 'Unknown Distributor'
+    -- NO NDC FILTERING - get ALL records like optimization service
   ),
   
-  -- Step 2: Filter to matching NDCs (same as optimization service exact match logic lines 592-596)
+  -- Step 2: Sort ALL records like JavaScript does (lines 1904-1910)
+  all_reports_sorted AS (
+    SELECT *,
+      ROW_NUMBER() OVER (ORDER BY sort_date_ms DESC, created_at DESC, id ASC) as global_sort_order
+    FROM all_reports_unfiltered
+  ),
+  
+  -- Step 3: Filter to matching NDCs AFTER sorting (like optimization service does in forEach)
   matched_reports AS (
     SELECT *
-    FROM all_reports
-    WHERE ndc_normalized = v_search_normalized
-    -- AND price_per_unit > 0  -- Keep all records, filter later per price type
+    FROM all_reports_sorted
+    WHERE 
+      ndc_normalized = v_search_normalized
+      AND distributor_name != 'Unknown Distributor'
+      AND ndc_code IS NOT NULL
+      AND TRIM(ndc_code) != ''
   ),
   
-  -- Step 3: Get LATEST FULL price per distributor (same as optimization service lines 750-756)
-  -- isFullRecord = itemFull > 0 && itemPartial === 0
-  -- Only stores FIRST (latest) match: if (!distributorNdcToFullPriceMap[key]) { map[key] = price; }
+  -- Step 3: Get LATEST FULL price per distributor using DISTINCT ON with global sort order
+  -- This exactly replicates the optimization service's "first match wins" logic (lines 753-754)
   full_prices AS (
     SELECT DISTINCT ON (distributor_name)
       distributor_name,
@@ -129,11 +133,11 @@ BEGIN
     FROM matched_reports
     WHERE item_full > 0 AND item_partial = 0  -- isFullRecord check (line 750)
       AND price_per_unit > 0  -- Only valid prices (line 702)
-    ORDER BY distributor_name, sort_date DESC NULLS LAST, id ASC  -- Latest first
+    ORDER BY distributor_name, sort_date_ms DESC, created_at DESC, id ASC
   ),
   
-  -- Step 4: Get LATEST PARTIAL price per distributor (same as optimization service lines 758-760)
-  -- isPartialRecord = itemPartial > 0 && itemFull === 0
+  -- Step 4: Get LATEST PARTIAL price per distributor using DISTINCT ON with global sort order
+  -- This exactly replicates the optimization service's "first match wins" logic (lines 758-759)
   partial_prices AS (
     SELECT DISTINCT ON (distributor_name)
       distributor_name,
@@ -149,7 +153,7 @@ BEGIN
     FROM matched_reports
     WHERE item_partial > 0 AND item_full = 0  -- isPartialRecord check (line 751)
       AND price_per_unit > 0  -- Only valid prices
-    ORDER BY distributor_name, sort_date DESC NULLS LAST, id ASC  -- Latest first
+    ORDER BY distributor_name, sort_date_ms DESC, created_at DESC, id ASC
   ),
   
   -- Step 5: Get unique NDC info (use latest record for product name)
@@ -351,7 +355,13 @@ BEGIN
         NULLIF(TRIM(rr.data->>'drugName'), ''),
         NULLIF(TRIM(rr.data->>'name'), '')
       ) AS product_name,
-      -- Sort date calculation (same as optimization service lines 716-721)
+      -- Sort date calculation - EXACT JavaScript replication  
+      CASE 
+        WHEN ud.report_date IS NOT NULL THEN EXTRACT(EPOCH FROM ud.report_date::TIMESTAMP WITH TIME ZONE) * 1000
+        WHEN ud.uploaded_at IS NOT NULL THEN EXTRACT(EPOCH FROM ud.uploaded_at) * 1000
+        WHEN rr.created_at IS NOT NULL THEN EXTRACT(EPOCH FROM rr.created_at) * 1000
+        ELSE 0
+      END AS sort_date_ms,
       COALESCE(ud.report_date::TIMESTAMP WITH TIME ZONE, ud.uploaded_at, rr.created_at) AS sort_date
     FROM return_reports rr
     JOIN uploaded_documents ud ON rr.document_id = ud.id
@@ -367,15 +377,22 @@ BEGIN
       )) != 'Unknown Distributor'
   ),
   
-  -- Step 2: Filter to matching NDCs
+  -- Step 2: Sort ALL records like JavaScript does (lines 1904-1910)
+  all_reports_sorted AS (
+    SELECT *,
+      ROW_NUMBER() OVER (ORDER BY sort_date_ms DESC, created_at DESC, id ASC) as global_sort_order
+    FROM all_reports
+  ),
+  
+  -- Step 3: Filter to matching NDCs AFTER sorting (like optimization service does in forEach)
   matched_reports AS (
     SELECT *
-    FROM all_reports
+    FROM all_reports_sorted
     WHERE ndc_normalized = v_search_normalized
   ),
   
-  -- Step 3: Get LATEST FULL price per distributor (optimization service lines 750-756)
-  -- isFullRecord = itemFull > 0 && itemPartial === 0
+  -- Step 4: Get LATEST FULL price per distributor using DISTINCT ON with global sort order
+  -- This exactly replicates the optimization service's "first match wins" logic (lines 753-754)
   full_prices AS (
     SELECT DISTINCT ON (distributor_name)
       distributor_name,
@@ -391,11 +408,11 @@ BEGIN
     FROM matched_reports
     WHERE item_full > 0 AND item_partial = 0
       AND price_per_unit > 0
-    ORDER BY distributor_name, sort_date DESC NULLS LAST, id ASC
+    ORDER BY distributor_name, sort_date_ms DESC, created_at DESC, id ASC
   ),
   
-  -- Step 4: Get LATEST PARTIAL price per distributor (optimization service lines 758-760)
-  -- isPartialRecord = itemPartial > 0 && itemFull === 0
+  -- Step 5: Get LATEST PARTIAL price per distributor using DISTINCT ON with global sort order
+  -- This exactly replicates the optimization service's "first match wins" logic (lines 758-759)
   partial_prices AS (
     SELECT DISTINCT ON (distributor_name)
       distributor_name,
@@ -411,7 +428,7 @@ BEGIN
     FROM matched_reports
     WHERE item_partial > 0 AND item_full = 0
       AND price_per_unit > 0
-    ORDER BY distributor_name, sort_date DESC NULLS LAST, id ASC
+    ORDER BY distributor_name, sort_date_ms DESC, created_at DESC, id ASC
   ),
   
   -- Step 5: Get unique NDC info
