@@ -101,7 +101,7 @@ BEGIN
   -- Step 2: Sort ALL records like JavaScript does (lines 1904-1910)
   all_reports_sorted AS (
     SELECT *,
-      ROW_NUMBER() OVER (ORDER BY sort_date_ms DESC, created_at DESC, id ASC) as global_sort_order
+      ROW_NUMBER() OVER (ORDER BY sort_date_ms DESC, created_at ASC, id ASC) as global_sort_order
     FROM all_reports_unfiltered
   ),
   
@@ -133,7 +133,7 @@ BEGIN
     FROM matched_reports
     WHERE item_full > 0 AND item_partial = 0  -- isFullRecord check (line 750)
       AND price_per_unit > 0  -- Only valid prices (line 702)
-    ORDER BY distributor_name, sort_date_ms DESC, created_at DESC, id ASC
+    ORDER BY distributor_name, sort_date_ms DESC, created_at ASC, id ASC
   ),
   
   -- Step 4: Get LATEST PARTIAL price per distributor using DISTINCT ON with global sort order
@@ -153,7 +153,7 @@ BEGIN
     FROM matched_reports
     WHERE item_partial > 0 AND item_full = 0  -- isPartialRecord check (line 751)
       AND price_per_unit > 0  -- Only valid prices
-    ORDER BY distributor_name, sort_date_ms DESC, created_at DESC, id ASC
+    ORDER BY distributor_name, sort_date_ms DESC, created_at ASC, id ASC
   ),
   
   -- Step 5: Get unique NDC info (use latest record for product name)
@@ -380,7 +380,7 @@ BEGIN
   -- Step 2: Sort ALL records like JavaScript does (lines 1904-1910)
   all_reports_sorted AS (
     SELECT *,
-      ROW_NUMBER() OVER (ORDER BY sort_date_ms DESC, created_at DESC, id ASC) as global_sort_order
+      ROW_NUMBER() OVER (ORDER BY sort_date_ms DESC, created_at ASC, id ASC) as global_sort_order
     FROM all_reports
   ),
   
@@ -408,7 +408,7 @@ BEGIN
     FROM matched_reports
     WHERE item_full > 0 AND item_partial = 0
       AND price_per_unit > 0
-    ORDER BY distributor_name, sort_date_ms DESC, created_at DESC, id ASC
+    ORDER BY distributor_name, sort_date_ms DESC, created_at ASC, id ASC
   ),
   
   -- Step 5: Get LATEST PARTIAL price per distributor using DISTINCT ON with global sort order
@@ -428,7 +428,7 @@ BEGIN
     FROM matched_reports
     WHERE item_partial > 0 AND item_full = 0
       AND price_per_unit > 0
-    ORDER BY distributor_name, sort_date_ms DESC, created_at DESC, id ASC
+    ORDER BY distributor_name, sort_date_ms DESC, created_at ASC, id ASC
   ),
   
   -- Step 5: Get unique NDC info
