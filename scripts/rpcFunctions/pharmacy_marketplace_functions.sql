@@ -41,7 +41,6 @@ DECLARE
   v_active_deals INTEGER;
   v_sold_deals INTEGER;
   v_expired_deals INTEGER;
-  v_deal_of_day_id UUID;
 BEGIN
   -- Calculate offset
   v_offset := (p_page - 1) * p_limit;
@@ -59,7 +58,7 @@ BEGIN
   WHERE is_deal_of_the_day = TRUE
     AND deal_of_the_day_until IS NOT NULL
     AND deal_of_the_day_until < NOW();
-    
+  
   UPDATE marketplace_deals
   SET is_deal_of_the_week = FALSE,
       deal_of_the_week_until = NULL,
@@ -75,29 +74,6 @@ BEGIN
   WHERE is_deal_of_the_month = TRUE
     AND deal_of_the_month_until IS NOT NULL
     AND deal_of_the_month_until < NOW();
-  
-  -- Get Deal of the Day ID to exclude (manual or automatic)
-  -- First check for manual Deal of the Day
-  SELECT id INTO v_deal_of_day_id
-  FROM marketplace_deals
-  WHERE is_deal_of_the_day = TRUE
-    AND status = 'active'
-    AND expiry_date >= CURRENT_DATE
-    AND quantity > 0
-  LIMIT 1;
-  
-  -- If no manual deal, get automatic selection (best savings)
-  IF v_deal_of_day_id IS NULL THEN
-    SELECT id INTO v_deal_of_day_id
-    FROM marketplace_deals
-    WHERE status = 'active'
-      AND expiry_date >= CURRENT_DATE
-      AND quantity > 0
-    ORDER BY 
-      ROUND(((original_price - deal_price) / original_price * 100), 0) DESC,
-      posted_date DESC
-    LIMIT 1;
-  END IF;
   
   -- Get unique categories from all deals
   SELECT COALESCE(jsonb_agg(DISTINCT category ORDER BY category), '[]'::jsonb)
@@ -133,7 +109,10 @@ BEGIN
       d.category ILIKE '%' || p_search || '%')
     AND (p_category IS NULL OR p_category = '' OR p_category = 'all' OR d.category = p_category)
     AND (p_status IS NULL OR p_status = '' OR p_status = 'all' OR d.status = p_status)
-    AND (v_deal_of_day_id IS NULL OR d.id != v_deal_of_day_id);
+    -- Exclude all featured deals (day, week, month)
+    AND COALESCE(d.is_deal_of_the_day, false) = false
+    AND COALESCE(d.is_deal_of_the_week, false) = false
+    AND COALESCE(d.is_deal_of_the_month, false) = false;
   
   -- Fetch deals with dynamic sorting
   SELECT COALESCE(jsonb_agg(deal_row), '[]'::jsonb)
@@ -178,7 +157,10 @@ BEGIN
         d.category ILIKE '%' || p_search || '%')
       AND (p_category IS NULL OR p_category = '' OR p_category = 'all' OR d.category = p_category)
       AND (p_status IS NULL OR p_status = '' OR p_status = 'all' OR d.status = p_status)
-      AND (v_deal_of_day_id IS NULL OR d.id != v_deal_of_day_id)
+      -- Exclude all featured deals (day, week, month)
+      AND COALESCE(d.is_deal_of_the_day, false) = false
+      AND COALESCE(d.is_deal_of_the_week, false) = false
+      AND COALESCE(d.is_deal_of_the_month, false) = false
     ORDER BY
       CASE WHEN p_sort_order = 'desc' THEN
         CASE p_sort_by

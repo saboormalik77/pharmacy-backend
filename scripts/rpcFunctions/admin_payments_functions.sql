@@ -123,22 +123,22 @@ BEGIN
       ud.file_url,
       ud.extracted_items,
       ud.processed_at
-    FROM uploaded_documents ud
-    LEFT JOIN pharmacy p ON p.id = ud.pharmacy_id
-    LEFT JOIN reverse_distributors rd ON rd.id = ud.reverse_distributor_id
-    WHERE ud.total_credit_amount IS NOT NULL
-      AND ud.total_credit_amount > 0
-      AND (
-        p_search IS NULL 
-        OR p_search = ''
-        OR p.pharmacy_name ILIKE p_search || '%'
-        OR p.name ILIKE p_search || '%'
-        OR ud.id::text ILIKE p_search || '%'
-        OR rd.name ILIKE p_search || '%'
-      )
-      AND (p_pharmacy_id IS NULL OR ud.pharmacy_id = p_pharmacy_id)
-      AND (p_start_date IS NULL OR COALESCE(ud.report_date, ud.uploaded_at::date) >= p_start_date)
-      AND (p_end_date IS NULL OR COALESCE(ud.report_date, ud.uploaded_at::date) <= p_end_date)
+  FROM uploaded_documents ud
+  LEFT JOIN pharmacy p ON p.id = ud.pharmacy_id
+  LEFT JOIN reverse_distributors rd ON rd.id = ud.reverse_distributor_id
+  WHERE ud.total_credit_amount IS NOT NULL
+    AND ud.total_credit_amount > 0
+    AND (
+      p_search IS NULL 
+      OR p_search = ''
+      OR p.pharmacy_name ILIKE p_search || '%'
+      OR p.name ILIKE p_search || '%'
+      OR ud.id::text ILIKE p_search || '%'
+      OR rd.name ILIKE p_search || '%'
+    )
+    AND (p_pharmacy_id IS NULL OR ud.pharmacy_id = p_pharmacy_id)
+    AND (p_start_date IS NULL OR COALESCE(ud.report_date, ud.uploaded_at::date) >= p_start_date)
+    AND (p_end_date IS NULL OR COALESCE(ud.report_date, ud.uploaded_at::date) <= p_end_date)
     -- Sort by date when date filters are provided, otherwise by uploaded_at
     ORDER BY 
       CASE 
@@ -147,7 +147,7 @@ BEGIN
         ELSE ud.uploaded_at::date
       END DESC,
       ud.uploaded_at DESC  -- Secondary sort for same dates
-    LIMIT p_limit
+  LIMIT p_limit
     OFFSET v_offset
   ) sub;
 
