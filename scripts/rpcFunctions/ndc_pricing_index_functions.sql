@@ -65,8 +65,10 @@ CREATE TABLE ndc_pricing_index (
   product_name TEXT,                         -- itemName from return_reports.data
   
   -- Distributor Information  
-  distributor_id UUID REFERENCES reverse_distributors(id) ON DELETE CASCADE,
-  distributor_name VARCHAR(255),
+  -- IMPORTANT: Group by distributor_name (string), NOT distributor_id (UUID)
+  -- This matches optimization API which uses distributorName as the grouping key
+  distributor_id UUID,                       -- Reference only, not for grouping
+  distributor_name VARCHAR(255) NOT NULL,    -- PRIMARY KEY for grouping (same as optimization API)
   distributor_email VARCHAR(255),
   distributor_phone VARCHAR(50),
   distributor_location TEXT,
@@ -77,18 +79,25 @@ CREATE TABLE ndc_pricing_index (
   credit_amount DECIMAL(12,4),
   quantity INTEGER,
   
-  -- Full/Partial tracking (for unit type filtering)
-  full_count INTEGER DEFAULT 0,
-  partial_count INTEGER DEFAULT 0,
+  -- CRITICAL FIX: Use BOOLEAN flags instead of actual counts!
+  -- Optimization API only cares IF (full > 0 && partial === 0), not the actual value
+  -- This ensures we store ONE "full price" per distributor-NDC, not multiple
+  is_full_record BOOLEAN NOT NULL DEFAULT FALSE,   -- TRUE if (full > 0 AND partial = 0)
+  is_partial_record BOOLEAN NOT NULL DEFAULT FALSE, -- TRUE if (partial > 0 AND full = 0)
   
   -- Metadata
   source_report_id UUID REFERENCES return_reports(id) ON DELETE SET NULL,
-  report_date DATE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  -- Date fields for ordering (SAME fallback chain as optimization API lines 340-352):
+  -- Priority: report_date > uploaded_at > source_created_at
+  report_date DATE,                          -- uploaded_documents.report_date
+  uploaded_at TIMESTAMP WITH TIME ZONE,      -- uploaded_documents.uploaded_at
+  source_created_at TIMESTAMP WITH TIME ZONE, -- return_reports.created_at (ORIGINAL, for fallback)
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   
-  -- Unique: one record per NDC-distributor-unit_type combination
-  UNIQUE(ndc_normalized, distributor_id, full_count, partial_count)
+  -- CRITICAL FIX: Use BOOLEAN flags for uniqueness
+  -- This ensures ONE full price and ONE partial price per distributor-NDC
+  -- Matching how optimization API stores prices in distributorNdcToFullPriceMap/distributorNdcToPartialPriceMap
+  UNIQUE(ndc_normalized, distributor_name, is_full_record, is_partial_record)
 );
 
 -- ============================================================
@@ -101,8 +110,11 @@ CREATE INDEX idx_ndc_pricing_ndc_trgm ON ndc_pricing_index USING gin(ndc_normali
 CREATE INDEX idx_ndc_pricing_ndc_orig_trgm ON ndc_pricing_index USING gin(ndc_original gin_trgm_ops);
 CREATE INDEX idx_ndc_pricing_product_trgm ON ndc_pricing_index USING gin(product_name gin_trgm_ops);
 CREATE INDEX idx_ndc_pricing_distributor ON ndc_pricing_index(distributor_id);
+CREATE INDEX idx_ndc_pricing_distributor_name ON ndc_pricing_index(distributor_name);
 CREATE INDEX idx_ndc_pricing_updated ON ndc_pricing_index(updated_at DESC);
 CREATE INDEX idx_ndc_pricing_report_date ON ndc_pricing_index(report_date DESC);
+-- Composite index for the UNIQUE constraint and common queries
+CREATE INDEX idx_ndc_pricing_ndc_dist_name ON ndc_pricing_index(ndc_normalized, distributor_name);
 
 -- ============================================================
 -- 3. SEARCH FUNCTION - Returns SAME format as optimization API
@@ -161,51 +173,73 @@ BEGIN
       m.product_name,
       (
         -- Get distributors with their LATEST prices (matching optimization API)
-        SELECT jsonb_agg(dist_data ORDER BY dist_data->>'fullPrice' DESC NULLS LAST)
+        -- CRITICAL: Group by distributor_name (NOT distributor_id) - same as optimization API
+        SELECT jsonb_agg(dist_data ORDER BY (dist_data->>'fullPrice')::numeric DESC NULLS LAST)
         FROM (
-          SELECT DISTINCT ON (d.distributor_id)
+          SELECT DISTINCT ON (d.distributor_name)
             jsonb_build_object(
               'id', d.distributor_id,
               'name', d.distributor_name,
-              -- fullPrice: price from records where full > 0 and partial = 0
+              -- fullPrice: Price from the LATEST FULL record (is_full_record = TRUE)
+              -- CRITICAL FIX: Add ORDER BY to get LATEST price (same as optimization API)
+              -- Optimization API sorts by date DESC, then by id ASC for tiebreaker
               'fullPrice', COALESCE(
                 (SELECT price_per_unit FROM ndc_pricing_index 
                  WHERE ndc_normalized = m.ndc_normalized 
-                   AND distributor_id = d.distributor_id 
-                   AND full_count > 0 AND partial_count = 0
-                 ORDER BY report_date DESC NULLS LAST LIMIT 1), 0
+                   AND distributor_name = d.distributor_name 
+                   AND is_full_record = TRUE
+                 ORDER BY COALESCE(report_date::timestamp, uploaded_at, source_created_at) DESC NULLS LAST,
+                          source_report_id ASC
+                 LIMIT 1), 0
               ),
-              -- partialPrice: price from records where partial > 0 and full = 0
+              -- partialPrice: Price from the LATEST PARTIAL record (is_partial_record = TRUE)
+              -- CRITICAL FIX: Add ORDER BY to get LATEST price (same as optimization API)
               'partialPrice', COALESCE(
                 (SELECT price_per_unit FROM ndc_pricing_index 
                  WHERE ndc_normalized = m.ndc_normalized 
-                   AND distributor_id = d.distributor_id 
-                   AND partial_count > 0 AND full_count = 0
-                 ORDER BY report_date DESC NULLS LAST LIMIT 1), 0
+                   AND distributor_name = d.distributor_name 
+                   AND is_partial_record = TRUE
+                 ORDER BY COALESCE(report_date::timestamp, uploaded_at, source_created_at) DESC NULLS LAST,
+                          source_report_id ASC
+                 LIMIT 1), 0
               ),
               'email', d.distributor_email,
               'phone', d.distributor_phone,
               'location', d.distributor_location,
-              'reportDate', d.report_date
+              'reportDate', COALESCE(d.report_date::timestamp, d.uploaded_at, d.source_created_at)
             ) AS dist_data
           FROM ndc_pricing_index d
           WHERE d.ndc_normalized = m.ndc_normalized
-          ORDER BY d.distributor_id, d.report_date DESC NULLS LAST
+          ORDER BY d.distributor_name, COALESCE(d.report_date::timestamp, d.uploaded_at, d.source_created_at) DESC NULLS LAST
         ) sub
       ) AS distributors,
-      -- Best full price (highest among all distributors)
+      -- Best full price (highest among all distributors) - use LATEST price per distributor
+      -- CRITICAL FIX: Get max of LATEST prices, not max of ALL prices
       (
-        SELECT MAX(price_per_unit) FROM ndc_pricing_index 
-        WHERE ndc_normalized = m.ndc_normalized 
-          AND full_count > 0 AND partial_count = 0
-          AND price_per_unit > 0
+        SELECT MAX(latest_price) FROM (
+          SELECT DISTINCT ON (distributor_name) price_per_unit AS latest_price
+          FROM ndc_pricing_index 
+          WHERE ndc_normalized = m.ndc_normalized 
+            AND is_full_record = TRUE
+            AND price_per_unit > 0
+          ORDER BY distributor_name, 
+                   COALESCE(report_date::timestamp, uploaded_at, source_created_at) DESC NULLS LAST,
+                   source_report_id ASC
+        ) sub
       ) AS best_full_price,
-      -- Best partial price (highest among all distributors)
+      -- Best partial price (highest among all distributors) - use LATEST price per distributor
+      -- CRITICAL FIX: Get max of LATEST prices, not max of ALL prices
       (
-        SELECT MAX(price_per_unit) FROM ndc_pricing_index 
-        WHERE ndc_normalized = m.ndc_normalized 
-          AND partial_count > 0 AND full_count = 0
-          AND price_per_unit > 0
+        SELECT MAX(latest_price) FROM (
+          SELECT DISTINCT ON (distributor_name) price_per_unit AS latest_price
+          FROM ndc_pricing_index 
+          WHERE ndc_normalized = m.ndc_normalized 
+            AND is_partial_record = TRUE
+            AND price_per_unit > 0
+          ORDER BY distributor_name, 
+                   COALESCE(report_date::timestamp, uploaded_at, source_created_at) DESC NULLS LAST,
+                   source_report_id ASC
+        ) sub
       ) AS best_partial_price
     FROM matched_ndcs m
   )
@@ -264,6 +298,8 @@ BEGIN
   FROM ndc_pricing_index
   WHERE p_updated_after IS NULL OR updated_at > p_updated_after;
 
+  -- IMPORTANT: Use COALESCE(report_date, uploaded_at, created_at) for ordering
+  -- This matches the optimization API's fallback chain for determining "latest" prices
   WITH unique_ndcs AS (
     SELECT DISTINCT ON (ndc_normalized)
       ndc_original,
@@ -271,7 +307,7 @@ BEGIN
       product_name
     FROM ndc_pricing_index
     WHERE p_updated_after IS NULL OR updated_at > p_updated_after
-    ORDER BY ndc_normalized, report_date DESC NULLS LAST
+    ORDER BY ndc_normalized, COALESCE(report_date::timestamp, uploaded_at, source_created_at) DESC NULLS LAST
     LIMIT p_limit
     OFFSET p_offset
   ),
@@ -281,37 +317,61 @@ BEGIN
       u.ndc_normalized,
       u.product_name,
       (
+        -- CRITICAL: Group by distributor_name (NOT distributor_id) - same as optimization API
         SELECT jsonb_agg(
           jsonb_build_object(
             'id', d.distributor_id,
             'name', d.distributor_name,
+            'email', d.distributor_email,
+            'phone', d.distributor_phone,
+            'location', d.distributor_location,
+            -- CRITICAL FIX: Add ORDER BY to get LATEST price (same as optimization API)
             'fullPrice', COALESCE(
               (SELECT price_per_unit FROM ndc_pricing_index 
                WHERE ndc_normalized = u.ndc_normalized 
-                 AND distributor_id = d.distributor_id 
-                 AND full_count > 0 AND partial_count = 0
-               ORDER BY report_date DESC NULLS LAST LIMIT 1), 0
+                 AND distributor_name = d.distributor_name 
+                 AND is_full_record = TRUE
+               ORDER BY COALESCE(report_date::timestamp, uploaded_at, source_created_at) DESC NULLS LAST,
+                        source_report_id ASC
+               LIMIT 1), 0
             ),
+            -- CRITICAL FIX: Add ORDER BY to get LATEST price (same as optimization API)
             'partialPrice', COALESCE(
               (SELECT price_per_unit FROM ndc_pricing_index 
                WHERE ndc_normalized = u.ndc_normalized 
-                 AND distributor_id = d.distributor_id 
-                 AND partial_count > 0 AND full_count = 0
-               ORDER BY report_date DESC NULLS LAST LIMIT 1), 0
+                 AND distributor_name = d.distributor_name 
+                 AND is_partial_record = TRUE
+               ORDER BY COALESCE(report_date::timestamp, uploaded_at, source_created_at) DESC NULLS LAST,
+                        source_report_id ASC
+               LIMIT 1), 0
             )
           ) ORDER BY d.price_per_unit DESC NULLS LAST
         )
         FROM (
-          SELECT DISTINCT ON (distributor_id) *
+          SELECT DISTINCT ON (distributor_name) *
           FROM ndc_pricing_index
           WHERE ndc_normalized = u.ndc_normalized
-          ORDER BY distributor_id, report_date DESC NULLS LAST
+          ORDER BY distributor_name, COALESCE(report_date::timestamp, uploaded_at, source_created_at) DESC NULLS LAST
         ) d
       ) AS distributors,
-      (SELECT MAX(price_per_unit) FROM ndc_pricing_index 
-       WHERE ndc_normalized = u.ndc_normalized AND full_count > 0 AND partial_count = 0) AS best_full_price,
-      (SELECT MAX(price_per_unit) FROM ndc_pricing_index 
-       WHERE ndc_normalized = u.ndc_normalized AND partial_count > 0 AND full_count = 0) AS best_partial_price,
+      -- CRITICAL FIX: Get max of LATEST prices per distributor, not max of ALL prices
+      (SELECT MAX(latest_price) FROM (
+        SELECT DISTINCT ON (distributor_name) price_per_unit AS latest_price
+        FROM ndc_pricing_index 
+        WHERE ndc_normalized = u.ndc_normalized AND is_full_record = TRUE
+        ORDER BY distributor_name, 
+                 COALESCE(report_date::timestamp, uploaded_at, source_created_at) DESC NULLS LAST,
+                 source_report_id ASC
+      ) sub) AS best_full_price,
+      -- CRITICAL FIX: Get max of LATEST prices per distributor, not max of ALL prices
+      (SELECT MAX(latest_price) FROM (
+        SELECT DISTINCT ON (distributor_name) price_per_unit AS latest_price
+        FROM ndc_pricing_index 
+        WHERE ndc_normalized = u.ndc_normalized AND is_partial_record = TRUE
+        ORDER BY distributor_name, 
+                 COALESCE(report_date::timestamp, uploaded_at, source_created_at) DESC NULLS LAST,
+                 source_report_id ASC
+      ) sub) AS best_partial_price,
       (SELECT MAX(updated_at) FROM ndc_pricing_index WHERE ndc_normalized = u.ndc_normalized) AS last_updated
     FROM unique_ndcs u
   )
@@ -354,12 +414,16 @@ DECLARE
   v_price_per_unit DECIMAL;
   v_full_count INTEGER;
   v_partial_count INTEGER;
+  v_is_full_record BOOLEAN;     -- TRUE if (full > 0 AND partial = 0)
+  v_is_partial_record BOOLEAN;  -- TRUE if (partial > 0 AND full = 0)
   v_distributor_id UUID;
   v_distributor_name TEXT;
   v_distributor_email TEXT;
   v_distributor_phone TEXT;
   v_distributor_location TEXT;
   v_report_date DATE;
+  v_uploaded_at TIMESTAMP WITH TIME ZONE;      -- uploaded_documents.uploaded_at
+  v_source_created_at TIMESTAMP WITH TIME ZONE; -- return_reports.created_at (ORIGINAL - for fallback)
 BEGIN
   -- Extract NDC (same as optimization service: item.ndcCode || item.ndc)
   v_ndc_original := COALESCE(
@@ -405,32 +469,54 @@ BEGIN
   v_full_count := COALESCE((NEW.data->>'full')::INTEGER, 0);
   v_partial_count := COALESCE((NEW.data->>'partial')::INTEGER, 0);
   
+  -- CRITICAL: Calculate boolean flags (same logic as optimization API lines 750-751)
+  -- is_full_record = (full > 0 && partial === 0)
+  -- is_partial_record = (partial > 0 && full === 0)
+  v_is_full_record := (v_full_count > 0 AND v_partial_count = 0);
+  v_is_partial_record := (v_partial_count > 0 AND v_full_count = 0);
+  
+  -- Store original return_reports.created_at for fallback ordering
+  -- This matches optimization API line 343: a.created_at (return_reports.created_at)
+  v_source_created_at := NEW.created_at;
+  
   -- Skip if no valid price
   IF v_price_per_unit <= 0 THEN
     RETURN NEW;
   END IF;
   
-  -- Get distributor info
+  -- Get distributor info (including uploaded_at for fallback ordering)
+  -- CRITICAL: Use same fallback chain for distributor name as optimization API (lines 455-458):
+  --   1. reverse_distributors.name
+  --   2. return_reports.data->>'reverseDistributor'
+  --   3. return_reports.data->'reverseDistributorInfo'->>'name'
+  --   4. 'Unknown Distributor'
   SELECT 
     ud.reverse_distributor_id,
-    rd.name,
+    TRIM(COALESCE(
+      rd.name,
+      NEW.data->>'reverseDistributor',
+      NEW.data->'reverseDistributorInfo'->>'name',
+      'Unknown Distributor'
+    )),
     rd.contact_email,
     rd.contact_phone,
     safe_get_location(rd.address),
-    ud.report_date
+    ud.report_date,
+    ud.uploaded_at
   INTO 
     v_distributor_id, 
     v_distributor_name,
     v_distributor_email,
     v_distributor_phone,
     v_distributor_location,
-    v_report_date
+    v_report_date,
+    v_uploaded_at
   FROM uploaded_documents ud
   LEFT JOIN reverse_distributors rd ON ud.reverse_distributor_id = rd.id
   WHERE ud.id = NEW.document_id;
   
-  -- Skip if no distributor
-  IF v_distributor_id IS NULL THEN
+  -- Skip if no valid distributor name
+  IF v_distributor_name IS NULL OR v_distributor_name = 'Unknown Distributor' THEN
     RETURN NEW;
   END IF;
   
@@ -447,10 +533,12 @@ BEGIN
     price_per_unit,
     credit_amount,
     quantity,
-    full_count,
-    partial_count,
+    is_full_record,
+    is_partial_record,
     source_report_id,
     report_date,
+    uploaded_at,
+    source_created_at,
     updated_at
   )
   VALUES (
@@ -465,39 +553,63 @@ BEGIN
     v_price_per_unit,
     v_credit_amount,
     v_quantity,
-    v_full_count,
-    v_partial_count,
+    v_is_full_record,
+    v_is_partial_record,
     NEW.id,
     v_report_date,
+    v_uploaded_at,
+    v_source_created_at,
     NOW()
   )
-  ON CONFLICT (ndc_normalized, distributor_id, full_count, partial_count)
+  ON CONFLICT (ndc_normalized, distributor_name, is_full_record, is_partial_record)
   DO UPDATE SET
     ndc_original = EXCLUDED.ndc_original,
     product_name = COALESCE(EXCLUDED.product_name, ndc_pricing_index.product_name),
-    distributor_name = COALESCE(EXCLUDED.distributor_name, ndc_pricing_index.distributor_name),
+    distributor_id = COALESCE(EXCLUDED.distributor_id, ndc_pricing_index.distributor_id),
     distributor_email = COALESCE(EXCLUDED.distributor_email, ndc_pricing_index.distributor_email),
     distributor_phone = COALESCE(EXCLUDED.distributor_phone, ndc_pricing_index.distributor_phone),
     distributor_location = COALESCE(EXCLUDED.distributor_location, ndc_pricing_index.distributor_location),
     -- Only update price if new report is more recent
+    -- SAME fallback chain as optimization API: report_date || uploaded_at || created_at
     price_per_unit = CASE 
-      WHEN EXCLUDED.report_date >= COALESCE(ndc_pricing_index.report_date, '1900-01-01'::DATE)
+      WHEN COALESCE(EXCLUDED.report_date::timestamp, EXCLUDED.uploaded_at, EXCLUDED.source_created_at) >= 
+           COALESCE(ndc_pricing_index.report_date::timestamp, ndc_pricing_index.uploaded_at, ndc_pricing_index.source_created_at)
       THEN EXCLUDED.price_per_unit 
       ELSE ndc_pricing_index.price_per_unit 
     END,
     credit_amount = CASE 
-      WHEN EXCLUDED.report_date >= COALESCE(ndc_pricing_index.report_date, '1900-01-01'::DATE)
+      WHEN COALESCE(EXCLUDED.report_date::timestamp, EXCLUDED.uploaded_at, EXCLUDED.source_created_at) >= 
+           COALESCE(ndc_pricing_index.report_date::timestamp, ndc_pricing_index.uploaded_at, ndc_pricing_index.source_created_at)
       THEN EXCLUDED.credit_amount 
       ELSE ndc_pricing_index.credit_amount 
     END,
     quantity = CASE 
-      WHEN EXCLUDED.report_date >= COALESCE(ndc_pricing_index.report_date, '1900-01-01'::DATE)
+      WHEN COALESCE(EXCLUDED.report_date::timestamp, EXCLUDED.uploaded_at, EXCLUDED.source_created_at) >= 
+           COALESCE(ndc_pricing_index.report_date::timestamp, ndc_pricing_index.uploaded_at, ndc_pricing_index.source_created_at)
       THEN EXCLUDED.quantity 
       ELSE ndc_pricing_index.quantity 
     END,
-    report_date = GREATEST(COALESCE(ndc_pricing_index.report_date, '1900-01-01'::DATE), EXCLUDED.report_date),
+    report_date = CASE 
+      WHEN COALESCE(EXCLUDED.report_date::timestamp, EXCLUDED.uploaded_at, EXCLUDED.source_created_at) >= 
+           COALESCE(ndc_pricing_index.report_date::timestamp, ndc_pricing_index.uploaded_at, ndc_pricing_index.source_created_at)
+      THEN EXCLUDED.report_date 
+      ELSE ndc_pricing_index.report_date 
+    END,
+    uploaded_at = CASE 
+      WHEN COALESCE(EXCLUDED.report_date::timestamp, EXCLUDED.uploaded_at, EXCLUDED.source_created_at) >= 
+           COALESCE(ndc_pricing_index.report_date::timestamp, ndc_pricing_index.uploaded_at, ndc_pricing_index.source_created_at)
+      THEN EXCLUDED.uploaded_at 
+      ELSE ndc_pricing_index.uploaded_at 
+    END,
+    source_created_at = CASE 
+      WHEN COALESCE(EXCLUDED.report_date::timestamp, EXCLUDED.uploaded_at, EXCLUDED.source_created_at) >= 
+           COALESCE(ndc_pricing_index.report_date::timestamp, ndc_pricing_index.uploaded_at, ndc_pricing_index.source_created_at)
+      THEN EXCLUDED.source_created_at 
+      ELSE ndc_pricing_index.source_created_at 
+    END,
     source_report_id = CASE 
-      WHEN EXCLUDED.report_date >= COALESCE(ndc_pricing_index.report_date, '1900-01-01'::DATE)
+      WHEN COALESCE(EXCLUDED.report_date::timestamp, EXCLUDED.uploaded_at, EXCLUDED.source_created_at) >= 
+           COALESCE(ndc_pricing_index.report_date::timestamp, ndc_pricing_index.uploaded_at, ndc_pricing_index.source_created_at)
       THEN EXCLUDED.source_report_id 
       ELSE ndc_pricing_index.source_report_id 
     END,
@@ -521,7 +633,14 @@ CREATE TRIGGER trg_update_ndc_pricing_index
 -- Clear existing
 TRUNCATE TABLE ndc_pricing_index;
 
--- Insert with same extraction logic as optimization service
+-- Insert with EXACT same extraction logic as optimization service
+-- CRITICAL: Use distributor_name (NOT distributor_id) for grouping - same as optimization API
+-- The optimization API uses distributorName as the key, not UUID
+-- Fallback chain for distributor name (lines 455-458 in optimizationService.ts):
+--   1. reverse_distributors.name
+--   2. return_reports.data->>'reverseDistributor'
+--   3. return_reports.data->'reverseDistributorInfo'->>'name'
+--   4. 'Unknown Distributor'
 INSERT INTO ndc_pricing_index (
   ndc_original,
   ndc_normalized,
@@ -534,17 +653,28 @@ INSERT INTO ndc_pricing_index (
   price_per_unit,
   credit_amount,
   quantity,
-  full_count,
-  partial_count,
+  is_full_record,
+  is_partial_record,
   source_report_id,
   report_date,
+  uploaded_at,
+  source_created_at,
   updated_at
 )
 SELECT DISTINCT ON (
   LOWER(REPLACE(COALESCE(rr.data->>'ndcCode', rr.data->>'ndc', ''), '-', '')),
-  ud.reverse_distributor_id,
-  COALESCE((rr.data->>'full')::INTEGER, 0),
-  COALESCE((rr.data->>'partial')::INTEGER, 0)
+  -- CRITICAL: Group by distributor NAME (same as optimization API)
+  TRIM(COALESCE(
+    rd.name,
+    rr.data->>'reverseDistributor',
+    rr.data->'reverseDistributorInfo'->>'name',
+    'Unknown Distributor'
+  )),
+  -- CRITICAL FIX: Use BOOLEAN expression, not actual counts!
+  -- is_full_record = (full > 0 AND partial = 0)
+  (COALESCE((rr.data->>'full')::INTEGER, 0) > 0 AND COALESCE((rr.data->>'partial')::INTEGER, 0) = 0),
+  -- is_partial_record = (partial > 0 AND full = 0)
+  (COALESCE((rr.data->>'partial')::INTEGER, 0) > 0 AND COALESCE((rr.data->>'full')::INTEGER, 0) = 0)
 )
   -- NDC (same as optimization service)
   COALESCE(rr.data->>'ndcCode', rr.data->>'ndc') AS ndc_original,
@@ -561,9 +691,14 @@ SELECT DISTINCT ON (
     NULLIF(TRIM(rr.data->>'name'), '')
   ) AS product_name,
   
-  -- Distributor info
+  -- Distributor info (using SAME fallback chain as optimization API lines 455-458)
   ud.reverse_distributor_id AS distributor_id,
-  rd.name AS distributor_name,
+  TRIM(COALESCE(
+    rd.name,
+    rr.data->>'reverseDistributor',
+    rr.data->'reverseDistributorInfo'->>'name',
+    'Unknown Distributor'
+  )) AS distributor_name,
   rd.contact_email AS distributor_email,
   rd.contact_phone AS distributor_phone,
   safe_get_location(rd.address) AS distributor_location,
@@ -581,13 +716,17 @@ SELECT DISTINCT ON (
   COALESCE((rr.data->>'creditAmount')::DECIMAL, 0) AS credit_amount,
   COALESCE((rr.data->>'quantity')::INTEGER, 1) AS quantity,
   
-  -- Full/Partial counts (for unit type filtering)
-  COALESCE((rr.data->>'full')::INTEGER, 0) AS full_count,
-  COALESCE((rr.data->>'partial')::INTEGER, 0) AS partial_count,
+  -- CRITICAL FIX: Boolean flags (same logic as optimization API lines 750-751)
+  -- is_full_record = (full > 0 AND partial = 0)
+  (COALESCE((rr.data->>'full')::INTEGER, 0) > 0 AND COALESCE((rr.data->>'partial')::INTEGER, 0) = 0) AS is_full_record,
+  -- is_partial_record = (partial > 0 AND full = 0)
+  (COALESCE((rr.data->>'partial')::INTEGER, 0) > 0 AND COALESCE((rr.data->>'full')::INTEGER, 0) = 0) AS is_partial_record,
   
-  -- Metadata
+  -- Metadata (dates for fallback ordering - SAME as optimization API)
   rr.id AS source_report_id,
-  ud.report_date,
+  ud.report_date,                -- uploaded_documents.report_date
+  ud.uploaded_at,                -- uploaded_documents.uploaded_at
+  rr.created_at AS source_created_at, -- return_reports.created_at (ORIGINAL - for fallback)
   NOW() AS updated_at
   
 FROM return_reports rr
@@ -596,7 +735,12 @@ LEFT JOIN reverse_distributors rd ON ud.reverse_distributor_id = rd.id
 WHERE 
   COALESCE(rr.data->>'ndcCode', rr.data->>'ndc') IS NOT NULL
   AND TRIM(COALESCE(rr.data->>'ndcCode', rr.data->>'ndc', '')) != ''
-  AND ud.reverse_distributor_id IS NOT NULL
+  -- Must have a valid distributor name (either from table or from data)
+  AND (
+    rd.name IS NOT NULL 
+    OR rr.data->>'reverseDistributor' IS NOT NULL
+    OR rr.data->'reverseDistributorInfo'->>'name' IS NOT NULL
+  )
   -- Only include records with valid price
   AND (
     (rr.data->>'pricePerUnit')::DECIMAL > 0
@@ -605,12 +749,30 @@ WHERE
       AND COALESCE((rr.data->>'creditAmount')::DECIMAL, 0) > 0
     )
   )
+-- SAME ordering as optimization API: COALESCE(report_date, uploaded_at, created_at) DESC
+-- CRITICAL: When dates are IDENTICAL, we need a TIEBREAKER!
+-- The optimization API fetches records without ORDER BY, then sorts by date DESC.
+-- JavaScript's stable sort preserves original order (by database id) for equal dates.
+-- The first match (lowest id) gets stored via: if (!map[key]) { map[key] = value; }
+-- So we use rr.id ASC as final tiebreaker to match this behavior.
 ORDER BY 
   LOWER(REPLACE(COALESCE(rr.data->>'ndcCode', rr.data->>'ndc', ''), '-', '')),
-  ud.reverse_distributor_id,
-  COALESCE((rr.data->>'full')::INTEGER, 0),
-  COALESCE((rr.data->>'partial')::INTEGER, 0),
-  ud.report_date DESC NULLS LAST;
+  -- CRITICAL: Order by distributor NAME (same as DISTINCT ON)
+  TRIM(COALESCE(
+    rd.name,
+    rr.data->>'reverseDistributor',
+    rr.data->'reverseDistributorInfo'->>'name',
+    'Unknown Distributor'
+  )),
+  -- CRITICAL FIX: Order by BOOLEAN expressions (same as DISTINCT ON)
+  (COALESCE((rr.data->>'full')::INTEGER, 0) > 0 AND COALESCE((rr.data->>'partial')::INTEGER, 0) = 0),
+  (COALESCE((rr.data->>'partial')::INTEGER, 0) > 0 AND COALESCE((rr.data->>'full')::INTEGER, 0) = 0),
+  -- Then order by date DESC to get the LATEST record
+  COALESCE(ud.report_date::timestamp, ud.uploaded_at, rr.created_at) DESC NULLS LAST,
+  -- FINAL TIEBREAKER: When all dates are identical, use record ID ASC
+  -- This matches optimization API's behavior: JS stable sort preserves DB order (by id),
+  -- and the first match (lowest id) gets stored in the map.
+  rr.id ASC;
 
 -- ============================================================
 -- 7. VERIFY DATA
@@ -638,16 +800,16 @@ FROM ndc_pricing_index
 WHERE product_name IS NOT NULL AND product_name != ''
 UNION ALL
 SELECT
-  'Full price records (full > 0, partial = 0)',
+  'Full price records (is_full_record = TRUE)',
   COUNT(*)::TEXT
 FROM ndc_pricing_index
-WHERE full_count > 0 AND partial_count = 0
+WHERE is_full_record = TRUE
 UNION ALL
 SELECT
-  'Partial price records (partial > 0, full = 0)',
+  'Partial price records (is_partial_record = TRUE)',
   COUNT(*)::TEXT
 FROM ndc_pricing_index
-WHERE partial_count > 0 AND full_count = 0;
+WHERE is_partial_record = TRUE;
 
 -- Sample data check
 SELECT 
@@ -655,12 +817,94 @@ SELECT
   product_name,
   distributor_name,
   price_per_unit,
-  full_count,
-  partial_count,
+  is_full_record,
+  is_partial_record,
   report_date
 FROM ndc_pricing_index
 ORDER BY updated_at DESC
 LIMIT 10;
+
+-- ============================================================
+-- DEBUG: Compare raw return_reports data for a specific NDC
+-- This shows ALL FULL records for RxReturn Services LLC to see why price differs
+-- ============================================================
+
+-- DEBUG 1: Show ALL raw FULL records for NDC 60219-1748-02 grouped by distributor
+-- This shows EVERY record that exists, sorted by date DESC (latest first)
+SELECT 
+  TRIM(COALESCE(rd.name, rr.data->>'reverseDistributor', rr.data->'reverseDistributorInfo'->>'name')) AS distributor_name,
+  COALESCE(
+    (rr.data->>'pricePerUnit')::DECIMAL,
+    CASE 
+      WHEN COALESCE((rr.data->>'quantity')::INTEGER, 1) > 0 
+        AND COALESCE((rr.data->>'creditAmount')::DECIMAL, 0) > 0
+      THEN COALESCE((rr.data->>'creditAmount')::DECIMAL, 0) / COALESCE((rr.data->>'quantity')::INTEGER, 1)
+      ELSE 0 
+    END
+  ) AS price_per_unit,
+  COALESCE((rr.data->>'full')::INTEGER, 0) AS full_count,
+  COALESCE((rr.data->>'partial')::INTEGER, 0) AS partial_count,
+  ud.report_date,
+  ud.uploaded_at,
+  rr.created_at AS source_created_at,
+  -- Show the sort key used (same as optimization API)
+  COALESCE(ud.report_date::timestamp, ud.uploaded_at, rr.created_at) AS sort_date
+FROM return_reports rr
+JOIN uploaded_documents ud ON rr.document_id = ud.id
+LEFT JOIN reverse_distributors rd ON ud.reverse_distributor_id = rd.id
+WHERE 
+  LOWER(REPLACE(COALESCE(rr.data->>'ndcCode', rr.data->>'ndc', ''), '-', '')) = '60219174802'
+  -- Only FULL records (same condition as optimization API)
+  AND COALESCE((rr.data->>'full')::INTEGER, 0) > 0 
+  AND COALESCE((rr.data->>'partial')::INTEGER, 0) = 0
+ORDER BY 
+  TRIM(COALESCE(rd.name, rr.data->>'reverseDistributor', rr.data->'reverseDistributorInfo'->>'name')),
+  -- CRITICAL: Order by the SAME expression used in DISTINCT ON
+  COALESCE(ud.report_date::timestamp, ud.uploaded_at, rr.created_at) DESC NULLS LAST;
+
+-- DEBUG 2: Show what the DISTINCT ON would pick (the FIRST/LATEST record per distributor)
+-- This simulates what the INSERT statement does
+SELECT DISTINCT ON (
+  TRIM(COALESCE(rd.name, rr.data->>'reverseDistributor', rr.data->'reverseDistributorInfo'->>'name'))
+)
+  TRIM(COALESCE(rd.name, rr.data->>'reverseDistributor', rr.data->'reverseDistributorInfo'->>'name')) AS distributor_name,
+  COALESCE(
+    (rr.data->>'pricePerUnit')::DECIMAL,
+    CASE 
+      WHEN COALESCE((rr.data->>'quantity')::INTEGER, 1) > 0 
+        AND COALESCE((rr.data->>'creditAmount')::DECIMAL, 0) > 0
+      THEN COALESCE((rr.data->>'creditAmount')::DECIMAL, 0) / COALESCE((rr.data->>'quantity')::INTEGER, 1)
+      ELSE 0 
+    END
+  ) AS price_that_should_be_stored,
+  ud.report_date,
+  ud.uploaded_at,
+  rr.created_at AS source_created_at,
+  COALESCE(ud.report_date::timestamp, ud.uploaded_at, rr.created_at) AS sort_date
+FROM return_reports rr
+JOIN uploaded_documents ud ON rr.document_id = ud.id
+LEFT JOIN reverse_distributors rd ON ud.reverse_distributor_id = rd.id
+WHERE 
+  LOWER(REPLACE(COALESCE(rr.data->>'ndcCode', rr.data->>'ndc', ''), '-', '')) = '60219174802'
+  AND COALESCE((rr.data->>'full')::INTEGER, 0) > 0 
+  AND COALESCE((rr.data->>'partial')::INTEGER, 0) = 0
+ORDER BY 
+  TRIM(COALESCE(rd.name, rr.data->>'reverseDistributor', rr.data->'reverseDistributorInfo'->>'name')),
+  COALESCE(ud.report_date::timestamp, ud.uploaded_at, rr.created_at) DESC NULLS LAST;
+
+-- DEBUG 3: Show what's actually stored in ndc_pricing_index
+SELECT 
+  distributor_name,
+  price_per_unit AS actual_stored_price,
+  is_full_record,
+  report_date,
+  uploaded_at,
+  source_created_at,
+  COALESCE(report_date::timestamp, uploaded_at, source_created_at) AS sort_date
+FROM ndc_pricing_index
+WHERE ndc_normalized = '60219174802'
+  AND is_full_record = TRUE
+ORDER BY distributor_name;
 
 -- ============================================================
 -- GRANT PERMISSIONS
