@@ -130,7 +130,7 @@ export const searchNDC = async (
   console.log(`🔍 NDC Search executing RPC for: ${trimmedSearch}`);
   
   // Call optimized RPC function
-  const { data, error } = await supabaseAdmin.rpc('search_ndc_pricing', {
+  const { data, error } = await supabaseAdmin.rpc('search_ndc_pricing_fixed', {
     p_search: trimmedSearch,
     p_limit: limit
   });
