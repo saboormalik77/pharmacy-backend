@@ -71,18 +71,31 @@ export const checkExpiringProductsAndNotify = async (): Promise<{
   }
 
   try {
-    // Calculate date 30 days from now
+    // Calculate date range: today and 30 days from now
     const today = new Date();
     const thirtyDaysFromNow = new Date(today);
     thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
     
     const todayStr = today.toISOString().split('T')[0];
-    const thirtyDaysStr = thirtyDaysFromNow.toISOString().split('T')[0];
+    const thirtyDaysFromNowStr = thirtyDaysFromNow.toISOString().split('T')[0];
 
-    console.log(`📅 Checking for products expiring between ${todayStr} and ${thirtyDaysStr}`);
+    console.log(`📅 Checking for products that are:`);
+    console.log(`   - Already expired (expiration_date < ${todayStr})`);
+    console.log(`   - OR expiring within next 30 days (expiration_date <= ${thirtyDaysFromNowStr})`);
 
-    // 1. Find all active inventory items expiring within 30 days
-    const { data: expiringItems, error: itemsError } = await supabaseAdmin
+    // 1. First, get all items that already have notifications (to exclude them)
+    const { data: processedItems } = await supabaseAdmin
+      .from('pharmacy_notifications')
+      .select('inventory_item_id')
+      .eq('notification_type', 'expiring_product')
+      .not('inventory_item_id', 'is', null);
+
+    const processedItemIds = processedItems?.map(item => item.inventory_item_id) || [];
+    console.log(`📋 Found ${processedItemIds.length} items already processed (will skip these)`);
+
+    // 2. Find all active inventory items that are expired OR expiring within next 30 days
+    // Use two separate conditions with OR logic
+    let query = supabaseAdmin
       .from('pharmacy_inventory_items')
       .select(`
         id,
@@ -100,8 +113,14 @@ export const checkExpiringProductsAndNotify = async (): Promise<{
         estimated_return_value
       `)
       .eq('status', 'active')
-      .lte('expiration_date', thirtyDaysStr)
-      .gte('expiration_date', todayStr);
+      .or(`expiration_date.lt.${todayStr},expiration_date.lte.${thirtyDaysFromNowStr}`);
+
+    // Exclude already processed items
+    if (processedItemIds.length > 0) {
+      query = query.not('id', 'in', `(${processedItemIds.join(',')})`);
+    }
+
+    const { data: expiringItems, error: itemsError } = await query;
 
     if (itemsError) {
       console.error('Error fetching expiring items:', itemsError);
@@ -110,11 +129,11 @@ export const checkExpiringProductsAndNotify = async (): Promise<{
     }
 
     if (!expiringItems || expiringItems.length === 0) {
-      console.log('✅ No expiring products found within 30 days');
+      console.log('✅ No new expired or expiring products found (all already processed)');
       return { processedPharmacies: 0, notificationsCreated: 0, emailsSent: 0, errors };
     }
 
-    console.log(`📦 Found ${expiringItems.length} expiring products`);
+    console.log(`📦 Found ${expiringItems.length} NEW expired/expiring products to process`);
 
     // 2. Get fresh pricing for all expiring items
     const pricingRequests: PricingRequest[] = expiringItems.map(item => ({
@@ -148,28 +167,11 @@ export const checkExpiringProductsAndNotify = async (): Promise<{
           .eq('id', pharmacyId)
           .single();
 
-        // Check for existing notifications for these items (avoid duplicates)
-        // Since cron runs every 30 minutes, check for notifications within last 2 hours
-        const itemIds = items.map(i => i.id);
-        const { data: existingNotifications } = await supabaseAdmin
-          .from('pharmacy_notifications')
-          .select('inventory_item_id')
-          .eq('pharmacy_id', pharmacyId)
-          .in('inventory_item_id', itemIds)
-          .eq('notification_type', 'expiring_product')
-          .gte('created_at', new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()); // Within last 2 hours
-
-        const existingItemIds = new Set(existingNotifications?.map(n => n.inventory_item_id) || []);
-
         // 5. Create notifications for each expiring item
+        // (No need to check for duplicates since we already filtered them out in the main query)
         const notificationsToInsert: any[] = [];
         
         for (const item of items) {
-          // Skip if notification already exists for this item
-          if (existingItemIds.has(item.id)) {
-            console.log(`⏭️ Skipping item ${item.id} - notification already exists`);
-            continue;
-          }
 
           // Get fresh pricing
           const ndcNormalized = item.ndc_normalized || item.ndc_code.replace(/-/g, '');
@@ -193,11 +195,24 @@ export const checkExpiringProductsAndNotify = async (): Promise<{
           const partialValue = (item.partial_units || 0) * partialPrice;
           const totalPotentialValue = Math.round((fullValue + partialValue) * 100) / 100;
 
-          // Calculate days until expiration
+          // Calculate days until/since expiration
           const expirationDate = new Date(item.expiration_date);
           const daysUntilExpiration = Math.floor(
             (expirationDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
           );
+
+          // Create appropriate message based on expiration status
+          let expirationMessage;
+          if (daysUntilExpiration < 0) {
+            // Already expired
+            expirationMessage = `This product EXPIRED ${Math.abs(daysUntilExpiration)} days ago!`;
+          } else if (daysUntilExpiration === 0) {
+            // Expires today
+            expirationMessage = `This product expires TODAY!`;
+          } else {
+            // Expires soon
+            expirationMessage = `This product expires in ${daysUntilExpiration} days.`;
+          }
 
           // Create notification
           const notification = {
@@ -205,7 +220,7 @@ export const checkExpiringProductsAndNotify = async (): Promise<{
             title: `Return Reminder: ${item.product_name || item.ndc_code}`,
             message: `Hey! If you still have ${item.product_name || `product ${item.ndc_code}`}, ` +
                      `return it now! You can earn $${totalPotentialValue.toFixed(2)}. ` +
-                     `This product expires in ${daysUntilExpiration} days.`,
+                     `${expirationMessage}`,
             notification_type: 'expiring_product',
             ndc_code: item.ndc_code,
             product_name: item.product_name,

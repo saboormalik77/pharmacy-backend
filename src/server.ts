@@ -145,55 +145,6 @@ app.use('/api/notifications', notificationRoutes);
 
 /**
  * @swagger
- * /api/cron/check-expiring-products:
- *   get:
- *     summary: Cron job to check expiring products and send notifications (runs every 30 minutes)
- *     description: This endpoint is called by Vercel Cron every 30 minutes. Requires CRON_SECRET.
- *     tags: [Cron]
- *     parameters:
- *       - in: header
- *         name: Authorization
- *         required: true
- *         schema:
- *           type: string
- *         description: CRON_SECRET for authentication
- *     responses:
- *       200:
- *         description: Cron job completed successfully
- *       401:
- *         description: Unauthorized - invalid or missing CRON_SECRET
- */
-app.get('/api/cron/check-expiring-products', async (req, res) => {
-  // Verify cron secret (Vercel sends this as authorization header)
-  const authHeader = req.headers.authorization;
-  const cronSecret = process.env.CRON_SECRET;
-  
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-    console.log('🚫 Unauthorized cron request');
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  console.log('⏰ Running cron job (every 30 minutes): check-expiring-products');
-  
-  try {
-    const result = await checkExpiringProductsAndNotify();
-    
-    res.status(200).json({
-      status: 'success',
-      message: 'Cron job completed',
-      data: result,
-    });
-  } catch (error: any) {
-    console.error('Cron job error:', error);
-    res.status(500).json({
-      status: 'error',
-      message: error.message,
-    });
-  }
-});
-
-/**
- * @swagger
  * /health:
  *   get:
  *     summary: Health check endpoint
@@ -231,6 +182,21 @@ if (process.env.VERCEL !== '1') {
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     console.log(`Swagger documentation available at http://localhost:${PORT}/api-docs`);
+    
+    // Start the cron job interval (runs every 1 minute)
+    console.log('🔄 Starting expiring products cron job (every 1 minute)...');
+    
+    setInterval(async () => {
+      try {
+        console.log('⏰ Running expiring products check...');
+        const result = await checkExpiringProductsAndNotify();
+        console.log(`✅ Cron completed: ${result.notificationsCreated} notifications, ${result.emailsSent} emails sent`);
+      } catch (error: any) {
+        console.error('❌ Cron job error:', error.message);
+      }
+    }, 60 * 1000); // 60 seconds = 1 minute
+    
+    console.log('🔔 Cron job scheduled to run every 1 minute');
   });
 }
 
