@@ -1,0 +1,14 @@
+Pharmacy Inventory List
+-----------------------
+
+Atropine Sulfate 1% Ophthalmic Solution - NDC: 60219-1748-02 - Qty: 5 units
+Sertaconazole Topical Cream 20mg/ml - NDC: 00187-5115-60 - Qty: 3 units
+Metformin HCL 500mg Tablets - 42385-0978-01 - 10 units
+Lisinopril 10mg - 69315-0282-09 - 8 units
+Ibuprofen 200mg Tablets - 00069-0600-66 - 15 ea
+Atorvastatin 20mg - 65862-0218-60 - 12 units
+Omeprazole 20mg DR Caps - 00378-1800-01 - 6 units
+Amlodipine 5mg - 68180-0757-06 - 20 units
+Gabapentin 300mg - 00093-7180-01 - 7 units
+Losartan 50mg - 55111-0682-60 - 9 units
+
