@@ -15,7 +15,7 @@
   "crons": [
     {
       "path": "/api/cron/check-expiring-products",
-      "schedule": "*/30 * * * *"
+      "schedule": "*/10 * * * *"
     }
   ]
 }
