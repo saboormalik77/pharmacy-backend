@@ -134,6 +134,11 @@ export const getSubscription = catchAsync(async (req: Request, res: Response, ne
  *               billingInterval:
  *                 type: string
  *                 enum: [monthly, yearly]
+ *               platform:
+ *                 type: string
+ *                 enum: [web, mobile]
+ *                 description: Platform type - 'web' for web redirect, 'mobile' for React Native app deep link
+ *                 example: mobile
  *     responses:
  *       200:
  *         description: Checkout session created
@@ -145,7 +150,7 @@ export const createCheckout = catchAsync(async (req: Request, res: Response, nex
     return next(new AppError('Pharmacy ID is required', 400));
   }
 
-  const { planId, billingInterval } = req.body;
+  const { planId, billingInterval, platform } = req.body;
 
   if (!planId || !billingInterval) {
     return next(new AppError('planId and billingInterval are required', 400));
@@ -153,6 +158,11 @@ export const createCheckout = catchAsync(async (req: Request, res: Response, nex
 
   if (!['monthly', 'yearly'].includes(billingInterval)) {
     return next(new AppError('billingInterval must be "monthly" or "yearly"', 400));
+  }
+
+  // Validate platform if provided
+  if (platform && !['web', 'mobile'].includes(platform)) {
+    return next(new AppError('platform must be "web" or "mobile"', 400));
   }
 
   // Get pharmacy email
@@ -172,7 +182,8 @@ export const createCheckout = catchAsync(async (req: Request, res: Response, nex
     planId,
     billingInterval,
     pharmacy.email,
-    pharmacy.pharmacy_name || pharmacy.name
+    pharmacy.pharmacy_name || pharmacy.name,
+    platform
   );
 
   res.status(200).json({
