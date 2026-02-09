@@ -1,14 +1,19 @@
 import { supabase, supabaseAdmin } from '../config/supabase';
 import { AppError } from '../utils/appError';
 import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 
 // Use admin client for backend operations (bypasses RLS)
 // Fallback to regular client if admin is not configured
 const db = supabaseAdmin || supabase;
 
+// JWT configuration (uses same secret as admin for consistency)
+const JWT_SECRET = process.env.JWT_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || 'your-secret-key-change-in-production';
+
 // Constants for token configuration
 const REFRESH_TOKEN_EXPIRY_DAYS = 30; // Custom refresh tokens last 30 days
 const ACCESS_TOKEN_EXPIRY_SECONDS = 3600; // Access tokens expire in 1 hour
+const JWT_EXPIRES_IN = '1h'; // JWT expiry string for jsonwebtoken
 
 export interface PhysicalAddress {
   street?: string;
@@ -176,51 +181,27 @@ export const cleanupExpiredTokens = async (): Promise<number> => {
 };
 
 /**
- * Generate access token using Supabase admin API
- * This creates a new session for the user
+ * Generate access token using jsonwebtoken
+ * Creates a signed JWT with pharmacy user information
  */
-const generateAccessToken = async (userId: string): Promise<{ accessToken: string; expiresIn: number; expiresAt: number }> => {
-  if (!supabaseAdmin) {
-    throw new AppError('Supabase admin client not configured', 500);
-  }
-
-  // Get user details
-  const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserById(userId);
-  
-  if (userError || !userData?.user) {
-    throw new AppError('User not found', 404);
-  }
-
-  // Generate a magic link that we can use to create a session
-  // This is a workaround since Supabase doesn't have a direct "generate token for user" admin API
-  // Instead, we'll use the generateLink with OTP type
-  const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-    type: 'magiclink',
-    email: userData.user.email!,
-  });
-
-  if (linkError || !linkData?.properties?.hashed_token) {
-    // Fallback: Try to verify OTP directly
-    // This is a workaround - we'll generate our own JWT
-    throw new AppError('Failed to generate access token', 500);
-  }
-
-  // Extract the token from the magic link and verify it to get a session
-  // The hashed_token can be used with verifyOtp
-  const { data: sessionData, error: sessionError } = await supabase.auth.verifyOtp({
-    token_hash: linkData.properties.hashed_token,
-    type: 'magiclink',
-  });
-
-  if (sessionError || !sessionData?.session) {
-    throw new AppError('Failed to create session', 500);
-  }
-
+const generateJwtAccessToken = (pharmacyId: string, email: string): { accessToken: string; expiresIn: number; expiresAt: number } => {
   const now = Math.floor(Date.now() / 1000);
   const expiresAt = now + ACCESS_TOKEN_EXPIRY_SECONDS;
 
+  const tokenPayload = {
+    sub: pharmacyId,
+    email: email,
+    role: 'authenticated',
+    aud: 'authenticated',
+    type: 'pharmacy',
+  };
+
+  const accessToken = jwt.sign(tokenPayload, JWT_SECRET, {
+    expiresIn: JWT_EXPIRES_IN,
+  } as jwt.SignOptions);
+
   return {
-    accessToken: sessionData.session.access_token,
+    accessToken,
     expiresIn: ACCESS_TOKEN_EXPIRY_SECONDS,
     expiresAt,
   };
@@ -288,25 +269,16 @@ export const signup = async (data: SignupData): Promise<AuthResponse> => {
     throw new AppError(pharmacyError.message || 'Failed to create pharmacy profile', 400);
   }
 
-  // Step 3: Sign in the user to get Supabase session (for initial access token)
-  const { data: sessionData, error: sessionError } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-
-  if (sessionError || !sessionData?.session) {
-    throw new AppError('Failed to create session', 500);
-  }
+  // Step 3: Generate JWT access token using jsonwebtoken
+  const { accessToken, expiresIn, expiresAt } = generateJwtAccessToken(authUserId, email);
 
   // Step 4: Generate and store our custom long-lived refresh token
   const customRefreshToken = generateRefreshToken();
   await storeRefreshToken(authUserId, customRefreshToken);
 
-  const { expiresIn, expiresAt } = calculateExpiry();
-
   return {
     user: pharmacyData,
-    token: sessionData.session.access_token,
+    token: accessToken,
     refreshToken: customRefreshToken, // Return our custom refresh token
     expiresIn,
     expiresAt,
@@ -356,15 +328,16 @@ export const signin = async (data: SigninData): Promise<AuthResponse> => {
   // This ensures that when a user logs in, all previous sessions are invalidated
   await revokeAllRefreshTokens(authUserId);
 
-  // Step 4: Generate and store our custom long-lived refresh token
+  // Step 4: Generate JWT access token using jsonwebtoken
+  const { accessToken, expiresIn, expiresAt } = generateJwtAccessToken(authUserId, email);
+
+  // Step 5: Generate and store our custom long-lived refresh token
   const customRefreshToken = generateRefreshToken();
   await storeRefreshToken(authUserId, customRefreshToken);
 
-  const { expiresIn, expiresAt } = calculateExpiry();
-
   return {
     user: pharmacyData,
-    token: authData.session.access_token,
+    token: accessToken,
     refreshToken: customRefreshToken, // Return our custom refresh token
     expiresIn,
     expiresAt,
@@ -376,8 +349,8 @@ export const signin = async (data: SigninData): Promise<AuthResponse> => {
  * 
  * This function:
  * 1. Validates the custom refresh token against our database
- * 2. Creates a new Supabase session for the user
- * 3. Optionally rotates the refresh token for added security
+ * 2. Generates a new JWT access token using jsonwebtoken
+ * 3. Rotates the refresh token for added security
  */
 export const refreshToken = async (data: RefreshTokenData): Promise<AuthResponse> => {
   const { refreshToken: refreshTokenValue } = data;
@@ -394,10 +367,6 @@ export const refreshToken = async (data: RefreshTokenData): Promise<AuthResponse
   }
 
   const { pharmacyId, tokenId } = tokenData;
-
-  if (!supabaseAdmin) {
-    throw new AppError('Supabase admin client not configured', 500);
-  }
 
   // Fetch the pharmacy user to get their email
   const { data: pharmacyData, error: pharmacyError } = await db
@@ -429,34 +398,8 @@ export const refreshToken = async (data: RefreshTokenData): Promise<AuthResponse
     throw new AppError('Your pharmacy account status is invalid. Please contact support.', 403);
   }
 
-  // Get user details from Supabase Auth
-  const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserById(pharmacyId);
-
-  if (userError || !userData?.user) {
-    await revokeRefreshToken(tokenId);
-    throw new AppError('User account not found', 404);
-  }
-
-  // Generate a new access token using magic link verification
-  // This is the recommended way to create a session for a user programmatically
-  const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-    type: 'magiclink',
-    email: userData.user.email!,
-  });
-
-  if (linkError || !linkData?.properties?.hashed_token) {
-    throw new AppError('Failed to generate access token', 500);
-  }
-
-  // Verify the magic link to get a session
-  const { data: sessionData, error: sessionError } = await supabase.auth.verifyOtp({
-    token_hash: linkData.properties.hashed_token,
-    type: 'magiclink',
-  });
-
-  if (sessionError || !sessionData?.session) {
-    throw new AppError('Failed to create new session', 500);
-  }
+  // Generate a new JWT access token using jsonwebtoken
+  const { accessToken, expiresIn, expiresAt } = generateJwtAccessToken(pharmacyId, pharmacyData.email);
 
   // Token rotation: Generate a new refresh token and revoke the old one
   // This provides better security as each refresh token can only be used once
@@ -464,11 +407,9 @@ export const refreshToken = async (data: RefreshTokenData): Promise<AuthResponse
   await storeRefreshToken(pharmacyId, newRefreshToken);
   await revokeRefreshToken(tokenId);
 
-  const { expiresIn, expiresAt } = calculateExpiry();
-
   return {
     user: pharmacyData,
-    token: sessionData.session.access_token,
+    token: accessToken,
     refreshToken: newRefreshToken, // Return the new rotated refresh token
     expiresIn,
     expiresAt,

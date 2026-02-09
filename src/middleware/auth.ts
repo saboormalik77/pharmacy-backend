@@ -1,44 +1,36 @@
 import { Request, Response, NextFunction } from 'express';
 import { supabaseAdmin } from '../config/supabase';
 import { AppError } from '../utils/appError';
+import jwt from 'jsonwebtoken';
+
+// JWT secret (must match the one used in authService.ts)
+const JWT_SECRET = process.env.JWT_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || 'your-secret-key-change-in-production';
 
 /**
- * Decode a JWT token locally without making a network call
- * This is much faster and more reliable than calling Supabase auth API
+ * Verify and decode a JWT token using jsonwebtoken
+ * This verifies the signature and checks expiration
  */
-function decodeJwt(token: string): { sub: string; exp: number; aud: string; role: string } | null {
+function verifyJwt(token: string): { sub: string; exp: number; aud: string; role: string } | null {
   try {
-    // JWT format: header.payload.signature
-    const parts = token.split('.');
-    if (parts.length !== 3) return null;
-    
-    // Decode the payload (base64url -> JSON)
-    const payload = parts[1];
-    const decoded = Buffer.from(payload, 'base64url').toString('utf-8');
-    const parsed = JSON.parse(decoded);
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
     
     // Validate required fields
-    if (!parsed.sub || !parsed.exp) return null;
+    if (!decoded.sub || !decoded.exp) return null;
     
     return {
-      sub: parsed.sub, // User ID
-      exp: parsed.exp, // Expiration timestamp
-      aud: parsed.aud || 'authenticated',
-      role: parsed.role || 'authenticated',
+      sub: decoded.sub,
+      exp: decoded.exp,
+      aud: decoded.aud || 'authenticated',
+      role: decoded.role || 'authenticated',
     };
-  } catch (error) {
-    console.log('[Auth] Failed to decode JWT:', error);
+  } catch (error: any) {
+    if (error.name === 'TokenExpiredError') {
+      console.log('[Auth] JWT expired');
+    } else {
+      console.log('[Auth] JWT verification failed:', error.message);
+    }
     return null;
   }
-}
-
-/**
- * Check if a JWT token is expired
- */
-function isTokenExpired(exp: number): boolean {
-  // exp is in seconds, Date.now() is in milliseconds
-  // Add 30 second buffer for clock skew
-  return (exp * 1000) < (Date.now() - 30000);
 }
 
 // Extend Express Request type to include pharmacyId and pharmacy status
@@ -154,17 +146,12 @@ export const authenticate = async (
       throw new AppError('Supabase admin client not configured', 500);
     }
 
-    // Step 1: Decode the JWT locally (no network call!)
-    // This is much faster and more reliable than calling Supabase auth API
-    const decoded = decodeJwt(token);
+    // Step 1: Verify and decode the JWT using jsonwebtoken
+    // This verifies the signature AND checks expiration in one step
+    const decoded = verifyJwt(token);
     
     if (!decoded) {
-      throw new AppError('Invalid token format', 401, 'TOKEN_INVALID');
-    }
-    
-    // Check if token is expired
-    if (isTokenExpired(decoded.exp)) {
-      throw new AppError('Token has expired', 401, 'TOKEN_EXPIRED');
+      throw new AppError('Invalid or expired token', 401, 'TOKEN_INVALID');
     }
     
     // Validate the token is for authenticated users
