@@ -36,6 +36,7 @@ export interface SignupData {
 export interface SigninData {
   email: string;
   password: string;
+  fcmToken?: string;
 }
 
 export interface AuthResponse {
@@ -334,6 +335,35 @@ export const signin = async (data: SigninData): Promise<AuthResponse> => {
   // Step 5: Generate and store our custom long-lived refresh token
   const customRefreshToken = generateRefreshToken();
   await storeRefreshToken(authUserId, customRefreshToken);
+
+  // Step 6: Store FCM token if provided (for push notifications)
+  // Only update if fcmToken is a valid non-empty string (don't overwrite with null/empty)
+  if (data.fcmToken && typeof data.fcmToken === 'string' && data.fcmToken.trim().length > 0) {
+    try {
+      console.log(`📱 Storing FCM token for pharmacy ${authUserId}: ${data.fcmToken.substring(0, 20)}...`);
+      const { error: fcmUpdateError, data: updateData } = await db
+        .from('pharmacy')
+        .update({ fcm_token: data.fcmToken })
+        .eq('id', authUserId)
+        .select('fcm_token');
+      
+      if (fcmUpdateError) {
+        console.error('❌ Failed to update FCM token during login:', fcmUpdateError);
+        console.error('Error details:', JSON.stringify(fcmUpdateError, null, 2));
+      } else {
+        console.log('✅ FCM token stored successfully');
+        if (updateData && updateData.length > 0) {
+          console.log('✅ Verified FCM token in database:', updateData[0].fcm_token ? `${updateData[0].fcm_token.substring(0, 20)}...` : 'null');
+        }
+      }
+    } catch (fcmError: any) {
+      // Log error but don't fail login if FCM token update fails
+      console.error('❌ Exception while updating FCM token during login:', fcmError);
+      console.error('Exception details:', fcmError?.message || JSON.stringify(fcmError, null, 2));
+    }
+  } else {
+    console.log('⚠️ No valid FCM token provided during login (token:', data.fcmToken ? 'empty/invalid' : 'null', ')');
+  }
 
   return {
     user: pharmacyData,

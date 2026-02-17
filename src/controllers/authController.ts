@@ -31,13 +31,15 @@ export const signupHandler = catchAsync(
 
 export const signinHandler = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { email, password } = req.body;
+    const { email, password, fcmToken } = req.body;
 
     if (!email || !password) {
       throw new AppError('Please provide email and password', 400);
     }
 
-    const result = await signin({ email, password });
+    console.log('📱 Signin request - FCM Token:', fcmToken ? `${fcmToken.substring(0, 20)}...` : 'not provided');
+
+    const result = await signin({ email, password, fcmToken });
 
     res.status(200).json({
       status: 'success',
