@@ -191,7 +191,7 @@ export const createCheckoutSession = async (
       quantity: item.quantity,
     })),
     automatic_tax: { enabled: false }, // We handle tax ourselves
-    success_url: `${process.env.FRONTEND_URL || 'http://localhost:3001'}/marketplace/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+    success_url: `${process.env.FRONTEND_URL || 'http://localhost:3001'}/marketplace`,
     cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:3001'}/marketplace/checkout?canceled=true`,
     metadata: {
       pharmacy_id: pharmacyId,
