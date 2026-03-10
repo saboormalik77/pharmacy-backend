@@ -4,5 +4,26 @@ dist/
 .env.local
 *.log
 .DS_Store
-
-
+ 
+# Next.js build outputs and cache
+.next/
+out/
+build/
+ 
+# Admin Next.js cache
+admin/.next/
+admin/out/
+admin/build/
+ 
+# Frontend Next.js cache  
+Frontend/.next/
+Frontend/out/
+Frontend/build/
+ 
+# Vercel
+.vercel
+ 
+# Cache directories
+.turbo/
+.cache/
+ 
