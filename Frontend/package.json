@@ -1,0 +1,45 @@
+{
+  "name": "phramcy",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@stripe/react-stripe-js": "^5.4.0",
+    "@stripe/stripe-js": "^8.5.2",
+    "@tailwindcss/postcss": "^4.1.17",
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "@zxing/library": "^0.21.3",
+    "autoprefixer": "^10.4.21",
+    "clsx": "^2.1.1",
+    "js-cookie": "^3.0.5",
+    "jsbarcode": "^3.12.1",
+    "lucide-react": "^0.553.0",
+    "next": "^16.0.7",
+    "openai": "^6.9.1",
+    "postcss": "^8.5.6",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "react-is": "^19.2.1",
+    "recharts": "^3.4.1",
+    "tailwind-merge": "^3.4.0",
+    "tailwindcss": "^3.4.18",
+    "typescript": "^5.9.3",
+    "xlsx": "^0.18.5",
+    "zustand": "^5.0.2"
+  },
+  "packageManager": "yarn@4.9.2+sha512.1fc009bc09d13cfd0e19efa44cbfc2b9cf6ca61482725eb35bbc5e257e093ebf4130db6dfe15d604ff4b79efd8e1e8e99b25fa7d0a6197c9f9826358d4d65c3c",
+  "devDependencies": {
+    "@types/js-cookie": "^3.0.6"
+  }
+}

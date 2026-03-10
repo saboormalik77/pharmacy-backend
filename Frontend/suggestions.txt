@@ -1,0 +1,93 @@
+API
+
+/api/optimization/suggestions
+
+Payload
+{
+    "items": [
+        {
+            "ndc": "00187-5115-60",
+            "quantity": 1
+        }
+    ],
+    "pharmacy_id": "3e19f01d-511d-421f-9cc6-ed83d33e034d"
+}
+
+Response
+
+{
+    "status": "success",
+    "data": {
+        "distributors": [
+            {
+                "distributorName": "Return Solutions, Inc.",
+                "products": [
+                    {
+                        "ndc": "00187-5115-60",
+                        "productName": "sertaconazole 20 MG/ML Topical Cream [Ertaczo]",
+                        "quantity": 1,
+                        "pricePerUnit": 682.93,
+                        "totalEstimatedValue": 682.93
+                    }
+                ],
+                "totalItems": 1,
+                "totalEstimatedValue": 682.93,
+                "ndcsCount": 1,
+                "distributorId": "2da2ca2e-c3c9-4ffa-9a06-a226631a9b4f",
+                "distributorContact": {
+                    "email": "dea.orderforms@usdoj.gov",
+                    "phone": "800-579-4804",
+                    "location": "10635 Dutchtown Road, Knoxville, TN, 37932, USA"
+                }
+            },
+            {
+                "distributorName": "PharmaReturn Network",
+                "products": [
+                    {
+                        "ndc": "00187-5115-60",
+                        "productName": "sertaconazole 20 MG/ML Topical Cream [Ertaczo]",
+                        "quantity": 1,
+                        "pricePerUnit": 48.99,
+                        "totalEstimatedValue": 48.99
+                    }
+                ],
+                "totalItems": 1,
+                "totalEstimatedValue": 48.99,
+                "ndcsCount": 1,
+                "distributorId": "9b67ae57-b566-4819-9ec8-03df64965897",
+                "distributorContact": {
+                    "email": "contact@pharmareturnnetsolutions.com",
+                    "phone": "444-677-6146",
+                    "location": "6022 123 Commerce Drive, Miami, MA, 87997, USA"
+                }
+            },
+            {
+                "distributorName": "MedReturn Partners",
+                "products": [
+                    {
+                        "ndc": "00187-5115-60",
+                        "productName": "sertaconazole 20 MG/ML Topical Cream [Ertaczo]",
+                        "quantity": 1,
+                        "pricePerUnit": 48.26,
+                        "totalEstimatedValue": 48.26
+                    }
+                ],
+                "totalItems": 1,
+                "totalEstimatedValue": 48.26,
+                "ndcsCount": 1,
+                "distributorId": "4572a0e3-250e-4154-9d3e-01273f2f3f4e",
+                "distributorContact": {
+                    "email": "returns@medreturnpartnedistributors.com",
+                    "phone": "948-478-8026",
+                    "location": "2785 654 Warehouse Avenue, Boston, CA, 49495, USA"
+                }
+            }
+        ],
+        "ndcsWithoutDistributors": [],
+        "totalItems": 1,
+        "totalDistributors": 3,
+        "totalEstimatedValue": 780.18,
+        "generatedAt": "2025-12-11T14:19:37.147Z"
+    }
+}
+
