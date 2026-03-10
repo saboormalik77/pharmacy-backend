@@ -26,3 +26,6 @@ Frontend/build/
 # Cache directories
 .turbo/
 .cache/
+
+# TypeScript build info
+*.tsbuildinfo

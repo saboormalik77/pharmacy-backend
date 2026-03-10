@@ -170,7 +170,8 @@ export const createCheckoutSession = async (
   planId: string,
   billingInterval: 'monthly' | 'yearly',
   email: string,
-  pharmacyName?: string
+  pharmacyName?: string,
+  platform?: 'web' | 'mobile'
 ): Promise<{ sessionId: string; url: string }> => {
   // Get the plan
   const plan = await getSubscriptionPlanById(planId);
@@ -191,6 +192,17 @@ export const createCheckoutSession = async (
   // Create or get Stripe customer
   const customerId = await createStripeCustomer(pharmacyId, email, pharmacyName);
 
+  // Determine success URL based on platform
+  let successUrl: string;
+  if (platform === 'mobile') {
+    // React Native deep link URL format
+    const mobileAppUrl = process.env.MOBILE_APP_DEEP_LINK_URL || 'pharmacyapp://home';
+    successUrl = `${mobileAppUrl}?success=true&session_id={CHECKOUT_SESSION_ID}`;
+  } else {
+    // Default web URL
+    successUrl = `${process.env.FRONTEND_URL || 'http://localhost:3001'}/subscription?success=true&session_id={CHECKOUT_SESSION_ID}`;
+  }
+
   // Create checkout session
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
@@ -202,12 +214,13 @@ export const createCheckoutSession = async (
         quantity: 1,
       },
     ],
-    success_url: `${process.env.FRONTEND_URL || 'http://localhost:3001'}/subscription?success=true&session_id={CHECKOUT_SESSION_ID}`,
+    success_url: successUrl,
     cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:3001'}/subscription?canceled=true`,
     metadata: {
       pharmacy_id: pharmacyId,
       plan_id: planId,
       billing_interval: billingInterval,
+      platform: platform || 'web',
     },
     subscription_data: {
       metadata: {

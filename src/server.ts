@@ -33,6 +33,7 @@ import notificationRoutes from './routes/notificationRoutes';
 import { globalErrorHandler } from './controllers/errorController';
 import { checkExpiringProductsAndNotify } from './services/notificationCronService';
 import { swaggerSpec } from './config/swagger';
+import { initializeFirebase } from './services/firebaseService';
 import cors from 'cors';
 
 // Load environment variables
@@ -40,6 +41,9 @@ import cors from 'cors';
 if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
   dotenv.config({ path: '.env.local' });
 }
+
+// Initialize Firebase Admin SDK for push notifications
+initializeFirebase();
 
 const app = express();
 const PORT = process.env.PORT || 3000;

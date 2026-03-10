@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "996681928337",
+    "project_id": "giftsocial-8841c",
+    "storage_bucket": "giftsocial-8841c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:996681928337:android:c2b23999d0ff8bfa0d3930",
+        "android_client_info": {
+          "package_name": "com.giftmobileapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBoCzEnUgPYJrwje5Do8A29jpK536liIE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:996681928337:android:c7564ef512afe07f0d3930",
+        "android_client_info": {
+          "package_name": "com.tmit.gifting"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBoCzEnUgPYJrwje5Do8A29jpK536liIE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
+

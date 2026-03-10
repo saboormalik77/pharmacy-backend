@@ -13,6 +13,7 @@
 import { supabaseAdmin } from '../config/supabase';
 import { getPricingForNDCs, PricingRequest } from './pricingService';
 import { sendEmail } from './emailService';
+import { sendPushNotification } from './firebaseService';
 
 // ============================================================
 // Types
@@ -38,6 +39,7 @@ interface PharmacyInfo {
   id: string;
   name: string;
   email: string;
+  fcm_token?: string | null;
 }
 
 // ============================================================
@@ -52,6 +54,7 @@ export const checkExpiringProductsAndNotify = async (): Promise<{
   processedPharmacies: number;
   notificationsCreated: number;
   emailsSent: number;
+  pushNotificationsSent: number;
   errors: string[];
 }> => {
   console.log('🔔 Starting expiring products check (runs every 30 minutes)...');
@@ -59,13 +62,15 @@ export const checkExpiringProductsAndNotify = async (): Promise<{
   const errors: string[] = [];
   let notificationsCreated = 0;
   let emailsSent = 0;
+  let pushNotificationsSent = 0;
   const processedPharmacies = new Set<string>();
 
-  if (!supabaseAdmin) {
+    if (!supabaseAdmin) {
     return {
       processedPharmacies: 0,
       notificationsCreated: 0,
       emailsSent: 0,
+      pushNotificationsSent: 0,
       errors: ['Supabase admin client not configured'],
     };
   }
@@ -125,12 +130,12 @@ export const checkExpiringProductsAndNotify = async (): Promise<{
     if (itemsError) {
       console.error('Error fetching expiring items:', itemsError);
       errors.push(`Error fetching expiring items: ${itemsError.message}`);
-      return { processedPharmacies: 0, notificationsCreated: 0, emailsSent: 0, errors };
+      return { processedPharmacies: 0, notificationsCreated: 0, emailsSent: 0, pushNotificationsSent: 0, errors };
     }
 
     if (!expiringItems || expiringItems.length === 0) {
       console.log('✅ No new expired or expiring products found (all already processed)');
-      return { processedPharmacies: 0, notificationsCreated: 0, emailsSent: 0, errors };
+      return { processedPharmacies: 0, notificationsCreated: 0, emailsSent: 0, pushNotificationsSent: 0, errors };
     }
 
     console.log(`📦 Found ${expiringItems.length} NEW expired/expiring products to process`);
@@ -160,10 +165,10 @@ export const checkExpiringProductsAndNotify = async (): Promise<{
       processedPharmacies.add(pharmacyId);
       
       try {
-        // Get pharmacy info for email
+        // Get pharmacy info for email and push notifications
         const { data: pharmacy } = await supabaseAdmin
           .from('pharmacy')
-          .select('id, name, email')
+          .select('id, name, email, fcm_token')
           .eq('id', pharmacyId)
           .single();
 
@@ -273,6 +278,41 @@ export const checkExpiringProductsAndNotify = async (): Promise<{
               errors.push(`Email to ${pharmacy.email}: ${emailError.message}`);
             }
           }
+
+          // 8. Send push notification to pharmacy
+          if (pharmacy?.fcm_token && typeof pharmacy.fcm_token === 'string' && pharmacy.fcm_token.trim().length > 0) {
+            try {
+              const totalValue = notificationsToInsert.reduce((sum, n) => sum + n.total_potential_value, 0);
+              const title = `📦 ${notificationsToInsert.length} Products Expiring Soon`;
+              const body = `Potential return value: $${totalValue.toFixed(2)}. Click to view details.`;
+              
+              const pushData = {
+                type: 'expiring_products',
+                notification_count: String(notificationsToInsert.length),
+                total_value: totalValue.toFixed(2),
+                pharmacy_id: pharmacyId,
+              };
+
+              const pushSent = await sendPushNotification(
+                pharmacy.fcm_token,
+                title,
+                body,
+                pushData
+              );
+
+              if (pushSent) {
+                pushNotificationsSent++;
+                console.log(`📱 Push notification sent to pharmacy ${pharmacyId}`);
+              } else {
+                console.warn(`⚠️ Failed to send push notification to pharmacy ${pharmacyId}`);
+              }
+            } catch (pushError: any) {
+              console.error(`Error sending push notification to pharmacy ${pharmacyId}:`, pushError);
+              errors.push(`Push notification to pharmacy ${pharmacyId}: ${pushError.message}`);
+            }
+          } else {
+            console.log(`ℹ️ No FCM token found for pharmacy ${pharmacyId}, skipping push notification`);
+          }
         }
       } catch (pharmacyError: any) {
         console.error(`Error processing pharmacy ${pharmacyId}:`, pharmacyError);
@@ -284,11 +324,13 @@ export const checkExpiringProductsAndNotify = async (): Promise<{
     console.log(`   Pharmacies processed: ${processedPharmacies.size}`);
     console.log(`   Notifications created: ${notificationsCreated}`);
     console.log(`   Emails sent: ${emailsSent}`);
+    console.log(`   Push notifications sent: ${pushNotificationsSent}`);
 
     return {
       processedPharmacies: processedPharmacies.size,
       notificationsCreated,
       emailsSent,
+      pushNotificationsSent,
       errors,
     };
 
@@ -299,6 +341,7 @@ export const checkExpiringProductsAndNotify = async (): Promise<{
       processedPharmacies: processedPharmacies.size,
       notificationsCreated,
       emailsSent,
+      pushNotificationsSent,
       errors,
     };
   }
