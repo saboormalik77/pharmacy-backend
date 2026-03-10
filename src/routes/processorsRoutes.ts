@@ -110,18 +110,25 @@ router.get('/', getProcessorsHandler);
  *             type: object
  *             required:
  *               - name
+ *               - email
+ *               - password
  *             properties:
  *               name:
  *                 type: string
+ *                 description: Processor's full name
  *               email:
  *                 type: string
+ *                 description: Email used for login to admin panel
+ *               password:
+ *                 type: string
+ *                 description: Password for admin panel login (min 8 chars)
  *               phone:
  *                 type: string
  *               notes:
  *                 type: string
  *     responses:
  *       201:
- *         description: Processor created
+ *         description: Processor created with admin login account
  *       409:
  *         description: Email already exists
  */

@@ -50,26 +50,35 @@ export const getProcessorByIdHandler = catchAsync(
 );
 
 // ============================================================
-// POST /api/admin/processors — Create processor
+// POST /api/admin/processors — Create processor (+ admin login)
 // ============================================================
 export const createProcessorHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
-    const { name, email, phone, notes } = req.body;
+    const { name, email, password, phone, notes } = req.body;
 
     if (!name) {
       throw new AppError('Processor name is required', 400);
     }
 
+    if (!email) {
+      throw new AppError('Processor email is required (used for login)', 400);
+    }
+
+    if (!password || password.length < 8) {
+      throw new AppError('Password is required and must be at least 8 characters', 400);
+    }
+
     const processor = await processorsService.createProcessor({
       name,
       email,
+      password,
       phone,
       notes,
     });
 
     res.status(201).json({
       status: 'success',
-      message: 'Processor created successfully',
+      message: 'Processor created successfully. They can now log in to the admin panel with the provided email and password.',
       data: { processor },
     });
   }
@@ -165,6 +174,26 @@ export const assignStoresHandler = catchAsync(
       status: 'success',
       message: `Assigned ${result.assigned} store(s), skipped ${result.skipped} already-assigned`,
       data: result,
+    });
+  }
+);
+
+// ============================================================
+// GET /api/processors/my-stores — Processor's own assigned stores
+// ============================================================
+export const getMyStoresHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const processorId = req.processorId;
+
+    if (!processorId) {
+      throw new AppError('Processor ID not found on request. Are you authenticated as a processor?', 401);
+    }
+
+    const stores = await processorsService.getMyStores(processorId);
+
+    res.status(200).json({
+      status: 'success',
+      data: { stores, total: stores.length },
     });
   }
 );

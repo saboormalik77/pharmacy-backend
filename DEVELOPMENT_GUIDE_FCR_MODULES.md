@@ -324,6 +324,16 @@ Create a new admin page at admin/app/processors/page.tsx for managing processors
 
 ## Module 2: User Access & Role-Based Entry
 
+### ✅ **STATUS: Backend Complete**
+
+| Component | Status | Files |
+|-----------|--------|-------|
+| **Admin Roles Extension** | ✅ Complete | `scripts/fcr_04_extend_admin_roles.sql` |
+| **Processor ↔ Admin Link** | ✅ Complete | `scripts/fcr_05_add_admin_user_id_to_processors.sql` |
+| **Processor Auth Middleware** | ✅ Complete | `src/middleware/processorAuth.ts` |
+| **My-Stores Endpoint** | ✅ Complete | `GET /api/processors/my-stores` |
+| **Processor Login** | ✅ Complete | Processors auto-get admin account (role=processor) on creation |
+
 ### What Client Document Says (Section 2)
 
 > "There are different entry paths depending on who is doing the work."
@@ -342,53 +352,80 @@ Paths:
 
 ### Developer Tasks
 
-#### Saboor (Backend)
+#### Saboor (Backend) ✅ **COMPLETED**
 
-**Task 2.1: Add processor role to admin auth**
+**Task 2.1: Add processor role to admin auth** ✅ **DONE**
 
-- Location: `src/middleware/adminAuth.ts`
-- Extend `authenticateAdmin` to recognize role = 'processor'
-- OR create new middleware `authenticateProcessor` that:
-  - Verifies JWT
-  - Loads processor record
-  - Sets `req.processorId` and `req.assignedStoreIds`
+- ✅ **File created:** `src/middleware/processorAuth.ts`
+- ✅ **Middleware:** `authenticateProcessor`
+  - Verifies admin JWT (same login system as other admins)
+  - Checks `role === 'processor'`
+  - Resolves processor record (by `admin_user_id` or email fallback)
+  - Sets `req.processorId` and `req.assignedStoreIds` on the request
+- ✅ Rejects non-processor roles with 403
+- ✅ Rejects inactive processor accounts
 
-**Task 2.2: Create store access middleware**
+**Task 2.2: Create store access middleware** ✅ **DONE**
 
-- Location: Create `src/middleware/processorAuth.ts`
-- Middleware: `checkProcessorStoreAccess`
-  - Reads `pharmacy_id` from request (body, query, or params)
-  - Checks if processor is assigned to that store
+- ✅ **File:** `src/middleware/processorAuth.ts` (same file as 2.1)
+- ✅ **Middleware:** `checkProcessorStoreAccess`
+  - Reads `pharmacy_id` from params, query, or body
+  - Checks if the pharmacy is in `req.assignedStoreIds`
   - Returns 403 if not assigned
-- Apply to all processor-facing endpoints
+  - Passes through for non-processor roles (so admins can still access)
 
-**Task 2.3: Extend admin roles enum**
+**Task 2.3: Extend admin roles enum** ✅ **DONE**
 
-- Location: Database + `src/types/` or inline types
-- Add roles: 'processor', 'warehouse_staff', 'sales_rep'
-- Update admin creation to support these roles
+- ✅ **File created:** `scripts/fcr_04_extend_admin_roles.sql`
+- ✅ **Roles added:** `processor`, `warehouse_staff`, `sales_rep`
+- ✅ **File created:** `scripts/fcr_05_add_admin_user_id_to_processors.sql`
+- ✅ **Column added:** `processors.admin_user_id` (FK to `admin.id`)
 
-**Task 2.4: Create endpoint for processor's assigned stores**
+**Module 1 Fix: Processor creation now auto-creates admin login** ✅ **DONE**
 
-- Location: `src/routes/processorsRoutes.ts`
-- Endpoint: `GET /api/processors/my-stores`
-  - Uses processor's token to get their ID
-  - Returns list of pharmacies they are assigned to
-  - Include: store_number, pharmacy_name, address, last_visit_date, service_type
+- ✅ **Updated:** `src/services/processorsService.ts` — `createProcessor()`
+  - Now requires `email` and `password`
+  - Creates an `admin` row with role `processor` + hashed password
+  - Links it to the processor via `admin_user_id`
+  - Rollback: if processor insert fails, the admin row is deleted
+- ✅ **Updated:** `src/controllers/processorsController.ts` — validates email + password
+- ✅ **Updated:** `deactivateProcessor()` — also deactivates the linked admin account
+- ✅ **Flow:** Admin creates processor → processor gets email + password → processor logs in to admin panel → sees only their stores
+
+**Task 2.4: Create endpoint for processor's assigned stores** ✅ **DONE**
+
+- ✅ **File created:** `src/routes/processorMyRoutes.ts`
+- ✅ **Mounted in:** `src/server.ts` at `/api/processors`
+- ✅ **Endpoint:** `GET /api/processors/my-stores`
+  - Protected by `authenticateProcessor` middleware
+  - Returns: businessName, storeNumber, city, state, address, serviceType, lastVisitDate, nextVisitDate
+- ✅ **Service function:** `getMyStores()` in `processorsService.ts`
 
 #### Younas (Frontend)
 
-**Task 2.5: No changes needed for pharmacy frontend**
+**Task 2.5: No changes needed for pharmacy frontend** ✅ **N/A**
 
 - Pharmacy users already see only their own store (existing `pharmacy_id` from token)
 - Self-service flow will use existing auth
 
 ### How to Implement (Guidance for Cursor AI)
 
-When working on Task 2.1-2.2 (auth middleware):
-```
-Prompt: "Create a new middleware called authenticateProcessor that verifies admin JWT, checks if role is 'processor', loads their assigned store IDs from processor_store_assignments, and sets req.processorId and req.assignedStoreIds. Also create checkProcessorStoreAccess middleware that verifies the requested pharmacy_id is in the processor's assigned stores."
-```
+**Backend Status:** ✅ **ALL MODULE 2 BACKEND TASKS COMPLETED**
+
+**What was built and how processors use the system now:**
+1. Admin creates a processor via `POST /api/admin/processors` (with name, email, password)
+2. System automatically creates an admin login (role = `processor`) + processor record
+3. Processor logs in to the admin panel with that email + password (same login endpoint as admins)
+4. After login, processor calls `GET /api/processors/my-stores` to see their assigned stores
+5. All future processor-facing endpoints use `authenticateProcessor` + `checkProcessorStoreAccess` middleware
+
+**API Endpoints Available:**
+- `GET /api/processors/my-stores` — Processor's own assigned stores (uses processor token)
+- `POST /api/admin/processors` — Now requires `email` + `password` (creates login automatically)
+
+**Middleware Available for Future Modules:**
+- `authenticateProcessor` — Verify processor JWT + load processorId + assignedStoreIds
+- `checkProcessorStoreAccess` — Verify processor has access to the requested pharmacy_id
 
 ---
 
