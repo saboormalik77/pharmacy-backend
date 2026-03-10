@@ -556,7 +556,8 @@ export interface ProcessorsResponse {
 
 export interface ProcessorCreatePayload {
     name: string;
-    email?: string;
+    email: string;
+    password: string;
     phone?: string;
     notes?: string;
 }

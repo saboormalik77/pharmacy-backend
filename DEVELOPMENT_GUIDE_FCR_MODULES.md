@@ -237,7 +237,7 @@ Required fields:
 - ✅ **Sidebar updated:** "Processors" link (UserCog icon) added to `admin/components/layout/Sidebar.tsx`
 - ✅ **Thunks implemented:**
   - `fetchProcessors` — List with pagination, search, status filter
-  - `createProcessor` — Add new processor
+  - `createProcessor` — Add new processor (sends name, email, password, phone, notes)
   - `updateProcessor` — Edit name, email, phone, status, notes
   - `deactivateProcessor` — Soft-deactivate via DELETE endpoint
   - `fetchProcessorStores` — Load a processor's assigned stores
@@ -249,7 +249,7 @@ Required fields:
   - Search by name/email, filter by status (all/active/inactive)
   - Pagination (15 per page)
   - **View modal:** Full processor detail card
-  - **Add modal:** Name (required), email, phone, notes form
+  - **Add modal:** Name (required), Email (required), Password (required, min 8 chars, show/hide toggle), Phone, Notes — processor can log into admin panel with these credentials
   - **Edit modal:** All fields + status toggle
   - **Assigned Stores modal:** List all stores with unassign button + "Assign More" shortcut
   - **Assign Stores modal:** Searchable pharmacy list with multi-select checkboxes
@@ -407,6 +407,7 @@ Paths:
 
 - Pharmacy users already see only their own store (existing `pharmacy_id` from token)
 - Self-service flow will use existing auth
+- ✅ **Admin side aligned:** Add Processor form in `admin/app/processors/page.tsx` now requires `email` + `password` fields (matching backend's auto-create admin login flow from Module 1 Fix / Task 2.3)
 
 ### How to Implement (Guidance for Cursor AI)
 

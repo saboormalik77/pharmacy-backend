@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import {
-    Search, Eye, UserPlus, X, ChevronLeft, ChevronRight,
+    Search, Eye, EyeOff, UserPlus, X, ChevronLeft, ChevronRight,
     Edit, Loader2, UserCog, Building2, CheckCircle, AlertCircle,
     Phone, Mail, Store, MapPin, Power,
 } from 'lucide-react';
@@ -54,9 +54,10 @@ export default function ProcessorsPage() {
 
     // Forms
     const [newProcessor, setNewProcessor] = useState<ProcessorCreatePayload>({
-        name: '', email: '', phone: '', notes: '',
+        name: '', email: '', password: '', phone: '', notes: '',
     });
     const [editForm, setEditForm] = useState<ProcessorUpdatePayload>({});
+    const [showPassword, setShowPassword] = useState(false);
 
     // Pharmacies for assignment
     const [availablePharmacies, setAvailablePharmacies] = useState<{ id: string; name: string }[]>([]);
@@ -108,11 +109,16 @@ export default function ProcessorsPage() {
 
     const handleAdd = async () => {
         if (!newProcessor.name.trim()) { showToast('Name is required', 'error'); return; }
+        if (!newProcessor.email.trim()) { showToast('Email is required', 'error'); return; }
+        if (!newProcessor.password || newProcessor.password.length < 8) {
+            showToast('Password must be at least 8 characters', 'error'); return;
+        }
         const result = await dispatch(createProcessor(newProcessor));
         if (createProcessor.fulfilled.match(result)) {
             showToast('Processor created successfully!');
             setAddModal(false);
-            setNewProcessor({ name: '', email: '', phone: '', notes: '' });
+            setNewProcessor({ name: '', email: '', password: '', phone: '', notes: '' });
+            setShowPassword(false);
             refresh();
         } else {
             showToast(result.payload as string || 'Failed to create processor', 'error');
@@ -463,11 +469,11 @@ export default function ProcessorsPage() {
 
             {/* ── Add Processor Modal ────────────────────────── */}
             {addModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setAddModal(false)}>
+                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => { setAddModal(false); setShowPassword(false); }}>
                     <div className="bg-white rounded-lg max-w-lg w-full shadow-xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-lg font-semibold text-gray-900">Add New Processor</h2>
-                            <button onClick={() => setAddModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                            <button onClick={() => { setAddModal(false); setShowPassword(false); }} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
                         </div>
                         <div className="p-6 space-y-3">
                             <div>
@@ -481,7 +487,7 @@ export default function ProcessorsPage() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Email <span className="text-red-500">*</span></label>
                                 <input
                                     type="email"
                                     value={newProcessor.email}
@@ -489,6 +495,27 @@ export default function ProcessorsPage() {
                                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     placeholder="email@example.com"
                                 />
+                                <p className="text-xs text-gray-500 mt-1">Used as the login email for the admin panel.</p>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Password <span className="text-red-500">*</span></label>
+                                <div className="relative">
+                                    <input
+                                        type={showPassword ? 'text' : 'password'}
+                                        value={newProcessor.password}
+                                        onChange={e => setNewProcessor({ ...newProcessor, password: e.target.value })}
+                                        className="w-full px-3 py-2 pr-10 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        placeholder="Min. 8 characters"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(p => !p)}
+                                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                                    >
+                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">Processor will use this to log in. Min. 8 characters.</p>
                             </div>
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">Phone</label>
@@ -505,15 +532,15 @@ export default function ProcessorsPage() {
                                 <textarea
                                     value={newProcessor.notes}
                                     onChange={e => setNewProcessor({ ...newProcessor, notes: e.target.value })}
-                                    rows={3}
+                                    rows={2}
                                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
                                     placeholder="Optional notes"
                                 />
                             </div>
                         </div>
                         <div className="flex justify-end gap-2 p-5 border-t border-gray-200 bg-gray-50">
-                            <Button variant="outline" onClick={() => setAddModal(false)}>Cancel</Button>
-                            <Button variant="primary" onClick={handleAdd} disabled={isLoading || !newProcessor.name.trim()}>
+                            <Button variant="outline" onClick={() => { setAddModal(false); setShowPassword(false); }}>Cancel</Button>
+                            <Button variant="primary" onClick={handleAdd} disabled={isLoading || !newProcessor.name.trim() || !newProcessor.email.trim() || !newProcessor.password}>
                                 {isLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Adding...</> : 'Add Processor'}
                             </Button>
                         </div>
