@@ -15,6 +15,7 @@ export { optimizationService } from './optimizationService';
 export { packagesService } from './packagesService';
 export { distributorsService } from './distributorsService';
 export { settingsService } from './settingsService';
+export { fcrStoreSettingsService } from './fcrStoreSettingsService';
 export { marketplaceService } from './marketplaceService';
 export { 
   getSubscriptionPlans,
@@ -40,6 +41,7 @@ export type { OptimizationRecommendations, Recommendation, AlternativeDistributo
 export type { PackagesResponse, Package, PackageProduct, DistributorContact, PackagesSummary, PackagesStats } from './packagesService';
 export type { TopDistributor, TopDistributorsResponse } from './distributorsService';
 export type { UserSettings, ChangePasswordRequest } from './settingsService';
+export type { FcrStoreSettings, UpdateFcrStoreSettings } from './fcrStoreSettingsService';
 export type { SubscriptionPlan, CheckoutSessionResponse, PortalSessionResponse } from './subscriptionService';
 export type { 
   MarketplaceDeal, 

@@ -24,14 +24,20 @@ import {
   Settings as SettingsIcon,
   DollarSign,
   Eye,
-  EyeOff
+  EyeOff,
+  Store,
+  Calendar,
+  Truck,
+  FileText,
+  AlertTriangle
 } from 'lucide-react';
-import { settingsService } from '@/lib/api/services';
+import { settingsService, fcrStoreSettingsService } from '@/lib/api/services';
+import type { FcrStoreSettings, UpdateFcrStoreSettings } from '@/lib/api/services';
 import { getUserData, setUserData } from '@/lib/utils/cookies';
 import { US_STATES } from '@/lib/constants/usStates';
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<'profile' | 'notifications' | 'billing' | 'security'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'notifications' | 'billing' | 'security' | 'store'>('profile');
   const [isEditing, setIsEditing] = useState(false);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -105,6 +111,15 @@ export default function SettingsPage() {
       zip: '62701',
     },
   });
+
+  // FCR Store Settings state
+  const [storeSettings, setStoreSettings] = useState<FcrStoreSettings | null>(null);
+  const [originalStoreSettings, setOriginalStoreSettings] = useState<FcrStoreSettings | null>(null);
+  const [isEditingStore, setIsEditingStore] = useState(false);
+  const [loadingStoreSettings, setLoadingStoreSettings] = useState(false);
+  const [savingStoreSettings, setSavingStoreSettings] = useState(false);
+  const [storeError, setStoreError] = useState<string | null>(null);
+  const [storeSaved, setStoreSaved] = useState(false);
 
   // Fetch settings on mount
   useEffect(() => {
@@ -363,8 +378,105 @@ export default function SettingsPage() {
     }
   };
 
+  // Fetch FCR store settings when the store tab is active
+  useEffect(() => {
+    if (activeTab !== 'store') return;
+    if (storeSettings) return;
+
+    const fetchStoreSettings = async () => {
+      try {
+        setLoadingStoreSettings(true);
+        setStoreError(null);
+        const settings = await fcrStoreSettingsService.getStoreSettings();
+        setStoreSettings(settings);
+        setOriginalStoreSettings(settings);
+      } catch (err: any) {
+        setStoreError(err.message || 'Failed to load store settings');
+      } finally {
+        setLoadingStoreSettings(false);
+      }
+    };
+
+    fetchStoreSettings();
+  }, [activeTab, storeSettings]);
+
+  const handleStoreSettingsSave = async () => {
+    if (!storeSettings || !originalStoreSettings) return;
+
+    const updates: UpdateFcrStoreSettings = {};
+    if (storeSettings.storeNumber !== originalStoreSettings.storeNumber)
+      updates.storeNumber = storeSettings.storeNumber || '';
+    if (storeSettings.primaryWholesaler !== originalStoreSettings.primaryWholesaler)
+      updates.primaryWholesaler = storeSettings.primaryWholesaler || '';
+    if (storeSettings.wholesalerAccountNumber !== originalStoreSettings.wholesalerAccountNumber)
+      updates.wholesalerAccountNumber = storeSettings.wholesalerAccountNumber || '';
+    if (storeSettings.secondaryWholesaler !== originalStoreSettings.secondaryWholesaler)
+      updates.secondaryWholesaler = storeSettings.secondaryWholesaler || '';
+    if (storeSettings.gpoAffiliation !== originalStoreSettings.gpoAffiliation)
+      updates.gpoAffiliation = storeSettings.gpoAffiliation || '';
+    if (storeSettings.serviceType !== originalStoreSettings.serviceType)
+      updates.serviceType = storeSettings.serviceType;
+    if (storeSettings.deaExpirationDate !== originalStoreSettings.deaExpirationDate)
+      updates.deaExpirationDate = storeSettings.deaExpirationDate || '';
+    if (storeSettings.faxNumber !== originalStoreSettings.faxNumber)
+      updates.faxNumber = storeSettings.faxNumber || '';
+    if (storeSettings.daysBetweenVisits !== originalStoreSettings.daysBetweenVisits)
+      updates.daysBetweenVisits = storeSettings.daysBetweenVisits;
+
+    if (Object.keys(updates).length === 0) {
+      setIsEditingStore(false);
+      return;
+    }
+
+    try {
+      setSavingStoreSettings(true);
+      setStoreError(null);
+      const updated = await fcrStoreSettingsService.updateStoreSettings(updates);
+      setStoreSettings(updated);
+      setOriginalStoreSettings(updated);
+      setIsEditingStore(false);
+      setStoreSaved(true);
+      setTimeout(() => setStoreSaved(false), 3000);
+    } catch (err: any) {
+      setStoreError(err.message || 'Failed to update store settings');
+    } finally {
+      setSavingStoreSettings(false);
+    }
+  };
+
+  const handleStoreSettingsCancel = () => {
+    if (originalStoreSettings) {
+      setStoreSettings({ ...originalStoreSettings });
+    }
+    setIsEditingStore(false);
+    setStoreError(null);
+  };
+
+  const updateStoreField = (field: keyof FcrStoreSettings, value: any) => {
+    if (!storeSettings) return;
+    setStoreSettings({ ...storeSettings, [field]: value });
+  };
+
+  const getDeaWarningStyle = (warning: string | null) => {
+    if (!warning) return null;
+    if (warning.includes('expired')) {
+      return { bg: 'bg-red-50', border: 'border-red-300', text: 'text-red-800', icon: 'text-red-600' };
+    }
+    if (warning.includes('expires in')) {
+      return { bg: 'bg-yellow-50', border: 'border-yellow-300', text: 'text-yellow-800', icon: 'text-yellow-600' };
+    }
+    return { bg: 'bg-gray-50', border: 'border-gray-300', text: 'text-gray-700', icon: 'text-gray-500' };
+  };
+
+  const SERVICE_TYPES = [
+    { value: 'full_service', label: 'Full Service (Rep processes onsite)' },
+    { value: 'self_service', label: 'Self-Service (Web)' },
+    { value: 'express', label: 'Express (Box-and-Ship)' },
+  ];
+
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User, color: 'bg-teal-600 text-white border-teal-600' },
+    { id: 'store', label: 'Store Settings', icon: Store, color: 'bg-teal-600 text-white border-teal-600' },
     // { id: 'notifications', label: 'Notifications', icon: Bell, color: 'bg-purple-100 text-purple-700 border-purple-300' },
     // { id: 'billing', label: 'Billing', icon: CreditCard, color: 'bg-green-100 text-green-700 border-green-300' },
     { id: 'security', label: 'Security', icon: Shield, color: 'bg-teal-600 text-white border-teal-600' },
@@ -822,6 +934,260 @@ export default function SettingsPage() {
                     Update Payment Information
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Store Settings Tab (FCR) */}
+        {activeTab === 'store' && (
+          <div className="space-y-3">
+            {/* DEA Expiration Warning Banner (Task 1.7) */}
+            {storeSettings?.deaExpirationWarning && (() => {
+              const style = getDeaWarningStyle(storeSettings.deaExpirationWarning);
+              if (!style) return null;
+              return (
+                <div className={`p-3 ${style.bg} border-2 ${style.border} rounded-lg flex items-center gap-3`}>
+                  <AlertTriangle className={`h-5 w-5 ${style.icon} flex-shrink-0`} />
+                  <div>
+                    <p className={`font-bold text-sm ${style.text}`}>DEA License Warning</p>
+                    <p className={`text-xs ${style.text} mt-0.5`}>{storeSettings.deaExpirationWarning}</p>
+                  </div>
+                </div>
+              );
+            })()}
+
+            <Card className="border-2 border-indigo-200 bg-gradient-to-br from-white to-indigo-50/30">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-indigo-100">
+                      <Store className="h-4 w-4 text-indigo-600" />
+                    </div>
+                    <h3 className="font-bold text-base text-gray-900">FCR Store Settings</h3>
+                  </div>
+                  {!isEditingStore ? (
+                    <Button variant="outline" size="sm" onClick={() => setIsEditingStore(true)} className="bg-teal-600 hover:bg-teal-700 text-white border-teal-600 rounded-lg" disabled={loadingStoreSettings}>
+                      <Edit className="mr-1 h-3 w-3" />
+                      Edit
+                    </Button>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={handleStoreSettingsCancel} disabled={savingStoreSettings} className="rounded-lg">
+                        Cancel
+                      </Button>
+                      <Button size="sm" onClick={handleStoreSettingsSave} disabled={savingStoreSettings} className="bg-teal-600 hover:bg-teal-700 text-white border-0 rounded-lg">
+                        <Save className="mr-1 h-3 w-3" />
+                        {savingStoreSettings ? 'Saving...' : 'Save'}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                {storeError && (
+                  <div className="p-2 mb-3 bg-red-50 border-2 border-red-200 rounded-lg flex items-center gap-2 text-red-800 text-xs">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>{storeError}</span>
+                  </div>
+                )}
+
+                {storeSaved && (
+                  <div className="p-2 mb-3 bg-green-50 border-2 border-green-200 rounded-lg flex items-center gap-2 text-green-800 text-xs">
+                    <CheckCircle className="h-4 w-4" />
+                    <span>Store settings saved successfully!</span>
+                  </div>
+                )}
+
+                {loadingStoreSettings ? (
+                  <div className="p-4 text-center text-sm text-gray-600">Loading store settings...</div>
+                ) : !storeSettings ? (
+                  <div className="p-4 text-center text-sm text-gray-500">Unable to load store settings. Please try again.</div>
+                ) : (
+                  <div className="space-y-4">
+                    {/* Store Identification */}
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-900 mb-1">Store Number</label>
+                        <Input
+                          value={storeSettings.storeNumber || ''}
+                          onChange={(e) => updateStoreField('storeNumber', e.target.value)}
+                          disabled={!isEditingStore}
+                          className="text-xs h-7"
+                          placeholder="e.g. 5544"
+                          maxLength={10}
+                        />
+                        <p className="text-xs text-gray-500 mt-0.5">Unique 4-digit store identifier</p>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-900 mb-1">Service Type</label>
+                        <select
+                          value={storeSettings.serviceType || 'full_service'}
+                          onChange={(e) => updateStoreField('serviceType', e.target.value)}
+                          disabled={!isEditingStore}
+                          className="w-full h-7 px-2 py-1 text-xs border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {SERVICE_TYPES.map((type) => (
+                            <option key={type.value} value={type.value}>
+                              {type.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Wholesaler Information */}
+                    <div className="pt-3 border-t-2 border-indigo-200">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Truck className="h-4 w-4 text-indigo-600" />
+                        <h4 className="font-bold text-sm text-gray-900">Wholesaler Information</h4>
+                      </div>
+                      <div className="grid gap-3 md:grid-cols-2">
+                        <div>
+                          <label className="block text-xs font-bold text-gray-900 mb-1">Primary Wholesaler</label>
+                          <Input
+                            value={storeSettings.primaryWholesaler || ''}
+                            onChange={(e) => updateStoreField('primaryWholesaler', e.target.value)}
+                            disabled={!isEditingStore}
+                            className="text-xs h-7"
+                            placeholder="e.g. Cardinal Health"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-gray-900 mb-1">
+                            Wholesaler Account Number
+                            <span className="text-red-500 ml-0.5">*</span>
+                          </label>
+                          <Input
+                            value={storeSettings.wholesalerAccountNumber || ''}
+                            onChange={(e) => updateStoreField('wholesalerAccountNumber', e.target.value)}
+                            disabled={!isEditingStore}
+                            className="text-xs h-7"
+                            placeholder="e.g. CH-987654"
+                          />
+                          <p className="text-xs text-gray-500 mt-0.5">Required for return processing</p>
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-xs font-bold text-gray-900 mb-1">Secondary Wholesaler</label>
+                          <Input
+                            value={storeSettings.secondaryWholesaler || ''}
+                            onChange={(e) => updateStoreField('secondaryWholesaler', e.target.value)}
+                            disabled={!isEditingStore}
+                            className="text-xs h-7"
+                            placeholder="Optional"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* GPO & Compliance */}
+                    <div className="pt-3 border-t-2 border-indigo-200">
+                      <div className="flex items-center gap-2 mb-3">
+                        <FileText className="h-4 w-4 text-indigo-600" />
+                        <h4 className="font-bold text-sm text-gray-900">GPO & Compliance</h4>
+                      </div>
+                      <div className="grid gap-3 md:grid-cols-2">
+                        <div>
+                          <label className="block text-xs font-bold text-gray-900 mb-1">GPO Affiliation</label>
+                          <Input
+                            value={storeSettings.gpoAffiliation || ''}
+                            onChange={(e) => updateStoreField('gpoAffiliation', e.target.value)}
+                            disabled={!isEditingStore}
+                            className="text-xs h-7"
+                            placeholder="e.g. BuyLine"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-gray-900 mb-1">DEA Expiration Date</label>
+                          <Input
+                            type="date"
+                            value={storeSettings.deaExpirationDate || ''}
+                            onChange={(e) => updateStoreField('deaExpirationDate', e.target.value)}
+                            disabled={!isEditingStore}
+                            className="text-xs h-7"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Visit Schedule & Contact */}
+                    <div className="pt-3 border-t-2 border-indigo-200">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Calendar className="h-4 w-4 text-indigo-600" />
+                        <h4 className="font-bold text-sm text-gray-900">Visit Schedule & Contact</h4>
+                      </div>
+                      <div className="grid gap-3 md:grid-cols-2">
+                        <div>
+                          <label className="block text-xs font-bold text-gray-900 mb-1">Days Between Visits</label>
+                          <Input
+                            type="number"
+                            min={1}
+                            max={365}
+                            value={storeSettings.daysBetweenVisits ?? 120}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value, 10);
+                              if (!isNaN(val) && val >= 1 && val <= 365) {
+                                updateStoreField('daysBetweenVisits', val);
+                              }
+                            }}
+                            disabled={!isEditingStore}
+                            className="text-xs h-7"
+                          />
+                          <p className="text-xs text-gray-500 mt-0.5">Default: 120 days</p>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-gray-900 mb-1">Fax Number</label>
+                          <Input
+                            value={storeSettings.faxNumber || ''}
+                            onChange={(e) => updateStoreField('faxNumber', e.target.value)}
+                            disabled={!isEditingStore}
+                            className="text-xs h-7"
+                            placeholder="Optional"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-gray-900 mb-1">Last Visit Date</label>
+                          <Input
+                            type="date"
+                            value={storeSettings.lastVisitDate || ''}
+                            disabled
+                            className="text-xs h-7 bg-gray-50"
+                          />
+                          <p className="text-xs text-gray-500 mt-0.5">Set by processor</p>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-gray-900 mb-1">Next Visit Date</label>
+                          <Input
+                            type="date"
+                            value={storeSettings.nextVisitDate || ''}
+                            disabled
+                            className="text-xs h-7 bg-gray-50"
+                          />
+                          <p className="text-xs text-gray-500 mt-0.5">Auto-calculated</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Assigned Staff (Read-Only) */}
+                    {(storeSettings.assignedProcessorName || storeSettings.assignedProcessorId) && (
+                      <div className="pt-3 border-t-2 border-indigo-200">
+                        <div className="flex items-center gap-2 mb-3">
+                          <User className="h-4 w-4 text-indigo-600" />
+                          <h4 className="font-bold text-sm text-gray-900">Assigned Staff</h4>
+                        </div>
+                        <div className="grid gap-3 md:grid-cols-2">
+                          <div>
+                            <label className="block text-xs font-bold text-gray-900 mb-1">Assigned Processor</label>
+                            <Input
+                              value={storeSettings.assignedProcessorName || 'Not assigned'}
+                              disabled
+                              className="text-xs h-7 bg-gray-50"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

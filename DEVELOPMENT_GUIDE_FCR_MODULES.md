@@ -129,16 +129,14 @@ PHARMACY FRONTEND (Frontend/)
 
 ## Module 1: Store Setup & Master Data
 
-### 🚀 **STATUS: Backend Complete, Frontend Ready to Start**
+### ✅ **STATUS: Backend Complete, Frontend Complete**
 
 | Component | Status | Files |
 |-----------|--------|-------|
 | **Database Schema** | ✅ Complete | `scripts/fcr_01_*.sql` (3 files) |
 | **Pharmacy Store Settings API** | ✅ Complete | GET/PATCH `/api/admin/pharmacies/:id/store-settings` |
 | **Processors Management API** | ✅ Complete | Full CRUD at `/api/admin/processors/*` |
-| **Frontend Integration** | 🟡 Ready to start | Use APIs above in settings page |
-
-**Next Step for Younas:** Extend `Frontend/app/(dashboard)/settings/page.tsx` using the completed backend APIs.
+| **Frontend Integration** | ✅ Complete | `Frontend/app/(dashboard)/settings/page.tsx` + `Frontend/lib/api/services/fcrStoreSettingsService.ts` |
 
 ### What Client Document Says (Section 1)
 
@@ -226,67 +224,43 @@ Required fields:
   - `POST /api/admin/processors/:id/assign-stores` — Assign stores to processor
   - `DELETE /api/admin/processors/:id/stores/:pharmacyId` — Unassign store
 
-#### Younas (Frontend)
+#### Younas (Frontend) ✅ **COMPLETED**
 
-**Task 1.6: Extend pharmacy settings page**
+**Task 1.6: Extend pharmacy settings page** ✅ **DONE**
 
-- **Location:** `Frontend/app/(dashboard)/settings/page.tsx`
-- **Backend APIs available:** ✅ Ready to use
-  - `GET /api/admin/pharmacies/:id/store-settings` — Get current FCR settings
-  - `PATCH /api/admin/pharmacies/:id/store-settings` — Update FCR settings
-- **Add new fields to settings form:**
-  - Primary wholesaler (dropdown or text input)
-  - Wholesaler account number (required field)
-  - Secondary wholesaler (optional)
-  - Service type selector: `full_service` | `self_service` | `express`
+- ✅ **Location:** `Frontend/app/(dashboard)/settings/page.tsx`
+- ✅ **API service created:** `Frontend/lib/api/services/fcrStoreSettingsService.ts`
+- ✅ **Exported in:** `Frontend/lib/api/services/index.ts`
+- ✅ **New "Store Settings" tab** added to the settings page tabs
+- ✅ **Form fields implemented:**
+  - Store number (text input, max 10 chars, with helper text)
+  - Service type selector (dropdown: `full_service` / `self_service` / `express`)
+  - Primary wholesaler (text input)
+  - Wholesaler account number (text input, marked as required)
+  - Secondary wholesaler (text input, optional)
   - GPO affiliation (text input)
-  - Store number (unique 4-digit identifier)
   - DEA expiration date (date picker)
-  - Fax number (optional)
-  - Days between visits (number input, default 120)
-- **API Integration:**
-  ```typescript
-  // GET current settings
-  const response = await fetch(`/api/admin/pharmacies/${pharmacyId}/store-settings`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  const { storeSettings } = await response.json();
-  
-  // UPDATE settings
-  await fetch(`/api/admin/pharmacies/${pharmacyId}/store-settings`, {
-    method: 'PATCH',
-    headers: { 
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}` 
-    },
-    body: JSON.stringify({
-      storeNumber: "5544",
-      primaryWholesaler: "Cardinal Health",
-      wholesalerAccountNumber: "CH-987654",
-      serviceType: "full_service",
-      deaExpirationDate: "2025-12-31"
-    })
-  });
-  ```
+  - Days between visits (number input, 1–365, default 120)
+  - Fax number (text input, optional)
+  - Last visit date (read-only, set by processor)
+  - Next visit date (read-only, auto-calculated)
+  - Assigned processor name (read-only)
+- ✅ **Features:**
+  - Lazy-loads store settings only when tab is clicked
+  - Edit/Save/Cancel pattern matching existing Profile tab
+  - Only sends changed fields to API (diff-based updates)
+  - Loading states, error handling, success notifications
+  - Proper validation (daysBetweenVisits 1–365)
 
-**Task 1.7: Add DEA expiration warning**
+**Task 1.7: Add DEA expiration warning** ✅ **DONE**
 
-- **Location:** `Frontend/app/(dashboard)/settings/page.tsx` or dashboard
-- **Backend provides:** `deaExpirationWarning` field in store settings response
-  - `null` = no warning
-  - `"DEA is expired"` = expired
-  - `"DEA expires in X days"` = expiring soon
-  - `"DEA expiration date is missing"` = no date set
-- **Implementation:**
-  ```typescript
-  if (storeSettings.deaExpirationWarning) {
-    // Show warning banner with appropriate color:
-    // - Red for expired
-    // - Yellow for expiring soon  
-    // - Gray for missing date
-  }
-  ```
-- **Visual:** Red/yellow/gray alert component with warning text
+- ✅ **Location:** `Frontend/app/(dashboard)/settings/page.tsx` — Store Settings tab
+- ✅ **Implementation:** Warning banner at top of Store Settings tab
+- ✅ **Styling based on `deaExpirationWarning` value:**
+  - Red banner with AlertTriangle icon for `"DEA is expired"`
+  - Yellow banner for `"DEA expires in X days"`
+  - Gray banner for `"DEA expiration date is missing"`
+  - No banner when `null` (DEA is valid and not expiring soon)
 
 ### How to Implement (Guidance for Cursor AI)
 
@@ -294,19 +268,12 @@ Required fields:
 - Database migrations ready in `scripts/fcr_01_*.sql` files
 - APIs ready at `/api/admin/pharmacies/:id/store-settings` and `/api/admin/processors/*`
 
-**For Younas (Frontend Tasks):**
+**Frontend Status:** ✅ **ALL FRONTEND TASKS COMPLETED**
+- Task 1.6 completed: Store Settings tab added to `Frontend/app/(dashboard)/settings/page.tsx`
+- Task 1.7 completed: DEA expiration warning banner implemented at top of Store Settings tab
+- API service created: `Frontend/lib/api/services/fcrStoreSettingsService.ts`
 
-When working on Task 1.6 (extend settings page):
-```
-Prompt: "Extend the pharmacy settings page in Frontend/app/(dashboard)/settings/page.tsx to include FCR store settings. Add form fields for store number, primary wholesaler, wholesaler account number, service type (dropdown with full_service/self_service/express), GPO affiliation, DEA expiration date, and fax number. Use the existing form patterns and call GET /api/admin/pharmacies/:id/store-settings to load current values and PATCH to save changes. Include proper validation and loading states."
-```
-
-When working on Task 1.7 (DEA warning):
-```
-Prompt: "Add a DEA expiration warning banner to the pharmacy settings page. Check the deaExpirationWarning field from the store settings API response. If not null, show an alert component with appropriate styling: red for 'expired', yellow for 'expires in X days', gray for 'missing date'. Position it prominently at the top of the settings form."
-```
-
-**API Endpoints Ready for Frontend:**
+**API Endpoints Used by Frontend:**
 - `GET /api/admin/pharmacies/:id/store-settings` — Returns all FCR fields + DEA warning
 - `PATCH /api/admin/pharmacies/:id/store-settings` — Updates FCR fields with validation
 

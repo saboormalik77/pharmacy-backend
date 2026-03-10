@@ -7,6 +7,11 @@ import {
   UpdateSettingsData,
   ChangePasswordData,
 } from '../services/settingsService';
+import {
+  getPharmacyStoreSettings,
+  updatePharmacyStoreSettings,
+  UpdatePharmacyStoreSettingsData,
+} from '../services/adminPharmaciesService';
 import { AppError } from '../utils/appError';
 
 /**
@@ -180,6 +185,111 @@ export const changePasswordHandler = catchAsync(
     res.status(200).json({
       status: 'success',
       message: 'Password changed successfully',
+    });
+  }
+);
+
+/**
+ * @swagger
+ * /api/settings/store-settings:
+ *   get:
+ *     summary: Get FCR store settings for the authenticated pharmacy
+ *     tags: [Settings]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: FCR store settings
+ */
+export const getStoreSettings = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const pharmacyId = req.pharmacyId;
+
+    if (!pharmacyId) {
+      return next(new AppError('Pharmacy ID is required', 400));
+    }
+
+    const settings = await getPharmacyStoreSettings(pharmacyId);
+
+    res.status(200).json({
+      status: 'success',
+      data: { storeSettings: settings },
+    });
+  }
+);
+
+/**
+ * @swagger
+ * /api/settings/store-settings:
+ *   patch:
+ *     summary: Update FCR store settings for the authenticated pharmacy
+ *     tags: [Settings]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               storeNumber:
+ *                 type: string
+ *               primaryWholesaler:
+ *                 type: string
+ *               wholesalerAccountNumber:
+ *                 type: string
+ *               secondaryWholesaler:
+ *                 type: string
+ *               gpoAffiliation:
+ *                 type: string
+ *               serviceType:
+ *                 type: string
+ *                 enum: [full_service, self_service, express]
+ *               deaExpirationDate:
+ *                 type: string
+ *                 format: date
+ *               daysBetweenVisits:
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 365
+ *               faxNumber:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Store settings updated successfully
+ */
+export const updateStoreSettings = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const pharmacyId = req.pharmacyId;
+
+    if (!pharmacyId) {
+      return next(new AppError('Pharmacy ID is required', 400));
+    }
+
+    const allowedFields = [
+      'storeNumber', 'primaryWholesaler', 'wholesalerAccountNumber',
+      'secondaryWholesaler', 'gpoAffiliation', 'serviceType',
+      'deaExpirationDate', 'daysBetweenVisits', 'faxNumber',
+    ];
+
+    const filtered: UpdatePharmacyStoreSettingsData = {};
+    for (const key of allowedFields) {
+      if (req.body[key] !== undefined) {
+        (filtered as any)[key] = req.body[key];
+      }
+    }
+
+    if (Object.keys(filtered).length === 0) {
+      return next(new AppError('No valid fields provided for update', 400));
+    }
+
+    const settings = await updatePharmacyStoreSettings(pharmacyId, filtered);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Store settings updated successfully',
+      data: { storeSettings: settings },
     });
   }
 );
