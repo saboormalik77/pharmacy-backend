@@ -1,0 +1,947 @@
+[03/05/2026 19:16:24] Bryan Shnider: Uh if you have any once you pulls it up. Who just came in seduce okay, so just yeah good.
+[03/05/2026 19:16:24] Josephine Velazquez: okay
+[03/05/2026 19:16:48] Josephine Velazquez: I'm gonna I'm going to close this out because I'm gonna show you from the first process what you would do is on the processing side because that's what we would
+[03/05/2026 19:16:56] Josephine Velazquez: start from farmerson. okay
+[03/05/2026 19:16:56] Bryan Shnider: Yeah, if you can if you can share your screen on the computer.
+[03/05/2026 19:17:08] Bryan Shnider: And be here if you need to join in again, there you.
+[03/05/2026 19:17:13] Josephine Velazquez: See it.
+[03/05/2026 19:17:15] Bryan Shnider: So I click the entire screen and then click the blue share button.
+[03/05/2026 19:17:33] Josephine Velazquez: Yeah, I just click it.
+[03/05/2026 19:17:50] Bryan Shnider: Are you on Google Chrome and your computer?
+[03/05/2026 19:17:53] Josephine Velazquez: yeah
+[03/05/2026 19:17:56] Bryan Shnider: It's not so if you you know just show you here. so you So you went in down to here to the this button and then you clicked.
+[03/05/2026 19:18:10] Josephine Velazquez: It's a share choose to what to share with me.
+[03/05/2026 19:18:14] Bryan Shnider: Yep, and then a little window pops up and then you have a couple screens.
+[03/05/2026 19:18:17] Josephine Velazquez: Yeah, when they popped off it says the left of tap to share.
+[03/05/2026 19:18:20] Bryan Shnider: and then you select it and
+[03/05/2026 19:18:25] Josephine Velazquez: And I didn't come up to. I said I select a tab to share but it's not.
+[03/05/2026 19:18:31] Bryan Shnider: Do try and tie your window so there's chrome tab. There's window and then entire screen if you just go to entire screen.
+[03/05/2026 19:18:37] Josephine Velazquez: Yeah fire screen.
+[03/05/2026 19:18:40] Bryan Shnider: And then you click the screen you still even if it's just one screen you still got a click this screen and then it highlights it in blue.
+[03/05/2026 19:18:45] Josephine Velazquez: okay now, they're now just
+[03/05/2026 19:18:47] Bryan Shnider: okay There we go okay. and rolling
+[03/05/2026 19:18:57] Josephine Velazquez: I'm gonna move this out close it here so I'm going to go into the processing side processor.
+[03/05/2026 19:19:03] Josephine Velazquez: So, that's where we that. This is where we would go when we first go into a pharmacy. Usually have a little laptop where they sign in.
+[03/05/2026 19:19:03] Bryan Shnider: And you can good.
+[03/05/2026 19:19:12] Bryan Shnider: So so awesome, this is where the pharmacy is creating the order.
+[03/05/2026 19:19:19] Josephine Velazquez: This is where our person would go in and create. the water So, it's select a store here. Dependent on the store that you're at and.
+[03/05/2026 19:19:33] Bryan Shnider: So this is just to be clear. This is a processor but their selecting the store for you. So you don't obviously want. You know a bunch of stores being available to this store right. This is like a
+[03/05/2026 19:19:48] Josephine Velazquez: Right this will be like like the dude say if I was the one to go into process
+[03/05/2026 19:19:49] Bryan Shnider: an employee or a salesperson.
+[03/05/2026 19:19:54] Josephine Velazquez: the stores these would be all the stores that I normally process. I would only see the stores that I process.
+[03/05/2026 19:19:59] Bryan Shnider: Okay got it.
+[03/05/2026 19:20:01] Joseph Delaney: And if the story itself was gonna do a self-service return they would go on through the website.
+[03/05/2026 19:20:07] Josephine Velazquez: Yeah, and they would only see things they would only see their store.
+[03/05/2026 19:20:08] Bryan Shnider: okay perfect
+[03/05/2026 19:20:12] Arnie Sarkar: he recording this Brian
+[03/05/2026 19:20:12] Josephine Velazquez: yeah
+[03/05/2026 19:20:13] Bryan Shnider: yeah
+[03/05/2026 19:20:15] Arnie Sarkar: okay
+[03/05/2026 19:20:16] Josephine Velazquez: sign in and would be their store only.
+[03/05/2026 19:20:22] Bryan Shnider: okay
+[03/05/2026 19:20:23] Josephine Velazquez: yeah So, I'm just gonna pull up any one here any store this just to show you the process, so let's say would you say you want to start a return for this store? So then you look on click yes? And then up here it says create return transaction. So you would click on that and then here I would create a license plate for that return that you're doing and those license plates are unique for each store that you're doing.
+[03/05/2026 19:20:52] Bryan Shnider: So hang on the license plates already theoretically created though in the here and awesome the license plate is like the store pharmacy.
+[03/05/2026 19:21:01] Bryan Shnider: license number
+[03/05/2026 19:21:01] Josephine Velazquez: So yeah, so I'll consist the day that you did it.
+[03/05/2026 19:21:05] Josephine Velazquez: And the last four numbers are the store number.
+[03/05/2026 19:21:06] Bryan Shnider: to get the data does this also include all the store license plate numbers and everything.
+[03/05/2026 19:21:22] Josephine Velazquez: Each one will have their own individual license plate for when you process a store. It'll automatically it's creates it.
+[03/05/2026 19:21:27] Bryan Shnider: but I'm saying that oh it creates it on the fly.
+[03/05/2026 19:21:33] Josephine Velazquez: It creates on the flies soon as you start the return.
+[03/05/2026 19:21:36] Bryan Shnider: Oh, so this, so let's say the middle number two three ha that's just a random number.
+[03/05/2026 19:21:42] Josephine Velazquez: Yeah, it already. I believe a lot of them have that 23ha and the metal of them. I just I don't think it means anything the most important.
+[03/05/2026 19:21:52] Joseph Delaney: the ha stands for house account
+[03/05/2026 19:21:56] bahir tayob: yeah
+[03/05/2026 19:21:56] Josephine Velazquez: Yeah, the last ones are most important and the day that you do the return.
+[03/05/2026 19:22:01] Bryan Shnider: 03:05 26 got it okay.
+[03/05/2026 19:22:03] Josephine Velazquez: Yeah, that would be today's date and then the last four will be the store
+[03/05/2026 19:22:05] Bryan Shnider: Yeah, and this is what ultimately ties the credit to this store account correct.
+[03/05/2026 19:22:07] Josephine Velazquez: number. Yep.
+[03/05/2026 19:22:16] Josephine Velazquez: While tie it to the credit.
+[03/05/2026 19:22:16] Bryan Shnider: Okay here you're gonna take them. Oh okay.
+[03/05/2026 19:22:21] Bryan Shnider: Here do you have?
+[03/05/2026 19:22:23] bahir tayob: No like this is just a random number that we generate with the store ID at the
+[03/05/2026 19:22:26] Bryan Shnider: yeah
+[03/05/2026 19:22:27] bahir tayob: end okay, so it's our generated number.
+[03/05/2026 19:22:29] Joseph Delaney: And if you did if you did five returns and a week you would have five separate license plates.
+[03/05/2026 19:22:35] Bryan Shnider: Oh, so how would but you only have like one product? Could you theoretically be able to do two per day for this one store?
+[03/05/2026 19:22:43] Joseph Delaney: if they wanted to
+[03/05/2026 19:22:44] Bryan Shnider: But then what would change with the number?
+[03/05/2026 19:22:48] Josephine Velazquez: It's kind of hard because what we normally do if they if we've had that situation happen what the same store did this two stores we would contact them and then we would add that return to the first one is what we normally would do.
+[03/05/2026 19:23:01] Bryan Shnider: I got it okay.
+[03/05/2026 19:23:02] Joseph Delaney: It's very very random. Yeah, maybe once a year.
+[03/05/2026 19:23:05] Josephine Velazquez: yeah that happens
+[03/05/2026 19:23:05] Bryan Shnider: rare yeah
+[03/05/2026 19:23:07] Bryan Shnider: okay Okay, so then you click yes.
+[03/05/2026 19:23:14] Josephine Velazquez: bottles.
+[03/05/2026 19:23:21] Joseph Delaney: we're going to scan a bottle Josephine
+[03/05/2026 19:23:23] Joseph Delaney: okay
+[03/05/2026 19:23:23] Josephine Velazquez: sure
+[03/05/2026 19:23:24] Bryan Shnider: So Joe's sitting in front of the Josephine's computer that she's working on right now. So he'll scan. a barcode So just be clear. What did you just scan? Did you scan the DC barcode?
+[03/05/2026 19:23:39] Joseph Delaney: I just can't doxys cycling.
+[03/05/2026 19:23:41] Bryan Shnider: But was it the NDC barcode?
+[03/05/2026 19:23:43] Josephine Velazquez: Here another QR code scan.
+[03/05/2026 19:23:45] Joseph Delaney: We scan the QR code.
+[03/05/2026 19:23:46] Bryan Shnider: So every bottle has a QR code.
+[03/05/2026 19:23:50] Joseph Delaney: 90% of them do this was promised 30 years ago and it actually started happening about four years ago.
+[03/05/2026 19:23:56] Josephine Velazquez: Yeah, and it's better to scan the QR code because it generates all the
+[03/05/2026 19:23:57] Bryan Shnider: okay
+[03/05/2026 19:24:00] Josephine Velazquez: information on there for you and all you have to add is the quantity of the bottles.
+[03/05/2026 19:24:05] Bryan Shnider: All of this because this to me is like where it has standard price a lot number cereal number this is essentially all of the data that we technically will need right.
+[03/05/2026 19:24:31] Josephine Velazquez: Right, we would need all of that now.
+[03/05/2026 19:24:34] Bryan Shnider: Does this come Joe does this come on that that database that standard you know at your your call it the hippa, spreadsheet?
+[03/05/2026 19:24:43] Josephine Velazquez: goodbye
+[03/05/2026 19:24:44] Joseph Delaney: So so next to the next to the QR code it has the NDC number and it has a lot number it has the expiration number. So before those a QR code the process would go in and have to enter in the NDC which is a very large numbers you can see it's 11 digits. And then the lot number etc and this is a partial bottle so then they do a visual. 25575%
+[03/05/2026 19:25:14] Bryan Shnider: okay, so this is a
+[03/05/2026 19:25:15] Joseph Delaney: If it's full it's just you know it's one.
+[03/05/2026 19:25:18] Bryan Shnider: So you're saying this is a partial bottle so does that mean that it's still is a returnable or does it tell you what you enter in. How much is like it would not
+[03/05/2026 19:25:24] Joseph Delaney: Yes.
+[03/05/2026 19:25:27] Bryan Shnider: be a full package correct.
+[03/05/2026 19:25:29] Joseph Delaney: Yes down here under full package if it was a full package for example this one says right on the label 60 tablets. But it's been opened so I would enter in. quantity return
+[03/05/2026 19:25:48] Josephine Velazquez: If it's a partial, I would go in here and put number of rounds or estimate.
+[03/05/2026 19:25:52] bahir tayob: Yeah, but no no no no this data is coming from our database right this this oldest data that you scanned in is from that QR code correct even though standard price serial number lock number everything came from that QR code correct the strength.
+[03/05/2026 19:26:07] Joseph Delaney: Sorry, yes.
+[03/05/2026 19:26:08] Bryan Shnider: But they hang out that the data that is in the application. It doesn't from the QR code.
+[03/05/2026 19:26:08] bahir tayob: Yeah all right.
+[03/05/2026 19:26:16] bahir tayob: nothing. We didn't use any internal data to generate this data. We yeah.
+[03/05/2026 19:26:23] Bryan Shnider: Well, that's what I'm saying is Joe does does this the document that the spreadsheet database that you're talking about the hippo document does that does all of this exist on that document?
+[03/05/2026 19:26:35] Joseph Delaney: What is under the hipaa is a price filed database and it has dndc. And it'll have the package description. It'll have it won't have the lot number because every different batch made each day as a different a lot number.
+[03/05/2026 19:26:58] Bryan Shnider: So how so how did it so the lot number was embedded in the QR code because this came up automatically with a lot number four or five seven five.
+[03/05/2026 19:27:05] bahir tayob: correct
+[03/05/2026 19:27:06] Josephine Velazquez: Yeah, it's already on there on the bottom.
+[03/05/2026 19:27:08] bahir tayob: Yeah, I am Brian when you scan the girl you there's no we didn't pull any data from Danny database you know it's they scan the QR code and it populated all this data.
+[03/05/2026 19:27:14] Josephine Velazquez: Yeah, right from the bottom.
+[03/05/2026 19:27:15] Bryan Shnider: picture of the QR code and then text it to me?
+[03/05/2026 19:27:24] Joseph Delaney: right now
+[03/05/2026 19:27:26] Bryan Shnider: Cool, thank you.
+[03/05/2026 19:27:27] Joseph Delaney: Yep.
+[03/05/2026 19:27:28] Bryan Shnider: All right all right.
+[03/05/2026 19:27:31] Joseph Delaney: You want more than one.
+[03/05/2026 19:27:33] Bryan Shnider: sure
+[03/05/2026 19:27:34] bahir tayob: If you have if you have more than one of the great yeah, please.
+[03/05/2026 19:27:36] Joseph Delaney: okay
+[03/05/2026 19:27:41] Bryan Shnider: Okay, so Joe then puts 75. And view policy, let's let's see.
+[03/05/2026 19:27:48] Josephine Velazquez: So here you go to view policy open. I'll tell you at six months prior six months post partials not accepted. No.
+[03/05/2026 19:27:59] Bryan Shnider: So partials are not accepted. So does that mean in in?
+[03/05/2026 19:28:02] Josephine Velazquez: for this particular so
+[03/05/2026 19:28:05] Bryan Shnider: Would it be nice to essentially then turn around and say not accepted because it is already automatically knowing that it's a partial.
+[03/05/2026 19:28:13] Josephine Velazquez: It's not returnable.
+[03/05/2026 19:28:15] Bryan Shnider: Is this a manual thing that you have to go through to verify each time?
+[03/05/2026 19:28:20] Josephine Velazquez: Well, if we know some of the policies then you don't have to verify them you know but it should automatically come up because we are doing the system that it's not returnable if it's in the policy.
+[03/05/2026 19:28:29] Bryan Shnider: yeah okay
+[03/05/2026 19:28:32] bahir tayob: And what do you do with the non-returnables just destroy him?
+[03/05/2026 19:28:35] Josephine Velazquez: Destroy them.
+[03/05/2026 19:28:36] Bryan Shnider: so be here, there's boxes and boxes of
+[03/05/2026 19:28:40] Joseph Delaney: Here what's your phone number?
+[03/05/2026 19:28:43] Bryan Shnider: You can text it to me. I'll send it to him.
+[03/05/2026 19:28:45] Bryan Shnider: Eat yeah, but here there's boxes and boxes of just baskets of pills. of that just get basically Joe removes the different pills from the bottles and then has them in a box and then a guy comes and picks them up for Destruction
+[03/05/2026 19:28:45] Joseph Delaney: okay
+[03/05/2026 19:29:04] Bryan Shnider: and it's the and it's done by a weight is that right Joe
+[03/05/2026 19:29:04] bahir tayob: okay
+[03/05/2026 19:29:08] Bryan Shnider: Okay and do we need to have the return reason on here? There's a little drop down in the middle? Just a fiend is that return that return reason in the middle below the
+[03/05/2026 19:29:08] Joseph Delaney: correct
+[03/05/2026 19:29:17] Josephine Velazquez: sorry oh no, no
+[03/05/2026 19:29:21] Bryan Shnider: expiration date does that matter?
+[03/05/2026 19:29:27] Josephine Velazquez: And then you would just say man return. So if you want we could put even here one just like this is just an example. You
+[03/05/2026 19:29:30] Joseph Delaney: so
+[03/05/2026 19:29:34] Josephine Velazquez: know if it's a full bottle. So um just tab it so then it should come up as I was 1125 would have to change the day for it to be because it's not within time.
+[03/05/2026 19:29:48] Bryan Shnider: six months prior to six months post drug expiration but isn't it currently six
+[03/05/2026 19:29:50] Josephine Velazquez: yeah
+[03/05/2026 19:29:53] Bryan Shnider: months post drug expiration
+[03/05/2026 19:29:55] Josephine Velazquez: Right, but it's November 2025. That's why it's on not returnable.
+[03/05/2026 19:30:02] Bryan Shnider: So to six months prior meaning it's not returnable between six months Prior and six months post.
+[03/05/2026 19:30:07] Josephine Velazquez: So that should have been the dates for it because now we're in 2026 it should have been. at least
+[03/05/2026 19:30:16] Bryan Shnider: because that would be April right November December January March April May
+[03/05/2026 19:30:18] Josephine Velazquez: yeah
+[03/05/2026 19:30:22] Bryan Shnider: so does
+[03/05/2026 19:30:27] Josephine Velazquez: returnable yeah
+[03/05/2026 19:30:29] Bryan Shnider: that's interesting so it's not returnable during the expiration 12 month period
+[03/05/2026 19:30:35] Josephine Velazquez: 12 months, what is the basics 1/6 months?
+[03/05/2026 19:30:36] Bryan Shnider: I see and Joe in this Joe in this situation you would put it in the Wine Cellar here. He calls the Wine Cellar because he lets the products age right, so he
+[03/05/2026 19:30:42] Joseph Delaney: Yes.
+[03/05/2026 19:30:45] Bryan Shnider: would just put in the Wine Cellar and then so basically come June once it's now
+[03/05/2026 19:30:46] bahir tayob: It's like that.
+[03/05/2026 19:30:51] Bryan Shnider: returnable. he would then go return it in the month of June
+[03/05/2026 19:30:56] Josephine Velazquez: all right
+[03/05/2026 19:30:59] Bryan Shnider: okay
+[03/05/2026 19:31:01] Arnie Sarkar: So um just a quick question on that Joe when you when they're non-returnable you put them in the Wine Cellar come. June you pick it out. You scan it again. Does that credit then go to that Pharmacy at that time or is that just a lost or it's that's revenue for us lost revenue for the pharmacy.
+[03/05/2026 19:31:22] Joseph Delaney: do that question
+[03/05/2026 19:31:25] Arnie Sarkar: If you put the product in the Wine Cellar wait for it to age, you open it up and
+[03/05/2026 19:31:28] Joseph Delaney: yeah
+[03/05/2026 19:31:30] Arnie Sarkar: then you scan it is that credit come to us directly or is that because the non-returnable is then identified on the manifest to the pharmacy as an on-returnable so they don't get credit for it. But if we scan it six months later, do we get the credit or does that credit go back to the pharmacies as well?
+[03/05/2026 19:31:50] Joseph Delaney: one. It's a federal destruction form. Pedantia question if it's if there's credit to be had it goes back to the customer. You know we take our feet out of it but for a non-returnable if it is a non-returnable. Then there'd be no credit for anyone.
+[03/05/2026 19:32:39] Josephine Velazquez: I think I understand what we normally do when it's um to be archived because it's not within date we put it in a baggied with the store name on it and then
+[03/05/2026 19:32:47] Josephine Velazquez: when it's time to processed and we we do another return for them with that.
+[03/05/2026 19:32:47] Joseph Delaney: Yep.
+[03/05/2026 19:32:52] Joseph Delaney: Yeah, the system the next every month the systems Q to find out what's in the Wine Cellar to search it and then that gets put into the return. For that store.
+[03/05/2026 19:33:02] Bryan Shnider: hey this needs to go into the return bucket for June And then in that box you've got 15 or 20 different stores with the June return in it right and then somebody goes to that box at some point picks them up and
+[03/05/2026 19:33:28] bahir tayob: correct
+[03/05/2026 19:33:32] Bryan Shnider: then scans them in again and then now creates the actual process.
+[03/05/2026 19:33:39] bahir tayob: No one and look if we find two bottles with the same lot number that's half and
+[03/05/2026 19:33:42] bahir tayob: half. Can we combine it?
+[03/05/2026 19:33:42] Josephine Velazquez: Yep.
+[03/05/2026 19:33:44] Joseph Delaney: Great question to here. The answer is no.
+[03/05/2026 19:33:49] bahir tayob: even if the same lot
+[03/05/2026 19:33:51] Bryan Shnider: well
+[03/05/2026 19:33:52] Joseph Delaney: So here's what happened. There was a Back as long time ago probably before some people were born there was a there
+[03/05/2026 19:33:59] bahir tayob: yeah
+[03/05/2026 19:34:01] Joseph Delaney: clients out to be liars. To work around your policy and that's when they started giving credit for partials.
+[03/05/2026 19:34:27] Joseph Delaney: So it's a great question.
+[03/05/2026 19:34:27] bahir tayob: okay
+[03/05/2026 19:34:29] bahir tayob: Okay because I was like.
+[03/05/2026 19:34:30] Joseph Delaney: But if they don't see the if they don't see the seal on top of the bottle. They're gonna assume that you made a full out of the partial.
+[03/05/2026 19:34:38] bahir tayob: Okay so with a full one. They'll probably look for for a closed they looking for
+[03/05/2026 19:34:40] Joseph Delaney: It's a great question.
+[03/05/2026 19:34:42] bahir tayob: a closed one, essentially.
+[03/05/2026 19:34:44] Joseph Delaney: Yeah, let me I'll send you I'll get a bottle now and just send it to Brian to
+[03/05/2026 19:34:45] Josephine Velazquez: That's pretty good.
+[03/05/2026 19:34:48] Joseph Delaney: distribute to you. So you can see what a full looks like.
+[03/05/2026 19:34:49] bahir tayob: Okay okay all right cool. Cool all right.
+[03/05/2026 19:34:55] Joseph Delaney: And it's right here in my hand. okay
+[03/05/2026 19:34:59] Bryan Shnider: can add that to it and that just goes into a Ziploc bag. It's literally just a ziplock bag with the bottle in it.
+[03/05/2026 19:35:25] bahir tayob: yeah, I'm thinking about printing out barcodes and making a scannable system as well to make a little bit easier for that inventory so
+[03/05/2026 19:35:31] Bryan Shnider: Well, they have they have barcodes on on the piece of paper? It's just all
+[03/05/2026 19:35:33] bahir tayob: yeah
+[03/05/2026 19:35:35] Bryan Shnider: within the baggie.
+[03/05/2026 19:35:36] bahir tayob: okay
+[03/05/2026 19:35:37] Bryan Shnider: so they'll print a piece of paper it has the barcode on it, so they can just pick it up scan it later and then start the process is that right Josephine
+[03/05/2026 19:35:44] Josephine Velazquez: Yeah as a barbecue mechanic.
+[03/05/2026 19:35:50] Bryan Shnider: Okay, so we have returnable products we have non returnable products and then 2B determined so if it's a non-returnable product because of date you guys put it in the Wine Cellar and if it's a non-returnable product because let's say for example the policy is they don't do partials then that just means that it's not returnable it scanned. It's associated with that pharmacy still.
+[03/05/2026 19:36:15] Josephine Velazquez: yeah
+[03/05/2026 19:36:16] Bryan Shnider: And then it's put into the destruction bin is that correct?
+[03/05/2026 19:36:19] Josephine Velazquez: That's correct.
+[03/05/2026 19:36:21] Bryan Shnider: Okay and then if it's a 2.
+[03/05/2026 19:36:24] Josephine Velazquez: So if it's too big determined we try to find. Why why I came up to be the department like contact manufacturer to see if it's a returnable item. Sometimes it's not scanning so it might come up to be to different do you determine because we never got that product. So we look for the policy.
+[03/05/2026 19:36:50] Bryan Shnider: Oh, so that that goes back to ensuring that we even have the data right because
+[03/05/2026 19:36:56] Josephine Velazquez: Yeah, right, so we don't have a data for yeah usually that's that would be.
+[03/05/2026 19:36:57] Bryan Shnider: you're using historical data. And what would be a scenario like if the data file the hippodata file that's free as all that data. What would be a scenario where you didn't have that data.
+[03/05/2026 19:37:10] Josephine Velazquez: To see if we get information on it and then if we do we return if not goes into destruction after if it's expires.
+[03/05/2026 19:37:27] Joseph Delaney: Can you guys see this box?
+[03/05/2026 19:37:31] Bryan Shnider: Are you did you text it to me?
+[03/05/2026 19:37:32] Joseph Delaney: I texted it to you, but I'm trying to put it in the camera for you.
+[03/05/2026 19:37:34] Bryan Shnider: But yeah, I see Jan 2016 dcb.
+[03/05/2026 19:37:37] Joseph Delaney: Yes, so the what we would put in for the future. This is the future is go on now, so that have to be all new tags put on there. But that's part of the Wine Cellar so that was done in 25.
+[03/05/2026 19:37:55] Bryan Shnider: What's dcb mean?
+[03/05/2026 19:37:59] Joseph Delaney: I actually don't know what that means.
+[03/05/2026 19:38:02] Joseph Delaney: Josephine you know that means I know to be determined but dcb
+[03/05/2026 19:38:02] Bryan Shnider: No, that's fine.
+[03/05/2026 19:38:09] Josephine Velazquez: What what to be determined?
+[03/05/2026 19:38:10] Josephine Velazquez: that You See Me
+[03/05/2026 19:38:10] Joseph Delaney: No, let's D as in dogs see cat and b-boy.
+[03/05/2026 19:38:15] Joseph Delaney: I have no clue.
+[03/05/2026 19:38:17] Josephine Velazquez: I don't know where you're seeing that.
+[03/05/2026 19:38:18] Joseph Delaney: I don't know who it was in the Wine Cellar it was empty because it would it would have gone out because it went out in December
+[03/05/2026 19:38:28] Bryan Shnider: In Austin I'm sending you these pictures of like what a close.
+[03/05/2026 19:38:30] bahir tayob: Yeah, we're getting we're getting them on boarding it to door constant you go
+[03/05/2026 19:38:32] Bryan Shnider: okay
+[03/05/2026 19:38:35] bahir tayob: through.
+[03/05/2026 19:38:38] Bryan Shnider: So the two b determined then those would just go into a separate box that's essentially something that's got to be worked. Got to work that to figure out. Okay anything else that we need to see on this page.
+[03/05/2026 19:38:53] bahir tayob: just a couple of things there's So just the policy the wages the policy that it comes up the policy came from the QR code is that something internally also came from the QR right?
+[03/05/2026 19:39:04] Josephine Velazquez: the policies and internally
+[03/05/2026 19:39:07] bahir tayob: The policy is internally.
+[03/05/2026 19:39:08] Joseph Delaney: yeah, we loaded every policy and
+[03/05/2026 19:39:11] bahir tayob: You loaded overpod. okay
+[03/05/2026 19:39:11] Bryan Shnider: Here it's policy from the manufacturer that they have access to.
+[03/05/2026 19:39:16] Bryan Shnider: manufacturer. Yeah.
+[03/05/2026 19:39:16] Josephine Velazquez: yeah
+[03/05/2026 19:39:21] bahir tayob: that's fine, but where do I get the
+[03/05/2026 19:39:24] Joseph Delaney: Well, I have the binders with all the policies in them.
+[03/05/2026 19:39:27] bahir tayob: The we don't have the electronically correct.
+[03/05/2026 19:39:30] Joseph Delaney: Well, they're in.
+[03/05/2026 19:39:30] Josephine Velazquez: I I started doing a spreadsheet with that.
+[03/05/2026 19:39:33] bahir tayob: okay
+[03/05/2026 19:39:34] Josephine Velazquez: With the policies if they're 6 to 12 or no partials.
+[03/05/2026 19:39:38] bahir tayob: okay so we
+[03/05/2026 19:39:39] Josephine Velazquez: So once I get that done so I could I could send that to you.
+[03/05/2026 19:39:43] bahir tayob: Beautiful okay and then the returnable product to determined I saw that it kind of like you know it has some predetermined do we actually choose the returnable or is the assistant choosing whether it's returnable and on returnable or tvd?
+[03/05/2026 19:39:58] Joseph Delaney: the system fuses
+[03/05/2026 19:39:58] Josephine Velazquez: The system are based by anap policy.
+[03/05/2026 19:40:00] bahir tayob: Okay so this.
+[03/05/2026 19:40:02] Bryan Shnider: The system is telling it has the policies in it, so if it was a six-month before six month after that you can't return it and you're trying to return it. Let's say in this example. It was six months within that expiration date the system is going to say hey this is non-returnable now an enhancement would be this is
+[03/05/2026 19:40:18] bahir tayob: Okay okay, thanks.
+[03/05/2026 19:40:20] Bryan Shnider: returnable in June or July put it in a box for July you know what I mean like that would be what we should build out to have it Drive the end user to make sure that they they know when what box even go put it in.
+[03/05/2026 19:40:34] bahir tayob: No, that's fine. I'm just trying to tell my logic like if logic. No it knows
+[03/05/2026 19:40:37] Bryan Shnider: yeah
+[03/05/2026 19:40:38] bahir tayob: it's returnable if it knows it's not returnable and then technically everything else goes into the tvd. all right
+[03/05/2026 19:40:50] Josephine Velazquez: Okay, let me go here so here. We'll show you the list of the products that we scanned. So once you scandal your your products then you're going to go here to complete return.
+[03/05/2026 19:41:03] Bryan Shnider: I'm trying to see what that says so these column headers are. proprietary name so doxycycline high clay and then you have quantity what's FRS f is that FRS
+[03/05/2026 19:41:18] Joseph Delaney: Where are we?
+[03/05/2026 19:41:19] Bryan Shnider: on the columns
+[03/05/2026 19:41:21] Josephine Velazquez: oh on the
+[03/05/2026 19:41:23] Joseph Delaney: That's full bottle size. That's being.
+[03/05/2026 19:41:24] Josephine Velazquez: That's the bottom.
+[03/05/2026 19:41:26] Bryan Shnider: For oh FB is full bottle size okay and then ou.
+[03/05/2026 19:41:28] Joseph Delaney: Yes bs and boy. That's see you this like this like getting a driver's license.
+[03/05/2026 19:41:33] Josephine Velazquez: seeing you
+[03/05/2026 19:41:34] Bryan Shnider: do you What is it what a c you mean?
+[03/05/2026 19:41:42] Joseph Delaney: I don't know.
+[03/05/2026 19:41:44] Bryan Shnider: Okay, so then you got price you have estimated. What is that estimated?
+[03/05/2026 19:41:49] Joseph Delaney: value
+[03/05/2026 19:41:50] Bryan Shnider: value expires
+[03/05/2026 19:41:54] Josephine Velazquez: all if it's returnable
+[03/05/2026 19:41:55] Bryan Shnider: return okay and then dea which is not
+[03/05/2026 19:41:58] Joseph Delaney: That's if it's an argument. Yeah, that's if it's in narcotic and it's not.
+[03/05/2026 19:41:59] Josephine Velazquez: if it's a console if
+[03/05/2026 19:42:03] Bryan Shnider: Yeah, and then you have a lot number and then you have what's that after.
+[03/05/2026 19:42:07] Josephine Velazquez: mental mental like if you write a memo in that memo box
+[03/05/2026 19:42:10] Bryan Shnider: So and then things at the bottom positive turn minimize app check pricing so what it like check pricing is doing what like your manually going into.
+[03/05/2026 19:42:27] Josephine Velazquez: Like if there's not a price on here, then, you meant you manually enter the price for that bottle if it happened to come up with a price. Well, sometimes look down on good RX or online to find a price if there's not a wet price on the bottle. And enter that price on there.
+[03/05/2026 19:42:45] Bryan Shnider: okay
+[03/05/2026 19:42:46] Joseph Delaney: Brian I'm standing you a copy of the manifest. I just sent it to you. So you can share it with behavior? and it seem
+[03/05/2026 19:42:56] Bryan Shnider: The manifest being the one that would get printed out.
+[03/05/2026 19:42:59] Joseph Delaney: Yes.
+[03/05/2026 19:43:00] Bryan Shnider: And is that an email you sent?
+[03/05/2026 19:43:02] Joseph Delaney: Not by just not your text.
+[03/05/2026 19:43:04] Bryan Shnider: okay
+[03/05/2026 19:43:05] Joseph Delaney: So you can fly it to the room?
+[03/05/2026 19:43:07] Bryan Shnider: Yeah, I didn't get the text. Oh there. It is okay cool. and yeah, so be here this is
+[03/05/2026 19:43:15] Josephine Velazquez: because you didn't finish it you can quit it and then go back into the return afterwards.
+[03/05/2026 19:43:25] Bryan Shnider: okay And the manifest it's a basic piece of basic picture. okay Let's send that in there. And also I'm just email it to you. okay
+[03/05/2026 19:43:55] Josephine Velazquez: So then we go here complete return so that's when you're all done with it with the return.
+[03/05/2026 19:44:02] Josephine Velazquez: so Danielle come up so you can print print the reports and or your FedEx number. And how many boxes are going out? So, it's just click here.
+[03/05/2026 19:44:02] Bryan Shnider: And then you print it off at that point.
+[03/05/2026 19:44:14] Bryan Shnider: into one little baggy. Right, so if you have a hundred Returns for 100 different pharmacies and 100 different bags maybe that's two boxes and are you saying hey we're putting disreturn into this box with this tracking number?
+[03/05/2026 19:44:33] bahir tayob: good
+[03/05/2026 19:44:34] Josephine Velazquez: so it would only be this one box say for for this pharmacy that would be doing it in store so it'd be just there a product and that box yeah because
+[03/05/2026 19:44:42] Bryan Shnider: Oh right okay. Sorry yes right.
+[03/05/2026 19:44:46] Bryan Shnider: Let's see it.
+[03/05/2026 19:44:46] Josephine Velazquez: Then we'll just FedEx number obviously wouldn't just be one bottle we're just
+[03/05/2026 19:44:50] Josephine Velazquez: doing this as an example.
+[03/05/2026 19:44:51] Bryan Shnider: Yeah, do they do they print out that manifest file typically?
+[03/05/2026 19:44:56] Josephine Velazquez: Yeah, we usually print it out in the store and give it to the pharmacy so
+[03/05/2026 19:44:59] Bryan Shnider: okay
+[03/05/2026 19:45:01] Joseph Delaney: so
+[03/05/2026 19:45:01] Josephine Velazquez: usually here.
+[03/05/2026 19:45:05] Josephine Velazquez: if you when you qualified x and you have your PRP number that they give you like confirmation and if not usually put I put my initials and
+[03/05/2026 19:45:05] Bryan Shnider: Good you.
+[03/05/2026 19:45:13] Bryan Shnider: What's up PRP number?
+[03/05/2026 19:45:15] Josephine Velazquez: confirmation number that they gave you for FedEx pickup
+[03/05/2026 19:45:23] Bryan Shnider: okay
+[03/05/2026 19:45:26] Bryan Shnider: Oh for a pickup so we could just have it automatically order a pickup technically we could have a pop-up that says hey.
+[03/05/2026 19:45:26] Josephine Velazquez: and then
+[03/05/2026 19:45:32] bahir tayob: yeah
+[03/05/2026 19:45:33] Bryan Shnider: They'll be here today. It's 4 pm or whatever.
+[03/05/2026 19:45:36] Joseph Delaney: And then to decision is just stay with FedEx or ups because they're expensive or you go to the US Mail which is less expensive.
+[03/05/2026 19:45:44] bahir tayob: No, no driver FedEx guy that I can get like 90% discount like some serious really good rates. It's cheaper than usbs.
+[03/05/2026 19:45:53] Joseph Delaney: Then FedEx is my friend again.
+[03/05/2026 19:45:55] bahir tayob: All right cool. No worry.
+[03/05/2026 19:45:57] Joseph Delaney: Because during covid FedEx went from being normal to ridiculous and it's never
+[03/05/2026 19:46:02] Joseph Delaney: going back.
+[03/05/2026 19:46:02] bahir tayob: yeah
+[03/05/2026 19:46:03] bahir tayob: no, hundred percent I got I got a really good guy for it so
+[03/05/2026 19:46:07] Joseph Delaney: good
+[03/05/2026 19:46:08] Bryan Shnider: Here gets good shipping deals.
+[03/05/2026 19:46:11] Josephine Velazquez: All right, so then we'll save the FedEx there because you'll need that once you're going to close out. And then says shipping information safe, so we're going to say okay. Then you're going to print your job sheets which will be what we did reports. And then on those reports will come up your non returnable in your return line items. and then you just
+[03/05/2026 19:46:47] Joseph Delaney: And as printing right now as we speak.
+[03/05/2026 19:46:51] Josephine Velazquez: And then you finalize. And then it's just telling you once your finalize you're not able to go back to it. make any changes And this is that for thinking is for it normally for the person that's out and on the fail with their laptop to make sure they sync so that the information can be seen in goals.
+[03/05/2026 19:47:15] Bryan Shnider: shouldn't be any sinking issues.
+[03/05/2026 19:47:20] Josephine Velazquez: Okay so then I would I would quit here right once I got that box over there. I'll put this application. And then I will go on to my lows outside here.
+[03/05/2026 19:47:35] Bryan Shnider: Then you're beating internal to the further to the warehouse this yeah, so now
+[03/05/2026 19:47:38] Josephine Velazquez: Yep, yep.
+[03/05/2026 19:47:40] Bryan Shnider: we're awesome and here switching to. the the warehouse checking in the products
+[03/05/2026 19:47:52] Josephine Velazquez: so once I know that I have the box in caholes and I received by FedEx tracking and I used today's date so usually you would just scan the FedEx box It's not let me scan it did I put a zero three again.
+[03/05/2026 19:48:22] Joseph Delaney: Yes, you are.
+[03/05/2026 19:48:23] Josephine Velazquez: So five what my scam it.
+[03/05/2026 19:48:25] Joseph Delaney: Yep.
+[03/05/2026 19:48:30] Josephine Velazquez: Can you check the paper that I printed with the FedEx number on it?
+[03/05/2026 19:48:35] Joseph Delaney: It's says zero three zero five two six Dash 23ha. Yeah, 55 the FedEx number shows 0-3 0526.
+[03/05/2026 19:48:44] Josephine Velazquez: the FedEx number and put all that Just socket.
+[03/05/2026 19:48:53] Joseph Delaney: yeah
+[03/05/2026 19:48:54] Josephine Velazquez: All right, so now it's a tracking found do you want to set today and you would
+[03/05/2026 19:48:55] Bryan Shnider: right track
+[03/05/2026 19:48:57] Josephine Velazquez: say yes?
+[03/05/2026 19:48:59] Bryan Shnider: Meaning what is set today's date like the day you check it in.
+[03/05/2026 19:49:00] bahir tayob: that's a
+[03/05/2026 19:49:02] Josephine Velazquez: The data, I received it as today so then.
+[03/05/2026 19:49:04] Bryan Shnider: Okay what?
+[03/05/2026 19:49:07] Josephine Velazquez: And you click here available to close out. And here should here's what we just did in the processing side. It says then you need to select a batch before proceeding. So the dash would be for March because that's the month we're in. So then see here is going to create a license plates starts with dl0. It creates three letterings to have it individual lettering for each store so you can.
+[03/05/2026 19:49:53] bahir tayob: Oh wait hold on does this number is created internally as well on our End right. This is not.
+[03/05/2026 19:49:58] Josephine Velazquez: Yeah on your end. Yeah.
+[03/05/2026 19:50:00] Bryan Shnider: And this is a cart this is for cardinal right.
+[03/05/2026 19:50:00] bahir tayob: Okay all right.
+[03/05/2026 19:50:03] Josephine Velazquez: So so when that debit memo goes to Cardinal I'll have that those unique lettering and this the number the last numbers will be the NDC numbers. on that debit memo
+[03/05/2026 19:50:17] Josephine Velazquez: So that you know goes to that store.
+[03/05/2026 19:50:17] bahir tayob: okay and then
+[03/05/2026 19:50:20] Bryan Shnider: so so I so this d-e-l032 so 0326 makes sense, but what does d e l and DCC
+[03/05/2026 19:50:29] Josephine Velazquez: The DCC is created internally it's just a lettering to create the debit memo number.
+[03/05/2026 19:50:36] Josephine Velazquez: Each store well, that's a different letters.
+[03/05/2026 19:50:36] Bryan Shnider: okay so that random for each store, so why would
+[03/05/2026 19:50:41] Bryan Shnider: You would it not make sense just to use the license from the store with those last four numbers on it. so you know which storage tied to
+[03/05/2026 19:50:52] Joseph Delaney: Everything that's doing really he wrote that made sense.
+[03/05/2026 19:50:55] Bryan Shnider: Got it okay.
+[03/05/2026 19:50:57] bahir tayob: And why do we create a back sorry? What's the purpose of the batch?
+[03/05/2026 19:51:01] Josephine Velazquez: the mattress for each month so you can you know which batch it is it goes to
+[03/05/2026 19:51:07] bahir tayob: because it's
+[03/05/2026 19:51:08] Bryan Shnider: Here at the end of this whole process.
+[03/05/2026 19:51:09] Josephine Velazquez: let the back would be the month of March and so when you create your cardinal invoice it will be that for March and Boise
+[03/05/2026 19:51:15] Bryan Shnider: So at the end of the month, they're sending it one time remember. They don't
+[03/05/2026 19:51:16] bahir tayob: Batch is just for cardinal for the month okay.
+[03/05/2026 19:51:19] Bryan Shnider: send boxes to Cardinal or to inmar for they don't send it every day. They receive all the boxes each month and then send it out once yeah.
+[03/05/2026 19:51:25] Josephine Velazquez: a month Yeah for the month. Yeah.
+[03/05/2026 19:51:31] Bryan Shnider: For the month, yeah.
+[03/05/2026 19:51:33] Josephine Velazquez: So then you would say yes.
+[03/05/2026 19:51:34] Joseph Delaney: Brian and be here does this make sense to you watching the screens?
+[03/05/2026 19:51:38] Bryan Shnider: yeah
+[03/05/2026 19:51:38] bahir tayob: Yeah, no, the only we might have some questions out. I'm just trying to see how
+[03/05/2026 19:51:41] bahir tayob: we can build the application of the way they simply so that that's why I'm
+[03/05/2026 19:51:43] Joseph Delaney: okay
+[03/05/2026 19:51:45] bahir tayob: asking all these questions.
+[03/05/2026 19:51:46] Joseph Delaney: Oh no. No, I just want to make sure that makes sense that's all.
+[03/05/2026 19:51:48] bahir tayob: Yeah, no problem.
+[03/05/2026 19:51:51] Bryan Shnider: And that whole left-hand side where it says pieces return check in verified integrity confirmed. Do you do that on each one to verify that this was like an unopen like it matches the
+[03/05/2026 19:51:51] Josephine Velazquez: um
+[03/05/2026 19:52:02] Josephine Velazquez: Yeah, when we when we close it out. We verify that that information is correct.
+[03/05/2026 19:52:05] Bryan Shnider: okay okay
+[03/05/2026 19:52:10] bahir tayob: Can we just go through the buttons at the bottom? What are all those buttons used for one? What is the function?
+[03/05/2026 19:52:16] Josephine Velazquez: So this one is just basically to refresh the screen and then this this is say
+[03/05/2026 19:52:21] bahir tayob: okay
+[03/05/2026 19:52:24] Josephine Velazquez: like if you have the wine suit blind seller stuff like Joe says and it happened to have something for glam Vista in there. You can add it on you all have to do is go here. So you add it up you would add it on. You can just you know scan it. I don't know if Joe's got something else there could just scan.
+[03/05/2026 19:52:45] bahir tayob: It's fine. We just go back to the main form. It's okay, I guess
+[03/05/2026 19:52:47] Josephine Velazquez: Okay, so it's just basically so you can add on something if need it to let me
+[03/05/2026 19:52:50] bahir tayob: yeah I got you.
+[03/05/2026 19:52:52] Josephine Velazquez: just go back here for the form.
+[03/05/2026 19:52:54] bahir tayob: okay
+[03/05/2026 19:52:55] Josephine Velazquez: And this no CEO is like say if there's something here that doesn't have a destination. It's going to come up right up there to let you know that you miss something.
+[03/05/2026 19:53:07] bahir tayob: And what is the CEO destination? What was the definition of that?
+[03/05/2026 19:53:12] Josephine Velazquez: It's just like if you miss something when you're scanning that state open because when you close out everything has to have a destination.
+[03/05/2026 19:53:20] Josephine Velazquez: or right
+[03/05/2026 19:53:20] Joseph Delaney: Contestation would be in Mar or would be colonics or would be farmer length. It
+[03/05/2026 19:53:26] Joseph Delaney: has to go somewhere so with that that's what that tells us.
+[03/05/2026 19:53:28] Josephine Velazquez: yeah
+[03/05/2026 19:53:29] bahir tayob: Okay, how do we determine? How do we determine that sorry?
+[03/05/2026 19:53:30] Josephine Velazquez: our forward
+[03/05/2026 19:53:33] Joseph Delaney: That's also in the system. Because the manufacturers that are within Marvel which is over 90 percent of
+[03/05/2026 19:53:36] bahir tayob: okay
+[03/05/2026 19:53:39] Joseph Delaney: them. That's in the database and then.
+[03/05/2026 19:53:40] bahir tayob: yeah okay
+[03/05/2026 19:53:44] Joseph Delaney: The only other ones are colonics which in our now owns and the other one is far more like that's pharmacologistix has a few they.
+[03/05/2026 19:53:53] Josephine Velazquez: Yeah, firmly.
+[03/05/2026 19:53:53] bahir tayob: okay
+[03/05/2026 19:53:53] Bryan Shnider: So so Josephine is that another data table or database item that you're able to
+[03/05/2026 19:54:00] Bryan Shnider: store and save for all the Daddy you're trying to collect. from the system like which product which product goes where essentially
+[03/05/2026 19:54:06] Josephine Velazquez: the Nelson wheel Yeah, that basically comes up from the database where it goes it's right in with the policy actually.
+[03/05/2026 19:54:16] Joseph Delaney: have
+[03/05/2026 19:54:17] Bryan Shnider: Okay well, I guess I'm saying that in you trying to save a bunch of data offline from outside of the database.
+[03/05/2026 19:54:26] Bryan Shnider: Is that something that you could also save like is that a report that people?
+[03/05/2026 19:54:26] Josephine Velazquez: mm-hmm
+[03/05/2026 19:54:29] Josephine Velazquez: Yeah, I actually am I spreadsheet that I started I'm putting like say if it's so cold it goes to Mr and putting Mr if it's six to six. I'm putting six to six. I'm trying to put enter all the information to that policy corresponding to that
+[03/05/2026 19:54:40] Bryan Shnider: okay
+[03/05/2026 19:54:43] Josephine Velazquez: policy.
+[03/05/2026 19:54:44] Bryan Shnider: cool all right and then no BMP
+[03/05/2026 19:54:52] Josephine Velazquez: I really I was gonna say I really don't know what that one's for either, but
+[03/05/2026 19:54:52] Joseph Delaney: I have no idea what that means.
+[03/05/2026 19:54:56] Bryan Shnider: okay Tbd only
+[03/05/2026 19:54:58] Josephine Velazquez: it's vaggy manifest not printed.
+[03/05/2026 19:55:00] Joseph Delaney: okay
+[03/05/2026 19:55:01] Bryan Shnider: baggy manifest not printed
+[03/05/2026 19:55:02] Josephine Velazquez: That means that you didn't print the back the bag manifest for that item.
+[03/05/2026 19:55:09] Bryan Shnider: So why would that be?
+[03/05/2026 19:55:11] Josephine Velazquez: that's really important if you did you know to have that button that you didn't in front of baggy manifest.
+[03/05/2026 19:55:24] Bryan Shnider: okay And then what's the next one Tbd normally?
+[03/05/2026 19:55:29] Josephine Velazquez: To be determined only those are the two to be determined.
+[03/05/2026 19:55:33] Bryan Shnider: So you would still ship those out as like because you're basically saying I don't know what I'm gonna get in return for this.
+[03/05/2026 19:55:41] Josephine Velazquez: No, that was too big determined only would be that we don't have. Destination or something where they're going.
+[03/05/2026 19:55:49] Joseph Delaney: it's very it's very random and and if it was a pricing thing we would go on line
+[03/05/2026 19:55:50] Josephine Velazquez: Say yes, very randomly.
+[03/05/2026 19:55:50] Bryan Shnider: so
+[03/05/2026 19:55:55] Joseph Delaney: and just get bad data from goodrx or something like that or if it's something my phone will ring and I'll call up one of my customers and get a price so just Looking up for me.
+[03/05/2026 19:56:06] Bryan Shnider: in your basing that price off of what they paid for it the Wack price or
+[03/05/2026 19:56:10] Joseph Delaney: You know the store is just aren't aware of any of this. It's Greeks to them. So a lot of the new owners think that they're going to get what they paid you get somebody you know over 40 years old and they realized that they're not going to get what they pay. They're just trying to get paid. And you get somebody over 60 they just want to get something back for their effort.
+[03/05/2026 19:57:43] Bryan Shnider: So basically what you're saying is that?
+[03/05/2026 19:57:46] Joseph Delaney: We decide and we dictate what we put in when we invoice the manufacturer we invoice at the full wack price because it's better to always ask for more.
+[03/05/2026 19:57:53] Bryan Shnider: okay I got it okay. all right and
+[03/05/2026 19:58:03] bahir tayob: You and you'll invoice at the pool prize, but they won't actually pay you the full price correct.
+[03/05/2026 19:58:07] Joseph Delaney: correct
+[03/05/2026 19:58:08] bahir tayob: okay
+[03/05/2026 19:58:09] Joseph Delaney: But it's better to ask for the full whack rather than a percentage and it's better for the store to see the percentage. Taken off lack because then it's it's better than it would be.
+[03/05/2026 19:58:16] bahir tayob: Correct now 100% and you might as well always ask for more right. I mean there
+[03/05/2026 19:58:25] bahir tayob: was no right.
+[03/05/2026 19:58:25] Joseph Delaney: Yes.
+[03/05/2026 19:58:26] Joseph Delaney: Correct it's it's just like dating.
+[03/05/2026 19:58:34] Bryan Shnider: okay reports what is that to
+[03/05/2026 19:58:44] Josephine Velazquez: It's like to re-run the store report these are he don't really have anything in there their future button so it's not not really anything.
+[03/05/2026 19:58:49] Bryan Shnider: yeah And then reports ceos status. over that
+[03/05/2026 19:58:58] Josephine Velazquez: other reset I don't think this for anything either. I never used this.
+[03/05/2026 19:59:06] bahir tayob: It's fine.
+[03/05/2026 19:59:07] Josephine Velazquez: It's like to reset the whole whole thing.
+[03/05/2026 19:59:11] Joseph Delaney: you know there's just I don't know why it's there. I forgot it was even there.
+[03/05/2026 19:59:17] Josephine Velazquez: yeah Yeah, we don't really use it for anything. We don't I've never used.
+[03/05/2026 19:59:25] Bryan Shnider: Okay in del c is what?
+[03/05/2026 19:59:28] Josephine Velazquez: Um, thanks.
+[03/05/2026 19:59:29] Joseph Delaney: Delaney is so she is LLC
+[03/05/2026 19:59:31] Bryan Shnider: Got it and that's what is shared. What is a button do just pulls up documents.
+[03/05/2026 19:59:32] Joseph Delaney: that's just pull up
+[03/05/2026 19:59:42] Josephine Velazquez: all the batches
+[03/05/2026 19:59:43] Bryan Shnider: Pull batches but does that matter does that something that?
+[03/05/2026 19:59:44] Joseph Delaney: yeah Doesn't have to be there.
+[03/05/2026 19:59:49] Bryan Shnider: yeah, and then clear complete CEO
+[03/05/2026 19:59:50] Josephine Velazquez: no the complete CEO is when I do the clothes out at the end of the month with all the stores so then you would click that you're going to complete the I want to do it because then I mess up March
+[03/05/2026 20:00:05] Bryan Shnider: yeah so this one form is just for this one store and then the complete CEO like is that hey I've got my 20 stores printed and ready to go and then I do a complete
+[03/05/2026 20:00:18] Josephine Velazquez: yeah
+[03/05/2026 20:00:19] Bryan Shnider: CEO and then that complete Close out and then that process be here and also
+[03/05/2026 20:00:20] Josephine Velazquez: a complete Club
+[03/05/2026 20:00:25] Bryan Shnider: that's what generates the file to upload the Cardinal
+[03/05/2026 20:00:29] Josephine Velazquez: Yep, blah blow the car.
+[03/05/2026 20:00:29] Joseph Delaney: correct
+[03/05/2026 20:00:30] Bryan Shnider: Okay and do you have an example of that it was there anything else that we need to see in this app because I know there's a bunch of other items on the application itself.
+[03/05/2026 20:00:39] bahir tayob: because I need that format of what sends us to Cardinal
+[03/05/2026 20:00:41] Josephine Velazquez: So like this one's not return return at once if I can click on it. It's like froze. Okay, so here you would save this.
+[03/05/2026 20:00:51] Bryan Shnider: yeah
+[03/05/2026 20:00:55] Josephine Velazquez: jail now. And I'll show you.
+[03/05/2026 20:01:20] Joseph Delaney: And it is. I'm going again.
+[03/05/2026 20:01:22] Josephine Velazquez: Okay he could probably take a picture and send it to.
+[03/05/2026 20:01:30] bahir tayob: then Brian we can go back to the That large menu item in the front we go through all the pieces of each button or what it does.
+[03/05/2026 20:01:41] Joseph Delaney: You want me to send you a picture of what was just printed.
+[03/05/2026 20:01:44] bahir tayob: Yes, please.
+[03/05/2026 20:01:44] Bryan Shnider: Yeah, just do like a full screen. Yeah, it's full picture that.
+[03/05/2026 20:01:45] Joseph Delaney: okay
+[03/05/2026 20:01:51] Bryan Shnider: Okay, but here I know we have a call and a few minutes. You just want to stay on this or what?
+[03/05/2026 20:01:57] bahir tayob: I'm fine to stay on this. I miss that call.
+[03/05/2026 20:02:00] Bryan Shnider: okay
+[03/05/2026 20:02:01] Josephine Velazquez: So new I made about a switchboard again.
+[03/05/2026 20:02:05] Bryan Shnider: Yeah, so you've you've basically finished everything for one pharmacy.
+[03/05/2026 20:02:09] Josephine Velazquez: For that one story so for the whole month you have basically do that same thing.
+[03/05/2026 20:02:11] Bryan Shnider: one store okay
+[03/05/2026 20:02:16] Bryan Shnider: March When it makes sense to kind of just do like have us watch and record that process as well and at the end of the month.
+[03/05/2026 20:02:16] Josephine Velazquez: For all the stories.
+[03/05/2026 20:02:31] Josephine Velazquez: sure
+[03/05/2026 20:02:32] Bryan Shnider: Yeah, I think that would be helpful. Okay all right, so what is the rest of this that you have?
+[03/05/2026 20:02:40] Josephine Velazquez: So that we went to the return mains and this is store look up. It's where you can find the stores information if you need to or add as new store. So here will be add a new story or put the sort of.
+[03/05/2026 20:02:54] Bryan Shnider: So this is like if we added a new account like a sales rep for somebody added in new account.
+[03/05/2026 20:03:00] Josephine Velazquez: yeah
+[03/05/2026 20:03:01] Bryan Shnider: okay And they have last visit date so here. That's something where we can just yeah.
+[03/05/2026 20:03:09] Bryan Shnider: What's service type?
+[03/05/2026 20:03:12] Josephine Velazquez: service if you're that means you're going in or they're doing it yourself or their FedEx Express in it to us box and ship.
+[03/05/2026 20:03:28] Bryan Shnider: What is why would they FedEx Express versus if they're doing self like what's the difference there?
+[03/05/2026 20:03:35] Josephine Velazquez: So if we're doing the stores we're going in and we're sending it if they're doing it themselves. They're doing it online and if they're sending it their box and shipping it and we're still doing in historic for them.
+[03/05/2026 20:03:49] Joseph Delaney: So when we started this for some of the customers said that they would pull it all. And then we would just scan other customers wanted everything pulled by us and then scanned. So the Express was when they pulled and we just can't and then self was when
+[03/05/2026 20:04:07] Bryan Shnider: Got it.
+[03/05/2026 20:04:09] Joseph Delaney: Express it was either. A full or did it online.
+[03/05/2026 20:04:24] Josephine Velazquez: online
+[03/05/2026 20:04:25] Bryan Shnider: okay
+[03/05/2026 20:04:30] Joseph Delaney: So the rep with the screen you're looking at now when you sign up the customer we get the wholesaler name we get the wholesaler account number which is required by the manufacturers to have that there then we have distort name. You know they're basic address and could you scroll that up?
+[03/05/2026 20:04:52] Josephine Velazquez: yeah
+[03/05/2026 20:04:53] Joseph Delaney: If you there and then who did the processing? These are all the different processors from day one salespeople.
+[03/05/2026 20:05:06] bahir tayob: Wait for us to get all this data like the whole sailors and stuff like that to plug in you or do we use it to figure out how to plug it in one by one?
+[03/05/2026 20:05:17] Bryan Shnider: Well, the goal is to get the database.
+[03/05/2026 20:05:17] Joseph Delaney: Part of Me
+[03/05/2026 20:05:20] bahir tayob: okay
+[03/05/2026 20:05:22] Bryan Shnider: Just think could you click on that again.
+[03/05/2026 20:05:24] Josephine Velazquez: wholesale all the sales person
+[03/05/2026 20:05:29] Bryan Shnider: Yeah, so just just understand so these have been your salespeople in the past
+[03/05/2026 20:05:33] Joseph Delaney: So yeah, so Rudy was in La Ron was in Vegas she she was running sales for a
+[03/05/2026 20:05:34] Bryan Shnider: right.
+[03/05/2026 20:05:35] Josephine Velazquez: yeah
+[03/05/2026 20:05:40] Joseph Delaney: Like match frier he works for buying group that will be contacting he used to work for a wholesaler Doug's worked for all the wholesalers he's like my age. She's still a telemarketer.
+[03/05/2026 20:06:34] Bryan Shnider: Can can you go back to the whole sailor so my understanding is couldn't the pharmacy have a couple of wholesalers that they're using.
+[03/05/2026 20:06:41] Joseph Delaney: They all have a primary and a secondary.
+[03/05/2026 20:06:44] Bryan Shnider: Okay, so do we need a track that does that matter?
+[03/05/2026 20:06:47] Joseph Delaney: midwest that Elaine runs in marketing for. Health source generic distributor same thing here and a generic distributors Smith drugs down in South Carolina they're a full wholesale but their tiny they might be doing they might be doing one billion. IPC that's part of mckesson. Rdcs out of business kenrigue bought by cardinal Masters got bought by cardinal they're very good companies by the way they sold for a couple billion Belco got bought by cardinal top RX is Dylan business our in Memphis secondary wholesaler there's similar to aster, but they're just really big. and then mutual drug is the one Arnie that's down in NC
+[03/05/2026 20:08:08] Joseph Delaney: is one in the same. I don't know why they're separate. I don't even know who these two are I didn't enter that data.
+[03/05/2026 20:08:08] Bryan Shnider: Is there a scroll on this or is there is that it other?
+[03/05/2026 20:08:27] Bryan Shnider: Okay all right and it doesn't really matter who those are I think from a database standpoint it would be helpful in the long run to you know to track the secondary wholesaler because you know if that's the buying group that's going to be. Using your reselling the software essentially that would be helpful to know that
+[03/05/2026 20:08:44] Bryan Shnider: up. mm-hmm
+[03/05/2026 20:08:44] Joseph Delaney: That would those would be your white label people.
+[03/05/2026 20:08:47] Joseph Delaney: and then we should have a new tab with the new company that lists every GPO
+[03/05/2026 20:08:53] Bryan Shnider: Correct yep and then ties the GPO to it okay.
+[03/05/2026 20:08:57] Joseph Delaney: yeah
+[03/05/2026 20:08:58] Bryan Shnider: Okay and then dea number and de expiration every pharmacy has a number and expiration date right.
+[03/05/2026 20:09:05] Josephine Velazquez: Yes, that's correct.
+[03/05/2026 20:09:05] Joseph Delaney: correct
+[03/05/2026 20:09:08] Bryan Shnider: And if if and when we go into the dea side of things. Is there anything else that we need to track against that or no?
+[03/05/2026 20:09:15] Joseph Delaney: for but the dea will come in and check your records and they'll be in the warehouse for two or three days.
+[03/05/2026 20:09:26] Bryan Shnider: okay all right
+[03/05/2026 20:09:29] Joseph Delaney: It's not difficult doing controls up until this company. I did them for the 30 other years just didn't want to do them anymore. And to get the EA license to take less than 60 days. You just hire a consultant.
+[03/05/2026 20:09:44] Bryan Shnider: You have to get it license in every state though right.
+[03/05/2026 20:09:47] Joseph Delaney: No, you just need one dea license.
+[03/05/2026 20:09:51] Bryan Shnider: But don't to be able to then pick up. In those other states that they're shipping from or does a good shift in the
+[03/05/2026 20:09:57] Joseph Delaney: well, they would be
+[03/05/2026 20:09:58] Bryan Shnider: mail.
+[03/05/2026 20:09:59] Joseph Delaney: They would be shipping to us. But once again when in fact when we were doing 3500 4,000 stores we had a de license. We didn't have a dea license and every state
+[03/05/2026 20:10:13] Bryan Shnider: okay
+[03/05/2026 20:10:14] Joseph Delaney: It was a national license.
+[03/05/2026 20:10:17] Bryan Shnider: needed to buy a product that you know because I'm running low on something and it's narcotic. I don't need to be a license in the state that I'm buying it from I just need to be a license in my state.
+[03/05/2026 20:10:30] Joseph Delaney: You need to be licensed in your state in your store.
+[03/05/2026 20:10:33] Bryan Shnider: yeah okay
+[03/05/2026 20:10:36] Joseph Delaney: And it's actually you just what I've done the past. I hired a retired DEA agent because they know the current dea agents and they they're in the building they right up the diagram, because it has to be a caged in. room or part of a room and has to have poor concrete floor cage to roof and security cameras But you know I did not to trivialize it, but it's actually easy. It's I'm surprised as easy as it is and then they come in. They got you know they blessed and then you're set.
+[03/05/2026 20:11:09] Bryan Shnider: Okay, but the you were saying something about consultants is that what you're saying is the xdea agent is the consultant?
+[03/05/2026 20:11:16] Joseph Delaney: mistakes done and it's the quickest way too because they just call their friends saying hey, can you do me a favorite come in in a couple weeks when I have it all done.
+[03/05/2026 20:11:28] Bryan Shnider: Okay so okay that makes sense. All right anything else on this screen be here.
+[03/05/2026 20:11:45] bahir tayob: No and nothing nothing.
+[03/05/2026 20:11:53] Josephine Velazquez: So then this one all right requests. so
+[03/05/2026 20:11:53] Bryan Shnider: all right
+[03/05/2026 20:12:00] Bryan Shnider: So you look at the batch for January for example?
+[03/05/2026 20:12:03] Josephine Velazquez: yeah
+[03/05/2026 20:12:06] Bryan Shnider: that has all of the products that you've
+[03/05/2026 20:12:08] Josephine Velazquez: So these areas when you get them the numbers are is I'll show you.
+[03/05/2026 20:12:14] Bryan Shnider: in an RA number comes from cardinal
+[03/05/2026 20:12:18] Joseph Delaney: No comes from the far right it comes from.
+[03/05/2026 20:12:19] Bryan Shnider: yeah
+[03/05/2026 20:12:23] Joseph Delaney: Because they represent the manufacturer cardinal cardinal has nothing to do in the entire process except the money from the manufacturer go through to us.
+[03/05/2026 20:12:31] Bryan Shnider: So, what so what is this saying so baggy manifest so each little baggy per in DC or per pharmacy?
+[03/05/2026 20:12:40] Bryan Shnider: is a bag Okay, so that's a debit memo and then you have the ra number that comes from nmr. And then how does this whole thing get populated? Like when does the ra number get added is that through an upload through a spreadsheet is that manually?
+[03/05/2026 20:12:40] Josephine Velazquez: That's their debit.
+[03/05/2026 20:12:56] Josephine Velazquez: So they came around the ra to you.
+[03/05/2026 20:13:01] Bryan Shnider: They email the ra2 you and is that one by one.
+[03/05/2026 20:13:04] Josephine Velazquez: yeps one
+[03/05/2026 20:13:06] Bryan Shnider: So each one of these was a separate email from nmr qnex whatever.
+[03/05/2026 20:13:11] Josephine Velazquez: yeah
+[03/05/2026 20:13:12] Bryan Shnider: And what?
+[03/05/2026 20:13:13] bahir tayob: Wizard, what email is that right now?
+[03/05/2026 20:13:15] Bryan Shnider: Can we see what that email looks like?
+[03/05/2026 20:13:17] Josephine Velazquez: I would have to sign in on other.
+[03/05/2026 20:13:21] Joseph Delaney: Can we send you?
+[03/05/2026 20:13:23] Bryan Shnider: Yeah, if you get forward that if you send it to my email but here's email to be
+[03/05/2026 20:13:24] Joseph Delaney: yeah
+[03/05/2026 20:13:28] Bryan Shnider: here over here it just sent it to Brian Dutch Schneider Gmail account.
+[03/05/2026 20:13:33] Josephine Velazquez: okay
+[03/05/2026 20:13:35] Bryan Shnider: And if you could send the call next version and a couple of the nmr versions just so we could see.
+[03/05/2026 20:13:41] Josephine Velazquez: yeah
+[03/05/2026 20:13:42] Bryan Shnider: All right and then so this so that gets later at it or added at a later time right.
+[03/05/2026 20:13:49] Josephine Velazquez: Yeah, so you would you would scan your baggie in here? Let me show you open this one.
+[03/05/2026 20:13:59] Bryan Shnider: yeah
+[03/05/2026 20:14:03] Josephine Velazquez: number in I'll have the store name on it. so you scan that ra number and you put the date that you received it and you're going to get another FedEx tracking number for nmart because those are all going to individual box for Mr Now those you can all put you can put them all in together for Mr whichever one's go to Mr doesn't matter what's pharmacy it belongs to they can go on the same back box back to more.
+[03/05/2026 20:14:48] Bryan Shnider: You said you scan in the ra number. So when you get that email back from nmr it has on the screen like a barcode.
+[03/05/2026 20:14:56] Josephine Velazquez: On the sheet that that you print I'll have a bar Focus that sheet will have to
+[03/05/2026 20:14:59] Josephine Velazquez: go in the bagging manifest also when you return it.
+[03/05/2026 20:14:59] Bryan Shnider: okay
+[03/05/2026 20:15:03] Bryan Shnider: So we have to print that out and put that into the individual baggy man or baggy which is tied again to the individual pharmacy.
+[03/05/2026 20:15:08] Josephine Velazquez: yeah Exactly, I'll come that's saying our a will have this debit memo number on it.
+[03/05/2026 20:15:12] Bryan Shnider: correct?
+[03/05/2026 20:15:23] Joseph Delaney: Yes, I was going to say if you notice there requested on the fifth and we got it on the 19th. Which is really good because some people are waiting four to six weeks.
+[03/05/2026 20:15:30] Bryan Shnider: so Oh, and this is why you call up Sandra and say hey Sandra can you do me a favor and get my Ras done.
+[03/05/2026 20:15:39] Joseph Delaney: Yep. Yes.
+[03/05/2026 20:15:42] Bryan Shnider: Okay, so be here this process so cardinal is the one that you send the uploaded spreadsheet and cardinal says yep approved and then that's done our Joe that's done in an hour so correct. Like they approved that Cardinals quick to approve.
+[03/05/2026 20:16:00] Josephine Velazquez: Oh, yeah, they respond quickly.
+[03/05/2026 20:16:02] Bryan Shnider: All right and then that spreadsheet then you guys the clothes out process.
+[03/05/2026 20:16:18] Joseph Delaney: crap
+[03/05/2026 20:16:26] Bryan Shnider: That's spreadsheet. It's not like one spreadsheet that goes to nmr or is it one spreadsheet that goes in more and one spreadsheet that goes to call next at the end of each month.
+[03/05/2026 20:16:36] Josephine Velazquez: when when you do the clothes out and individual copy of the developmental goals to Mr
+[03/05/2026 20:16:42] Bryan Shnider: In the debit memo is per pharmacy.
+[03/05/2026 20:16:46] Josephine Velazquez: perform pharmacy, yeah
+[03/05/2026 20:16:47] Bryan Shnider: and then that will have 10 or 1 or 100 NDC codes on it and then they They then generate an RA number off of that.
+[03/05/2026 20:16:57] Josephine Velazquez: off of that debit memo
+[03/05/2026 20:16:58] Bryan Shnider: And was that that memo is emailed automatically through the system to Sandra or to the the ra team?
+[03/05/2026 20:17:06] Josephine Velazquez: So I'll go in.
+[03/05/2026 20:17:08] Joseph Delaney: well, Santa runs the R18
+[03/05/2026 20:17:11] Josephine Velazquez: select my Returns here and I'll generate the email to nmr or to call an X or wherever is going to.
+[03/05/2026 20:17:26] Bryan Shnider: But this so this would do the email for each of these debit memos. But it does it one by one.
+[03/05/2026 20:17:35] Josephine Velazquez: Yep.
+[03/05/2026 20:17:36] Bryan Shnider: Okay, so this would automatically send out whatever 2020 individual emails because there's 20 debit memos on here.
+[03/05/2026 20:17:42] Josephine Velazquez: For each for each set at number yes.
+[03/05/2026 20:17:45] Bryan Shnider: Okay and then you then receive back. Is it a reply back to that email that says here's your ra number?
+[03/05/2026 20:17:53] Josephine Velazquez: Yes.
+[03/05/2026 20:17:54] Bryan Shnider: And then that comes with a PDF that then you print out.
+[03/05/2026 20:17:57] Josephine Velazquez: okay
+[03/05/2026 20:18:00] Bryan Shnider: You print it out and then put that into the same baggy for that pharmacy.
+[03/05/2026 20:18:05] Josephine Velazquez: Yep.
+[03/05/2026 20:18:06] Bryan Shnider: something. So that when you're printing this you're not searching through just a single box that has 100 different baggies in it.
+[03/05/2026 20:18:28] Josephine Velazquez: So what we normally do is we like say see how to his own lettering. That's what the letterings come from. When the letter lettering generates we put that lettering on the box and only those will be in that box. So when we get the RAS we know all that letterings in that box and we look for them in that box. We'll put them together.
+[03/05/2026 20:18:53] Bryan Shnider: Right, I'm just thinking like again if to even scale that out further right.
+[03/05/2026 20:18:56] Josephine Velazquez: Yeah, they could and by number order whatever it makes it easier to.
+[03/05/2026 20:19:02] Bryan Shnider: okay so that
+[03/05/2026 20:19:02] Josephine Velazquez: my NDC
+[03/05/2026 20:19:04] Bryan Shnider: it back in the baggie. Is that would be a type-consuming thing to do that for 200 500 pharmacies okay,
+[03/05/2026 20:19:24] Arnie Sarkar: Yeah, it's cumbersome.
+[03/05/2026 20:19:27] Bryan Shnider: and then Joe this is also where you're saying will shoot. Why don't we just contract or contact the manufacturers directly because you're not having to wait
+[03/05/2026 20:19:38] Joseph Delaney: Yes.
+[03/05/2026 20:19:39] Bryan Shnider: for that ra process from nmr.
+[03/05/2026 20:19:41] Joseph Delaney: Yeah, we can Ship Around The Turn Around time and also the payment so if I could be convincing to the manufacturers saying. You know been in a business over 30 years. I don't I think I got a way to save you money and save you time. And make it more efficient of course. I think that's a good story and back when I had like 30 or 40 manufacturers. They at that time they were also using another company. Cuz they had the same idea and I wasn't in more it was called company called one box and they got bought by in Mar as well, but what they were doing was the same thing hey I got a bunch of products.
+[03/05/2026 20:20:25] Bryan Shnider: Well, wouldn't would other Returns companies and turn around and say we'll shoot why don't we just use? First class Returns similar that we use in Mar we could just use first class Returns if they're making the credit memo process faster.
+[03/05/2026 20:20:38] Joseph Delaney: If that's the story to sell to your to the other Returns companies.
+[03/05/2026 20:20:42] Bryan Shnider: okay, but yeah
+[03/05/2026 20:20:44] Joseph Delaney: Because it here gotten this car and drove over to in Mars address. normally over 10 trailer loads of product in the parking lot
+[03/05/2026 20:20:55] Bryan Shnider: Every day or just in general. Yeah.
+[03/05/2026 20:20:56] Joseph Delaney: Every day they just the government you know that's no one understood the industry and in Mars got a monopoly and part of the big bottleneck. Is they have too much product?
+[03/05/2026 20:21:10] Joseph Delaney: Waiting to be scanned out.
+[03/05/2026 20:21:10] Bryan Shnider: Got it.
+[03/05/2026 20:21:12] Bryan Shnider: So that ra when you ship it, so they're not even giving you the you know you can't ship it until you have the R.A number right and so maybe they have some
+[03/05/2026 20:21:19] Joseph Delaney: correct
+[03/05/2026 20:21:20] Josephine Velazquez: right
+[03/05/2026 20:21:21] Bryan Shnider: automated way to get that ra number to you, but what is what is it that they're actually doing they're just checking the price and saying hey here's the return value, or is it just yes, this is returnable.
+[03/05/2026 20:21:31] Joseph Delaney: I wish I knew the answer to that because if I'm in Mar I I highly doubt that in Mars opening up all these baggies and all these boxes. I mean, I think that they would look and see I'm sure that if your company that they've checked and verified that you're playing by the rules. But if you're a company that they've had issues with maybe they are opening up all the boxes and going through all the baggy manifests, but if you think the 90% of the product is going through one location. I mean there was a quarter million square feet when I was there last and I was a
+[03/05/2026 20:22:04] Bryan Shnider: right
+[03/05/2026 20:22:06] Joseph Delaney: long long time ago. I can't imagine how much square footage they have. Because they're also the largest OTC hba cigarette and alcohol Returns company
+[03/05/2026 20:22:12] Bryan Shnider: okay
+[03/05/2026 20:22:16] Joseph Delaney: and grocery.
+[03/05/2026 20:22:18] Bryan Shnider: hmm in Mars
+[03/05/2026 20:22:21] Joseph Delaney: And more is their own by adventure group out of winston-sale, North Carolina I believe?
+[03/05/2026 20:22:27] Bryan Shnider: Okay interesting so basically this ra process here. I think that this could be we can't speed it up, but what Joe is basically getting at is well in Mars that has the contracts with the manufacturers if we had some manufacturers that we had a lot of volume that we were typically sending to why not reach out to the manufacturers and we could just get our own deal with them where it's half the price that in March charges, but you get your payments faster and you get your returns faster. That's essentially the story. um okay
+[03/05/2026 20:23:00] Josephine Velazquez: So, we're finally you have to request an online yourself and those you get done that same same day you entered information on there you get your area that same day.
+[03/05/2026 20:23:10] Bryan Shnider: Okay and so that needed. Yeah.
+[03/05/2026 20:23:11] Joseph Delaney: And they've got about their 25 or 30 vendors mostly generic companies. No, it's just any more.
+[03/05/2026 20:23:18] Bryan Shnider: and you can only And you can only use firmly for those vendors or just nmart also have an agreement with those vendors.
+[03/05/2026 20:23:26] Josephine Velazquez: No, it's just opened.
+[03/05/2026 20:23:29] Joseph Delaney: Excuse me. I'm sorry no each of those two only work with their own so if you're with it any Returns company like us we have to send it to clone actually have this senate we'll call next now is in Mark but so you have to send it to nmr or Farm a link.
+[03/05/2026 20:23:43] Bryan Shnider: So, why would a manufacturer work with us?
+[03/05/2026 20:23:47] Joseph Delaney: Because once again, we're going to offer them a discount to do so.
+[03/05/2026 20:23:50] Bryan Shnider: No, I get that but I mean you'd have to basically now be the new Returns in that Endpoint Returns companies, so you'd have to be able to accept from every Returns company that product right because they're only going to do the
+[03/05/2026 20:24:03] Joseph Delaney: correct
+[03/05/2026 20:24:04] Bryan Shnider: manufacturers only doing business with one company. You're not.
+[03/05/2026 20:24:11] Joseph Delaney: and the last all the data was being transferred EDI
+[03/05/2026 20:24:16] Bryan Shnider: Right, so you'd have to prove that you can handle the technology handle the
+[03/05/2026 20:24:19] Joseph Delaney: correct
+[03/05/2026 20:24:20] Bryan Shnider: whole process and also facilities so it it's not just as simple as calling them up saying hey let us do this. It's we would have to prove and in my mind you probably want to have kind of like a 10 or 20 of them ready lined up to go saying hey we're going to save you money and then we're going to have proof that we can do all this and And once once you go through that entire approval process across all 20 of them now. You have a story that you can kind of tell so that like hey on this time now. We're going to so you need to switch to us because we're saving you money. essentially is that
+[03/05/2026 20:24:56] Joseph Delaney: True, I think it's a nice. It's a nice grip to say though that the manufacturers are impressed if you work for big Pharma which I did and I did do vendors. I did do manufacturers, but the other thing is. If you're dealing if you're on the cardinal program. You know there's only I don't know there might be ten of us. Just being on their program loans not an easy access. It's not like you're just there used to be returned companies that didn't even have a warehouse. They just want in this George wrote up all the returns and They left the boxes behind for the stores to send to their wholesaler so it's
+[03/05/2026 20:25:33] Joseph Delaney: come to what.
+[03/05/2026 20:25:33] Bryan Shnider: You're saying that it's not a like. It's a heavy lift in the sense that yes,
+[03/05/2026 20:25:39] Bryan Shnider: it's stuff needs to be done but it's you're going to ten. Ten Returns companies essentially around the country saying hey switch to either gonna switch to us for these 25 manufacturers. And you're going to get paid quicker and you're gonna get your RH faster kind of
+[03/05/2026 20:25:53] Josephine Velazquez: it's
+[03/05/2026 20:25:55] Joseph Delaney: click yep
+[03/05/2026 20:25:55] Bryan Shnider: what formal link does.
+[03/05/2026 20:25:57] Bryan Shnider: okay Okay all right and what's what's next after this process.
+[03/05/2026 20:26:08] Josephine Velazquez: We don't really do anything with this. I'm paid debit memo well.
+[03/05/2026 20:26:12] Bryan Shnider: Does this not what you do?
+[03/05/2026 20:26:14] Josephine Velazquez: Yeah, this will be like. Debit mentals are not paid where you can send an email. You should be able to send an email.
+[03/05/2026 20:26:24] Bryan Shnider: To the manufacturer or just yeah.
+[03/05/2026 20:26:27] Bryan Shnider: And you're just saying hey you guys owe us for these 20 label labels at least 20
+[03/05/2026 20:26:27] Josephine Velazquez: Yeah to manufacture.
+[03/05/2026 20:26:31] Josephine Velazquez: Yep.
+[03/05/2026 20:26:34] Joseph Delaney: We'll send you we'll send you on email with a picture of it. So you can have that.
+[03/05/2026 20:26:34] Bryan Shnider: 25.
+[03/05/2026 20:26:39] Bryan Shnider: Yeah, yeah.
+[03/05/2026 20:26:41] Josephine Velazquez: So this right here is Labor learn information that we were talking about. That I'm trying to do a put everything on spreadsheet for you. Which I'm put in the Labor ID that's done last five of their NDC number label
+[03/05/2026 20:26:54] Bryan Shnider: just
+[03/05/2026 20:26:57] Josephine Velazquez: our name.
+[03/05/2026 20:26:58] Bryan Shnider: So when you say you're trying to put this into a spreadsheet isn't this all and just data put a data table now that you can just pull from.
+[03/05/2026 20:27:05] Josephine Velazquez: yeah I don't have access to it done.
+[03/05/2026 20:27:09] Joseph Delaney: That's our problem.
+[03/05/2026 20:27:11] Bryan Shnider: Okay, so that's this is a database The Master label. One information is a database that would be good to get access to from okay.
+[03/05/2026 20:27:19] Joseph Delaney: correct
+[03/05/2026 20:27:20] Josephine Velazquez: yeah So here I have your policy when everything if it's partial.
+[03/05/2026 20:27:22] Bryan Shnider: okay And how far along are you on that that spreadsheet?
+[03/05/2026 20:27:32] Josephine Velazquez: I don't know. Quite a few on there already. I right now, but probably a hundred maybe.
+[03/05/2026 20:27:39] Bryan Shnider: because there's 300 manufacturers or a thousand or
+[03/05/2026 20:27:42] Josephine Velazquez: Back huh, yeah, I'm not sure how many there is but there's quite a few.
+[03/05/2026 20:27:46] Bryan Shnider: CoCo and you're just going down one by one.
+[03/05/2026 20:27:49] Josephine Velazquez: Yeah, I was about the order. I was trying to do it.
+[03/05/2026 20:27:51] Bryan Shnider: What are you on?
+[03/05/2026 20:27:54] Josephine Velazquez: I haven't touched it in a while because I've been busy doing some other things
+[03/05/2026 20:27:57] Josephine Velazquez: but I can I can probably send you what I have later on so you could see.
+[03/05/2026 20:27:57] Bryan Shnider: yeah
+[03/05/2026 20:28:04] Bryan Shnider: Yeah, and you're tracking it also the policy the six months and 12 months okay.
+[03/05/2026 20:28:08] Josephine Velazquez: Yeah, right down the policy and everything on there. Yeah, if it's if it's parcels are accepted if yes or no it goes to qualities.
+[03/05/2026 20:28:14] Bryan Shnider: And what is this? What is this note one 1822 norvir tri-core HUMIRA crayon to
+[03/05/2026 20:28:21] Josephine Velazquez: So I've put some notes in some of them like if some items are not returnable.
+[03/05/2026 20:28:22] Bryan Shnider: the
+[03/05/2026 20:28:28] Josephine Velazquez: On the policy, so that when we go into process it you know because it might come up come up still like it's recurrentable but those. Those certain products are not returnable.
+[03/05/2026 20:28:46] Bryan Shnider: alright
+[03/05/2026 20:28:47] Joseph Delaney: I think what I'm going to I think bubbles do is have you do a search of the top 250 vendors based on dollars? And that's what we're prioritized instead of just alphabetical.
+[03/05/2026 20:28:47] Josephine Velazquez: It's on the possible beyond, it's on the policy to.
+[03/05/2026 20:29:02] Bryan Shnider: that makes sense This right here, so these are individual drugs for this. Labor that are not returnable so what it makes sense.
+[03/05/2026 20:29:13] Josephine Velazquez: vaginal exactly
+[03/05/2026 20:29:17] Bryan Shnider: In a new application to basically map these when the drug.
+[03/05/2026 20:29:23] Bryan Shnider: this policies and Yeah, okay okay. All right what else?
+[03/05/2026 20:29:23] Josephine Velazquez: So automatically comes up non returnable, yeah.
+[03/05/2026 20:29:34] Josephine Velazquez: To switchboard and then this is an effect FedEx label like if somebody's doing it web return so through here. I can find a store whoever is join the web return. And so if it's Montgomery and I scan and what they'll tell me how many they want by email how many labels I'll scan them in here and then send them the FedEx labels.
+[03/05/2026 20:29:59] Bryan Shnider: okay
+[03/05/2026 20:30:00] Josephine Velazquez: That's what this is for here was where we were earlier is when I received my FedEx label from when the box is coming.
+[03/05/2026 20:30:14] Bryan Shnider: Now this database here that NDC the price all that is that something that you have access to your table to export or no.
+[03/05/2026 20:30:22] Josephine Velazquez: Now I can't.
+[03/05/2026 20:30:25] Bryan Shnider: See that that's a helpful one. okay
+[03/05/2026 20:30:33] Joseph Delaney: You can buy a database figure seven or eight thousand dollars a year trying to representative company that does that I can look it up.
+[03/05/2026 20:30:41] Bryan Shnider: But it has all that information. It's got the current price. It's got the return policy. You didn't have the return policy.
+[03/05/2026 20:30:45] Joseph Delaney: Yep.
+[03/05/2026 20:30:51] Bryan Shnider: Or does it?
+[03/05/2026 20:30:52] Joseph Delaney: I don't know I don't remember because it's been it's been years.
+[03/05/2026 20:30:54] Bryan Shnider: Yeah, yeah. If you get think of that, they'll be helpful that would be.
+[03/05/2026 20:30:59] Joseph Delaney: No, I'm just making it my to-do list today.
+[03/05/2026 20:31:01] Bryan Shnider: okay cardinal invoice
+[03/05/2026 20:31:04] Josephine Velazquez: So, that's when we do the clothes out where we create invoice.
+[03/05/2026 20:31:09] Bryan Shnider: okay
+[03/05/2026 20:31:14] Josephine Velazquez: And we've done anything with this.
+[03/05/2026 20:31:18] Joseph Delaney: And then delete a return.
+[03/05/2026 20:31:20] Josephine Velazquez: Delay to return look like it will be what we were doing right now. I would go in here because it's it's not a real return.
+[03/05/2026 20:31:27] Bryan Shnider: the test return yeah
+[03/05/2026 20:31:28] Josephine Velazquez: And then I would just delete it.
+[03/05/2026 20:31:30] Bryan Shnider: okay
+[03/05/2026 20:31:31] Josephine Velazquez: Rather delete while we're there and they'll actually if you've really wanted to delete it. okay and then I'll exit and This we started it's the pace to pay stores.
+[03/05/2026 20:31:44] Bryan Shnider: To pay what is it?
+[03/05/2026 20:31:47] Josephine Velazquez: Where you can keep the information in for what stores you're paying them? I'll take your paid them.
+[03/05/2026 20:31:57] Bryan Shnider: so this is like the internal so if I have a wire Jack
+[03/05/2026 20:32:01] Josephine Velazquez: Actually if you want to wire you put the information.
+[03/05/2026 20:32:04] Bryan Shnider: And then how much you're paying this is what creates the actual memo for them saying hey we're doing the payment or this is just the money that goes out to pay them.
+[03/05/2026 20:32:14] Josephine Velazquez: What we're going to send out to them.
+[03/05/2026 20:32:16] Bryan Shnider: Who's doing the actual what like when you had a high volume stores? Who is doing the wired as a system automatically set that up.
+[03/05/2026 20:32:22] Josephine Velazquez: No it does.
+[03/05/2026 20:32:25] Joseph Delaney: I was writing checks, and I was also doing zell I was also doing cash.
+[03/05/2026 20:32:33] Joseph Delaney: Because when I did chaos I paid less.
+[03/05/2026 20:32:33] Bryan Shnider: okay
+[03/05/2026 20:32:36] Bryan Shnider: Hmm. So there's there's tools out there that we could tie that into automatic wire.
+[03/05/2026 20:32:42] Josephine Velazquez: Automatically do it yeah?
+[03/05/2026 20:32:43] Bryan Shnider: Yeah, you know he could pay a thousand stores on one day through an automatic choir if you wanted to. okay and Legacy stores
+[03/05/2026 20:32:53] Josephine Velazquez: I haven't done anything. I think it's just something he started to set up for Legacy sources. It doesn't even open.
+[03/05/2026 20:32:59] Bryan Shnider: okay and NDC pricing
+[03/05/2026 20:33:00] Joseph Delaney: Legacy is divine group down in best. frogs chain Ernie
+[03/05/2026 20:33:09] Joseph Delaney: Arnie
+[03/05/2026 20:33:09] Bryan Shnider: Oh Legacy is the Legacy the worst that the GPO got it.
+[03/05/2026 20:33:11] Arnie Sarkar: yeah
+[03/05/2026 20:33:13] Joseph Delaney: yeah yeah, so what we were going to do is we were gonna have a tab for each GPO
+[03/05/2026 20:33:15] Arnie Sarkar: in New Jersey
+[03/05/2026 20:33:19] Joseph Delaney: Because that way for us to pay the rebate back to the GPO if we had all them lumped under one group. It would be easier for us to do that.
+[03/05/2026 20:33:30] Bryan Shnider: Mm-hmm yeah, so I was thinking we'd have a tab for essentially the warehouse workflow which is everything that we're seeing. Today and then the payments tab which would be the pharmacy payout or the GPO pay out than each of those are going to have the kind of sub. Buckets underneath it but okay and then.
+[03/05/2026 20:33:48] Josephine Velazquez: So then this endlessly pricing. Is basically like to change the price like say I got a credit memo and the price was higher or low vice versa lower I can adjust the price here and our system.
+[03/05/2026 20:34:03] Bryan Shnider: Okay and so the estimate so if the price was lower then you're putting the essentially the last price against that NDC that you receive.
+[03/05/2026 20:34:10] Josephine Velazquez: Yeah, I would stand at I was Gannon and DC number that I type it in and then I would go it was time. We want my current prices and then I'll just change it and I'll tell me when I change it and then the source would be where I got it was from credit memo. So usually it's from a labelers credit man modified change it.
+[03/05/2026 20:34:32] Bryan Shnider: okay
+[03/05/2026 20:34:33] Josephine Velazquez: That's what basically this is right here.
+[03/05/2026 20:34:38] Josephine Velazquez: and then this one
+[03/05/2026 20:34:38] Bryan Shnider: could you go back to that sorry, could you go back to that drop-down the
+[03/05/2026 20:34:42] Bryan Shnider: the price source is that
+[03/05/2026 20:34:46] Josephine Velazquez: the price yeah where we got the price from So, I knew that's one label or credit memo.
+[03/05/2026 20:34:49] Bryan Shnider: so I see Oh, so now you could say okay, let's go back and look at the good RX pricing and see if we were okay and then.
+[03/05/2026 20:34:59] Josephine Velazquez: Yeah, if I got the price off a good RX because if I didn't have a price for it. I would check the RX if I couldn't find anywhere else so then I would put I got my price from there from goodrx.
+[03/05/2026 20:35:09] Bryan Shnider: Joe is that of priceless is that is that the company that sells it?
+[03/05/2026 20:35:16] Joseph Delaney: It was well the other owned by United Healthcare so that was a 30 locations and we loaded in their price list.
+[03/05/2026 20:35:28] Joseph Delaney: That was all specialty pharmacy cancer was cancer products. So it was very high skews.
+[03/05/2026 20:35:28] Bryan Shnider: okay
+[03/05/2026 20:35:37] Bryan Shnider: okay so
+[03/05/2026 20:35:38] Joseph Delaney: My normal pharmacy didn't have access to that price list so that's why I had to have theirs.
+[03/05/2026 20:35:45] Bryan Shnider: I've got it okay. All right and then that was the end of it.
+[03/05/2026 20:35:50] Joseph Delaney: Price chopper price chopper is 100 store chain than the Albany area and they
+[03/05/2026 20:35:50] Josephine Velazquez: Yes.
+[03/05/2026 20:35:50] Bryan Shnider: so
+[03/05/2026 20:35:55] Joseph Delaney: wanted their price file used.
+[03/05/2026 20:35:59] Bryan Shnider: Interesting and what why would they do that like? What's the rush now for that?
+[03/05/2026 20:36:04] Joseph Delaney: They had an accountant. I thought it was a good idea.
+[03/05/2026 20:36:07] Bryan Shnider: okay
+[03/05/2026 20:36:08] Joseph Delaney: I don't have any other than that that was the answer they told me.
+[03/05/2026 20:36:10] Bryan Shnider: and yeah Okay and then that was everything so so when you do the closeout Arne I think it'd be good just to track the closeout process and do the same type of recording Josephine how long does it take for you to do a close-out? I know it's dependent on the number of products that you have but.
+[03/05/2026 20:36:28] Josephine Velazquez: oh
+[03/05/2026 20:36:32] Bryan Shnider: In the month of February for example, how long did that take?
+[03/05/2026 20:36:35] Josephine Velazquez: It doesn't take long maybe 15 20 minutes. It doesn't take that long.
+[03/05/2026 20:36:40] Bryan Shnider: okay, so can you let us know when you're preparing to do it for the month of March
+[03/05/2026 20:36:44] Josephine Velazquez: sure
+[03/05/2026 20:36:45] Bryan Shnider: Or have you done it for February already?
+[03/05/2026 20:36:47] Josephine Velazquez: Yeah, sorry done.
+[03/05/2026 20:36:48] Bryan Shnider: Okay okay, so if we can just record that on the month of March I would be helpful.
+[03/05/2026 20:36:53] Josephine Velazquez: okay
+[03/05/2026 20:36:54] Bryan Shnider: And then there's a couple emails that we need the debit manufacturer email the email that gets sent to nmr and then the email you get back from nmr. Just so we can see all those and then we still need to get that file that you upload. To to Cardinal and then like what that process looks like right.
+[03/05/2026 20:37:16] Josephine Velazquez: Yeah, and the copy of the ra, you want right. I think Jill's gonna send you that.
+[03/05/2026 20:37:21] Joseph Delaney: you want it you want to I've got down here. copy of the email for each ra, that's a JV it's Josephine And then I'm gonna find out. By buying the database NDC database does it just have pricing or does it have return policies well?
+[03/05/2026 20:37:46] Bryan Shnider: okay perfect Okay um awesome. I know you've been watching this. Do you have any immediate questions right now?
+[03/05/2026 20:38:00] Asim Hayat: for the moment
+[03/05/2026 20:38:01] Bryan Shnider: Okay all right so awesome. I'm thinking that we would build this like I said you know we have kind of the pharmacy part of the portal we have the you know like the lab the admin part of the portal this to me would probably be in the admin section but more specifically like in the a warehouse tab that only the warehouse. You know only like the internal company would be would be facilitating each of these items that makes sense.
+[03/05/2026 20:38:29] Asim Hayat: yeah
+[03/05/2026 20:38:30] Bryan Shnider: So, let's put a plan together use a use some ah you know clot or chachi B to help us right up the story for this also. I'll share this video with you in screenshots and stuff and then. We can start working to get this added into the the application because again awesome the the goal is to have this all within a single web-based application.
+[03/05/2026 20:38:56] Asim Hayat: right
+[03/05/2026 20:38:58] Bryan Shnider: All right you are already do you have any questions?
+[03/05/2026 20:39:05] Arnie Sarkar: I don't think so um the NDC manufactured dollar amounts is that did I miss that is that being worked on? So we can determine the type of benefits we're going to be providing. Either the pharmacy and/or the buying group in terms of like the program.
+[03/05/2026 20:39:28] Joseph Delaney: Are you talking about versus receive?
+[03/05/2026 20:39:30] Arnie Sarkar: yeah
+[03/05/2026 20:39:31] Joseph Delaney: Yeah, so they ask versus received would be Josephine do you want to pull something up? One of the manufacturers so we can see the ask verses received.
+[03/05/2026 20:39:44] Arnie Sarkar: Essentially what we want to do right.
+[03/05/2026 20:39:45] Josephine Velazquez: From a story or say.
+[03/05/2026 20:39:47] Joseph Delaney: From a manufacturer go to the manufacturer and they'll tell you percentage received.
+[03/05/2026 20:39:55] Arnie Sarkar: Because Brian what we want to do is be able to have those numbers and then uniformly be able to have the buying group control what they show the pharmacy right.
+[03/05/2026 20:40:05] Bryan Shnider: correct
+[03/05/2026 20:40:06] Josephine Velazquez: Any specific one?
+[03/05/2026 20:40:08] Joseph Delaney: Just pick up a lunch do a brand in engineering.
+[03/05/2026 20:40:09] Bryan Shnider: system
+[03/05/2026 20:40:11] Josephine Velazquez: okay
+[03/05/2026 20:40:15] Joseph Delaney: You can do rising if you want that's always an interesting one.
+[03/05/2026 20:40:25] Bryan Shnider: All right so their average number day see but you have I thought you had access to this data. Do you not? Like you you generated a spreadsheet that had.
+[03/05/2026 20:40:34] Josephine Velazquez: Yeah, we have a spreadsheet that we have.
+[03/05/2026 20:40:36] Bryan Shnider: Yeah, but the question is per n d c. With the return pay is right because like the ask versus receive. Is based on like if you broke it down to NDC do you have that information?
+[03/05/2026 20:40:54] Joseph Delaney: I believe we have it by manufacturer only.
+[03/05/2026 20:40:58] Bryan Shnider: so you can't go pick like a random NDC and say what the average price pay or with the average number of days pay we're on that NDC
+[03/05/2026 20:41:08] Bryan Shnider: Burwood that
+[03/05/2026 20:41:08] Joseph Delaney: Just put it if we put an NDC and what would it show us?
+[03/05/2026 20:41:15] Josephine Velazquez: How many days yeah you have one? I could probably put it in here like where we change the pricing but I don't think that.
+[03/05/2026 20:41:24] Bryan Shnider: At least tell you that ask. Or what the last price was that you got right that we do need that so that let's do. Did you pull up?
+[03/05/2026 20:41:36] Bryan Shnider: where you picking that against the against that return Solutions invoices
+[03/05/2026 20:41:36] Joseph Delaney: what do you
+[03/05/2026 20:41:43] Josephine Velazquez: I'm sorry.
+[03/05/2026 20:41:44] Joseph Delaney: It's that is still being worked on I've got cardinal things that I'm doing currently right now. That's taking all of Josephine's time.
+[03/05/2026 20:41:50] Bryan Shnider: yoga So let me hear I've got a couple of examples of ndc's then let's do.
+[03/05/2026 20:41:55] Joseph Delaney: Okay go ahead and use those.
+[03/05/2026 20:41:59] Bryan Shnider: Can you do by product name try now Trek zone in alt-r-e?
+[03/05/2026 20:42:06] Josephine Velazquez: You know I really don't NDC number.
+[03/05/2026 20:42:09] Bryan Shnider: Okay I can put it into the chat here so you should be able to see the chat pop up. Do you see that?
+[03/05/2026 20:42:24] Joseph Delaney: I see 16. Oh, I did see something.
+[03/05/2026 20:42:27] Bryan Shnider: How about this tonight? What Josephine if I sent you kind of like just like 10 in dc's? could you just do the screenshot of this and then send it back in an email with what you don't have to put it into a spreadsheet or anything just put like the The NDC and then just take a screenshot of it and send it back to us.
+[03/05/2026 20:42:27] Josephine Velazquez: Did you say it?
+[03/05/2026 20:42:46] Josephine Velazquez: sure
+[03/05/2026 20:42:47] Bryan Shnider: okay, I'll do that Arne if you have any specific ndc's that would be interesting I was just going to pull some random ones from the from the return Solutions
+[03/05/2026 20:42:57] Arnie Sarkar: Yeah, I don't really care. It was just more of like trying to build the program on the back end. To be able to do this uniformly.
+[03/05/2026 20:43:05] Bryan Shnider: yeah tend to
+[03/05/2026 20:43:10] Arnie Sarkar: Where did that NCC number go other than the chat?
+[03/05/2026 20:43:12] Bryan Shnider: I will. yeah, so all send those as an email to you Joe and if you want to send that off to Josephine
+[03/05/2026 20:43:20] Joseph Delaney: okay
+[03/05/2026 20:43:21] Bryan Shnider: Just again.
+[03/05/2026 20:43:23] Joseph Delaney: Just you want to add this one in just to see what comes up. It's a Teva product. So it's it's 0093. 41 75 73 pardon me
+[03/05/2026 20:43:46] Josephine Velazquez: All right yep.
+[03/05/2026 20:43:47] Joseph Delaney: okay
+[03/05/2026 20:43:48] Bryan Shnider: ceflaxin
+[03/05/2026 20:43:51] Arnie Sarkar: so
+[03/05/2026 20:43:52] Bryan Shnider: availa so you're
+[03/05/2026 20:43:54] Arnie Sarkar: I said. Go ahead and go ahead.
+[03/05/2026 20:43:58] Bryan Shnider: Estimated store prices 840 last 1680 so what exactly just explain what that means?
+[03/05/2026 20:44:07] Joseph Delaney: Well that this is actually came off in a Vela price list. That's interesting. I'll change so what we have here. just we need to explain it better than I
+[03/05/2026 20:44:23] Josephine Velazquez: So this is our current price that we've had right here, so we haven't changed
+[03/05/2026 20:44:27] Joseph Delaney: in our system
+[03/05/2026 20:44:28] Josephine Velazquez: anything. estimated store prices what we have for the pharmacy
+[03/05/2026 20:44:36] Arnie Sarkar: That's what you show the pharmacy there are estimated return value. And then what you have is the current price. That's 1680 is what you've what we would typically receive from the manufacturer.
+[03/05/2026 20:44:49] Josephine Velazquez: Right and then if we needed to edit the price. We would go here where it says edit price.
+[03/05/2026 20:44:57] Arnie Sarkar: And why would you edit the price?
+[03/05/2026 20:44:58] Josephine Velazquez: Like if I got it from credit mental I got a different price and I needed to edit it.
+[03/05/2026 20:45:03] Josephine Velazquez: I would go there and then that's where we change where Joe was trying to change it here. So if I got an uprice from a labeler credit memo.
+[03/05/2026 20:45:03] Arnie Sarkar: Oh, god it.
+[03/05/2026 20:45:08] Arnie Sarkar: yeah
+[03/05/2026 20:45:10] Josephine Velazquez: So, I will click here and I that's why I update it and then it will show it will change the date in here that I updated it today and then it was Joe what my price was before and my new and the price that I've changed.
+[03/05/2026 20:45:25] Arnie Sarkar: Okay and then on that other screen it will show when that manufacturer actually pays, that's how you cross reference.
+[03/05/2026 20:45:33] Arnie Sarkar: Saying we have the last price here. We have the estimated store price and then
+[03/05/2026 20:45:33] Josephine Velazquez: yeah
+[03/05/2026 20:45:36] Josephine Velazquez: Yeah, it would write up here. I would show it to you here.
+[03/05/2026 20:45:37] Arnie Sarkar: on that other.
+[03/05/2026 20:45:40] Josephine Velazquez: The date and I resent.
+[03/05/2026 20:45:43] Bryan Shnider: okay um
+[03/05/2026 20:45:44] Joseph Delaney: And then we then we would have to put into. We'd have to have another screen that showed what we are going to pay.
+[03/05/2026 20:45:54] Bryan Shnider: Yeah, and that would be like an editable screen.
+[03/05/2026 20:45:57] Joseph Delaney: Yes.
+[03/05/2026 20:45:58] Bryan Shnider: If okay yeah, I I just went through the the list of these PDFs that I have and they don't have that exact NDC they have ceflaxin but they don't have that 100 milliliter bottle so I'll send you.
+[03/05/2026 20:46:12] Josephine Velazquez: I could be from some other manufacturer.
+[03/05/2026 20:46:15] Bryan Shnider: Yeah, I'll send you some just examples of generics and a brands. And then yeah, we can just do a price comparison from that.
+[03/05/2026 20:46:26] Josephine Velazquez: okay
+[03/05/2026 20:46:27] Bryan Shnider: cool okay Arnies had something do you would you be interested in just doing that just doing like 10 ndc's. Of like five brands fine. Yeah, Five brands, five generics just to do a
+[03/05/2026 20:46:38] Arnie Sarkar: like
+[03/05/2026 20:46:43] Bryan Shnider: comparison of Dave's. You know taken from his what's it called his spreadsheet or his documents.
+[03/05/2026 20:46:50] Arnie Sarkar: Yeah, I don't know which one would be Brandon generic.
+[03/05/2026 20:46:55] Arnie Sarkar: Is that I is that identified?
+[03/05/2026 20:46:55] Joseph Delaney: I can help you with that.
+[03/05/2026 20:46:58] Bryan Shnider: Like is it yeah? I guess I don't know yeah. I don't know which one actually.
+[03/05/2026 20:47:03] Arnie Sarkar: Jared do you want me to just send you want me to send you and Josephine like the How do you yeah because I wouldn't know which ones which in terms of the brand?
+[03/05/2026 20:47:14] Joseph Delaney: Once you send it to me and I forwarded on to her.
+[03/05/2026 20:47:19] Arnie Sarkar: Send you the reports.
+[03/05/2026 20:47:21] Joseph Delaney: Why I have the reports but if you want, I'll just pick up. I'll just pick out some because I haven't looked at that a couple days. So after myself to see what it tells me on the report does it does have the
+[03/05/2026 20:47:28] Arnie Sarkar: okay
+[03/05/2026 20:47:32] Joseph Delaney: manufacture name and the NDC right next to it?
+[03/05/2026 20:47:35] Bryan Shnider: Yeah, it's broken down by manufacturer and it's got the NDC just boil it.
+[03/05/2026 20:47:37] Joseph Delaney: Fine but you also seen has the same thing as I swallowed it to her. I just got her doing some other things.
+[03/05/2026 20:47:41] Bryan Shnider: so Josephine shows a fan if you have that list is that something you can just pick you don't have to right now, but if you could just pick out 10 of the ndc's of brand and
+[03/05/2026 20:47:53] Josephine Velazquez: Oh, yeah, the list that is on you with the brands in arka pickups and in just
+[03/05/2026 20:47:56] Bryan Shnider: Exactly, but what we're trying is see Josephine is you know this company Returns
+[03/05/2026 20:47:57] Josephine Velazquez: any attention and of each.
+[03/05/2026 20:48:03] Bryan Shnider: solution says hey here's this NDC and here's the value right. We're literally trying to compare it against your price data to see how much are they undervaluing their pricing does that make sense?
+[03/05/2026 20:48:16] Josephine Velazquez: Yep.
+[03/05/2026 20:48:17] Bryan Shnider: So we're just trying to is it 5% is it 10% is it 50% we don't know so we're just trying to do the comparison of what you guys have internally in your price like
+[03/05/2026 20:48:22] Josephine Velazquez: okay
+[03/05/2026 20:48:25] Bryan Shnider: the Ask and receive price.
+[03/05/2026 20:48:28] Josephine Velazquez: okay
+[03/05/2026 20:48:29] Bryan Shnider: that makes sense
+[03/05/2026 20:48:30] Josephine Velazquez: yeah
+[03/05/2026 20:48:31] Bryan Shnider: Awesome yeah it just do just do five or Ted of them. Just so we can get an understanding of the the price differential.
+[03/05/2026 20:48:40] Bryan Shnider: All right awesome, I don't have any other questions right now.
+[03/05/2026 20:48:40] Josephine Velazquez: okay
+[03/05/2026 20:48:41] Josephine Velazquez: yeah
+[03/05/2026 20:48:46] Bryan Shnider: But just being I appreciate you digging in. Through all this and Joe thanks for putting this together.
+[03/05/2026 20:48:51] Josephine Velazquez: okay
+[03/05/2026 20:48:55] Joseph Delaney: No, thank you.
+[03/05/2026 20:48:57] Bryan Shnider: Alright Arnie you have any other questions?
+[03/05/2026 20:49:00] Arnie Sarkar: Enough right now. Joe I just sent you forwarded you an email with the handful of reports from Dave so you'll be able to see him and I think you'll be able to even log into his system if you needed to let that be easier but or you just take it off the reports.
+[03/05/2026 20:49:16] Joseph Delaney: okay
+[03/05/2026 20:49:20] Bryan Shnider: awesome okay
+[03/05/2026 20:49:23] Arnie Sarkar: Cool, thank you.
+[03/05/2026 20:49:25] Josephine Velazquez: All right, thank you. Have a nice day.
+[03/05/2026 20:49:26] Bryan Shnider: Thanks take.
+[03/05/2026 20:49:28] Arnie Sarkar: you do but

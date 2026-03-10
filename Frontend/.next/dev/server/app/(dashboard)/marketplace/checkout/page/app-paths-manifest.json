@@ -1,0 +1,3 @@
+{
+  "/(dashboard)/marketplace/checkout/page": "app/(dashboard)/marketplace/checkout/page.js"
+}

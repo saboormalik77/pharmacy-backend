@@ -1,0 +1,1274 @@
+# Reverse Distributor Platform - Development Guide
+
+## Project Overview
+A comprehensive web-based SaaS platform for pharmacy reverse distributors to manage pharmaceutical returns, credits, and an integrated B2B marketplace.
+
+## Tech Stack
+- **Frontend**: Next.js 14+ with TypeScript
+- **Styling**: TailwindCSS
+- **State Management**: React Query + Zustand
+- **UI Components**: Headless UI / shadcn/ui
+- **Icons**: Lucide React
+
+## Mock UI Development Roadmap
+
+### Phase 1: Authentication & Core Layout (Week 1)
+
+#### 1.1 Authentication Pages
+```
+Features to implement:
+- Login page with email/password
+- Registration wizard (5-step process)
+- Password reset flow
+- MFA setup page (SMS/TOTP options)
+- Session timeout handling
+
+Design Requirements:
+- Mobile-first responsive design
+- Brand colors and logo placement
+- Form validation with error states
+- Loading states for async operations
+```
+
+#### 1.2 Main Layout Structure
+```
+Components:
+- Dashboard layout with sidebar navigation
+- Top navigation bar with user menu
+- Mobile hamburger menu
+- Notification bell with badge counter
+- Breadcrumb navigation
+- Footer with links
+
+Navigation Structure:
+├── Dashboard
+├── Returns Management
+├── Shipments
+├── Credits & Payments
+├── Marketplace
+├── Analytics
+├── Documents
+├── Settings
+└── Support
+```
+
+---
+
+### Phase 2: Client Management Module (Week 1-2)
+
+#### 2.1 Registration Wizard
+```
+Step 1: Basic Information
+- Pharmacy name
+- NPI number (10-digit validation)
+- DEA number (2 letters + 7 digits)
+- Primary contact info
+- Facility type dropdown
+
+Step 2: Address Information
+- Physical address
+- Billing address (same as physical checkbox)
+- Shipping address
+- Address validation
+
+Step 3: Document Upload
+- DEA license upload (drag-drop zone)
+- State license upload
+- W-9 form upload
+- File preview modal
+- Upload progress indicators
+
+Step 4: Additional Details
+- Storage capabilities checkboxes
+- Operating hours
+- Timezone selection
+- Multi-location setup option
+
+Step 5: Review & Submit
+- Summary view of all entered data
+- Edit buttons for each section
+- Terms of service acceptance
+- Submit button with loading state
+```
+
+#### 2.2 Client Dashboard
+```
+Components:
+- Welcome header with client name
+- Quick stats cards (4 across on desktop):
+  * Total returns this month
+  * Pending credits
+  * Credits received YTD
+  * Active shipments
+- Quick action buttons:
+  * Create New Return
+  * View Statements
+  * Track Shipment
+  * Browse Marketplace
+- Recent activity feed
+- Upcoming payment timeline
+```
+
+#### 2.3 Profile Management
+```
+Pages:
+- View/Edit profile page
+- Multi-location management
+- User management with RBAC
+- Document library
+- License renewal reminders
+```
+
+---
+
+### Phase 3: Inventory & Returns Module (Week 2-3)
+
+#### 3.1 Create Return Flow
+```
+Main Interface:
+- Tab navigation: Barcode Scan | Manual Entry | CSV Upload | Photo OCR
+- Item list table (dynamic rows)
+- Batch summary sidebar (sticky)
+- Save as draft / Submit buttons
+
+Barcode Scanning View:
+- Large input field for scanner
+- Auto-populate fields on scan
+- Visual/audio feedback on success
+- Manual override fields
+- NDC lookup with drug details card
+
+Manual Entry Form:
+- Type-ahead search for drug name
+- NDC field with auto-formatting
+- Lot number input
+- Expiration date picker (MM/YYYY)
+- Quantity + unit selector
+- Reason for return dropdown
+- Notes textarea
+- Photo upload (up to 5)
+- Add to batch button
+
+CSV Upload:
+- Template download link
+- Drag-drop upload zone
+- Progress bar during processing
+- Validation results table
+- Error report download
+- Bulk edit before submission
+
+Photo OCR:
+- Camera capture or file upload
+- Image preview
+- OCR processing animation
+- Extracted data form with confidence scores
+- Manual correction fields
+- Accept/retry buttons
+```
+
+#### 3.2 Returns Dashboard
+```
+Views:
+- All Returns (default)
+- Drafts
+- Ready to Ship
+- In Transit
+- Processing
+- Completed
+
+Table Columns:
+- Return ID (clickable)
+- Date created
+- Item count
+- Estimated credit
+- Status badge
+- Actions dropdown
+
+Filters:
+- Date range picker
+- Status multi-select
+- Manufacturer filter
+- NDC search
+- Value range slider
+
+Bulk Actions:
+- Select multiple returns
+- Batch print labels
+- Export to CSV
+- Delete drafts
+```
+
+#### 3.3 Return Detail View
+```
+Sections:
+1. Header:
+   - Return ID and QR code
+   - Status timeline
+   - Estimated total credit
+   - Action buttons (Edit, Print Label, Cancel)
+
+2. Items Table:
+   - NDC, Drug name, Manufacturer
+   - Lot, Expiration
+   - Quantity, Unit
+   - Classification badge
+   - Estimated credit
+   - Photos thumbnail gallery
+   - Row actions (Edit, Remove)
+
+3. Shipment Info:
+   - Carrier and service level
+   - Tracking number
+   - Shipping address
+   - Packing slip download
+
+4. Activity Log:
+   - Timestamped events
+   - User who performed action
+   - Status changes
+```
+
+---
+
+### Phase 4: Shipment & Tracking Module (Week 3)
+
+#### 4.1 Shipment Creation
+```
+Interface:
+- Select carrier (UPS/FedEx/USPS)
+- Service level selector
+- Package dimensions
+- Weight estimate
+- Insurance option
+- Generate label button
+
+Results:
+- Label PDF preview
+- Manifest PDF preview
+- QR code display
+- Tracking number
+- Cost breakdown
+- Print/download buttons
+```
+
+#### 4.2 Shipment Tracking
+```
+Dashboard View:
+- Active shipments map (optional)
+- Status filter tabs
+- Shipments table with:
+  * Tracking number
+  * Return ID link
+  * Destination
+  * Carrier + service
+  * Status badge
+  * ETA
+  * Actions
+
+Detail View:
+- Visual timeline (vertical)
+- Status updates with timestamps
+- Location information
+- Exception alerts
+- Contact carrier button
+- Related return details
+- Chain of custody signatures
+```
+
+#### 4.3 Chain of Custody
+```
+Document View:
+- Digital form with required fields
+- Signature capture areas (touch/mouse)
+- Timestamp display
+- User identification
+- PDF generation
+- Verification QR code
+```
+
+---
+
+### Phase 5: Processing & Credits Module (Week 4)
+
+#### 5.1 Processing Queue (Admin)
+```
+Queue Dashboard:
+- Tabs: Awaiting Receipt | Ready to Process | In Progress | On Hold | Completed
+- Assign processor dropdown
+- Batch scanning mode toggle
+- Queue metrics cards
+
+Scanning Interface:
+- Shipment QR scan input
+- Expected items list (left panel)
+- Received items list (right panel)
+- Scan item to verify
+- Visual match indicators
+- Discrepancy flagging
+- Photo capture for damages
+- Condition assessment form per item
+- Submit batch button
+```
+
+#### 5.2 Credit Management Dashboard
+```
+Overview Cards:
+- Expected credits pipeline
+- Credits received this month
+- Variance (expected vs actual)
+- Outstanding overdue credits
+
+Detailed Table:
+- Return item line items
+- Expected credit
+- Actual credit received
+- Variance
+- Status
+- Expected payment date
+- Actual payment date
+- Manufacturer
+- Actions
+
+Filters:
+- Date range
+- Manufacturer
+- Status
+- Client
+- Value range
+
+Aging Report View:
+- Aging buckets (0-30, 31-60, etc.)
+- Drill-down capability
+- Export to Excel
+```
+
+#### 5.3 Payment Timeline
+```
+Visual Timeline:
+- Gantt-chart style display
+- Color-coded by status
+- Milestone markers
+- Expected date indicators
+- Actual date tracking
+- Hover tooltips with details
+
+Lag Schedule Configuration (Admin):
+- Manufacturer selector
+- Schedule type dropdown
+- Payment stages builder
+- Expected days inputs
+- Save schedule button
+```
+
+---
+
+### Phase 6: Payments & Financials Module (Week 4-5)
+
+#### 6.1 Bank Account Management
+```
+Setup Flow:
+- Plaid Link integration button
+- Manual entry option
+- Account verification status
+- Primary account designation
+- Multiple accounts support
+
+Display:
+- Masked account numbers
+- Bank name and logo
+- Account type
+- Verification badge
+- Remove button (with confirmation)
+```
+
+#### 6.2 Payout Dashboard
+```
+Overview:
+- Current balance
+- Pending payouts
+- Payout history table
+- Initiate payout button (admin)
+
+Payout Detail:
+- Settlement statement viewer
+- Line item breakdown
+- Service fees section
+- Advance repayment section
+- Net payout calculation
+- Transaction reference
+- Status tracking
+- Dispute button
+```
+
+#### 6.3 Monthly Statements
+```
+Statement List:
+- Month/year selector
+- PDF download links
+- Email statement button
+- Print option
+
+Statement Viewer:
+- Header with period and client info
+- Summary section
+- Transaction detail table
+- Fees breakdown
+- Outstanding balance
+- Next expected payments
+- Footer with contact info
+```
+
+---
+
+### Phase 7: Analytics & Reporting Module (Week 5)
+
+#### 7.1 Executive Dashboard
+```
+Layout (Grid of Widgets):
+
+Row 1: KPI Cards (4 columns)
+- Total Returns (with trend arrow)
+- Credits Received (with YTD comparison)
+- Net Savings (credits - fees)
+- Active Shipments
+
+Row 2: Charts (2 columns)
+- Returns Trend (bar chart, 12 months)
+- Credits Timeline (line chart)
+
+Row 3: Charts (2 columns)
+- Top Returned Drugs (pie chart)
+- Manufacturer Payment Speed (horizontal bar)
+
+Row 4: Tables
+- Recent transactions
+- Upcoming payments
+
+Date Range Selector (top right):
+- Last 7 days
+- Last month
+- Last quarter
+- YTD
+- Custom range
+```
+
+#### 7.2 Detailed Reports
+```
+Report Types:
+1. ROI Analysis
+   - Input fields (labor costs)
+   - Calculation display
+   - Trend chart
+   - Export button
+
+2. Manufacturer Performance
+   - Sortable table
+   - Traffic light indicators
+   - Average lag calculation
+   - Variance percentages
+   - Filter by manufacturer
+
+3. Destruction vs Returnable
+   - Pie chart
+   - Trend over time
+   - Value breakdown
+   - Reasons analysis
+   - Recommendations panel
+
+4. Revenue Forecast
+   - 12-month projection chart
+   - Confidence intervals
+   - Assumptions panel
+   - Scenario planning sliders
+   - Export forecast
+```
+
+#### 7.3 Custom Reports
+```
+Report Builder:
+- Filter configuration panel
+- Metric selection (checkboxes)
+- Date range picker
+- Group by dropdown
+- Sort options
+- Preview button
+- Save report template
+- Schedule delivery option
+
+Export Options:
+- Format selector (Excel/CSV/PDF)
+- Email delivery
+- Download button
+```
+
+---
+
+### Phase 8: Marketplace Module (Week 6-7)
+
+#### 8.1 Marketplace Settings
+```
+Enable Marketplace:
+- Selling toggle
+- Buying toggle
+- License verification checklist
+- Admin approval status
+- Commission rate display
+- Terms acceptance
+```
+
+#### 8.2 Create Listing Flow
+```
+Form Sections:
+
+1. Product Information:
+   - NDC search/scan
+   - Auto-populated drug details
+   - Lot number
+   - Expiration date
+   - Quantity + unit
+   - Storage condition selector
+
+2. Pricing:
+   - WAC display (reference)
+   - Price per unit input
+   - Suggested price range
+   - Bulk pricing option
+   - Discount calculator
+
+3. Condition & Verification:
+   - Attestation checkboxes
+   - Photo uploads (5 max)
+   - Condition notes textarea
+   - Original packaging checkbox
+
+4. Visibility:
+   - Public/Private selector
+   - If private: whitelist client IDs
+   - Access code option
+
+5. Review & Submit:
+   - Summary preview
+   - Edit buttons
+   - Submit listing
+```
+
+#### 8.3 Marketplace Browse
+```
+Layout:
+
+Header:
+- Search bar (drug name, NDC)
+- Filter panel toggle button
+
+Filters (Left Sidebar):
+- Therapeutic class
+- Price range slider
+- Expiration date range
+- Distance from buyer
+- Seller rating
+- Storage condition
+- In stock only checkbox
+- Clear all button
+
+Results (Main Area):
+- Sort dropdown
+- Grid/List view toggle
+- Listing cards:
+  * Drug image placeholder
+  * Drug name + strength
+  * NDC
+  * Quantity available
+  * Price per unit
+  * Expiration badge
+  * Seller rating stars
+  * Location (city, state)
+  * Quick Buy button
+  * View Details link
+- Pagination
+
+Listing Detail Modal:
+- Large drug info section
+- Photo gallery
+- Seller info card
+- Condition details
+- Quantity selector
+- Add to cart button
+- Make offer button
+- Report listing link
+```
+
+#### 8.4 Shopping Cart & Checkout
+```
+Cart Page:
+- Line items table
+- Quantity adjusters
+- Remove button per item
+- Subtotal calculation
+- Estimated shipping
+- Total
+- Proceed to checkout button
+
+Checkout Flow:
+Step 1: Review Order
+- Items summary
+- Shipping address verification
+- DEA license confirmation
+
+Step 2: Submit Purchase Request
+- Order summary
+- Submit button
+- Explanation of seller confirmation
+
+Order Confirmation:
+- Order number
+- Awaiting seller approval message
+- Estimated timeline
+- Email confirmation sent
+```
+
+#### 8.5 Order Management
+```
+Seller Orders View:
+- Tabs: Pending | Confirmed | Shipped | Completed | Cancelled
+- Order table with actions
+- Confirm/Reject buttons
+- Bulk actions
+
+Order Detail (Seller):
+- Order info card
+- Buyer information
+- Line items
+- Confirm order section
+- Generate shipping label
+- Upload tracking number
+- Mark as shipped
+
+Buyer Orders View:
+- Order history table
+- Status tracking
+- Confirm receipt button
+- Report issue button
+- Rate seller button
+
+Order Detail (Buyer):
+- Order summary
+- Seller information
+- Shipment tracking integration
+- Receipt confirmation
+- Rating/review form
+```
+
+#### 8.6 Ratings & Reviews
+```
+Rating Form:
+- Star ratings (1-5) for:
+  * Overall experience
+  * Product as described
+  * Shipping speed
+  * Communication
+- Written review textarea
+- Photo upload option
+- Submit button
+
+Seller Profile:
+- Overall rating (large)
+- Total transactions
+- Response time
+- Shipping metrics
+- Review list with filters
+- Verified badges display
+```
+
+#### 8.7 Marketplace Analytics
+```
+Seller Dashboard:
+- Active listings count
+- Views per listing chart
+- Conversion rate
+- Sales revenue (month/YTD)
+- Commission paid
+- Top products table
+- Export data button
+
+Buyer Dashboard:
+- Total purchases
+- Savings vs WAC
+- Average delivery time
+- Favorite sellers list
+- Purchase history table
+- Reorder quick actions
+```
+
+---
+
+### Phase 9: Admin Portal (Week 7-8)
+
+#### 9.1 Admin Dashboard
+```
+Overview Cards:
+- Total clients
+- Active returns
+- Processing queue size
+- Marketplace GMV
+- Revenue (month/YTD)
+
+Quick Actions:
+- Approve client access
+- Process shipments
+- Review disputes
+- System settings
+
+Activity Feed:
+- Recent sign-ups
+- High-value transactions
+- Exception alerts
+- System notifications
+```
+
+#### 9.2 Client Management (Admin)
+```
+Client List:
+- Search bar
+- Filters (status, type, tier)
+- Sortable table columns
+- Bulk actions
+- Export client list
+
+Client Actions:
+- View full profile
+- Edit details
+- Suspend/Reactivate
+- Adjust pricing
+- View activity log
+- Impersonate user (audit logged)
+- Send announcement
+
+Client Detail View:
+- All profile information
+- Users table
+- Returns history
+- Payment history
+- Marketplace activity
+- Documents
+- Audit log
+- Notes section
+```
+
+#### 9.3 Processing Dashboard (Admin)
+```
+Queue Management:
+- Visual queue board (Kanban)
+- Drag-drop to assign
+- Filter by processor
+- SLA indicators
+- Batch mode
+
+Processor Metrics:
+- Items processed today
+- Average processing time
+- Error rate
+- Leaderboard
+```
+
+#### 9.4 Manufacturer Management
+```
+Manufacturer Directory:
+- Add new manufacturer button
+- Search/filter
+- Manufacturer cards
+
+Manufacturer Detail/Edit:
+- Basic information
+- Contact details
+- Return policy editor
+- Payment lag schedule builder
+- Eligible NDC prefix list
+- Portal integration status
+- Save changes
+```
+
+#### 9.5 Pricing Plans
+```
+Plans List:
+- Standard/Premium/Custom cards
+- Edit plan button
+- Create new plan
+
+Plan Editor:
+- Plan name
+- Service fee percentage
+- Advance percentage
+- Minimum fee
+- Volume tier builder
+- Active toggle
+- Save plan
+
+Client Pricing Assignment:
+- Select client
+- Choose plan template
+- Custom overrides section
+- Effective date
+- Apply button
+```
+
+#### 9.6 Dispute Resolution
+```
+Dispute Queue:
+- Status filter tabs
+- Priority sorting
+- Assigned to filter
+- Dispute cards
+
+Dispute Detail:
+- Transaction information
+- Buyer complaint (text + photos)
+- Seller response
+- Communication thread
+- Evidence uploads
+- Admin notes
+- Resolution form
+- Decision buttons
+```
+
+#### 9.7 System Configuration
+```
+Settings Categories:
+- General settings
+- Email templates
+- Notification preferences
+- Fee structures
+- Integration credentials
+- Feature toggles
+- Maintenance mode
+
+Each with appropriate forms and save buttons
+```
+
+---
+
+### Phase 10: Supporting Features (Week 8-9)
+
+#### 10.1 Document Library
+```
+Layout:
+- Folder tree (left sidebar)
+- Document grid (main area)
+- Search bar
+- Filter dropdowns
+- Bulk download checkbox
+
+Document Card:
+- File type icon
+- Document name
+- Date
+- Size
+- Download button
+- Preview button (modal)
+
+Bulk Actions:
+- Select multiple
+- Download as ZIP
+- Delete (with confirmation)
+```
+
+#### 10.2 Messaging & Support
+```
+Support Ticket Submission:
+- Category selector
+- Priority dropdown
+- Subject line
+- Description textarea
+- Attach files (images, PDFs)
+- Related return ID lookup
+- Submit ticket
+
+Ticket List:
+- Status filter tabs
+- Ticket table
+- Search tickets
+- View ticket detail
+
+Ticket Detail:
+- Ticket information card
+- Message thread
+- Reply textarea
+- Attach file button
+- Change status dropdown
+- Assign to user
+- Close ticket button
+
+In-App Messaging:
+- Conversation list
+- Thread view
+- New message button
+- Real-time updates (WebSocket)
+```
+
+#### 10.3 Notifications Center
+```
+Notification Panel:
+- Badge counter on bell icon
+- Dropdown with recent notifications
+- Mark as read
+- View all link
+
+Notifications Page:
+- Filter by type
+- Date range
+- Notification cards with:
+  * Icon by type
+  * Message
+  * Timestamp
+  * Action button (if applicable)
+  * Mark as read
+- Pagination
+
+Notification Preferences:
+- Notification type list
+- Toggle email/SMS/in-app per type
+- Digest mode options
+- Save preferences
+```
+
+#### 10.4 Knowledge Base
+```
+Homepage:
+- Search bar
+- Category cards
+- Popular articles
+- Video tutorials section
+
+Article List (by category):
+- Breadcrumb navigation
+- Article thumbnails
+- Title and excerpt
+- Read time estimate
+
+Article View:
+- Title and metadata
+- Table of contents (sticky)
+- Article content with images
+- Related articles
+- Was this helpful? feedback
+- Print/PDF download
+```
+
+#### 10.5 User Settings
+```
+Settings Sections:
+
+1. Profile:
+   - Avatar upload
+   - Name, email, phone
+   - Timezone
+   - Save changes
+
+2. Security:
+   - Change password
+   - Enable/disable MFA
+   - Trusted devices list
+   - Session management
+   - Login activity log
+
+3. Notifications:
+   - Preference toggles by category
+   - Frequency settings
+   - Quiet hours
+
+4. Preferences:
+   - Language selector
+   - Theme toggle (light/dark)
+   - Date format
+   - Currency
+```
+
+---
+
+### Phase 11: Responsive & Mobile Optimization (Week 9)
+
+#### 11.1 Mobile Navigation
+```
+Components:
+- Hamburger menu icon
+- Slide-out drawer navigation
+- Bottom tab bar (optional)
+- Touch-optimized buttons (min 44px)
+- Swipe gestures for modals
+```
+
+#### 11.2 Mobile-Specific Views
+```
+Optimize for mobile:
+- Stack cards vertically
+- Collapse filters into modal
+- Simplified tables (horizontal scroll or cards)
+- Floating action button
+- Pull-to-refresh
+- Infinite scroll for lists
+```
+
+#### 11.3 Camera Integration
+```
+Barcode Scanning:
+- Camera access request
+- Viewfinder with scan overlay
+- Auto-focus and capture
+- Manual focus tap
+- Flashlight toggle
+
+Photo Upload:
+- Camera or gallery choice
+- Image preview
+- Crop/rotate tools
+- Retake option
+```
+
+---
+
+### Phase 12: Advanced Features (Week 10)
+
+#### 12.1 Real-Time Updates
+```
+WebSocket Integration:
+- Connection status indicator
+- Live shipment tracking updates
+- New message notifications
+- Credit received alerts
+- Marketplace activity (new listings)
+- Processing queue updates
+```
+
+#### 12.2 Batch Operations
+```
+Batch Selection:
+- Select all checkbox
+- Individual checkboxes
+- Selection counter
+- Clear selection
+
+Batch Actions Toolbar:
+- Action dropdown
+- Apply button
+- Progress modal during processing
+- Results summary
+```
+
+#### 12.3 Advanced Search
+```
+Search Interface:
+- Global search bar (top nav)
+- Search scope selector
+- Autocomplete suggestions
+- Recent searches
+
+Results Page:
+- Grouped by entity type
+- Highlighting of search terms
+- Filter results panel
+- Sort options
+```
+
+---
+
+## UI Component Library
+
+### Core Components to Build
+
+#### 1. Layout Components
+- `DashboardLayout` - Main app shell
+- `AuthLayout` - Login/registration pages
+- `Sidebar` - Navigation sidebar
+- `TopBar` - Header navigation
+- `Footer` - App footer
+
+#### 2. Form Components
+- `Input` - Text input with validation
+- `Select` - Dropdown selector
+- `Textarea` - Multi-line input
+- `DatePicker` - Calendar picker
+- `FileUpload` - Drag-drop upload zone
+- `Checkbox` - Single checkbox
+- `Radio` - Radio button group
+- `Toggle` - On/off switch
+- `RangeSlider` - Value range selector
+
+#### 3. Data Display
+- `Table` - Sortable, filterable table
+- `Card` - Content card container
+- `Badge` - Status indicators
+- `Avatar` - User avatar image
+- `StatusTimeline` - Vertical timeline
+- `ProgressBar` - Progress indicator
+- `StatCard` - Metric display card
+- `Chart` - Recharts wrapper components
+
+#### 4. Navigation
+- `Tabs` - Tab navigation
+- `Breadcrumbs` - Navigation breadcrumbs
+- `Pagination` - Page navigation
+- `Menu` - Dropdown menu
+- `MobileNav` - Mobile drawer menu
+
+#### 5. Feedback
+- `Modal` - Dialog modal
+- `Alert` - Alert message
+- `Toast` - Notification toast
+- `Tooltip` - Hover tooltip
+- `LoadingSpinner` - Loading indicator
+- `EmptyState` - No data placeholder
+- `ErrorBoundary` - Error handling
+
+#### 6. Action Components
+- `Button` - Primary action button
+- `IconButton` - Icon-only button
+- `ButtonGroup` - Grouped buttons
+- `FloatingActionButton` - Mobile FAB
+- `DropdownMenu` - Action menu
+
+#### 7. Specialized
+- `BarcodeScanner` - Scanner interface
+- `SignatureCapture` - Signature pad
+- `QRCodeDisplay` - QR code generator
+- `MapView` - Location display
+- `ImageGallery` - Photo gallery
+- `RichTextEditor` - WYSIWYG editor
+
+---
+
+## File Structure
+
+```
+/app
+  /api                    # API routes (mock data for now)
+  /(auth)
+    /login
+    /register
+    /forgot-password
+  /(dashboard)
+    /dashboard
+    /returns
+    /shipments
+    /credits
+    /marketplace
+    /analytics
+    /documents
+    /settings
+    /support
+  /(admin)
+    /admin
+      /clients
+      /processing
+      /manufacturers
+      /disputes
+      /settings
+
+/components
+  /ui                     # Base UI components
+  /forms                  # Form components
+  /layout                 # Layout components
+  /charts                 # Chart components
+  /marketplace            # Marketplace-specific
+  /returns                # Returns-specific
+  /admin                  # Admin-specific
+
+/lib
+  /utils                  # Utility functions
+  /hooks                  # Custom React hooks
+  /constants              # Constants and enums
+  /validation             # Form validation schemas
+
+/types                    # TypeScript type definitions
+
+/public
+  /images
+  /icons
+  /fonts
+
+/styles                   # Global styles
+
+/data                     # Mock data for UI development
+```
+
+---
+
+## Mock Data Strategy
+
+### Create Mock Data Files
+```typescript
+// /data/mockClients.ts
+// /data/mockReturns.ts
+// /data/mockShipments.ts
+// /data/mockCredits.ts
+// /data/mockMarketplaceListings.ts
+// /data/mockTransactions.ts
+// /data/mockUsers.ts
+```
+
+### Mock API Responses
+```typescript
+// /lib/mockApi.ts
+- getClients()
+- getReturns()
+- createReturn()
+- getShipments()
+- etc.
+```
+
+---
+
+## Development Phases Summary
+
+**Week 1**: Auth, Layout, Client Management
+**Week 2-3**: Returns & Inventory Module
+**Week 3**: Shipment & Tracking
+**Week 4**: Processing & Credits
+**Week 4-5**: Payments & Financials
+**Week 5**: Analytics & Reporting
+**Week 6-7**: Marketplace Module
+**Week 7-8**: Admin Portal
+**Week 8-9**: Supporting Features
+**Week 9**: Mobile Optimization
+**Week 10**: Advanced Features & Polish
+
+---
+
+## Key Design Principles
+
+1. **Consistency**: Use shared component library
+2. **Accessibility**: WCAG 2.1 AA compliance
+3. **Performance**: Lazy loading, code splitting
+4. **Responsiveness**: Mobile-first approach
+5. **Feedback**: Loading states, success/error messages
+6. **Progressive Disclosure**: Show details on demand
+7. **Scannable**: Visual hierarchy, whitespace
+8. **Error Handling**: Friendly error messages with recovery options
+
+---
+
+## Getting Started
+
+1. Set up Next.js project with TypeScript
+2. Install TailwindCSS and configure
+3. Install UI library (shadcn/ui recommended)
+4. Create base layout components
+5. Build component library
+6. Create mock data
+7. Implement features phase by phase
+8. Test on multiple devices/browsers
+
+---
+
+## Notes for Claude
+
+When generating components:
+- Include TypeScript types
+- Add proper accessibility attributes
+- Include loading and error states
+- Make responsive (mobile-first)
+- Add inline comments for complex logic
+- Follow Next.js 14 app router conventions
+- Use server components where appropriate
+- Implement proper form validation
+- Add skeleton loaders for async content
+
+

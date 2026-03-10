@@ -1,0 +1,196 @@
+env
+
+NEXT_PUBLIC_API_URL=https://pharmacy-backend-dusky.vercel.app/api
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_51SWxavAI9jOPJ9MLSKQ5D8ClxtMdDzDP1tsojoUkhCs2h8yRiiz9Zl4SZBZ0jGgQ8meKilGE98rZCFcSDGSgkz37008P3PmrB8
+
+Project structure to analyze
+
+
+# Routes Documentation
+ 
+Complete mapping of all routes to their corresponding files in the Pharma Collect UI project.
+ 
+---
+ 
+## 📋 Table of Contents
+ 
+- [Root Route](#root-route)
+- [Authentication Routes](#authentication-routes-public)
+- [Dashboard Routes](#dashboard-routes-protected)
+- [Orders Routes](#orders-routes-protected)
+- [Returns Routes](#returns-routes-protected)
+- [Shipments Routes](#shipments-routes-protected)
+- [Marketplace Routes](#marketplace-routes-protected)
+- [Warehouse Routes](#warehouse-routes-protected)
+- [API Routes](#api-routes)
+- [Layout Files](#layout-files)
+- [Summary](#summary)
+ 
+---
+ 
+## Root Route
+ 
+| Route | File Path | Description |
+|-------|-----------|-------------|
+| `/` | `app/page.tsx` | Root route - redirects to `/login` |
+ 
+---
+ 
+## Authentication Routes (Public)
+ 
+| Route | File Path | Description |
+|-------|-----------|-------------|
+| `/login` | `app/(auth)/login/page.tsx` | User login page |
+| `/register` | `app/(auth)/register/page.tsx` | User registration page |
+| `/forgot-password` | `app/(auth)/forgot-password/page.tsx` | Password recovery page |
+| `/reset-password` | `app/(auth)/reset-password/page.tsx` | Password reset page |
+ 
+---
+ 
+## Dashboard Routes (Protected)
+ 
+| Route | File Path | Description |
+|-------|-----------|-------------|
+| `/dashboard` | `app/(dashboard)/dashboard/page.tsx` | Main dashboard page |
+| `/analytics` | `app/(dashboard)/analytics/page.tsx` | Analytics and insights page |
+| `/products` | `app/(dashboard)/products/page.tsx` | Products management page |
+| `/inventory` | `app/(dashboard)/inventory/page.tsx` | Inventory management page |
+| `/upload` | `app/(dashboard)/upload/page.tsx` | File upload page |
+| `/optimization` | `app/(dashboard)/optimization/page.tsx` | Optimization tools page |
+| `/packages` | `app/(dashboard)/packages/page.tsx` | Packages management page |
+| `/packages/suggestions` | `app/(dashboard)/packages/suggestions/page.tsx` | Package suggestions page |
+| `/top-distributors` | `app/(dashboard)/top-distributors/page.tsx` | Top distributors page |
+| `/reports` | `app/(dashboard)/reports/page.tsx` | Reports page |
+| `/documents` | `app/(dashboard)/documents/page.tsx` | Documents listing page |
+| `/documents/[id]` | `app/(dashboard)/documents/[id]/page.tsx` | Individual document detail page |
+| `/notifications` | `app/(dashboard)/notifications/page.tsx` | Notifications page |
+| `/settings` | `app/(dashboard)/settings/page.tsx` | Settings page |
+| `/subscription` | `app/(dashboard)/subscription/page.tsx` | Subscription management page |
+| `/support` | `app/(dashboard)/support/page.tsx` | Support page |
+| `/credits` | `app/(dashboard)/credits/page.tsx` | Credits management page |
+| `/payments` | `app/(dashboard)/payments/page.tsx` | Payments page |
+| `/barcode-generator` | `app/(dashboard)/barcode-generator/page.tsx` | Barcode generator tool |
+ 
+---
+ 
+## Orders Routes (Protected)
+ 
+| Route | File Path | Description |
+|-------|-----------|-------------|
+| `/orders` | `app/(dashboard)/orders/page.tsx` | Orders listing page |
+| `/orders/[id]` | `app/(dashboard)/orders/[id]/page.tsx` | Individual order detail page |
+ 
+---
+ 
+## Returns Routes (Protected)
+ 
+| Route | File Path | Description |
+|-------|-----------|-------------|
+| `/returns` | `app/(dashboard)/returns/page.tsx` | Returns listing page |
+| `/returns/create` | `app/(dashboard)/returns/create/page.tsx` | Create new return page |
+| `/returns/[id]` | `app/(dashboard)/returns/[id]/page.tsx` | Individual return detail page |
+ 
+---
+ 
+## Shipments Routes (Protected)
+ 
+| Route | File Path | Description |
+|-------|-----------|-------------|
+| `/shipments` | `app/(dashboard)/shipments/page.tsx` | Shipments listing page |
+ 
+---
+ 
+## Marketplace Routes (Protected)
+ 
+| Route | File Path | Description |
+|-------|-----------|-------------|
+| `/marketplace` | `app/(dashboard)/marketplace/page.tsx` | Marketplace main page |
+| `/marketplace/create` | `app/(dashboard)/marketplace/create/page.tsx` | Create marketplace deal page |
+| `/marketplace/checkout` | `app/(dashboard)/marketplace/checkout/page.tsx` | Marketplace checkout page |
+| `/marketplace/checkout/success` | `app/(dashboard)/marketplace/checkout/success/page.tsx` | Checkout success page |
+| `/marketplace/orders` | `app/(dashboard)/marketplace/orders/page.tsx` | Marketplace orders listing page |
+| `/marketplace/orders/[id]` | `app/(dashboard)/marketplace/orders/[id]/page.tsx` | Individual marketplace order detail page |
+ 
+---
+ 
+## Warehouse Routes (Protected)
+ 
+| Route | File Path | Description |
+|-------|-----------|-------------|
+| `/warehouse/orders` | `app/(dashboard)/warehouse/orders/page.tsx` | Warehouse orders listing page |
+| `/warehouse/orders/[id]` | `app/(dashboard)/warehouse/orders/[id]/page.tsx` | Individual warehouse order detail page |
+| `/warehouse/receiving` | `app/(dashboard)/warehouse/receiving/page.tsx` | Warehouse receiving page |
+| `/warehouse/packages/create` | `app/(dashboard)/warehouse/packages/create/page.tsx` | Create warehouse package page |
+ 
+---
+ 
+## API Routes
+ 
+| Route | File Path | Method | Description |
+|-------|-----------|--------|-------------|
+| `/api/admin/marketplace` | `app/api/admin/marketplace/route.ts` | GET | Admin marketplace API endpoint |
+| `/api/chatbot` | `app/api/chatbot/route.ts` | POST | Chatbot API endpoint |
+| `/api/credits/estimate` | `app/api/credits/estimate/route.ts` | POST | Estimate credits API endpoint |
+| `/api/inventory/search` | `app/api/inventory/search/route.ts` | GET | Inventory search API endpoint |
+| `/api/ndc/validate` | `app/api/ndc/validate/route.ts` | GET/POST | NDC validation API endpoint |
+| `/api/returns/estimate-credit` | `app/api/returns/estimate-credit/route.ts` | POST | Returns credit estimation API endpoint |
+ 
+---
+ 
+## Layout Files
+ 
+| File Path | Purpose |
+|-----------|---------|
+| `app/layout.tsx` | Root layout - applies to all routes |
+| `app/(auth)/layout.tsx` | Authentication layout (if exists) - applies to auth routes |
+| `app/(dashboard)/layout.tsx` | Dashboard layout (if exists) - applies to dashboard routes |
+ 
+---
+ 
+## Summary
+ 
+### Statistics
+ 
+- **Total Page Routes**: 40
+- **Total API Routes**: 6
+- **Authentication Routes**: 4 (public)
+- **Dashboard Routes**: 36 (protected)
+- **Dynamic Routes**: 6 (routes with `[id]` parameters)
+ 
+### Route Categories
+ 
+1. **Public Routes** (4): Login, Register, Forgot Password, Reset Password
+2. **Protected Routes** (36): All dashboard routes require authentication
+3. **Dynamic Routes** (6): Routes with dynamic `[id]` parameters
+4. **API Routes** (6): Backend API endpoints
+ 
+### Route Protection
+ 
+All dashboard routes are protected by middleware (`middleware.ts`) and require:
+- Valid authentication token (`auth_token` cookie)
+- Redirect to `/login` if not authenticated
+- Preserve intended destination for post-login redirect
+ 
+### Special Routes
+ 
+- **Root Route (`/`)**: Automatically redirects to `/login`
+- **External Redirect Routes**:
+  - `/marketplace/checkout/success` - Handles Stripe redirects
+  - `/subscription` - Handles subscription redirects
+- **Protected Routes**: All routes under `/dashboard`, `/products`, `/marketplace`, etc.
+ 
+---
+ 
+## Notes
+ 
+- All routes use Next.js 13+ App Router structure
+- Route groups `(auth)` and `(dashboard)` are used for organization but don't affect URLs
+- Dynamic routes use `[id]` syntax for parameterized routes
+- API routes are located in `app/api/` directory
+- Middleware handles authentication and route protection
+ 
+---
+ 
+*Last Updated: Generated automatically from project structure*
+ 
+ 
