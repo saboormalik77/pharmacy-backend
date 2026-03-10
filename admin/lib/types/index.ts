@@ -569,3 +569,73 @@ export interface ProcessorUpdatePayload {
     status?: 'active' | 'inactive';
     notes?: string;
 }
+
+// ── Return Transactions ────────────────────────────────────
+
+export interface ReturnTransaction {
+    id: string;
+    licensePlate: string;
+    pharmacyId: string;
+    pharmacyName: string | null;
+    processorId: string | null;
+    processorName: string | null;
+    serviceType: string;
+    status: 'in_progress' | 'paused' | 'completed' | 'finalized' | 'received' | 'closed_out';
+    fedexTracking: string | null;
+    fedexPickupConfirmation: string | null;
+    totalItems: number;
+    totalReturnableValue: number;
+    totalNonReturnableValue: number;
+    batchId: string | null;
+    timeIn: string | null;
+    timeOut: string | null;
+    receivedInWarehouseDate: string | null;
+    verifiedIntegrity: boolean;
+    notes: string | null;
+    finalizedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface ReturnTransactionsPagination {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+}
+
+export interface ReturnTransactionsListResponse {
+    status: string;
+    data: {
+        transactions: ReturnTransaction[];
+        pagination: ReturnTransactionsPagination;
+    };
+}
+
+export interface ReturnTransactionCreatePayload {
+    pharmacyId: string;
+    serviceType?: string;
+    notes?: string;
+    forceCreate?: boolean;
+}
+
+export interface ReturnTransactionUpdatePayload {
+    fedexTracking?: string;
+    fedexPickupConfirmation?: string;
+    notes?: string;
+    serviceType?: string;
+}
+
+export interface ProcessorMyStore {
+    assignmentId: string;
+    pharmacyId: string;
+    businessName: string;
+    storeNumber: string | null;
+    city: string | null;
+    state: string | null;
+    address: string | null;
+    serviceType: string | null;
+    lastVisitDate: string | null;
+    nextVisitDate: string | null;
+    assignedDate: string;
+}

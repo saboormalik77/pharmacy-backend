@@ -559,7 +559,7 @@ curl -X GET http://localhost:3000/api/processors/my-stores \
 
 ## Module 3: Return Transaction Creation
 
-### ✅ **STATUS: Backend Complete (100% RPC) — Frontend Ready to Start**
+### ✅ **STATUS: Fully Complete — Backend + Admin Frontend**
 
 | Component | Status | Files |
 |-----------|--------|-------|
@@ -570,6 +570,10 @@ curl -X GET http://localhost:3000/api/processors/my-stores \
 | **Lifecycle Endpoints** | ✅ Complete | pause / resume / complete / finalize — `change_return_transaction_status()` RPC |
 | **Auth** | ✅ Complete | Works with both processor and admin tokens |
 | **Swagger Docs** | ✅ Complete | Available at `/api-docs` under "Return Transactions" tag |
+| **Redux Slice** | ✅ Complete | `admin/lib/store/returnTransactionsSlice.ts` + registered in store |
+| **Create Return Page** | ✅ Complete | `admin/app/warehouse/returns/create/page.tsx` |
+| **Returns List Page** | ✅ Complete | `admin/app/warehouse/returns/page.tsx` |
+| **Return Detail Page** | ✅ Complete | `admin/app/warehouse/returns/[id]/page.tsx` |
 
 > **⚠️ Architecture Note**: All business logic for Module 3 lives in PostgreSQL RPC functions.
 > The TypeScript service layer (`src/services/returnTransactionService.ts`) contains **zero SQL queries** —
@@ -635,9 +639,9 @@ License plate format: `MMDDYY-23HA-XXXX`
 
 ---
 
-#### Younas (Admin Frontend) — 🔲 **READY TO START**
+#### Younas (Admin Frontend) ✅ **COMPLETED**
 
-> **Backend for Module 3 is fully done. Below is everything Younas needs to integrate.**
+> **All Module 3 frontend tasks are done.**
 
 ##### 📌 Database Migration to Run First
 
@@ -748,69 +752,84 @@ completed   → finalized               (finalize — permanent lock)
 
 ##### 📌 Frontend Tasks for Younas
 
-**Task 3.5: Update processor store selection + create return page**
+**Task 3.5: Update processor store selection + create return page** ✅ **DONE**
 
-- Location: `admin/app/warehouse/returns/create/page.tsx` (already exists with store selection)
-- What to add:
-  - After selecting a store, show a "Create Return Transaction" button
-  - On click: show confirmation dialog with store name
-  - On confirm: call `POST /api/return-transactions` with `{ pharmacyId: selectedStore.pharmacyId }`
-  - On success: show the generated license plate and redirect to the return detail page
-  - On 409 error: show message about existing active return with option to resume or force-create
-  - Use `apiClient.post('/return-transactions', { pharmacyId: ... })` from existing apiClient
+- ✅ **Location:** `admin/app/warehouse/returns/create/page.tsx`
+- ✅ **Uses Redux:** `fetchMyStores` thunk from `returnTransactionsSlice` (via `/api/processors/my-stores`)
+- ✅ **Store selection:** Cards showing store name, store number, city/state, last visit, service type
+- ✅ **Selected store highlight:** Primary border + ring + CheckCircle icon
+- ✅ **Options after selection:** Service type dropdown (In-Store / Self-Service / Express), optional notes
+- ✅ **Confirmation modal:** Shows store details + service type + notes before creating
+- ✅ **API call:** `POST /api/return-transactions` with `{ pharmacyId, serviceType, notes }`
+- ✅ **On success:** Toast with license plate, redirects to returns list
+- ✅ **On 409 error:** Shows error toast with duplicate message
+- ✅ **Access control:** Only visible to `role === 'processor'`
 
-**Task 3.6: Create return transactions list page**
+**Task 3.6: Create return transactions list page** ✅ **DONE**
 
-- Location: `admin/app/warehouse/returns/page.tsx` (already exists as placeholder)
-- Replace placeholder content with:
-  - Table columns: License Plate, Store Name, Status, Items, Value, Date, Processor
-  - Filters: Status dropdown, Date range picker, Search by license plate
-  - Click row → navigate to `/warehouse/returns/[id]`
-  - Use `apiClient.get('/return-transactions', true, { status, search, page, limit })` from existing apiClient
-  - Status badges with color coding: in_progress (blue), paused (yellow), completed (green), finalized (gray)
+- ✅ **Location:** `admin/app/warehouse/returns/page.tsx`
+- ✅ **Table columns:** License Plate (mono font), Store Name, Status (color badge), Items, Value (currency), Date, Actions
+- ✅ **Filters:** Search by license plate/store name (debounced), Status dropdown, Date From/To pickers
+- ✅ **Pagination:** Page navigation with count display
+- ✅ **Row click:** Navigates to `/warehouse/returns/[id]` detail page
+- ✅ **Stats cards:** Total Returns, In Progress, Completed, Total Value
+- ✅ **Action buttons per row:** View, Edit, Pause/Resume, Complete, Finalize, Delete (conditional on status)
+- ✅ **View modal:** Full detail display (license plate, store, processor, values, shipping, notes, timestamps)
+- ✅ **Edit modal:** FedEx tracking, pickup confirmation, notes
+- ✅ **Status action modals:** Confirmation dialogs for Pause/Resume/Complete/Finalize (finalize shows permanent warning)
+- ✅ **Delete modal:** Confirmation with warning
+- ✅ **Empty state:** Different messages for no data vs no filter results
+- ✅ **Status badge colors:** in_progress (blue), paused (yellow), completed (green), finalized (gray)
 
-**Task 3.7: Create return transaction detail page**
+**Task 3.7: Create return transaction detail page** ✅ **DONE**
 
-- Location: `admin/app/warehouse/returns/[id]/page.tsx` (new page)
-- Show full return details: license plate, pharmacy info, status, timestamps
-- Action buttons based on status:
-  - `in_progress`: Pause, Complete
-  - `paused`: Resume, Complete
-  - `completed`: Finalize
-- Update fields: FedEx tracking, notes
-- Use `apiClient.get('/return-transactions/{id}')` and `apiClient.patch('/return-transactions/{id}', data)`
+- ✅ **Location:** `admin/app/warehouse/returns/[id]/page.tsx`
+- ✅ **Layout:** Back button + license plate header with status badge
+- ✅ **4 detail cards:**
+  - General Information (license plate, service type, created/updated/finalized dates, notes)
+  - Store & Processor (pharmacy name, processor name)
+  - Items & Values (total items, returnable/non-returnable/total values)
+  - Shipping & Processing (FedEx tracking, pickup confirmation, time in/out, warehouse date, integrity)
+- ✅ **Action buttons in header:** Edit, Pause, Resume, Complete, Finalize, Delete (conditional on status)
+- ✅ **Edit modal:** FedEx tracking, pickup confirmation, notes
+- ✅ **Status action modals:** Confirmation dialogs with finalize warning
+- ✅ **Delete modal:** Confirmation then redirect to list
+- ✅ **Redux:** Uses `fetchReturnTransactionById`, clears on unmount
 
-**Task 3.8: Add Redux slice for return transactions** (optional — can also use local state)
+**Task 3.8: Add Redux slice for return transactions** ✅ **DONE**
 
-- Location: `admin/lib/store/returnTransactionsSlice.ts`
-- State: list, currentTransaction, pagination, filters, isLoading, error
-- Thunks: fetchReturnTransactions, createReturnTransaction, updateReturnTransaction, etc.
-- Register in store.ts
+- ✅ **Location:** `admin/lib/store/returnTransactionsSlice.ts`
+- ✅ **Registered in:** `admin/lib/store/store.ts` under `returnTransactions` key
+- ✅ **Types added:** `ReturnTransaction`, `ReturnTransactionsPagination`, `ReturnTransactionsListResponse`, `ReturnTransactionCreatePayload`, `ReturnTransactionUpdatePayload`, `ProcessorMyStore` in `admin/lib/types/index.ts`
+- ✅ **State:** `transactions`, `currentTransaction`, `myStores`, `pagination`, `filters`, `isLoading`, `isStoresLoading`, `isActionLoading`, `error`
+- ✅ **Thunks:**
+  - `fetchMyStores` — Load processor's assigned stores (`GET /api/processors/my-stores`)
+  - `fetchReturnTransactions` — Paginated list with filters (`GET /api/return-transactions`)
+  - `fetchReturnTransactionById` — Single detail (`GET /api/return-transactions/:id`)
+  - `createReturnTransaction` — Create new return (`POST /api/return-transactions`)
+  - `updateReturnTransaction` — Update tracking/notes (`PATCH /api/return-transactions/:id`)
+  - `pauseReturnTransaction` — Pause (`POST /api/return-transactions/:id/pause`)
+  - `resumeReturnTransaction` — Resume (`POST /api/return-transactions/:id/resume`)
+  - `completeReturnTransaction` — Complete (`POST /api/return-transactions/:id/complete`)
+  - `finalizeReturnTransaction` — Finalize (`POST /api/return-transactions/:id/finalize`)
+  - `deleteReturnTransaction` — Delete (`DELETE /api/return-transactions/:id`)
+- ✅ **Reducers:** `setFilters`, `clearError`, `clearCurrentTransaction`
 
 ### How to Implement (Guidance for Cursor AI)
 
-When working on Task 3.5 (create return page):
-```
-Prompt: "Update the page at admin/app/warehouse/returns/create/page.tsx to:
-1. Keep the existing store selection from /api/processors/my-stores
-2. After selecting a store, show a 'Create Return Transaction' button
-3. On click, show a confirmation dialog
-4. On confirm, POST to /api/return-transactions with { pharmacyId }
-5. On success, show the license plate and redirect to return detail page
-6. Handle 409 duplicate error gracefully
-Use the existing apiClient pattern from admin/lib/api/apiClient.ts"
-```
+**Frontend Status:** ✅ **ALL MODULE 3 FRONTEND TASKS COMPLETED**
+- Task 3.5 **COMPLETED**: Create Return page with store selection + confirmation modal
+- Task 3.6 **COMPLETED**: Return Transactions list with table, filters, pagination, action modals
+- Task 3.7 **COMPLETED**: Return Transaction detail page with 4 info cards + all lifecycle actions
+- Task 3.8 **COMPLETED**: Redux slice with all thunks + types + registered in store
 
-When working on Task 3.6 (returns list page):
-```
-Prompt: "Update the page at admin/app/warehouse/returns/page.tsx to:
-1. Fetch return transactions from GET /api/return-transactions with pagination
-2. Display a table with: License Plate, Store Name, Status, Total Items, Value, Created Date
-3. Add status filter dropdown and search by license plate
-4. Color-code status badges
-5. Click row to navigate to /warehouse/returns/[id]
-Use the existing apiClient and follow table patterns from admin/app/pharmacies/page.tsx"
-```
+**Files Created/Modified:**
+- `admin/lib/types/index.ts` — Added `ReturnTransaction`, `ProcessorMyStore`, payload/response types
+- `admin/lib/store/returnTransactionsSlice.ts` — Created with 10 thunks + 3 reducers
+- `admin/lib/store/store.ts` — Registered `returnTransactions` reducer
+- `admin/app/warehouse/returns/create/page.tsx` — Full create flow with Redux
+- `admin/app/warehouse/returns/page.tsx` — Full list with table, filters, modals
+- `admin/app/warehouse/returns/[id]/page.tsx` — Full detail page with lifecycle actions
 
 ---
 
