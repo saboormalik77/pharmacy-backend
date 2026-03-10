@@ -513,3 +513,58 @@ export interface AdminUpdatePayload {
 export interface AdminPasswordUpdatePayload {
     newPassword: string;
 }
+
+// ── Processors ──────────────────────────────────────────────
+
+export interface Processor {
+    id: string;
+    name: string;
+    email: string | null;
+    phone: string | null;
+    status: 'active' | 'inactive';
+    notes: string | null;
+    assignedStoresCount: number;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface AssignedStore {
+    assignmentId: string;
+    pharmacyId: string;
+    businessName: string;
+    storeNumber: string | null;
+    city: string | null;
+    state: string | null;
+    serviceType: string | null;
+    assignedDate: string;
+}
+
+export interface ProcessorsPagination {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+}
+
+export interface ProcessorsResponse {
+    status: string;
+    data: {
+        processors: Processor[];
+        pagination: ProcessorsPagination;
+    };
+}
+
+export interface ProcessorCreatePayload {
+    name: string;
+    email?: string;
+    phone?: string;
+    notes?: string;
+}
+
+export interface ProcessorUpdatePayload {
+    name?: string;
+    email?: string;
+    phone?: string;
+    status?: 'active' | 'inactive';
+    notes?: string;
+}

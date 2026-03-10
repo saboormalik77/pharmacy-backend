@@ -10,6 +10,7 @@ import adminsReducer from './adminsSlice';
 import settingsReducer from './settingsSlice';
 import marketplaceReducer from './marketplaceSlice';
 import recentActivityReducer from './recentActivitySlice';
+import processorsReducer from './processorsSlice';
 
 export const makeStore = () => {
   return configureStore({
@@ -25,6 +26,7 @@ export const makeStore = () => {
       settings: settingsReducer,
       marketplace: marketplaceReducer,
       recentActivity: recentActivityReducer,
+      processors: processorsReducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({

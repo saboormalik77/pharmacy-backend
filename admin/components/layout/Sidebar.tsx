@@ -13,6 +13,7 @@ import {
     BarChart3,
     Settings,
     Users,
+    UserCog,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -27,6 +28,7 @@ const sidebarLinks = [
     { href: '/analytics', icon: BarChart3, label: 'Analytics' },
     { href: '/settings', icon: Settings, label: 'Settings' },
     { href: '/admins', icon: Users, label: 'Admins' },
+    { href: '/processors', icon: UserCog, label: 'Processors' },
 ];
 
 interface SidebarProps {
