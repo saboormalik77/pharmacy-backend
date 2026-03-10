@@ -183,13 +183,15 @@ export const assignStoresHandler = catchAsync(
 // ============================================================
 export const getMyStoresHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
+    console.log('🏪 Getting stores for processor:', req.processorId);
+    
     const processorId = req.processorId;
 
     if (!processorId) {
       throw new AppError('Processor ID not found on request. Are you authenticated as a processor?', 401);
     }
 
-    const stores = await processorsService.getMyStores(processorId);
+    const stores = await processorsService.getProcessorStores(processorId);
 
     res.status(200).json({
       status: 'success',
@@ -217,3 +219,4 @@ export const unassignStoreHandler = catchAsync(
     });
   }
 );
+

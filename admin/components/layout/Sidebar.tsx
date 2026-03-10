@@ -14,21 +14,34 @@ import {
     Settings,
     Users,
     UserCog,
+    ClipboardList,
+    Scan,
+    Archive,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAppSelector } from '@/lib/store/hooks';
 
-const sidebarLinks = [
+// Admin navigation (for super_admin, manager, reviewer, support)
+const adminSidebarLinks = [
     { href: '/', icon: LayoutDashboard, label: 'Dashboard' },
     { href: '/pharmacies', icon: Building2, label: 'Pharmacies' },
     { href: '/distributors', icon: Warehouse, label: 'Distributors' },
     { href: '/marketplace', icon: ShoppingCart, label: 'Marketplace' },
-    // { href: '/shipments', icon: Package, label: 'Shipments' },
     { href: '/documents', icon: FileText, label: 'Documents' },
     { href: '/payments', icon: CreditCard, label: 'Payments' },
     { href: '/analytics', icon: BarChart3, label: 'Analytics' },
     { href: '/settings', icon: Settings, label: 'Settings' },
     { href: '/admins', icon: Users, label: 'Admins' },
     { href: '/processors', icon: UserCog, label: 'Processors' },
+];
+
+// Processor navigation (for role = 'processor')
+const processorSidebarLinks = [
+    { href: '/', icon: LayoutDashboard, label: 'Dashboard' },
+    { href: '/warehouse/returns', icon: ClipboardList, label: 'Returns' },
+    { href: '/warehouse/returns/create', icon: Scan, label: 'Create Return' },
+    { href: '/warehouse/wine-cellar', icon: Archive, label: 'Wine Cellar' },
+    { href: '/settings', icon: Settings, label: 'Settings' },
 ];
 
 interface SidebarProps {
@@ -39,6 +52,10 @@ interface SidebarProps {
 
 export function Sidebar({ isCollapsed, isOpen = false, onClose }: SidebarProps) {
     const pathname = usePathname();
+    const { user } = useAppSelector((state) => state.auth);
+
+    // Choose navigation links based on user role
+    const sidebarLinks = user?.role === 'processor' ? processorSidebarLinks : adminSidebarLinks;
 
     const handleLinkClick = () => {
         // Close sidebar on mobile when a link is clicked

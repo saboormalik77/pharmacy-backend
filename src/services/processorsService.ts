@@ -349,10 +349,26 @@ export const getProcessorStores = async (processorId: string): Promise<AssignedS
   if (!data || data.length === 0) return [];
 
   const pharmacyIds = data.map((a: any) => a.pharmacy_id);
-  const { data: pharmacies } = await sb
+  
+  // Fetch pharmacy data using the correct column names from the actual schema
+  const { data: pharmacies, error: pharmacyError } = await sb
     .from('pharmacy')
-    .select('id, business_name, store_number, city, state, service_type')
+    .select(`
+      id,
+      pharmacy_name,
+      email,
+      phone,
+      physical_address,
+      store_number,
+      service_type,
+      last_visit_date,
+      next_visit_date
+    `)
     .in('id', pharmacyIds);
+
+  if (pharmacyError) {
+    console.error('Error fetching pharmacy data:', pharmacyError.message);
+  }
 
   const pharmacyMap: Record<string, any> = {};
   if (pharmacies) {
@@ -363,14 +379,40 @@ export const getProcessorStores = async (processorId: string): Promise<AssignedS
 
   return data.map((a: any) => {
     const pharm = pharmacyMap[a.pharmacy_id] || {};
+    
+    // Use pharmacy_name as business name, fallback to email or create identifier
+    const businessName = pharm.pharmacy_name || pharm.email || `Pharmacy ${a.pharmacy_id.slice(0, 8)}`;
+    
+    // Extract city and state from physical_address if it exists
+    let city = null;
+    let state = null;
+    let address = null;
+    
+    if (pharm.physical_address) {
+      try {
+        const addressObj = typeof pharm.physical_address === 'string' 
+          ? JSON.parse(pharm.physical_address) 
+          : pharm.physical_address;
+        city = addressObj?.city || null;
+        state = addressObj?.state || null;
+        address = addressObj?.street || null;
+      } catch (e) {
+        // If physical_address is not JSON, treat it as a string address
+        address = pharm.physical_address;
+      }
+    }
+    
     return {
       assignmentId: a.id,
       pharmacyId: a.pharmacy_id,
-      businessName: pharm.business_name || 'Unknown',
+      businessName,
       storeNumber: pharm.store_number || null,
-      city: pharm.city || null,
-      state: pharm.state || null,
-      serviceType: pharm.service_type || null,
+      city,
+      state,
+      address,
+      serviceType: pharm.service_type || 'full_service',
+      lastVisitDate: pharm.last_visit_date || null,
+      nextVisitDate: pharm.next_visit_date || null,
       assignedDate: a.assigned_date,
     };
   });

@@ -1,6 +1,6 @@
 'use client';
 
-import { Building2, Truck, FileText, DollarSign, Warehouse } from 'lucide-react';
+import { Building2, Truck, FileText, DollarSign, Warehouse, ClipboardList, Scan, Archive } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { StatCard } from '@/components/ui/StatCard';
@@ -10,11 +10,79 @@ import { fetchDashboard } from '@/lib/store/dashboardSlice';
 import { fetchRecentActivity, Activity } from '@/lib/store/recentActivitySlice';
 import { formatRelativeTime } from '@/lib/utils';
 
+// Processor Dashboard Component
+function ProcessorDashboard() {
+  const router = useRouter();
+  const { user } = useAppSelector((state) => state.auth);
+
+  return (
+    <div className="space-y-4 sm:space-y-6">
+      {/* Page Header */}
+      <div>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Processor Dashboard</h1>
+        <p className="text-sm sm:text-base text-gray-600 mt-1">Welcome back, {user?.name}</p>
+      </div>
+
+      {/* Quick Actions for Processors */}
+      <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+        <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          <button
+            onClick={() => router.push('/warehouse/returns/create')}
+            className="p-4 sm:p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition-colors"
+          >
+            <Scan className="w-6 h-6 sm:w-8 sm:h-8 text-gray-600 mx-auto mb-2" />
+            <p className="text-sm sm:text-base font-medium text-gray-900 text-center">Create New Return</p>
+            <p className="text-xs text-gray-500 text-center mt-1">Start a new return transaction</p>
+          </button>
+          <button
+            onClick={() => router.push('/warehouse/returns')}
+            className="p-4 sm:p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition-colors"
+          >
+            <ClipboardList className="w-6 h-6 sm:w-8 sm:h-8 text-gray-600 mx-auto mb-2" />
+            <p className="text-sm sm:text-base font-medium text-gray-900 text-center">View Returns</p>
+            <p className="text-xs text-gray-500 text-center mt-1">See all return transactions</p>
+          </button>
+          <button
+            onClick={() => router.push('/warehouse/wine-cellar')}
+            className="p-4 sm:p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition-colors"
+          >
+            <Archive className="w-6 h-6 sm:w-8 sm:h-8 text-gray-600 mx-auto mb-2" />
+            <p className="text-sm sm:text-base font-medium text-gray-900 text-center">Wine Cellar</p>
+            <p className="text-xs text-gray-500 text-center mt-1">View stored items</p>
+          </button>
+        </div>
+      </div>
+
+      {/* My Stores */}
+      <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+        <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">My Assigned Stores</h2>
+        <div className="text-center py-8">
+          <Building2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-sm text-gray-500 mb-4">Your assigned stores will appear here</p>
+          <button
+            onClick={() => router.push('/warehouse/returns/create')}
+            className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors"
+          >
+            View Stores
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { data, isLoading } = useAppSelector((state) => state.dashboard);
   const { recentActivity, isLoadingRecentActivity } = useAppSelector((state) => state.recentActivity);
+  const { user } = useAppSelector((state) => state.auth);
+
+  // Show processor dashboard for processor role
+  if (user?.role === 'processor') {
+    return <ProcessorDashboard />;
+  }
 
   useEffect(() => {
     // Fetch dashboard data on mount

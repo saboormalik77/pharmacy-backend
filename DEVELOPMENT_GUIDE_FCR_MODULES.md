@@ -129,15 +129,18 @@ PHARMACY FRONTEND (Frontend/)
 
 ## Module 1: Store Setup & Master Data
 
-### ✅ **STATUS: Fully Complete — Backend + Frontend + Admin**
+### ✅ **STATUS: Fully Complete — Backend + Frontend + Admin + Processor UI**
 
 | Component | Status | Files |
 |-----------|--------|-------|
-| **Database Schema** | ✅ Complete | `scripts/fcr_01_*.sql` (3 files) |
+| **Database Schema** | ✅ Complete | `scripts/fcr_01_*.sql` (3 files) + `fcr_05_add_admin_user_id_to_processors.sql` |
 | **Pharmacy Store Settings API** | ✅ Complete | GET/PATCH `/api/admin/pharmacies/:id/store-settings` |
 | **Pharmacy Settings (self-service)** | ✅ Complete | GET/PATCH `/api/settings/store-settings` |
-| **Processors Management API** | ✅ Complete | Full CRUD at `/api/admin/processors/*` |
+| **Processors Management API** | ✅ Complete | Full CRUD at `/api/admin/processors/*` + login creation |
+| **Processor My-Stores API** | ✅ Complete | GET `/api/processors/my-stores` |
 | **Pharmacy Frontend** | ✅ Complete | Store Settings tab + DEA warning in `Frontend/` |
+| **Admin Processors UI** | ✅ Complete | Admin can create/manage processors in `admin/` |
+| **Processor Role-Based UI** | ✅ Complete | Processor dashboard + store selection in `admin/` |
 | **Admin Processors Page** | ✅ Complete | Full CRUD UI at `admin/app/processors/page.tsx` |
 
 ### What Client Document Says (Section 1)
@@ -430,7 +433,148 @@ Paths:
 
 ---
 
+## 🧪 Testing Modules 1 & 2
+
+### Prerequisites
+1. **Database Setup**: Run all SQL migration files in `scripts/` folder:
+   ```bash
+   # Run these in order on your Supabase database
+   psql -f scripts/fcr_01_extend_pharmacy_table.sql
+   psql -f scripts/fcr_02_create_processors_table.sql
+   psql -f scripts/fcr_03_create_processor_store_assignments.sql
+   psql -f scripts/fcr_04_extend_admin_roles.sql
+   psql -f scripts/fcr_05_add_admin_user_id_to_processors.sql
+   ```
+
+2. **Backend Running**: Ensure `src/server.ts` is running on port 3000
+3. **Admin Panel Running**: Ensure `admin/` Next.js app is running
+
+### Test Case 1: Admin Creates Processor (Module 1)
+
+**Step 1:** Login to Admin Panel as super_admin
+- URL: `http://localhost:3001/login`
+- Use your existing admin credentials
+
+**Step 2:** Create a Processor
+- Navigate to: **Processors** (in sidebar)
+- Click: **Add Processor**
+- Fill form:
+  - Name: `Test Processor`
+  - Email: `younas@gmail.com`
+  - Password: `password`
+  - Phone: `555-0123`
+- Submit form
+- ✅ **Expected**: Processor created successfully
+
+**Step 3:** Assign Processor to Store
+- In processor details, click **Assign Stores**
+- Select one or more pharmacies
+- ✅ **Expected**: Store assignments saved
+
+### Test Case 2: Processor Login & Role-Based UI (Module 2)
+
+**Step 1:** Logout from Admin Panel
+- Click logout in top-right corner
+
+**Step 2:** Login as Processor
+- URL: `http://localhost:3001/login`
+- Email: `younas@gmail.com`
+- Password: `password`
+- ✅ **Expected**: Login successful
+
+**Step 3:** Verify Processor Dashboard
+- ✅ **Expected**: See "Processor Dashboard" (not admin dashboard)
+- ✅ **Expected**: Sidebar shows: Dashboard, Returns, Create Return, Wine Cellar, Settings
+- ✅ **Expected**: No access to admin features (Pharmacies, Distributors, etc.)
+
+**Step 4:** Test Store Access
+- Click: **Create Return** (in sidebar)
+- ✅ **Expected**: See list of assigned stores only
+- ✅ **Expected**: Can select a store
+- ✅ **Expected**: "Create Return Transaction" button appears
+
+### Test Case 3: Backend API Verification
+
+**Test Processor My-Stores API:**
+```bash
+# 1. Login as processor to get token
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"younas@gmail.com","password":"password"}'
+
+# 2. Use the returned token to call my-stores
+curl -X GET http://localhost:3000/api/processors/my-stores \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE"
+```
+
+✅ **Expected Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "stores": [
+      {
+        "assignmentId": "uuid",
+        "pharmacyId": "uuid", 
+        "businessName": "Store Name",
+        "storeNumber": "1234",
+        "city": "City",
+        "state": "State"
+      }
+    ]
+  }
+}
+```
+
+### Test Case 4: Access Control Verification
+
+**Test 1:** Non-processor admin tries to access my-stores
+```bash
+# Login as super_admin, then call processor endpoint
+curl -X GET http://localhost:3000/api/processors/my-stores \
+  -H "Authorization: Bearer ADMIN_TOKEN"
+```
+✅ **Expected**: `403 Forbidden` (Only processors can access this endpoint)
+
+**Test 2:** Processor tries to access admin endpoints
+- Login as processor in admin panel
+- Try to navigate to `/pharmacies` or `/processors`
+- ✅ **Expected**: Should not see these menu items in sidebar
+
+### Troubleshooting
+
+**Issue**: Processor login fails
+- **Check**: Processor was created with email/password (not just name/phone)
+- **Check**: `admin` table has user with `role='processor'` and matching email
+
+**Issue**: Processor sees admin UI instead of processor UI
+- **Check**: User object in Redux store has `role: 'processor'`
+- **Check**: `authSlice.ts` is properly setting user.role from login response
+
+**Issue**: My-stores API returns empty array
+- **Check**: Processor is assigned to stores in `processor_store_assignments` table
+- **Check**: Processor's `admin_user_id` links correctly to `admin` table
+
+---
+
 ## Module 3: Return Transaction Creation
+
+### ✅ **STATUS: Backend Complete (100% RPC) — Frontend Ready to Start**
+
+| Component | Status | Files |
+|-----------|--------|-------|
+| **Database Schema + RPC Functions** | ✅ Complete | `scripts/fcr_06_create_return_transactions.sql` (table + 6 RPC functions) |
+| **License Plate Generator** | ✅ Complete | `create_return_transaction()` RPC — generates inside PostgreSQL |
+| **Return Transaction CRUD** | ✅ Complete | Full REST API at `/api/return-transactions/*` — all powered by Supabase RPC |
+| **Duplicate Prevention** | ✅ Complete | 409 if pharmacy has active return; `forceCreate` override — handled in RPC |
+| **Lifecycle Endpoints** | ✅ Complete | pause / resume / complete / finalize — `change_return_transaction_status()` RPC |
+| **Auth** | ✅ Complete | Works with both processor and admin tokens |
+| **Swagger Docs** | ✅ Complete | Available at `/api-docs` under "Return Transactions" tag |
+
+> **⚠️ Architecture Note**: All business logic for Module 3 lives in PostgreSQL RPC functions.
+> The TypeScript service layer (`src/services/returnTransactionService.ts`) contains **zero SQL queries** —
+> it only calls `supabaseAdmin.rpc('function_name', { params })` and handles errors.
+> This is the same pattern used in `adminPharmaciesService.ts`.
 
 ### What Client Document Says (Section 3)
 
@@ -451,92 +595,192 @@ License plate format: `MMDDYY-23HA-XXXX`
 
 ### Developer Tasks
 
-#### Saboor (Backend)
+#### Saboor (Backend) ✅ **COMPLETED**
 
-**Task 3.1: Create return_transactions table**
+**Task 3.1: Create return_transactions table + RPC functions** ✅ DONE
+- ✅ File: `scripts/fcr_06_create_return_transactions.sql`
+- ✅ Table with all columns from spec (license_plate, pharmacy_id, processor_id, service_type, status, fedex tracking, totals, batch_id, timestamps, notes)
+- ✅ Indexes on pharmacy_id, processor_id, status, license_plate, created_at, batch_id
+- ✅ Auto-update trigger on updated_at
+- ✅ RLS enabled with service role policy
+- ✅ **6 PostgreSQL RPC functions created** (ALL business logic in SQL, zero in JS):
+  1. `_rt_to_json(r)` — helper: builds camelCase JSON from a row, joins pharmacy_name + processor name
+  2. `create_return_transaction(p_pharmacy_id, p_processor_id, p_service_type, p_notes, p_force_create)` — generates license plate, checks duplicates, inserts
+  3. `list_return_transactions(p_pharmacy_id, p_processor_id, p_status, p_date_from, p_date_to, p_search, p_page, p_limit)` — paginated listing with filters
+  4. `get_return_transaction_by_id(p_id)` — single row lookup
+  5. `update_return_transaction(p_id, p_fedex_tracking, p_fedex_pickup_confirmation, p_notes, p_service_type)` — field updates (blocks finalized)
+  6. `change_return_transaction_status(p_id, p_new_status)` — enforces valid transitions: pause/resume/complete/finalize
+  7. `delete_return_transaction(p_id)` — blocks deletion of finalized/received/closed returns
 
-- Location: SQL migration
-- Table: `return_transactions`
-  - `id` (UUID, PK)
-  - `license_plate` (VARCHAR 20, UNIQUE) — e.g., "030526-23HA-5544"
-  - `pharmacy_id` (UUID, FK)
-  - `processor_id` (UUID, FK, nullable for self-service)
-  - `service_type` (ENUM: 'in_store', 'self_service', 'express')
-  - `status` (ENUM: 'in_progress', 'paused', 'completed', 'finalized', 'received', 'closed_out')
-  - `fedex_tracking` (TEXT)
-  - `fedex_pickup_confirmation` (TEXT)
-  - `total_items` (INTEGER, default 0)
-  - `total_returnable_value` (DECIMAL)
-  - `total_non_returnable_value` (DECIMAL)
-  - `batch_id` (UUID, FK, nullable)
-  - `time_in` (TIMESTAMP) — when processing started
-  - `time_out` (TIMESTAMP) — when processing completed
-  - `received_in_warehouse_date` (TIMESTAMP)
-  - `verified_integrity` (BOOLEAN)
-  - `notes` (TEXT)
-  - `finalized_at` (TIMESTAMP)
-  - `created_at`, `updated_at`
+**Task 3.2: License plate generation** ✅ DONE (inside `create_return_transaction` RPC)
+- ✅ Reads store_number from pharmacy table inside PostgreSQL
+- ✅ Falls back to first 4 chars of pharmacy_id if no store_number
+- ✅ Format: `MMDDYY-23HA-XXXX`
+- ✅ Collision handling: appends `-A`, `-B`, etc.
 
-**Task 3.2: Create license plate generator service**
+**Task 3.3: Create return transaction API** ✅ DONE
+- ✅ Files:
+  - `src/services/returnTransactionService.ts` — **thin RPC callers only** (no `.from()`, no `.select()`, no JS queries)
+  - `src/controllers/returnTransactionController.ts` — request parsing + auth checks
+  - `src/routes/returnTransactionRoutes.ts` — routes + Swagger docs
+- ✅ Route registered in `src/server.ts` at `/api/return-transactions`
+- ✅ All 9 endpoints implemented (see API reference below)
+- ✅ Auth: Shared `authenticateAny` middleware accepts both processor and admin JWT tokens
+- ✅ Processor-scoped: processors see only their own returns; store access enforced in controller
 
-- Location: `src/services/returnTransactionService.ts`
-- Function: `generateLicensePlate(pharmacyId)`
-  - Get store_number from pharmacy
-  - Format: `MMDDYY-23HA-XXXX`
-  - Check uniqueness (if collision, add suffix like -A, -B)
-  - Return the license plate string
+**Task 3.4: Duplicate prevention** ✅ DONE (inside `create_return_transaction` RPC)
+- ✅ RPC checks for existing `in_progress` or `paused` return for same pharmacy
+- ✅ If found → returns `{ error: true, code: 409, message: "...", existingId, existingLicensePlate }`
+- ✅ Override: pass `p_force_create = true` to bypass
 
-**Task 3.3: Create return transaction API**
+---
 
-- Location: Create new files:
-  - `src/services/returnTransactionService.ts`
-  - `src/controllers/returnTransactionController.ts`
-  - `src/routes/returnTransactionRoutes.ts`
-- Endpoints:
-  - `POST /api/return-transactions` — Create new return
-    - Input: `pharmacy_id` (processor selects from dropdown)
-    - Generate license plate
-    - Set status = 'in_progress'
-    - Return the transaction with license plate
-  - `GET /api/return-transactions` — List returns (filtered by pharmacy, status, date)
-  - `GET /api/return-transactions/:id` — Get single return with items
-  - `PATCH /api/return-transactions/:id` — Update (add tracking, notes, etc.)
-  - `POST /api/return-transactions/:id/pause` — Pause return (save WIP)
-  - `POST /api/return-transactions/:id/complete` — Mark as completed
-  - `POST /api/return-transactions/:id/finalize` — Lock return permanently
-  - `DELETE /api/return-transactions/:id` — Delete (only if not finalized)
-- Auth: Use `authenticateProcessor` OR `authenticateAdmin` with role check
+#### Younas (Admin Frontend) — 🔲 **READY TO START**
 
-**Task 3.4: Add duplicate prevention**
+> **Backend for Module 3 is fully done. Below is everything Younas needs to integrate.**
 
-- In create endpoint:
-  - Check if pharmacy has an 'in_progress' return already
-  - If yes, return error with existing return ID
-  - Option to force create second return (rare case)
+##### 📌 Database Migration to Run First
 
-#### Younas (Admin Frontend)
+Run this script in Supabase SQL Editor before testing. It creates both the table AND the RPC functions:
+```
+scripts/fcr_06_create_return_transactions.sql
+```
+This single file includes: table creation, indexes, trigger, RLS policy, and **6 RPC functions**
+(`create_return_transaction`, `list_return_transactions`, `get_return_transaction_by_id`,
+`update_return_transaction`, `change_return_transaction_status`, `delete_return_transaction`).
 
-**Task 3.5: Create processor store selection page**
+##### 📌 API Endpoints Available
 
-- Location: `admin/app/warehouse/returns/create/page.tsx`
-- UI:
-  - Dropdown: "Select Store" (populated from `/api/processors/my-stores`)
-  - Show store details when selected (name, address, last visit)
-  - Button: "Create Return Transaction"
-  - Confirmation dialog: "You are about to create Return Transaction ID: [LICENSE_PLATE]. Once you do this you can begin adding products. OK to proceed?"
-  - On confirm: Call `POST /api/return-transactions`
-  - On success: Redirect to adding products mode
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| `POST` | `/api/return-transactions` | Create new return | Processor or Admin |
+| `GET` | `/api/return-transactions` | List returns (paginated, filterable) | Processor or Admin |
+| `GET` | `/api/return-transactions/:id` | Get single return | Processor or Admin |
+| `PATCH` | `/api/return-transactions/:id` | Update tracking/notes/serviceType | Processor or Admin |
+| `POST` | `/api/return-transactions/:id/pause` | Pause an in-progress return | Processor or Admin |
+| `POST` | `/api/return-transactions/:id/resume` | Resume a paused return | Processor or Admin |
+| `POST` | `/api/return-transactions/:id/complete` | Mark return as completed | Processor or Admin |
+| `POST` | `/api/return-transactions/:id/finalize` | Lock return permanently | Processor or Admin |
+| `DELETE` | `/api/return-transactions/:id` | Delete (only non-finalized) | Processor or Admin |
+
+##### 📌 Create Return — Request & Response
+
+**Request:**
+```json
+POST /api/return-transactions
+Authorization: Bearer <token>
+
+{
+  "pharmacyId": "uuid-of-pharmacy",
+  "serviceType": "in_store",         // optional, default "in_store"
+  "notes": "First visit notes",      // optional
+  "forceCreate": false                // optional, set true to bypass duplicate check
+}
+```
+
+**Success Response (201):**
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "uuid",
+    "licensePlate": "031026-23HA-5544",
+    "pharmacyId": "uuid",
+    "pharmacyName": "CVS Pharmacy",
+    "processorId": "uuid",
+    "processorName": "younas",
+    "serviceType": "in_store",
+    "status": "in_progress",
+    "fedexTracking": null,
+    "totalItems": 0,
+    "totalReturnableValue": 0,
+    "totalNonReturnableValue": 0,
+    "timeIn": "2026-03-10T...",
+    "timeOut": null,
+    "notes": null,
+    "finalizedAt": null,
+    "createdAt": "...",
+    "updatedAt": "..."
+  }
+}
+```
+
+**Duplicate Error (409):**
+```json
+{
+  "status": "fail",
+  "message": "This pharmacy already has an active return (031026-23HA-5544, status: in_progress). Use forceCreate=true to create an additional return, or resume the existing one."
+}
+```
+
+##### 📌 List Returns — Query Parameters
+
+```
+GET /api/return-transactions?pharmacyId=uuid&status=in_progress&search=031026&dateFrom=2026-03-01&dateTo=2026-03-31&page=1&limit=20
+```
+
+All query params are optional. Processors automatically see only their own returns.
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "transactions": [ ...array of return objects... ],
+    "pagination": {
+      "page": 1,
+      "limit": 20,
+      "total": 5,
+      "totalPages": 1
+    }
+  }
+}
+```
+
+##### 📌 Return Lifecycle Status Flow
+
+```
+in_progress → paused → in_progress    (pause / resume)
+in_progress → completed               (complete)
+paused      → completed               (complete)
+completed   → finalized               (finalize — permanent lock)
+```
+
+##### 📌 Frontend Tasks for Younas
+
+**Task 3.5: Update processor store selection + create return page**
+
+- Location: `admin/app/warehouse/returns/create/page.tsx` (already exists with store selection)
+- What to add:
+  - After selecting a store, show a "Create Return Transaction" button
+  - On click: show confirmation dialog with store name
+  - On confirm: call `POST /api/return-transactions` with `{ pharmacyId: selectedStore.pharmacyId }`
+  - On success: show the generated license plate and redirect to the return detail page
+  - On 409 error: show message about existing active return with option to resume or force-create
+  - Use `apiClient.post('/return-transactions', { pharmacyId: ... })` from existing apiClient
 
 **Task 3.6: Create return transactions list page**
 
-- Location: `admin/app/warehouse/returns/page.tsx`
-- UI:
-  - Table: License Plate, Store Name, Status, Items, Value, Date, Processor
-  - Filters: Status, Date range, Store
-  - Search by license plate
-  - Click row → go to detail page
+- Location: `admin/app/warehouse/returns/page.tsx` (already exists as placeholder)
+- Replace placeholder content with:
+  - Table columns: License Plate, Store Name, Status, Items, Value, Date, Processor
+  - Filters: Status dropdown, Date range picker, Search by license plate
+  - Click row → navigate to `/warehouse/returns/[id]`
+  - Use `apiClient.get('/return-transactions', true, { status, search, page, limit })` from existing apiClient
+  - Status badges with color coding: in_progress (blue), paused (yellow), completed (green), finalized (gray)
 
-**Task 3.7: Add Redux slice for return transactions**
+**Task 3.7: Create return transaction detail page**
+
+- Location: `admin/app/warehouse/returns/[id]/page.tsx` (new page)
+- Show full return details: license plate, pharmacy info, status, timestamps
+- Action buttons based on status:
+  - `in_progress`: Pause, Complete
+  - `paused`: Resume, Complete
+  - `completed`: Finalize
+- Update fields: FedEx tracking, notes
+- Use `apiClient.get('/return-transactions/{id}')` and `apiClient.patch('/return-transactions/{id}', data)`
+
+**Task 3.8: Add Redux slice for return transactions** (optional — can also use local state)
 
 - Location: `admin/lib/store/returnTransactionsSlice.ts`
 - State: list, currentTransaction, pagination, filters, isLoading, error
@@ -545,27 +789,27 @@ License plate format: `MMDDYY-23HA-XXXX`
 
 ### How to Implement (Guidance for Cursor AI)
 
-When working on Task 3.2 (license plate generator):
+When working on Task 3.5 (create return page):
 ```
-Prompt: "Create a function generateLicensePlate(pharmacyId) that:
-1. Fetches the pharmacy's store_number
-2. Gets current date formatted as MMDDYY
-3. Combines as: MMDDYY-23HA-XXXX where XXXX is the store_number
-4. Checks return_transactions table for uniqueness
-5. If collision exists, append -A, -B, etc.
-6. Returns the unique license plate string"
+Prompt: "Update the page at admin/app/warehouse/returns/create/page.tsx to:
+1. Keep the existing store selection from /api/processors/my-stores
+2. After selecting a store, show a 'Create Return Transaction' button
+3. On click, show a confirmation dialog
+4. On confirm, POST to /api/return-transactions with { pharmacyId }
+5. On success, show the license plate and redirect to return detail page
+6. Handle 409 duplicate error gracefully
+Use the existing apiClient pattern from admin/lib/api/apiClient.ts"
 ```
 
-When working on Task 3.5 (store selection UI):
+When working on Task 3.6 (returns list page):
 ```
-Prompt: "Create a page at admin/app/warehouse/returns/create/page.tsx that:
-1. Fetches processor's assigned stores from API
-2. Shows a dropdown to select a store
-3. Displays store details when selected
-4. Has a 'Create Return Transaction' button
-5. Shows confirmation dialog with the license plate
-6. On confirm, calls the create API and redirects to the adding products page
-Follow the existing page patterns in the admin app."
+Prompt: "Update the page at admin/app/warehouse/returns/page.tsx to:
+1. Fetch return transactions from GET /api/return-transactions with pagination
+2. Display a table with: License Plate, Store Name, Status, Total Items, Value, Created Date
+3. Add status filter dropdown and search by license plate
+4. Color-code status badges
+5. Click row to navigate to /warehouse/returns/[id]
+Use the existing apiClient and follow table patterns from admin/app/pharmacies/page.tsx"
 ```
 
 ---
