@@ -129,14 +129,17 @@ PHARMACY FRONTEND (Frontend/)
 
 ## Module 1: Store Setup & Master Data
 
-### ✅ **STATUS: Backend Complete, Frontend Complete**
+### 🚀 **STATUS: Backend Complete, Frontend Partially Complete**
 
 | Component | Status | Files |
 |-----------|--------|-------|
 | **Database Schema** | ✅ Complete | `scripts/fcr_01_*.sql` (3 files) |
 | **Pharmacy Store Settings API** | ✅ Complete | GET/PATCH `/api/admin/pharmacies/:id/store-settings` |
 | **Processors Management API** | ✅ Complete | Full CRUD at `/api/admin/processors/*` |
-| **Frontend Integration** | ✅ Complete | `Frontend/app/(dashboard)/settings/page.tsx` + `Frontend/lib/api/services/fcrStoreSettingsService.ts` |
+| **Pharmacy Frontend** | ✅ Complete | Store Settings + DEA warning in `Frontend/` |
+| **Admin Frontend** | 🟡 **MISSING** | **Need:** Processors management page in `admin/` |
+
+**Next Step for Younas:** Create `admin/app/processors/page.tsx` using the Processors API.
 
 ### What Client Document Says (Section 1)
 
@@ -224,9 +227,32 @@ Required fields:
   - `POST /api/admin/processors/:id/assign-stores` — Assign stores to processor
   - `DELETE /api/admin/processors/:id/stores/:pharmacyId` — Unassign store
 
-#### Younas (Frontend) ✅ **COMPLETED**
+#### Younas (Frontend)
 
-**Task 1.6: Extend pharmacy settings page** ✅ **DONE**
+**Task 1.6: Create Admin Processors Management Page** 🟡 **PENDING**
+
+- **Location:** `admin/app/processors/page.tsx` (new page)
+- **Backend APIs available:** ✅ Ready to use
+  - `GET /api/admin/processors` — List processors with pagination/search
+  - `POST /api/admin/processors` — Create new processor
+  - `GET /api/admin/processors/:id` — Get processor details
+  - `PATCH /api/admin/processors/:id` — Update processor
+  - `DELETE /api/admin/processors/:id` — Deactivate processor
+  - `GET /api/admin/processors/:id/stores` — Get assigned stores
+  - `POST /api/admin/processors/:id/assign-stores` — Assign stores
+  - `DELETE /api/admin/processors/:id/stores/:pharmacyId` — Unassign store
+- **UI Components needed:**
+  - **Main table:** Name, Email, Phone, Status, Assigned Stores Count, Actions
+  - **Search/filter:** By name, email, status (active/inactive)
+  - **"Add Processor" button** → modal form (name, email, phone, notes)
+  - **Row actions:** Edit, View Stores, Deactivate
+  - **Store assignment modal:** Multi-select pharmacies, assign/unassign
+- **Integration with existing admin patterns:**
+  - Follow `admin/app/admins/page.tsx` table structure
+  - Use existing admin Redux store patterns
+  - Follow admin form validation patterns
+
+**Task 1.7: Extend pharmacy settings page** ✅ **DONE**
 
 - ✅ **Location:** `Frontend/app/(dashboard)/settings/page.tsx`
 - ✅ **API service created:** `Frontend/lib/api/services/fcrStoreSettingsService.ts`
@@ -252,7 +278,7 @@ Required fields:
   - Loading states, error handling, success notifications
   - Proper validation (daysBetweenVisits 1–365)
 
-**Task 1.7: Add DEA expiration warning** ✅ **DONE**
+**Task 1.8: Add DEA expiration warning** ✅ **DONE**
 
 - ✅ **Location:** `Frontend/app/(dashboard)/settings/page.tsx` — Store Settings tab
 - ✅ **Implementation:** Warning banner at top of Store Settings tab
@@ -268,14 +294,27 @@ Required fields:
 - Database migrations ready in `scripts/fcr_01_*.sql` files
 - APIs ready at `/api/admin/pharmacies/:id/store-settings` and `/api/admin/processors/*`
 
-**Frontend Status:** ✅ **ALL FRONTEND TASKS COMPLETED**
-- Task 1.6 completed: Store Settings tab added to `Frontend/app/(dashboard)/settings/page.tsx`
-- Task 1.7 completed: DEA expiration warning banner implemented at top of Store Settings tab
+**Frontend Status:** 🟡 **PARTIALLY COMPLETE - 1 TASK PENDING**
+- Task 1.6 **PENDING**: Admin Processors Management Page (`admin/app/processors/page.tsx`)
+- Task 1.7 **COMPLETED**: Pharmacy Store Settings tab (`Frontend/app/(dashboard)/settings/page.tsx`)
+- Task 1.8 **COMPLETED**: DEA expiration warning banner
 - API service created: `Frontend/lib/api/services/fcrStoreSettingsService.ts`
 
 **API Endpoints Used by Frontend:**
 - `GET /api/admin/pharmacies/:id/store-settings` — Returns all FCR fields + DEA warning
 - `PATCH /api/admin/pharmacies/:id/store-settings` — Updates FCR fields with validation
+- `GET /api/admin/processors` — List processors (for admin page)
+- `POST /api/admin/processors` — Create processor
+- `PATCH /api/admin/processors/:id` — Update processor
+- `GET /api/admin/processors/:id/stores` — Get assigned stores
+- `POST /api/admin/processors/:id/assign-stores` — Assign stores
+
+**Cursor AI Prompts for Remaining Tasks:**
+
+Task 1.6 (Admin Processors page):
+```
+Create a new admin page at admin/app/processors/page.tsx for managing processors. Follow the pattern from admin/app/admins/page.tsx. Create a table showing processor name, email, phone, status, and assigned stores count. Add search/filter functionality. Include 'Add Processor' button with modal form. Add row actions for Edit, View Stores, and Deactivate. Use the processors API endpoints: GET /api/admin/processors for listing, POST for creating, PATCH for updating. Create a store assignment modal that shows available pharmacies and allows assigning/unassigning stores using the store assignment endpoints.
+```
 
 ---
 
