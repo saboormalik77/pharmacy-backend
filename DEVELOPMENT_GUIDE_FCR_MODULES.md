@@ -129,6 +129,17 @@ PHARMACY FRONTEND (Frontend/)
 
 ## Module 1: Store Setup & Master Data
 
+### 🚀 **STATUS: Backend Complete, Frontend Ready to Start**
+
+| Component | Status | Files |
+|-----------|--------|-------|
+| **Database Schema** | ✅ Complete | `scripts/fcr_01_*.sql` (3 files) |
+| **Pharmacy Store Settings API** | ✅ Complete | GET/PATCH `/api/admin/pharmacies/:id/store-settings` |
+| **Processors Management API** | ✅ Complete | Full CRUD at `/api/admin/processors/*` |
+| **Frontend Integration** | 🟡 Ready to start | Use APIs above in settings page |
+
+**Next Step for Younas:** Extend `Frontend/app/(dashboard)/settings/page.tsx` using the completed backend APIs.
+
 ### What Client Document Says (Section 1)
 
 > "Before any return can happen, the store has to exist in the system."
@@ -156,12 +167,12 @@ Required fields:
 
 ### Developer Tasks
 
-#### Saboor (Backend)
+#### Saboor (Backend) ✅ **COMPLETED**
 
-**Task 1.1: Extend pharmacy table schema**
+**Task 1.1: Extend pharmacy table schema** ✅ **DONE**
 
-- Location: Create SQL migration in `scripts/` folder
-- Add columns to existing `pharmacy` table:
+- ✅ **File created:** `scripts/fcr_01_extend_pharmacy_table.sql`
+- ✅ **Added 12 new columns** to existing `pharmacy` table:
   - `store_number` (VARCHAR 10, unique identifier like "5544")
   - `primary_wholesaler` (TEXT)
   - `wholesaler_account_number` (TEXT)
@@ -175,44 +186,37 @@ Required fields:
   - `days_between_visits` (INTEGER, default 120)
   - `dea_expiration_date` (DATE)
   - `fax_number` (TEXT)
-- Run migration via Supabase SQL editor or migration script
+- ✅ **Indexes created** on `store_number` and `assigned_processor_id`
 
-**Task 1.2: Create processors table**
+**Task 1.2: Create processors table** ✅ **DONE**
 
-- Location: Create SQL migration
-- Table: `processors`
-  - `id` (UUID, PK)
-  - `user_id` (UUID, FK to admin users if using same auth)
-  - `name` (TEXT)
-  - `email` (TEXT)
-  - `phone` (TEXT)
-  - `status` (ENUM: 'active', 'inactive')
-  - `created_at`, `updated_at`
+- ✅ **File created:** `scripts/fcr_02_create_processors_table.sql`
+- ✅ **Table created:** `processors` with auto-update trigger
+- ✅ **Foreign key added:** `pharmacy.assigned_processor_id → processors.id`
 
-**Task 1.3: Create processor_store_assignments table**
+**Task 1.3: Create processor_store_assignments table** ✅ **DONE**
 
-- Location: Create SQL migration
-- Table: `processor_store_assignments`
-  - `id` (UUID, PK)
-  - `processor_id` (UUID, FK)
-  - `pharmacy_id` (UUID, FK)
-  - `assigned_date` (TIMESTAMP)
-  - Unique constraint on (processor_id, pharmacy_id)
+- ✅ **File created:** `scripts/fcr_03_create_processor_store_assignments.sql`
+- ✅ **Junction table created** with unique constraint and indexes
 
-**Task 1.4: Extend pharmacies API**
+**Task 1.4: Extend pharmacies API** ✅ **DONE**
 
-- Location: `src/services/adminPharmaciesService.ts`, `src/controllers/adminPharmaciesController.ts`
-- Update existing pharmacy CRUD to handle new fields
-- Add validation for DEA expiration (warn if expired)
-- Add validation for wholesaler account number (required for certain operations)
+- ✅ **Extended:** `src/services/adminPharmaciesService.ts`
+- ✅ **Extended:** `src/controllers/adminPharmaciesController.ts`  
+- ✅ **Extended:** `src/routes/adminPharmaciesRoutes.ts`
+- ✅ **New endpoints:**
+  - `GET /api/admin/pharmacies/:id/store-settings` — Get FCR store settings
+  - `PATCH /api/admin/pharmacies/:id/store-settings` — Update FCR store settings
+- ✅ **Features:** DEA expiration warnings, store number uniqueness validation
 
-**Task 1.5: Create processors API**
+**Task 1.5: Create processors API** ✅ **DONE**
 
-- Location: Create new files:
+- ✅ **Files created:**
   - `src/services/processorsService.ts`
   - `src/controllers/processorsController.ts`
   - `src/routes/processorsRoutes.ts`
-- Endpoints:
+- ✅ **Mounted in:** `src/server.ts` at `/api/admin/processors`
+- ✅ **Endpoints created:**
   - `GET /api/admin/processors` — List all processors
   - `POST /api/admin/processors` — Create processor
   - `GET /api/admin/processors/:id` — Get processor details
@@ -220,39 +224,91 @@ Required fields:
   - `DELETE /api/admin/processors/:id` — Deactivate processor
   - `GET /api/admin/processors/:id/stores` — Get assigned stores
   - `POST /api/admin/processors/:id/assign-stores` — Assign stores to processor
-- Use `authenticateAdmin` middleware
-- Mount in `server.ts`
+  - `DELETE /api/admin/processors/:id/stores/:pharmacyId` — Unassign store
 
 #### Younas (Frontend)
 
 **Task 1.6: Extend pharmacy settings page**
 
-- Location: `Frontend/app/(dashboard)/settings/page.tsx`
-- Add new fields to settings form:
-  - Primary wholesaler (dropdown or text)
-  - Wholesaler account number
-  - Secondary wholesaler
-  - Service type selector (Full Service / Self-Service / Express)
-  - GPO affiliation
-- Call existing settings API with new fields
+- **Location:** `Frontend/app/(dashboard)/settings/page.tsx`
+- **Backend APIs available:** ✅ Ready to use
+  - `GET /api/admin/pharmacies/:id/store-settings` — Get current FCR settings
+  - `PATCH /api/admin/pharmacies/:id/store-settings` — Update FCR settings
+- **Add new fields to settings form:**
+  - Primary wholesaler (dropdown or text input)
+  - Wholesaler account number (required field)
+  - Secondary wholesaler (optional)
+  - Service type selector: `full_service` | `self_service` | `express`
+  - GPO affiliation (text input)
+  - Store number (unique 4-digit identifier)
+  - DEA expiration date (date picker)
+  - Fax number (optional)
+  - Days between visits (number input, default 120)
+- **API Integration:**
+  ```typescript
+  // GET current settings
+  const response = await fetch(`/api/admin/pharmacies/${pharmacyId}/store-settings`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  const { storeSettings } = await response.json();
+  
+  // UPDATE settings
+  await fetch(`/api/admin/pharmacies/${pharmacyId}/store-settings`, {
+    method: 'PATCH',
+    headers: { 
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}` 
+    },
+    body: JSON.stringify({
+      storeNumber: "5544",
+      primaryWholesaler: "Cardinal Health",
+      wholesalerAccountNumber: "CH-987654",
+      serviceType: "full_service",
+      deaExpirationDate: "2025-12-31"
+    })
+  });
+  ```
 
 **Task 1.7: Add DEA expiration warning**
 
-- Location: `Frontend/app/(dashboard)/settings/page.tsx` or dashboard
-- If `dea_expiration_date` is past or within 30 days, show warning banner
-- Visual: Red/yellow alert component
+- **Location:** `Frontend/app/(dashboard)/settings/page.tsx` or dashboard
+- **Backend provides:** `deaExpirationWarning` field in store settings response
+  - `null` = no warning
+  - `"DEA is expired"` = expired
+  - `"DEA expires in X days"` = expiring soon
+  - `"DEA expiration date is missing"` = no date set
+- **Implementation:**
+  ```typescript
+  if (storeSettings.deaExpirationWarning) {
+    // Show warning banner with appropriate color:
+    // - Red for expired
+    // - Yellow for expiring soon  
+    // - Gray for missing date
+  }
+  ```
+- **Visual:** Red/yellow/gray alert component with warning text
 
 ### How to Implement (Guidance for Cursor AI)
 
-When working on Task 1.1-1.3 (database):
+**Backend Status:** ✅ **ALL BACKEND TASKS COMPLETED**
+- Database migrations ready in `scripts/fcr_01_*.sql` files
+- APIs ready at `/api/admin/pharmacies/:id/store-settings` and `/api/admin/processors/*`
+
+**For Younas (Frontend Tasks):**
+
+When working on Task 1.6 (extend settings page):
 ```
-Prompt: "Create a SQL migration file to extend the pharmacy table with these columns: [list columns]. Also create processors and processor_store_assignments tables. Follow the existing migration pattern in the scripts/ folder."
+Prompt: "Extend the pharmacy settings page in Frontend/app/(dashboard)/settings/page.tsx to include FCR store settings. Add form fields for store number, primary wholesaler, wholesaler account number, service type (dropdown with full_service/self_service/express), GPO affiliation, DEA expiration date, and fax number. Use the existing form patterns and call GET /api/admin/pharmacies/:id/store-settings to load current values and PATCH to save changes. Include proper validation and loading states."
 ```
 
-When working on Task 1.5 (processors API):
+When working on Task 1.7 (DEA warning):
 ```
-Prompt: "Create a new API for processor management following the existing pattern in adminUsersService.ts and adminUsersController.ts. Include CRUD operations and store assignment endpoints. Use authenticateAdmin middleware."
+Prompt: "Add a DEA expiration warning banner to the pharmacy settings page. Check the deaExpirationWarning field from the store settings API response. If not null, show an alert component with appropriate styling: red for 'expired', yellow for 'expires in X days', gray for 'missing date'. Position it prominently at the top of the settings form."
 ```
+
+**API Endpoints Ready for Frontend:**
+- `GET /api/admin/pharmacies/:id/store-settings` — Returns all FCR fields + DEA warning
+- `PATCH /api/admin/pharmacies/:id/store-settings` — Updates FCR fields with validation
 
 ---
 

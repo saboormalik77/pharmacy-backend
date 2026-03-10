@@ -96,6 +96,40 @@ export interface UpdatePharmacyData {
   subscriptionStatus?: string;
 }
 
+export interface PharmacyStoreSettings {
+  storeNumber: string | null;
+  primaryWholesaler: string | null;
+  wholesalerAccountNumber: string | null;
+  secondaryWholesaler: string | null;
+  gpoAffiliation: string | null;
+  serviceType: string;
+  assignedProcessorId: string | null;
+  assignedProcessorName: string | null;
+  assignedSalesPersonId: string | null;
+  lastVisitDate: string | null;
+  nextVisitDate: string | null;
+  daysBetweenVisits: number;
+  deaExpirationDate: string | null;
+  deaExpirationWarning: string | null;
+  faxNumber: string | null;
+}
+
+export interface UpdatePharmacyStoreSettingsData {
+  storeNumber?: string;
+  primaryWholesaler?: string;
+  wholesalerAccountNumber?: string;
+  secondaryWholesaler?: string;
+  gpoAffiliation?: string;
+  serviceType?: string;
+  assignedProcessorId?: string | null;
+  assignedSalesPersonId?: string | null;
+  lastVisitDate?: string;
+  nextVisitDate?: string;
+  daysBetweenVisits?: number;
+  deaExpirationDate?: string;
+  faxNumber?: string;
+}
+
 // ============================================================
 // Service Functions
 // ============================================================
@@ -258,5 +292,158 @@ export const updatePharmacyStatus = async (
     statusChange: data.statusChange,
     generatedAt: data.generatedAt,
   };
+};
+
+// ============================================================
+// FCR Store-Settings Functions (direct queries, no RPC)
+// ============================================================
+
+const FCR_PHARMACY_COLUMNS = `
+  store_number,
+  primary_wholesaler,
+  wholesaler_account_number,
+  secondary_wholesaler,
+  gpo_affiliation,
+  service_type,
+  assigned_processor_id,
+  assigned_sales_person_id,
+  last_visit_date,
+  next_visit_date,
+  days_between_visits,
+  dea_expiration_date,
+  dea_number,
+  fax_number
+`;
+
+function buildDeaWarning(deaExp: string | null): string | null {
+  if (!deaExp) return 'DEA expiration date is missing';
+  const expDate = new Date(deaExp);
+  const now = new Date();
+  if (expDate < now) return 'DEA is expired';
+  const daysLeft = Math.ceil((expDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  if (daysLeft <= 30) return `DEA expires in ${daysLeft} days`;
+  return null;
+}
+
+export const getPharmacyStoreSettings = async (
+  pharmacyId: string
+): Promise<PharmacyStoreSettings> => {
+  if (!supabaseAdmin) {
+    throw new AppError('Supabase admin client not configured', 500);
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from('pharmacy')
+    .select(FCR_PHARMACY_COLUMNS)
+    .eq('id', pharmacyId)
+    .single();
+
+  if (error) {
+    throw new AppError(`Failed to fetch pharmacy store settings: ${error.message}`, error.code === 'PGRST116' ? 404 : 400);
+  }
+
+  if (!data) {
+    throw new AppError('Pharmacy not found', 404);
+  }
+
+  let processorName: string | null = null;
+  if (data.assigned_processor_id) {
+    const { data: proc } = await supabaseAdmin
+      .from('processors')
+      .select('name')
+      .eq('id', data.assigned_processor_id)
+      .single();
+    processorName = proc?.name || null;
+  }
+
+  return {
+    storeNumber: data.store_number,
+    primaryWholesaler: data.primary_wholesaler,
+    wholesalerAccountNumber: data.wholesaler_account_number,
+    secondaryWholesaler: data.secondary_wholesaler,
+    gpoAffiliation: data.gpo_affiliation,
+    serviceType: data.service_type || 'full_service',
+    assignedProcessorId: data.assigned_processor_id,
+    assignedProcessorName: processorName,
+    assignedSalesPersonId: data.assigned_sales_person_id,
+    lastVisitDate: data.last_visit_date,
+    nextVisitDate: data.next_visit_date,
+    daysBetweenVisits: data.days_between_visits ?? 120,
+    deaExpirationDate: data.dea_expiration_date,
+    deaExpirationWarning: buildDeaWarning(data.dea_expiration_date),
+    faxNumber: data.fax_number,
+  };
+};
+
+export const updatePharmacyStoreSettings = async (
+  pharmacyId: string,
+  updates: UpdatePharmacyStoreSettingsData
+): Promise<PharmacyStoreSettings> => {
+  if (!supabaseAdmin) {
+    throw new AppError('Supabase admin client not configured', 500);
+  }
+
+  const dbUpdates: Record<string, any> = {};
+  if (updates.storeNumber !== undefined) dbUpdates.store_number = updates.storeNumber;
+  if (updates.primaryWholesaler !== undefined) dbUpdates.primary_wholesaler = updates.primaryWholesaler;
+  if (updates.wholesalerAccountNumber !== undefined) dbUpdates.wholesaler_account_number = updates.wholesalerAccountNumber;
+  if (updates.secondaryWholesaler !== undefined) dbUpdates.secondary_wholesaler = updates.secondaryWholesaler;
+  if (updates.gpoAffiliation !== undefined) dbUpdates.gpo_affiliation = updates.gpoAffiliation;
+  if (updates.serviceType !== undefined) dbUpdates.service_type = updates.serviceType;
+  if (updates.assignedProcessorId !== undefined) dbUpdates.assigned_processor_id = updates.assignedProcessorId;
+  if (updates.assignedSalesPersonId !== undefined) dbUpdates.assigned_sales_person_id = updates.assignedSalesPersonId;
+  if (updates.lastVisitDate !== undefined) dbUpdates.last_visit_date = updates.lastVisitDate;
+  if (updates.nextVisitDate !== undefined) dbUpdates.next_visit_date = updates.nextVisitDate;
+  if (updates.daysBetweenVisits !== undefined) dbUpdates.days_between_visits = updates.daysBetweenVisits;
+  if (updates.deaExpirationDate !== undefined) dbUpdates.dea_expiration_date = updates.deaExpirationDate;
+  if (updates.faxNumber !== undefined) dbUpdates.fax_number = updates.faxNumber;
+
+  if (Object.keys(dbUpdates).length === 0) {
+    throw new AppError('No valid fields provided for update', 400);
+  }
+
+  if (dbUpdates.store_number) {
+    const { data: existing } = await supabaseAdmin
+      .from('pharmacy')
+      .select('id')
+      .eq('store_number', dbUpdates.store_number)
+      .neq('id', pharmacyId)
+      .maybeSingle();
+    if (existing) {
+      throw new AppError(`Store number "${dbUpdates.store_number}" is already assigned to another pharmacy`, 409);
+    }
+  }
+
+  if (dbUpdates.service_type) {
+    const valid = ['full_service', 'self_service', 'express'];
+    if (!valid.includes(dbUpdates.service_type)) {
+      throw new AppError(`Invalid service type. Must be one of: ${valid.join(', ')}`, 400);
+    }
+  }
+
+  if (dbUpdates.assigned_processor_id) {
+    const { data: proc, error: procErr } = await supabaseAdmin
+      .from('processors')
+      .select('id, status')
+      .eq('id', dbUpdates.assigned_processor_id)
+      .single();
+    if (procErr || !proc) {
+      throw new AppError('Assigned processor not found', 404);
+    }
+    if (proc.status !== 'active') {
+      throw new AppError('Cannot assign an inactive processor', 400);
+    }
+  }
+
+  const { error } = await supabaseAdmin
+    .from('pharmacy')
+    .update(dbUpdates)
+    .eq('id', pharmacyId);
+
+  if (error) {
+    throw new AppError(`Failed to update pharmacy store settings: ${error.message}`, 400);
+  }
+
+  return getPharmacyStoreSettings(pharmacyId);
 };
 

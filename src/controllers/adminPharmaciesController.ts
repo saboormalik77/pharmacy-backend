@@ -4,6 +4,8 @@ import {
   getPharmacyById,
   updatePharmacy,
   updatePharmacyStatus,
+  getPharmacyStoreSettings,
+  updatePharmacyStoreSettings,
 } from '../services/adminPharmaciesService';
 import { AppError } from '../utils/appError';
 
@@ -206,6 +208,121 @@ export const updatePharmacyStatusHandler = async (
       status: 'success',
       message: `Pharmacy status updated to ${status}`,
       data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get pharmacy store settings (FCR fields)
+ * GET /api/admin/pharmacies/:id/store-settings
+ */
+export const getPharmacyStoreSettingsHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      throw new AppError('Pharmacy ID is required', 400);
+    }
+
+    const settings = await getPharmacyStoreSettings(id);
+
+    res.status(200).json({
+      status: 'success',
+      data: { storeSettings: settings },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Update pharmacy store settings (FCR fields)
+ * PATCH /api/admin/pharmacies/:id/store-settings
+ */
+export const updatePharmacyStoreSettingsHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    if (!id) {
+      throw new AppError('Pharmacy ID is required', 400);
+    }
+
+    const allowedFields = [
+      'storeNumber',
+      'primaryWholesaler',
+      'wholesalerAccountNumber',
+      'secondaryWholesaler',
+      'gpoAffiliation',
+      'serviceType',
+      'assignedProcessorId',
+      'assignedSalesPersonId',
+      'lastVisitDate',
+      'nextVisitDate',
+      'daysBetweenVisits',
+      'deaExpirationDate',
+      'faxNumber',
+    ];
+
+    const filtered: Record<string, any> = {};
+    for (const key of allowedFields) {
+      if (updates[key] !== undefined) {
+        filtered[key] = updates[key];
+      }
+    }
+
+    if (Object.keys(filtered).length === 0) {
+      throw new AppError(
+        'No valid fields to update. Allowed fields: ' + allowedFields.join(', '),
+        400
+      );
+    }
+
+    if (filtered.deaExpirationDate) {
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!dateRegex.test(filtered.deaExpirationDate)) {
+        throw new AppError('Invalid DEA expiration date format. Must be YYYY-MM-DD', 400);
+      }
+    }
+
+    if (filtered.lastVisitDate) {
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!dateRegex.test(filtered.lastVisitDate)) {
+        throw new AppError('Invalid last visit date format. Must be YYYY-MM-DD', 400);
+      }
+    }
+
+    if (filtered.nextVisitDate) {
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!dateRegex.test(filtered.nextVisitDate)) {
+        throw new AppError('Invalid next visit date format. Must be YYYY-MM-DD', 400);
+      }
+    }
+
+    if (filtered.daysBetweenVisits !== undefined) {
+      const days = Number(filtered.daysBetweenVisits);
+      if (isNaN(days) || days < 1 || days > 365) {
+        throw new AppError('Days between visits must be a number between 1 and 365', 400);
+      }
+      filtered.daysBetweenVisits = days;
+    }
+
+    const settings = await updatePharmacyStoreSettings(id, filtered);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Pharmacy store settings updated successfully',
+      data: { storeSettings: settings },
     });
   } catch (error) {
     next(error);

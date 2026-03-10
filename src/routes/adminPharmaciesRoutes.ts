@@ -4,6 +4,8 @@ import {
   getPharmacyByIdHandler,
   updatePharmacyHandler,
   updatePharmacyStatusHandler,
+  getPharmacyStoreSettingsHandler,
+  updatePharmacyStoreSettingsHandler,
 } from '../controllers/adminPharmaciesController';
 import { authenticateAdmin } from '../middleware/adminAuth';
 
@@ -470,6 +472,115 @@ router.put('/:id', updatePharmacyHandler);
  *         description: Unauthorized - invalid or missing token
  */
 router.put('/:id/status', updatePharmacyStatusHandler);
+
+/**
+ * @swagger
+ * /api/admin/pharmacies/{id}/store-settings:
+ *   get:
+ *     summary: Get pharmacy store settings (FCR fields)
+ *     description: |
+ *       Returns the FCR-specific store settings for a pharmacy including
+ *       wholesaler info, service type, processor assignment, visit schedule,
+ *       DEA expiration status, and GPO affiliation.
+ *     tags: [Admin - Pharmacies]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Pharmacy ID
+ *     responses:
+ *       200:
+ *         description: Store settings retrieved successfully
+ *       404:
+ *         description: Pharmacy not found
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/:id/store-settings', getPharmacyStoreSettingsHandler);
+
+/**
+ * @swagger
+ * /api/admin/pharmacies/{id}/store-settings:
+ *   patch:
+ *     summary: Update pharmacy store settings (FCR fields)
+ *     description: |
+ *       Updates the FCR-specific fields on a pharmacy: store number, wholesaler info,
+ *       service type, processor/sales-rep assignment, visit schedule, DEA expiration, etc.
+ *     tags: [Admin - Pharmacies]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Pharmacy ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               storeNumber:
+ *                 type: string
+ *                 example: "5544"
+ *               primaryWholesaler:
+ *                 type: string
+ *                 example: "Cardinal Health"
+ *               wholesalerAccountNumber:
+ *                 type: string
+ *                 example: "CH-987654"
+ *               secondaryWholesaler:
+ *                 type: string
+ *                 example: "McKesson"
+ *               gpoAffiliation:
+ *                 type: string
+ *                 example: "BuyLine"
+ *               serviceType:
+ *                 type: string
+ *                 enum: [full_service, self_service, express]
+ *               assignedProcessorId:
+ *                 type: string
+ *                 format: uuid
+ *               assignedSalesPersonId:
+ *                 type: string
+ *                 format: uuid
+ *               lastVisitDate:
+ *                 type: string
+ *                 format: date
+ *               nextVisitDate:
+ *                 type: string
+ *                 format: date
+ *               daysBetweenVisits:
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 365
+ *               deaExpirationDate:
+ *                 type: string
+ *                 format: date
+ *               faxNumber:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Store settings updated successfully
+ *       400:
+ *         description: Invalid request body
+ *       404:
+ *         description: Pharmacy not found
+ *       409:
+ *         description: Conflict (e.g. duplicate store number)
+ *       401:
+ *         description: Unauthorized
+ */
+router.patch('/:id/store-settings', updatePharmacyStoreSettingsHandler);
 
 export default router;
 
