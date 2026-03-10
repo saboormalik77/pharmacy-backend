@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '../config/supabase';
 import { AppError } from '../utils/appError';
+import bcrypt from 'bcryptjs';
 
 // ============================================================
 // Interfaces
@@ -29,7 +30,8 @@ export interface ProcessorListResponse {
 
 export interface CreateProcessorData {
   name: string;
-  email?: string;
+  email: string;
+  password: string;
   phone?: string;
   notes?: string;
 }
@@ -49,7 +51,10 @@ export interface AssignedStore {
   storeNumber: string | null;
   city: string | null;
   state: string | null;
+  address?: string | null;
   serviceType: string | null;
+  lastVisitDate?: string | null;
+  nextVisitDate?: string | null;
   assignedDate: string;
 }
 
@@ -175,22 +180,58 @@ export const createProcessor = async (input: CreateProcessorData): Promise<Proce
     throw new AppError('Processor name is required', 400);
   }
 
-  if (input.email) {
-    const { data: existing } = await sb
-      .from('processors')
-      .select('id')
-      .eq('email', input.email.toLowerCase().trim())
-      .maybeSingle();
-    if (existing) {
-      throw new AppError('A processor with this email already exists', 409);
-    }
+  if (!input.email || !input.email.trim()) {
+    throw new AppError('Processor email is required (used for login)', 400);
+  }
+
+  if (!input.password || input.password.length < 8) {
+    throw new AppError('Password is required and must be at least 8 characters', 400);
+  }
+
+  const email = input.email.toLowerCase().trim();
+
+  const { data: existingProcessor } = await sb
+    .from('processors')
+    .select('id')
+    .eq('email', email)
+    .maybeSingle();
+  if (existingProcessor) {
+    throw new AppError('A processor with this email already exists', 409);
+  }
+
+  const { data: existingAdmin } = await sb
+    .from('admin')
+    .select('id')
+    .eq('email', email)
+    .maybeSingle();
+  if (existingAdmin) {
+    throw new AppError('An admin user with this email already exists', 409);
+  }
+
+  const passwordHash = await bcrypt.hash(input.password, 10);
+
+  const { data: adminUser, error: adminError } = await sb
+    .from('admin')
+    .insert({
+      email,
+      password_hash: passwordHash,
+      name: input.name.trim(),
+      role: 'processor',
+      is_active: true,
+    })
+    .select('id')
+    .single();
+
+  if (adminError) {
+    throw new AppError(`Failed to create admin login for processor: ${adminError.message}`, 400);
   }
 
   const insertData: Record<string, any> = {
     name: input.name.trim(),
+    email,
     status: 'active',
+    admin_user_id: adminUser.id,
   };
-  if (input.email) insertData.email = input.email.toLowerCase().trim();
   if (input.phone) insertData.phone = input.phone.trim();
   if (input.notes) insertData.notes = input.notes.trim();
 
@@ -201,6 +242,7 @@ export const createProcessor = async (input: CreateProcessorData): Promise<Proce
     .single();
 
   if (error) {
+    await sb.from('admin').delete().eq('id', adminUser.id);
     throw new AppError(`Failed to create processor: ${error.message}`, 400);
   }
 
@@ -266,6 +308,12 @@ export const updateProcessor = async (
 export const deactivateProcessor = async (processorId: string): Promise<void> => {
   const sb = ensureAdmin();
 
+  const { data: proc } = await sb
+    .from('processors')
+    .select('admin_user_id')
+    .eq('id', processorId)
+    .single();
+
   const { error } = await sb
     .from('processors')
     .update({ status: 'inactive' })
@@ -273,6 +321,13 @@ export const deactivateProcessor = async (processorId: string): Promise<void> =>
 
   if (error) {
     throw new AppError(`Failed to deactivate processor: ${error.message}`, 400);
+  }
+
+  if (proc?.admin_user_id) {
+    await sb
+      .from('admin')
+      .update({ is_active: false })
+      .eq('id', proc.admin_user_id);
   }
 };
 
@@ -380,6 +435,52 @@ export const assignStoresToProcessor = async (
     assigned: toInsert.length,
     skipped: alreadyAssigned.size,
   };
+};
+
+export const getMyStores = async (processorId: string): Promise<AssignedStore[]> => {
+  const sb = ensureAdmin();
+
+  const { data: assignments, error } = await sb
+    .from('processor_store_assignments')
+    .select('id, processor_id, pharmacy_id, assigned_date')
+    .eq('processor_id', processorId)
+    .order('assigned_date', { ascending: false });
+
+  if (error) {
+    throw new AppError(`Failed to fetch assigned stores: ${error.message}`, 400);
+  }
+
+  if (!assignments || assignments.length === 0) return [];
+
+  const pharmacyIds = assignments.map((a: any) => a.pharmacy_id);
+  const { data: pharmacies } = await sb
+    .from('pharmacy')
+    .select('id, business_name, store_number, city, state, address, service_type, last_visit_date, next_visit_date')
+    .in('id', pharmacyIds);
+
+  const pharmacyMap: Record<string, any> = {};
+  if (pharmacies) {
+    for (const p of pharmacies) {
+      pharmacyMap[p.id] = p;
+    }
+  }
+
+  return assignments.map((a: any) => {
+    const pharm = pharmacyMap[a.pharmacy_id] || {};
+    return {
+      assignmentId: a.id,
+      pharmacyId: a.pharmacy_id,
+      businessName: pharm.business_name || 'Unknown',
+      storeNumber: pharm.store_number || null,
+      city: pharm.city || null,
+      state: pharm.state || null,
+      address: pharm.address || null,
+      serviceType: pharm.service_type || null,
+      lastVisitDate: pharm.last_visit_date || null,
+      nextVisitDate: pharm.next_visit_date || null,
+      assignedDate: a.assigned_date,
+    };
+  });
 };
 
 export const unassignStoreFromProcessor = async (
