@@ -1153,9 +1153,10 @@ The system determines:
 
 #### Saboor (Backend)
 
-**Task 5.1: Create manufacturer_policies table**
+**Task 5.1: Create manufacturer_policies table** ✅ **DONE**
 
-- Location: SQL migration
+- Location: `scripts/fcr_08_create_policy_engine_tables.sql`
+- SQL migration
 - Table: `manufacturer_policies`
   - `id` (UUID, PK)
   - `labeler_id` (VARCHAR 10, UNIQUE) — NDC prefix digits
@@ -1170,9 +1171,10 @@ The system determines:
   - `verified_date` (DATE)
   - `created_at`, `updated_at`
 
-**Task 5.2: Create manufacturer_return_policies table**
+**Task 5.2: Create manufacturer_return_policies table** ✅ **DONE**
 
-- Location: SQL migration
+- Location: `scripts/fcr_08_create_policy_engine_tables.sql`
+- SQL migration
 - Table: `manufacturer_return_policies`
   - `id` (UUID, PK)
   - `manufacturer_policy_id` (UUID, FK)
@@ -1188,9 +1190,10 @@ The system determines:
   - `reimbursement_type` (ENUM: 'batch', 'per_item')
   - `created_at`, `updated_at`
 
-**Task 5.3: Create non_returnable_products table**
+**Task 5.3: Create non_returnable_products table** ✅ **DONE**
 
-- Location: SQL migration
+- Location: `scripts/fcr_08_create_policy_engine_tables.sql`
+- SQL migration
 - Table: `non_returnable_products`
   - `id` (UUID, PK)
   - `manufacturer_policy_id` (UUID, FK)
@@ -1199,9 +1202,10 @@ The system determines:
   - `reason` (TEXT)
   - `created_at`
 
-**Task 5.4: Create manufacturer_policy_notes table**
+**Task 5.4: Create manufacturer_policy_notes table** ✅ **DONE**
 
-- Location: SQL migration
+- Location: `scripts/fcr_08_create_policy_engine_tables.sql`
+- SQL migration
 - Table: `manufacturer_policy_notes`
   - `id` (UUID, PK)
   - `manufacturer_policy_id` (UUID, FK)
@@ -1210,7 +1214,7 @@ The system determines:
   - `note_text` (TEXT)
   - `created_at`
 
-**Task 5.5: Create policy engine service**
+**Task 5.5: Create policy engine service** ✅ **DONE**
 
 - Location: `src/services/policyEngineService.ts`
 - Function: `checkReturnability(ndc, expirationDate, isPartial, dosageForm)`
@@ -1232,12 +1236,15 @@ The system determines:
     - If accepted, check dosage form against partial_dosage_forms
   - Step 9: Return { status: 'returnable', destination, discount_rate }
 
-**Task 5.6: Create policies API**
+**Task 5.6: Create policies API** ✅ **DONE**
 
-- Location: Create new files:
-  - `src/services/policiesService.ts`
-  - `src/controllers/policiesController.ts`
-  - `src/routes/policiesRoutes.ts`
+- Location: Created files:
+  - `src/services/policiesService.ts` ✅
+  - `src/controllers/policiesController.ts` ✅
+  - `src/routes/policiesRoutes.ts` ✅
+  - Routes registered in `src/server.ts` ✅
+  - Frontend guide: `MODULE_5_FRONTEND_GUIDE.md` ✅
+  - Seed data: `scripts/fcr_09_seed_policy_engine_data.sql` ✅
 - Endpoints:
   - `GET /api/admin/policies` — List all manufacturer policies (paginated, searchable)
   - `POST /api/admin/policies` — Create policy

@@ -93,6 +93,7 @@ function parseDigitalLink(url: string): GS1ParsedData {
 /**
  * Parse a raw GS1 element string (FNC1-delimited or fixed-length).
  * Handles both the GS character (\u001d) separator and parenthesized AIs.
+ * Also handles concatenated fixed-length AIs without separators.
  */
 function parseElementString(raw: string): GS1ParsedData {
   const result: GS1ParsedData = {
@@ -108,15 +109,7 @@ function parseElementString(raw: string): GS1ParsedData {
   const parts = cleaned.split('\u001d');
 
   for (const part of parts) {
-    if (part.startsWith('01') && part.length >= 16) {
-      result.gtin = part.slice(2, 16);
-    } else if (part.startsWith('17') && part.length >= 8) {
-      result.expirationDate = parseGS1Date(part.slice(2, 8));
-    } else if (part.startsWith('10')) {
-      result.lotNumber = part.slice(2);
-    } else if (part.startsWith('21')) {
-      result.serialNumber = part.slice(2);
-    }
+    parseAIsFromString(part, result);
   }
 
   if (result.gtin) {
@@ -125,6 +118,85 @@ function parseElementString(raw: string): GS1ParsedData {
   }
 
   return result;
+}
+
+/**
+ * Parse Application Identifiers from a string that may contain multiple concatenated AIs.
+ * Handles fixed-length AIs: 01(14), 17(6), and variable-length AIs: 10, 21.
+ */
+function parseAIsFromString(str: string, result: GS1ParsedData): void {
+  let pos = 0;
+
+  while (pos < str.length) {
+    if (pos + 1 >= str.length) break;
+    
+    const ai = str.slice(pos, pos + 2);
+
+    // AI 01 (GTIN) - fixed length 14 digits
+    if (ai === '01' && pos + 16 <= str.length) {
+      result.gtin = str.slice(pos + 2, pos + 16);
+      pos += 16;
+      continue;
+    }
+
+    // AI 17 (Expiry) - fixed length 6 digits (YYMMDD)
+    if (ai === '17' && pos + 8 <= str.length) {
+      const rawDate = str.slice(pos + 2, pos + 8);
+      result.expirationDate = parseGS1Date(rawDate);
+      pos += 8;
+      continue;
+    }
+
+    // AI 10 (Lot) - variable length, read until next AI or end
+    if (ai === '10') {
+      const dataStart = pos + 2;
+      let dataEnd = str.length;
+      
+      // Look for next AI starting from dataStart, but be more careful about AI detection
+      for (let i = dataStart + 1; i <= str.length - 2; i++) {
+        const nextAI = str.slice(i, i + 2);
+        // Only consider it a valid AI if it's at a proper boundary
+        if ((nextAI === '01' || nextAI === '17' || nextAI === '21') && (i === 0 || str[i-1] === '\u001d')) {
+          dataEnd = i;
+          break;
+        }
+      }
+      
+      result.lotNumber = str.slice(dataStart, dataEnd);
+      pos = dataEnd;
+      continue;
+    }
+
+    // AI 21 (Serial) - variable length, read until next AI or end
+    if (ai === '21') {
+      const dataStart = pos + 2;
+      let dataEnd = str.length;
+      
+      // Look for next AI starting from dataStart, but be more careful about AI detection
+      // We need to ensure we're at a proper AI boundary (after a GS character or at a known position)
+      for (let i = dataStart + 1; i <= str.length - 2; i++) {
+        const nextAI = str.slice(i, i + 2);
+        // Only consider it a valid AI if it's one of the known fixed-length AIs
+        // or if we're at the start of the string or after a GS character
+        if ((nextAI === '01' || nextAI === '17') && (i === 0 || str[i-1] === '\u001d')) {
+          dataEnd = i;
+          break;
+        }
+        // For variable-length AIs like '10', be more restrictive
+        if (nextAI === '10' && (i === 0 || str[i-1] === '\u001d')) {
+          dataEnd = i;
+          break;
+        }
+      }
+      
+      result.serialNumber = str.slice(dataStart, dataEnd);
+      pos = dataEnd;
+      continue;
+    }
+
+    // If we can't match any known AI, advance by 1
+    pos++;
+  }
 }
 
 /**

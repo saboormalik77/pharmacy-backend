@@ -35,6 +35,7 @@ import pharmacyMarketplaceRoutes from './routes/pharmacyMarketplaceRoutes';
 import ndcSearchRoutes from './routes/ndcSearchRoutes';
 import inventoryAnalysisRoutes from './routes/inventoryAnalysisRoutes';
 import notificationRoutes from './routes/notificationRoutes';
+import { adminPoliciesRouter, policyCheckRouter } from './routes/policiesRoutes';
 import { globalErrorHandler } from './controllers/errorController';
 import { checkExpiringProductsAndNotify } from './services/notificationCronService';
 import { swaggerSpec } from './config/swagger';
@@ -156,6 +157,8 @@ app.use('/api/marketplace', pharmacyMarketplaceRoutes);
 app.use('/api/ndc-search', ndcSearchRoutes);
 app.use('/api/inventory-analysis', inventoryAnalysisRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/admin/policies', adminPoliciesRouter);
+app.use('/api/policies', policyCheckRouter);
 
 /**
  * @swagger
