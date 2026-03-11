@@ -835,6 +835,21 @@ completed   → finalized               (finalize — permanent lock)
 
 ## Module 4: Product Scanning & Entry
 
+### ✅ **STATUS: Backend Complete (100% RPC + External APIs) — Frontend Ready to Start**
+
+| Component | Status | Files |
+|-----------|--------|-------|
+| **Database Schema + RPC Functions** | ✅ Complete | `scripts/fcr_07_create_return_transaction_items.sql` (table + 5 RPC functions) |
+| **GS1 Barcode Parser** | ✅ Complete | `src/services/gs1ParserService.ts` |
+| **NDC Lookup Pipeline** | ✅ Complete | `src/services/ndcLookupService.ts` — openFDA → RxNav → Azure OpenAI |
+| **Items CRUD API** | ✅ Complete | 5 endpoints at `/api/return-transactions/:id/items/*` — all RPC-based |
+| **Barcode Scan API** | ✅ Complete | `POST /api/barcode/scan` — parse + lookup in one call |
+| **Auth** | ✅ Complete | Works with both processor and admin tokens |
+| **Swagger Docs** | ✅ Complete | Available at `/api-docs` under "Return Transaction Items" and "Barcode" tags |
+
+> **⚠️ Architecture Note**: Items CRUD uses PostgreSQL RPC functions (zero JS queries).
+> Barcode parsing & NDC lookup run in Node.js because they call external APIs (openFDA, RxNav, Azure OpenAI).
+
 ### What Client Document Says (Section 4)
 
 > "This is the core capture step."
@@ -862,150 +877,250 @@ Fallback workflow:
 
 ### Developer Tasks
 
-#### Saboor (Backend)
+#### Saboor (Backend) ✅ **COMPLETED**
 
-**Task 4.1: Create return_transaction_items table**
+**Task 4.1: Create return_transaction_items table + RPC functions** ✅ DONE
+- ✅ File: `scripts/fcr_07_create_return_transaction_items.sql`
+- ✅ Table with all columns: ndc, ndc_10, gtin, proprietary_name, generic_name, manufacturer, package_description, dosage_form, strength, route, lot_number, serial_number, expiration_date, standard_price, quantity, full_package_size, is_partial, partial_percentage, estimated_value, return_status, non_returnable_reason, return_reason, destination, dea_schedule, dea_form_222_required, product_type, co_status, bmp_status, memo, wine_cellar_id, scan_source, raw_scan_data
+- ✅ Indexes on transaction_id, ndc, ndc_10, gtin, lot_number, return_status, expiration_date
+- ✅ Auto-update trigger + RLS
+- ✅ **5 PostgreSQL RPC functions** (all CRUD logic in SQL):
+  1. `add_return_transaction_item(p_data jsonb)` — validates transaction, checks duplicate NDC+lot, inserts, auto-calculates estimated_value, updates transaction totals
+  2. `list_return_transaction_items(p_transaction_id, p_return_status, p_search)` — list + filter + search with summary totals
+  3. `get_return_transaction_item(p_item_id)` — single lookup
+  4. `update_return_transaction_item(p_item_id, p_updates jsonb)` — partial update, recalculates value + totals
+  5. `delete_return_transaction_item(p_item_id)` — delete + update totals
 
-- Location: SQL migration
-- Table: `return_transaction_items`
-  - `id` (UUID, PK)
-  - `transaction_id` (UUID, FK to return_transactions)
-  - `ndc` (VARCHAR 13) — 11-digit NDC
-  - `ndc_10` (VARCHAR 12) — 10-digit format
-  - `proprietary_name` (TEXT)
-  - `manufacturer` (TEXT)
-  - `package_description` (TEXT)
-  - `dosage` (TEXT)
-  - `strength` (TEXT)
-  - `unit` (TEXT)
-  - `lot_number` (TEXT)
-  - `serial_number` (TEXT)
-  - `expiration_date` (DATE)
-  - `standard_price` (DECIMAL)
-  - `quantity` (INTEGER)
-  - `full_package_size` (INTEGER)
-  - `is_partial` (BOOLEAN)
-  - `partial_percentage` (DECIMAL)
-  - `return_status` (ENUM: 'returnable', 'non_returnable', 'tbd')
-  - `non_returnable_reason` (ENUM: 'date', 'policy', 'no_data')
-  - `return_reason` (TEXT) — dropdown selection
-  - `destination` (ENUM: 'inmar', 'qualanex', 'pharmalink', null)
-  - `estimated_value` (DECIMAL) — calculated: price × qty
-  - `dea_class` (TEXT)
-  - `dea_form_222_required` (BOOLEAN)
-  - `co_status` (ENUM: 'yes', 'no')
-  - `bmp_status` (ENUM: 'yes', 'no')
-  - `memo` (TEXT)
-  - `wine_cellar_id` (UUID, FK, nullable)
-  - `created_at`
+**Task 4.2: Create return transaction items API** ✅ DONE
+- ✅ Files:
+  - `src/services/returnTransactionItemsService.ts` — **thin RPC callers only**
+  - `src/controllers/returnTransactionItemsController.ts` — handlers + scan endpoint
+  - `src/routes/returnTransactionItemsRoutes.ts` — routes + Swagger
+- ✅ Routes registered in `src/server.ts` at `/api/return-transactions/:id/items`
 
-**Task 4.2: Create return transaction items API**
+**Task 4.3: Create GS1 barcode parser service** ✅ DONE
+- ✅ File: `src/services/gs1ParserService.ts`
+- ✅ Parses GS1 Digital Link URLs (e.g. `https://go.gs1.org/01/GTIN/10/LOT/21/SERIAL?17=EXPIRY`)
+- ✅ Parses GS1 element strings (FNC1-delimited, parenthesized AIs)
+- ✅ Extracts: GTIN, lot number, serial number, expiration date
+- ✅ Converts GTIN-14 → NDC-10 → three NDC-11 candidates
+- ✅ GS1 date parsing (YYMMDD → YYYY-MM-DD)
 
-- Location: Extend `returnTransactionService.ts` and controller
-- Endpoints:
-  - `POST /api/return-transactions/:id/items` — Add scanned item
-    - Input: NDC, lot, expiration, quantity, is_partial, etc.
-    - Auto-call policy engine to determine return_status
-    - Calculate estimated_value
-    - Return the created item with classification
-  - `GET /api/return-transactions/:id/items` — List all items in transaction
-  - `PATCH /api/return-transactions/:id/items/:itemId` — Update item
-  - `DELETE /api/return-transactions/:id/items/:itemId` — Remove item
-- Validation:
-  - Check for duplicate NDC+lot in same transaction (warn, don't block)
-  - Validate quantity doesn't exceed full_package_size
+**Task 4.4: Create NDC lookup service** ✅ DONE
+- ✅ File: `src/services/ndcLookupService.ts`
+- ✅ Multi-source pipeline: openFDA (primary) → RxNav (secondary) → Azure OpenAI (fallback)
+- ✅ Tested: correctly identified DOXYCYCLINE HYCLATE 200mg from Solco Healthcare via openFDA
+- ✅ `POST /api/barcode/scan` — single endpoint combining parse + lookup
 
-**Task 4.3: Extend barcode parsing service**
+**Barcode scan endpoint** ✅ DONE
+- ✅ File: `src/routes/barcodeScanRoutes.ts`
+- ✅ `POST /api/barcode/scan` returns `{ scan, product, autoFill }` — ready for frontend form
 
-- Location: `src/services/barcodeService.ts`
-- Extend `parseBarcodeWithAI` to return structured data:
-  - NDC (both 11-digit and 10-digit formats)
-  - Lot number
-  - Expiration date
-  - Serial number (if present)
-  - Package size (if present)
-- Add fallback for different QR code formats (GS1, HIBCC, etc.)
+#### Younas (Admin Frontend) — 🔲 **READY TO START**
 
-**Task 4.4: Create NDC lookup service**
+> **Backend for Module 4 is fully done. Below is everything Younas needs to integrate.**
 
-- Location: `src/services/ndcLookupService.ts`
-- Function: `lookupNDC(ndc)`
-  - Search existing products table
-  - Search NDC database (if integrated)
-  - Return: product name, manufacturer, package size, price
-- Function: `lookupPrice(ndc)`
-  - Get current price from ndc_price_history or products
-  - Return price and source
+##### 📌 Database Migration to Run First
 
-#### Younas (Admin Frontend)
+Run this script in Supabase SQL Editor before testing:
+```
+scripts/fcr_07_create_return_transaction_items.sql
+```
+
+##### 📌 API Endpoints Available
+
+**Items CRUD** (nested under return transactions):
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| `POST` | `/api/return-transactions/:id/items` | Add item to return | Processor or Admin |
+| `GET` | `/api/return-transactions/:id/items` | List all items (with summary) | Processor or Admin |
+| `GET` | `/api/return-transactions/:id/items/:itemId` | Get single item | Processor or Admin |
+| `PATCH` | `/api/return-transactions/:id/items/:itemId` | Update item | Processor or Admin |
+| `DELETE` | `/api/return-transactions/:id/items/:itemId` | Delete item | Processor or Admin |
+
+**Barcode Scan** (the key integration point):
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| `POST` | `/api/barcode/scan` | Parse GS1 QR + lookup product info | Processor or Admin |
+
+##### 📌 Barcode Scan — Request & Response (THE KEY ENDPOINT)
+
+**Request:**
+```json
+POST /api/barcode/scan
+Authorization: Bearer <token>
+{ "scanData": "https://go.gs1.org/01/00343547325060/10/0000054575/21/100000033382?17=251110" }
+```
+
+**Response (200) — real tested output:**
+```json
+{
+  "status": "success",
+  "data": {
+    "scan": {
+      "gtin": "00343547325060",
+      "lotNumber": "0000054575",
+      "serialNumber": "100000033382",
+      "expirationDate": "2025-11-10",
+      "ndc10": "4354732506",
+      "ndcCandidates": ["43547-3250-06", "43547-0325-06", "04354-7325-06"]
+    },
+    "product": {
+      "ndc": "43547-3250-06",
+      "proprietaryName": "DOXYCYCLINE HYCLATE",
+      "genericName": "DOXYCYCLINE HYCLATE",
+      "manufacturer": "Solco Healthcare US LLC",
+      "packageDescription": "60 TABLET, DELAYED RELEASE in 1 BOTTLE (43547-325-06)",
+      "dosageForm": "TABLET, DELAYED RELEASE",
+      "strength": "200 mg/1",
+      "route": "ORAL",
+      "deaSchedule": null,
+      "productType": "HUMAN PRESCRIPTION DRUG",
+      "source": "openfda"
+    },
+    "autoFill": {
+      "ndc": "43547-3250-06",
+      "ndc10": "4354732506",
+      "gtin": "00343547325060",
+      "proprietaryName": "DOXYCYCLINE HYCLATE",
+      "genericName": "DOXYCYCLINE HYCLATE",
+      "manufacturer": "Solco Healthcare US LLC",
+      "packageDescription": "60 TABLET, DELAYED RELEASE in 1 BOTTLE (43547-325-06)",
+      "dosageForm": "TABLET, DELAYED RELEASE",
+      "strength": "200 mg/1",
+      "route": "ORAL",
+      "lotNumber": "0000054575",
+      "serialNumber": "100000033382",
+      "expirationDate": "2025-11-10",
+      "scanSource": "gs1_qr"
+    }
+  }
+}
+```
+
+> **Use the `autoFill` object to populate all form fields at once.**
+
+##### 📌 Add Item — Request & Response
+
+```json
+POST /api/return-transactions/{transactionId}/items
+Authorization: Bearer <token>
+{
+  "ndc": "43547-3250-06",
+  "ndc10": "4354732506",
+  "gtin": "00343547325060",
+  "proprietaryName": "DOXYCYCLINE HYCLATE",
+  "manufacturer": "Solco Healthcare US LLC",
+  "packageDescription": "60 TABLET, DELAYED RELEASE in 1 BOTTLE",
+  "dosageForm": "TABLET, DELAYED RELEASE",
+  "strength": "200 mg/1",
+  "lotNumber": "0000054575",
+  "serialNumber": "100000033382",
+  "expirationDate": "2025-11-10",
+  "standardPrice": 45.99,
+  "quantity": 1,
+  "fullPackageSize": 60,
+  "isPartial": false,
+  "returnStatus": "tbd",
+  "scanSource": "gs1_qr"
+}
+```
+
+Response includes `warning` + `duplicateItemId` if same NDC+lot already exists (still saves, just warns).
+
+##### 📌 List Items — Response
+
+```
+GET /api/return-transactions/{id}/items?returnStatus=returnable&search=doxy
+```
+
+```json
+{
+  "status": "success",
+  "data": {
+    "items": [ ...item objects... ],
+    "summary": {
+      "totalItems": 12,
+      "totalReturnableValue": 523.45,
+      "totalNonReturnableValue": 89.10,
+      "totalValue": 612.55
+    }
+  }
+}
+```
+
+##### 📌 Frontend Workflow: Scan → Fill → Save → Next
+
+```
+1. User clicks "Add Item" or focuses scan input
+2. QR scanner fires → POST /api/barcode/scan { scanData }
+3. response.data.autoFill → populate all form fields
+4. User reviews, adjusts quantity/price, adds price if missing
+5. User clicks "Save & Scan Next" → POST /api/return-transactions/:id/items
+6. Form clears → ready for next scan
+7. Item appears in grid (GET /api/return-transactions/:id/items)
+```
+
+##### 📌 Frontend Tasks for Younas
 
 **Task 4.5: Create "Adding Products Mode" page**
 
 - Location: `admin/app/warehouse/returns/[id]/add-items/page.tsx`
 - UI sections:
   1. **Header**: Pharmacy name, License plate, "Adding Products Mode" label
-  2. **Barcode input**: 
-     - Text field for scan input (auto-focus)
-     - "Manual NDC Entry" button (fallback)
-  3. **Product fields** (auto-populated from scan):
-     - NDC (11-digit, read-only after scan)
-     - Proprietary Name
-     - Manufacturer
-     - Package Description
-     - Dosage / Strength / Unit (3 fields)
-     - Lot Number
-     - Serial Number
-     - Expiration Date (month/year dropdowns)
-     - Standard Price (with "Add Price" button for manual)
-     - Full Package Size
-     - Full Package QTY Returned (number input)
-     - Full vs Partial toggle
-     - Estimated Value (auto-calculated, read-only)
-  4. **Classification** (auto-set by policy engine, can override):
-     - Radio: Returnable / Non-Returnable / TBD
-  5. **Additional fields**:
-     - DEA Class (if controlled substance)
-     - Return Reason (dropdown)
-     - Memo (textarea)
-  6. **Action buttons**:
-     - "Save & Return" — save item, clear form, ready for next scan
-     - "Cancel This Item" — discard without saving
-     - "Back To Main Form" — return to transaction view
+  2. **Barcode input**: text field (auto-focus, listen for paste/scanner), on input: call `POST /api/barcode/scan`, use `autoFill` to populate fields. "Manual NDC Entry" fallback button.
+  3. **Product fields** (auto-populated from autoFill): NDC, Proprietary Name, Generic Name, Manufacturer, Package Description, Dosage Form, Strength, Route, Lot Number, Serial Number, Expiration Date, Standard Price (editable), Full Package Size, Quantity Returned, Full vs Partial toggle, Estimated Value (auto-calc, read-only)
+  4. **Classification**: Radio Returnable / Non-Returnable / TBD (default: tbd)
+  5. **Additional**: DEA Schedule (auto-filled if controlled), Return Reason (dropdown), Memo (textarea)
+  6. **Buttons**: "Save & Scan Next" (POST items + clear form), "Cancel This Item", "Back To Return"
 
-**Task 4.6: Create product list grid**
+**Task 4.6: Create product list grid on return detail page**
 
 - Location: `admin/app/warehouse/returns/[id]/page.tsx`
-- UI:
-  - Data grid with columns: NDC, Name, QTY, FBS, Price, Est.Value, Expires, Returnable, DEA, Lot, Memo, Manufacturer
-  - Row click → edit item
-  - Delete button per row
-  - Summary: Total items, Total returnable value, Total non-returnable value
-  - Buttons: "Add More Items", "Check Pricing", "Complete Return"
+- Fetch: `GET /api/return-transactions/:id/items`
+- Grid columns: NDC, Name, QTY, Package Size, Price, Est.Value, Expires, Status, DEA, Lot, Manufacturer
+- Row actions: edit (inline/modal), delete (confirm → DELETE endpoint)
+- Summary bar: totalItems, totalReturnableValue, totalNonReturnableValue, totalValue
+- Buttons: "Add More Items" (→ add-items page), "Complete Return"
+- Status badges: returnable (green), non_returnable (red), tbd (yellow)
 
 **Task 4.7: Integrate barcode scanner component**
 
-- Location: Reuse `Frontend/components/barcode/BarcodeScanner.tsx`
-- Copy to admin app or create shared component
-- On scan:
-  1. Call `/api/barcode/parse` with scanned data
-  2. Call `/api/ndc-search` or NDC lookup
-  3. Call policy engine
-  4. Populate form fields
+- Option A: Reuse `Frontend/components/barcode/BarcodeScanner.tsx` (copy to admin)
+- Option B: Text input that captures USB/Bluetooth scanner output (simplest)
+- On scan: call `POST /api/barcode/scan` → use `autoFill` object → populate form
 
 ### How to Implement (Guidance for Cursor AI)
 
 When working on Task 4.5 (Adding Products Mode):
 ```
-Prompt: "Create the Adding Products Mode page at admin/app/warehouse/returns/[id]/add-items/page.tsx. This page should:
-1. Show pharmacy name and license plate in header
-2. Have a barcode scan input field that auto-focuses
-3. Have a 'Manual NDC Entry' button as fallback
-4. Show a form with all product fields (NDC, name, manufacturer, dosage, strength, unit, lot, serial, expiration, price, quantity, full/partial toggle)
-5. Auto-calculate estimated value (price × quantity)
-6. Show classification radio buttons (Returnable/Non-Returnable/TBD) that are auto-set by API
-7. Have Save & Return, Cancel, and Back buttons
-8. On Save, call POST /api/return-transactions/:id/items and clear form for next scan
-Follow the existing form patterns in the admin app."
+Prompt: "Create the Adding Products Mode page at admin/app/warehouse/returns/[id]/add-items/page.tsx:
+1. Show pharmacy name and license plate in header (fetch from GET /api/return-transactions/:id)
+2. Auto-focus barcode input that listens for paste/scan events
+3. On scan/paste: call POST /api/barcode/scan with { scanData: value }
+4. Use response.data.autoFill to populate ALL product fields automatically
+5. Fields: NDC (readonly after scan), name, manufacturer, dosage, strength, lot, serial, expiration, price (editable), quantity, full/partial toggle
+6. Auto-calculate estimated value = price × quantity
+7. Classification radios: Returnable / Non-Returnable / TBD (default: tbd)
+8. 'Save & Scan Next': POST /api/return-transactions/:id/items with all fields, clear form
+9. 'Manual NDC Entry' fallback button
+Use apiClient from admin/lib/api/apiClient.ts."
+```
+
+When working on Task 4.6 (product list grid):
+```
+Prompt: "Create the return detail page at admin/app/warehouse/returns/[id]/page.tsx:
+1. Fetch return details from GET /api/return-transactions/:id
+2. Fetch items from GET /api/return-transactions/:id/items
+3. Header: license plate, pharmacy, status, timestamps
+4. Data grid: NDC, Name, QTY, Price, Est.Value, Expiration, Return Status, Lot, Manufacturer
+5. Summary: totalItems, totalReturnableValue, totalNonReturnableValue from response.data.summary
+6. Row actions: edit, delete (DELETE /api/return-transactions/:id/items/:itemId)
+7. Buttons: 'Add More Items' → add-items page, 'Complete Return'
+8. Color-code returnStatus badges
+Follow table patterns from admin/app/pharmacies/page.tsx."
 ```
 
 ---
