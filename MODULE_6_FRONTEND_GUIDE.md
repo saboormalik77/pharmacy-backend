@@ -36,6 +36,7 @@ curl -X POST http://localhost:3000/api/return-transactions/{transactionId}/items
     "proprietaryName": "DOXYCYCLINE HYCLATE",
     "manufacturer": "Solco Healthcare US LLC",
     "quantity": 1,
+    "fullPackageSize": 60,
     "isPartial": false,
     "scanSource": "gs1_qr"
   }'

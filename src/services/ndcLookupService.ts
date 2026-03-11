@@ -27,6 +27,7 @@ export interface NDCProductInfo {
   route: string | null;
   deaSchedule: string | null;
   productType: string | null;
+  fullPackageSize: number | null;
   activeIngredients: { name: string; strength: string }[];
   source: 'openfda' | 'rxnav' | 'openai' | 'combined';
 }
@@ -67,6 +68,7 @@ async function lookupOpenFDA(ndc: string): Promise<NDCProductInfo | null> {
         route: Array.isArray(r.route) ? r.route.join(', ') : r.route || null,
         deaSchedule: r.dea_schedule || null,
         productType: r.product_type || null,
+        fullPackageSize: extractPackageSize(pkg?.description),
         activeIngredients: (r.active_ingredients || []).map((ai: any) => ({
           name: ai.name,
           strength: ai.strength,
@@ -115,6 +117,7 @@ async function lookupRxNav(ndc: string): Promise<NDCProductInfo | null> {
         route: null,
         deaSchedule: null,
         productType: null,
+        fullPackageSize: null,
         activeIngredients: [],
         source: 'rxnav',
       };
@@ -179,6 +182,7 @@ Only return valid JSON. If you are not sure about a field, return null for it.`;
       route: parsed.route || partialData?.route || null,
       deaSchedule: parsed.deaSchedule || partialData?.deaSchedule || null,
       productType: parsed.productType || partialData?.productType || null,
+      fullPackageSize: partialData?.fullPackageSize || null,
       activeIngredients: partialData?.activeIngredients || [],
       source: partialData ? 'combined' : 'openai',
     };
@@ -225,6 +229,7 @@ export async function lookupNDC(ndc: string): Promise<NDCProductInfo | null> {
       ndc11: rxResult.ndc11 || fdaResult.ndc11,
       proprietaryName: fdaResult.proprietaryName || rxResult.proprietaryName,
       genericName: fdaResult.genericName || rxResult.genericName,
+      fullPackageSize: fdaResult.fullPackageSize || rxResult.fullPackageSize,
       source: 'combined',
     };
   }
@@ -263,6 +268,36 @@ export async function lookupNDCFromCandidates(candidates: string[]): Promise<NDC
 // ============================================================
 // Helpers
 // ============================================================
+
+/**
+ * Extract package size (count) from FDA packaging description.
+ * Examples:
+ *   "100 TABLET, EXTENDED RELEASE in 1 BOTTLE (62332-745-31)" → 100
+ *   "1000 TABLET, EXTENDED RELEASE in 1 BOTTLE (62332-745-91)" → 1000
+ *   "30 CAPSULE in 1 BOTTLE (12345-678-30)" → 30
+ *   "1 TUBE in 1 CARTON (98765-432-01)" → 1
+ */
+function extractPackageSize(description: string | null | undefined): number | null {
+  if (!description) return null;
+  
+  // Match patterns like "100 TABLET", "1000 CAPSULE", "30 INJECTION", etc.
+  // Look for number at the start followed by a space and dosage form word
+  const match = description.match(/^(\d+)\s+(?:TABLET|CAPSULE|INJECTION|VIAL|AMPULE|SYRINGE|PATCH|SUPPOSITORY|CREAM|OINTMENT|GEL|LOTION|SOLUTION|SUSPENSION|POWDER|GRANULE|PELLET|LOZENGE|TROCHE|FILM|STRIP|DISC|RING|INSERT|APPLICATOR|BOTTLE|TUBE|JAR|PACKET|SACHET|POUCH|BAG|KIT|DEVICE|INHALER|PEN|CARTRIDGE|PREFILLED|UNIT|DOSE)/i);
+  
+  if (match) {
+    const size = parseInt(match[1], 10);
+    return isNaN(size) ? null : size;
+  }
+  
+  // Fallback: try to find any number at the beginning
+  const fallbackMatch = description.match(/^(\d+)/);
+  if (fallbackMatch) {
+    const size = parseInt(fallbackMatch[1], 10);
+    return isNaN(size) ? null : size;
+  }
+  
+  return null;
+}
 
 /**
  * Generate all possible product_ndc (labeler-product) formats for openFDA search.

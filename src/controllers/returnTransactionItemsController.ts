@@ -252,6 +252,7 @@ export const scanBarcodeHandler = catchAsync(
         route: productInfo.route,
         deaSchedule: productInfo.deaSchedule,
         productType: productInfo.productType,
+        fullPackageSize: productInfo.fullPackageSize,
         activeIngredients: productInfo.activeIngredients,
         source: productInfo.source,
       } : null,
@@ -271,6 +272,7 @@ export const scanBarcodeHandler = catchAsync(
         expirationDate: gs1.expirationDate || null,
         deaSchedule: productInfo?.deaSchedule || null,
         productType: productInfo?.productType || null,
+        fullPackageSize: productInfo?.fullPackageSize || null,
         scanSource: gs1.gtin ? 'gs1_qr' : 'manual',
       },
     };
