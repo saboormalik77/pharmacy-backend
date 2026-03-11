@@ -3,7 +3,7 @@ import { catchAsync } from '../utils/catchAsync';
 import { AppError } from '../utils/appError';
 import * as itemsService from '../services/returnTransactionItemsService';
 import { parseGS1 } from '../services/gs1ParserService';
-import { lookupNDC, lookupNDCFromCandidates } from '../services/ndcLookupService';
+import { lookupNDC, lookupNDCFromCandidates, extractPackageSizeFromDescription } from '../services/ndcLookupService';
 import { checkReturnability, ReturnabilityResult } from '../services/policyEngineService';
 
 // ============================================================
@@ -20,8 +20,12 @@ export const addItemHandler = catchAsync(
     let destination = body.destination;
     let policyResult: ReturnabilityResult | null = null;
 
-    // Auto-classify via policy engine if returnStatus not explicitly set
-    const shouldAutoClassify = !returnStatus && body.ndc && body.expirationDate;
+    // Auto-classify via policy engine when:
+    // - returnStatus is not set, OR
+    // - returnStatus is "tbd" (default from frontend — means "please classify for me")
+    // Only skip when processor explicitly chose "returnable" or "non_returnable"
+    const shouldAutoClassify =
+      (!returnStatus || returnStatus === 'tbd') && body.ndc && body.expirationDate;
 
     if (shouldAutoClassify) {
       try {
@@ -51,6 +55,15 @@ export const addItemHandler = catchAsync(
       }
     }
 
+    // Extract fullPackageSize from packageDescription if not explicitly provided
+    let fullPackageSize: number | undefined;
+    if (body.fullPackageSize != null) {
+      fullPackageSize = Number(body.fullPackageSize);
+    } else if (body.packageDescription) {
+      const extracted = extractPackageSizeFromDescription(body.packageDescription);
+      if (extracted) fullPackageSize = extracted;
+    }
+
     const result = await itemsService.addItem({
       transactionId,
       ndc: body.ndc,
@@ -68,7 +81,7 @@ export const addItemHandler = catchAsync(
       expirationDate: body.expirationDate,
       standardPrice: body.standardPrice != null ? Number(body.standardPrice) : undefined,
       quantity: body.quantity != null ? Number(body.quantity) : undefined,
-      fullPackageSize: body.fullPackageSize != null ? Number(body.fullPackageSize) : undefined,
+      fullPackageSize,
       isPartial: body.isPartial,
       partialPercentage: body.partialPercentage != null ? Number(body.partialPercentage) : undefined,
       returnStatus,

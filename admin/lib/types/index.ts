@@ -914,6 +914,7 @@ export interface BarcodeScanResponse {
         route: string | null;
         deaSchedule: string | null;
         productType: string | null;
+        fullPackageSize: number | null;
         source: string;
     } | null;
     autoFill: {
@@ -932,6 +933,7 @@ export interface BarcodeScanResponse {
         expirationDate: string | null;
         deaSchedule: string | null;
         productType: string | null;
+        fullPackageSize: number | null;
         scanSource: string;
     };
 }

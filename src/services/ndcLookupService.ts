@@ -277,6 +277,10 @@ export async function lookupNDCFromCandidates(candidates: string[]): Promise<NDC
  *   "30 CAPSULE in 1 BOTTLE (12345-678-30)" → 30
  *   "1 TUBE in 1 CARTON (98765-432-01)" → 1
  */
+export function extractPackageSizeFromDescription(description: string | null | undefined): number | null {
+  return extractPackageSize(description);
+}
+
 function extractPackageSize(description: string | null | undefined): number | null {
   if (!description) return null;
   

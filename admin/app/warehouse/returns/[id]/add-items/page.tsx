@@ -122,7 +122,7 @@ export default function AddItemsPage() {
                 expirationDate: af.expirationDate || '',
                 standardPrice: '',
                 quantity: '1',
-                fullPackageSize: '',
+                fullPackageSize: af.fullPackageSize ? String(af.fullPackageSize) : '',
                 isPartial: false,
                 partialPercentage: '',
                 returnStatus: 'tbd',
