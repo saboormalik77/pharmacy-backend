@@ -12,6 +12,7 @@ import marketplaceReducer from './marketplaceSlice';
 import recentActivityReducer from './recentActivitySlice';
 import processorsReducer from './processorsSlice';
 import returnTransactionsReducer from './returnTransactionsSlice';
+import policiesReducer from './policiesSlice';
 
 export const makeStore = () => {
   return configureStore({
@@ -29,6 +30,7 @@ export const makeStore = () => {
       recentActivity: recentActivityReducer,
       processors: processorsReducer,
       returnTransactions: returnTransactionsReducer,
+      policies: policiesReducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({

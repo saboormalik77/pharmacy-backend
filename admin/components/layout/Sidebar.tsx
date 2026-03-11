@@ -17,6 +17,7 @@ import {
     ClipboardList,
     Scan,
     Archive,
+    Shield,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppSelector } from '@/lib/store/hooks';
@@ -33,6 +34,7 @@ const adminSidebarLinks = [
     { href: '/settings', icon: Settings, label: 'Settings' },
     { href: '/admins', icon: Users, label: 'Admins' },
     { href: '/processors', icon: UserCog, label: 'Processors' },
+    { href: '/policies', icon: Shield, label: 'Policies' },
 ];
 
 // Processor navigation (for role = 'processor')

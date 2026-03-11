@@ -1260,50 +1260,53 @@ The system determines:
   - `GET /api/admin/policies/:id/notes` — Get policy notes
   - `POST /api/admin/policies/:id/notes` — Add note
 
-#### Younas (Admin Frontend)
+#### Younas (Admin Frontend) ✅ **COMPLETED**
 
-**Task 5.7: Create policies management page**
+> **All Module 5 frontend tasks are done.**
 
-- Location: `admin/app/policies/page.tsx`
-- UI:
-  - Table: Labeler ID, Manufacturer Name, Type, Destination, Partials, Avg Pay %, Avg Days
-  - Search by manufacturer name or labeler ID
-  - Filter by destination, type
-  - Click row → detail page
-  - "Add Policy" button → modal form
+**Task 5.7: Create policies management page** ✅ **DONE**
 
-**Task 5.8: Create policy detail page**
+- ✅ **Location:** `admin/app/policies/page.tsx`
+- ✅ **Table columns:** Labeler ID (mono), Manufacturer Name, Type badge, Destinations (color badges), Partials, Avg Pay %, Avg Days
+- ✅ **Search:** Debounced search by manufacturer name, labeler ID, or email
+- ✅ **Filters:** Type (All/Generic/Brand), Destination (All/Inmar/Qualanex/PharmaLink)
+- ✅ **Pagination:** Full pagination with page indicator
+- ✅ **Click row:** Navigates to detail page (`/policies/[id]`)
+- ✅ **Add Policy modal:** Labeler ID, Type, Manufacturer Name, Contact, Phone, Email, Avg Pay %, Avg Days
+- ✅ **Delete Policy:** Confirmation modal with warning about cascade
+- ✅ **Sidebar:** Added "Policies" link with Shield icon in admin navigation
 
-- Location: `admin/app/policies/[id]/page.tsx`
-- UI sections:
-  1. **Basic info**: Labeler ID, Name, Type, Contact info
-  2. **Return policies**: Table of return policy records (destination, window, partials, rate)
-  3. **Exceptions**: Table of non-returnable products (NDC, name, reason)
-  4. **Notes**: Chronological list of dated notes
-  5. **Metrics**: Avg pay percent, Avg days to pay
-- Edit buttons for each section
+**Task 5.8: Create policy detail page** ✅ **DONE**
 
-**Task 5.9: Add Redux slice for policies**
+- ✅ **Location:** `admin/app/policies/[id]/page.tsx`
+- ✅ **Section 1 — Policy Info:** Labeler ID, Type, Contact, Phone, Email, Address, Verified date
+- ✅ **Section 2 — Metrics:** Two stat cards (Avg Pay %, Avg Days to Pay), Created/Updated dates
+- ✅ **Section 3 — Return Policies:** Table (Destination badge, Window "Xmo before – Ymo after", Partials, Discount rate, Description). Add/Edit/Delete modals with full form (destination, reimbursement type, description, months before/after, discount, partials, auto RA email)
+- ✅ **Section 4 — Non-Returnable Exceptions:** Table (NDC mono, Product Name, Reason). Add/Delete modals
+- ✅ **Section 5 — Notes:** Chronological cards with date, author initials badge, text. Add/Delete modals
+- ✅ **Edit Info modal:** All basic policy fields editable
+- ✅ **Delete Policy:** Confirmation modal from header
 
-- Location: `admin/lib/store/policiesSlice.ts`
-- State: list, currentPolicy, pagination, filters, isLoading, error
-- Thunks: fetchPolicies, createPolicy, updatePolicy, checkReturnability, etc.
+**Task 5.9: Add Redux slice for policies** ✅ **DONE**
+
+- ✅ **Location:** `admin/lib/store/policiesSlice.ts`
+- ✅ **State:** `policies`, `currentPolicy`, `pagination`, `filters`, `isLoading`, `isActionLoading`, `error`
+- ✅ **Core thunks:** `fetchPolicies`, `fetchPolicyById`, `createPolicy`, `updatePolicy`, `deletePolicy`
+- ✅ **Return Policy thunks:** `addReturnPolicy`, `updateReturnPolicy`, `deleteReturnPolicy`
+- ✅ **Exception thunks:** `addException`, `deleteException`
+- ✅ **Note thunks:** `addNote`, `deleteNote`
+- ✅ **Policy check thunk:** `checkReturnability` (`POST /api/policies/check`)
+- ✅ **Reducers:** `setFilters`, `clearError`, `clearCurrentPolicy`
+- ✅ **Registered** in `admin/lib/store/store.ts`
+
+**Types added to `admin/lib/types/index.ts`:**
+- `ManufacturerPolicy`, `ReturnPolicyRecord`, `NonReturnableProduct`, `PolicyNote`
+- `ManufacturerPolicyCreatePayload`, `ReturnPolicyCreatePayload`, `NonReturnableProductPayload`, `PolicyNotePayload`
+- `ReturnabilityCheckResult`, `PoliciesListResponse`
 
 ### How to Implement (Guidance for Cursor AI)
 
-When working on Task 5.5 (policy engine):
-```
-Prompt: "Create a policy engine service at src/services/policyEngineService.ts with a function checkReturnability(ndc, expirationDate, isPartial, dosageForm) that:
-1. Extracts labeler_id from NDC (first 5 digits)
-2. Looks up manufacturer_policies by labeler_id
-3. Returns TBD if no policy found
-4. Checks non_returnable_products for specific NDC exceptions
-5. Calculates return window based on months_before and months_after expiration
-6. Checks if current date is within window
-7. Checks partial acceptance rules
-8. Returns { status, reason, destination, expected_returnable_date }
-Use Supabase for database queries."
-```
+> **All Module 5 tasks are completed. Guidance kept for reference.**
 
 ---
 

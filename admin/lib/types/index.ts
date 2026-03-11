@@ -721,6 +721,144 @@ export interface AddItemPayload {
     rawScanData?: string;
 }
 
+// ── Policy Engine (Module 5) ───────────────────────────────
+
+export interface ManufacturerPolicy {
+    id: string;
+    labelerId: string;
+    labelerType: 'generic' | 'brand';
+    manufacturerName: string;
+    address1: string | null;
+    address2: string | null;
+    city: string | null;
+    state: string | null;
+    zip: string | null;
+    mainContact: string | null;
+    mainPhone: string | null;
+    fax: string | null;
+    creditRequestEmail: string | null;
+    contact2Name: string | null;
+    contact2Phone: string | null;
+    contact2Email: string | null;
+    averagePayPercent: number | null;
+    averageDaysToPay: number | null;
+    verifiedDate: string | null;
+    createdAt: string;
+    updatedAt: string;
+    returnPolicies?: ReturnPolicyRecord[];
+    destinations?: string[];
+    exceptions?: NonReturnableProduct[];
+    notes?: PolicyNote[];
+}
+
+export interface ReturnPolicyRecord {
+    id: string;
+    manufacturerPolicyId: string;
+    destination: string;
+    autoRaEmail: string | null;
+    policyNumber: number | null;
+    policyDescription: string | null;
+    monthsBeforeExpiration: number | null;
+    monthsAfterExpiration: number | null;
+    discountRate: number | null;
+    partialsAccepted: boolean;
+    partialDosageForms: string[] | null;
+    reimbursementType: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface NonReturnableProduct {
+    id: string;
+    manufacturerPolicyId: string;
+    ndc: string;
+    productName: string | null;
+    reason: string | null;
+    createdAt: string;
+}
+
+export interface PolicyNote {
+    id: string;
+    manufacturerPolicyId: string;
+    noteDate: string;
+    authorInitials: string | null;
+    noteText: string;
+    createdAt: string;
+}
+
+export interface ManufacturerPolicyCreatePayload {
+    labelerId: string;
+    manufacturerName: string;
+    labelerType?: 'generic' | 'brand';
+    address1?: string;
+    address2?: string;
+    city?: string;
+    state?: string;
+    zip?: string;
+    mainContact?: string;
+    mainPhone?: string;
+    fax?: string;
+    creditRequestEmail?: string;
+    contact2Name?: string;
+    contact2Phone?: string;
+    contact2Email?: string;
+    averagePayPercent?: number;
+    averageDaysToPay?: number;
+    verifiedDate?: string;
+}
+
+export interface ReturnPolicyCreatePayload {
+    destination: string;
+    autoRaEmail?: string;
+    policyNumber?: number;
+    policyDescription?: string;
+    monthsBeforeExpiration?: number;
+    monthsAfterExpiration?: number;
+    discountRate?: number;
+    partialsAccepted?: boolean;
+    partialDosageForms?: string[];
+    reimbursementType?: 'batch' | 'per_item';
+}
+
+export interface NonReturnableProductPayload {
+    ndc: string;
+    productName?: string;
+    reason?: string;
+}
+
+export interface PolicyNotePayload {
+    noteText: string;
+    noteDate?: string;
+    authorInitials?: string;
+}
+
+export interface ReturnabilityCheckResult {
+    status: 'returnable' | 'non_returnable' | 'tbd';
+    reason: string | null;
+    destination: string | null;
+    discountRate: number | null;
+    reimbursementType: string | null;
+    policyNumber: number | null;
+    policyDescription: string | null;
+    expectedReturnableDate: string | null;
+    windowStart: string | null;
+    windowEnd: string | null;
+    partialsAccepted: boolean | null;
+    manufacturerName: string | null;
+    manufacturerPolicyId: string | null;
+    autoRaEmail: string | null;
+}
+
+export interface PoliciesListResponse {
+    policies: ManufacturerPolicy[];
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+    };
+}
+
 export interface BarcodeScanResponse {
     scan: {
         gtin: string | null;
