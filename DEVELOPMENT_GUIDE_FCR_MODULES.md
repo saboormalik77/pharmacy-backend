@@ -1335,51 +1335,42 @@ Based on policy engine result, route item to:
 
 #### Saboor (Backend)
 
-**Task 6.1: Implement routing in add item endpoint**
+**Task 6.1: Implement routing in add item endpoint** ✅ DONE
 
-- Location: `src/services/returnTransactionService.ts`
-- When adding item:
-  1. Call policy engine
-  2. Based on result:
-     - If returnable → set return_status = 'returnable', assign destination
-     - If non_returnable (permanent) → set return_status = 'non_returnable', reason = 'policy'
-     - If non_returnable (timing) → set return_status = 'non_returnable', reason = 'date', calculate expected_returnable_date
-     - If TBD → set return_status = 'tbd'
-  3. Save item with classification
+- Location: `src/controllers/returnTransactionItemsController.ts`
+- Auto-classifies items via policy engine when `returnStatus` is not provided
+- Returns `policyCheck` object alongside saved item data
+- Falls back to `tbd` if policy engine fails
 
-**Task 6.2: Create TBD resolution endpoint**
+**Task 6.2: Create TBD resolution endpoint** ✅ DONE
 
-- Location: Extend return transaction items API
 - Endpoint: `PATCH /api/return-transactions/:id/items/:itemId/resolve`
-  - Input: new_status ('returnable' or 'non_returnable'), reason, destination
-  - Used when staff manually researches and resolves TBD items
+- Validates item is currently TBD before allowing resolution
+- Input: `new_status` ('returnable' or 'non_returnable'), `reason`, `destination`, `memo`
+- Location: `src/controllers/returnTransactionItemsController.ts` + `src/routes/returnTransactionItemsRoutes.ts`
 
-**Task 6.3: Create destruction_records table**
+**Task 6.3: Create destruction_records table** ✅ DONE
 
-- Location: SQL migration
-- Table: `destruction_records`
-  - `id` (UUID, PK)
-  - `pharmacy_id` (UUID, FK)
-  - `transaction_item_id` (UUID, FK)
-  - `ndc` (VARCHAR 13)
-  - `product_name` (TEXT)
-  - `quantity` (INTEGER)
-  - `weight_lbs` (DECIMAL)
-  - `destruction_reason` (TEXT)
-  - `federal_form_number` (TEXT)
-  - `destruction_company` (TEXT)
-  - `picked_up_at` (TIMESTAMP)
-  - `form_url` (TEXT)
-  - `created_at`
+- SQL migration: `scripts/fcr_10_create_destruction_records.sql`
+- Includes: status enum, indexes, RLS, updated_at trigger
+- Extended columns: `manufacturer`, `lot_number`, `status` enum, `scheduled_date`, `destroyed_at`, `notes`, `created_by`
 
-**Task 6.4: Create destruction API**
+**Task 6.4: Create destruction API** ✅ DONE
 
-- Location: Create new files for destruction management
+- Service: `src/services/destructionService.ts`
+- Controller: `src/controllers/destructionController.ts`
+- Routes: `src/routes/destructionRoutes.ts`
 - Endpoints:
-  - `GET /api/admin/destruction` — List destruction records
-  - `POST /api/admin/destruction` — Create record (when item marked for destruction)
-  - `PATCH /api/admin/destruction/:id` — Update (pickup date, form number)
+  - `GET /api/admin/destruction` — List with pagination, filtering, search
+  - `POST /api/admin/destruction` — Create record
+  - `PATCH /api/admin/destruction/:id` — Update (status, pickup date, form number, etc.)
   - `GET /api/admin/destruction/pending` — Items awaiting destruction
+  - `GET /api/admin/destruction/stats` — Statistics by status
+  - `GET /api/admin/destruction/:id` — Get single record
+
+### How to Implement (Guidance for Cursor AI)
+
+> **All Module 6 backend tasks are completed. Guidance kept for reference.**
 
 #### Younas (Admin Frontend)
 

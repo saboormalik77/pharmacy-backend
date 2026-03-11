@@ -5,6 +5,7 @@ import {
   getItemHandler,
   updateItemHandler,
   deleteItemHandler,
+  resolveItemHandler,
 } from '../controllers/returnTransactionItemsController';
 import { authenticateAdmin } from '../middleware/adminAuth';
 import { authenticateProcessor } from '../middleware/processorAuth';
@@ -174,6 +175,45 @@ router.get('/:itemId', authenticateAny, getItemHandler);
  *         description: Updated item
  */
 router.patch('/:itemId', authenticateAny, updateItemHandler);
+
+/**
+ * @swagger
+ * /api/return-transactions/{transactionId}/items/{itemId}/resolve:
+ *   patch:
+ *     summary: Resolve a TBD item (manual classification after research)
+ *     tags: [Return Transaction Items]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: transactionId
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *       - in: path
+ *         name: itemId
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [new_status]
+ *             properties:
+ *               new_status: { type: string, enum: [returnable, non_returnable] }
+ *               reason: { type: string, description: "Reason for non-returnable classification" }
+ *               destination: { type: string, enum: [inmar, qualanex, pharmalink, other] }
+ *               memo: { type: string, description: "Staff notes on the resolution" }
+ *     responses:
+ *       200:
+ *         description: Item resolved successfully
+ *       400:
+ *         description: Invalid status or item already classified
+ *       404:
+ *         description: Item not found
+ */
+router.patch('/:itemId/resolve', authenticateAny, resolveItemHandler);
 
 /**
  * @swagger

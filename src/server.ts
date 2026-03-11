@@ -36,6 +36,7 @@ import ndcSearchRoutes from './routes/ndcSearchRoutes';
 import inventoryAnalysisRoutes from './routes/inventoryAnalysisRoutes';
 import notificationRoutes from './routes/notificationRoutes';
 import { adminPoliciesRouter, policyCheckRouter } from './routes/policiesRoutes';
+import destructionRoutes from './routes/destructionRoutes';
 import { globalErrorHandler } from './controllers/errorController';
 import { checkExpiringProductsAndNotify } from './services/notificationCronService';
 import { swaggerSpec } from './config/swagger';
@@ -159,6 +160,7 @@ app.use('/api/inventory-analysis', inventoryAnalysisRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/admin/policies', adminPoliciesRouter);
 app.use('/api/policies', policyCheckRouter);
+app.use('/api/admin/destruction', destructionRoutes);
 
 /**
  * @swagger

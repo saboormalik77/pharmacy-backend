@@ -4,14 +4,52 @@ import { AppError } from '../utils/appError';
 import * as itemsService from '../services/returnTransactionItemsService';
 import { parseGS1 } from '../services/gs1ParserService';
 import { lookupNDC, lookupNDCFromCandidates } from '../services/ndcLookupService';
+import { checkReturnability, ReturnabilityResult } from '../services/policyEngineService';
 
 // ============================================================
 // POST /api/return-transactions/:id/items — Add scanned item
+// Auto-classifies via policy engine when returnStatus is not provided
 // ============================================================
 export const addItemHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const transactionId = req.params.id;
     const body = req.body;
+
+    let returnStatus = body.returnStatus;
+    let nonReturnableReason = body.nonReturnableReason;
+    let destination = body.destination;
+    let policyResult: ReturnabilityResult | null = null;
+
+    // Auto-classify via policy engine if returnStatus not explicitly set
+    const shouldAutoClassify = !returnStatus && body.ndc && body.expirationDate;
+
+    if (shouldAutoClassify) {
+      try {
+        policyResult = await checkReturnability({
+          ndc: body.ndc,
+          expirationDate: body.expirationDate,
+          isPartial: body.isPartial === true || body.isPartial === 'true',
+          dosageForm: body.dosageForm,
+        });
+
+        returnStatus = policyResult.status;
+        destination = policyResult.destination || destination;
+
+        if (policyResult.status === 'non_returnable' && policyResult.reason) {
+          const reasonMap: Record<string, string> = {
+            too_early: 'date',
+            too_late: 'date',
+            policy_exception: 'policy',
+            no_partials: 'policy',
+            dosage_form_not_accepted: 'policy',
+          };
+          nonReturnableReason = reasonMap[policyResult.reason] || 'policy';
+        }
+      } catch (err: any) {
+        console.error('Policy engine auto-classify failed (saving as TBD):', err.message);
+        returnStatus = 'tbd';
+      }
+    }
 
     const result = await itemsService.addItem({
       transactionId,
@@ -33,10 +71,10 @@ export const addItemHandler = catchAsync(
       fullPackageSize: body.fullPackageSize != null ? Number(body.fullPackageSize) : undefined,
       isPartial: body.isPartial,
       partialPercentage: body.partialPercentage != null ? Number(body.partialPercentage) : undefined,
-      returnStatus: body.returnStatus,
-      nonReturnableReason: body.nonReturnableReason,
+      returnStatus,
+      nonReturnableReason,
       returnReason: body.returnReason,
-      destination: body.destination,
+      destination,
       deaSchedule: body.deaSchedule,
       deaForm222Required: body.deaForm222Required,
       productType: body.productType,
@@ -51,6 +89,10 @@ export const addItemHandler = catchAsync(
       status: 'success',
       data: result.item,
     };
+
+    if (policyResult) {
+      response.policyCheck = policyResult;
+    }
 
     if (result.duplicate) {
       response.warning = 'Duplicate NDC + lot number detected in this transaction';
@@ -106,6 +148,56 @@ export const deleteItemHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     await itemsService.deleteItem(req.params.itemId);
     res.status(200).json({ status: 'success', message: 'Item deleted' });
+  }
+);
+
+// ============================================================
+// PATCH /api/return-transactions/:id/items/:itemId/resolve — Resolve TBD item
+// ============================================================
+export const resolveItemHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { itemId } = req.params;
+    const { new_status, reason, destination, memo } = req.body;
+
+    if (!new_status || !['returnable', 'non_returnable'].includes(new_status)) {
+      throw new AppError('new_status must be "returnable" or "non_returnable"', 400);
+    }
+
+    const existingItem = await itemsService.getItem(itemId);
+    if (!existingItem) {
+      throw new AppError('Item not found', 404);
+    }
+
+    if (existingItem.returnStatus !== 'tbd') {
+      throw new AppError(
+        `Item is already classified as "${existingItem.returnStatus}". Only TBD items can be resolved.`,
+        400
+      );
+    }
+
+    const updates: Partial<itemsService.AddItemData> = {
+      returnStatus: new_status,
+    };
+
+    if (new_status === 'non_returnable') {
+      updates.nonReturnableReason = reason || 'manual_review';
+    }
+
+    if (destination) {
+      updates.destination = destination;
+    }
+
+    if (memo) {
+      updates.memo = memo;
+    }
+
+    const updatedItem = await itemsService.updateItem(itemId, updates);
+
+    res.status(200).json({
+      status: 'success',
+      data: updatedItem,
+      message: `Item resolved as ${new_status}`,
+    });
   }
 );
 
