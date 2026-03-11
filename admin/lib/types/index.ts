@@ -917,6 +917,18 @@ export interface BarcodeScanResponse {
         fullPackageSize: number | null;
         source: string;
     } | null;
+    pricing: {
+        suggestedPrice: number | null;
+        bestFullPrice: number | null;
+        bestPartialPrice: number | null;
+        priceSource: string | null;
+        distributorPricing: {
+            distributorName: string;
+            fullPrice: number;
+            partialPrice: number;
+            reportDate: string | null;
+        }[] | null;
+    };
     autoFill: {
         ndc: string | null;
         ndc10: string | null;
@@ -934,6 +946,7 @@ export interface BarcodeScanResponse {
         deaSchedule: string | null;
         productType: string | null;
         fullPackageSize: number | null;
+        standardPrice: number | null;
         scanSource: string;
     };
 }

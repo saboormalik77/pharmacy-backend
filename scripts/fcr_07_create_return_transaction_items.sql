@@ -164,7 +164,14 @@ BEGIN
   -- 2. Check for duplicate NDC + lot in same transaction (warn, don't block)
   v_price := COALESCE((p_data->>'standardPrice')::decimal, 0);
   v_qty   := COALESCE((p_data->>'quantity')::int, 1);
-  v_est   := v_price * v_qty;
+  
+  -- Calculate estimated value considering partials
+  v_est := CASE 
+    WHEN COALESCE((p_data->>'isPartial')::boolean, false) = true 
+     AND (p_data->>'partialPercentage')::decimal IS NOT NULL 
+    THEN v_price * v_qty * ((p_data->>'partialPercentage')::decimal / 100)
+    ELSE v_price * v_qty 
+  END;
 
   IF p_data->>'ndc' IS NOT NULL AND p_data->>'lotNumber' IS NOT NULL THEN
     SELECT id INTO v_dup
@@ -385,10 +392,17 @@ BEGIN
   WHERE id = p_item_id
   RETURNING * INTO v_item;
 
-  -- Recalculate estimated_value
+  -- Recalculate estimated_value considering partials
   v_price := COALESCE(v_item.standard_price, 0);
   v_qty   := COALESCE(v_item.quantity, 1);
-  UPDATE return_transaction_items SET estimated_value = v_price * v_qty WHERE id = p_item_id
+  
+  UPDATE return_transaction_items 
+  SET estimated_value = CASE 
+    WHEN is_partial = true AND partial_percentage IS NOT NULL 
+    THEN v_price * v_qty * (partial_percentage / 100)
+    ELSE v_price * v_qty 
+  END
+  WHERE id = p_item_id
   RETURNING * INTO v_item;
 
   -- Update transaction totals

@@ -120,7 +120,7 @@ export default function AddItemsPage() {
                 lotNumber: af.lotNumber || '',
                 serialNumber: af.serialNumber || '',
                 expirationDate: af.expirationDate || '',
-                standardPrice: '',
+                standardPrice: af.standardPrice ? String(af.standardPrice) : '',
                 quantity: '1',
                 fullPackageSize: af.fullPackageSize ? String(af.fullPackageSize) : '',
                 isPartial: false,

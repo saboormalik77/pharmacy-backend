@@ -5,6 +5,7 @@ import * as itemsService from '../services/returnTransactionItemsService';
 import { parseGS1 } from '../services/gs1ParserService';
 import { lookupNDC, lookupNDCFromCandidates, extractPackageSizeFromDescription } from '../services/ndcLookupService';
 import { checkReturnability, ReturnabilityResult } from '../services/policyEngineService';
+import { getPricingForSingleNDC } from '../services/pricingService';
 
 // ============================================================
 // POST /api/return-transactions/:id/items — Add scanned item
@@ -243,7 +244,45 @@ export const scanBarcodeHandler = catchAsync(
       productInfo = await lookupNDC(trimmed);
     }
 
-    // 3. Build unified response
+    // 3. Lookup suggested price from return reports
+    const resolvedNdc = productInfo?.ndc || gs1.ndcCandidates[0] || null;
+    let pricing: {
+      suggestedPrice: number | null;
+      bestFullPrice: number | null;
+      bestPartialPrice: number | null;
+      priceSource: string | null;
+      distributorPricing: any[] | null;
+    } = {
+      suggestedPrice: null,
+      bestFullPrice: null,
+      bestPartialPrice: null,
+      priceSource: null,
+      distributorPricing: null,
+    };
+
+    if (resolvedNdc) {
+      try {
+        const pricingResult = await getPricingForSingleNDC(resolvedNdc);
+        if (pricingResult && pricingResult.bestFullPrice > 0) {
+          pricing = {
+            suggestedPrice: pricingResult.bestFullPrice,
+            bestFullPrice: pricingResult.bestFullPrice,
+            bestPartialPrice: pricingResult.bestPartialPrice || null,
+            priceSource: pricingResult.recommendedDistributor?.distributorName || 'return_reports',
+            distributorPricing: pricingResult.distributors.map(d => ({
+              distributorName: d.distributorName,
+              fullPrice: d.fullPrice,
+              partialPrice: d.partialPrice,
+              reportDate: d.reportDate || null,
+            })),
+          };
+        }
+      } catch (err: any) {
+        console.error('Pricing lookup failed (non-blocking):', err.message);
+      }
+    }
+
+    // 4. Build unified response
     const result: Record<string, any> = {
       scan: {
         gtin: gs1.gtin,
@@ -269,8 +308,9 @@ export const scanBarcodeHandler = catchAsync(
         activeIngredients: productInfo.activeIngredients,
         source: productInfo.source,
       } : null,
+      pricing,
       autoFill: {
-        ndc: productInfo?.ndc || gs1.ndcCandidates[0] || null,
+        ndc: resolvedNdc,
         ndc10: gs1.ndc10 || null,
         gtin: gs1.gtin || null,
         proprietaryName: productInfo?.proprietaryName || null,
@@ -286,6 +326,7 @@ export const scanBarcodeHandler = catchAsync(
         deaSchedule: productInfo?.deaSchedule || null,
         productType: productInfo?.productType || null,
         fullPackageSize: productInfo?.fullPackageSize || null,
+        standardPrice: pricing.suggestedPrice,
         scanSource: gs1.gtin ? 'gs1_qr' : 'manual',
       },
     };
