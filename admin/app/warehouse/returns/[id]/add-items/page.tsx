@@ -16,7 +16,7 @@ import {
     scanBarcode,
     addTransactionItem,
 } from '@/lib/store/returnTransactionsSlice';
-import { BarcodeScanResponse } from '@/lib/types';
+import { BarcodeScanResponse, ReturnabilityCheckResult } from '@/lib/types';
 
 // Dynamically imported so it only loads in the browser (uses WebRTC APIs)
 const QrScannerModal = dynamic(() => import('@/components/scanner/QrScannerModal'), { ssr: false });
@@ -64,6 +64,7 @@ export default function AddItemsPage() {
     const [toasts, setToasts] = useState<Toast[]>([]);
     const [itemCount, setItemCount] = useState(0);
     const [lastWarning, setLastWarning] = useState('');
+    const [lastClassification, setLastClassification] = useState<{ item: string; status: string; policyCheck?: ReturnabilityCheckResult } | null>(null);
 
     const showToast = (message: string, type: Toast['type'] = 'success') => {
         const id = Date.now().toString();
@@ -205,6 +206,9 @@ export default function AddItemsPage() {
         if (addTransactionItem.fulfilled.match(result)) {
             setItemCount(prev => prev + 1);
             const name = form.proprietaryName || form.ndc || 'Item';
+            const savedItem = result.payload.item;
+            const pc = result.payload.policyCheck;
+
             showToast(`${name} saved! Ready for next scan.`);
 
             if (result.payload.warning) {
@@ -212,6 +216,12 @@ export default function AddItemsPage() {
             } else {
                 setLastWarning('');
             }
+
+            setLastClassification({
+                item: name,
+                status: savedItem?.returnStatus || form.returnStatus,
+                policyCheck: pc,
+            });
 
             setForm({ ...EMPTY_FORM });
             setScanError('');
@@ -226,6 +236,7 @@ export default function AddItemsPage() {
         setForm({ ...EMPTY_FORM });
         setScanError('');
         setLastWarning('');
+        setLastClassification(null);
         if (mode === 'usb') scanInputRef.current?.focus();
     };
 
@@ -401,6 +412,83 @@ export default function AddItemsPage() {
                     </div>
                 )}
             </div>
+
+            {/* Classification Result */}
+            {lastClassification && (
+                <div className={`rounded-lg border-2 p-4 ${
+                    lastClassification.status === 'returnable'
+                        ? 'bg-green-50 border-green-300'
+                        : lastClassification.status === 'non_returnable'
+                        ? 'bg-red-50 border-red-300'
+                        : 'bg-yellow-50 border-yellow-300'
+                }`}>
+                    <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                lastClassification.status === 'returnable' ? 'bg-green-200' :
+                                lastClassification.status === 'non_returnable' ? 'bg-red-200' : 'bg-yellow-200'
+                            }`}>
+                                {lastClassification.status === 'returnable' ? (
+                                    <CheckCircle className="w-5 h-5 text-green-700" />
+                                ) : lastClassification.status === 'non_returnable' ? (
+                                    <X className="w-5 h-5 text-red-700" />
+                                ) : (
+                                    <AlertTriangle className="w-5 h-5 text-yellow-700" />
+                                )}
+                            </div>
+                            <div>
+                                <p className={`text-sm font-bold ${
+                                    lastClassification.status === 'returnable' ? 'text-green-800' :
+                                    lastClassification.status === 'non_returnable' ? 'text-red-800' : 'text-yellow-800'
+                                }`}>
+                                    {lastClassification.item} — {
+                                        lastClassification.status === 'returnable' ? 'RETURNABLE' :
+                                        lastClassification.status === 'non_returnable' ? 'NON-RETURNABLE' : 'TBD (Needs Research)'
+                                    }
+                                </p>
+                                {lastClassification.policyCheck && (
+                                    <div className="mt-1 text-xs space-y-0.5">
+                                        {lastClassification.policyCheck.destination && (
+                                            <p className={lastClassification.status === 'returnable' ? 'text-green-700' : 'text-gray-600'}>
+                                                Destination: <span className="font-semibold capitalize">{lastClassification.policyCheck.destination}</span>
+                                            </p>
+                                        )}
+                                        {lastClassification.policyCheck.reason && lastClassification.status !== 'returnable' && (
+                                            <p className={lastClassification.status === 'non_returnable' ? 'text-red-700' : 'text-yellow-700'}>
+                                                Reason: {lastClassification.policyCheck.reason.replace(/_/g, ' ')}
+                                            </p>
+                                        )}
+                                        {lastClassification.policyCheck.expectedReturnableDate && (
+                                            <p className="text-blue-700 font-medium">
+                                                Will become returnable: {lastClassification.policyCheck.expectedReturnableDate}
+                                            </p>
+                                        )}
+                                        {lastClassification.policyCheck.windowStart && lastClassification.policyCheck.windowEnd && (
+                                            <p className="text-gray-500">
+                                                Return window: {lastClassification.policyCheck.windowStart} — {lastClassification.policyCheck.windowEnd}
+                                            </p>
+                                        )}
+                                        {lastClassification.policyCheck.manufacturerName && (
+                                            <p className="text-gray-500">
+                                                Manufacturer policy: {lastClassification.policyCheck.manufacturerName}
+                                            </p>
+                                        )}
+                                        {lastClassification.status === 'tbd' && !lastClassification.policyCheck.reason && (
+                                            <p className="text-yellow-700">Policy not found. Needs manual research.</p>
+                                        )}
+                                    </div>
+                                )}
+                                {!lastClassification.policyCheck && lastClassification.status === 'tbd' && (
+                                    <p className="text-xs text-yellow-700 mt-1">No policy data available. Needs manual research.</p>
+                                )}
+                            </div>
+                        </div>
+                        <button onClick={() => setLastClassification(null)} className="text-gray-400 hover:text-gray-600 p-1 flex-shrink-0">
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Product Form */}
             <div className="bg-white rounded-lg shadow-md p-5">
