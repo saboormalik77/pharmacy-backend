@@ -835,7 +835,7 @@ completed   → finalized               (finalize — permanent lock)
 
 ## Module 4: Product Scanning & Entry
 
-### ✅ **STATUS: Backend Complete (100% RPC + External APIs) — Frontend Ready to Start**
+### ✅ **STATUS: Fully Complete — Backend + Admin Frontend**
 
 | Component | Status | Files |
 |-----------|--------|-------|
@@ -846,6 +846,10 @@ completed   → finalized               (finalize — permanent lock)
 | **Barcode Scan API** | ✅ Complete | `POST /api/barcode/scan` — parse + lookup in one call |
 | **Auth** | ✅ Complete | Works with both processor and admin tokens |
 | **Swagger Docs** | ✅ Complete | Available at `/api-docs` under "Return Transaction Items" and "Barcode" tags |
+| **Redux Slice (Items)** | ✅ Complete | Extended `returnTransactionsSlice.ts` with 5 items thunks + scan thunk |
+| **Adding Products Page** | ✅ Complete | `admin/app/warehouse/returns/[id]/add-items/page.tsx` |
+| **Product List Grid** | ✅ Complete | Enhanced `admin/app/warehouse/returns/[id]/page.tsx` with items table + summary |
+| **Barcode Scanner** | ✅ Complete | Text input for USB/Bluetooth scanners + manual NDC entry fallback |
 
 > **⚠️ Architecture Note**: Items CRUD uses PostgreSQL RPC functions (zero JS queries).
 > Barcode parsing & NDC lookup run in Node.js because they call external APIs (openFDA, RxNav, Azure OpenAI).
@@ -916,9 +920,9 @@ Fallback workflow:
 - ✅ File: `src/routes/barcodeScanRoutes.ts`
 - ✅ `POST /api/barcode/scan` returns `{ scan, product, autoFill }` — ready for frontend form
 
-#### Younas (Admin Frontend) — 🔲 **READY TO START**
+#### Younas (Admin Frontend) ✅ **COMPLETED**
 
-> **Backend for Module 4 is fully done. Below is everything Younas needs to integrate.**
+> **All Module 4 frontend tasks are done.**
 
 ##### 📌 Database Migration to Run First
 
@@ -1065,63 +1069,58 @@ GET /api/return-transactions/{id}/items?returnStatus=returnable&search=doxy
 
 ##### 📌 Frontend Tasks for Younas
 
-**Task 4.5: Create "Adding Products Mode" page**
+**Task 4.5: Create "Adding Products Mode" page** ✅ **DONE**
 
-- Location: `admin/app/warehouse/returns/[id]/add-items/page.tsx`
-- UI sections:
-  1. **Header**: Pharmacy name, License plate, "Adding Products Mode" label
-  2. **Barcode input**: text field (auto-focus, listen for paste/scanner), on input: call `POST /api/barcode/scan`, use `autoFill` to populate fields. "Manual NDC Entry" fallback button.
-  3. **Product fields** (auto-populated from autoFill): NDC, Proprietary Name, Generic Name, Manufacturer, Package Description, Dosage Form, Strength, Route, Lot Number, Serial Number, Expiration Date, Standard Price (editable), Full Package Size, Quantity Returned, Full vs Partial toggle, Estimated Value (auto-calc, read-only)
-  4. **Classification**: Radio Returnable / Non-Returnable / TBD (default: tbd)
-  5. **Additional**: DEA Schedule (auto-filled if controlled), Return Reason (dropdown), Memo (textarea)
-  6. **Buttons**: "Save & Scan Next" (POST items + clear form), "Cancel This Item", "Back To Return"
+- ✅ **Location:** `admin/app/warehouse/returns/[id]/add-items/page.tsx`
+- ✅ **Header:** Pharmacy name, license plate, "Adding Products" label, items added counter badge
+- ✅ **Scan/Manual toggle:** Two modes — "Scan Barcode" (auto-focus text input with Enter trigger) and "Manual NDC Entry" (input + lookup button)
+- ✅ **Barcode scanning:** On Enter/submit → `POST /api/barcode/scan` → `autoFill` populates all form fields
+- ✅ **Product fields (3-column grid):** NDC, Proprietary Name, Generic Name, Manufacturer, Package Description, Dosage Form, Strength, Route, DEA Schedule, Lot Number, Serial Number, Expiration Date
+- ✅ **Quantity & Pricing:** Standard Price (editable), Quantity, Full Package Size, Estimated Value (auto-calc = price × qty, adjusted for partial)
+- ✅ **Partial toggle:** Checkbox + percentage input when checked
+- ✅ **Classification:** Radio buttons — TBD (default) / Returnable / Non-Returnable
+- ✅ **Additional:** Return Reason dropdown (9 options), Memo text input
+- ✅ **Buttons:** "Save & Scan Next" (POST items + clear form + refocus scan), "Clear Form", "Cancel"
+- ✅ **Duplicate warning:** Displays warning from API if same NDC+lot already exists
+- ✅ **Scan error handling:** Shows info banner when product not found in database
+- ✅ **Redux thunks used:** `fetchReturnTransactionById`, `scanBarcode`, `addTransactionItem`
 
-**Task 4.6: Create product list grid on return detail page**
+**Task 4.6: Create product list grid on return detail page** ✅ **DONE**
 
-- Location: `admin/app/warehouse/returns/[id]/page.tsx`
-- Fetch: `GET /api/return-transactions/:id/items`
-- Grid columns: NDC, Name, QTY, Package Size, Price, Est.Value, Expires, Status, DEA, Lot, Manufacturer
-- Row actions: edit (inline/modal), delete (confirm → DELETE endpoint)
-- Summary bar: totalItems, totalReturnableValue, totalNonReturnableValue, totalValue
-- Buttons: "Add More Items" (→ add-items page), "Complete Return"
-- Status badges: returnable (green), non_returnable (red), tbd (yellow)
+- ✅ **Location:** `admin/app/warehouse/returns/[id]/page.tsx` (enhanced existing page)
+- ✅ **Fetches:** `GET /api/return-transactions/:id/items` with search and status filter
+- ✅ **Summary bar:** 4 cards — Total Items, Returnable Value (green), Non-Returnable Value (red), Total Value (blue)
+- ✅ **Filters:** Search by NDC/name/manufacturer/lot (debounced), Status dropdown (All/Returnable/Non-Returnable/TBD)
+- ✅ **Table columns:** NDC (mono), Name, Manufacturer, QTY (with "P" indicator for partials), Price, Est. Value, Expires, Lot (mono), Status badge
+- ✅ **Row actions:** Edit (modal with quantity, price, status, memo), Delete (confirmation modal)
+- ✅ **Status badges:** returnable (green), non_returnable (red), tbd (yellow)
+- ✅ **Buttons:** "Add Items" → navigates to add-items page, "Start Scanning" when empty
+- ✅ **Auto-refresh:** Items re-fetched after edit/delete, transaction totals refreshed
 
-**Task 4.7: Integrate barcode scanner component**
+**Task 4.7: Integrate barcode scanner component** ✅ **DONE**
 
-- Option A: Reuse `Frontend/components/barcode/BarcodeScanner.tsx` (copy to admin)
-- Option B: Text input that captures USB/Bluetooth scanner output (simplest)
-- On scan: call `POST /api/barcode/scan` → use `autoFill` object → populate form
+- ✅ **Implementation:** Text input (Option B) that captures USB/Bluetooth scanner output
+- ✅ **Auto-focus:** Scan input is auto-focused on page load and after each save
+- ✅ **Enter key trigger:** Scanner typically sends Enter after scan; input fires `POST /api/barcode/scan`
+- ✅ **Paste support:** Works with pasted GS1 data (copy-paste from phone camera scan apps)
+- ✅ **Loading state:** Spinner shown during scan API call
+- ✅ **Manual fallback:** "Manual NDC Entry" mode with separate input + "Lookup" button
+
+**Redux Slice Extensions (for Module 4):**
+
+- ✅ **Types added:** `ReturnTransactionItem`, `ReturnTransactionItemsListResponse`, `AddItemPayload`, `BarcodeScanResponse` in `admin/lib/types/index.ts`
+- ✅ **State added:** `items`, `itemsSummary`, `isItemsLoading`, `isItemActionLoading`, `isScanLoading`
+- ✅ **Thunks added:**
+  - `scanBarcode` — `POST /api/barcode/scan`
+  - `fetchTransactionItems` — `GET /api/return-transactions/:id/items`
+  - `addTransactionItem` — `POST /api/return-transactions/:id/items`
+  - `updateTransactionItem` — `PATCH /api/return-transactions/:id/items/:itemId`
+  - `deleteTransactionItem` — `DELETE /api/return-transactions/:id/items/:itemId`
+- ✅ **Reducer added:** `clearItems`
 
 ### How to Implement (Guidance for Cursor AI)
 
-When working on Task 4.5 (Adding Products Mode):
-```
-Prompt: "Create the Adding Products Mode page at admin/app/warehouse/returns/[id]/add-items/page.tsx:
-1. Show pharmacy name and license plate in header (fetch from GET /api/return-transactions/:id)
-2. Auto-focus barcode input that listens for paste/scan events
-3. On scan/paste: call POST /api/barcode/scan with { scanData: value }
-4. Use response.data.autoFill to populate ALL product fields automatically
-5. Fields: NDC (readonly after scan), name, manufacturer, dosage, strength, lot, serial, expiration, price (editable), quantity, full/partial toggle
-6. Auto-calculate estimated value = price × quantity
-7. Classification radios: Returnable / Non-Returnable / TBD (default: tbd)
-8. 'Save & Scan Next': POST /api/return-transactions/:id/items with all fields, clear form
-9. 'Manual NDC Entry' fallback button
-Use apiClient from admin/lib/api/apiClient.ts."
-```
-
-When working on Task 4.6 (product list grid):
-```
-Prompt: "Create the return detail page at admin/app/warehouse/returns/[id]/page.tsx:
-1. Fetch return details from GET /api/return-transactions/:id
-2. Fetch items from GET /api/return-transactions/:id/items
-3. Header: license plate, pharmacy, status, timestamps
-4. Data grid: NDC, Name, QTY, Price, Est.Value, Expiration, Return Status, Lot, Manufacturer
-5. Summary: totalItems, totalReturnableValue, totalNonReturnableValue from response.data.summary
-6. Row actions: edit, delete (DELETE /api/return-transactions/:id/items/:itemId)
-7. Buttons: 'Add More Items' → add-items page, 'Complete Return'
-8. Color-code returnStatus badges
-Follow table patterns from admin/app/pharmacies/page.tsx."
-```
+> **All Module 4 tasks are completed. Guidance kept for reference.**
 
 ---
 

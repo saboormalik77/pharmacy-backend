@@ -639,3 +639,126 @@ export interface ProcessorMyStore {
     nextVisitDate: string | null;
     assignedDate: string;
 }
+
+// ── Return Transaction Items ───────────────────────────────
+
+export interface ReturnTransactionItem {
+    id: string;
+    transactionId: string;
+    ndc: string | null;
+    ndc10: string | null;
+    gtin: string | null;
+    proprietaryName: string | null;
+    genericName: string | null;
+    manufacturer: string | null;
+    packageDescription: string | null;
+    dosageForm: string | null;
+    strength: string | null;
+    route: string | null;
+    lotNumber: string | null;
+    serialNumber: string | null;
+    expirationDate: string | null;
+    standardPrice: number | null;
+    quantity: number;
+    fullPackageSize: number | null;
+    isPartial: boolean;
+    partialPercentage: number | null;
+    estimatedValue: number | null;
+    returnStatus: 'returnable' | 'non_returnable' | 'tbd';
+    nonReturnableReason: string | null;
+    returnReason: string | null;
+    destination: string | null;
+    deaSchedule: string | null;
+    deaForm222Required: boolean;
+    productType: string | null;
+    coStatus: string;
+    bmpStatus: string;
+    memo: string | null;
+    wineCellarId: string | null;
+    scanSource: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface ReturnTransactionItemsListResponse {
+    items: ReturnTransactionItem[];
+    summary: {
+        totalItems: number;
+        totalReturnableValue: number;
+        totalNonReturnableValue: number;
+        totalValue: number;
+    };
+}
+
+export interface AddItemPayload {
+    ndc?: string;
+    ndc10?: string;
+    gtin?: string;
+    proprietaryName?: string;
+    genericName?: string;
+    manufacturer?: string;
+    packageDescription?: string;
+    dosageForm?: string;
+    strength?: string;
+    route?: string;
+    lotNumber?: string;
+    serialNumber?: string;
+    expirationDate?: string;
+    standardPrice?: number;
+    quantity?: number;
+    fullPackageSize?: number;
+    isPartial?: boolean;
+    partialPercentage?: number;
+    returnStatus?: string;
+    nonReturnableReason?: string;
+    returnReason?: string;
+    destination?: string;
+    deaSchedule?: string;
+    deaForm222Required?: boolean;
+    productType?: string;
+    memo?: string;
+    scanSource?: string;
+    rawScanData?: string;
+}
+
+export interface BarcodeScanResponse {
+    scan: {
+        gtin: string | null;
+        lotNumber: string | null;
+        serialNumber: string | null;
+        expirationDate: string | null;
+        ndc10: string | null;
+        ndcCandidates: string[];
+    };
+    product: {
+        ndc: string;
+        proprietaryName: string | null;
+        genericName: string | null;
+        manufacturer: string | null;
+        packageDescription: string | null;
+        dosageForm: string | null;
+        strength: string | null;
+        route: string | null;
+        deaSchedule: string | null;
+        productType: string | null;
+        source: string;
+    } | null;
+    autoFill: {
+        ndc: string | null;
+        ndc10: string | null;
+        gtin: string | null;
+        proprietaryName: string | null;
+        genericName: string | null;
+        manufacturer: string | null;
+        packageDescription: string | null;
+        dosageForm: string | null;
+        strength: string | null;
+        route: string | null;
+        lotNumber: string | null;
+        serialNumber: string | null;
+        expirationDate: string | null;
+        deaSchedule: string | null;
+        productType: string | null;
+        scanSource: string;
+    };
+}

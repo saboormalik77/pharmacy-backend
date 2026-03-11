@@ -6,6 +6,10 @@ import {
     ReturnTransactionUpdatePayload,
     ReturnTransactionsPagination,
     ProcessorMyStore,
+    ReturnTransactionItem,
+    ReturnTransactionItemsListResponse,
+    AddItemPayload,
+    BarcodeScanResponse,
 } from '@/lib/types';
 
 // ── State ─────────────────────────────────────────────────────
@@ -29,6 +33,18 @@ export interface ReturnTransactionsState {
         dateFrom: string;
         dateTo: string;
     };
+    // Items
+    items: ReturnTransactionItem[];
+    itemsSummary: {
+        totalItems: number;
+        totalReturnableValue: number;
+        totalNonReturnableValue: number;
+        totalValue: number;
+    } | null;
+    isItemsLoading: boolean;
+    isItemActionLoading: boolean;
+    isScanLoading: boolean;
+    // General
     isLoading: boolean;
     isStoresLoading: boolean;
     isActionLoading: boolean;
@@ -41,6 +57,11 @@ const initialState: ReturnTransactionsState = {
     myStores: [],
     pagination: null,
     filters: { search: '', status: '', pharmacyId: '', dateFrom: '', dateTo: '' },
+    items: [],
+    itemsSummary: null,
+    isItemsLoading: false,
+    isItemActionLoading: false,
+    isScanLoading: false,
     isLoading: false,
     isStoresLoading: false,
     isActionLoading: false,
@@ -262,6 +283,108 @@ export const deleteReturnTransaction = createAsyncThunk(
     }
 );
 
+// ── Items Thunks ──────────────────────────────────────────────
+
+export const scanBarcode = createAsyncThunk(
+    'returnTransactions/scanBarcode',
+    async (scanData: string, { rejectWithValue }) => {
+        try {
+            const { apiClient } = await import('@/lib/api/apiClient');
+            const { cookieUtils } = await import('@/lib/utils/cookies');
+            if (!cookieUtils.getAuthToken()) return rejectWithValue('Authentication required.');
+
+            const response = await apiClient.post<{ status: string; data: BarcodeScanResponse }>(
+                '/barcode/scan',
+                { scanData },
+                true
+            );
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error?.message || 'Failed to scan barcode');
+        }
+    }
+);
+
+export const fetchTransactionItems = createAsyncThunk(
+    'returnTransactions/fetchItems',
+    async ({ transactionId, returnStatus, search }: { transactionId: string; returnStatus?: string; search?: string }, { rejectWithValue }) => {
+        try {
+            const { apiClient } = await import('@/lib/api/apiClient');
+            const { cookieUtils } = await import('@/lib/utils/cookies');
+            if (!cookieUtils.getAuthToken()) return rejectWithValue('Authentication required.');
+
+            const query: Record<string, string | undefined> = {};
+            if (returnStatus) query.return_status = returnStatus;
+            if (search) query.search = search;
+
+            const response = await apiClient.get<{ status: string; data: ReturnTransactionItemsListResponse }>(
+                `/return-transactions/${transactionId}/items`,
+                true,
+                query
+            );
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error?.message || 'Failed to fetch items');
+        }
+    }
+);
+
+export const addTransactionItem = createAsyncThunk(
+    'returnTransactions/addItem',
+    async ({ transactionId, payload }: { transactionId: string; payload: AddItemPayload }, { rejectWithValue }) => {
+        try {
+            const { apiClient } = await import('@/lib/api/apiClient');
+            const { cookieUtils } = await import('@/lib/utils/cookies');
+            if (!cookieUtils.getAuthToken()) return rejectWithValue('Authentication required.');
+
+            const response = await apiClient.post<{ status: string; data: ReturnTransactionItem; warning?: string; duplicateItemId?: string }>(
+                `/return-transactions/${transactionId}/items`,
+                payload,
+                true
+            );
+            return { item: response.data, warning: response.warning, duplicateItemId: response.duplicateItemId };
+        } catch (error: any) {
+            return rejectWithValue(error?.message || 'Failed to add item');
+        }
+    }
+);
+
+export const updateTransactionItem = createAsyncThunk(
+    'returnTransactions/updateItem',
+    async ({ transactionId, itemId, payload }: { transactionId: string; itemId: string; payload: Partial<AddItemPayload> }, { rejectWithValue }) => {
+        try {
+            const { apiClient } = await import('@/lib/api/apiClient');
+            const { cookieUtils } = await import('@/lib/utils/cookies');
+            if (!cookieUtils.getAuthToken()) return rejectWithValue('Authentication required.');
+
+            const response = await apiClient.patch<{ status: string; data: ReturnTransactionItem }>(
+                `/return-transactions/${transactionId}/items/${itemId}`,
+                payload,
+                true
+            );
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error?.message || 'Failed to update item');
+        }
+    }
+);
+
+export const deleteTransactionItem = createAsyncThunk(
+    'returnTransactions/deleteItem',
+    async ({ transactionId, itemId }: { transactionId: string; itemId: string }, { rejectWithValue }) => {
+        try {
+            const { apiClient } = await import('@/lib/api/apiClient');
+            const { cookieUtils } = await import('@/lib/utils/cookies');
+            if (!cookieUtils.getAuthToken()) return rejectWithValue('Authentication required.');
+
+            await apiClient.delete<{ status: string }>(`/return-transactions/${transactionId}/items/${itemId}`, true);
+            return itemId;
+        } catch (error: any) {
+            return rejectWithValue(error?.message || 'Failed to delete item');
+        }
+    }
+);
+
 // ── Slice ─────────────────────────────────────────────────────
 
 const returnTransactionsSlice = createSlice({
@@ -276,6 +399,10 @@ const returnTransactionsSlice = createSlice({
         },
         clearCurrentTransaction: (state) => {
             state.currentTransaction = null;
+        },
+        clearItems: (state) => {
+            state.items = [];
+            state.itemsSummary = null;
         },
     },
     extraReducers: (builder) => {
@@ -377,9 +504,51 @@ const returnTransactionsSlice = createSlice({
                 state.isActionLoading = false;
                 state.transactions = state.transactions.filter(t => t.id !== action.payload);
             })
-            .addCase(deleteReturnTransaction.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; });
+            .addCase(deleteReturnTransaction.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
+
+            // ── Items ─────────────────────────────────────
+
+            // scanBarcode
+            .addCase(scanBarcode.pending, (state) => { state.isScanLoading = true; state.error = null; })
+            .addCase(scanBarcode.fulfilled, (state) => { state.isScanLoading = false; })
+            .addCase(scanBarcode.rejected, (state, action) => { state.isScanLoading = false; state.error = action.payload as string; })
+
+            // fetchTransactionItems
+            .addCase(fetchTransactionItems.pending, (state) => { state.isItemsLoading = true; state.error = null; })
+            .addCase(fetchTransactionItems.fulfilled, (state, action) => {
+                state.isItemsLoading = false;
+                state.items = action.payload.items || [];
+                state.itemsSummary = action.payload.summary || null;
+            })
+            .addCase(fetchTransactionItems.rejected, (state, action) => { state.isItemsLoading = false; state.error = action.payload as string; })
+
+            // addTransactionItem
+            .addCase(addTransactionItem.pending, (state) => { state.isItemActionLoading = true; state.error = null; })
+            .addCase(addTransactionItem.fulfilled, (state, action) => {
+                state.isItemActionLoading = false;
+                if (action.payload.item) state.items = [action.payload.item, ...state.items];
+            })
+            .addCase(addTransactionItem.rejected, (state, action) => { state.isItemActionLoading = false; state.error = action.payload as string; })
+
+            // updateTransactionItem
+            .addCase(updateTransactionItem.pending, (state) => { state.isItemActionLoading = true; state.error = null; })
+            .addCase(updateTransactionItem.fulfilled, (state, action) => {
+                state.isItemActionLoading = false;
+                if (action.payload) {
+                    state.items = state.items.map(i => i.id === action.payload.id ? action.payload : i);
+                }
+            })
+            .addCase(updateTransactionItem.rejected, (state, action) => { state.isItemActionLoading = false; state.error = action.payload as string; })
+
+            // deleteTransactionItem
+            .addCase(deleteTransactionItem.pending, (state) => { state.isItemActionLoading = true; })
+            .addCase(deleteTransactionItem.fulfilled, (state, action) => {
+                state.isItemActionLoading = false;
+                state.items = state.items.filter(i => i.id !== action.payload);
+            })
+            .addCase(deleteTransactionItem.rejected, (state, action) => { state.isItemActionLoading = false; state.error = action.payload as string; });
     },
 });
 
-export const { setFilters, clearError, clearCurrentTransaction } = returnTransactionsSlice.actions;
+export const { setFilters, clearError, clearCurrentTransaction, clearItems } = returnTransactionsSlice.actions;
 export default returnTransactionsSlice.reducer;

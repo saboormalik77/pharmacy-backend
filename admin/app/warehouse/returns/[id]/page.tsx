@@ -5,12 +5,14 @@ import { useRouter, useParams } from 'next/navigation';
 import {
     ArrowLeft, Loader2, AlertCircle, X, Pause, Play, CheckCircle, Lock,
     Trash2, Edit, ClipboardList, Building2, UserCog, Package, Truck, Clock,
+    Plus, Search, ScanLine,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
 import { formatDate } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
+import { useDebounce } from '@/lib/hooks/useDebounce';
 import {
     fetchReturnTransactionById,
     updateReturnTransaction,
@@ -20,8 +22,12 @@ import {
     finalizeReturnTransaction,
     deleteReturnTransaction,
     clearCurrentTransaction,
+    fetchTransactionItems,
+    deleteTransactionItem,
+    updateTransactionItem,
+    clearItems,
 } from '@/lib/store/returnTransactionsSlice';
-import { ReturnTransaction } from '@/lib/types';
+import { ReturnTransaction, ReturnTransactionItem } from '@/lib/types';
 
 // ── Helpers ────────────────────────────────────────────────────
 
@@ -64,11 +70,23 @@ export default function ReturnDetailPage() {
         (state) => state.returnTransactions
     );
 
+    const { items, itemsSummary, isItemsLoading, isItemActionLoading } = useAppSelector(
+        (state) => state.returnTransactions
+    );
+
     const [toasts, setToasts] = useState<Toast[]>([]);
     const [editModal, setEditModal] = useState(false);
     const [editForm, setEditForm] = useState({ fedexTracking: '', fedexPickupConfirmation: '', notes: '' });
     const [actionModal, setActionModal] = useState<'pause' | 'resume' | 'complete' | 'finalize' | null>(null);
     const [deleteModal, setDeleteModal] = useState(false);
+
+    // Items state
+    const [itemSearch, setItemSearch] = useState('');
+    const [itemStatusFilter, setItemStatusFilter] = useState('');
+    const [deleteItemModal, setDeleteItemModal] = useState<ReturnTransactionItem | null>(null);
+    const [editItemModal, setEditItemModal] = useState<ReturnTransactionItem | null>(null);
+    const [editItemForm, setEditItemForm] = useState({ quantity: '', standardPrice: '', returnStatus: 'tbd', memo: '' });
+    const debouncedItemSearch = useDebounce(itemSearch, 500);
 
     const showToast = (message: string, type: Toast['type'] = 'success') => {
         const tid = Date.now().toString();
@@ -78,8 +96,18 @@ export default function ReturnDetailPage() {
 
     useEffect(() => {
         if (id) dispatch(fetchReturnTransactionById(id));
-        return () => { dispatch(clearCurrentTransaction()); };
+        return () => { dispatch(clearCurrentTransaction()); dispatch(clearItems()); };
     }, [dispatch, id]);
+
+    useEffect(() => {
+        if (id) {
+            dispatch(fetchTransactionItems({
+                transactionId: id,
+                returnStatus: itemStatusFilter || undefined,
+                search: debouncedItemSearch || undefined,
+            }));
+        }
+    }, [dispatch, id, itemStatusFilter, debouncedItemSearch]);
 
     useEffect(() => {
         if (editModal && tx) {
@@ -133,6 +161,67 @@ export default function ReturnDetailPage() {
             setDeleteModal(false);
         }
     };
+
+    // ── Item handlers ───────────────────────────────────────────
+
+    const refreshItems = () => dispatch(fetchTransactionItems({
+        transactionId: id,
+        returnStatus: itemStatusFilter || undefined,
+        search: debouncedItemSearch || undefined,
+    }));
+
+    useEffect(() => {
+        if (editItemModal) {
+            setEditItemForm({
+                quantity: String(editItemModal.quantity),
+                standardPrice: editItemModal.standardPrice != null ? String(editItemModal.standardPrice) : '',
+                returnStatus: editItemModal.returnStatus,
+                memo: editItemModal.memo || '',
+            });
+        }
+    }, [editItemModal]);
+
+    const handleDeleteItem = async () => {
+        if (!deleteItemModal) return;
+        const result = await dispatch(deleteTransactionItem({ transactionId: id, itemId: deleteItemModal.id }));
+        if (deleteTransactionItem.fulfilled.match(result)) {
+            showToast('Item deleted');
+            setDeleteItemModal(null);
+            refreshItems();
+            refresh();
+        } else {
+            showToast(result.payload as string || 'Failed to delete item', 'error');
+            setDeleteItemModal(null);
+        }
+    };
+
+    const handleUpdateItem = async () => {
+        if (!editItemModal) return;
+        const payload: Record<string, any> = {};
+        if (editItemForm.quantity) payload.quantity = parseInt(editItemForm.quantity);
+        if (editItemForm.standardPrice) payload.standardPrice = parseFloat(editItemForm.standardPrice);
+        payload.returnStatus = editItemForm.returnStatus;
+        if (editItemForm.memo) payload.memo = editItemForm.memo;
+
+        const result = await dispatch(updateTransactionItem({ transactionId: id, itemId: editItemModal.id, payload }));
+        if (updateTransactionItem.fulfilled.match(result)) {
+            showToast('Item updated');
+            setEditItemModal(null);
+            refreshItems();
+            refresh();
+        } else {
+            showToast(result.payload as string || 'Failed to update item', 'error');
+        }
+    };
+
+    function getItemStatusBadge(status: string): { variant: 'success' | 'warning' | 'danger' | 'default'; label: string } {
+        switch (status) {
+            case 'returnable': return { variant: 'success', label: 'Returnable' };
+            case 'non_returnable': return { variant: 'danger', label: 'Non-Returnable' };
+            case 'tbd': return { variant: 'warning', label: 'TBD' };
+            default: return { variant: 'default', label: status };
+        }
+    }
 
     // ── Loading / Error States ─────────────────────────────────
 
@@ -328,6 +417,225 @@ export default function ReturnDetailPage() {
                     </dl>
                 </div>
             </div>
+
+            {/* ── Items Section ──────────────────────────────── */}
+            <div className="bg-white rounded-lg shadow-md p-5">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                    <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+                        <ScanLine className="w-4 h-4" /> Products ({itemsSummary?.totalItems ?? items.length})
+                    </h2>
+                    {canDoAction(tx, 'edit') && (
+                        <Button variant="primary" size="sm" onClick={() => router.push(`/warehouse/returns/${id}/add-items`)}>
+                            <Plus className="w-4 h-4 mr-1" /> Add Items
+                        </Button>
+                    )}
+                </div>
+
+                {/* Summary Bar */}
+                {itemsSummary && itemsSummary.totalItems > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                        <div className="bg-gray-50 rounded-lg p-2.5 text-center">
+                            <p className="text-xs text-gray-500">Items</p>
+                            <p className="text-sm font-bold text-gray-900">{itemsSummary.totalItems}</p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-2.5 text-center">
+                            <p className="text-xs text-green-600">Returnable</p>
+                            <p className="text-sm font-bold text-green-800">{formatCurrency(itemsSummary.totalReturnableValue)}</p>
+                        </div>
+                        <div className="bg-red-50 rounded-lg p-2.5 text-center">
+                            <p className="text-xs text-red-600">Non-Returnable</p>
+                            <p className="text-sm font-bold text-red-800">{formatCurrency(itemsSummary.totalNonReturnableValue)}</p>
+                        </div>
+                        <div className="bg-blue-50 rounded-lg p-2.5 text-center">
+                            <p className="text-xs text-blue-600">Total Value</p>
+                            <p className="text-sm font-bold text-blue-800">{formatCurrency(itemsSummary.totalValue)}</p>
+                        </div>
+                    </div>
+                )}
+
+                {/* Items Filters */}
+                <div className="flex flex-col sm:flex-row gap-2 mb-3">
+                    <div className="relative flex-1">
+                        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            value={itemSearch}
+                            onChange={e => setItemSearch(e.target.value)}
+                            placeholder="Search by NDC, name, manufacturer, lot..."
+                            className="w-full pl-9 pr-4 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        />
+                    </div>
+                    <select
+                        value={itemStatusFilter}
+                        onChange={e => setItemStatusFilter(e.target.value)}
+                        className="px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    >
+                        <option value="">All Statuses</option>
+                        <option value="returnable">Returnable</option>
+                        <option value="non_returnable">Non-Returnable</option>
+                        <option value="tbd">TBD</option>
+                    </select>
+                </div>
+
+                {/* Items Table */}
+                {isItemsLoading ? (
+                    <div className="flex justify-center py-8">
+                        <Loader2 className="w-6 h-6 animate-spin text-primary-600" />
+                    </div>
+                ) : items.length === 0 ? (
+                    <div className="text-center py-8">
+                        <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                        <p className="text-gray-500 text-sm font-medium">No items yet</p>
+                        {canDoAction(tx, 'edit') && (
+                            <Button variant="primary" size="sm" className="mt-3" onClick={() => router.push(`/warehouse/returns/${id}/add-items`)}>
+                                <Plus className="w-4 h-4 mr-1" /> Start Scanning
+                            </Button>
+                        )}
+                    </div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full table-auto text-xs">
+                            <thead>
+                                <tr className="bg-gray-50 border-b border-gray-200">
+                                    <th className="text-left px-2 py-2 font-medium text-gray-500 uppercase tracking-wider">NDC</th>
+                                    <th className="text-left px-2 py-2 font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                    <th className="text-left px-2 py-2 font-medium text-gray-500 uppercase tracking-wider">Manufacturer</th>
+                                    <th className="text-center px-2 py-2 font-medium text-gray-500 uppercase tracking-wider">QTY</th>
+                                    <th className="text-right px-2 py-2 font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                                    <th className="text-right px-2 py-2 font-medium text-gray-500 uppercase tracking-wider">Est. Value</th>
+                                    <th className="text-left px-2 py-2 font-medium text-gray-500 uppercase tracking-wider">Expires</th>
+                                    <th className="text-left px-2 py-2 font-medium text-gray-500 uppercase tracking-wider">Lot</th>
+                                    <th className="text-left px-2 py-2 font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th className="text-right px-2 py-2 font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {items.map((item) => {
+                                    const sBadge = getItemStatusBadge(item.returnStatus);
+                                    return (
+                                        <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                            <td className="px-2 py-2 font-mono text-gray-900">{item.ndc || '—'}</td>
+                                            <td className="px-2 py-2 text-gray-900 max-w-[140px] truncate" title={item.proprietaryName || ''}>
+                                                {item.proprietaryName || item.genericName || '—'}
+                                            </td>
+                                            <td className="px-2 py-2 text-gray-600 max-w-[120px] truncate" title={item.manufacturer || ''}>
+                                                {item.manufacturer || '—'}
+                                            </td>
+                                            <td className="px-2 py-2 text-center text-gray-900">
+                                                {item.quantity}{item.isPartial && <span className="text-yellow-600 ml-0.5">P</span>}
+                                            </td>
+                                            <td className="px-2 py-2 text-right text-gray-900">
+                                                {item.standardPrice != null ? formatCurrency(item.standardPrice) : '—'}
+                                            </td>
+                                            <td className="px-2 py-2 text-right font-medium text-gray-900">
+                                                {item.estimatedValue != null ? formatCurrency(item.estimatedValue) : '—'}
+                                            </td>
+                                            <td className="px-2 py-2 text-gray-600">
+                                                {item.expirationDate ? formatDate(item.expirationDate) : '—'}
+                                            </td>
+                                            <td className="px-2 py-2 text-gray-600 font-mono">{item.lotNumber || '—'}</td>
+                                            <td className="px-2 py-2">
+                                                <Badge variant={sBadge.variant}>{sBadge.label}</Badge>
+                                            </td>
+                                            <td className="px-2 py-2">
+                                                <div className="flex items-center justify-end gap-1">
+                                                    {canDoAction(tx, 'edit') && (
+                                                        <button
+                                                            onClick={() => setEditItemModal(item)}
+                                                            className="p-1 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded"
+                                                            title="Edit item"
+                                                        >
+                                                            <Edit className="w-3.5 h-3.5" />
+                                                        </button>
+                                                    )}
+                                                    {canDoAction(tx, 'edit') && (
+                                                        <button
+                                                            onClick={() => setDeleteItemModal(item)}
+                                                            className="p-1 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded"
+                                                            title="Delete item"
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
+
+            {/* ── Edit Item Modal ───────────────────────────── */}
+            {editItemModal && (
+                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setEditItemModal(null)}>
+                    <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
+                            <h2 className="text-lg font-semibold text-gray-900">Edit Item</h2>
+                            <button onClick={() => setEditItemModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                        </div>
+                        <div className="p-5">
+                            <p className="text-xs text-gray-500 mb-3">{editItemModal.proprietaryName || editItemModal.ndc} — Lot: {editItemModal.lotNumber || '—'}</p>
+                            <div className="space-y-3">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Quantity</label>
+                                        <input type="number" min="1" value={editItemForm.quantity} onChange={e => setEditItemForm({ ...editItemForm, quantity: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Price ($)</label>
+                                        <input type="number" step="0.01" min="0" value={editItemForm.standardPrice} onChange={e => setEditItemForm({ ...editItemForm, standardPrice: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Return Status</label>
+                                    <select value={editItemForm.returnStatus} onChange={e => setEditItemForm({ ...editItemForm, returnStatus: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                        <option value="tbd">TBD</option>
+                                        <option value="returnable">Returnable</option>
+                                        <option value="non_returnable">Non-Returnable</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Memo</label>
+                                    <input type="text" value={editItemForm.memo} onChange={e => setEditItemForm({ ...editItemForm, memo: e.target.value })} placeholder="Optional memo" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex justify-end gap-2 p-5 border-t border-gray-200 bg-gray-50">
+                            <Button variant="outline" onClick={() => setEditItemModal(null)}>Cancel</Button>
+                            <Button variant="primary" onClick={handleUpdateItem} disabled={isItemActionLoading}>
+                                {isItemActionLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Saving...</> : 'Save'}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Delete Item Modal ────────────────────────── */}
+            {deleteItemModal && (
+                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setDeleteItemModal(null)}>
+                    <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
+                            <h2 className="text-lg font-semibold text-gray-900">Delete Item</h2>
+                            <button onClick={() => setDeleteItemModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                        </div>
+                        <div className="p-6">
+                            <p className="text-gray-700">
+                                Delete <strong>{deleteItemModal.proprietaryName || deleteItemModal.ndc || 'this item'}</strong>
+                                {deleteItemModal.lotNumber && <> (Lot: {deleteItemModal.lotNumber})</>}?
+                            </p>
+                        </div>
+                        <div className="flex justify-end gap-2 p-5 border-t border-gray-200 bg-gray-50">
+                            <Button variant="outline" onClick={() => setDeleteItemModal(null)}>Cancel</Button>
+                            <Button variant="danger" onClick={handleDeleteItem} disabled={isItemActionLoading}>
+                                {isItemActionLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Deleting...</> : 'Delete'}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* ── Edit Modal ────────────────────────────────── */}
             {editModal && (
