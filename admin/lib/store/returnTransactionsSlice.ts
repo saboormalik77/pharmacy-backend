@@ -10,6 +10,7 @@ import {
     ReturnTransactionItemsListResponse,
     AddItemPayload,
     BarcodeScanResponse,
+    ReturnabilityCheckResult,
 } from '@/lib/types';
 
 // ── State ─────────────────────────────────────────────────────
@@ -337,12 +338,18 @@ export const addTransactionItem = createAsyncThunk(
             const { cookieUtils } = await import('@/lib/utils/cookies');
             if (!cookieUtils.getAuthToken()) return rejectWithValue('Authentication required.');
 
-            const response = await apiClient.post<{ status: string; data: ReturnTransactionItem; warning?: string; duplicateItemId?: string }>(
+            const response = await apiClient.post<{
+                status: string;
+                data: ReturnTransactionItem;
+                warning?: string;
+                duplicateItemId?: string;
+                policyCheck?: ReturnabilityCheckResult;
+            }>(
                 `/return-transactions/${transactionId}/items`,
                 payload,
                 true
             );
-            return { item: response.data, warning: response.warning, duplicateItemId: response.duplicateItemId };
+            return { item: response.data, warning: response.warning, duplicateItemId: response.duplicateItemId, policyCheck: response.policyCheck };
         } catch (error: any) {
             return rejectWithValue(error?.message || 'Failed to add item');
         }
@@ -365,6 +372,26 @@ export const updateTransactionItem = createAsyncThunk(
             return response.data;
         } catch (error: any) {
             return rejectWithValue(error?.message || 'Failed to update item');
+        }
+    }
+);
+
+export const resolveTransactionItem = createAsyncThunk(
+    'returnTransactions/resolveItem',
+    async ({ transactionId, itemId, payload }: { transactionId: string; itemId: string; payload: { new_status: string; reason?: string; destination?: string; memo?: string } }, { rejectWithValue }) => {
+        try {
+            const { apiClient } = await import('@/lib/api/apiClient');
+            const { cookieUtils } = await import('@/lib/utils/cookies');
+            if (!cookieUtils.getAuthToken()) return rejectWithValue('Authentication required.');
+
+            const response = await apiClient.patch<{ status: string; data: ReturnTransactionItem }>(
+                `/return-transactions/${transactionId}/items/${itemId}/resolve`,
+                payload,
+                true
+            );
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error?.message || 'Failed to resolve item');
         }
     }
 );
@@ -539,6 +566,16 @@ const returnTransactionsSlice = createSlice({
                 }
             })
             .addCase(updateTransactionItem.rejected, (state, action) => { state.isItemActionLoading = false; state.error = action.payload as string; })
+
+            // resolveTransactionItem
+            .addCase(resolveTransactionItem.pending, (state) => { state.isItemActionLoading = true; state.error = null; })
+            .addCase(resolveTransactionItem.fulfilled, (state, action) => {
+                state.isItemActionLoading = false;
+                if (action.payload) {
+                    state.items = state.items.map(i => i.id === action.payload.id ? action.payload : i);
+                }
+            })
+            .addCase(resolveTransactionItem.rejected, (state, action) => { state.isItemActionLoading = false; state.error = action.payload as string; })
 
             // deleteTransactionItem
             .addCase(deleteTransactionItem.pending, (state) => { state.isItemActionLoading = true; })

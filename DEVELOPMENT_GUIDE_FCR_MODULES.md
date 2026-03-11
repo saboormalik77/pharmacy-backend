@@ -1312,6 +1312,8 @@ The system determines:
 
 ## Module 6: Item Routing & Disposition
 
+**Status: Fully Complete — Backend + Admin Frontend**
+
 ### What Client Document Says (Section 7)
 
 Based on policy engine result, route item to:
@@ -1368,29 +1370,34 @@ Based on policy engine result, route item to:
   - `GET /api/admin/destruction/stats` — Statistics by status
   - `GET /api/admin/destruction/:id` — Get single record
 
-### How to Implement (Guidance for Cursor AI)
-
-> **All Module 6 backend tasks are completed. Guidance kept for reference.**
-
 #### Younas (Admin Frontend)
 
-**Task 6.5: Show routing result in Adding Products Mode**
+**Task 6.5: Show routing result in Adding Products Mode** ✅ DONE
 
 - Location: `admin/app/warehouse/returns/[id]/add-items/page.tsx`
-- After scan/save:
-  - Show classification result prominently
-  - If non-returnable (timing): Show "This product will become returnable in [MONTH]"
-  - If TBD: Show "Policy not found. Needs manual research."
-  - Color coding: Green (returnable), Red (non-returnable), Yellow (TBD)
+- After item save, a prominent classification banner shows:
+  - **Green** banner with check icon for **Returnable** items — shows destination, return window, manufacturer policy
+  - **Red** banner with X icon for **Non-Returnable** items — shows reason (date, policy, etc.), expected returnable date if timing-based
+  - **Yellow** banner with warning icon for **TBD** items — shows "Needs manual research" message
+- Displays full `policyCheck` data: destination, reason, expected returnable date, return window, manufacturer name
+- Dismissable via X button; auto-clears on form reset
+- Redux: Updated `addTransactionItem` thunk to capture and return `policyCheck` from API response
+- Types: Added `ReturnabilityCheckResult` import to add-items page
 
-**Task 6.6: Create TBD items view**
+**Task 6.6: Create TBD items view** ✅ DONE
 
 - Location: `admin/app/warehouse/tbd-items/page.tsx`
-- UI:
-  - List all items with return_status = 'tbd'
-  - Group by pharmacy/transaction
-  - "Resolve" button → modal to set status and destination
-  - Filter by date, pharmacy
+- Grouped by return transaction — expandable accordion view
+- Each transaction header shows: License Plate, Pharmacy Name, Status badge, TBD count badge, Date
+- Expanding a transaction fetches its TBD items (filtered by `return_status=tbd`)
+- Items table: NDC, Product, Manufacturer, Lot, Expires, QTY, Resolve button
+- Search across items by NDC/product/manufacturer/lot (debounced, re-fetches expanded groups)
+- **Resolve modal**: Radio selection (Returnable / Non-Returnable) with color-coded cards, Destination dropdown (Inmar, Qualanex, PharmaLink, Other), Reason field (for non-returnable), Memo textarea
+- Calls `PATCH /api/return-transactions/:id/items/:itemId/resolve` via `resolveTransactionItem` thunk
+- Auto-refreshes TBD items after resolution
+- Added to both admin and processor sidebars with AlertTriangle icon
+- Redux: Added `resolveTransactionItem` async thunk to `returnTransactionsSlice.ts`
+- Types: Added `DestructionRecord`, `DestructionStats` to `admin/lib/types/index.ts`
 
 ---
 

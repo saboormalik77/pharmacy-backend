@@ -859,6 +859,41 @@ export interface PoliciesListResponse {
     };
 }
 
+// ── Destruction Records (Module 6) ─────────────────────────
+
+export interface DestructionRecord {
+    id: string;
+    pharmacyId: string;
+    transactionItemId: string | null;
+    ndc: string | null;
+    productName: string | null;
+    manufacturer: string | null;
+    lotNumber: string | null;
+    quantity: number;
+    weightLbs: number | null;
+    destructionReason: string;
+    status: 'pending' | 'scheduled' | 'picked_up' | 'destroyed' | 'cancelled';
+    federalFormNumber: string | null;
+    destructionCompany: string | null;
+    scheduledDate: string | null;
+    pickedUpAt: string | null;
+    destroyedAt: string | null;
+    formUrl: string | null;
+    notes: string | null;
+    createdBy: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface DestructionStats {
+    total: number;
+    pending: number;
+    scheduled: number;
+    pickedUp: number;
+    destroyed: number;
+    cancelled: number;
+}
+
 export interface BarcodeScanResponse {
     scan: {
         gtin: string | null;
