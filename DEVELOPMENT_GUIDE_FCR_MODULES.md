@@ -1910,7 +1910,7 @@ Based on policy engine result, route item to:
 
 ## Module 11: RA Request & Tracking
 
-### ❌ **STATUS: NOT YET STARTED**
+### ✅ **STATUS: Fully Complete — Backend + Admin Frontend**
 
 ### What Client Document Says (Sections 15-17)
 
@@ -1939,71 +1939,122 @@ Based on policy engine result, route item to:
 
 #### Saboor (Backend)
 
-**Task 11.1: Create RA request service**
+**Task 11.1: Create RA request service** ✅ DONE
 
-- Location: `src/services/raRequestService.ts`
-- Functions:
-  - `sendRARequest(debitMemoId)` — send email to destination
-  - `generateRARequestEmail(debitMemo)` — create email content
-  - `recordRAReceived(debitMemoId, raNumber, pdfUrl)` — record RA response
-  - `getOutstandingRARequests()` — get pending RAs
-  - `sendRAReminder(debitMemoId)` — resend request
+- SQL Migration: `scripts/fcr_16_ra_request_tracking.sql`
+  - Created `ra_requests` table (id, debit_memo_id, request_type, destination_email, destination_name, subject, body_preview, status, sent_by, sent_at, error_message, created_at) with indexes and RLS
+  - Added `ra_status` column to `debit_memos` (values: pending, requested, received, shipped, overdue) with index
+  - Updated `_debit_memo_to_json` helper to include `raStatus`
+  - Created `_ra_request_to_json` helper for consistent camelCase output
+- Service: `src/services/raService.ts` — all RPC-backed, zero custom JS logic
+  - Interfaces: `RARequest`, `RAEmailTemplate`, `RAReminderTemplate`, `RATrackingSummary`
+  - Functions (all via Supabase RPC):
+    - `sendRARequest(debitMemoId, sentBy?, emailOverride?)` — looks up `credit_request_email` from `manufacturer_policies`, creates ra_request log, sets ra_status='requested', auto-sets tickler date (14 days)
+    - `receiveRA(debitMemoId, raNumber, pdfUrl?)` — records RA number, sets ra_status='received'
+    - `resendRARequest(debitMemoId, sentBy?, emailOverride?)` — creates reminder log, bumps tickler date (+7 days)
+    - `listRATracking(filters)` — dashboard with ra_status/destination/date/search filters, includes summary counts
+    - `listOutstandingRAs(search?, page?, limit?)` — requested but not received RAs
+    - `listOverdueRAs(search?, page?, limit?)` — RAs past tickler date
+    - `shipDebitMemo(debitMemoId, outboundTracking, shippedAt?)` — records shipment, requires RA number first
+    - `listOutboundShipments(search?, page?, limit?)` — shipped debit memos
+    - `generateRequestEmail(debitMemoId, emailOverride?)` — builds full email template (to, subject, body, items list)
+    - `generateReminderEmail(debitMemoId, emailOverride?)` — builds reminder template with follow-up count
 
-**Task 11.2: Create RA tracking API**
+- RPC functions (13 total):
+  - `ra_send_request` — validates memo, finds email from manufacturer_policies (or uses override), creates log, updates memo status/tickler
+  - `ra_receive` — records RA number and sets status to received
+  - `ra_resend_request` — logs reminder with follow-up count, bumps tickler
+  - `ra_list_tracking` — full dashboard with sorting (overdue first), pagination, and summary counts per status
+  - `ra_list_outstanding` — pending RAs sorted by tickler date
+  - `ra_list_overdue` — past-tickler RAs sorted by urgency
+  - `ra_ship_debit_memo` — validates RA exists, records tracking + shipped_at, sets ra_status='shipped'
+  - `ra_list_outbound_shipments` — shipped memos sorted by ship date
+  - `ra_generate_request_email` — builds full email with pharmacy address, item list, contact info
+  - `ra_generate_reminder_email` — builds reminder with follow-up count and original request date
 
-- Location: Create new files
+**Task 11.2: Create RA tracking API** ✅ DONE
+
+- Controller: `src/controllers/raController.ts`
+- Routes registered on two routers:
+  - `src/routes/debitMemoRoutes.ts` (extended) — per-memo RA actions:
+    - `POST /api/admin/debit-memos/:id/request-ra` — Send RA request
+    - `POST /api/admin/debit-memos/:id/receive-ra` — Record RA received (requires `raNumber`)
+    - `POST /api/admin/debit-memos/:id/resend-ra` — Resend RA reminder
+    - `POST /api/admin/debit-memos/:id/ship` — Record outbound shipment (requires `outboundTracking`, validates RA received)
+    - `GET /api/admin/debit-memos/:id/email-preview?type=request|reminder` — Preview email template
+  - `src/routes/raTrackingRoutes.ts` → registered at `/api/admin/ra-tracking`:
+    - `GET /api/admin/ra-tracking` — Dashboard (filter by ra_status, destination, date range, search; includes summary)
+    - `GET /api/admin/ra-tracking/outstanding` — Pending RAs
+    - `GET /api/admin/ra-tracking/overdue` — Past-tickler RAs
+  - `src/routes/shipmentRoutes.ts` → registered at `/api/admin/shipments`:
+    - `GET /api/admin/shipments/outbound` — All shipped debit memos
+
+**Task 11.3: Create email templates** ✅ DONE
+
+- Implemented as RPC functions (no separate template files — all logic in Postgres):
+  - `ra_generate_request_email` — returns `{ to, toName, subject, body, memoNumber, pharmacyName, destination, labelerName, totalItems, totalAskValue, items[] }`
+  - `ra_generate_reminder_email` — returns `{ to, toName, subject, body, memoNumber, pharmacyName, requestCount, originalDate }`
+- Email content includes: debit memo number, pharmacy info (name + address), item list (NDC, product, qty, ask price, lot, expiration), contact info
+- Destination email sourced from `manufacturer_policies.credit_request_email` with override option
+- Exposed via `GET /api/admin/debit-memos/:id/email-preview?type=request|reminder&emailOverride=...`
+
+**Task 11.4: Create outbound shipment tracking** ✅ DONE
+
 - Endpoints:
-  - `POST /api/admin/debit-memos/:id/request-ra` — Send RA request email
-  - `POST /api/admin/debit-memos/:id/receive-ra` — Record RA received
-    - Input: ra_number, pdf_url
-  - `POST /api/admin/debit-memos/:id/resend-ra` — Resend RA request
-  - `GET /api/admin/ra-tracking` — Dashboard of all RA statuses
-  - `GET /api/admin/ra-tracking/outstanding` — Pending RAs
-  - `GET /api/admin/ra-tracking/overdue` — RAs past tickler date
-
-**Task 11.3: Create email templates**
-
-- Location: `src/templates/` or email service
-- Templates:
-  - RA request email (per destination format)
-  - RA reminder email
-  - Include: debit memo number, pharmacy info, item list, contact info
-
-**Task 11.4: Create outbound shipment tracking**
-
-- Location: Extend debit memo service
-- Endpoints:
-  - `POST /api/admin/debit-memos/:id/ship` — Record shipment to destination
-    - Input: fedex_tracking, ship_date
-  - `GET /api/admin/shipments/outbound` — List outbound shipments
+  - `POST /api/admin/debit-memos/:id/ship` — Records FedEx/UPS tracking + ship date. Validates RA number exists. Sets ra_status='shipped'.
+  - `GET /api/admin/shipments/outbound` — Lists all shipped debit memos with search, pagination. Searchable by memo number, tracking, labeler, pharmacy.
 
 #### Younas (Admin Frontend)
 
-**Task 11.5: Create RA tracking page**
+**Redux & Types Setup** ✅ DONE
+
+- Types: Added `raStatus` field to `DebitMemo` interface. Added `RARequest`, `RAEmailTemplate`, `RATrackingSummary` interfaces to `admin/lib/types/index.ts`
+- Redux slice: `admin/lib/store/raTrackingSlice.ts` — state for memos, pagination, summary, emailPreview, loading states
+  - Thunks: `fetchRATracking`, `fetchOutstandingRAs`, `fetchOverdueRAs`, `sendRARequest`, `receiveRA`, `resendRA`, `shipMemo`, `fetchEmailPreview`
+  - Reducers: `clearError`, `clearEmailPreview`
+  - All thunks update the memo in-place in the list after successful actions
+- Store: Registered `raTrackingReducer` in `admin/lib/store/store.ts`
+- Sidebar: Added "RA Tracking" link with `MailCheck` icon to admin sidebar
+
+**Task 11.5: Create RA tracking page** ✅ DONE
 
 - Location: `admin/app/warehouse/ra-tracking/page.tsx`
-- UI:
-  - Summary cards: Pending, Received, Shipped, Overdue
-  - Table: Debit Memo, Pharmacy, Destination, Requested Date, Tickler Date, RA Number, Status
-  - Filters: Status, Destination, Date range
-  - Row actions: Request RA, Record RA, Resend, Ship
+- **Summary cards**: Pending (gray), Requested (blue), Received (green), Shipped (purple), Overdue (red) — live counts from API summary
+- **Filters**: Search (debounced, by memo #/pharmacy/labeler/RA #), RA Status dropdown, Destination dropdown, Date range (from/to) pickers
+- **Table columns**: Memo #, Pharmacy, Destination, Labeler, Ask Value, Requested Date, Tickler Date (red + "(!)" if overdue), RA #, Status badge, Actions
+- **Overdue row highlighting**: Rows with past tickler dates get a red background tint
+- **Context-sensitive row actions** based on `raStatus`:
+  - `pending` → "Request RA" button
+  - `requested` / `overdue` → "Resend" + "Record RA" buttons
+  - `received` → "Ship" button
+- **Pagination**: Previous/Next with page/total indicator
 
-**Task 11.6: Create RA request modal**
+**Task 11.6: Create RA request modal** ✅ DONE
 
-- Location: Component for RA actions
-- UI:
-  - Show debit memo details
-  - Destination email (pre-filled from policy)
-  - "Send RA Request" button
-  - Confirmation of email sent
+- Integrated as a modal within the RA tracking page (opened via "Request RA" or "Resend" row actions)
+- **Request RA modal**:
+  - Shows debit memo details (Memo #, Pharmacy, Destination, Labeler, Items, Ask Value)
+  - Loads email preview via `GET /admin/debit-memos/:id/email-preview?type=request` — shows To, Subject, and full Body preview
+  - Email override input (optional) to send to a different address
+  - "Send RA Request" button → calls `POST /admin/debit-memos/:id/request-ra`
+  - Success toast confirmation
+- **Resend RA modal**:
+  - Shows original request date and tickler date (with overdue warning)
+  - Loads reminder email preview via `?type=reminder`
+  - Email override input
+  - "Resend Reminder" button → calls `POST /admin/debit-memos/:id/resend-ra`
 
-**Task 11.7: Create RA receive modal**
+**Task 11.7: Create RA receive modal** ✅ DONE
 
-- Location: Component
-- UI:
-  - RA Number input
-  - PDF upload (optional)
-  - "Record RA Received" button
+- Integrated as a modal within the RA tracking page (opened via "Record RA" row action)
+- Shows debit memo details (Memo #, Labeler, Destination)
+- **RA Number input** (required, auto-focused)
+- **PDF URL input** (optional, for RA authorization document link)
+- "Record RA Received" button → calls `POST /admin/debit-memos/:id/receive-ra`
+- Also includes a **Ship modal** for received memos:
+  - Shows memo details + RA number
+  - Outbound tracking # input (required)
+  - "Record Shipment" button → calls `POST /admin/debit-memos/:id/ship`
 
 ---
 

@@ -22,6 +22,7 @@ import {
     PackageCheck,
     Layers,
     Receipt,
+    MailCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppSelector } from '@/lib/store/hooks';
@@ -43,6 +44,7 @@ const adminSidebarLinks = [
     { href: '/warehouse/receiving', icon: PackageCheck, label: 'Receiving' },
     { href: '/warehouse/batches', icon: Layers, label: 'Batches' },
     { href: '/warehouse/debit-memos', icon: Receipt, label: 'Debit Memos' },
+    { href: '/warehouse/ra-tracking', icon: MailCheck, label: 'RA Tracking' },
     { href: '/warehouse/wine-cellar', icon: Archive, label: 'Wine Cellar' },
 ];
 

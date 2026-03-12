@@ -41,6 +41,8 @@ import wineCellarRoutes from './routes/wineCellarRoutes';
 import warehouseRoutes from './routes/warehouseRoutes';
 import batchRoutes from './routes/batchRoutes';
 import debitMemoRoutes from './routes/debitMemoRoutes';
+import raTrackingRoutes from './routes/raTrackingRoutes';
+import shipmentRoutes from './routes/shipmentRoutes';
 import { globalErrorHandler } from './controllers/errorController';
 import { checkExpiringProductsAndNotify } from './services/notificationCronService';
 import { surfaceReadyWineCellarItems } from './services/wineCellarCronService';
@@ -170,6 +172,8 @@ app.use('/api/admin/wine-cellar', wineCellarRoutes);
 app.use('/api/admin/warehouse', warehouseRoutes);
 app.use('/api/admin/batches', batchRoutes);
 app.use('/api/admin/debit-memos', debitMemoRoutes);
+app.use('/api/admin/ra-tracking', raTrackingRoutes);
+app.use('/api/admin/shipments', shipmentRoutes);
 
 /**
  * @swagger

@@ -16,6 +16,7 @@ import policiesReducer from './policiesSlice';
 import wineCellarReducer from './wineCellarSlice';
 import warehouseReducer from './warehouseSlice';
 import batchReducer from './batchSlice';
+import raTrackingReducer from './raTrackingSlice';
 
 export const makeStore = () => {
   return configureStore({
@@ -37,6 +38,7 @@ export const makeStore = () => {
       wineCellar: wineCellarReducer,
       warehouse: warehouseReducer,
       batch: batchReducer,
+      raTracking: raTrackingReducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({

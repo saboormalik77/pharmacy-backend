@@ -1081,6 +1081,7 @@ export interface DebitMemo {
     raNumber: string | null;
     raRequestedAt: string | null;
     raReceivedAt: string | null;
+    raStatus: 'pending' | 'requested' | 'received' | 'shipped' | 'overdue';
     ticklerDate: string | null;
     baggieManifest: string | null;
     outboundTracking: string | null;
@@ -1104,4 +1105,50 @@ export interface DebitMemoItem {
     lotNumber: string | null;
     expirationDate: string | null;
     createdAt: string;
+}
+
+// ── RA Request & Tracking (Module 11) ────────────────────────
+
+export interface RARequest {
+    id: string;
+    debitMemoId: string;
+    requestType: 'initial' | 'reminder' | 'resend';
+    destinationEmail: string | null;
+    destinationName: string | null;
+    subject: string | null;
+    bodyPreview: string | null;
+    status: 'sent' | 'failed' | 'bounced';
+    sentBy: string | null;
+    sentAt: string;
+    errorMessage: string | null;
+    createdAt: string;
+}
+
+export interface RAEmailTemplate {
+    to: string | null;
+    toName: string | null;
+    subject: string;
+    body: string;
+    memoNumber: string;
+    pharmacyName: string;
+    destination: string | null;
+    labelerName: string | null;
+    totalItems: number;
+    totalAskValue: number;
+    items?: Array<{
+        ndc: string | null;
+        productName: string | null;
+        quantity: number;
+        askPrice: number | null;
+        lotNumber: string | null;
+        expirationDate: string | null;
+    }>;
+}
+
+export interface RATrackingSummary {
+    pending: number;
+    requested: number;
+    received: number;
+    shipped: number;
+    overdue: number;
 }
