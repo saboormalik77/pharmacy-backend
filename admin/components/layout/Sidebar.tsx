@@ -20,6 +20,8 @@ import {
     Shield,
     AlertTriangle,
     PackageCheck,
+    Layers,
+    Receipt,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppSelector } from '@/lib/store/hooks';
@@ -39,6 +41,8 @@ const adminSidebarLinks = [
     { href: '/policies', icon: Shield, label: 'Policies' },
     { href: '/warehouse/tbd-items', icon: AlertTriangle, label: 'TBD Items' },
     { href: '/warehouse/receiving', icon: PackageCheck, label: 'Receiving' },
+    { href: '/warehouse/batches', icon: Layers, label: 'Batches' },
+    { href: '/warehouse/debit-memos', icon: Receipt, label: 'Debit Memos' },
     { href: '/warehouse/wine-cellar', icon: Archive, label: 'Wine Cellar' },
 ];
 
@@ -87,7 +91,10 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose }: SidebarProps) 
                 isCollapsed ? 'sm:w-16' : 'sm:w-64'
             )}
         >
-            <div className="p-4">
+            <div
+                className="h-full overflow-y-auto overflow-x-hidden p-4 pb-8"
+                style={{ scrollbarWidth: 'thin', scrollbarColor: '#334155 transparent' }}
+            >
                 <nav className="space-y-1">
                     {sidebarLinks.map((link) => {
                         const Icon = link.icon;

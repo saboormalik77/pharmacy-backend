@@ -39,6 +39,8 @@ import { adminPoliciesRouter, policyCheckRouter } from './routes/policiesRoutes'
 import destructionRoutes from './routes/destructionRoutes';
 import wineCellarRoutes from './routes/wineCellarRoutes';
 import warehouseRoutes from './routes/warehouseRoutes';
+import batchRoutes from './routes/batchRoutes';
+import debitMemoRoutes from './routes/debitMemoRoutes';
 import { globalErrorHandler } from './controllers/errorController';
 import { checkExpiringProductsAndNotify } from './services/notificationCronService';
 import { surfaceReadyWineCellarItems } from './services/wineCellarCronService';
@@ -166,6 +168,8 @@ app.use('/api/policies', policyCheckRouter);
 app.use('/api/admin/destruction', destructionRoutes);
 app.use('/api/admin/wine-cellar', wineCellarRoutes);
 app.use('/api/admin/warehouse', warehouseRoutes);
+app.use('/api/admin/batches', batchRoutes);
+app.use('/api/admin/debit-memos', debitMemoRoutes);
 
 /**
  * @swagger

@@ -1774,7 +1774,7 @@ Based on policy engine result, route item to:
 
 ## Module 10: Monthly Batch & Close-Out
 
-### ❌ **STATUS: NOT YET STARTED**
+### ✅ **STATUS: Fully Complete — Backend + Admin Frontend**
 
 ### What Client Document Says (Sections 13-14)
 
@@ -1800,125 +1800,111 @@ Based on policy engine result, route item to:
 
 #### Saboor (Backend)
 
-**Task 10.1: Create return_batches table**
+**Task 10.1: Create return_batches table** ✅ DONE
 
-- Location: SQL migration
-- Table: `return_batches`
-  - `id` (UUID, PK)
-  - `batch_month` (DATE) — first of month
-  - `batch_name` (TEXT) — e.g., "March 2026"
-  - `status` (ENUM: 'open', 'closed', 'submitted')
-  - `total_returns` (INTEGER)
-  - `total_debit_memos` (INTEGER)
-  - `total_value` (DECIMAL)
-  - `cardinal_file_generated` (BOOLEAN)
-  - `cardinal_file_url` (TEXT)
-  - `cardinal_submitted_at` (TIMESTAMP)
-  - `cardinal_approved_at` (TIMESTAMP)
-  - `closed_at` (TIMESTAMP)
-  - `created_at`, `updated_at`
+- SQL Migration: `scripts/fcr_15_batch_closeout.sql`
+- Table: `return_batches` with all specified columns
+- Unique index on `batch_month` to prevent duplicate batches for the same month
+- `_batch_to_json` helper for consistent camelCase JSON output
+- RLS enabled, updated_at trigger
 
-**Task 10.2: Create debit_memos table**
+**Task 10.2: Create debit_memos table** ✅ DONE
 
-- Location: SQL migration
-- Table: `debit_memos`
-  - `id` (UUID, PK)
-  - `batch_id` (UUID, FK)
-  - `pharmacy_id` (UUID, FK)
-  - `memo_number` (VARCHAR 30, UNIQUE) — e.g., "DEL-0326-DCC-XXXX"
-  - `destination` (ENUM)
-  - `labeler_id` (VARCHAR 10)
-  - `labeler_name` (TEXT)
-  - `total_items` (INTEGER)
-  - `total_ask_value` (DECIMAL)
-  - `total_received_value` (DECIMAL)
-  - `ra_number` (TEXT)
-  - `ra_requested_at` (TIMESTAMP)
-  - `ra_received_at` (TIMESTAMP)
-  - `tickler_date` (DATE)
-  - `baggie_manifest` (TEXT)
-  - `outbound_tracking` (TEXT)
-  - `shipped_at` (TIMESTAMP)
-  - `payment_status` (ENUM: 'pending', 'partial', 'paid', 'disputed')
-  - `amount_requested` (DECIMAL)
-  - `amount_received` (DECIMAL)
-  - `created_at`, `updated_at`
+- Table: `debit_memos` with all specified columns
+- Indexes on `batch_id`, `pharmacy_id`, `destination`, `payment_status`
+- `_debit_memo_to_json` helper with joined `pharmacyName` from pharmacy table
+- RLS enabled, updated_at trigger
 
-**Task 10.3: Create debit_memo_items table**
+**Task 10.3: Create debit_memo_items table** ✅ DONE
 
-- Location: SQL migration
-- Table: `debit_memo_items`
-  - `id` (UUID, PK)
-  - `debit_memo_id` (UUID, FK)
-  - `transaction_item_id` (UUID, FK)
-  - `ndc` (VARCHAR 13)
-  - `product_name` (TEXT)
-  - `quantity` (INTEGER)
-  - `ask_price` (DECIMAL)
-  - `received_price` (DECIMAL)
-  - `lot_number` (TEXT)
-  - `expiration_date` (DATE)
-  - `created_at`
+- Table: `debit_memo_items` with all specified columns
+- Indexes on `debit_memo_id`, `transaction_item_id`
+- RLS enabled
 
-**Task 10.4: Create batch management service**
+**Task 10.4: Create batch management service** ✅ DONE
 
-- Location: `src/services/batchService.ts`
-- Functions:
-  - `createBatch(month)` — create new monthly batch
-  - `assignToBatch(transactionId, batchId)` — assign return to batch
-  - `closeBatch(batchId)` — close batch, generate debit memos
-  - `generateDebitMemos(batchId)` — create debit memo records
-  - `generateCardinalFile(batchId)` — generate CSV/Excel for Cardinal
+- Service: `src/services/batchService.ts` — all RPC-backed, zero custom JS logic
+- Interfaces: `ReturnBatch`, `DebitMemo`, `DebitMemoItem`
+- Functions (all via Supabase RPC):
+  - `createBatch(batchMonth, batchName?)` — creates batch, normalises to first-of-month, rejects duplicates
+  - `listBatches(status?, page?, limit?)` — paginated list with status filter
+  - `getBatch(batchId)` — returns batch + nested debitMemos + assigned returns
+  - `assignReturnsToBatch(batchId, transactionIds[])` — assigns received/closed_out returns, skips invalid, updates batch totals
+  - `closeBatch(batchId)` — validates no TBD items, no returnable items without destination, generates debit memos grouped by (pharmacy, destination, labeler_id), populates debit_memo_items, closes batch
+  - `submitCardinal(batchId)` — marks batch as submitted to Cardinal
+  - `listDebitMemos(filters)` — paginated list with batch, pharmacy, destination, payment_status, search filters
+  - `getDebitMemo(memoId)` — returns memo + all line items
+  - `updateDebitMemo(memoId, updates)` — updates RA info, payment, shipping fields
 
-**Task 10.5: Create batch/close-out API**
+**Task 10.5: Create batch/close-out API** ✅ DONE
 
-- Location: Create new files
+- Controller: `src/controllers/batchController.ts`
+- Routes: `src/routes/batchRoutes.ts` → registered at `/api/admin/batches`
 - Endpoints:
-  - `GET /api/admin/batches` — List all batches
-  - `POST /api/admin/batches` — Create new batch
-  - `GET /api/admin/batches/:id` — Get batch with debit memos
-  - `POST /api/admin/batches/:id/assign` — Assign returns to batch
-  - `POST /api/admin/batches/:id/close` — Close batch (generate debit memos)
-  - `GET /api/admin/batches/:id/cardinal-file` — Download Cardinal file
+  - `GET /api/admin/batches` — List batches (filter by status, paginated)
+  - `POST /api/admin/batches` — Create batch (`{ batchMonth, batchName? }`)
+  - `GET /api/admin/batches/:id` — Get batch with debit memos and returns
+  - `POST /api/admin/batches/:id/assign` — Assign returns (`{ transactionIds: [] }`)
+  - `POST /api/admin/batches/:id/close` — Close batch (generates debit memos)
   - `POST /api/admin/batches/:id/submit-cardinal` — Mark as submitted
 
-**Task 10.6: Create debit memo API**
+**Task 10.6: Create debit memo API** ✅ DONE
 
-- Location: Create new files
+- Controller: `src/controllers/debitMemoController.ts`
+- Routes: `src/routes/debitMemoRoutes.ts` → registered at `/api/admin/debit-memos`
 - Endpoints:
-  - `GET /api/admin/debit-memos` — List all debit memos
-  - `GET /api/admin/debit-memos/:id` — Get debit memo with items
-  - `PATCH /api/admin/debit-memos/:id` — Update (RA number, payment info)
+  - `GET /api/admin/debit-memos` — List memos (filter by batch, pharmacy, destination, payment_status, search)
+  - `GET /api/admin/debit-memos/:id` — Get memo with line items
+  - `PATCH /api/admin/debit-memos/:id` — Update RA number, payment, shipping info
 
 #### Younas (Admin Frontend)
 
-**Task 10.7: Create batches page**
+**Redux & Types Setup** ✅ DONE
+
+- Types: Added `ReturnBatch`, `DebitMemo`, `DebitMemoItem` interfaces to `admin/lib/types/index.ts`
+- Redux slice: `admin/lib/store/batchSlice.ts` — state for batches, debit memos, pagination, current detail views
+  - Batch thunks: `fetchBatches`, `createBatch`, `fetchBatchDetail`, `assignReturnsToBatch`, `closeBatch`, `submitCardinal`
+  - Debit memo thunks: `fetchDebitMemos`, `fetchDebitMemoDetail`, `updateDebitMemo`
+  - Reducers: `clearError`, `clearCurrentBatch`, `clearCurrentMemo`
+- Store: Registered `batchReducer` in `admin/lib/store/store.ts`
+- Sidebar: Added "Batches" (`Layers` icon) and "Debit Memos" (`Receipt` icon) links to admin sidebar
+
+**Task 10.7: Create batches page** ✅ DONE
 
 - Location: `admin/app/warehouse/batches/page.tsx`
-- UI:
-  - Table: Batch Month, Status, Returns, Debit Memos, Total Value, Cardinal Status
-  - "Create New Batch" button
-  - Click row → batch detail page
+- **Stats cards**: Total batches, Open, Closed, Submitted — with color-coded icons
+- **Filters**: Status dropdown (All / Open / Closed / Submitted)
+- **Table**: Batch Month (formatted as "March 2026"), Name, Status badge, Returns count, Debit Memos count, Total Value (currency), Cardinal status badge (Pending / File Ready / Submitted), Created date
+- **Create Batch modal**: Month picker (`<input type="month">`) and optional name field. Calls `POST /api/admin/batches`
+- **Row click**: Navigates to batch detail page `/warehouse/batches/:id`
+- **Pagination**: Previous/Next with page indicator
 
-**Task 10.8: Create batch detail page**
+**Task 10.8: Create batch detail page** ✅ DONE
 
 - Location: `admin/app/warehouse/batches/[id]/page.tsx`
-- UI:
-  - Batch info header
-  - Returns in batch (table)
-  - Debit memos generated (table)
-  - Actions:
-    - "Close Batch" (generates debit memos)
-    - "Generate Cardinal File"
-    - "Mark Cardinal Submitted"
+- **Header**: Batch name, status badge, month, action buttons
+- **Info cards**: Returns count, Debit Memos count, Total Value, Cardinal Status with submitted date
+- **Batch Details card**: Created date, Closed date, Cardinal Approved date, Cardinal File download link
+- **Returns in Batch** (collapsible): Table with License Plate, Pharmacy, Status, Items, Value, Tracking. Row click navigates to return detail.
+- **Debit Memos** (collapsible): Table with Memo #, Pharmacy, Destination, Labeler, Items, Ask Value, RA #, Payment Status. Contextual empty message for open vs closed batches.
+- **Assign Returns modal** (open batches only): Fetches received returns from warehouse API, searchable list with checkboxes, shows license plate/pharmacy/items/value. Calls `POST /api/admin/batches/:id/assign`
+- **Close Batch** confirmation modal (open batches only): Warning about irreversibility, explains what happens (locks batch, generates debit memos, validates no TBD items). Calls `POST /api/admin/batches/:id/close`
+- **Mark Cardinal Submitted** confirmation modal (closed batches only): Calls `POST /api/admin/batches/:id/submit-cardinal`
 
-**Task 10.9: Create debit memos page**
+**Task 10.9: Create debit memos page** ✅ DONE
 
 - Location: `admin/app/warehouse/debit-memos/page.tsx`
-- UI:
-  - Table: Memo #, Pharmacy, Destination, Items, Ask Value, RA Status, Payment Status
-  - Filters: Batch, Destination, RA status, Payment status
-  - Click row → detail page
+- **Filters**: Search (memo #, pharmacy, labeler — debounced), Destination dropdown, Payment Status dropdown
+- **Accordion list**: Each memo is an expandable row showing Memo #, Pharmacy, Destination, Items, Ask Value, RA Status (Pending/Requested/Received badges), Payment Status badge
+- **Expanded detail view** (inline, no separate page):
+  - **RA Info card**: RA Number, Requested/Received dates, Tickler date — editable in edit mode
+  - **Shipping card**: Baggie Manifest, Outbound Tracking, Shipped date — editable
+  - **Payment card**: Status dropdown, Amount Requested, Amount Received — editable
+  - **Memo Details card**: Labeler ID, Labeler Name, Destination, Total Ask, Total Received
+  - **Line Items table**: NDC, Product, Lot #, Expires, Qty, Ask Price, Received Price
+  - **Edit mode**: Toggle with Edit button, updates via `PATCH /api/admin/debit-memos/:id`, inline form fields replace display values
+- **Highlight support**: `?highlight=<memoId>` query param auto-expands the specified memo (used from batch detail page)
+- **Pagination**: Previous/Next with page/total indicator
 
 ---
 

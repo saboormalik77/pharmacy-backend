@@ -1046,3 +1046,62 @@ export interface VerificationSummary {
     verifiedItems: number;
     openDiscrepancies: number;
 }
+
+// ── Monthly Batch & Close-Out (Module 10) ────────────────────
+
+export interface ReturnBatch {
+    id: string;
+    batchMonth: string;
+    batchName: string;
+    status: 'open' | 'closed' | 'submitted';
+    totalReturns: number;
+    totalDebitMemos: number;
+    totalValue: number;
+    cardinalFileGenerated: boolean;
+    cardinalFileUrl: string | null;
+    cardinalSubmittedAt: string | null;
+    cardinalApprovedAt: string | null;
+    closedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface DebitMemo {
+    id: string;
+    batchId: string;
+    pharmacyId: string;
+    pharmacyName: string;
+    memoNumber: string;
+    destination: string | null;
+    labelerId: string | null;
+    labelerName: string | null;
+    totalItems: number;
+    totalAskValue: number;
+    totalReceivedValue: number;
+    raNumber: string | null;
+    raRequestedAt: string | null;
+    raReceivedAt: string | null;
+    ticklerDate: string | null;
+    baggieManifest: string | null;
+    outboundTracking: string | null;
+    shippedAt: string | null;
+    paymentStatus: 'pending' | 'partial' | 'paid' | 'disputed';
+    amountRequested: number;
+    amountReceived: number;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface DebitMemoItem {
+    id: string;
+    debitMemoId: string;
+    transactionItemId: string | null;
+    ndc: string | null;
+    productName: string | null;
+    quantity: number;
+    askPrice: number | null;
+    receivedPrice: number | null;
+    lotNumber: string | null;
+    expirationDate: string | null;
+    createdAt: string;
+}
