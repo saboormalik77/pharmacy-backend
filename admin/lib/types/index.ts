@@ -593,6 +593,8 @@ export interface ReturnTransaction {
     verifiedIntegrity: boolean;
     notes: string | null;
     finalizedAt: string | null;
+    boxCount: number | null;
+    manifestGeneratedAt: string | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -949,4 +951,66 @@ export interface BarcodeScanResponse {
         standardPrice: number | null;
         scanSource: string;
     };
+}
+
+// ── Wine Cellar (Module 7) ─────────────────────────────────
+
+export interface WineCellarItem {
+    id: string;
+    pharmacyId: string;
+    pharmacyName: string | null;
+    transactionItemId: string | null;
+    ndc: string | null;
+    ndc10: string | null;
+    productName: string | null;
+    manufacturer: string | null;
+    lotNumber: string | null;
+    serialNumber: string | null;
+    expirationDate: string | null;
+    quantity: number;
+    standardPrice: number | null;
+    estimatedValue: number | null;
+    isPartial: boolean;
+    partialPercentage: number | null;
+    dateShelved: string;
+    expectedReturnableDate: string | null;
+    physicalLocation: string | null;
+    baggieBarcode: string | null;
+    status: 'shelved' | 'ready_to_return' | 'returned' | 'destroyed';
+    returnedInTransactionId: string | null;
+    returnedAt: string | null;
+    notes: string | null;
+    createdBy: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface WineCellarStats {
+    totalItems: number;
+    shelved: number;
+    readyToReturn: number;
+    returned: number;
+    destroyed: number;
+    totalValue: number;
+}
+
+export interface WineCellarListResponse {
+    items: WineCellarItem[];
+    summary: {
+        totalItems: number;
+        totalShelved: number;
+        totalReady: number;
+        totalValue: number;
+    };
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+    };
+}
+
+export interface WineCellarSurfaceResult {
+    surfacedCount: number;
+    items: WineCellarItem[];
 }

@@ -37,6 +37,7 @@ const adminSidebarLinks = [
     { href: '/processors', icon: UserCog, label: 'Processors' },
     { href: '/policies', icon: Shield, label: 'Policies' },
     { href: '/warehouse/tbd-items', icon: AlertTriangle, label: 'TBD Items' },
+    { href: '/warehouse/wine-cellar', icon: Archive, label: 'Wine Cellar' },
 ];
 
 // Processor navigation (for role = 'processor')

@@ -6,6 +6,7 @@ import {
   updateItemHandler,
   deleteItemHandler,
   resolveItemHandler,
+  moveToWineCellarHandler,
 } from '../controllers/returnTransactionItemsController';
 import { authenticateAdmin } from '../middleware/adminAuth';
 import { authenticateProcessor } from '../middleware/processorAuth';
@@ -237,5 +238,45 @@ router.patch('/:itemId/resolve', authenticateAny, resolveItemHandler);
  *         description: Item deleted
  */
 router.delete('/:itemId', authenticateAny, deleteItemHandler);
+
+/**
+ * @swagger
+ * /api/return-transactions/{transactionId}/items/{itemId}/wine-cellar:
+ *   post:
+ *     summary: Move an existing item to wine cellar
+ *     tags: [Return Transaction Items]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: transactionId
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *       - in: path
+ *         name: itemId
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [expectedReturnableDate]
+ *             properties:
+ *               expectedReturnableDate:
+ *                 type: string
+ *                 format: date
+ *               physicalLocation:
+ *                 type: string
+ *               baggieBarcode:
+ *                 type: string
+ *               notes:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Item moved to wine cellar
+ */
+router.post('/:itemId/wine-cellar', authenticateAny, moveToWineCellarHandler);
 
 export default router;

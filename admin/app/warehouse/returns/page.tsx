@@ -18,7 +18,6 @@ import {
     pauseReturnTransaction,
     resumeReturnTransaction,
     completeReturnTransaction,
-    finalizeReturnTransaction,
     deleteReturnTransaction,
     updateReturnTransaction,
 } from '@/lib/store/returnTransactionsSlice';
@@ -73,7 +72,7 @@ export default function ReturnsPage() {
     const [viewModal, setViewModal] = useState<ReturnTransaction | null>(null);
     const [editModal, setEditModal] = useState<ReturnTransaction | null>(null);
     const [deleteModal, setDeleteModal] = useState<ReturnTransaction | null>(null);
-    const [actionModal, setActionModal] = useState<{ tx: ReturnTransaction; action: 'pause' | 'resume' | 'complete' | 'finalize' } | null>(null);
+    const [actionModal, setActionModal] = useState<{ tx: ReturnTransaction; action: 'pause' | 'resume' | 'complete' } | null>(null);
 
     // Edit form
     const [editForm, setEditForm] = useState({ fedexTracking: '', fedexPickupConfirmation: '', notes: '' });
@@ -124,11 +123,11 @@ export default function ReturnsPage() {
     const handleStatusAction = async () => {
         if (!actionModal) return;
         const { tx, action } = actionModal;
-        const thunkMap = { pause: pauseReturnTransaction, resume: resumeReturnTransaction, complete: completeReturnTransaction, finalize: finalizeReturnTransaction };
+        const thunkMap: Record<string, any> = { pause: pauseReturnTransaction, resume: resumeReturnTransaction, complete: completeReturnTransaction };
         const thunk = thunkMap[action];
         const result = await dispatch(thunk(tx.id));
         if (thunk.fulfilled.match(result)) {
-            const labels = { pause: 'paused', resume: 'resumed', complete: 'completed', finalize: 'finalized' };
+            const labels: Record<string, string> = { pause: 'paused', resume: 'resumed', complete: 'completed' };
             showToast(`Return ${tx.licensePlate} ${labels[action]} successfully!`);
             setActionModal(null);
             refresh();
@@ -390,9 +389,9 @@ export default function ReturnsPage() {
                                                     )}
                                                     {canDoAction(tx, 'finalize') && (
                                                         <button
-                                                            onClick={() => setActionModal({ tx, action: 'finalize' })}
+                                                            onClick={() => router.push(`/warehouse/returns/${tx.id}`)}
                                                             className="p-1.5 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded"
-                                                            title="Finalize"
+                                                            title="Finalize (open detail page)"
                                                         >
                                                             <Lock className="w-4 h-4" />
                                                         </button>
@@ -567,24 +566,18 @@ export default function ReturnsPage() {
                                 {actionModal.action === 'pause' && 'Pause Return'}
                                 {actionModal.action === 'resume' && 'Resume Return'}
                                 {actionModal.action === 'complete' && 'Mark as Completed'}
-                                {actionModal.action === 'finalize' && 'Finalize Return'}
                             </h2>
                             <button onClick={() => setActionModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
                         </div>
                         <div className="p-6">
-                            <p className="text-gray-700 mb-3">
+                            <p className="text-gray-700">
                                 Are you sure you want to <strong>{actionModal.action}</strong> return <strong>{actionModal.tx.licensePlate}</strong>?
                             </p>
-                            {actionModal.action === 'finalize' && (
-                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-800">
-                                    <strong>Warning:</strong> Finalizing a return locks it permanently. This action cannot be undone.
-                                </div>
-                            )}
                         </div>
                         <div className="flex justify-end gap-2 p-5 border-t border-gray-200 bg-gray-50">
                             <Button variant="outline" onClick={() => setActionModal(null)}>Cancel</Button>
                             <Button
-                                variant={actionModal.action === 'finalize' ? 'danger' : 'primary'}
+                                variant="primary"
                                 onClick={handleStatusAction}
                                 disabled={isActionLoading}
                             >

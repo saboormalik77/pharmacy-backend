@@ -1403,6 +1403,8 @@ Based on policy engine result, route item to:
 
 ## Module 7: Wine Cellar System
 
+### ✅ **STATUS: COMPLETE** (Tasks 7.1–7.9)
+
 ### What Client Document Says (Section 7C)
 
 > "Goes to 'wine cellar' aging inventory. Bagged by store. Labeled so it can be found later. Should be queued for future month when it becomes eligible."
@@ -1417,81 +1419,126 @@ Based on policy engine result, route item to:
 
 #### Saboor (Backend)
 
-**Task 7.1: Create wine_cellar table**
+**Task 7.1: Create wine_cellar table** ✅ DONE
 
-- Location: SQL migration
-- Table: `wine_cellar`
-  - `id` (UUID, PK)
-  - `pharmacy_id` (UUID, FK)
-  - `transaction_item_id` (UUID, FK, nullable)
-  - `ndc` (VARCHAR 13)
-  - `product_name` (TEXT)
-  - `manufacturer` (TEXT)
-  - `lot_number` (TEXT)
-  - `serial_number` (TEXT)
-  - `expiration_date` (DATE)
-  - `quantity` (INTEGER)
-  - `standard_price` (DECIMAL)
-  - `date_shelved` (TIMESTAMP)
-  - `expected_returnable_date` (DATE)
-  - `physical_location` (TEXT) — box label/shelf
-  - `baggie_barcode` (TEXT)
-  - `status` (ENUM: 'shelved', 'ready_to_return', 'returned', 'destroyed')
-  - `returned_in_transaction_id` (UUID, FK, nullable)
-  - `returned_at` (TIMESTAMP)
-  - `created_at`, `updated_at`
+- Location: `scripts/fcr_11_create_wine_cellar.sql`
+- Table: `wine_cellar` with 23 columns including `ndc_10`, `is_partial`, `partial_percentage`, `estimated_value`, `notes`, `created_by`
+- 7 indexes, auto-update trigger, RLS policies
+- `_wc_to_json()` helper function for camelCase JSONB output with pharmacy name JOIN
 
-**Task 7.2: Create wine cellar service**
+**Task 7.2: Create wine cellar service** ✅ DONE
 
 - Location: `src/services/wineCellarService.ts`
-- Functions:
-  - `addToWineCellar(itemData)` — create wine cellar record
-  - `getWineCellarItems(filters)` — list items with filters
-  - `getDueItems(month)` — get items due for return this month
-  - `markAsReturned(id, transactionId)` — update status when added to return
-  - `checkAndSurfaceReadyItems()` — cron job function to find newly returnable items
+- 7 thin RPC wrapper functions (zero query building):
+  - `addToWineCellar` → `add_to_wine_cellar` RPC
+  - `listWineCellarItems` → `list_wine_cellar_items` RPC
+  - `getWineCellarItem` → `get_wine_cellar_item` RPC
+  - `updateWineCellarItem` → `update_wine_cellar_item` RPC
+  - `markAsReturned` → `mark_wine_cellar_returned` RPC
+  - `checkAndSurfaceReadyItems` → `check_and_surface_ready_items` RPC
+  - `getWineCellarStats` → `get_wine_cellar_stats` RPC
 
-**Task 7.3: Create wine cellar API**
+**Task 7.3: Create wine cellar API** ✅ DONE
 
-- Location: Create new files
+- Controller: `src/controllers/wineCellarController.ts` (8 handlers)
+- Routes: `src/routes/wineCellarRoutes.ts` (Swagger documented, authenticateAdmin)
+- Registered: `app.use('/api/admin/wine-cellar', wineCellarRoutes)` in server.ts
 - Endpoints:
-  - `GET /api/admin/wine-cellar` — List all items (filterable)
-  - `POST /api/admin/wine-cellar` — Add item manually
-  - `GET /api/admin/wine-cellar/due` — Get items due this month
-  - `POST /api/admin/wine-cellar/:id/return` — Mark item as ready to return
-  - `POST /api/admin/wine-cellar/check-ready` — Trigger readiness check
+  - `GET /api/admin/wine-cellar` — Paginated list with search, status, expected_month filters + summary stats
+  - `POST /api/admin/wine-cellar` — Add item (validates pharmacy, checks duplicates)
+  - `GET /api/admin/wine-cellar/due` — Items due this month (ready_to_return)
+  - `GET /api/admin/wine-cellar/stats` — Count by status + total value
+  - `GET /api/admin/wine-cellar/:id` — Single item detail
+  - `PATCH /api/admin/wine-cellar/:id` — Update (location, barcode, notes, qty, price, partial fields)
+  - `POST /api/admin/wine-cellar/:id/return` — Mark returned, links to return transaction
+  - `POST /api/admin/wine-cellar/check-ready` — Surface items past expected date
 
-**Task 7.4: Create wine cellar cron job**
+**Task 7.4: Create wine cellar cron job** ✅ DONE
 
-- Location: `src/scripts/` or integrate with existing cron
-- Monthly job (1st of month):
-  - Query wine_cellar where expected_returnable_date <= current month
-  - Update status to 'ready_to_return'
-  - Create notification for warehouse staff
-  - Log items surfaced
+- **Service:** `src/services/wineCellarCronService.ts` — Wraps `checkAndSurfaceReadyItems()` with logging
+- **Integration:** `src/server.ts` — Automated cron job runs daily at 2:00 AM
+- **Schedule:** Checks every hour, but only executes at 2 AM; also runs once on server startup
+- **RPC:** `check_and_surface_ready_items()` bulk-updates shelved items where `expected_returnable_date <= CURRENT_DATE` → `ready_to_return`
+- **Manual trigger:** `POST /api/admin/wine-cellar/check-ready` — Can be called from UI or manually
+- **Logs:** `✅ Wine cellar cron completed: N items surfaced` on success
 
 #### Younas (Admin Frontend)
 
-**Task 7.5: Create wine cellar page**
+**Task 7.5: Create wine cellar page** ✅ DONE
 
 - Location: `admin/app/warehouse/wine-cellar/page.tsx`
+- Types added: `WineCellarItem`, `WineCellarStats`, `WineCellarListResponse`, `WineCellarSurfaceResult` in `admin/lib/types/index.ts`
+- Redux slice: `admin/lib/store/wineCellarSlice.ts` (5 async thunks: fetchWineCellarItems, fetchWineCellarStats, updateWineCellarItem, markWineCellarReturned, checkAndSurfaceReady)
+- Registered in store: `admin/lib/store/store.ts` → `wineCellar: wineCellarReducer`
+- Sidebar: Added Wine Cellar link to `adminSidebarLinks` in `admin/components/layout/Sidebar.tsx`
 - UI:
-  - Table: NDC, Product, Pharmacy, Shelved Date, Expected Return Date, Status, Location
-  - Filters: Status, Pharmacy, Expected month
-  - "Due This Month" quick filter
-  - "Add to Return" button for ready items
-  - Bulk select and add to return
+  - Stats cards: Total Items, Shelved, Ready to Return, Returned, Destroyed, Total Value
+  - Table: NDC, Product, Pharmacy, QTY, Price, Shelved Date, Expected Return Date, Location, Status, Actions
+  - Filters: Search (debounced), Status dropdown, Expected month picker, Clear button
+  - "Due This Month" quick filter button
+  - "Check Ready Items" button (surfaces items past expected date)
+  - Edit modal: Quantity, Price, Physical Location, Baggie Barcode, Expected Date, Notes
+  - Pagination with Previous/Next
+  - Summary bar: Showing count, Shelved, Ready, Value
 
-**Task 7.6: Wine cellar integration in return creation**
+**Task 7.6: Wine cellar integration in return creation** ✅ DONE
 
 - Location: `admin/app/warehouse/returns/[id]/page.tsx`
-- Add button: "Add Wine Cellar Items"
-- Modal: Shows wine cellar items for this pharmacy that are ready
-- Select items → add to current return
+- Added "Wine Cellar Items" button next to "Add Items" in items section header
+- Modal: Fetches wine cellar items with `ready_to_return` status for the return's pharmacy
+- Table with select-all checkbox, NDC, Product, QTY, Price, Shelved date, Location
+- Click rows to toggle selection
+- "Add N Items" button calls `POST /api/admin/wine-cellar/:id/return` for each selected item
+- Auto-refreshes items list and return summary after adding
+
+**Task 7.7: Auto wine cellar entry from processor scanning** ✅ DONE
+
+- **Flow:** Processor scans item → Policy engine returns `too_early` → Item auto-added to wine cellar
+- **Backend changes:**
+  - Controller: `src/controllers/returnTransactionItemsController.ts` — `addItemHandler` now checks if `policyResult.reason === 'too_early'` after saving the item. If true, it auto-calls `wcService.addToWineCellar()` with product data from the scan + pharmacy from the transaction, then links the created `wineCellarId` back on the item via `itemsService.updateItem()`. Non-blocking (errors logged but don't crash the request).
+  - Import: `wineCellarService` and `getReturnTransactionById` from respective services
+  - Response: `addItem` response now includes `wineCellarItem` field when auto-add succeeds
+- **Frontend changes:**
+  - Location: `admin/app/warehouse/returns/[id]/add-items/page.tsx`
+  - Classification result UI shows purple theme with Archive icon when item is auto-added to wine cellar
+  - Shows "MOVED TO WINE CELLAR" label with expected returnable date
+  - Purple toast notification: "Item auto-added to Wine Cellar! Returnable after {date}"
+  - `lastClassification` state extended with `wineCellarItem?: any`
+- **Redux changes:**
+  - `addTransactionItem` thunk return type now includes `wineCellarItem`
+
+**Task 7.8: Manual move to wine cellar from items list** ✅ DONE
+
+- **Flow:** Admin views return items → Sees item with `nonReturnableReason: 'date'` → Clicks Archive button → Item moved to wine cellar
+- **Backend changes:**
+  - New handler: `moveToWineCellarHandler` in `src/controllers/returnTransactionItemsController.ts`
+  - New route: `POST /api/return-transactions/:id/items/:itemId/wine-cellar` in `src/routes/returnTransactionItemsRoutes.ts`
+  - Auth: `authenticateAny` (admin or processor)
+  - Request body: `{ expectedReturnableDate, physicalLocation?, baggieBarcode?, notes? }`
+  - Logic: Validates item exists, not already in wine cellar, creates wine cellar entry, links `wine_cellar_id` on item, sets `return_status = 'non_returnable'` and `non_returnable_reason = 'date'`
+- **Frontend changes:**
+  - Location: `admin/app/warehouse/returns/[id]/page.tsx`
+  - Status column: Shows `WC` badge (purple, with Archive icon) next to status when `item.wineCellarId` is set
+  - Actions column: Archive button for items with `nonReturnableReason === 'date'` and no `wineCellarId`
+  - `handleMoveToWineCellar`: Calculates expected returnable date (expiration + 6 months), dispatches `moveItemToWineCellar` thunk
+- **Redux changes:**
+  - New async thunk: `moveItemToWineCellar` in `admin/lib/store/returnTransactionsSlice.ts`
+  - Calls `POST /return-transactions/:transactionId/items/:itemId/wine-cellar`
+
+**Task 7.9: SQL migration for wine_cellar_id link** ✅ DONE
+
+- Location: `scripts/fcr_12_wine_cellar_item_link.sql`
+- Changes:
+  1. FK constraint `fk_rti_wine_cellar` on `return_transaction_items.wine_cellar_id → wine_cellar.id` (ON DELETE SET NULL)
+  2. Partial index `idx_rti_wine_cellar_id` for efficient lookups
+  3. Updated `update_return_transaction_item()` RPC to include `wine_cellar_id` in UPDATE clause (was previously missing — the field existed on the table but the RPC ignored it)
+- **Run manually:** Execute in Supabase SQL Editor
 
 ---
 
 ## Module 8: Return Finalization & Shipping
+
+### � **STATUS: COMPLETE (BACKEND + FRONTEND)**
 
 ### What Client Document Says (Section 10)
 
@@ -1507,71 +1554,128 @@ Based on policy engine result, route item to:
 - Store forgot to include paperwork in shipment
 - Box count entered incorrectly
 
+### Schema Changes
+
+**SQL Migration:** `scripts/fcr_13_finalization_and_manifest.sql` (run manually)
+
+- Added `box_count INTEGER` column to `return_transactions`
+- Added `manifest_generated_at TIMESTAMPTZ` column to `return_transactions`
+- Updated `_rt_to_json()` helper to include `boxCount` and `manifestGeneratedAt`
+
+### New RPC Functions
+
+1. **`finalize_return_transaction(p_id UUID, p_fedex_tracking TEXT, p_box_count INTEGER)`**
+   - Validates status = 'completed' (must complete before finalizing)
+   - Validates no items with `return_status = 'tbd'` remain
+   - Validates FedEx tracking is provided
+   - Sets status = 'finalized', `finalized_at = NOW()`, stores tracking + box count
+   - Returns updated transaction JSON
+
+2. **`get_manifest_data(p_transaction_id UUID)`**
+   - Returns full manifest JSON: transaction info, pharmacy info, processor info
+   - Includes summary (returnable/non-returnable counts, values, hasCiiItems flag)
+   - Includes returnableItems and nonReturnableItems arrays with full item details
+   - Sets `manifest_generated_at = NOW()` on the transaction
+
+3. **`get_dea_form_222_data(p_transaction_id UUID)`**
+   - Returns pharmacy info + items where `dea_form_222_required = true`
+   - Returns 404-style error if no CII items found
+
+### New API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/return-transactions/:id/finalize` | Finalize with validation (body: `fedexTracking`, `boxCount`) |
+| GET | `/api/return-transactions/:id/manifest` | Download manifest as PDF |
+| GET | `/api/return-transactions/:id/manifest-data` | Get manifest data as JSON |
+| GET | `/api/return-transactions/:id/dea-form-222` | Download DEA Form 222 as PDF |
+
+### New Files Created
+
+- `src/services/manifestService.ts` — PDF generation (pdfkit) for manifest and DEA Form 222
+- `scripts/fcr_13_finalization_and_manifest.sql` — Schema changes + 3 RPC functions
+
 ### Developer Tasks
 
 #### Saboor (Backend)
 
-**Task 8.1: Create finalization endpoint**
+**Task 8.1: ✅ DONE — Enhanced finalization endpoint with validation**
 
-- Location: `src/services/returnTransactionService.ts`
+- Location: `src/services/returnTransactionService.ts`, `src/controllers/returnTransactionController.ts`
 - Endpoint: `POST /api/return-transactions/:id/finalize`
-- Logic:
-  1. Validate all items have destination (no TBD remaining)
-  2. Validate FedEx tracking entered
-  3. Set status = 'finalized'
-  4. Set finalized_at = now
-  5. Lock record (no more edits allowed)
-  6. Generate manifest data
-- Return: confirmation + manifest data
+- Implementation:
+  1. Accepts `fedexTracking` (required) and `boxCount` (optional) in request body
+  2. Calls `finalize_return_transaction` RPC which validates:
+     - Status must be 'completed'
+     - No TBD items remaining
+     - FedEx tracking must be provided
+  3. Sets status = 'finalized', finalized_at = now
+  4. Returns updated transaction JSON
+- Frontend types and Redux thunk updated to pass new parameters
 
-**Task 8.2: Create manifest generation endpoint**
+**Task 8.2: ✅ DONE — Manifest generation endpoint**
 
 - Location: `src/services/manifestService.ts`
-- Endpoint: `GET /api/return-transactions/:id/manifest`
-- Generate PDF with:
-  - Store info (name, address, DEA)
-  - License plate
-  - Returnable items list (NDC, name, qty, price, value)
-  - Non-returnable items list
-  - Totals
-  - Barcode for scanning
-- Use PDF generation library (pdfkit, puppeteer, or similar)
+- Endpoints: `GET /manifest` (PDF) and `GET /manifest-data` (JSON)
+- PDF includes:
+  - Pharmacy info (name, DEA, NPI, phone)
+  - Transaction info (license plate, processor, dates, tracking)
+  - Summary box (returnable/non-returnable counts + values)
+  - Returnable items table (NDC, Product, Lot, Exp, Qty, Price, Value, Destination)
+  - Non-returnable items table (NDC, Product, Lot, Exp, Qty, Price, Value, Reason)
+  - Page footers with generation timestamp
+- Uses pdfkit library (v0.17.2)
 
-**Task 8.3: Create DEA Form 222 generation**
+**Task 8.3: ✅ DONE — DEA Form 222 generation**
 
-- Location: `src/services/deaFormService.ts`
+- Location: `src/services/manifestService.ts` (combined with manifest service)
 - Endpoint: `GET /api/return-transactions/:id/dea-form-222`
-- Generate DEA Form 222 for Schedule II controlled substances
-- Only include items with dea_form_222_required = true
+- Generates DEA Form 222 PDF for Schedule II controlled substances
+- Only includes items with `dea_form_222_required = true`
+- Includes registrant info, numbered CII items table, signature lines
 
 #### Younas (Admin Frontend)
 
-**Task 8.4: Create "Complete Return" flow**
+**Task 8.4: ✅ DONE — "Complete Return" finalization flow**
 
 - Location: `admin/app/warehouse/returns/[id]/page.tsx`
-- UI flow:
-  1. "Complete Return" button (disabled if TBD items exist)
-  2. Shows summary: X returnable items ($Y value), Z non-returnable
-  3. FedEx tracking input field
-  4. Pickup confirmation input (optional)
-  5. "Print Manifest" button → opens PDF
-  6. "Print DEA Form 222" button (if CII items exist)
-  7. Confirmation checkboxes:
-     - ☐ Manifest printed and included
-     - ☐ DEA Form 222 printed (if applicable)
-     - ☐ All items verified
-  8. "Finalize Return" button
-  9. Warning dialog: "You will no longer be able to edit this return. Proceed?"
-  10. On confirm: Call finalize API
+- Dedicated finalize modal (replaces simple confirm dialog) with:
+  1. **Return Summary** — Shows returnable/non-returnable item counts and values
+  2. **TBD Warning** — Red banner if any items still have TBD status (blocks finalization)
+  3. **FedEx Tracking** input (required, validated before submit)
+  4. **Box Count** input (optional)
+  5. **Print Manifest** button — Opens manifest PDF in new browser tab
+  6. **Print DEA Form 222** button — Only shown when CII items exist
+  7. **Confirmation Checkboxes** (all must be checked to enable finalize):
+     - ☐ Manifest printed and included in shipment
+     - ☐ DEA Form 222 printed and included (only if CII items exist)
+     - ☐ All items have been verified
+  8. **Warning banner** — "Finalizing locks this return permanently"
+  9. **Finalize Return** button — Disabled until tracking entered + all checks done
+  10. On confirm: Calls `finalizeReturnTransaction` thunk with tracking + box count
+- **Documents Section** — Shown on detail page after finalization (status = finalized/received/closed_out):
+  - "Download Manifest" button (blue, opens PDF in new tab)
+  - "DEA Form 222" button (orange, opens PDF in new tab)
+  - Shows manifest generation timestamp
+- **Shipping Card** — Now shows box count when available
+- **List Page** — Finalize button redirects to detail page for full flow (no more simple confirm)
 
-**Task 8.5: Create manifest preview/print**
+**Task 8.5: ✅ DONE — Manifest preview/print**
 
-- Location: Component for PDF preview
-- Options: View in browser, Download PDF, Print directly
+- Location: `admin/app/warehouse/returns/[id]/page.tsx` (integrated in detail page)
+- PDF download via direct `fetch()` with Bearer token authentication
+- Opens PDF in new browser tab (user can view, print via browser, or download)
+- Loading state with spinner while PDF generates
+- Error handling with toast notifications
+- Available in two contexts:
+  1. **During finalization** — "Print Manifest" and "Print DEA Form 222" buttons in finalize modal
+  2. **After finalization** — "Download Manifest" and "DEA Form 222" buttons in Documents card
 
 ---
 
 ## Module 9: Warehouse Receiving
+
+### ❌ **STATUS: NOT YET STARTED**
 
 ### What Client Document Says (Section 12)
 
@@ -1651,6 +1755,8 @@ Based on policy engine result, route item to:
 ---
 
 ## Module 10: Monthly Batch & Close-Out
+
+### ❌ **STATUS: NOT YET STARTED**
 
 ### What Client Document Says (Sections 13-14)
 
@@ -1800,6 +1906,8 @@ Based on policy engine result, route item to:
 
 ## Module 11: RA Request & Tracking
 
+### ❌ **STATUS: NOT YET STARTED**
+
 ### What Client Document Says (Sections 15-17)
 
 > "Debit memos are sent one-by-one to destination processors. Destinations may include Inmar, PharmaLink, Collex/Colonyx-type routes. Often email-driven."
@@ -1897,6 +2005,8 @@ Based on policy engine result, route item to:
 
 ## Module 12: Manufacturer Payment Tracking
 
+### ❌ **STATUS: NOT YET STARTED**
+
 ### What Client Document Says (Section 18)
 
 > "Processor/manufacturer handles review. Credits eventually flow back. Actual paid amount is often lower than original ask."
@@ -1968,6 +2078,8 @@ Based on policy engine result, route item to:
 ---
 
 ## Module 13: Pharmacy & GPO Payout
+
+### ❌ **STATUS: NOT YET STARTED**
 
 ### What Client Document Says (Section 20)
 
@@ -2048,6 +2160,8 @@ Based on policy engine result, route item to:
 ---
 
 ## Module 14: Reporting & Analytics
+
+### ❌ **STATUS: NOT YET STARTED**
 
 ### What Client Document Says (Section 21)
 

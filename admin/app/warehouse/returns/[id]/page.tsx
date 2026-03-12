@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import {
     ArrowLeft, Loader2, AlertCircle, X, Pause, Play, CheckCircle, Lock,
     Trash2, Edit, ClipboardList, Building2, UserCog, Package, Truck, Clock,
-    Plus, Search, ScanLine,
+    Plus, Search, ScanLine, Archive, FileText, Download, AlertTriangle, Printer,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -25,9 +25,10 @@ import {
     fetchTransactionItems,
     deleteTransactionItem,
     updateTransactionItem,
+    moveItemToWineCellar,
     clearItems,
 } from '@/lib/store/returnTransactionsSlice';
-import { ReturnTransaction, ReturnTransactionItem } from '@/lib/types';
+import { ReturnTransaction, ReturnTransactionItem, WineCellarItem } from '@/lib/types';
 
 // ── Helpers ────────────────────────────────────────────────────
 
@@ -77,7 +78,7 @@ export default function ReturnDetailPage() {
     const [toasts, setToasts] = useState<Toast[]>([]);
     const [editModal, setEditModal] = useState(false);
     const [editForm, setEditForm] = useState({ fedexTracking: '', fedexPickupConfirmation: '', notes: '' });
-    const [actionModal, setActionModal] = useState<'pause' | 'resume' | 'complete' | 'finalize' | null>(null);
+    const [actionModal, setActionModal] = useState<'pause' | 'resume' | 'complete' | null>(null);
     const [deleteModal, setDeleteModal] = useState(false);
 
     // Items state
@@ -87,6 +88,19 @@ export default function ReturnDetailPage() {
     const [editItemModal, setEditItemModal] = useState<ReturnTransactionItem | null>(null);
     const [editItemForm, setEditItemForm] = useState({ quantity: '', standardPrice: '', returnStatus: 'tbd', memo: '' });
     const debouncedItemSearch = useDebounce(itemSearch, 500);
+
+    // Wine Cellar integration state
+    const [wcModal, setWcModal] = useState(false);
+    const [wcItems, setWcItems] = useState<WineCellarItem[]>([]);
+    const [wcLoading, setWcLoading] = useState(false);
+    const [wcSelected, setWcSelected] = useState<Set<string>>(new Set());
+    const [wcAdding, setWcAdding] = useState(false);
+
+    // Finalize flow state
+    const [finalizeModal, setFinalizeModal] = useState(false);
+    const [finalizeForm, setFinalizeForm] = useState({ fedexTracking: '', boxCount: '' });
+    const [finalizeChecks, setFinalizeChecks] = useState({ manifestPrinted: false, deaFormPrinted: false, allItemsVerified: false });
+    const [pdfLoading, setPdfLoading] = useState<string | null>(null);
 
     const showToast = (message: string, type: Toast['type'] = 'success') => {
         const tid = Date.now().toString();
@@ -123,11 +137,11 @@ export default function ReturnDetailPage() {
 
     const handleStatusAction = async () => {
         if (!actionModal || !tx) return;
-        const thunkMap = { pause: pauseReturnTransaction, resume: resumeReturnTransaction, complete: completeReturnTransaction, finalize: finalizeReturnTransaction };
+        const thunkMap: Record<string, any> = { pause: pauseReturnTransaction, resume: resumeReturnTransaction, complete: completeReturnTransaction };
         const thunk = thunkMap[actionModal];
         const result = await dispatch(thunk(tx.id));
         if (thunk.fulfilled.match(result)) {
-            const labels = { pause: 'paused', resume: 'resumed', complete: 'completed', finalize: 'finalized' };
+            const labels: Record<string, string> = { pause: 'paused', resume: 'resumed', complete: 'completed' };
             showToast(`Return ${tx.licensePlate} ${labels[actionModal]} successfully!`);
             setActionModal(null);
             refresh();
@@ -214,6 +228,142 @@ export default function ReturnDetailPage() {
         }
     };
 
+    // ── Wine Cellar handlers ────────────────────────────────────
+
+    const openWcModal = async () => {
+        if (!tx) return;
+        setWcModal(true);
+        setWcLoading(true);
+        setWcSelected(new Set());
+        try {
+            const { apiClient } = await import('@/lib/api/apiClient');
+            const res = await apiClient.get<{ status: string; data: { items: WineCellarItem[] } }>(
+                '/admin/wine-cellar', true, { pharmacy_id: tx.pharmacyId, status: 'ready_to_return', limit: '100' }
+            );
+            setWcItems(res.data.items || []);
+        } catch {
+            setWcItems([]);
+        }
+        setWcLoading(false);
+    };
+
+    const toggleWcSelect = (itemId: string) => {
+        setWcSelected(prev => {
+            const next = new Set(prev);
+            if (next.has(itemId)) next.delete(itemId); else next.add(itemId);
+            return next;
+        });
+    };
+
+    const handleAddWcItems = async () => {
+        if (wcSelected.size === 0 || !tx) return;
+        setWcAdding(true);
+        let successCount = 0;
+        try {
+            const { apiClient } = await import('@/lib/api/apiClient');
+            for (const wcId of wcSelected) {
+                try {
+                    await apiClient.post(`/admin/wine-cellar/${encodeURIComponent(wcId)}/return`, { transactionId: tx.id }, true);
+                    successCount++;
+                } catch { /* skip failed */ }
+            }
+        } catch { /* ignore */ }
+        setWcAdding(false);
+        setWcModal(false);
+        if (successCount > 0) {
+            showToast(`${successCount} wine cellar item(s) marked as returned!`);
+            refreshItems();
+            refresh();
+        } else {
+            showToast('Failed to add wine cellar items', 'error');
+        }
+    };
+
+    const handleMoveToWineCellar = async (item: ReturnTransactionItem) => {
+        if (!tx || !item.expirationDate) {
+            showToast('Item must have an expiration date to move to Wine Cellar', 'error');
+            return;
+        }
+        // Calculate expected returnable date: 6 months after expiration
+        const exp = new Date(item.expirationDate);
+        exp.setMonth(exp.getMonth() + 6);
+        const expectedDate = exp.toISOString().split('T')[0];
+
+        const result = await dispatch(moveItemToWineCellar({
+            transactionId: tx.id,
+            itemId: item.id,
+            expectedReturnableDate: expectedDate,
+        }));
+        if (moveItemToWineCellar.fulfilled.match(result)) {
+            showToast(`${item.proprietaryName || item.ndc || 'Item'} moved to Wine Cellar! Returnable after ${expectedDate}`);
+            refreshItems();
+        } else {
+            showToast(result.payload as string || 'Failed to move item to wine cellar', 'error');
+        }
+    };
+
+    // ── Finalize & Document helpers ─────────────────────────────
+
+    const tbdItems = items.filter(i => i.returnStatus === 'tbd');
+    const ciiItems = items.filter(i => i.deaForm222Required);
+    const hasTbdItems = tbdItems.length > 0;
+    const hasCiiItems = ciiItems.length > 0;
+    const isFinalized = tx ? ['finalized', 'received', 'closed_out'].includes(tx.status) : false;
+
+    const openFinalizeModal = () => {
+        if (!tx) return;
+        setFinalizeForm({ fedexTracking: tx.fedexTracking || '', boxCount: tx.boxCount ? String(tx.boxCount) : '' });
+        setFinalizeChecks({ manifestPrinted: false, deaFormPrinted: false, allItemsVerified: false });
+        setFinalizeModal(true);
+    };
+
+    const downloadPdf = async (endpoint: string, filename: string) => {
+        setPdfLoading(endpoint);
+        try {
+            const { cookieUtils } = await import('@/lib/utils/cookies');
+            const token = cookieUtils.getAuthToken();
+            const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+            const res = await fetch(`${baseUrl}/return-transactions/${encodeURIComponent(id)}/${endpoint}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({ message: 'Download failed' }));
+                throw new Error(err.message || 'Download failed');
+            }
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
+            setTimeout(() => URL.revokeObjectURL(url), 60000);
+        } catch (e: any) {
+            showToast(e.message || 'Failed to download document', 'error');
+        }
+        setPdfLoading(null);
+    };
+
+    const handleFinalize = async () => {
+        if (!tx) return;
+        const fedexTracking = finalizeForm.fedexTracking.trim();
+        const boxCount = finalizeForm.boxCount ? parseInt(finalizeForm.boxCount) : undefined;
+        if (!fedexTracking) {
+            showToast('FedEx tracking number is required', 'error');
+            return;
+        }
+        const result = await dispatch(finalizeReturnTransaction({ id: tx.id, fedexTracking, boxCount }));
+        if (finalizeReturnTransaction.fulfilled.match(result)) {
+            showToast(`Return ${tx.licensePlate} finalized successfully!`);
+            setFinalizeModal(false);
+            refresh();
+        } else {
+            showToast(result.payload as string || 'Failed to finalize return', 'error');
+        }
+    };
+
+    const canFinalize = finalizeForm.fedexTracking.trim().length > 0
+        && !hasTbdItems
+        && finalizeChecks.allItemsVerified
+        && finalizeChecks.manifestPrinted
+        && (!hasCiiItems || finalizeChecks.deaFormPrinted);
+
     function getItemStatusBadge(status: string): { variant: 'success' | 'warning' | 'danger' | 'default'; label: string } {
         switch (status) {
             case 'returnable': return { variant: 'success', label: 'Returnable' };
@@ -286,7 +436,7 @@ export default function ReturnDetailPage() {
                             </Button>
                         )}
                         {canDoAction(tx, 'finalize') && (
-                            <Button variant="danger" size="sm" onClick={() => setActionModal('finalize')}>
+                            <Button variant="danger" size="sm" onClick={openFinalizeModal}>
                                 <Lock className="w-4 h-4 mr-1" /> Finalize
                             </Button>
                         )}
@@ -414,9 +564,45 @@ export default function ReturnDetailPage() {
                             <dt className="text-gray-500">Verified Integrity</dt>
                             <dd className="text-gray-900">{tx.verifiedIntegrity ? 'Yes' : 'No'}</dd>
                         </div>
+                        {tx.boxCount != null && (
+                            <div className="flex justify-between">
+                                <dt className="text-gray-500">Box Count</dt>
+                                <dd className="text-gray-900 font-semibold">{tx.boxCount}</dd>
+                            </div>
+                        )}
                     </dl>
                 </div>
             </div>
+
+            {/* ── Documents Section (post-finalization) ──────── */}
+            {isFinalized && (
+                <div className="bg-white rounded-lg shadow-md p-5">
+                    <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <FileText className="w-4 h-4" /> Documents
+                    </h2>
+                    <div className="flex flex-wrap gap-3">
+                        <button
+                            onClick={() => downloadPdf('manifest', `manifest-${tx.licensePlate}.pdf`)}
+                            disabled={pdfLoading === 'manifest'}
+                            className="flex items-center gap-2 px-4 py-2.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg text-sm text-blue-700 font-medium transition-colors disabled:opacity-50"
+                        >
+                            {pdfLoading === 'manifest' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                            Download Manifest
+                        </button>
+                        <button
+                            onClick={() => downloadPdf('dea-form-222', `dea-form-222-${tx.licensePlate}.pdf`)}
+                            disabled={pdfLoading === 'dea-form-222'}
+                            className="flex items-center gap-2 px-4 py-2.5 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg text-sm text-orange-700 font-medium transition-colors disabled:opacity-50"
+                        >
+                            {pdfLoading === 'dea-form-222' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
+                            DEA Form 222
+                        </button>
+                    </div>
+                    {tx.manifestGeneratedAt && (
+                        <p className="text-xs text-gray-400 mt-3">Manifest last generated: {formatDate(tx.manifestGeneratedAt)}</p>
+                    )}
+                </div>
+            )}
 
             {/* ── Items Section ──────────────────────────────── */}
             <div className="bg-white rounded-lg shadow-md p-5">
@@ -425,9 +611,14 @@ export default function ReturnDetailPage() {
                         <ScanLine className="w-4 h-4" /> Products ({itemsSummary?.totalItems ?? items.length})
                     </h2>
                     {canDoAction(tx, 'edit') && (
-                        <Button variant="primary" size="sm" onClick={() => router.push(`/warehouse/returns/${id}/add-items`)}>
-                            <Plus className="w-4 h-4 mr-1" /> Add Items
-                        </Button>
+                        <div className="flex gap-2">
+                            <Button variant="primary" size="sm" onClick={() => router.push(`/warehouse/returns/${id}/add-items`)}>
+                                <Plus className="w-4 h-4 mr-1" /> Add Items
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={openWcModal}>
+                                <Archive className="w-4 h-4 mr-1" /> Wine Cellar Items
+                            </Button>
+                        </div>
                     )}
                 </div>
 
@@ -535,10 +726,26 @@ export default function ReturnDetailPage() {
                                             </td>
                                             <td className="px-2 py-2 text-gray-600 font-mono">{item.lotNumber || '—'}</td>
                                             <td className="px-2 py-2">
-                                                <Badge variant={sBadge.variant}>{sBadge.label}</Badge>
+                                                <div className="flex items-center gap-1">
+                                                    <Badge variant={sBadge.variant}>{sBadge.label}</Badge>
+                                                    {item.wineCellarId && (
+                                                        <Badge variant="info">
+                                                            <Archive className="w-3 h-3 mr-0.5 inline" />WC
+                                                        </Badge>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td className="px-2 py-2">
                                                 <div className="flex items-center justify-end gap-1">
+                                                    {canDoAction(tx, 'edit') && item.nonReturnableReason === 'date' && !item.wineCellarId && (
+                                                        <button
+                                                            onClick={() => handleMoveToWineCellar(item)}
+                                                            className="p-1 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded"
+                                                            title="Move to Wine Cellar"
+                                                        >
+                                                            <Archive className="w-3.5 h-3.5" />
+                                                        </button>
+                                                    )}
                                                     {canDoAction(tx, 'edit') && (
                                                         <button
                                                             onClick={() => setEditItemModal(item)}
@@ -696,23 +903,17 @@ export default function ReturnDetailPage() {
                                 {actionModal === 'pause' && 'Pause Return'}
                                 {actionModal === 'resume' && 'Resume Return'}
                                 {actionModal === 'complete' && 'Mark as Completed'}
-                                {actionModal === 'finalize' && 'Finalize Return'}
                             </h2>
                             <button onClick={() => setActionModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
                         </div>
                         <div className="p-6">
-                            <p className="text-gray-700 mb-3">
+                            <p className="text-gray-700">
                                 Are you sure you want to <strong>{actionModal}</strong> return <strong>{tx.licensePlate}</strong>?
                             </p>
-                            {actionModal === 'finalize' && (
-                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-800">
-                                    <strong>Warning:</strong> Finalizing a return locks it permanently. This action cannot be undone.
-                                </div>
-                            )}
                         </div>
                         <div className="flex justify-end gap-2 p-5 border-t border-gray-200 bg-gray-50">
                             <Button variant="outline" onClick={() => setActionModal(null)}>Cancel</Button>
-                            <Button variant={actionModal === 'finalize' ? 'danger' : 'primary'} onClick={handleStatusAction} disabled={isActionLoading}>
+                            <Button variant="primary" onClick={handleStatusAction} disabled={isActionLoading}>
                                 {isActionLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Processing...</> : 'Confirm'}
                             </Button>
                         </div>
@@ -737,6 +938,261 @@ export default function ReturnDetailPage() {
                             <Button variant="outline" onClick={() => setDeleteModal(false)}>Cancel</Button>
                             <Button variant="danger" onClick={handleDelete} disabled={isActionLoading}>
                                 {isActionLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Deleting...</> : 'Delete'}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Finalize Return Modal ──────────────────── */}
+            {finalizeModal && (
+                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setFinalizeModal(false)}>
+                    <div className="bg-white rounded-lg max-w-xl w-full shadow-xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
+                            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                <Lock className="w-5 h-5 text-red-600" /> Finalize Return — {tx.licensePlate}
+                            </h2>
+                            <button onClick={() => setFinalizeModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                        </div>
+                        <div className="p-5 flex-1 overflow-y-auto space-y-5">
+                            {/* Summary */}
+                            <div>
+                                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Return Summary</h3>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div className="bg-green-50 rounded-lg p-3 text-center">
+                                        <p className="text-xs text-green-600">Returnable Items</p>
+                                        <p className="text-lg font-bold text-green-800">
+                                            {items.filter(i => i.returnStatus === 'returnable').length}
+                                        </p>
+                                        <p className="text-xs text-green-700 font-medium">{formatCurrency(itemsSummary?.totalReturnableValue || 0)}</p>
+                                    </div>
+                                    <div className="bg-red-50 rounded-lg p-3 text-center">
+                                        <p className="text-xs text-red-600">Non-Returnable Items</p>
+                                        <p className="text-lg font-bold text-red-800">
+                                            {items.filter(i => i.returnStatus === 'non_returnable').length}
+                                        </p>
+                                        <p className="text-xs text-red-700 font-medium">{formatCurrency(itemsSummary?.totalNonReturnableValue || 0)}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* TBD Warning */}
+                            {hasTbdItems && (
+                                <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
+                                    <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                                    <div>
+                                        <p className="text-sm font-medium text-red-800">
+                                            {tbdItems.length} item{tbdItems.length !== 1 ? 's' : ''} still have TBD status
+                                        </p>
+                                        <p className="text-xs text-red-700 mt-0.5">
+                                            All items must be resolved as returnable or non-returnable before finalizing.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Shipping Info */}
+                            <div>
+                                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Shipping Information</h3>
+                                <div className="space-y-3">
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                                            FedEx Tracking Number <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={finalizeForm.fedexTracking}
+                                            onChange={e => setFinalizeForm({ ...finalizeForm, fedexTracking: e.target.value })}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono"
+                                            placeholder="Enter FedEx tracking number"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Box Count</label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={finalizeForm.boxCount}
+                                            onChange={e => setFinalizeForm({ ...finalizeForm, boxCount: e.target.value })}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                            placeholder="Number of boxes"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Documents */}
+                            <div>
+                                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Print Documents</h3>
+                                <div className="flex flex-wrap gap-2">
+                                    <button
+                                        onClick={() => downloadPdf('manifest', `manifest-${tx.licensePlate}.pdf`)}
+                                        disabled={pdfLoading === 'manifest'}
+                                        className="flex items-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg text-sm text-blue-700 font-medium transition-colors disabled:opacity-50"
+                                    >
+                                        {pdfLoading === 'manifest' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Printer className="w-4 h-4" />}
+                                        Print Manifest
+                                    </button>
+                                    {hasCiiItems && (
+                                        <button
+                                            onClick={() => downloadPdf('dea-form-222', `dea-form-222-${tx.licensePlate}.pdf`)}
+                                            disabled={pdfLoading === 'dea-form-222'}
+                                            className="flex items-center gap-2 px-3 py-2 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg text-sm text-orange-700 font-medium transition-colors disabled:opacity-50"
+                                        >
+                                            {pdfLoading === 'dea-form-222' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
+                                            Print DEA Form 222
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Confirmation Checkboxes */}
+                            <div>
+                                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Confirmation</h3>
+                                <div className="space-y-2">
+                                    <label className="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-gray-50">
+                                        <input
+                                            type="checkbox"
+                                            checked={finalizeChecks.manifestPrinted}
+                                            onChange={e => setFinalizeChecks({ ...finalizeChecks, manifestPrinted: e.target.checked })}
+                                            className="rounded text-primary-600 focus:ring-primary-500"
+                                        />
+                                        <span className="text-sm text-gray-700">Manifest printed and included in shipment</span>
+                                    </label>
+                                    {hasCiiItems && (
+                                        <label className="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-gray-50">
+                                            <input
+                                                type="checkbox"
+                                                checked={finalizeChecks.deaFormPrinted}
+                                                onChange={e => setFinalizeChecks({ ...finalizeChecks, deaFormPrinted: e.target.checked })}
+                                                className="rounded text-primary-600 focus:ring-primary-500"
+                                            />
+                                            <span className="text-sm text-gray-700">DEA Form 222 printed and included</span>
+                                        </label>
+                                    )}
+                                    <label className="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-gray-50">
+                                        <input
+                                            type="checkbox"
+                                            checked={finalizeChecks.allItemsVerified}
+                                            onChange={e => setFinalizeChecks({ ...finalizeChecks, allItemsVerified: e.target.checked })}
+                                            className="rounded text-primary-600 focus:ring-primary-500"
+                                        />
+                                        <span className="text-sm text-gray-700">All items have been verified</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            {/* Warning */}
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex items-start gap-2">
+                                <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="text-sm font-medium text-yellow-800">This action cannot be undone</p>
+                                    <p className="text-xs text-yellow-700 mt-0.5">
+                                        Finalizing locks this return permanently. You will no longer be able to edit items or make changes.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex justify-end gap-2 p-5 border-t border-gray-200 bg-gray-50">
+                            <Button variant="outline" onClick={() => setFinalizeModal(false)}>Cancel</Button>
+                            <Button variant="danger" onClick={handleFinalize} disabled={isActionLoading || !canFinalize}>
+                                {isActionLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Finalizing...</> : <><Lock className="w-4 h-4 mr-1" />Finalize Return</>}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Wine Cellar Modal ────────────────────────── */}
+            {wcModal && (
+                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setWcModal(false)}>
+                    <div className="bg-white rounded-lg max-w-2xl w-full shadow-xl max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
+                            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                <Archive className="w-5 h-5 text-purple-600" /> Add Wine Cellar Items
+                            </h2>
+                            <button onClick={() => setWcModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                        </div>
+                        <div className="p-5 flex-1 overflow-y-auto">
+                            {wcLoading ? (
+                                <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary-600" /></div>
+                            ) : wcItems.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <Archive className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                                    <p className="text-gray-500 text-sm font-medium">No wine cellar items ready to return</p>
+                                    <p className="text-gray-400 text-xs mt-1">Items with &quot;Ready to Return&quot; status for this pharmacy will appear here.</p>
+                                </div>
+                            ) : (
+                                <>
+                                    <p className="text-xs text-gray-500 mb-3">
+                                        Select items to add to this return. {wcSelected.size > 0 && <strong>{wcSelected.size} selected</strong>}
+                                    </p>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full table-auto text-xs">
+                                            <thead>
+                                                <tr className="bg-purple-50 border-b border-purple-200">
+                                                    <th className="px-3 py-2 w-8">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={wcSelected.size === wcItems.length && wcItems.length > 0}
+                                                            onChange={() => {
+                                                                if (wcSelected.size === wcItems.length) {
+                                                                    setWcSelected(new Set());
+                                                                } else {
+                                                                    setWcSelected(new Set(wcItems.map(i => i.id)));
+                                                                }
+                                                            }}
+                                                            className="rounded text-purple-600 focus:ring-purple-500"
+                                                        />
+                                                    </th>
+                                                    <th className="text-left px-3 py-2 font-medium text-purple-700">NDC</th>
+                                                    <th className="text-left px-3 py-2 font-medium text-purple-700">Product</th>
+                                                    <th className="text-center px-3 py-2 font-medium text-purple-700">QTY</th>
+                                                    <th className="text-right px-3 py-2 font-medium text-purple-700">Price</th>
+                                                    <th className="text-left px-3 py-2 font-medium text-purple-700">Shelved</th>
+                                                    <th className="text-left px-3 py-2 font-medium text-purple-700">Location</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {wcItems.map(item => (
+                                                    <tr
+                                                        key={item.id}
+                                                        className={`border-b border-gray-100 cursor-pointer transition-colors ${wcSelected.has(item.id) ? 'bg-purple-50' : 'hover:bg-gray-50'}`}
+                                                        onClick={() => toggleWcSelect(item.id)}
+                                                    >
+                                                        <td className="px-3 py-2">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={wcSelected.has(item.id)}
+                                                                onChange={() => toggleWcSelect(item.id)}
+                                                                className="rounded text-purple-600 focus:ring-purple-500"
+                                                            />
+                                                        </td>
+                                                        <td className="px-3 py-2 font-mono text-gray-900">{item.ndc || '—'}</td>
+                                                        <td className="px-3 py-2 text-gray-900 max-w-[140px] truncate" title={item.productName || ''}>
+                                                            <div>
+                                                                <p className="truncate">{item.productName || '—'}</p>
+                                                                {item.manufacturer && <p className="text-gray-400 text-[10px] truncate">{item.manufacturer}</p>}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-3 py-2 text-center text-gray-900">{item.quantity}</td>
+                                                        <td className="px-3 py-2 text-right text-gray-900">
+                                                            {item.standardPrice != null ? formatCurrency(item.standardPrice) : '—'}
+                                                        </td>
+                                                        <td className="px-3 py-2 text-gray-600">{formatDate(item.dateShelved)}</td>
+                                                        <td className="px-3 py-2 text-gray-600">{item.physicalLocation || '—'}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                        <div className="flex justify-end gap-2 p-5 border-t border-gray-200 bg-gray-50">
+                            <Button variant="outline" onClick={() => setWcModal(false)}>Cancel</Button>
+                            <Button variant="primary" onClick={handleAddWcItems} disabled={wcAdding || wcSelected.size === 0}>
+                                {wcAdding ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Adding...</> : `Add ${wcSelected.size} Item${wcSelected.size !== 1 ? 's' : ''}`}
                             </Button>
                         </div>
                     </div>

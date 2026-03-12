@@ -8,6 +8,9 @@ import {
   resumeHandler,
   completeHandler,
   finalizeHandler,
+  manifestHandler,
+  manifestDataHandler,
+  deaForm222Handler,
   deleteHandler,
 } from '../controllers/returnTransactionController';
 import { authenticateAdmin } from '../middleware/adminAuth';
@@ -263,7 +266,54 @@ router.post('/:id/complete', authenticateAny, completeHandler);
  * /api/return-transactions/{id}/finalize:
  *   post:
  *     summary: Finalize a return — locks it permanently
- *     description: Only completed returns can be finalized. No further edits allowed after this.
+ *     description: |
+ *       Validates and finalizes a completed return:
+ *       - Status must be 'completed'
+ *       - No TBD items remaining (all classified)
+ *       - FedEx tracking required (pass in body or set via PATCH first)
+ *       - Sets status to 'finalized', sets finalized_at timestamp
+ *       - No further edits allowed after this
+ *     tags: [Return Transactions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               fedexTracking:
+ *                 type: string
+ *                 description: FedEx tracking number (can also be set via PATCH before finalizing)
+ *               boxCount:
+ *                 type: integer
+ *                 description: Number of boxes in the shipment
+ *     responses:
+ *       200:
+ *         description: Return finalized successfully
+ *       400:
+ *         description: Validation failed (TBD items, missing tracking, wrong status)
+ */
+router.post('/:id/finalize', authenticateAny, finalizeHandler);
+
+// ============================================================
+// GET    /api/return-transactions/:id/manifest — PDF manifest
+// ============================================================
+/**
+ * @swagger
+ * /api/return-transactions/{id}/manifest:
+ *   get:
+ *     summary: Download return manifest as PDF
+ *     description: |
+ *       Generates and returns a PDF manifest containing:
+ *       pharmacy info, license plate, FedEx tracking,
+ *       returnable items list, non-returnable items list,
+ *       and summary totals. Also marks manifest_generated_at.
  *     tags: [Return Transactions]
  *     security:
  *       - bearerAuth: []
@@ -274,9 +324,76 @@ router.post('/:id/complete', authenticateAny, completeHandler);
  *         schema: { type: string, format: uuid }
  *     responses:
  *       200:
- *         description: Return finalized
+ *         description: PDF file
+ *         content:
+ *           application/pdf:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       404:
+ *         description: Return transaction not found
  */
-router.post('/:id/finalize', authenticateAny, finalizeHandler);
+router.get('/:id/manifest', authenticateAny, manifestHandler);
+
+// ============================================================
+// GET    /api/return-transactions/:id/manifest-data — Raw manifest JSON
+// ============================================================
+/**
+ * @swagger
+ * /api/return-transactions/{id}/manifest-data:
+ *   get:
+ *     summary: Get manifest data as JSON
+ *     description: |
+ *       Returns the raw manifest data (pharmacy info, items, totals)
+ *       without generating a PDF. Useful for frontend preview.
+ *     tags: [Return Transactions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: Manifest data
+ *       404:
+ *         description: Return transaction not found
+ */
+router.get('/:id/manifest-data', authenticateAny, manifestDataHandler);
+
+// ============================================================
+// GET    /api/return-transactions/:id/dea-form-222 — DEA Form 222 PDF
+// ============================================================
+/**
+ * @swagger
+ * /api/return-transactions/{id}/dea-form-222:
+ *   get:
+ *     summary: Download DEA Form 222 as PDF
+ *     description: |
+ *       Generates a DEA Form 222 PDF for Schedule II controlled substances.
+ *       Only includes items where dea_form_222_required = true.
+ *       Returns 404 if no CII items exist in the return.
+ *     tags: [Return Transactions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: PDF file
+ *         content:
+ *           application/pdf:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       404:
+ *         description: No CII items found or return not found
+ */
+router.get('/:id/dea-form-222', authenticateAny, deaForm222Handler);
 
 // ============================================================
 // DELETE  /api/return-transactions/:id

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { catchAsync } from '../utils/catchAsync';
 import { AppError } from '../utils/appError';
 import * as rtService from '../services/returnTransactionService';
+import { generateManifestPdf, generateDeaForm222Pdf } from '../services/manifestService';
 
 // ============================================================
 // POST /api/return-transactions — Create new return
@@ -149,8 +150,63 @@ export const completeHandler = catchAsync(
 // ============================================================
 export const finalizeHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
-    const transaction = await rtService.finalizeReturnTransaction(req.params.id);
+    const { fedexTracking, fedex_tracking, boxCount, box_count } = req.body;
+
+    const transaction = await rtService.finalizeReturnTransaction(
+      req.params.id,
+      fedexTracking || fedex_tracking,
+      boxCount ?? box_count
+    );
+
     res.status(200).json({ status: 'success', data: transaction });
+  }
+);
+
+// ============================================================
+// GET /api/return-transactions/:id/manifest — Generate manifest PDF
+// ============================================================
+export const manifestHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { id } = req.params;
+
+    const manifestData = await rtService.getManifestData(id);
+
+    const pdfBuffer = await generateManifestPdf(manifestData);
+
+    const filename = `manifest_${manifestData.transaction.licensePlate || id}.pdf`;
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+    res.setHeader('Content-Length', pdfBuffer.length);
+    res.end(pdfBuffer);
+  }
+);
+
+// ============================================================
+// GET /api/return-transactions/:id/dea-form-222 — Generate DEA Form 222 PDF
+// ============================================================
+export const deaForm222Handler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { id } = req.params;
+
+    const deaData = await rtService.getDeaForm222Data(id);
+
+    const pdfBuffer = await generateDeaForm222Pdf(deaData);
+
+    const filename = `dea_form_222_${deaData.transaction.licensePlate || id}.pdf`;
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+    res.setHeader('Content-Length', pdfBuffer.length);
+    res.end(pdfBuffer);
+  }
+);
+
+// ============================================================
+// GET /api/return-transactions/:id/manifest-data — Get raw manifest data (JSON)
+// ============================================================
+export const manifestDataHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const manifestData = await rtService.getManifestData(req.params.id);
+    res.status(200).json({ status: 'success', data: manifestData });
   }
 );
 

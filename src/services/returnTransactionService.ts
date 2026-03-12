@@ -26,6 +26,8 @@ export interface ReturnTransaction {
   verifiedIntegrity: boolean;
   notes: string | null;
   finalizedAt: string | null;
+  boxCount: number | null;
+  manifestGeneratedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -204,17 +206,46 @@ export const completeReturnTransaction = async (
 };
 
 export const finalizeReturnTransaction = async (
-  transactionId: string
+  transactionId: string,
+  fedexTracking?: string,
+  boxCount?: number
 ): Promise<ReturnTransaction> => {
   const sb = ensureAdmin();
 
-  const { data, error } = await sb.rpc('change_return_transaction_status', {
+  const { data, error } = await sb.rpc('finalize_return_transaction', {
     p_id: transactionId,
-    p_new_status: 'finalized',
+    p_fedex_tracking: fedexTracking || null,
+    p_box_count: boxCount ?? null,
   });
 
   handleRpcError(data, error, 'Failed to finalize return transaction');
   return data.data as ReturnTransaction;
+};
+
+export const getManifestData = async (
+  transactionId: string
+): Promise<any> => {
+  const sb = ensureAdmin();
+
+  const { data, error } = await sb.rpc('get_manifest_data', {
+    p_transaction_id: transactionId,
+  });
+
+  handleRpcError(data, error, 'Failed to get manifest data');
+  return data.data;
+};
+
+export const getDeaForm222Data = async (
+  transactionId: string
+): Promise<any> => {
+  const sb = ensureAdmin();
+
+  const { data, error } = await sb.rpc('get_dea_form_222_data', {
+    p_transaction_id: transactionId,
+  });
+
+  handleRpcError(data, error, 'Failed to get DEA Form 222 data');
+  return data.data;
 };
 
 export const deleteReturnTransaction = async (

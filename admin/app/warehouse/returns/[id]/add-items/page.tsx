@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { useRouter, useParams } from 'next/navigation';
 import {
     ArrowLeft, Loader2, ScanLine, Keyboard, CheckCircle,
-    AlertTriangle, RotateCcw, X, Camera,
+    AlertTriangle, RotateCcw, X, Camera, Archive,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -43,6 +43,14 @@ const EMPTY_FORM = {
 
 type FormState = typeof EMPTY_FORM;
 
+type ScannedPrices = {
+    bestFullPrice: number | null;
+    bestPartialPrice: number | null;
+};
+
+const MIN_PARTIAL_PERCENTAGE = 1;
+const MAX_PARTIAL_PERCENTAGE = 100;
+
 // ── Page ───────────────────────────────────────────────────────
 
 export default function AddItemsPage() {
@@ -64,7 +72,8 @@ export default function AddItemsPage() {
     const [toasts, setToasts] = useState<Toast[]>([]);
     const [itemCount, setItemCount] = useState(0);
     const [lastWarning, setLastWarning] = useState('');
-    const [lastClassification, setLastClassification] = useState<{ item: string; status: string; policyCheck?: ReturnabilityCheckResult } | null>(null);
+    const [lastClassification, setLastClassification] = useState<{ item: string; status: string; policyCheck?: ReturnabilityCheckResult; wineCellarItem?: any } | null>(null);
+    const [scannedPrices, setScannedPrices] = useState<ScannedPrices | null>(null);
 
     const showToast = (message: string, type: Toast['type'] = 'success') => {
         const id = Date.now().toString();
@@ -84,11 +93,82 @@ export default function AddItemsPage() {
         setForm(prev => ({ ...prev, [field]: value }));
     }, []);
 
+    const getNormalizedPartialPercentage = useCallback((value: string) => {
+        if (value.trim() === '') return null;
+
+        const numericValue = Number(value);
+        if (!Number.isFinite(numericValue)) return null;
+
+        return Math.min(MAX_PARTIAL_PERCENTAGE, Math.max(MIN_PARTIAL_PERCENTAGE, numericValue));
+    }, []);
+
+    const getScannedStandardPrice = useCallback((isPartial: boolean, prices: ScannedPrices | null) => {
+        if (!prices) return '';
+
+        const selectedPrice = isPartial
+            ? prices.bestPartialPrice ?? prices.bestFullPrice
+            : prices.bestFullPrice ?? prices.bestPartialPrice;
+
+        return selectedPrice != null ? String(selectedPrice) : '';
+    }, []);
+
+    const handlePartialToggle = useCallback((checked: boolean) => {
+        setForm(prev => ({
+            ...prev,
+            isPartial: checked,
+            partialPercentage: checked ? (prev.partialPercentage || '100') : '',
+            standardPrice: getScannedStandardPrice(checked, scannedPrices),
+        }));
+    }, [getScannedStandardPrice, scannedPrices]);
+
+    const handleQuantityChange = useCallback((value: string) => {
+        const numValue = parseInt(value) || 0;
+        updateField('quantity', numValue > 0 ? String(numValue) : value);
+
+        // If in partial mode with fullPackageSize, calculate % remaining
+        if (form.isPartial && form.fullPackageSize) {
+            const packageSize = parseFloat(form.fullPackageSize);
+            if (packageSize > 0 && numValue > 0) {
+                const newPercentage = (numValue / packageSize) * 100;
+                // Clamp to 1-100 range
+                const clampedPercentage = Math.min(100, Math.max(1, newPercentage));
+                updateField('partialPercentage', clampedPercentage.toFixed(2));
+            }
+        }
+    }, [form.isPartial, form.fullPackageSize, updateField]);
+
+    const handlePartialPercentageChange = useCallback((value: string) => {
+        if (value.trim() === '') {
+            updateField('partialPercentage', '');
+            return;
+        }
+
+        const normalizedValue = getNormalizedPartialPercentage(value);
+        if (normalizedValue != null) {
+            updateField('partialPercentage', String(normalizedValue));
+
+            // If fullPackageSize exists, calculate and update quantity
+            if (form.fullPackageSize) {
+                const packageSize = parseFloat(form.fullPackageSize);
+                if (packageSize > 0) {
+                    const newQuantity = (normalizedValue / 100) * packageSize;
+                    // Round to nearest whole number or 1 decimal place
+                    updateField('quantity', Math.round(newQuantity * 10) / 10);
+                }
+            }
+        } else {
+            updateField('partialPercentage', '');
+        }
+    }, [getNormalizedPartialPercentage, form.fullPackageSize, updateField]);
+
     const estimatedValue = (() => {
         const price = parseFloat(form.standardPrice) || 0;
         const qty = parseInt(form.quantity) || 0;
-        if (form.isPartial && form.partialPercentage) {
-            return price * qty * (parseFloat(form.partialPercentage) / 100);
+        const partialPercentage = getNormalizedPartialPercentage(form.partialPercentage);
+
+        if (form.isPartial) {
+            if (partialPercentage == null) return 0;
+            return price * qty * (partialPercentage / 100);
         }
         return price * qty;
     })();
@@ -105,6 +185,12 @@ export default function AddItemsPage() {
         if (scanBarcode.fulfilled.match(result)) {
             const data = result.payload as BarcodeScanResponse;
             const af = data.autoFill;
+            const nextScannedPrices: ScannedPrices = {
+                bestFullPrice: data.pricing.bestFullPrice,
+                bestPartialPrice: data.pricing.bestPartialPrice,
+            };
+
+            setScannedPrices(nextScannedPrices);
 
             setForm({
                 ndc: af.ndc || '',
@@ -120,7 +206,7 @@ export default function AddItemsPage() {
                 lotNumber: af.lotNumber || '',
                 serialNumber: af.serialNumber || '',
                 expirationDate: af.expirationDate || '',
-                standardPrice: af.standardPrice ? String(af.standardPrice) : '',
+                standardPrice: getScannedStandardPrice(false, nextScannedPrices),
                 quantity: '1',
                 fullPackageSize: af.fullPackageSize ? String(af.fullPackageSize) : '',
                 isPartial: false,
@@ -140,6 +226,7 @@ export default function AddItemsPage() {
 
             setScanInput('');
         } else {
+            setScannedPrices(null);
             setScanError(result.payload as string || 'Scan failed. Try manual entry.');
             setScanInput('');
         }
@@ -174,6 +261,12 @@ export default function AddItemsPage() {
             return;
         }
 
+        const partialPercentage = getNormalizedPartialPercentage(form.partialPercentage);
+        if (form.isPartial && partialPercentage == null) {
+            showToast('Enter a valid % remaining between 1 and 100 for a partial bottle.', 'error');
+            return;
+        }
+
         const payload: Record<string, any> = {};
         if (form.ndc) payload.ndc = form.ndc;
         if (form.ndc10) payload.ndc10 = form.ndc10;
@@ -192,7 +285,7 @@ export default function AddItemsPage() {
         payload.quantity = parseInt(form.quantity) || 1;
         if (form.fullPackageSize) payload.fullPackageSize = parseInt(form.fullPackageSize);
         payload.isPartial = form.isPartial;
-        if (form.isPartial && form.partialPercentage) payload.partialPercentage = parseFloat(form.partialPercentage);
+        if (form.isPartial && partialPercentage != null) payload.partialPercentage = partialPercentage;
         payload.returnStatus = form.returnStatus;
         if (form.returnReason) payload.returnReason = form.returnReason;
         if (form.deaSchedule) payload.deaSchedule = form.deaSchedule;
@@ -208,8 +301,13 @@ export default function AddItemsPage() {
             const name = form.proprietaryName || form.ndc || 'Item';
             const savedItem = result.payload.item;
             const pc = result.payload.policyCheck;
+            const wcItem = result.payload.wineCellarItem;
 
-            showToast(`${name} saved! Ready for next scan.`);
+            if (wcItem) {
+                showToast(`${name} saved & moved to Wine Cellar! Will be returnable ${pc?.expectedReturnableDate || 'later'}.`);
+            } else {
+                showToast(`${name} saved! Ready for next scan.`);
+            }
 
             if (result.payload.warning) {
                 setLastWarning(result.payload.warning);
@@ -221,9 +319,11 @@ export default function AddItemsPage() {
                 item: name,
                 status: savedItem?.returnStatus || form.returnStatus,
                 policyCheck: pc,
+                wineCellarItem: wcItem,
             });
 
             setForm({ ...EMPTY_FORM });
+            setScannedPrices(null);
             setScanError('');
             setScanInput('');
             if (mode === 'usb') scanInputRef.current?.focus();
@@ -234,6 +334,7 @@ export default function AddItemsPage() {
 
     const handleClearForm = () => {
         setForm({ ...EMPTY_FORM });
+        setScannedPrices(null);
         setScanError('');
         setLastWarning('');
         setLastClassification(null);
@@ -416,7 +517,9 @@ export default function AddItemsPage() {
             {/* Classification Result */}
             {lastClassification && (
                 <div className={`rounded-lg border-2 p-4 ${
-                    lastClassification.status === 'returnable'
+                    lastClassification.wineCellarItem
+                        ? 'bg-purple-50 border-purple-300'
+                        : lastClassification.status === 'returnable'
                         ? 'bg-green-50 border-green-300'
                         : lastClassification.status === 'non_returnable'
                         ? 'bg-red-50 border-red-300'
@@ -425,10 +528,13 @@ export default function AddItemsPage() {
                     <div className="flex items-start justify-between gap-3">
                         <div className="flex items-start gap-3">
                             <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                lastClassification.wineCellarItem ? 'bg-purple-200' :
                                 lastClassification.status === 'returnable' ? 'bg-green-200' :
                                 lastClassification.status === 'non_returnable' ? 'bg-red-200' : 'bg-yellow-200'
                             }`}>
-                                {lastClassification.status === 'returnable' ? (
+                                {lastClassification.wineCellarItem ? (
+                                    <Archive className="w-5 h-5 text-purple-700" />
+                                ) : lastClassification.status === 'returnable' ? (
                                     <CheckCircle className="w-5 h-5 text-green-700" />
                                 ) : lastClassification.status === 'non_returnable' ? (
                                     <X className="w-5 h-5 text-red-700" />
@@ -438,15 +544,32 @@ export default function AddItemsPage() {
                             </div>
                             <div>
                                 <p className={`text-sm font-bold ${
+                                    lastClassification.wineCellarItem ? 'text-purple-800' :
                                     lastClassification.status === 'returnable' ? 'text-green-800' :
                                     lastClassification.status === 'non_returnable' ? 'text-red-800' : 'text-yellow-800'
                                 }`}>
                                     {lastClassification.item} — {
+                                        lastClassification.wineCellarItem ? 'MOVED TO WINE CELLAR' :
                                         lastClassification.status === 'returnable' ? 'RETURNABLE' :
                                         lastClassification.status === 'non_returnable' ? 'NON-RETURNABLE' : 'TBD (Needs Research)'
                                     }
                                 </p>
-                                {lastClassification.policyCheck && (
+                                {lastClassification.wineCellarItem && (
+                                    <div className="mt-1 text-xs space-y-0.5">
+                                        <p className="text-purple-700 font-medium">
+                                            ✓ Automatically shelved in Wine Cellar
+                                        </p>
+                                        {lastClassification.policyCheck?.expectedReturnableDate && (
+                                            <p className="text-purple-700">
+                                                Will become returnable: <span className="font-semibold">{lastClassification.policyCheck.expectedReturnableDate}</span>
+                                            </p>
+                                        )}
+                                        <p className="text-purple-600">
+                                            Item will be automatically surfaced when the return window opens.
+                                        </p>
+                                    </div>
+                                )}
+                                {!lastClassification.wineCellarItem && lastClassification.policyCheck && (
                                     <div className="mt-1 text-xs space-y-0.5">
                                         {lastClassification.policyCheck.destination && (
                                             <p className={lastClassification.status === 'returnable' ? 'text-green-700' : 'text-gray-600'}>
@@ -546,7 +669,7 @@ export default function AddItemsPage() {
                             type="number"
                             min="1"
                             value={form.quantity}
-                            onChange={e => updateField('quantity', e.target.value)}
+                            onChange={e => handleQuantityChange(e.target.value)}
                             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                         />
                     </div>
@@ -578,7 +701,7 @@ export default function AddItemsPage() {
                         <input
                             type="checkbox"
                             checked={form.isPartial}
-                            onChange={e => updateField('isPartial', e.target.checked)}
+                            onChange={e => handlePartialToggle(e.target.checked)}
                             className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                         />
                         <span className="text-gray-700">Partial bottle</span>
@@ -588,9 +711,10 @@ export default function AddItemsPage() {
                             <input
                                 type="number"
                                 min="1"
-                                max="99"
+                                max="100"
+                                step="0.01"
                                 value={form.partialPercentage}
-                                onChange={e => updateField('partialPercentage', e.target.value)}
+                                onChange={e => handlePartialPercentageChange(e.target.value)}
                                 placeholder="%"
                                 className="w-20 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                             />

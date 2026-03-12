@@ -250,7 +250,7 @@ export const completeReturnTransaction = createAsyncThunk(
 
 export const finalizeReturnTransaction = createAsyncThunk(
     'returnTransactions/finalize',
-    async (id: string, { rejectWithValue }) => {
+    async ({ id, fedexTracking, boxCount }: { id: string; fedexTracking?: string; boxCount?: number }, { rejectWithValue }) => {
         try {
             const { apiClient } = await import('@/lib/api/apiClient');
             const { cookieUtils } = await import('@/lib/utils/cookies');
@@ -258,7 +258,7 @@ export const finalizeReturnTransaction = createAsyncThunk(
 
             const response = await apiClient.post<{ status: string; data: ReturnTransaction }>(
                 `/return-transactions/${id}/finalize`,
-                {},
+                { fedexTracking, boxCount },
                 true
             );
             return response.data;
@@ -344,14 +344,35 @@ export const addTransactionItem = createAsyncThunk(
                 warning?: string;
                 duplicateItemId?: string;
                 policyCheck?: ReturnabilityCheckResult;
+                wineCellarItem?: any;
             }>(
                 `/return-transactions/${transactionId}/items`,
                 payload,
                 true
             );
-            return { item: response.data, warning: response.warning, duplicateItemId: response.duplicateItemId, policyCheck: response.policyCheck };
+            return { item: response.data, warning: response.warning, duplicateItemId: response.duplicateItemId, policyCheck: response.policyCheck, wineCellarItem: response.wineCellarItem };
         } catch (error: any) {
             return rejectWithValue(error?.message || 'Failed to add item');
+        }
+    }
+);
+
+export const moveItemToWineCellar = createAsyncThunk(
+    'returnTransactions/moveToWineCellar',
+    async ({ transactionId, itemId, expectedReturnableDate, notes }: { transactionId: string; itemId: string; expectedReturnableDate: string; notes?: string }, { rejectWithValue }) => {
+        try {
+            const { apiClient } = await import('@/lib/api/apiClient');
+            const { cookieUtils } = await import('@/lib/utils/cookies');
+            if (!cookieUtils.getAuthToken()) return rejectWithValue('Authentication required.');
+
+            const response = await apiClient.post<{ status: string; data: any; message: string }>(
+                `/return-transactions/${transactionId}/items/${itemId}/wine-cellar`,
+                { expectedReturnableDate, notes },
+                true
+            );
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error?.message || 'Failed to move item to wine cellar');
         }
     }
 );

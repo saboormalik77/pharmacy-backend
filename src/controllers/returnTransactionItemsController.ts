@@ -6,6 +6,21 @@ import { parseGS1 } from '../services/gs1ParserService';
 import { lookupNDC, lookupNDCFromCandidates, extractPackageSizeFromDescription } from '../services/ndcLookupService';
 import { checkReturnability, ReturnabilityResult } from '../services/policyEngineService';
 import { getPricingForSingleNDC } from '../services/pricingService';
+import * as wcService from '../services/wineCellarService';
+import { getReturnTransactionById } from '../services/returnTransactionService';
+
+const parseBooleanInput = (value: unknown): boolean => value === true || value === 'true';
+
+const parsePartialPercentage = (value: unknown): number | undefined => {
+  if (value == null || value === '') return undefined;
+
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 1 || parsed > 100) {
+    throw new AppError('partialPercentage must be between 1 and 100', 400);
+  }
+
+  return parsed;
+};
 
 // ============================================================
 // POST /api/return-transactions/:id/items — Add scanned item
@@ -15,6 +30,12 @@ export const addItemHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const transactionId = req.params.id;
     const body = req.body;
+    const isPartial = parseBooleanInput(body.isPartial);
+    const partialPercentage = isPartial ? parsePartialPercentage(body.partialPercentage) : undefined;
+
+    if (isPartial && partialPercentage == null) {
+      throw new AppError('partialPercentage is required when isPartial is true', 400);
+    }
 
     let returnStatus = body.returnStatus;
     let nonReturnableReason = body.nonReturnableReason;
@@ -33,7 +54,7 @@ export const addItemHandler = catchAsync(
         policyResult = await checkReturnability({
           ndc: body.ndc,
           expirationDate: body.expirationDate,
-          isPartial: body.isPartial === true || body.isPartial === 'true',
+          isPartial,
           dosageForm: body.dosageForm,
         });
 
@@ -83,8 +104,8 @@ export const addItemHandler = catchAsync(
       standardPrice: body.standardPrice != null ? Number(body.standardPrice) : undefined,
       quantity: body.quantity != null ? Number(body.quantity) : undefined,
       fullPackageSize,
-      isPartial: body.isPartial,
-      partialPercentage: body.partialPercentage != null ? Number(body.partialPercentage) : undefined,
+      isPartial,
+      partialPercentage,
       returnStatus,
       nonReturnableReason,
       returnReason: body.returnReason,
@@ -99,6 +120,44 @@ export const addItemHandler = catchAsync(
       rawScanData: body.rawScanData,
     });
 
+    // ── Auto-add to wine cellar when reason is 'too_early' ──────
+    let wineCellarItem: any = null;
+    if (
+      policyResult &&
+      policyResult.reason === 'too_early' &&
+      policyResult.expectedReturnableDate &&
+      result.item
+    ) {
+      try {
+        const transaction = await getReturnTransactionById(transactionId);
+        wineCellarItem = await wcService.addToWineCellar({
+          pharmacyId: transaction.pharmacyId,
+          transactionItemId: result.item.id,
+          ndc: body.ndc,
+          ndc10: body.ndc10,
+          productName: body.proprietaryName || body.genericName,
+          manufacturer: body.manufacturer,
+          lotNumber: body.lotNumber,
+          serialNumber: body.serialNumber,
+          expirationDate: body.expirationDate,
+          quantity: body.quantity != null ? Number(body.quantity) : 1,
+          standardPrice: body.standardPrice != null ? Number(body.standardPrice) : undefined,
+          isPartial,
+          partialPercentage,
+          expectedReturnableDate: policyResult.expectedReturnableDate,
+          createdBy: (req as any).adminId || (req as any).processorId,
+        });
+
+        // Link wine_cellar_id back on the return item
+        await itemsService.updateItem(result.item.id, {
+          wineCellarId: wineCellarItem.id,
+        } as any);
+        result.item.wineCellarId = wineCellarItem.id;
+      } catch (wcErr: any) {
+        console.error('Auto wine-cellar add failed (non-blocking):', wcErr.message);
+      }
+    }
+
     const response: any = {
       status: 'success',
       data: result.item,
@@ -106,6 +165,10 @@ export const addItemHandler = catchAsync(
 
     if (policyResult) {
       response.policyCheck = policyResult;
+    }
+
+    if (wineCellarItem) {
+      response.wineCellarItem = wineCellarItem;
     }
 
     if (result.duplicate) {
@@ -150,7 +213,33 @@ export const getItemHandler = catchAsync(
 // ============================================================
 export const updateItemHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
-    const item = await itemsService.updateItem(req.params.itemId, req.body);
+    const existingItem = await itemsService.getItem(req.params.itemId);
+    const body = req.body;
+    const hasIsPartial = Object.prototype.hasOwnProperty.call(body, 'isPartial');
+    const hasPartialPercentage = Object.prototype.hasOwnProperty.call(body, 'partialPercentage');
+
+    const isPartial = hasIsPartial ? parseBooleanInput(body.isPartial) : existingItem.isPartial;
+    let partialPercentage: number | null | undefined;
+
+    if (isPartial) {
+      partialPercentage = hasPartialPercentage
+        ? parsePartialPercentage(body.partialPercentage) ?? null
+        : existingItem.partialPercentage;
+
+      if (partialPercentage == null) {
+        throw new AppError('partialPercentage is required when isPartial is true', 400);
+      }
+    } else if (hasIsPartial || hasPartialPercentage) {
+      partialPercentage = null;
+    }
+
+    const normalizedUpdates = {
+      ...body,
+      ...(hasIsPartial ? { isPartial } : {}),
+      ...(partialPercentage !== undefined ? { partialPercentage } : {}),
+    };
+
+    const item = await itemsService.updateItem(req.params.itemId, normalizedUpdates);
     res.status(200).json({ status: 'success', data: item });
   }
 );
@@ -162,6 +251,66 @@ export const deleteItemHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     await itemsService.deleteItem(req.params.itemId);
     res.status(200).json({ status: 'success', message: 'Item deleted' });
+  }
+);
+
+// ============================================================
+// POST /api/return-transactions/:id/items/:itemId/wine-cellar
+// Manually move an existing item to wine cellar
+// ============================================================
+export const moveToWineCellarHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { id: transactionId, itemId } = req.params;
+    const body = req.body;
+
+    const existingItem = await itemsService.getItem(itemId);
+    if (!existingItem) {
+      throw new AppError('Item not found', 404);
+    }
+
+    if (existingItem.wineCellarId) {
+      throw new AppError('Item is already in wine cellar', 400);
+    }
+
+    if (!body.expectedReturnableDate) {
+      throw new AppError('expectedReturnableDate is required', 400);
+    }
+
+    const transaction = await getReturnTransactionById(transactionId);
+
+    const wineCellarItem = await wcService.addToWineCellar({
+      pharmacyId: transaction.pharmacyId,
+      transactionItemId: existingItem.id,
+      ndc: existingItem.ndc || undefined,
+      ndc10: existingItem.ndc10 || undefined,
+      productName: existingItem.proprietaryName || existingItem.genericName || undefined,
+      manufacturer: existingItem.manufacturer || undefined,
+      lotNumber: existingItem.lotNumber || undefined,
+      serialNumber: existingItem.serialNumber || undefined,
+      expirationDate: existingItem.expirationDate || undefined,
+      quantity: existingItem.quantity,
+      standardPrice: existingItem.standardPrice ?? undefined,
+      isPartial: existingItem.isPartial,
+      partialPercentage: existingItem.partialPercentage ?? undefined,
+      expectedReturnableDate: body.expectedReturnableDate,
+      physicalLocation: body.physicalLocation,
+      baggieBarcode: body.baggieBarcode,
+      notes: body.notes,
+      createdBy: (req as any).adminId || (req as any).processorId,
+    });
+
+    // Update item with wine_cellar_id and mark as non_returnable with date reason
+    await itemsService.updateItem(itemId, {
+      wineCellarId: wineCellarItem.id,
+      returnStatus: 'non_returnable',
+      nonReturnableReason: 'date',
+    } as any);
+
+    res.status(201).json({
+      status: 'success',
+      data: wineCellarItem,
+      message: 'Item moved to wine cellar',
+    });
   }
 );
 
@@ -263,10 +412,12 @@ export const scanBarcodeHandler = catchAsync(
     if (resolvedNdc) {
       try {
         const pricingResult = await getPricingForSingleNDC(resolvedNdc);
-        if (pricingResult && pricingResult.bestFullPrice > 0) {
+        if (pricingResult && (pricingResult.bestFullPrice > 0 || pricingResult.bestPartialPrice > 0)) {
           pricing = {
-            suggestedPrice: pricingResult.bestFullPrice,
-            bestFullPrice: pricingResult.bestFullPrice,
+            suggestedPrice: pricingResult.bestFullPrice > 0
+              ? pricingResult.bestFullPrice
+              : pricingResult.bestPartialPrice,
+            bestFullPrice: pricingResult.bestFullPrice || null,
             bestPartialPrice: pricingResult.bestPartialPrice || null,
             priceSource: pricingResult.recommendedDistributor?.distributorName || 'return_reports',
             distributorPricing: pricingResult.distributors.map(d => ({

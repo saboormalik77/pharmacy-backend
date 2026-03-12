@@ -37,8 +37,10 @@ import inventoryAnalysisRoutes from './routes/inventoryAnalysisRoutes';
 import notificationRoutes from './routes/notificationRoutes';
 import { adminPoliciesRouter, policyCheckRouter } from './routes/policiesRoutes';
 import destructionRoutes from './routes/destructionRoutes';
+import wineCellarRoutes from './routes/wineCellarRoutes';
 import { globalErrorHandler } from './controllers/errorController';
 import { checkExpiringProductsAndNotify } from './services/notificationCronService';
+import { surfaceReadyWineCellarItems } from './services/wineCellarCronService';
 import { swaggerSpec } from './config/swagger';
 import { initializeFirebase } from './services/firebaseService';
 import cors from 'cors';
@@ -161,6 +163,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/admin/policies', adminPoliciesRouter);
 app.use('/api/policies', policyCheckRouter);
 app.use('/api/admin/destruction', destructionRoutes);
+app.use('/api/admin/wine-cellar', wineCellarRoutes);
 
 /**
  * @swagger
@@ -216,6 +219,34 @@ if (process.env.VERCEL !== '1') {
     }, 60 * 1000); // 60 seconds = 1 minute
     
     console.log('🔔 Cron job scheduled to run every 1 minute');
+
+    // Wine Cellar surface check - runs once daily at 2 AM
+    console.log('🍷 Starting wine cellar surface check cron job (daily at 2 AM)...');
+    
+    // Run immediately on startup
+    surfaceReadyWineCellarItems().catch((error: any) => {
+      console.error('❌ Wine cellar cron startup error:', error.message);
+    });
+    
+    // Then schedule for daily runs at 2 AM
+    setInterval(async () => {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      
+      // Run at 2:00 AM (check every hour, but only execute at 2 AM)
+      if (hours === 2 && minutes === 0) {
+        try {
+          console.log('⏰ Running wine cellar surface check...');
+          const result = await surfaceReadyWineCellarItems();
+          console.log(`✅ Wine cellar cron completed: ${result.surfacedCount} items surfaced`);
+        } catch (error: any) {
+          console.error('❌ Wine cellar cron error:', error.message);
+        }
+      }
+    }, 60 * 60 * 1000); // Check every hour
+    
+    console.log('🔔 Wine cellar cron scheduled to run daily at 2:00 AM');
   });
 }
 

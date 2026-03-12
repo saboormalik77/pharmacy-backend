@@ -13,6 +13,7 @@ import recentActivityReducer from './recentActivitySlice';
 import processorsReducer from './processorsSlice';
 import returnTransactionsReducer from './returnTransactionsSlice';
 import policiesReducer from './policiesSlice';
+import wineCellarReducer from './wineCellarSlice';
 
 export const makeStore = () => {
   return configureStore({
@@ -31,6 +32,7 @@ export const makeStore = () => {
       processors: processorsReducer,
       returnTransactions: returnTransactionsReducer,
       policies: policiesReducer,
+      wineCellar: wineCellarReducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
