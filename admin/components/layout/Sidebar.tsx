@@ -19,6 +19,7 @@ import {
     Archive,
     Shield,
     AlertTriangle,
+    PackageCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppSelector } from '@/lib/store/hooks';
@@ -37,6 +38,7 @@ const adminSidebarLinks = [
     { href: '/processors', icon: UserCog, label: 'Processors' },
     { href: '/policies', icon: Shield, label: 'Policies' },
     { href: '/warehouse/tbd-items', icon: AlertTriangle, label: 'TBD Items' },
+    { href: '/warehouse/receiving', icon: PackageCheck, label: 'Receiving' },
     { href: '/warehouse/wine-cellar', icon: Archive, label: 'Wine Cellar' },
 ];
 
@@ -46,6 +48,7 @@ const processorSidebarLinks = [
     { href: '/warehouse/returns', icon: ClipboardList, label: 'Returns' },
     { href: '/warehouse/returns/create', icon: Scan, label: 'Create Return' },
     { href: '/warehouse/tbd-items', icon: AlertTriangle, label: 'TBD Items' },
+    { href: '/warehouse/receiving', icon: PackageCheck, label: 'Receiving' },
     { href: '/warehouse/wine-cellar', icon: Archive, label: 'Wine Cellar' },
     { href: '/settings', icon: Settings, label: 'Settings' },
 ];

@@ -1675,7 +1675,7 @@ Based on policy engine result, route item to:
 
 ## Module 9: Warehouse Receiving
 
-### ❌ **STATUS: NOT YET STARTED**
+### ✅ **STATUS: Fully Complete — Backend + Admin Frontend**
 
 ### What Client Document Says (Section 12)
 
@@ -1696,61 +1696,79 @@ Based on policy engine result, route item to:
 
 #### Saboor (Backend)
 
-**Task 9.1: Create receiving endpoint**
+**Task 9.1: Create receiving endpoint** ✅ DONE
 
-- Location: `src/services/warehouseService.ts`
+- SQL Migration: `scripts/fcr_14_warehouse_receiving.sql`
+  - Added columns to `return_transactions`: `verified_at`, `verified_by`, `pieces_received`
+  - Added columns to `return_transaction_items`: `verified`, `actual_quantity`, `condition_notes`
+  - Created `warehouse_discrepancies` table with status tracking and resolution fields
+  - Updated `_rt_to_json` helper to include new columns
+- Service: `src/services/warehouseService.ts`
+- Controller: `src/controllers/warehouseController.ts`
+- Routes: `src/routes/warehouseRoutes.ts` → registered at `/api/admin/warehouse`
+- RPC: `warehouse_receive_return(p_fedex_tracking)`
+  - Finds return by `fedex_tracking` (case-insensitive)
+  - Validates status is `finalized` and not already received
+  - Sets `status = 'received'`, `received_in_warehouse_date = NOW()`
 - Endpoint: `POST /api/admin/warehouse/receive`
-- Input: fedex_tracking
-- Logic:
-  1. Find return_transaction by fedex_tracking
-  2. If not found → return error
-  3. Set received_in_warehouse_date = now
-  4. Set status = 'received'
-  5. Return transaction details for verification
+  - Input: `{ fedexTracking: string }`
+  - Returns: full return transaction object
 
-**Task 9.2: Create verification endpoints**
+**Task 9.2: Create verification endpoints** ✅ DONE
 
-- Location: `src/services/warehouseService.ts`
-- Endpoints:
-  - `GET /api/admin/warehouse/pending` — Returns awaiting check-in
-  - `GET /api/admin/warehouse/received` — Returns received, awaiting verification
-  - `POST /api/admin/warehouse/:id/verify` — Mark return as verified
-    - Input: pieces_count, verified_integrity, notes
-  - `PATCH /api/admin/warehouse/:id/items/:itemId/verify` — Verify individual item
-    - Input: verified (boolean), actual_quantity, condition_notes
+- **List pending** — `GET /api/admin/warehouse/pending`
+  - RPC: `warehouse_list_pending(p_search, p_page, p_limit)`
+  - Returns finalized returns not yet received, with pagination and search
+- **List received** — `GET /api/admin/warehouse/received`
+  - RPC: `warehouse_list_received(p_search, p_page, p_limit)`
+  - Returns received returns awaiting verification, with pagination and search
+- **Verify return** — `POST /api/admin/warehouse/:id/verify`
+  - RPC: `warehouse_verify_return(p_id, p_pieces_received, p_verified_integrity, p_notes, p_verified_by)`
+  - Validates status is `received`
+  - Sets `verified_integrity`, `verified_at`, `verified_by`, `pieces_received`
+  - Returns transaction + verification summary (totalItems, verifiedItems, openDiscrepancies)
+- **Verify item** — `PATCH /api/admin/warehouse/:id/items/:itemId/verify`
+  - RPC: `warehouse_verify_item(p_transaction_id, p_item_id, p_verified, p_actual_quantity, p_condition_notes)`
+  - Validates return is in `received` status
+  - Updates per-item `verified`, `actual_quantity`, `condition_notes`
 
-**Task 9.3: Create discrepancy handling**
+**Task 9.3: Create discrepancy handling** ✅ DONE
 
-- Location: Extend warehouse service
-- Endpoint: `POST /api/admin/warehouse/:id/discrepancy`
-- Input: type ('missing', 'extra', 'damaged'), item_details, notes
-- Creates discrepancy record for resolution
+- **Report discrepancy** — `POST /api/admin/warehouse/:id/discrepancy`
+  - RPC: `warehouse_report_discrepancy(p_transaction_id, p_type, p_item_id, p_ndc, p_product_name, p_expected_quantity, p_actual_quantity, p_notes, p_reported_by)`
+  - Types: `missing`, `extra`, `damaged`, `wrong_store`, `other`
+  - Creates record with `status = 'open'`
+- **List discrepancies** — `GET /api/admin/warehouse/:id/discrepancies`
+  - RPC: `warehouse_list_discrepancies(p_transaction_id, p_status)`
+  - Filter by status: `open`, `resolved`, `dismissed`
 
 #### Younas (Admin Frontend)
 
-**Task 9.4: Create receiving page**
+**Task 9.4: Create receiving page** ✅ DONE
 
 - Location: `admin/app/warehouse/receiving/page.tsx`
-- UI:
-  - Large text input: "Scan FedEx Tracking Number"
-  - Auto-submit on scan (detect barcode pattern)
-  - On success: Show return details (pharmacy, license plate, items count)
-  - Confirmation: "This Return Has Been Received. Ready for verification?"
-  - "Receive Another" button for batch receiving
+- Three-tab layout: Scan & Receive, Pending, Received
+- **Scan & Receive tab**: Large barcode-scanner-optimized text input with Enter-to-submit, calls `POST /admin/warehouse/receive`. On success, shows full return details card (license plate, pharmacy, items count, FedEx tracking, box count, value, received timestamp). "Start Verification" button navigates to verification page. "Receive Another" resets for batch scanning.
+- **Pending tab**: Lists finalized returns not yet received (`GET /admin/warehouse/pending`) with search, showing license plate, pharmacy, tracking, items, boxes, finalized date.
+- **Received tab**: Lists received returns (`GET /admin/warehouse/received`) with search. Shows verification status badge and "Verify" action button linking to the verification page.
+- Redux: Created `admin/lib/store/warehouseSlice.ts` with 7 async thunks (`receiveReturn`, `fetchPendingReturns`, `fetchReceivedReturns`, `verifyReturn`, `verifyItem`, `reportDiscrepancy`, `fetchDiscrepancies`, `fetchTransactionForVerification`). Registered `warehouseReducer` in `admin/lib/store/store.ts`.
+- Types: Extended `ReturnTransaction` with `verifiedAt`, `verifiedBy`, `piecesReceived`. Extended `ReturnTransactionItem` with `verified`, `actualQuantity`, `conditionNotes`. Added `WarehouseDiscrepancy` and `VerificationSummary` interfaces.
+- Sidebar: Added "Receiving" link with `PackageCheck` icon to both admin and processor sidebars.
 
-**Task 9.5: Create verification page**
+**Task 9.5: Create verification page** ✅ DONE
 
 - Location: `admin/app/warehouse/receiving/[id]/page.tsx`
-- UI:
-  - Return header: Pharmacy, License plate, Received date
-  - Checklist:
-    - ☐ Pieces count matches: [input] / [expected]
-    - ☐ Checked in
-    - ☐ Verified
-    - ☐ Integrity confirmed
-  - Items grid with verification checkboxes per item
-  - "Report Discrepancy" button
-  - "Complete Verification" button
+- **Return header**: License plate, pharmacy name, received date, status badges
+- **Summary cards**: Total items, verified items count, open discrepancies, FedEx tracking, box count
+- **Verification checklist**:
+  - Pieces received input (compared against expected box count)
+  - All items verified indicator (auto-computed)
+  - Integrity confirmed checkbox
+  - Verification notes textarea
+- **Items grid**: Full table of all items with per-item verification checkboxes (`PATCH /admin/warehouse/:id/items/:itemId/verify`). Columns: checkbox, NDC, Product, Manufacturer, Lot, Expires, QTY, Status badge, Destination. "Verify All" bulk action. Filterable by NDC/product/manufacturer/lot.
+- **Discrepancies section**: Lists all discrepancies for the return with type badge, product, NDC, expected/actual quantities, notes, status, and report date.
+- **Report Discrepancy modal**: Type selector (missing, extra, damaged, wrong_store, other), NDC, product name, expected/actual quantities, notes. Calls `POST /admin/warehouse/:id/discrepancy`.
+- **Complete Verification** button: Calls `POST /admin/warehouse/:id/verify` with pieces received, integrity confirmed, and notes.
 
 ---
 

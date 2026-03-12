@@ -595,6 +595,9 @@ export interface ReturnTransaction {
     finalizedAt: string | null;
     boxCount: number | null;
     manifestGeneratedAt: string | null;
+    verifiedAt: string | null;
+    verifiedBy: string | null;
+    piecesReceived: number | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -678,6 +681,9 @@ export interface ReturnTransactionItem {
     memo: string | null;
     wineCellarId: string | null;
     scanSource: string;
+    verified: boolean;
+    actualQuantity: number | null;
+    conditionNotes: string | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -1013,4 +1019,30 @@ export interface WineCellarListResponse {
 export interface WineCellarSurfaceResult {
     surfacedCount: number;
     items: WineCellarItem[];
+}
+
+// ── Warehouse Receiving (Module 9) ──────────────────────────
+
+export interface WarehouseDiscrepancy {
+    id: string;
+    transactionId: string;
+    itemId: string | null;
+    type: 'missing' | 'extra' | 'damaged' | 'wrong_store' | 'other';
+    ndc: string | null;
+    productName: string | null;
+    expectedQuantity: number | null;
+    actualQuantity: number | null;
+    notes: string | null;
+    status: 'open' | 'resolved' | 'dismissed';
+    reportedBy: string | null;
+    resolvedBy: string | null;
+    resolvedAt: string | null;
+    resolutionNotes: string | null;
+    createdAt: string;
+}
+
+export interface VerificationSummary {
+    totalItems: number;
+    verifiedItems: number;
+    openDiscrepancies: number;
 }

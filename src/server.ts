@@ -38,6 +38,7 @@ import notificationRoutes from './routes/notificationRoutes';
 import { adminPoliciesRouter, policyCheckRouter } from './routes/policiesRoutes';
 import destructionRoutes from './routes/destructionRoutes';
 import wineCellarRoutes from './routes/wineCellarRoutes';
+import warehouseRoutes from './routes/warehouseRoutes';
 import { globalErrorHandler } from './controllers/errorController';
 import { checkExpiringProductsAndNotify } from './services/notificationCronService';
 import { surfaceReadyWineCellarItems } from './services/wineCellarCronService';
@@ -164,6 +165,7 @@ app.use('/api/admin/policies', adminPoliciesRouter);
 app.use('/api/policies', policyCheckRouter);
 app.use('/api/admin/destruction', destructionRoutes);
 app.use('/api/admin/wine-cellar', wineCellarRoutes);
+app.use('/api/admin/warehouse', warehouseRoutes);
 
 /**
  * @swagger
