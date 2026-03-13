@@ -5,6 +5,7 @@ import pharmaciesReducer from './pharmaciesSlice';
 import distributorsReducer from './distributorsSlice';
 import analyticsReducer from './analyticsSlice';
 import paymentsReducer from './paymentsSlice';
+import pharmacyPaymentsReducer from './pharmacyPaymentsSlice';
 import documentsReducer from './documentsSlice';
 import adminsReducer from './adminsSlice';
 import settingsReducer from './settingsSlice';
@@ -28,6 +29,7 @@ export const makeStore = () => {
       distributors: distributorsReducer,
       analytics: analyticsReducer,
       payments: paymentsReducer,
+      pharmacyPayments: pharmacyPaymentsReducer,
       documents: documentsReducer,
       admins: adminsReducer,
       settings: settingsReducer,

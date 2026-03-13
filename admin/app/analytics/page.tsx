@@ -53,11 +53,6 @@ export default function AnalyticsPage() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
-                <p className="text-gray-600 mt-1">Insights and statistics for pharmaceutical returns</p>
-            </div>
-
             {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
                     {error}

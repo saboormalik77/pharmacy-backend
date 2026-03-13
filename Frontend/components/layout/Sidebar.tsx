@@ -80,6 +80,16 @@ const navItems: NavItem[] = [
     href: '/top-distributors',
     icon: Building2,
   },
+  {
+    title: 'Credits',
+    href: '/credits',
+    icon: CreditCard,
+  },
+  {
+    title: 'Analytics & Reports',
+    href: '/analytics',
+    icon: BarChart3,
+  },
   // {
   //   title: 'Documents',
   //   href: '/documents',

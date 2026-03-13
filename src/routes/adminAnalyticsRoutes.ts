@@ -4,6 +4,16 @@ import {
   askVsReceivedHandler,
   manufacturerPaymentsHandler,
 } from '../controllers/paymentTrackingController';
+import {
+  returnsSummaryHandler,
+  fcrAskVsReceivedHandler,
+  agingInventoryHandler,
+  outstandingRaHandler,
+  unpaidMemosHandler,
+  priceAuditHandler,
+  pharmacyPerformanceHandler,
+  gpoSummaryHandler,
+} from '../controllers/reportingAnalyticsController';
 import { authenticateAdmin } from '../middleware/adminAuth';
 
 const router = Router();
@@ -313,6 +323,247 @@ router.get('/ask-vs-received', askVsReceivedHandler);
  *         description: Per-manufacturer payment stats
  */
 router.get('/manufacturer-payments', manufacturerPaymentsHandler);
+
+// ============================================================
+// Module 14: Reporting & Analytics — New Endpoints
+// ============================================================
+
+/**
+ * @swagger
+ * /api/admin/analytics/returns-summary:
+ *   get:
+ *     summary: Returns summary with trend data
+ *     description: Returns overview of all return transactions — count, value, trend by period.
+ *     tags: [Admin - Reporting & Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: period_start
+ *         schema: { type: string, format: date }
+ *         description: Start date (YYYY-MM-DD). Defaults to 12 months ago.
+ *       - in: query
+ *         name: period_end
+ *         schema: { type: string, format: date }
+ *         description: End date (YYYY-MM-DD). Defaults to today.
+ *       - in: query
+ *         name: pharmacy_id
+ *         schema: { type: string, format: uuid }
+ *         description: Filter by pharmacy
+ *       - in: query
+ *         name: group_by
+ *         schema: { type: string, enum: [month, week, status, service_type], default: month }
+ *     responses:
+ *       200:
+ *         description: Returns summary with overall stats, status breakdown, and trend
+ */
+router.get('/returns-summary', returnsSummaryHandler);
+
+/**
+ * @swagger
+ * /api/admin/analytics/fcr-ask-vs-received:
+ *   get:
+ *     summary: Ask vs Received from debit memos (by manufacturer, NDC, or destination)
+ *     tags: [Admin - Reporting & Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: group_by
+ *         schema: { type: string, enum: [manufacturer, ndc, destination], default: manufacturer }
+ *       - in: query
+ *         name: batch_id
+ *         schema: { type: string, format: uuid }
+ *       - in: query
+ *         name: period
+ *         schema: { type: string }
+ *         description: Filter by batch month (YYYY-MM)
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 50 }
+ *     responses:
+ *       200:
+ *         description: Ask vs received comparison with totals and pagination
+ */
+router.get('/fcr-ask-vs-received', fcrAskVsReceivedHandler);
+
+/**
+ * @swagger
+ * /api/admin/analytics/aging-inventory:
+ *   get:
+ *     summary: Wine cellar aging inventory report
+ *     tags: [Admin - Reporting & Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: pharmacy_id
+ *         schema: { type: string, format: uuid }
+ *       - in: query
+ *         name: status
+ *         schema: { type: string, enum: [shelved, ready_to_return, returned, destroyed] }
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 20 }
+ *     responses:
+ *       200:
+ *         description: Aging inventory with summary, aging buckets, and paginated items
+ */
+router.get('/aging-inventory', agingInventoryHandler);
+
+/**
+ * @swagger
+ * /api/admin/analytics/outstanding-ra:
+ *   get:
+ *     summary: Outstanding RA (Return Authorization) aging report
+ *     tags: [Admin - Reporting & Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: destination
+ *         schema: { type: string }
+ *         description: Filter by destination (inmar, qualanex, etc.)
+ *       - in: query
+ *         name: search
+ *         schema: { type: string }
+ *         description: Search by manufacturer name or memo number
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 20 }
+ *     responses:
+ *       200:
+ *         description: Outstanding RA requests with aging buckets
+ */
+router.get('/outstanding-ra', outstandingRaHandler);
+
+/**
+ * @swagger
+ * /api/admin/analytics/unpaid-memos:
+ *   get:
+ *     summary: Unpaid debit memo aging report
+ *     tags: [Admin - Reporting & Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: manufacturer
+ *         schema: { type: string }
+ *         description: Filter by manufacturer name
+ *       - in: query
+ *         name: destination
+ *         schema: { type: string }
+ *       - in: query
+ *         name: search
+ *         schema: { type: string }
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 20 }
+ *     responses:
+ *       200:
+ *         description: Unpaid memos with aging buckets and summary
+ */
+router.get('/unpaid-memos', unpaidMemosHandler);
+
+/**
+ * @swagger
+ * /api/admin/analytics/price-audit:
+ *   get:
+ *     summary: NDC price source audit trail
+ *     tags: [Admin - Reporting & Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: ndc
+ *         schema: { type: string }
+ *         description: Filter by specific NDC
+ *       - in: query
+ *         name: source
+ *         schema: { type: string }
+ *         description: Filter by price source
+ *       - in: query
+ *         name: search
+ *         schema: { type: string }
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 50 }
+ *     responses:
+ *       200:
+ *         description: Price change history with summary
+ */
+router.get('/price-audit', priceAuditHandler);
+
+/**
+ * @swagger
+ * /api/admin/analytics/pharmacy-performance:
+ *   get:
+ *     summary: Per-pharmacy performance report
+ *     tags: [Admin - Reporting & Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema: { type: string }
+ *         description: Search by pharmacy name or store number
+ *       - in: query
+ *         name: sort_by
+ *         schema: { type: string, enum: [totalValue, returns, avgValue], default: totalValue }
+ *       - in: query
+ *         name: sort_dir
+ *         schema: { type: string, enum: [asc, desc], default: desc }
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 20 }
+ *     responses:
+ *       200:
+ *         description: Pharmacy performance with overall totals
+ */
+router.get('/pharmacy-performance', pharmacyPerformanceHandler);
+
+/**
+ * @swagger
+ * /api/admin/analytics/gpo-summary:
+ *   get:
+ *     summary: GPO performance summary
+ *     tags: [Admin - Reporting & Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema: { type: string }
+ *         description: Search by GPO name
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 20 }
+ *     responses:
+ *       200:
+ *         description: GPO summary with payout and return stats
+ */
+router.get('/gpo-summary', gpoSummaryHandler);
 
 export default router;
 

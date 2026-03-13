@@ -105,6 +105,40 @@ export interface Credit {
   status: 'expected' | 'received' | 'overdue' | 'disputed'
 }
 
+export interface PharmacyPayment {
+  id: string
+  pharmacyId: string
+  pharmacyName: string
+  batchId: string | null
+  batchName: string | null
+  batchMonth: string | null
+  totalCreditReceived: number
+  companyFee: number
+  companyFeePercent: number
+  gpoShare: number
+  gpoName: string | null
+  pharmacyPayout: number
+  paymentMethod: string | null
+  paymentReference: string | null
+  paidAt: string | null
+  status: 'pending' | 'processing' | 'paid' | 'failed' | 'disputed'
+  notes: string | null
+  createdBy: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface PharmacyPaymentSummary {
+  totalCredits: number
+  totalFees: number
+  totalPayout: number
+  paidPayouts: number
+  pendingPayouts: number
+  totalPayments: number
+  paidCount: number
+  pendingCount: number
+}
+
 export type ListingStatus = 'active' | 'sold' | 'expired' | 'pending_approval'
 
 export interface MarketplaceListing {

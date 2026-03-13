@@ -10,6 +10,7 @@ export { productsService } from './productsService';
 export { productListsService } from './productListsService';
 export { dashboardService } from './dashboardService';
 export { creditsService } from './creditsService';
+export { pharmacyPaymentService } from './pharmacyPaymentService';
 export { documentsService } from './documentsService';
 export { optimizationService } from './optimizationService';
 export { packagesService } from './packagesService';
@@ -36,6 +37,7 @@ export type { ValidateNDCResponse, CreateProductRequest } from './productsServic
 export type { ProductList, ProductListItem } from './productListsService';
 export type { DashboardSummary, EarningsHistoryResponse, PeriodEarning, DistributorEarning, EarningsHistoryParams, EarningsEstimationResponse, EarningsEstimationChartData } from './dashboardService';
 export type { CreditEstimateItem, CreditEstimate } from './creditsService';
+export type { PharmacyPaymentListResponse } from './pharmacyPaymentService';
 export type { DocumentsFilters } from './documentsService';
 export type { OptimizationRecommendations, Recommendation, AlternativeDistributor, OptimizationSuggestionsResponse, OptimizationSuggestionItem, OptimizationSuggestionDistributor, OptimizationSuggestionProduct, CustomPackageItem, CreateCustomPackageRequest, PackageSuggestionsResponse, PackageSuggestion, PackageSuggestionProduct, DistributorSuggestionResponse, DistributorSuggestionPackage, DistributorSuggestionProduct } from './optimizationService';
 export type { PackagesResponse, Package, PackageProduct, DistributorContact, PackagesSummary, PackagesStats } from './packagesService';

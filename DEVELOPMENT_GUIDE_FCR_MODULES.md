@@ -2135,7 +2135,7 @@ Based on policy engine result, route item to:
 
 ## Module 13: Pharmacy & GPO Payout
 
-### ❌ **STATUS: NOT YET STARTED**
+### ✅ **STATUS: COMPLETE**
 
 ### What Client Document Says (Section 20)
 
@@ -2155,69 +2155,106 @@ Based on policy engine result, route item to:
 
 #### Saboor (Backend)
 
-**Task 13.1: Create pharmacy_payments table**
+**Task 13.1: Create pharmacy_payments table** ✅ DONE
 
-- Location: SQL migration
+- Location: `scripts/fcr_18_pharmacy_gpo_payout.sql`
 - Table: `pharmacy_payments`
   - `id` (UUID, PK)
-  - `pharmacy_id` (UUID, FK)
-  - `batch_id` (UUID, FK)
-  - `total_credit_received` (DECIMAL)
-  - `company_fee` (DECIMAL)
-  - `company_fee_percent` (DECIMAL)
-  - `gpo_share` (DECIMAL)
-  - `pharmacy_payout` (DECIMAL)
-  - `payment_method` (ENUM: 'wire', 'check', 'zelle', 'cash')
+  - `pharmacy_id` (UUID, FK → pharmacy)
+  - `batch_id` (UUID, FK → return_batches, nullable)
+  - `total_credit_received` (DECIMAL 12,2)
+  - `company_fee` (DECIMAL 12,2)
+  - `company_fee_percent` (DECIMAL 5,2)
+  - `gpo_share` (DECIMAL 12,2)
+  - `gpo_name` (TEXT — auto-populated from pharmacy.gpo_affiliation)
+  - `pharmacy_payout` (DECIMAL 12,2)
+  - `payment_method` (TEXT: 'wire', 'check', 'zelle', 'cash')
   - `payment_reference` (TEXT)
-  - `paid_at` (TIMESTAMP)
-  - `status` (ENUM: 'pending', 'processing', 'paid', 'failed')
+  - `paid_at` (TIMESTAMPTZ)
+  - `status` (TEXT: 'pending', 'processing', 'paid', 'failed', 'disputed')
   - `notes` (TEXT)
-  - `created_at`
+  - `created_by` (UUID)
+  - `created_at` (TIMESTAMPTZ)
+  - `updated_at` (TIMESTAMPTZ — auto-updated via trigger)
+- Includes: RLS policy, indexes on pharmacy_id/batch_id/status/paid_at/created_at, updated_at trigger
 
-**Task 13.2: Create pharmacy payment service**
+**Task 13.2: Create pharmacy payment RPC functions** ✅ DONE
 
-- Location: `src/services/pharmacyPaymentService.ts`
-- Functions:
-  - `calculatePayout(pharmacyId, batchId)` — calculate amounts
-  - `createPaymentRecord(data)` — create payment record
-  - `recordPayment(paymentId, method, reference)` — mark as paid
-  - `getPaymentHistory(pharmacyId)` — pharmacy's payment history
-  - `generatePaymentStatement(paymentId)` — PDF statement
+- Location: `scripts/fcr_18_pharmacy_gpo_payout.sql`
+- RPC Functions (all via Supabase `sb.rpc()`):
+  - `pharmacy_payment_calculate(p_pharmacy_id, p_batch_id, p_company_fee_pct, p_gpo_share_pct)` — calculate payout from debit memo totals
+  - `pharmacy_payment_create(...)` — create payment record (with duplicate pharmacy+batch guard)
+  - `pharmacy_payment_update(...)` — update status/method/reference/amounts (auto-sets paid_at when status='paid')
+  - `pharmacy_payment_get(p_payment_id)` — get single payment with associated debit memos
+  - `pharmacy_payment_list(p_status, p_pharmacy, p_batch_id, p_search, p_page, p_limit)` — admin paginated list with summary totals
+  - `pharmacy_payment_summary(p_search, p_page, p_limit)` — summary grouped by pharmacy
+  - `pharmacy_payment_my_payments(p_pharmacy_id, p_status, p_page, p_limit)` — pharmacy-facing own history with summary
+- Helper: `_pharmacy_payment_to_json(p)` — consistent JSON serialization
 
-**Task 13.3: Create pharmacy payment API**
+**Task 13.3: Create pharmacy payment API** ✅ DONE
 
-- Location: Create new files
-- Endpoints:
-  - `GET /api/admin/pharmacy-payments` — List all payments
+- Service: `src/services/pharmacyPaymentService.ts`
+- Controller: `src/controllers/pharmacyPaymentController.ts`
+- Routes: `src/routes/pharmacyPaymentRoutes.ts`
+- Registered in: `src/server.ts`
+- Admin endpoints (require admin auth):
+  - `POST /api/admin/pharmacy-payments/calculate` — Calculate payout for pharmacy+batch
+  - `GET /api/admin/pharmacy-payments` — List all payments (filters: status, pharmacy, batch_id, search)
   - `POST /api/admin/pharmacy-payments` — Create payment record
-  - `GET /api/admin/pharmacy-payments/:id` — Get payment details
-  - `PATCH /api/admin/pharmacy-payments/:id` — Update payment
-  - `GET /api/admin/pharmacy-payments/summary` — Summary by pharmacy
-  - `GET /api/pharmacy-payments/my-payments` — Pharmacy's own payments (for frontend)
+  - `GET /api/admin/pharmacy-payments/summary` — Summary grouped by pharmacy
+  - `GET /api/admin/pharmacy-payments/:id` — Get payment detail with debit memos
+  - `PATCH /api/admin/pharmacy-payments/:id` — Update payment (status, method, reference, amounts)
+- Pharmacy endpoint (require pharmacy auth):
+  - `GET /api/pharmacy-payments/my-payments` — Pharmacy's own payment history with summary
 
 #### Younas (Pharmacy Frontend)
 
-**Task 13.4: Create credit statement page**
+**Task 13.4: Create credit statement page** ✅ DONE
 
 - Location: `Frontend/app/(dashboard)/credits/statement/page.tsx`
 - UI:
-  - Payment history table
-  - Per payment: Date, Batch, Credit Received, Fee, Payout, Method, Status
-  - Download statement button
-  - Filter by date range
+  - Payment history table with totals row
+  - Per payment: Date, Batch, Month, Credit Received, Company Fee, GPO Share, Payout, Method, Reference, Paid At, Status
+  - Download CSV button
+  - Filter by date range (start/end date inputs)
+  - Pagination support
+  - Summary stats: Total Credits, Total Fees, Total Payout, Paid/Pending counts
 
-**Task 13.5: Wire up existing credits page**
+**Task 13.5: Wire up existing credits page** ✅ DONE
 
 - Location: `Frontend/app/(dashboard)/credits/page.tsx`
-- Currently uses mock data
-- Connect to `/api/pharmacy-payments/my-payments`
-- Show: Total credits, Pending payouts, Payment history
+- Replaced mock data with real API via `pharmacyPaymentService.getMyPayments()`
+- API service: `Frontend/lib/api/services/pharmacyPaymentService.ts`
+- Types: `PharmacyPayment`, `PharmacyPaymentSummary` in `Frontend/types/index.ts`
+- Shows: Total Credits, Total Payout, Total Fees, Paid/Pending amounts, Payout Rate
+- Payment history table with: Date, Batch, Credit Received, Company Fee, GPO Share, Payout, Method, Reference, Paid At, Status
+- Status filter buttons (All, Pending, Processing, Paid, Failed, Disputed)
+- Pagination support
+- Link to credit statement page
 
 ---
 
 ## Module 14: Reporting & Analytics
 
-### ❌ **STATUS: NOT YET STARTED**
+### ✅ **STATUS: Backend Complete**
+
+| Component | Status | Files |
+|-----------|--------|-------|
+| **ndc_price_history table** | ✅ Complete | `scripts/fcr_19_reporting_analytics.sql` |
+| **RPC: analytics_returns_summary** | ✅ Complete | Returns by period, status, service type |
+| **RPC: analytics_ask_vs_received** | ✅ Complete | By manufacturer, NDC, or destination |
+| **RPC: analytics_aging_inventory** | ✅ Complete | Wine cellar aging report with buckets |
+| **RPC: analytics_outstanding_ra** | ✅ Complete | RA aging report with buckets |
+| **RPC: analytics_unpaid_memos** | ✅ Complete | Unpaid memo aging with buckets |
+| **RPC: analytics_price_audit** | ✅ Complete | NDC price source audit trail |
+| **RPC: analytics_pharmacy_performance** | ✅ Complete | Per-pharmacy performance |
+| **RPC: analytics_gpo_summary** | ✅ Complete | Per-GPO summary |
+| **RPC: analytics_pharmacy_dashboard** | ✅ Complete | Pharmacy-facing own analytics |
+| **Backend Service** | ✅ Complete | `src/services/reportingAnalyticsService.ts` |
+| **Backend Controller** | ✅ Complete | `src/controllers/reportingAnalyticsController.ts` |
+| **Admin API Routes** | ✅ Complete | Extended `src/routes/adminAnalyticsRoutes.ts` |
+| **Pharmacy API Route** | ✅ Complete | `src/routes/pharmacyAnalyticsRoutes.ts` |
+| **Server Registration** | ✅ Complete | `src/server.ts` |
 
 ### What Client Document Says (Section 21)
 
@@ -2342,7 +2379,7 @@ For each edge case:
 | `return_batches` | Saboor | Week 4 |
 | `debit_memos` | Saboor | Week 4 |
 | `debit_memo_items` | Saboor | Week 4 |
-| `pharmacy_payments` | Saboor | Week 5 |
+| `pharmacy_payments` | Saboor | Week 5 ✅ |
 | `destruction_records` | Saboor | Week 5 |
 | `ndc_price_history` | Saboor | Week 5 |
 
@@ -2370,8 +2407,8 @@ For each edge case:
 | Batches | `/api/admin/batches` | Admin | Saboor |
 | Debit Memos | `/api/admin/debit-memos` | Admin | Saboor |
 | RA Tracking | `/api/admin/ra-tracking` | Admin | Saboor |
-| Pharmacy Payments | `/api/admin/pharmacy-payments` | Admin | Saboor |
-| My Payments | `/api/pharmacy-payments/my-payments` | Pharmacy | Saboor |
+| Pharmacy Payments | `/api/admin/pharmacy-payments` | Admin | Saboor | ✅ |
+| My Payments | `/api/pharmacy-payments/my-payments` | Pharmacy | Saboor | ✅ |
 | Destruction | `/api/admin/destruction` | Admin | Saboor |
 | Extended Analytics | `/api/admin/analytics/*` | Admin | Saboor |
 

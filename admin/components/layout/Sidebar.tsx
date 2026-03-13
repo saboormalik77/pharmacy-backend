@@ -24,6 +24,7 @@ import {
     Receipt,
     MailCheck,
     CircleDollarSign,
+    DollarSign,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppSelector } from '@/lib/store/hooks';
@@ -36,6 +37,7 @@ const adminSidebarLinks = [
     { href: '/marketplace', icon: ShoppingCart, label: 'Marketplace' },
     { href: '/documents', icon: FileText, label: 'Documents' },
     { href: '/payments', icon: CreditCard, label: 'Payments' },
+    { href: '/pharmacy-payments', icon: DollarSign, label: 'Pharmacy Payments' },
     { href: '/analytics', icon: BarChart3, label: 'Analytics' },
     { href: '/settings', icon: Settings, label: 'Settings' },
     { href: '/admins', icon: Users, label: 'Admins' },

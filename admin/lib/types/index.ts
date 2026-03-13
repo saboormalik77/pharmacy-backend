@@ -1192,3 +1192,283 @@ export interface ManufacturerPaymentSummary {
     policyAvgPayPercent: number | null;
     policyAvgDaysToPay: number | null;
 }
+
+// ============================================================
+// Module 14: Reporting & Analytics Types
+// ============================================================
+
+export interface Pagination {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+}
+
+// Returns Summary
+export interface ReturnsSummaryOverall {
+    totalReturns: number;
+    totalReturnableValue: number;
+    totalNonReturnableValue: number;
+    totalItems: number;
+    avgItemsPerReturn: number;
+    avgReturnValue: number;
+    uniquePharmacies: number;
+}
+
+export interface ReturnsByStatus {
+    status: string;
+    count: number;
+    totalReturnableValue: number;
+}
+
+export interface ReturnsTrendItem {
+    period?: string;
+    periodKey?: string;
+    returns: number;
+    totalValue: number;
+    totalItems: number;
+    serviceType?: string;
+}
+
+export interface ReturnsSummaryData {
+    periodStart: string;
+    periodEnd: string;
+    groupBy: string;
+    overall: ReturnsSummaryOverall;
+    byStatus: ReturnsByStatus[];
+    trend: ReturnsTrendItem[];
+}
+
+// Ask vs Received
+export interface AskVsReceivedRow {
+    labelerId?: string;
+    labelerName?: string;
+    ndc?: string;
+    productName?: string;
+    destination?: string;
+    memoCount?: number;
+    totalItems?: number;
+    totalQty?: number;
+    totalAsk: number;
+    totalReceived: number;
+    difference: number;
+    payPercent: number;
+    paidMemos?: number;
+    unpaidMemos?: number;
+}
+
+export interface AskVsReceivedTotals {
+    totalMemos: number;
+    totalAskValue: number;
+    totalReceived: number;
+    totalDifference: number;
+    overallPayPercent: number;
+}
+
+export interface AskVsReceivedResponse {
+    data: AskVsReceivedRow[];
+    totals: AskVsReceivedTotals;
+    pagination: Pagination;
+}
+
+// Aging Inventory
+export interface AgingBucket {
+    count: number;
+    value: number;
+}
+
+export interface AgingInventoryItem {
+    id: string;
+    pharmacyId: string;
+    pharmacyName: string;
+    ndc: string;
+    productName: string;
+    manufacturer: string;
+    lotNumber: string;
+    expirationDate: string;
+    quantity: number;
+    estimatedValue: number;
+    dateShelved: string;
+    expectedReturnableDate: string;
+    status: string;
+    daysShelved: number;
+    physicalLocation: string;
+    baggieBarcode: string;
+}
+
+export interface AgingInventorySummary {
+    totalItems: number;
+    totalValue: number;
+    shelvedCount: number;
+    readyCount: number;
+    returnedCount: number;
+    destroyedCount: number;
+    avgDaysShelved: number;
+}
+
+export interface AgingInventoryBuckets {
+    under30Days: AgingBucket;
+    days30to90: AgingBucket;
+    days91to180: AgingBucket;
+    over180Days: AgingBucket;
+}
+
+export interface AgingInventoryResponse {
+    data: AgingInventoryItem[];
+    summary: AgingInventorySummary;
+    agingBuckets: AgingInventoryBuckets;
+    pagination: Pagination;
+}
+
+// Outstanding RA
+export interface OutstandingRaItem {
+    id: string;
+    memoNumber: string;
+    labelerName: string;
+    labelerId: string;
+    destination: string;
+    pharmacyName: string;
+    totalItems: number;
+    amountRequested: number;
+    raRequestedAt: string;
+    ticklerDate: string;
+    daysWaiting: number;
+    batchName: string;
+}
+
+export interface OutstandingRaSummary {
+    totalOutstanding: number;
+    totalAskValue: number;
+    avgDaysWaiting: number;
+    oldestRequest: string;
+}
+
+export interface OutstandingRaBuckets {
+    under30Days: AgingBucket;
+    days30to60: AgingBucket;
+    days61to120: AgingBucket;
+    over120Days: AgingBucket;
+}
+
+export interface OutstandingRaResponse {
+    data: OutstandingRaItem[];
+    summary: OutstandingRaSummary;
+    agingBuckets: OutstandingRaBuckets;
+    pagination: Pagination;
+}
+
+// Unpaid Memos
+export interface UnpaidMemoItem {
+    id: string;
+    memoNumber: string;
+    labelerName: string;
+    labelerId: string;
+    destination: string;
+    pharmacyName: string;
+    totalItems: number;
+    amountRequested: number;
+    amountReceived: number;
+    outstandingAmount: number;
+    paymentStatus: string;
+    daysOutstanding: number;
+    batchName: string;
+    raNumber: string;
+}
+
+export interface UnpaidMemosSummary {
+    totalUnpaidMemos: number;
+    totalAmountRequested: number;
+    totalAmountReceived: number;
+    totalOutstanding: number;
+    avgDaysOutstanding: number;
+}
+
+export interface UnpaidMemosBuckets {
+    under30Days: { count: number; outstanding: number };
+    days30to90: { count: number; outstanding: number };
+    days91to180: { count: number; outstanding: number };
+    days181to365: { count: number; outstanding: number };
+    over365Days: { count: number; outstanding: number };
+}
+
+export interface UnpaidMemosResponse {
+    data: UnpaidMemoItem[];
+    summary: UnpaidMemosSummary;
+    agingBuckets: UnpaidMemosBuckets;
+    pagination: Pagination;
+}
+
+// Price Audit
+export interface PriceAuditItem {
+    id: string;
+    ndc: string;
+    oldPrice: number | null;
+    newPrice: number;
+    priceChange: number | null;
+    changePercent: number | null;
+    priceSource: string;
+    changedBy: string;
+    changedAt: string;
+}
+
+export interface PriceAuditSummary {
+    totalChanges: number;
+    uniqueNdcs: number;
+    uniqueSources: number;
+    avgPriceIncrease: number;
+}
+
+export interface PriceAuditResponse {
+    data: PriceAuditItem[];
+    summary: PriceAuditSummary;
+    pagination: Pagination;
+}
+
+// Pharmacy Performance
+export interface PharmacyPerformanceItem {
+    pharmacyId: string;
+    pharmacyName: string;
+    storeNumber: string;
+    gpoAffiliation: string;
+    serviceType: string;
+    totalReturns: number;
+    totalItems: number;
+    totalReturnableValue: number;
+    totalNonReturnableValue: number;
+    avgReturnValue: number;
+    totalPayout: number;
+    pendingPayout: number;
+    lastReturnDate: string;
+    firstReturnDate: string;
+}
+
+export interface PharmacyPerformanceOverall {
+    totalPharmacies: number;
+    totalReturns: number;
+    totalReturnableValue: number;
+    totalItems: number;
+    totalPayout: number;
+}
+
+export interface PharmacyPerformanceResponse {
+    data: PharmacyPerformanceItem[];
+    overall: PharmacyPerformanceOverall;
+    pagination: Pagination;
+}
+
+// GPO Summary
+export interface GpoSummaryItem {
+    gpoName: string;
+    pharmacyCount: number;
+    totalReturns: number;
+    totalItems: number;
+    totalReturnableValue: number;
+    avgReturnValue: number;
+    totalPayout: number;
+    totalGpoShare: number;
+}
+
+export interface GpoSummaryResponse {
+    data: GpoSummaryItem[];
+    pagination: Pagination;
+}
