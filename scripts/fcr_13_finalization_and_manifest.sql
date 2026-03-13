@@ -348,6 +348,7 @@ BEGIN
       'message', 'No Schedule II (CII) items found requiring DEA Form 222.');
   END IF;
 
+
   RETURN jsonb_build_object(
     'error', false,
     'data', jsonb_build_object(
