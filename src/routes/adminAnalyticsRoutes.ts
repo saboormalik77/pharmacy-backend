@@ -1,5 +1,9 @@
 import { Router } from 'express';
 import { getAnalyticsHandler } from '../controllers/adminAnalyticsController';
+import {
+  askVsReceivedHandler,
+  manufacturerPaymentsHandler,
+} from '../controllers/paymentTrackingController';
 import { authenticateAdmin } from '../middleware/adminAuth';
 
 const router = Router();
@@ -261,6 +265,54 @@ router.use(authenticateAdmin);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get('/', getAnalyticsHandler);
+
+/**
+ * @swagger
+ * /api/admin/analytics/ask-vs-received:
+ *   get:
+ *     summary: Ask vs Received analytics (grouped by manufacturer or period)
+ *     tags: [Payment Tracking]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: group_by
+ *         schema: { type: string, enum: [manufacturer, period], default: manufacturer }
+ *         description: Group results by manufacturer or by month
+ *       - in: query
+ *         name: period
+ *         schema: { type: string }
+ *         description: Filter to specific month (YYYY-MM format)
+ *     responses:
+ *       200:
+ *         description: Ask vs received breakdown with totals
+ */
+router.get('/ask-vs-received', askVsReceivedHandler);
+
+/**
+ * @swagger
+ * /api/admin/analytics/manufacturer-payments:
+ *   get:
+ *     summary: Per-manufacturer payment summary
+ *     tags: [Payment Tracking]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema: { type: string }
+ *         description: Search by manufacturer name or labeler ID
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 20 }
+ *     responses:
+ *       200:
+ *         description: Per-manufacturer payment stats
+ */
+router.get('/manufacturer-payments', manufacturerPaymentsHandler);
 
 export default router;
 

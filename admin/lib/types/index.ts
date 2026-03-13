@@ -1089,6 +1089,9 @@ export interface DebitMemo {
     paymentStatus: 'pending' | 'partial' | 'paid' | 'disputed';
     amountRequested: number;
     amountReceived: number;
+    paymentReceivedAt: string | null;
+    paymentReference: string | null;
+    paymentNotes: string | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -1151,4 +1154,41 @@ export interface RATrackingSummary {
     received: number;
     shipped: number;
     overdue: number;
+}
+
+// ── Manufacturer Payment Tracking (Module 12) ────────────────
+
+export interface UnpaidSummary {
+    totalUnpaid: number;
+    totalOutstanding: number;
+}
+
+export interface AskVsReceivedRow {
+    labelerId: string | null;
+    labelerName: string;
+    memoCount: number;
+    totalItems?: number;
+    totalAskValue: number;
+    totalReceived: number;
+    difference: number;
+    payPercent: number;
+    paidCount?: number;
+    unpaidCount?: number;
+    period?: string;
+}
+
+export interface ManufacturerPaymentSummary {
+    labelerId: string | null;
+    labelerName: string;
+    totalMemos: number;
+    unpaidMemos: number;
+    paidMemos: number;
+    disputedMemos: number;
+    totalAskValue: number;
+    totalPaidAmount: number;
+    outstandingAmount: number;
+    averagePayPercent: number;
+    averageDaysToPay: number;
+    policyAvgPayPercent: number | null;
+    policyAvgDaysToPay: number | null;
 }

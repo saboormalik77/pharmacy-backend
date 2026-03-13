@@ -2060,7 +2060,7 @@ Based on policy engine result, route item to:
 
 ## Module 12: Manufacturer Payment Tracking
 
-### ❌ **STATUS: NOT YET STARTED**
+### ✅ **STATUS: COMPLETE (Backend + Admin Frontend done)**
 
 ### What Client Document Says (Section 18)
 
@@ -2080,55 +2080,56 @@ Based on policy engine result, route item to:
 
 #### Saboor (Backend)
 
-**Task 12.1: Create payment tracking fields**
+**Task 12.1: Create payment tracking fields** ✅ DONE
 
-- Already in debit_memos table:
-  - `amount_requested`, `amount_received`, `payment_status`
-- Add: `payment_received_at`, `payment_reference`, `payment_notes`
+- SQL migration: `scripts/fcr_17_manufacturer_payment_tracking.sql`
+- Added 3 new columns to `debit_memos`: `payment_received_at`, `payment_reference`, `payment_notes`
+- Updated `_debit_memo_to_json` helper to include the new fields
+- All columns added with safe `IF NOT EXISTS` checks
 
-**Task 12.2: Create unpaid tracking API**
+**Task 12.2: Create unpaid tracking API** ✅ DONE
 
-- Location: Extend debit memo service
-- Endpoints:
-  - `GET /api/admin/debit-memos/unpaid` — List unpaid debit memos
-  - `POST /api/admin/debit-memos/:id/record-payment` — Record payment received
-    - Input: amount_received, payment_date, reference
-  - `POST /api/admin/debit-memos/:id/send-reminder` — Send payment reminder email
-  - `GET /api/admin/analytics/ask-vs-received` — Ask vs received analytics
-    - Group by manufacturer, time period
+- Service: `src/services/paymentTrackingService.ts` — all functions wrap Supabase RPC calls
+- Controller: `src/controllers/paymentTrackingController.ts`
+- Routes added to `src/routes/debitMemoRoutes.ts` (for debit-memo endpoints) and `src/routes/adminAnalyticsRoutes.ts` (for analytics endpoints)
+- Endpoints created:
+  - `GET /api/admin/debit-memos/unpaid` — Lists unpaid memos with outstanding amounts, days outstanding, pagination, and summary totals. RPC: `payment_list_unpaid`
+  - `POST /api/admin/debit-memos/:id/record-payment` — Records payment (amount, date, reference, notes). Auto-determines payment_status (pending/partial/paid). RPC: `payment_record`
+  - `POST /api/admin/debit-memos/:id/send-reminder` — Sends payment reminder email to manufacturer. Logs in `ra_requests` table with `request_type='reminder'`. RPC: `payment_send_reminder`
+  - `GET /api/admin/analytics/ask-vs-received` — Ask vs Received analytics grouped by manufacturer or time period. RPC: `payment_ask_vs_received`
+- All 5 RPC functions created in SQL migration
 
-**Task 12.3: Create manufacturer payment summary**
+**Task 12.3: Create manufacturer payment summary** ✅ DONE
 
-- Location: Extend analytics service
 - Endpoint: `GET /api/admin/analytics/manufacturer-payments`
-- Return per manufacturer:
-  - Total unpaid debit memos
-  - Outstanding amount
-  - Paid amount
-  - Average pay percent
-  - Average days to pay
+- RPC: `payment_manufacturer_summary` — returns per manufacturer:
+  - Total memos, unpaid count, paid count, disputed count
+  - Total ask value, total paid amount, outstanding amount
+  - Average pay percent, average days to pay
+  - Policy-defined avg pay percent and avg days to pay (from `manufacturer_policies`)
+- Pagination and search support included
 
 #### Younas (Admin Frontend)
 
-**Task 12.4: Create unpaid debit memos page**
+**Task 12.4: Create unpaid debit memos page** ✅ DONE
 
 - Location: `admin/app/warehouse/unpaid/page.tsx`
-- UI:
-  - Summary: Total outstanding, # of unpaid memos
-  - Table: Debit Memo, Manufacturer, Pharmacy, Amount Requested, Days Outstanding
-  - Group by manufacturer option
-  - "Send Reminder" button
-  - "Record Payment" button
+- Types added to `admin/lib/types/index.ts`: `UnpaidSummary`, `AskVsReceivedRow`, `ManufacturerPaymentSummary`
+- Redux slice: `admin/lib/store/paymentTrackingSlice.ts` with 5 async thunks: `fetchUnpaidMemos`, `recordPayment`, `sendPaymentReminder`, `fetchAskVsReceived`, `fetchManufacturerSummary`
+- Registered `paymentTrackingReducer` in `admin/lib/store/store.ts`
+- Added "Unpaid Memos" link (CircleDollarSign icon) to admin sidebar
+- Page has 3 tabs:
+  - **Unpaid Memos**: Summary cards (total unpaid, total outstanding), search/destination filters, table with Memo #, Manufacturer, Pharmacy, Destination, Asked, Received, Outstanding, Days Outstanding, Status, Pay/Remind action buttons, pagination
+  - **Ask vs Received**: Totals cards (memos, ask, received, pay %), toggle between manufacturer/monthly grouping, analytics table
+  - **Manufacturer Summary**: Search, table per manufacturer with total/unpaid/paid memos, ask value, paid amount, outstanding, avg pay %, avg days to pay (with policy benchmarks)
 
-**Task 12.5: Create payment recording modal**
+**Task 12.5: Create payment recording modal** ✅ DONE
 
-- Location: Component
-- UI:
-  - Amount received input
-  - Payment date
-  - Reference number
-  - Notes
-  - "Record Payment" button
+- Integrated into `admin/app/warehouse/unpaid/page.tsx`
+- "Record Payment" modal: Shows memo summary (asked, received so far, outstanding), Amount received input ($ prefix), Payment date picker, Reference # input, Notes textarea, Record Payment button
+- Auto-determines payment status (pending/partial/paid) on backend
+- "Send Reminder" modal: Sends payment reminder email to manufacturer, optional email override
+- Both modals show loading state during async actions and success/error toasts
 
 ---
 

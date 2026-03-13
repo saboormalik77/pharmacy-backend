@@ -48,6 +48,7 @@ export interface DebitMemo {
   raNumber: string | null;
   raRequestedAt: string | null;
   raReceivedAt: string | null;
+  raStatus: string | null;
   ticklerDate: string | null;
   baggieManifest: string | null;
   outboundTracking: string | null;
@@ -55,6 +56,9 @@ export interface DebitMemo {
   paymentStatus: string;
   amountRequested: number;
   amountReceived: number;
+  paymentReceivedAt: string | null;
+  paymentReference: string | null;
+  paymentNotes: string | null;
   createdAt: string;
   updatedAt: string;
 }

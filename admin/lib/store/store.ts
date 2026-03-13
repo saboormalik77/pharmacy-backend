@@ -17,6 +17,7 @@ import wineCellarReducer from './wineCellarSlice';
 import warehouseReducer from './warehouseSlice';
 import batchReducer from './batchSlice';
 import raTrackingReducer from './raTrackingSlice';
+import paymentTrackingReducer from './paymentTrackingSlice';
 
 export const makeStore = () => {
   return configureStore({
@@ -39,6 +40,7 @@ export const makeStore = () => {
       warehouse: warehouseReducer,
       batch: batchReducer,
       raTracking: raTrackingReducer,
+      paymentTracking: paymentTrackingReducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({

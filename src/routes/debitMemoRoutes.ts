@@ -12,6 +12,11 @@ import {
   shipDebitMemoHandler,
   emailPreviewHandler,
 } from '../controllers/raController';
+import {
+  listUnpaidHandler,
+  recordPaymentHandler,
+  sendReminderHandler,
+} from '../controllers/paymentTrackingController';
 
 const router = Router();
 
@@ -20,7 +25,41 @@ const router = Router();
  * tags:
  *   - name: Debit Memos
  *     description: Debit memo management and tracking (Module 10)
+ *   - name: Payment Tracking
+ *     description: Manufacturer payment tracking (Module 12)
  */
+
+/**
+ * @swagger
+ * /api/admin/debit-memos/unpaid:
+ *   get:
+ *     summary: List unpaid debit memos with outstanding amounts
+ *     tags: [Payment Tracking]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: manufacturer
+ *         schema: { type: string }
+ *         description: Filter by manufacturer (labeler name or ID)
+ *       - in: query
+ *         name: destination
+ *         schema: { type: string }
+ *       - in: query
+ *         name: search
+ *         schema: { type: string }
+ *         description: Search by memo number, labeler name, or pharmacy name
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 20 }
+ *     responses:
+ *       200:
+ *         description: Paginated list of unpaid debit memos with summary
+ */
+router.get('/unpaid', authenticateAdmin, listUnpaidHandler);
 
 /**
  * @swagger
@@ -238,6 +277,72 @@ router.post('/:id/resend-ra', authenticateAdmin, resendRAHandler);
  *         description: Tracking number required / RA number required first
  */
 router.post('/:id/ship', authenticateAdmin, shipDebitMemoHandler);
+
+/**
+ * @swagger
+ * /api/admin/debit-memos/{id}/record-payment:
+ *   post:
+ *     summary: Record payment received for a debit memo
+ *     tags: [Payment Tracking]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [amountReceived]
+ *             properties:
+ *               amountReceived: { type: number, description: Amount received from manufacturer }
+ *               paymentDate: { type: string, format: date-time, description: Date payment was received (defaults to now) }
+ *               reference: { type: string, description: Check/wire reference number }
+ *               notes: { type: string, description: Payment notes }
+ *     responses:
+ *       200:
+ *         description: Payment recorded, returns updated debit memo
+ *       400:
+ *         description: Invalid amount
+ *       404:
+ *         description: Debit memo not found
+ */
+router.post('/:id/record-payment', authenticateAdmin, recordPaymentHandler);
+
+/**
+ * @swagger
+ * /api/admin/debit-memos/{id}/send-reminder:
+ *   post:
+ *     summary: Send payment reminder email to manufacturer
+ *     tags: [Payment Tracking]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               sentBy: { type: string, description: Name/email of the admin sending }
+ *               emailOverride: { type: string, description: Override destination email }
+ *     responses:
+ *       200:
+ *         description: Reminder sent successfully
+ *       400:
+ *         description: Memo already paid or no email found
+ *       404:
+ *         description: Debit memo not found
+ */
+router.post('/:id/send-reminder', authenticateAdmin, sendReminderHandler);
 
 /**
  * @swagger
