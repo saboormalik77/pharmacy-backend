@@ -52,13 +52,12 @@ const adminSidebarLinks = [
     { href: '/warehouse/wine-cellar', icon: Archive, label: 'Wine Cellar' },
 ];
 
-// Processor navigation (for role = 'processor')
+// Processor navigation (for role = 'processor') — Receiving is warehouse-only
 const processorSidebarLinks = [
     { href: '/', icon: LayoutDashboard, label: 'Dashboard' },
     { href: '/warehouse/returns', icon: ClipboardList, label: 'Returns' },
     { href: '/warehouse/returns/create', icon: Scan, label: 'Create Return' },
     { href: '/warehouse/tbd-items', icon: AlertTriangle, label: 'TBD Items' },
-    { href: '/warehouse/receiving', icon: PackageCheck, label: 'Receiving' },
     { href: '/warehouse/wine-cellar', icon: Archive, label: 'Wine Cellar' },
     { href: '/settings', icon: Settings, label: 'Settings' },
 ];

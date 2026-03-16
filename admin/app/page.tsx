@@ -1,6 +1,6 @@
 'use client';
 
-import { Building2, Truck, FileText, DollarSign, Warehouse, ClipboardList, Scan, Archive } from 'lucide-react';
+import { Building2, Truck, FileText, DollarSign, Warehouse, ClipboardList, Scan, Archive, MapPin, Calendar, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { StatCard } from '@/components/ui/StatCard';
@@ -8,12 +8,19 @@ import { ReturnsValueChart } from '@/components/charts/ReturnsValueChart';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { fetchDashboard } from '@/lib/store/dashboardSlice';
 import { fetchRecentActivity, Activity } from '@/lib/store/recentActivitySlice';
+import { fetchMyStores } from '@/lib/store/returnTransactionsSlice';
 import { formatRelativeTime } from '@/lib/utils';
 
 // Processor Dashboard Component
 function ProcessorDashboard() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
+  const { myStores, isStoresLoading } = useAppSelector((state) => state.returnTransactions);
+
+  useEffect(() => {
+    dispatch(fetchMyStores());
+  }, [dispatch]);
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -54,19 +61,74 @@ function ProcessorDashboard() {
         </div>
       </div>
 
-      {/* My Stores */}
+      {/* My Assigned Stores */}
       <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-        <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">My Assigned Stores</h2>
-        <div className="text-center py-8">
-          <Building2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-sm text-gray-500 mb-4">Your assigned stores will appear here</p>
-          <button
-            onClick={() => router.push('/warehouse/returns/create')}
-            className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors"
-          >
-            View Stores
-          </button>
-        </div>
+        <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
+          My Assigned Stores
+          {myStores.length > 0 && (
+            <span className="ml-2 text-sm font-normal text-gray-500">({myStores.length})</span>
+          )}
+        </h2>
+
+        {isStoresLoading ? (
+          <div className="flex items-center justify-center py-10">
+            <Loader2 className="w-6 h-6 animate-spin text-gray-400 mr-2" />
+            <span className="text-sm text-gray-500">Loading stores...</span>
+          </div>
+        ) : myStores.length === 0 ? (
+          <div className="text-center py-8">
+            <Building2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-sm text-gray-500 mb-4">No stores assigned yet</p>
+            <button
+              onClick={() => router.push('/warehouse/returns/create')}
+              className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors"
+            >
+              View Stores
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+            {myStores.map((store) => (
+              <div
+                key={store.pharmacyId}
+                className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 hover:bg-gray-50 transition-all"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Building2 className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                      <span className="font-semibold text-gray-900 text-sm">{store.businessName}</span>
+                      {store.storeNumber && (
+                        <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
+                          #{store.storeNumber}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 mt-1">
+                      {store.city && store.state && (
+                        <span className="flex items-center gap-1 text-xs text-gray-500">
+                          <MapPin className="w-3 h-3" />
+                          {store.city}, {store.state}
+                        </span>
+                      )}
+                      {store.lastVisitDate && (
+                        <span className="flex items-center gap-1 text-xs text-gray-500">
+                          <Calendar className="w-3 h-3" />
+                          Last: {new Date(store.lastVisitDate).toLocaleDateString()}
+                        </span>
+                      )}
+                      {store.serviceType && (
+                        <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
+                          {store.serviceType.replace(/_/g, ' ').toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

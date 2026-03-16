@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { X, Camera, Loader2, AlertCircle } from 'lucide-react';
 
 interface QrScannerModalProps {
@@ -10,66 +10,149 @@ interface QrScannerModalProps {
 
 type ScannerStatus = 'requesting' | 'active' | 'error';
 
+// Safe client-side check (this component is dynamic-imported with ssr:false)
+const hasBarcodeDetector = typeof window !== 'undefined' && 'BarcodeDetector' in window;
+
 export default function QrScannerModal({ onScan, onClose }: QrScannerModalProps) {
     const [status, setStatus] = useState<ScannerStatus>('requesting');
     const [errorMsg, setErrorMsg] = useState('');
-    const scannerRef = useRef<any>(null);
-    const scannedRef = useRef(false);
-    const mountedRef = useRef(true);
 
-    const stopScanner = useCallback(async () => {
-        if (scannerRef.current) {
-            try {
-                const state = scannerRef.current.getState?.();
-                if (state === 2 || state === 3) {
-                    await scannerRef.current.stop();
-                }
-            } catch {
-                // already stopped
-            }
-            scannerRef.current = null;
+    // Native path refs (BarcodeDetector)
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const streamRef = useRef<MediaStream | null>(null);
+    const rafRef = useRef<number>(0);
+
+    // html5-qrcode fallback ref
+    const scannerRef = useRef<any>(null);
+
+    const scannedRef = useRef(false);
+
+    // ── Stop helpers ──────────────────────────────────────────
+
+    // Synchronously stops the native getUserMedia stream + rAF loop.
+    const stopNative = () => {
+        if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = 0; }
+        if (streamRef.current) { streamRef.current.getTracks().forEach(t => t.stop()); streamRef.current = null; }
+        if (videoRef.current) { videoRef.current.srcObject = null; }
+    };
+
+    // Synchronously stops any video tracks injected by html5-qrcode,
+    // then fires the async scanner.stop() in the background.
+    const stopFallback = () => {
+        // Sync: kill the camera tracks directly on the DOM video element
+        const container = document.getElementById('qr-fallback-container');
+        if (container) {
+            container.querySelectorAll('video').forEach(video => {
+                const s = video.srcObject as MediaStream | null;
+                if (s) { s.getTracks().forEach(t => t.stop()); video.srcObject = null; }
+            });
         }
-    }, []);
+        // Async: let html5-qrcode clean up its own state
+        if (scannerRef.current) {
+            const sc = scannerRef.current;
+            scannerRef.current = null;
+            try {
+                const state = sc.getState?.();
+                if (state === 2 || state === 3) sc.stop().catch(() => {});
+            } catch {}
+        }
+    };
+
+    // ── Effect ────────────────────────────────────────────────
 
     useEffect(() => {
-        mountedRef.current = true;
+        // `cancelled` is local to this effect invocation.
+        // React 18 Strict Mode double-mounts: cleanup1 sets cancelled1=true before
+        // run2 starts, so any async callbacks from run1 see cancelled1=true and exit.
+        // This prevents html5-qrcode from being created twice on the same DOM node.
+        let cancelled = false;
+        scannedRef.current = false;
 
-        const startScanner = async () => {
+        const start = async () => {
             try {
-                const { Html5Qrcode } = await import('html5-qrcode');
+                if (hasBarcodeDetector) {
+                    // ── PRIMARY: native getUserMedia + BarcodeDetector ──────────
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: 'environment' },
+                    });
+                    if (cancelled) { stream.getTracks().forEach(t => t.stop()); return; }
 
-                // Container div must already be in the DOM at this point
-                const scanner = new Html5Qrcode('qr-reader-container');
-                scannerRef.current = scanner;
+                    streamRef.current = stream;
+                    const video = videoRef.current;
+                    if (!video) { stream.getTracks().forEach(t => t.stop()); return; }
+                    video.srcObject = stream;
+                    await video.play();
+                    if (cancelled) { stopNative(); return; }
+                    setStatus('active');
 
-                await scanner.start(
-                    { facingMode: 'environment' },
-                    {
-                        fps: 15,
-                        qrbox: { width: 260, height: 260 },
-                        aspectRatio: 1.333,
-                    },
-                    (decodedText: string) => {
-                        if (scannedRef.current) return;
-                        scannedRef.current = true;
+                    const detector = new (window as any).BarcodeDetector({
+                        formats: [
+                            'qr_code',
+                            'code_128', 'code_39', 'code_93',
+                            'ean_13', 'ean_8',
+                            'upc_a', 'upc_e',
+                            'data_matrix', 'pdf417', 'aztec', 'itf',
+                        ],
+                    });
 
-                        setTimeout(async () => {
-                            if (!mountedRef.current) return;
-                            await stopScanner();
-                            onScan(decodedText);
-                        }, 200);
-                    },
-                    () => {
-                        // per-frame errors — ignore
-                    }
-                );
+                    const tick = async () => {
+                        if (cancelled || scannedRef.current || !video) return;
+                        if (video.readyState >= video.HAVE_ENOUGH_DATA) {
+                            try {
+                                const results = await detector.detect(video);
+                                if (results.length > 0 && !scannedRef.current && !cancelled) {
+                                    scannedRef.current = true;
+                                    stopNative();
+                                    onScan(results[0].rawValue);
+                                    return;
+                                }
+                            } catch { /* per-frame errors — ignore */ }
+                        }
+                        rafRef.current = requestAnimationFrame(tick);
+                    };
+                    rafRef.current = requestAnimationFrame(tick);
 
-                if (mountedRef.current) setStatus('active');
+                } else {
+                    // ── FALLBACK: html5-qrcode ──────────────────────────────────
+                    const { Html5Qrcode } = await import('html5-qrcode');
+                    if (cancelled) return;
+
+                    // Enumerate cameras and pick back-facing one by device ID.
+                    // Passing a specific ID prevents html5-qrcode injecting a
+                    // camera-selection dropdown inside the container.
+                    let cameraId: string | { facingMode: string } = { facingMode: 'environment' };
+                    try {
+                        const cameras = await Html5Qrcode.getCameras();
+                        if (cameras?.length > 0) {
+                            const back = cameras.find(c => /back|rear|environment/i.test(c.label));
+                            cameraId = (back ?? cameras[cameras.length - 1]).id;
+                        }
+                    } catch {}
+                    if (cancelled) return;
+
+                    const scanner = new Html5Qrcode('qr-fallback-container');
+                    scannerRef.current = scanner;
+
+                    await scanner.start(
+                        cameraId,
+                        { fps: 15, qrbox: { width: 260, height: 260 }, aspectRatio: 1.333 },
+                        (decodedText: string) => {
+                            if (scannedRef.current || cancelled) return;
+                            scannedRef.current = true;
+                            stopFallback();
+                            if (!cancelled) onScan(decodedText);
+                        },
+                        () => { /* per-frame errors — ignore */ }
+                    );
+                    if (cancelled) { stopFallback(); return; }
+                    setStatus('active');
+                }
+
             } catch (err: any) {
-                if (!mountedRef.current) return;
+                if (cancelled) return;
                 const msg: string = err?.message || String(err);
                 if (/permission|denied/i.test(msg)) {
-                    setErrorMsg('Camera permission denied. Please allow camera access in your browser settings and try again.');
+                    setErrorMsg('Camera permission denied. Allow camera access in your browser settings and try again.');
                 } else if (/notfound|no device|no camera/i.test(msg)) {
                     setErrorMsg('No camera found on this device.');
                 } else {
@@ -79,13 +162,16 @@ export default function QrScannerModal({ onScan, onClose }: QrScannerModalProps)
             }
         };
 
-        startScanner();
+        start();
 
         return () => {
-            mountedRef.current = false;
-            stopScanner();
+            cancelled = true;
+            stopNative();
+            stopFallback();
         };
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // ── Render ────────────────────────────────────────────────
 
     return (
         <div
@@ -113,7 +199,7 @@ export default function QrScannerModal({ onScan, onClose }: QrScannerModalProps)
                 {/* Body */}
                 <div className="flex-1 flex flex-col">
 
-                    {/* ── Error state ── */}
+                    {/* Error state */}
                     {status === 'error' && (
                         <div className="flex flex-col items-center justify-center py-10 px-6 gap-4 text-center">
                             <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center">
@@ -129,12 +215,13 @@ export default function QrScannerModal({ onScan, onClose }: QrScannerModalProps)
                         </div>
                     )}
 
-                    {/* ── Camera container — always rendered so html5-qrcode can inject video ── */}
+                    {/* Camera view */}
                     {status !== 'error' && (
-                        <div className="relative">
-                            {/* Loading overlay — sits on top of the (empty) camera container */}
+                        <div className="relative" style={{ minHeight: 320 }}>
+
+                            {/* Loading overlay */}
                             {status === 'requesting' && (
-                                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gray-50 z-10" style={{ minHeight: 320 }}>
+                                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gray-50 z-10">
                                     <div className="w-14 h-14 rounded-full bg-primary-100 flex items-center justify-center">
                                         <Loader2 className="w-7 h-7 animate-spin text-primary-600" />
                                     </div>
@@ -143,15 +230,42 @@ export default function QrScannerModal({ onScan, onClose }: QrScannerModalProps)
                                 </div>
                             )}
 
-                            {/* html5-qrcode MUST render into this div — never hidden or display:none */}
-                            <div
-                                id="qr-reader-container"
-                                style={{ width: '100%', minHeight: 320 }}
-                            />
+                            {hasBarcodeDetector ? (
+                                // Native video element — library injects nothing here
+                                <>
+                                    <video
+                                        ref={videoRef}
+                                        muted
+                                        playsInline
+                                        className="w-full block"
+                                        style={{
+                                            minHeight: 320,
+                                            objectFit: 'cover',
+                                            visibility: status === 'active' ? 'visible' : 'hidden',
+                                        }}
+                                    />
+                                    {status === 'active' && (
+                                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                            <div className="relative w-52 h-52">
+                                                <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-green-400" />
+                                                <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-green-400" />
+                                                <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-green-400" />
+                                                <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-green-400" />
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                // html5-qrcode fallback — must be in the DOM before the effect runs
+                                <div
+                                    id="qr-fallback-container"
+                                    style={{ width: '100%', minHeight: 320 }}
+                                />
+                            )}
                         </div>
                     )}
 
-                    {/* Hint below camera */}
+                    {/* Hint */}
                     {status === 'active' && (
                         <p className="text-xs text-center text-gray-400 px-4 py-2 border-t border-gray-100">
                             Point camera at the QR code or barcode on the bottle

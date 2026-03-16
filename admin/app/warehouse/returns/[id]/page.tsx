@@ -304,6 +304,15 @@ export default function ReturnDetailPage() {
 
     // ── Finalize & Document helpers ─────────────────────────────
 
+    const nonWcItems = items.filter(i => !i.wineCellarId);
+    const nonWcReturnableValue = nonWcItems
+        .filter(i => i.returnStatus === 'returnable')
+        .reduce((sum, i) => sum + (i.estimatedValue ?? 0), 0);
+    const nonWcNonReturnableValue = nonWcItems
+        .filter(i => i.returnStatus === 'non_returnable')
+        .reduce((sum, i) => sum + (i.estimatedValue ?? 0), 0);
+    const nonWcTotalValue = nonWcReturnableValue + nonWcNonReturnableValue;
+
     const tbdItems = items.filter(i => i.returnStatus === 'tbd');
     const ciiItems = items.filter(i => i.deaForm222Required);
     const hasTbdItems = tbdItems.length > 0;
@@ -515,19 +524,19 @@ export default function ReturnDetailPage() {
                     <dl className="space-y-3 text-sm">
                         <div className="flex justify-between">
                             <dt className="text-gray-500">Total Items</dt>
-                            <dd className="font-semibold text-gray-900">{tx.totalItems}</dd>
+                            <dd className="font-semibold text-gray-900">{nonWcItems.length}</dd>
                         </div>
                         <div className="flex justify-between">
                             <dt className="text-gray-500">Returnable Value</dt>
-                            <dd className="font-semibold text-green-700">{formatCurrency(tx.totalReturnableValue)}</dd>
+                            <dd className="font-semibold text-green-700">{formatCurrency(nonWcReturnableValue)}</dd>
                         </div>
                         <div className="flex justify-between">
                             <dt className="text-gray-500">Non-Returnable Value</dt>
-                            <dd className="font-semibold text-red-700">{formatCurrency(tx.totalNonReturnableValue)}</dd>
+                            <dd className="font-semibold text-red-700">{formatCurrency(nonWcNonReturnableValue)}</dd>
                         </div>
                         <div className="flex justify-between pt-2 border-t border-gray-100">
                             <dt className="text-gray-500 font-medium">Total Value</dt>
-                            <dd className="font-bold text-gray-900">{formatCurrency(tx.totalReturnableValue + tx.totalNonReturnableValue)}</dd>
+                            <dd className="font-bold text-gray-900">{formatCurrency(nonWcTotalValue)}</dd>
                         </div>
                     </dl>
                 </div>
@@ -608,7 +617,7 @@ export default function ReturnDetailPage() {
             <div className="bg-white rounded-lg shadow-md p-5">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
                     <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
-                        <ScanLine className="w-4 h-4" /> Products ({itemsSummary?.totalItems ?? items.length})
+                        <ScanLine className="w-4 h-4" /> Products ({nonWcItems.length})
                     </h2>
                     {canDoAction(tx, 'edit') && (
                         <div className="flex gap-2">
@@ -623,23 +632,23 @@ export default function ReturnDetailPage() {
                 </div>
 
                 {/* Summary Bar */}
-                {itemsSummary && itemsSummary.totalItems > 0 && (
+                {nonWcItems.length > 0 && (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                         <div className="bg-gray-50 rounded-lg p-2.5 text-center">
                             <p className="text-xs text-gray-500">Items</p>
-                            <p className="text-sm font-bold text-gray-900">{itemsSummary.totalItems}</p>
+                            <p className="text-sm font-bold text-gray-900">{nonWcItems.length}</p>
                         </div>
                         <div className="bg-green-50 rounded-lg p-2.5 text-center">
                             <p className="text-xs text-green-600">Returnable</p>
-                            <p className="text-sm font-bold text-green-800">{formatCurrency(itemsSummary.totalReturnableValue)}</p>
+                            <p className="text-sm font-bold text-green-800">{formatCurrency(nonWcReturnableValue)}</p>
                         </div>
                         <div className="bg-red-50 rounded-lg p-2.5 text-center">
                             <p className="text-xs text-red-600">Non-Returnable</p>
-                            <p className="text-sm font-bold text-red-800">{formatCurrency(itemsSummary.totalNonReturnableValue)}</p>
+                            <p className="text-sm font-bold text-red-800">{formatCurrency(nonWcNonReturnableValue)}</p>
                         </div>
                         <div className="bg-blue-50 rounded-lg p-2.5 text-center">
                             <p className="text-xs text-blue-600">Total Value</p>
-                            <p className="text-sm font-bold text-blue-800">{formatCurrency(itemsSummary.totalValue)}</p>
+                            <p className="text-sm font-bold text-blue-800">{formatCurrency(nonWcTotalValue)}</p>
                         </div>
                     </div>
                 )}
@@ -673,7 +682,7 @@ export default function ReturnDetailPage() {
                     <div className="flex justify-center py-8">
                         <Loader2 className="w-6 h-6 animate-spin text-primary-600" />
                     </div>
-                ) : items.length === 0 ? (
+                ) : nonWcItems.length === 0 ? (
                     <div className="text-center py-8">
                         <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                         <p className="text-gray-500 text-sm font-medium">No items yet</p>
@@ -701,7 +710,7 @@ export default function ReturnDetailPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {items.map((item) => {
+                                {nonWcItems.map((item) => {
                                     const sBadge = getItemStatusBadge(item.returnStatus);
                                     return (
                                         <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">

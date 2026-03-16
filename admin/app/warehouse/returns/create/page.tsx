@@ -61,7 +61,7 @@ export default function CreateReturnPage() {
             setConfirmModal(false);
             setSelectedStore(null);
             setNotes('');
-            setTimeout(() => router.push('/warehouse/returns'), 1500);
+            router.push(`/warehouse/returns/${tx.id}`);
         } else {
             const errMsg = result.payload as string || 'Failed to create return transaction';
             showToast(errMsg, 'error');
@@ -102,7 +102,7 @@ export default function CreateReturnPage() {
 
     return (
         <div className="space-y-6">
-            <ToastContainer toasts={toasts} removeToast={removeToast} />
+            <ToastContainer toasts={toasts} onClose={removeToast} />
 
             {/* Header */}
             <div>
@@ -201,8 +201,6 @@ export default function CreateReturnPage() {
                                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                                 >
                                     <option value="in_store">In-Store Processing</option>
-                                    <option value="self_service">Self-Service</option>
-                                    <option value="express">Express (Box & Ship)</option>
                                 </select>
                             </div>
                             <div>
