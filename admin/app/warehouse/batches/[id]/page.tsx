@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import {
     ArrowLeft, Loader2, AlertCircle, Layers, Lock, Send,
-    Plus, ChevronDown, ChevronUp, DollarSign, Package, FileText,
+    Plus, ChevronDown, ChevronUp, Package,
     CheckCircle, X, Search, ExternalLink,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
@@ -17,7 +17,7 @@ import {
     clearCurrentBatch, clearError,
 } from '@/lib/store/batchSlice';
 import { fetchReceivedReturns } from '@/lib/store/warehouseSlice';
-import { ReturnTransaction, DebitMemo } from '@/lib/types';
+import { ReturnTransaction } from '@/lib/types';
 
 function formatCurrency(v: number) {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(v);
@@ -39,13 +39,13 @@ function getStatusBadge(status: string): { label: string; variant: 'success' | '
 export default function BatchDetailPage() {
     const params = useParams();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const dispatch = useAppDispatch();
     const batchId = params.id as string;
 
     const {
         currentBatch: batch,
         batchReturns,
-        batchMemos,
         isLoading,
         isActionLoading,
         error,
@@ -60,7 +60,6 @@ export default function BatchDetailPage() {
     const [selectedReturnIds, setSelectedReturnIds] = useState<string[]>([]);
     const [assignSearch, setAssignSearch] = useState('');
     const [returnsExpanded, setReturnsExpanded] = useState(true);
-    const [memosExpanded, setMemosExpanded] = useState(true);
 
     const addToast = useCallback((msg: string, type: Toast['type']) => {
         setToasts(prev => [...prev, { id: Date.now().toString(), message: msg, type }]);
@@ -70,6 +69,13 @@ export default function BatchDetailPage() {
         dispatch(fetchBatchDetail(batchId));
         return () => { dispatch(clearCurrentBatch()); };
     }, [dispatch, batchId]);
+
+    // Auto-open Close Batch modal when navigated via ?action=closeout
+    useEffect(() => {
+        if (searchParams.get('action') === 'closeout' && batch && batch.status === 'open') {
+            setShowClose(true);
+        }
+    }, [searchParams, batch]);
 
     useEffect(() => {
         if (error) { addToast(error, 'error'); dispatch(clearError()); }
@@ -117,6 +123,8 @@ export default function BatchDetailPage() {
     };
 
     const filteredReceived = receivedReturns.filter(r => {
+        // Exclude returns already assigned to any batch
+        if (r.batchId) return false;
         if (!assignSearch) return true;
         const s = assignSearch.toLowerCase();
         return (
@@ -289,73 +297,6 @@ export default function BatchDetailPage() {
                                                 <td className="px-6 py-3 text-sm text-gray-700">{rt.totalItems}</td>
                                                 <td className="px-6 py-3 text-sm font-medium">{formatCurrency(rt.totalReturnableValue || 0)}</td>
                                                 <td className="px-6 py-3 text-sm text-gray-500">{rt.fedexTracking || '—'}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </div>
-                )}
-            </div>
-
-            {/* Debit Memos */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-                <button
-                    onClick={() => setMemosExpanded(e => !e)}
-                    className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors"
-                >
-                    <div className="flex items-center gap-2">
-                        <FileText className="w-5 h-5 text-gray-600" />
-                        <h2 className="text-lg font-semibold text-gray-900">Debit Memos</h2>
-                        <Badge variant="default">{batchMemos.length}</Badge>
-                    </div>
-                    {memosExpanded ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
-                </button>
-
-                {memosExpanded && (
-                    <div className="border-t border-gray-200">
-                        {batchMemos.length === 0 ? (
-                            <p className="text-center py-8 text-gray-500">
-                                {batch.status === 'open'
-                                    ? 'Debit memos will be generated when the batch is closed.'
-                                    : 'No debit memos.'}
-                            </p>
-                        ) : (
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Memo #</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pharmacy</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Destination</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Labeler</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Items</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ask Value</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">RA #</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-200">
-                                        {batchMemos.map((m: DebitMemo) => (
-                                            <tr key={m.id} className="hover:bg-gray-50 cursor-pointer"
-                                                onClick={() => router.push(`/warehouse/debit-memos?highlight=${m.id}`)}>
-                                                <td className="px-6 py-3 text-sm font-medium text-primary-600">{m.memoNumber}</td>
-                                                <td className="px-6 py-3 text-sm text-gray-700">{m.pharmacyName}</td>
-                                                <td className="px-6 py-3 text-sm text-gray-700">{m.destination || '—'}</td>
-                                                <td className="px-6 py-3 text-sm text-gray-700">{m.labelerName || '—'}</td>
-                                                <td className="px-6 py-3 text-sm text-gray-700">{m.totalItems}</td>
-                                                <td className="px-6 py-3 text-sm font-medium">{formatCurrency(m.totalAskValue)}</td>
-                                                <td className="px-6 py-3 text-sm">{m.raNumber || <span className="text-gray-400">Pending</span>}</td>
-                                                <td className="px-6 py-3 text-sm">
-                                                    <Badge variant={
-                                                        m.paymentStatus === 'paid' ? 'success' :
-                                                        m.paymentStatus === 'partial' ? 'warning' :
-                                                        m.paymentStatus === 'disputed' ? 'danger' : 'default'
-                                                    }>
-                                                        {m.paymentStatus}
-                                                    </Badge>
-                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>
