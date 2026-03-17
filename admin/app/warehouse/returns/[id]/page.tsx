@@ -75,6 +75,9 @@ export default function ReturnDetailPage() {
         (state) => state.returnTransactions
     );
 
+    const currentUser = useAppSelector((state) => state.auth.user);
+    const isProcessor = currentUser?.role === 'processor';
+
     const [toasts, setToasts] = useState<Toast[]>([]);
     const [editModal, setEditModal] = useState(false);
     const [editForm, setEditForm] = useState({ fedexTracking: '', fedexPickupConfirmation: '', notes: '' });
@@ -421,7 +424,7 @@ export default function ReturnDetailPage() {
 
     return (
         <div className="space-y-6">
-            <ToastContainer toasts={toasts} removeToast={removeToast} />
+            <ToastContainer toasts={toasts} onClose={removeToast} />
 
             {/* Back + Header */}
             <div>
@@ -629,7 +632,7 @@ export default function ReturnDetailPage() {
                     <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
                         <ScanLine className="w-4 h-4" /> Products ({nonWcItems.length})
                     </h2>
-                    {canDoAction(tx, 'edit') && (
+                    {isProcessor && canDoAction(tx, 'edit') && (
                         <div className="flex gap-2">
                             <Button variant="primary" size="sm" onClick={() => router.push(`/warehouse/returns/${id}/add-items`)}>
                                 <Plus className="w-4 h-4 mr-1" /> Add Items
@@ -696,7 +699,7 @@ export default function ReturnDetailPage() {
                     <div className="text-center py-8">
                         <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                         <p className="text-gray-500 text-sm font-medium">No items yet</p>
-                        {canDoAction(tx, 'edit') && (
+                        {isProcessor && canDoAction(tx, 'edit') && (
                             <Button variant="primary" size="sm" className="mt-3" onClick={() => router.push(`/warehouse/returns/${id}/add-items`)}>
                                 <Plus className="w-4 h-4 mr-1" /> Start Scanning
                             </Button>
