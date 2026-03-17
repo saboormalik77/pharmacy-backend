@@ -99,7 +99,7 @@ export default function ReturnDetailPage() {
     // Finalize flow state
     const [finalizeModal, setFinalizeModal] = useState(false);
     const [finalizeForm, setFinalizeForm] = useState({ fedexTracking: '', boxCount: '' });
-    const [finalizeChecks, setFinalizeChecks] = useState({ manifestPrinted: false, deaFormPrinted: false, allItemsVerified: false });
+    const [finalizeStepsDone, setFinalizeStepsDone] = useState({ printManifest: false, fedexEntered: false, printJobSheets: false });
     const [pdfLoading, setPdfLoading] = useState<string | null>(null);
 
     const showToast = (message: string, type: Toast['type'] = 'success') => {
@@ -139,12 +139,18 @@ export default function ReturnDetailPage() {
         if (!actionModal || !tx) return;
         const thunkMap: Record<string, any> = { pause: pauseReturnTransaction, resume: resumeReturnTransaction, complete: completeReturnTransaction };
         const thunk = thunkMap[actionModal];
+        const wasComplete = actionModal === 'complete';
         const result = await dispatch(thunk(tx.id));
         if (thunk.fulfilled.match(result)) {
             const labels: Record<string, string> = { pause: 'paused', resume: 'resumed', complete: 'completed' };
             showToast(`Return ${tx.licensePlate} ${labels[actionModal]} successfully!`);
             setActionModal(null);
             refresh();
+            if (wasComplete) {
+                setFinalizeForm({ fedexTracking: '', boxCount: '' });
+                setFinalizeStepsDone({ printManifest: false, fedexEntered: false, printJobSheets: false });
+                setFinalizeModal(true);
+            }
         } else {
             showToast(result.payload as string || `Failed to ${actionModal}`, 'error');
             setActionModal(null);
@@ -304,6 +310,15 @@ export default function ReturnDetailPage() {
 
     // ── Finalize & Document helpers ─────────────────────────────
 
+    const nonWcItems = items.filter(i => !i.wineCellarId);
+    const nonWcReturnableValue = nonWcItems
+        .filter(i => i.returnStatus === 'returnable')
+        .reduce((sum, i) => sum + (i.estimatedValue ?? 0), 0);
+    const nonWcNonReturnableValue = nonWcItems
+        .filter(i => i.returnStatus === 'non_returnable')
+        .reduce((sum, i) => sum + (i.estimatedValue ?? 0), 0);
+    const nonWcTotalValue = nonWcReturnableValue + nonWcNonReturnableValue;
+
     const tbdItems = items.filter(i => i.returnStatus === 'tbd');
     const ciiItems = items.filter(i => i.deaForm222Required);
     const hasTbdItems = tbdItems.length > 0;
@@ -313,7 +328,11 @@ export default function ReturnDetailPage() {
     const openFinalizeModal = () => {
         if (!tx) return;
         setFinalizeForm({ fedexTracking: tx.fedexTracking || '', boxCount: tx.boxCount ? String(tx.boxCount) : '' });
-        setFinalizeChecks({ manifestPrinted: false, deaFormPrinted: false, allItemsVerified: false });
+        setFinalizeStepsDone({
+            printManifest: false,
+            fedexEntered: !!(tx.fedexTracking),
+            printJobSheets: false,
+        });
         setFinalizeModal(true);
     };
 
@@ -358,11 +377,11 @@ export default function ReturnDetailPage() {
         }
     };
 
-    const canFinalize = finalizeForm.fedexTracking.trim().length > 0
-        && !hasTbdItems
-        && finalizeChecks.allItemsVerified
-        && finalizeChecks.manifestPrinted
-        && (!hasCiiItems || finalizeChecks.deaFormPrinted);
+    const canFinalize = finalizeStepsDone.printManifest
+        && finalizeStepsDone.fedexEntered
+        && finalizeForm.fedexTracking.trim().length > 0
+        && finalizeStepsDone.printJobSheets
+        && !hasTbdItems;
 
     function getItemStatusBadge(status: string): { variant: 'success' | 'warning' | 'danger' | 'default'; label: string } {
         switch (status) {
@@ -515,19 +534,19 @@ export default function ReturnDetailPage() {
                     <dl className="space-y-3 text-sm">
                         <div className="flex justify-between">
                             <dt className="text-gray-500">Total Items</dt>
-                            <dd className="font-semibold text-gray-900">{tx.totalItems}</dd>
+                            <dd className="font-semibold text-gray-900">{nonWcItems.length}</dd>
                         </div>
                         <div className="flex justify-between">
                             <dt className="text-gray-500">Returnable Value</dt>
-                            <dd className="font-semibold text-green-700">{formatCurrency(tx.totalReturnableValue)}</dd>
+                            <dd className="font-semibold text-green-700">{formatCurrency(nonWcReturnableValue)}</dd>
                         </div>
                         <div className="flex justify-between">
                             <dt className="text-gray-500">Non-Returnable Value</dt>
-                            <dd className="font-semibold text-red-700">{formatCurrency(tx.totalNonReturnableValue)}</dd>
+                            <dd className="font-semibold text-red-700">{formatCurrency(nonWcNonReturnableValue)}</dd>
                         </div>
                         <div className="flex justify-between pt-2 border-t border-gray-100">
                             <dt className="text-gray-500 font-medium">Total Value</dt>
-                            <dd className="font-bold text-gray-900">{formatCurrency(tx.totalReturnableValue + tx.totalNonReturnableValue)}</dd>
+                            <dd className="font-bold text-gray-900">{formatCurrency(nonWcTotalValue)}</dd>
                         </div>
                     </dl>
                 </div>
@@ -589,14 +608,14 @@ export default function ReturnDetailPage() {
                             {pdfLoading === 'manifest' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                             Download Manifest
                         </button>
-                        <button
+                        {/* <button
                             onClick={() => downloadPdf('dea-form-222', `dea-form-222-${tx.licensePlate}.pdf`)}
                             disabled={pdfLoading === 'dea-form-222'}
                             className="flex items-center gap-2 px-4 py-2.5 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg text-sm text-orange-700 font-medium transition-colors disabled:opacity-50"
                         >
                             {pdfLoading === 'dea-form-222' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
                             DEA Form 222
-                        </button>
+                        </button> */}
                     </div>
                     {tx.manifestGeneratedAt && (
                         <p className="text-xs text-gray-400 mt-3">Manifest last generated: {formatDate(tx.manifestGeneratedAt)}</p>
@@ -608,7 +627,7 @@ export default function ReturnDetailPage() {
             <div className="bg-white rounded-lg shadow-md p-5">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
                     <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
-                        <ScanLine className="w-4 h-4" /> Products ({itemsSummary?.totalItems ?? items.length})
+                        <ScanLine className="w-4 h-4" /> Products ({nonWcItems.length})
                     </h2>
                     {canDoAction(tx, 'edit') && (
                         <div className="flex gap-2">
@@ -623,23 +642,23 @@ export default function ReturnDetailPage() {
                 </div>
 
                 {/* Summary Bar */}
-                {itemsSummary && itemsSummary.totalItems > 0 && (
+                {nonWcItems.length > 0 && (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                         <div className="bg-gray-50 rounded-lg p-2.5 text-center">
                             <p className="text-xs text-gray-500">Items</p>
-                            <p className="text-sm font-bold text-gray-900">{itemsSummary.totalItems}</p>
+                            <p className="text-sm font-bold text-gray-900">{nonWcItems.length}</p>
                         </div>
                         <div className="bg-green-50 rounded-lg p-2.5 text-center">
                             <p className="text-xs text-green-600">Returnable</p>
-                            <p className="text-sm font-bold text-green-800">{formatCurrency(itemsSummary.totalReturnableValue)}</p>
+                            <p className="text-sm font-bold text-green-800">{formatCurrency(nonWcReturnableValue)}</p>
                         </div>
                         <div className="bg-red-50 rounded-lg p-2.5 text-center">
                             <p className="text-xs text-red-600">Non-Returnable</p>
-                            <p className="text-sm font-bold text-red-800">{formatCurrency(itemsSummary.totalNonReturnableValue)}</p>
+                            <p className="text-sm font-bold text-red-800">{formatCurrency(nonWcNonReturnableValue)}</p>
                         </div>
                         <div className="bg-blue-50 rounded-lg p-2.5 text-center">
                             <p className="text-xs text-blue-600">Total Value</p>
-                            <p className="text-sm font-bold text-blue-800">{formatCurrency(itemsSummary.totalValue)}</p>
+                            <p className="text-sm font-bold text-blue-800">{formatCurrency(nonWcTotalValue)}</p>
                         </div>
                     </div>
                 )}
@@ -673,7 +692,7 @@ export default function ReturnDetailPage() {
                     <div className="flex justify-center py-8">
                         <Loader2 className="w-6 h-6 animate-spin text-primary-600" />
                     </div>
-                ) : items.length === 0 ? (
+                ) : nonWcItems.length === 0 ? (
                     <div className="text-center py-8">
                         <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                         <p className="text-gray-500 text-sm font-medium">No items yet</p>
@@ -701,7 +720,7 @@ export default function ReturnDetailPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {items.map((item) => {
+                                {nonWcItems.map((item) => {
                                     const sBadge = getItemStatusBadge(item.returnStatus);
                                     return (
                                         <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
@@ -948,35 +967,18 @@ export default function ReturnDetailPage() {
             {finalizeModal && (
                 <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setFinalizeModal(false)}>
                     <div className="bg-white rounded-lg max-w-xl w-full shadow-xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+
+                        {/* Header */}
                         <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                                 <Lock className="w-5 h-5 text-red-600" /> Finalize Return — {tx.licensePlate}
                             </h2>
                             <button onClick={() => setFinalizeModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
                         </div>
-                        <div className="p-5 flex-1 overflow-y-auto space-y-5">
-                            {/* Summary */}
-                            <div>
-                                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Return Summary</h3>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <div className="bg-green-50 rounded-lg p-3 text-center">
-                                        <p className="text-xs text-green-600">Returnable Items</p>
-                                        <p className="text-lg font-bold text-green-800">
-                                            {items.filter(i => i.returnStatus === 'returnable').length}
-                                        </p>
-                                        <p className="text-xs text-green-700 font-medium">{formatCurrency(itemsSummary?.totalReturnableValue || 0)}</p>
-                                    </div>
-                                    <div className="bg-red-50 rounded-lg p-3 text-center">
-                                        <p className="text-xs text-red-600">Non-Returnable Items</p>
-                                        <p className="text-lg font-bold text-red-800">
-                                            {items.filter(i => i.returnStatus === 'non_returnable').length}
-                                        </p>
-                                        <p className="text-xs text-red-700 font-medium">{formatCurrency(itemsSummary?.totalNonReturnableValue || 0)}</p>
-                                    </div>
-                                </div>
-                            </div>
 
-                            {/* TBD Warning */}
+                        <div className="p-5 flex-1 overflow-y-auto space-y-3">
+
+                            {/* TBD blocker */}
                             {hasTbdItems && (
                                 <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
                                     <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
@@ -985,119 +987,173 @@ export default function ReturnDetailPage() {
                                             {tbdItems.length} item{tbdItems.length !== 1 ? 's' : ''} still have TBD status
                                         </p>
                                         <p className="text-xs text-red-700 mt-0.5">
-                                            All items must be resolved as returnable or non-returnable before finalizing.
+                                            Resolve all TBD items before finalizing.
                                         </p>
                                     </div>
                                 </div>
                             )}
 
-                            {/* Shipping Info */}
-                            <div>
-                                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Shipping Information</h3>
-                                <div className="space-y-3">
-                                    <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">
-                                            FedEx Tracking Number <span className="text-red-500">*</span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={finalizeForm.fedexTracking}
-                                            onChange={e => setFinalizeForm({ ...finalizeForm, fedexTracking: e.target.value })}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono"
-                                            placeholder="Enter FedEx tracking number"
-                                        />
+                            {/* ── Step 1: Print Itemized Return ── */}
+                            <div className={`border rounded-lg p-4 transition-colors ${finalizeStepsDone.printManifest ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-white'}`}>
+                                <div className="flex items-start gap-3">
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${finalizeStepsDone.printManifest ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'}`}>
+                                        {finalizeStepsDone.printManifest ? <CheckCircle className="w-4 h-4" /> : '1'}
                                     </div>
-                                    <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">Box Count</label>
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            value={finalizeForm.boxCount}
-                                            onChange={e => setFinalizeForm({ ...finalizeForm, boxCount: e.target.value })}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                            placeholder="Number of boxes"
-                                        />
+                                    <div className="flex-1 min-w-0">
+                                        <p className={`text-sm font-semibold ${finalizeStepsDone.printManifest ? 'text-green-800' : 'text-gray-800'}`}>
+                                            Print Itemized Return
+                                        </p>
+                                        <p className="text-xs text-gray-500 mt-0.5">Print the full list of all items included in this return.</p>
+                                        <div className="flex items-center gap-3 mt-2">
+                                            <button
+                                                onClick={() => {
+                                                    downloadPdf('manifest', `manifest-${tx.licensePlate}.pdf`);
+                                                    setFinalizeStepsDone(prev => ({ ...prev, printManifest: true }));
+                                                }}
+                                                disabled={pdfLoading === 'manifest'}
+                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+                                            >
+                                                {pdfLoading === 'manifest' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Printer className="w-3.5 h-3.5" />}
+                                                Print
+                                            </button>
+                                            {finalizeStepsDone.printManifest && (
+                                                <span className="text-xs text-green-700 font-medium flex items-center gap-1">
+                                                    <CheckCircle className="w-3.5 h-3.5" /> Done
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Documents */}
-                            <div>
-                                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Print Documents</h3>
-                                <div className="flex flex-wrap gap-2">
-                                    <button
-                                        onClick={() => downloadPdf('manifest', `manifest-${tx.licensePlate}.pdf`)}
-                                        disabled={pdfLoading === 'manifest'}
-                                        className="flex items-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg text-sm text-blue-700 font-medium transition-colors disabled:opacity-50"
-                                    >
-                                        {pdfLoading === 'manifest' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Printer className="w-4 h-4" />}
-                                        Print Manifest
-                                    </button>
-                                    {hasCiiItems && (
-                                        <button
-                                            onClick={() => downloadPdf('dea-form-222', `dea-form-222-${tx.licensePlate}.pdf`)}
-                                            disabled={pdfLoading === 'dea-form-222'}
-                                            className="flex items-center gap-2 px-3 py-2 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg text-sm text-orange-700 font-medium transition-colors disabled:opacity-50"
-                                        >
-                                            {pdfLoading === 'dea-form-222' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
-                                            Print DEA Form 222
-                                        </button>
-                                    )}
+                            {/* ── Step 2: Enter FedEx Tracking ── */}
+                            <div className={`border rounded-lg p-4 transition-colors ${finalizeStepsDone.fedexEntered && finalizeForm.fedexTracking.trim() ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-white'}`}>
+                                <div className="flex items-start gap-3">
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${finalizeStepsDone.fedexEntered && finalizeForm.fedexTracking.trim() ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'}`}>
+                                        {finalizeStepsDone.fedexEntered && finalizeForm.fedexTracking.trim() ? <CheckCircle className="w-4 h-4" /> : '2'}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className={`text-sm font-semibold ${finalizeStepsDone.fedexEntered && finalizeForm.fedexTracking.trim() ? 'text-green-800' : 'text-gray-800'}`}>
+                                            Enter FedEx Tracking
+                                        </p>
+                                        <p className="text-xs text-gray-500 mt-0.5">Enter the FedEx tracking number for this shipment.</p>
+                                        <div className="mt-2 space-y-2">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">
+                                                    Tracking Number <span className="text-red-500">*</span>
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={finalizeForm.fedexTracking}
+                                                    onChange={e => {
+                                                        const val = e.target.value;
+                                                        setFinalizeForm(prev => ({ ...prev, fedexTracking: val }));
+                                                        setFinalizeStepsDone(prev => ({ ...prev, fedexEntered: val.trim().length > 0 }));
+                                                    }}
+                                                    placeholder="Enter FedEx tracking number"
+                                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Box Count</label>
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    value={finalizeForm.boxCount}
+                                                    onChange={e => setFinalizeForm(prev => ({ ...prev, boxCount: e.target.value }))}
+                                                    placeholder="Number of boxes"
+                                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Confirmation Checkboxes */}
-                            <div>
-                                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Confirmation</h3>
-                                <div className="space-y-2">
-                                    <label className="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-gray-50">
-                                        <input
-                                            type="checkbox"
-                                            checked={finalizeChecks.manifestPrinted}
-                                            onChange={e => setFinalizeChecks({ ...finalizeChecks, manifestPrinted: e.target.checked })}
-                                            className="rounded text-primary-600 focus:ring-primary-500"
-                                        />
-                                        <span className="text-sm text-gray-700">Manifest printed and included in shipment</span>
-                                    </label>
-                                    {hasCiiItems && (
-                                        <label className="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-gray-50">
-                                            <input
-                                                type="checkbox"
-                                                checked={finalizeChecks.deaFormPrinted}
-                                                onChange={e => setFinalizeChecks({ ...finalizeChecks, deaFormPrinted: e.target.checked })}
-                                                className="rounded text-primary-600 focus:ring-primary-500"
-                                            />
-                                            <span className="text-sm text-gray-700">DEA Form 222 printed and included</span>
-                                        </label>
-                                    )}
-                                    <label className="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-gray-50">
-                                        <input
-                                            type="checkbox"
-                                            checked={finalizeChecks.allItemsVerified}
-                                            onChange={e => setFinalizeChecks({ ...finalizeChecks, allItemsVerified: e.target.checked })}
-                                            className="rounded text-primary-600 focus:ring-primary-500"
-                                        />
-                                        <span className="text-sm text-gray-700">All items have been verified</span>
-                                    </label>
+                            {/* ── Step 3: Print Job Sheets ── */}
+                            <div className={`border rounded-lg p-4 transition-colors ${finalizeStepsDone.printJobSheets ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-white'}`}>
+                                <div className="flex items-start gap-3">
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${finalizeStepsDone.printJobSheets ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'}`}>
+                                        {finalizeStepsDone.printJobSheets ? <CheckCircle className="w-4 h-4" /> : '3'}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className={`text-sm font-semibold ${finalizeStepsDone.printJobSheets ? 'text-green-800' : 'text-gray-800'}`}>
+                                            Print Job Sheets
+                                        </p>
+                                        <p className="text-xs text-gray-500 mt-0.5">Print job sheets for all outgoing boxes.</p>
+                                        <div className="flex items-center gap-3 mt-2">
+                                            {hasCiiItems && (
+                                                <button
+                                                    onClick={() => {
+                                                        downloadPdf('dea-form-222', `dea-form-222-${tx.licensePlate}.pdf`);
+                                                        setFinalizeStepsDone(prev => ({ ...prev, printJobSheets: true }));
+                                                    }}
+                                                    disabled={pdfLoading === 'dea-form-222'}
+                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+                                                >
+                                                    {pdfLoading === 'dea-form-222' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
+                                                    Print DEA Form 222
+                                                </button>
+                                            )}
+                                            <label className="flex items-center gap-2 cursor-pointer select-none">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={finalizeStepsDone.printJobSheets}
+                                                    onChange={e => setFinalizeStepsDone(prev => ({ ...prev, printJobSheets: e.target.checked }))}
+                                                    className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                                />
+                                                <span className="text-xs text-gray-700">Job sheets printed</span>
+                                            </label>
+                                            {finalizeStepsDone.printJobSheets && (
+                                                <span className="text-xs text-green-700 font-medium flex items-center gap-1">
+                                                    <CheckCircle className="w-3.5 h-3.5" /> Done
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Warning */}
-                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex items-start gap-2">
-                                <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-                                <div>
-                                    <p className="text-sm font-medium text-yellow-800">This action cannot be undone</p>
-                                    <p className="text-xs text-yellow-700 mt-0.5">
-                                        Finalizing locks this return permanently. You will no longer be able to edit items or make changes.
-                                    </p>
+                            {/* ── Step 4: Finalize Return ── */}
+                            <div className={`border-2 rounded-lg p-4 transition-colors ${canFinalize ? 'border-green-200 bg-green-50' : 'border-dashed border-gray-200 bg-gray-50'}`}>
+                                <div className="flex items-start gap-3">
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${canFinalize ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-500'}`}>
+                                        {canFinalize ? <CheckCircle className="w-4 h-4" /> : '4'}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className={`text-sm font-semibold ${canFinalize ? 'text-green-800' : 'text-gray-400'}`}>
+                                            Finalize Return
+                                        </p>
+                                        <p className={`text-xs mt-0.5 ${canFinalize ? 'text-green-700' : 'text-gray-400'}`}>
+                                            Lock this return permanently. This cannot be undone.
+                                        </p>
+                                        {!canFinalize && (
+                                            <p className="text-xs text-gray-400 mt-1">Complete steps 1 – 3 above to enable finalization.</p>
+                                        )}
+                                        {canFinalize && (
+                                            <div className="mt-3">
+                                                <div className="bg-yellow-50 border border-yellow-200 rounded-md p-2 flex items-start gap-1.5 mb-3">
+                                                    <AlertTriangle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
+                                                    <p className="text-xs text-yellow-800">
+                                                        Once finalized, items and shipping details can no longer be edited.
+                                                    </p>
+                                                </div>
+                                                <Button variant="primary" onClick={handleFinalize} disabled={isActionLoading || !canFinalize}>
+                                                    {isActionLoading
+                                                        ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Finalizing...</>
+                                                        : <><Lock className="w-4 h-4 mr-1" />Finalize Return</>
+                                                    }
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
+
                         </div>
-                        <div className="flex justify-end gap-2 p-5 border-t border-gray-200 bg-gray-50">
+
+                        <div className="flex justify-end p-4 border-t border-gray-200 bg-gray-50">
                             <Button variant="outline" onClick={() => setFinalizeModal(false)}>Cancel</Button>
-                            <Button variant="danger" onClick={handleFinalize} disabled={isActionLoading || !canFinalize}>
-                                {isActionLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Finalizing...</> : <><Lock className="w-4 h-4 mr-1" />Finalize Return</>}
-                            </Button>
                         </div>
                     </div>
                 </div>

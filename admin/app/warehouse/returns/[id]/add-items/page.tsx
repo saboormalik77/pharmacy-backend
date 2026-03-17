@@ -30,10 +30,11 @@ const RETURN_REASONS = [
 
 const EMPTY_FORM = {
     ndc: '', ndc10: '', gtin: '', proprietaryName: '', genericName: '',
-    manufacturer: '', packageDescription: '', dosageForm: '', strength: '',
+    manufacturer: '', packageDescription: '', dosageForm: '',
+    strengthValue: '', strengthUnit: '',
     route: '', lotNumber: '', serialNumber: '', expirationDate: '',
-    standardPrice: '', quantity: '1', fullPackageSize: '',
-    isPartial: false, partialPercentage: '',
+    standardPrice: '', fullPackageSize: '',
+    fullPackageQtyReturned: '', qtyMode: 'units' as 'units' | 'percent',
     returnStatus: 'tbd' as 'returnable' | 'non_returnable' | 'tbd',
     deaSchedule: '', productType: '',
     returnReason: '', memo: '',
@@ -48,8 +49,13 @@ type ScannedPrices = {
     bestPartialPrice: number | null;
 };
 
-const MIN_PARTIAL_PERCENTAGE = 1;
-const MAX_PARTIAL_PERCENTAGE = 100;
+/** Splits a combined strength string like "500 mg" or "10 MG/ML" into value + unit. */
+function parseStrength(strength: string): { value: string; unit: string } {
+    if (!strength) return { value: '', unit: '' };
+    const match = strength.trim().match(/^([\d.,/]+)\s*(.*)$/);
+    if (match) return { value: match[1].trim(), unit: match[2].trim() };
+    return { value: strength, unit: '' };
+}
 
 // ── Page ───────────────────────────────────────────────────────
 
@@ -93,84 +99,19 @@ export default function AddItemsPage() {
         setForm(prev => ({ ...prev, [field]: value }));
     }, []);
 
-    const getNormalizedPartialPercentage = useCallback((value: string) => {
-        if (value.trim() === '') return null;
-
-        const numericValue = Number(value);
-        if (!Number.isFinite(numericValue)) return null;
-
-        return Math.min(MAX_PARTIAL_PERCENTAGE, Math.max(MIN_PARTIAL_PERCENTAGE, numericValue));
-    }, []);
-
-    const getScannedStandardPrice = useCallback((isPartial: boolean, prices: ScannedPrices | null) => {
-        if (!prices) return '';
-
-        const selectedPrice = isPartial
-            ? prices.bestPartialPrice ?? prices.bestFullPrice
-            : prices.bestFullPrice ?? prices.bestPartialPrice;
-
-        return selectedPrice != null ? String(selectedPrice) : '';
-    }, []);
-
-    const handlePartialToggle = useCallback((checked: boolean) => {
-        setForm(prev => ({
-            ...prev,
-            isPartial: checked,
-            partialPercentage: checked ? (prev.partialPercentage || '100') : '',
-            standardPrice: getScannedStandardPrice(checked, scannedPrices),
-        }));
-    }, [getScannedStandardPrice, scannedPrices]);
-
-    const handleQuantityChange = useCallback((value: string) => {
-        const numValue = parseInt(value) || 0;
-        updateField('quantity', numValue > 0 ? String(numValue) : value);
-
-        // If in partial mode with fullPackageSize, calculate % remaining
-        if (form.isPartial && form.fullPackageSize) {
-            const packageSize = parseFloat(form.fullPackageSize);
-            if (packageSize > 0 && numValue > 0) {
-                const newPercentage = (numValue / packageSize) * 100;
-                // Clamp to 1-100 range
-                const clampedPercentage = Math.min(100, Math.max(1, newPercentage));
-                updateField('partialPercentage', clampedPercentage.toFixed(2));
-            }
-        }
-    }, [form.isPartial, form.fullPackageSize, updateField]);
-
-    const handlePartialPercentageChange = useCallback((value: string) => {
-        if (value.trim() === '') {
-            updateField('partialPercentage', '');
-            return;
-        }
-
-        const normalizedValue = getNormalizedPartialPercentage(value);
-        if (normalizedValue != null) {
-            updateField('partialPercentage', String(normalizedValue));
-
-            // If fullPackageSize exists, calculate and update quantity
-            if (form.fullPackageSize) {
-                const packageSize = parseFloat(form.fullPackageSize);
-                if (packageSize > 0) {
-                    const newQuantity = (normalizedValue / 100) * packageSize;
-                    // Round to nearest whole number or 1 decimal place
-                    updateField('quantity', Math.round(newQuantity * 10) / 10);
-                }
-            }
-        } else {
-            updateField('partialPercentage', '');
-        }
-    }, [getNormalizedPartialPercentage, form.fullPackageSize, updateField]);
-
     const estimatedValue = (() => {
         const price = parseFloat(form.standardPrice) || 0;
-        const qty = parseInt(form.quantity) || 0;
-        const partialPercentage = getNormalizedPartialPercentage(form.partialPercentage);
+        if (price <= 0) return 0;
+        const pkgSize = parseFloat(form.fullPackageSize) || 0;
+        const qtyNum = parseFloat(form.fullPackageQtyReturned) || 0;
 
-        if (form.isPartial) {
-            if (partialPercentage == null) return 0;
-            return price * qty * (partialPercentage / 100);
-        }
-        return price * qty;
+        if (!form.fullPackageQtyReturned.trim() || qtyNum <= 0 || pkgSize <= 0) return price;
+
+        const pct = form.qtyMode === 'units'
+            ? Math.min(100, (qtyNum / pkgSize) * 100)
+            : Math.min(100, qtyNum);
+
+        return price * (pct / 100);
     })();
 
     // ── Barcode scan handler ───────────────────────────────────
@@ -192,6 +133,8 @@ export default function AddItemsPage() {
 
             setScannedPrices(nextScannedPrices);
 
+            const parsedStrength = parseStrength(af.strength || '');
+            const bestPrice = data.pricing.bestFullPrice ?? data.pricing.bestPartialPrice;
             setForm({
                 ndc: af.ndc || '',
                 ndc10: af.ndc10 || '',
@@ -201,16 +144,16 @@ export default function AddItemsPage() {
                 manufacturer: af.manufacturer || '',
                 packageDescription: af.packageDescription || '',
                 dosageForm: af.dosageForm || '',
-                strength: af.strength || '',
+                strengthValue: parsedStrength.value,
+                strengthUnit: parsedStrength.unit,
                 route: af.route || '',
                 lotNumber: af.lotNumber || '',
                 serialNumber: af.serialNumber || '',
                 expirationDate: af.expirationDate || '',
-                standardPrice: getScannedStandardPrice(false, nextScannedPrices),
-                quantity: '1',
+                standardPrice: bestPrice != null ? String(bestPrice) : '',
                 fullPackageSize: af.fullPackageSize ? String(af.fullPackageSize) : '',
-                isPartial: false,
-                partialPercentage: '',
+                fullPackageQtyReturned: '',
+                qtyMode: 'units',
                 returnStatus: 'tbd',
                 deaSchedule: af.deaSchedule || '',
                 productType: af.productType || '',
@@ -261,10 +204,38 @@ export default function AddItemsPage() {
             return;
         }
 
-        const partialPercentage = getNormalizedPartialPercentage(form.partialPercentage);
-        if (form.isPartial && partialPercentage == null) {
-            showToast('Enter a valid % remaining between 1 and 100 for a partial bottle.', 'error');
-            return;
+        // ── Compute quantity / partial from the new Qty Returned field ──
+        const pkgSize = parseFloat(form.fullPackageSize) || 0;
+        const qtyInput = parseFloat(form.fullPackageQtyReturned) || 0;
+
+        let payloadQuantity = 1;
+        let payloadIsPartial = false;
+        let payloadPartialPercentage: number | null = null;
+
+        if (form.fullPackageQtyReturned.trim() && qtyInput > 0) {
+            if (pkgSize > 0) {
+                let unitsReturned: number;
+                let pctReturned: number;
+                if (form.qtyMode === 'units') {
+                    unitsReturned = qtyInput;
+                    pctReturned = (unitsReturned / pkgSize) * 100;
+                } else {
+                    pctReturned = qtyInput;
+                    unitsReturned = (pctReturned / 100) * pkgSize;
+                }
+                if (unitsReturned >= pkgSize || pctReturned >= 100) {
+                    payloadQuantity = 1;
+                    payloadIsPartial = false;
+                } else {
+                    payloadQuantity = 1;
+                    payloadIsPartial = true;
+                    payloadPartialPercentage = Math.min(100, Math.max(1, pctReturned));
+                }
+            } else {
+                // No package size — treat input as unit count, assume full
+                payloadQuantity = Math.round(qtyInput) || 1;
+                payloadIsPartial = false;
+            }
         }
 
         const payload: Record<string, any> = {};
@@ -276,16 +247,17 @@ export default function AddItemsPage() {
         if (form.manufacturer) payload.manufacturer = form.manufacturer;
         if (form.packageDescription) payload.packageDescription = form.packageDescription;
         if (form.dosageForm) payload.dosageForm = form.dosageForm;
-        if (form.strength) payload.strength = form.strength;
+        const strengthCombined = [form.strengthValue, form.strengthUnit].filter(Boolean).join(' ');
+        if (strengthCombined) payload.strength = strengthCombined;
         if (form.route) payload.route = form.route;
         if (form.lotNumber) payload.lotNumber = form.lotNumber;
         if (form.serialNumber) payload.serialNumber = form.serialNumber;
         if (form.expirationDate) payload.expirationDate = form.expirationDate;
         if (form.standardPrice) payload.standardPrice = parseFloat(form.standardPrice);
-        payload.quantity = parseInt(form.quantity) || 1;
+        payload.quantity = payloadQuantity;
         if (form.fullPackageSize) payload.fullPackageSize = parseInt(form.fullPackageSize);
-        payload.isPartial = form.isPartial;
-        if (form.isPartial && partialPercentage != null) payload.partialPercentage = partialPercentage;
+        payload.isPartial = payloadIsPartial;
+        if (payloadIsPartial && payloadPartialPercentage != null) payload.partialPercentage = payloadPartialPercentage;
         payload.returnStatus = form.returnStatus;
         if (form.returnReason) payload.returnReason = form.returnReason;
         if (form.deaSchedule) payload.deaSchedule = form.deaSchedule;
@@ -353,7 +325,7 @@ export default function AddItemsPage() {
 
     return (
         <div className="space-y-4">
-            <ToastContainer toasts={toasts} removeToast={removeToast} />
+            <ToastContainer toasts={toasts} onClose={removeToast} />
 
             {/* Camera QR Scanner Modal */}
             {cameraOpen && (
@@ -628,8 +600,26 @@ export default function AddItemsPage() {
                     <Field label="Package Description" value={form.packageDescription} onChange={v => updateField('packageDescription', v)} placeholder="e.g. 60 TABLET in BOTTLE" />
                     <Field label="Dosage Form" value={form.dosageForm} onChange={v => updateField('dosageForm', v)} placeholder="e.g. TABLET" />
 
-                    {/* Row 3: Strength / Route / DEA */}
-                    <Field label="Strength" value={form.strength} onChange={v => updateField('strength', v)} placeholder="e.g. 200 mg" />
+                    {/* Row 3: Strength (value + unit) / Route / DEA */}
+                    <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Strength</label>
+                        <div className="flex gap-1.5">
+                            <input
+                                type="text"
+                                value={form.strengthValue}
+                                onChange={e => updateField('strengthValue', e.target.value)}
+                                placeholder="e.g. 500"
+                                className="w-1/2 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            />
+                            <input
+                                type="text"
+                                value={form.strengthUnit}
+                                onChange={e => updateField('strengthUnit', e.target.value)}
+                                placeholder="e.g. mg"
+                                className="w-1/2 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            />
+                        </div>
+                    </div>
                     <Field label="Route" value={form.route} onChange={v => updateField('route', v)} placeholder="e.g. ORAL" />
                     <Field label="DEA Schedule" value={form.deaSchedule} onChange={v => updateField('deaSchedule', v)} placeholder="e.g. CII, CIII" />
 
@@ -650,78 +640,93 @@ export default function AddItemsPage() {
                 <hr className="my-4 border-gray-200" />
                 <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Quantity & Pricing</h2>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Standard Price ($)</label>
-                        <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={form.standardPrice}
-                            onChange={e => updateField('standardPrice', e.target.value)}
-                            placeholder="0.00"
-                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Quantity</label>
-                        <input
-                            type="number"
-                            min="1"
-                            value={form.quantity}
-                            onChange={e => handleQuantityChange(e.target.value)}
-                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Full Package Size</label>
-                        <input
-                            type="number"
-                            min="1"
-                            value={form.fullPackageSize}
-                            onChange={e => updateField('fullPackageSize', e.target.value)}
-                            placeholder="e.g. 60"
-                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Estimated Value</label>
-                        <input
-                            type="text"
-                            readOnly
-                            value={`$${estimatedValue.toFixed(2)}`}
-                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md bg-gray-50 text-gray-700 font-medium"
-                        />
-                    </div>
-                </div>
-
-                {/* Partial toggle */}
-                <div className="flex items-center gap-4 mt-3">
-                    <label className="flex items-center gap-2 text-sm">
-                        <input
-                            type="checkbox"
-                            checked={form.isPartial}
-                            onChange={e => handlePartialToggle(e.target.checked)}
-                            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                        />
-                        <span className="text-gray-700">Partial bottle</span>
-                    </label>
-                    {form.isPartial && (
-                        <div className="flex items-center gap-1">
-                            <input
-                                type="number"
-                                min="1"
-                                max="100"
-                                step="0.01"
-                                value={form.partialPercentage}
-                                onChange={e => handlePartialPercentageChange(e.target.value)}
-                                placeholder="%"
-                                className="w-20 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                            />
-                            <span className="text-xs text-gray-500">% remaining</span>
+                {(() => {
+                    const pkgSize = parseFloat(form.fullPackageSize) || 0;
+                    const qtyNum = parseFloat(form.fullPackageQtyReturned) || 0;
+                    let isPartialDerived = false;
+                    let pctDerived = 0;
+                    let unitsDerived = 0;
+                    if (form.fullPackageQtyReturned.trim() && qtyNum > 0 && pkgSize > 0) {
+                        if (form.qtyMode === 'units') {
+                            unitsDerived = qtyNum;
+                            pctDerived = (qtyNum / pkgSize) * 100;
+                        } else {
+                            pctDerived = qtyNum;
+                            unitsDerived = (pctDerived / 100) * pkgSize;
+                        }
+                        isPartialDerived = unitsDerived < pkgSize && pctDerived < 100;
+                    }
+                    return (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Standard Price ($)</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    value={form.standardPrice}
+                                    onChange={e => updateField('standardPrice', e.target.value)}
+                                    placeholder="0.00"
+                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Full Package Size</label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={form.fullPackageSize}
+                                    onChange={e => updateField('fullPackageSize', e.target.value)}
+                                    placeholder="e.g. 60"
+                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">
+                                    Qty Returned
+                                    <span className="ml-1 font-normal text-gray-400">
+                                        ({form.qtyMode === 'units' ? 'units' : '%'})
+                                    </span>
+                                </label>
+                                <div className="flex gap-1">
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        step="any"
+                                        value={form.fullPackageQtyReturned}
+                                        onChange={e => updateField('fullPackageQtyReturned', e.target.value)}
+                                        placeholder={form.qtyMode === 'units' ? 'e.g. 45' : 'e.g. 75'}
+                                        className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => updateField('qtyMode', form.qtyMode === 'units' ? 'percent' : 'units')}
+                                        className="px-2 py-1 text-xs font-semibold rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
+                                        title="Toggle between unit count and percentage"
+                                    >
+                                        {form.qtyMode === 'units' ? '#' : '%'}
+                                    </button>
+                                </div>
+                                {form.fullPackageQtyReturned.trim() && qtyNum > 0 && pkgSize > 0 && (
+                                    <p className={`text-xs mt-1 font-medium ${isPartialDerived ? 'text-green-600' : 'text-green-600'}`}>
+                                        {isPartialDerived
+                                            ? `Partial — ${pctDerived.toFixed(1)}% (${unitsDerived.toFixed(1)} units)`
+                                            : 'Full bottle'}
+                                    </p>
+                                )}
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Estimated Value</label>
+                                <input
+                                    type="text"
+                                    readOnly
+                                    value={`$${estimatedValue.toFixed(2)}`}
+                                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md bg-gray-50 text-gray-700 font-medium"
+                                />
+                            </div>
                         </div>
-                    )}
-                </div>
+                    );
+                })()}
 
                 <hr className="my-4 border-gray-200" />
                 <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Classification</h2>

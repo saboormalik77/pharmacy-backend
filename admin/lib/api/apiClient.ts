@@ -67,35 +67,20 @@ export class ApiClient {
   }
 
   /**
-   * Check if error indicates token expiration
-   * Only treat as token expiration if we have a token (not during login)
-   * Be specific to avoid logging out users for other 401 errors
+   * Check if error indicates an expired / invalid session.
+   * Any 401 on a non-login endpoint while a token is present means the
+   * session is gone (expired or revoked) — redirect to login.
    */
-  private isTokenExpiredError(status: number, errorData: any, endpoint?: string): boolean {
-    // Don't treat login endpoint errors as token expiration
-    if (endpoint && endpoint.includes('/auth/login')) {
+  private isTokenExpiredError(status: number, _errorData: any, endpoint?: string): boolean {
+    // Never treat a failed login attempt as session expiry
+    if (endpoint && (endpoint.includes('/auth/login') || endpoint.includes('/auth/admin/login'))) {
       return false;
     }
-    
-    // Check for specific error messages that indicate token expiration
-    // Be careful not to include general validation errors like "invalid signature"
-    const errorMessage = errorData?.message?.toLowerCase() || '';
-    const isTokenExpiredMessage = 
-      errorMessage.includes('expired token') ||
-      errorMessage.includes('jwt expired') ||
-      errorMessage.includes('token has expired') ||
-      errorMessage.includes('session expired') ||
-      errorData?.message === 'Invalid or expired token';
-    
-    // Only treat as token expiration if 401 AND the message indicates token issue
-    if (status === 401 && isTokenExpiredMessage) {
-      return true;
+    // Only act when we actually have a token (user was authenticated)
+    if (!this.getAuthToken()) {
+      return false;
     }
-    
-    // If status is 401 but no specific token message, don't treat as token expiration
-    // This prevents logout for other authorization errors (e.g., permission denied)
-    
-    return false;
+    return status === 401;
   }
 
   /**
