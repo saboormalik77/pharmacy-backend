@@ -2,25 +2,69 @@
 
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useAppSelector } from '@/lib/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
+import { logoutUser } from '@/lib/store/authSlice';
 
 // Pages that don't require authentication
 const PUBLIC_PAGES = ['/login', '/forgot-password', '/reset-password'];
 
+/** Decode the `exp` field from a JWT payload without any external library. */
+function decodeJwtExp(token: string): number | null {
+  try {
+    const base64Url = token.split('.')[1];
+    if (!base64Url) return null;
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const json = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    const payload = JSON.parse(json);
+    return typeof payload.exp === 'number' ? payload.exp : null;
+  } catch {
+    return null;
+  }
+}
+
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
+  const { isAuthenticated, isLoading, token } = useAppSelector((state) => state.auth);
   const isPublicPage = PUBLIC_PAGES.includes(pathname);
 
+  // ── Auto-logout when JWT expires ─────────────────────────────
+  useEffect(() => {
+    if (!token) return;
+
+    const exp = decodeJwtExp(token);
+    if (!exp) return;
+
+    const msUntilExpiry = exp * 1000 - Date.now();
+
+    const doLogout = () => {
+      dispatch(logoutUser());
+      router.push('/login');
+    };
+
+    if (msUntilExpiry <= 0) {
+      // Token already expired at mount time
+      doLogout();
+      return;
+    }
+
+    const timer = setTimeout(doLogout, msUntilExpiry);
+    return () => clearTimeout(timer);
+  }, [token, dispatch, router]);
+
+  // ── Route protection ──────────────────────────────────────────
   useEffect(() => {
     if (isLoading) return;
 
     if (!isAuthenticated && !isPublicPage) {
-      // Redirect to login if not authenticated
       router.push('/login');
     } else if (isAuthenticated && isPublicPage) {
-      // Redirect to home if authenticated and on public page
       router.push('/');
     }
   }, [isAuthenticated, isLoading, isPublicPage, router]);

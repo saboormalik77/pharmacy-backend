@@ -65,7 +65,7 @@ export function ToastContainer({ toasts, onClose }: ToastContainerProps) {
     if (toasts.length === 0) return null;
 
     return (
-        <div className="fixed top-4 right-4 z-50 flex flex-col items-end">
+        <div className="fixed top-4 right-4 z-[200] flex flex-col items-end">
             {toasts.map((toast) => (
                 <ToastComponent key={toast.id} toast={toast} onClose={onClose} />
             ))}
