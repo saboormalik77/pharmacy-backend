@@ -15,6 +15,7 @@ interface EmailPayload {
   replyTo?: string;
   templateType?: 'ra-request' | 'ra-reminder';
   templateData?: Record<string, unknown>;
+  
   recipientName?: string;
   contactInfo?: { name?: string; email?: string; phone?: string };
 }
