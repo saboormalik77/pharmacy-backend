@@ -175,7 +175,7 @@ export default function ReturnDetailPage() {
         if (deleteReturnTransaction.fulfilled.match(result)) {
             showToast(`Return ${tx.licensePlate} deleted!`);
             setDeleteModal(false);
-            setTimeout(() => router.push('/warehouse/returns'), 1000);
+            setTimeout(() => router.push(tx.batchId ? `/warehouse/batches/${tx.batchId}` : '/warehouse/returns'), 1000);
         } else {
             showToast(result.payload as string || 'Failed to delete', 'error');
             setDeleteModal(false);
@@ -405,8 +405,8 @@ export default function ReturnDetailPage() {
     if (error || !tx) {
         return (
             <div className="space-y-4">
-                <button onClick={() => router.push('/warehouse/returns')} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800">
-                    <ArrowLeft className="w-4 h-4" /> Back to Returns
+                <button onClick={() => router.push(tx?.batchId ? `/warehouse/batches/${tx.batchId}` : '/warehouse/returns')} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800">
+                    <ArrowLeft className="w-4 h-4" /> Back to {tx?.batchId ? 'Batch' : 'Returns'}
                 </button>
                 <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
                     <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-3" />
@@ -425,8 +425,8 @@ export default function ReturnDetailPage() {
 
             {/* Back + Header */}
             <div>
-                <button onClick={() => router.push('/warehouse/returns')} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 mb-3">
-                    <ArrowLeft className="w-4 h-4" /> Back to Returns
+                <button onClick={() => router.push(tx.batchId ? `/warehouse/batches/${tx.batchId}` : '/warehouse/returns')} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 mb-3">
+                    <ArrowLeft className="w-4 h-4" /> Back to {tx.batchId ? 'Batch' : 'Returns'}
                 </button>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div className="flex items-center gap-3">

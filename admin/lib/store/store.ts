@@ -15,7 +15,7 @@ import processorsReducer from './processorsSlice';
 import returnTransactionsReducer from './returnTransactionsSlice';
 import policiesReducer from './policiesSlice';
 import wineCellarReducer from './wineCellarSlice';
-import emailManagementReducer from './emailManagementSlice';
+// import emailManagementReducer from './emailManagementSlice';
 import warehouseReducer from './warehouseSlice';
 import batchReducer from './batchSlice';
 import raTrackingReducer from './raTrackingSlice';
@@ -40,7 +40,7 @@ export const makeStore = () => {
       returnTransactions: returnTransactionsReducer,
       policies: policiesReducer,
       wineCellar: wineCellarReducer,
-      emailManagement: emailManagementReducer,
+      // emailManagement: emailManagementReducer,
       warehouse: warehouseReducer,
       batch: batchReducer,
       raTracking: raTrackingReducer,

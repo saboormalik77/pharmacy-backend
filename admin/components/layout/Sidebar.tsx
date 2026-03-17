@@ -39,7 +39,7 @@ const adminSidebarLinks = [
     { href: '/payments', icon: CreditCard, label: 'Payments' },
     { href: '/pharmacy-payments', icon: DollarSign, label: 'Pharmacy Payments' },
     { href: '/analytics', icon: BarChart3, label: 'Analytics' },
-    { href: '/email-management', icon: MailCheck, label: 'Email Management' },
+    // { href: '/email-management', icon: MailCheck, label: 'Email Management' },
     { href: '/settings', icon: Settings, label: 'Settings' },
     { href: '/admins', icon: Users, label: 'Admins' },
     { href: '/processors', icon: UserCog, label: 'Processors' },
