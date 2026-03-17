@@ -21,6 +21,7 @@ import {
   ShoppingCart,
   ClipboardList,
   Warehouse,
+  Archive,
 } from 'lucide-react'
 
 interface NavItem {
@@ -89,6 +90,11 @@ const navItems: NavItem[] = [
     title: 'Analytics & Reports',
     href: '/analytics',
     icon: BarChart3,
+  },
+  {
+    title: 'Wine Cellar',
+    href: '/wine-cellar',
+    icon: Archive,
   },
   // {
   //   title: 'Documents',

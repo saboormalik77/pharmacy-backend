@@ -50,7 +50,7 @@ const adminSidebarLinks = [
     { href: '/warehouse/debit-memos', icon: Receipt, label: 'Debit Memos' },
     { href: '/warehouse/ra-tracking', icon: MailCheck, label: 'RA Tracking' },
     { href: '/warehouse/unpaid', icon: CircleDollarSign, label: 'Unpaid Memos' },
-    { href: '/warehouse/wine-cellar', icon: Archive, label: 'Wine Cellar' },
+    // { href: '/warehouse/wine-cellar', icon: Archive, label: 'Wine Cellar' },
 ];
 
 // Processor navigation (for role = 'processor') — Receiving is warehouse-only
@@ -59,7 +59,7 @@ const processorSidebarLinks = [
     { href: '/warehouse/returns', icon: ClipboardList, label: 'Returns' },
     { href: '/warehouse/returns/create', icon: Scan, label: 'Create Return' },
     { href: '/warehouse/tbd-items', icon: AlertTriangle, label: 'TBD Items' },
-    { href: '/warehouse/wine-cellar', icon: Archive, label: 'Wine Cellar' },
+    // { href: '/warehouse/wine-cellar', icon: Archive, label: 'Wine Cellar' },
     { href: '/settings', icon: Settings, label: 'Settings' },
 ];
 

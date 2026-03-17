@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import {
     ArrowLeft, Loader2, CheckCircle, X, AlertTriangle, Package, ClipboardCheck,
-    ShieldCheck, Check, Search,
+    ShieldCheck, Check, Search, Layers, PlusCircle,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -19,7 +19,12 @@ import {
     fetchDiscrepancies,
     clearCurrentReturn,
 } from '@/lib/store/warehouseSlice';
-import { ReturnTransactionItem } from '@/lib/types';
+import {
+    fetchBatches,
+    createBatch,
+    assignReturnsToBatch,
+} from '@/lib/store/batchSlice';
+import { ReturnTransactionItem, ReturnBatch } from '@/lib/types';
 
 export default function WarehouseVerificationPage() {
     const dispatch = useAppDispatch();
@@ -37,6 +42,16 @@ export default function WarehouseVerificationPage() {
     // Discrepancy modal
     const [discModal, setDiscModal] = useState(false);
     const [discForm, setDiscForm] = useState({ type: 'missing' as string, itemId: '', ndc: '', productName: '', expectedQuantity: '', actualQuantity: '', notes: '' });
+
+    // Batch assignment modal
+    const [batchModal, setBatchModal] = useState(false);
+    const [openBatches, setOpenBatches] = useState<ReturnBatch[]>([]);
+    const [batchesLoading, setBatchesLoading] = useState(false);
+    const [selectedBatchId, setSelectedBatchId] = useState<string>('');
+    const [createNewBatch, setCreateNewBatch] = useState(false);
+    const [newBatchMonth, setNewBatchMonth] = useState('');
+    const [newBatchName, setNewBatchName] = useState('');
+    const [batchAssigning, setBatchAssigning] = useState(false);
 
     // Toasts
     const [toasts, setToasts] = useState<Toast[]>([]);
@@ -112,8 +127,58 @@ export default function WarehouseVerificationPage() {
 
         if (verifyReturn.fulfilled.match(result)) {
             showToast('Verification complete!');
+            // Load open batches and open the batch assignment modal
+            setBatchesLoading(true);
+            setBatchModal(true);
+            setSelectedBatchId('');
+            setCreateNewBatch(false);
+            setNewBatchMonth(new Date().toISOString().slice(0, 7)); // default YYYY-MM
+            setNewBatchName('');
+            const batchResult = await dispatch(fetchBatches({ status: 'open', limit: 100 }));
+            if (fetchBatches.fulfilled.match(batchResult)) {
+                setOpenBatches(batchResult.payload.data);
+            }
+            setBatchesLoading(false);
         } else {
             showToast(result.payload as string || 'Failed to complete verification', 'error');
+        }
+    };
+
+    const handleAssignToBatch = async () => {
+        setBatchAssigning(true);
+        try {
+            let targetBatchId = selectedBatchId;
+
+            if (createNewBatch) {
+                if (!newBatchMonth) {
+                    showToast('Please select a batch month', 'error');
+                    setBatchAssigning(false);
+                    return;
+                }
+                const createResult = await dispatch(createBatch({ batchMonth: `${newBatchMonth}-01`, batchName: newBatchName || undefined }));
+                if (!createBatch.fulfilled.match(createResult)) {
+                    showToast(createResult.payload as string || 'Failed to create batch', 'error');
+                    setBatchAssigning(false);
+                    return;
+                }
+                targetBatchId = createResult.payload.id;
+            }
+
+            if (!targetBatchId) {
+                showToast('Please select a batch or create a new one', 'error');
+                setBatchAssigning(false);
+                return;
+            }
+
+            const assignResult = await dispatch(assignReturnsToBatch({ batchId: targetBatchId, transactionIds: [transactionId] }));
+            if (assignReturnsToBatch.fulfilled.match(assignResult)) {
+                setBatchModal(false);
+                router.push('/warehouse/batches');
+            } else {
+                showToast(assignResult.payload as string || 'Failed to assign to batch', 'error');
+            }
+        } finally {
+            setBatchAssigning(false);
         }
     };
 
@@ -163,7 +228,7 @@ export default function WarehouseVerificationPage() {
 
     return (
         <div className="space-y-6">
-            <ToastContainer toasts={toasts} removeToast={removeToast} />
+            <ToastContainer toasts={toasts} onClose={removeToast} />
 
             {/* Header */}
             <div className="flex items-center justify-between">
@@ -394,6 +459,108 @@ export default function WarehouseVerificationPage() {
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Batch Assignment Modal ──────────────────── */}
+            {batchModal && (
+                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setBatchModal(false)}>
+                    <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-5 border-b bg-gray-50">
+                            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                <Layers className="w-5 h-5 text-primary-600" />
+                                Add to Batch
+                            </h2>
+                            <button onClick={() => setBatchModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                        </div>
+                        <div className="p-5 space-y-4">
+                            <p className="text-sm text-gray-600">
+                                Verification complete for <span className="font-semibold">{currentReturn.licensePlate}</span>.
+                                Assign this return to a monthly batch for close-out processing.
+                            </p>
+
+                            {batchesLoading ? (
+                                <div className="flex justify-center py-6">
+                                    <Loader2 className="w-5 h-5 animate-spin text-primary-600" />
+                                </div>
+                            ) : (
+                                <>
+                                    {/* Toggle: existing vs new */}
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => setCreateNewBatch(false)}
+                                            className={`flex-1 py-2 text-sm rounded-lg border font-medium transition-colors ${!createNewBatch ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                                        >
+                                            Existing Batch
+                                        </button>
+                                        <button
+                                            onClick={() => setCreateNewBatch(true)}
+                                            className={`flex-1 py-2 text-sm rounded-lg border font-medium transition-colors ${createNewBatch ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                                        >
+                                            <PlusCircle className="w-4 h-4 inline mr-1" />Create New
+                                        </button>
+                                    </div>
+
+                                    {!createNewBatch ? (
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700 mb-1">Select Open Batch</label>
+                                            {openBatches.length === 0 ? (
+                                                <div className="text-sm text-gray-500 bg-gray-50 rounded-lg p-3 text-center">
+                                                    No open batches found. Switch to "Create New" to start one.
+                                                </div>
+                                            ) : (
+                                                <select
+                                                    value={selectedBatchId}
+                                                    onChange={e => setSelectedBatchId(e.target.value)}
+                                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                >
+                                                    <option value="">— Choose a batch —</option>
+                                                    {openBatches.map(b => (
+                                                        <option key={b.id} value={b.id}>
+                                                            {b.batchName || b.batchMonth} ({b.totalReturns} returns)
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-3">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Batch Month <span className="text-red-500">*</span></label>
+                                                <input
+                                                    type="month"
+                                                    value={newBatchMonth}
+                                                    onChange={e => setNewBatchMonth(e.target.value)}
+                                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Batch Name <span className="text-gray-400 font-normal">(optional)</span></label>
+                                                <input
+                                                    type="text"
+                                                    value={newBatchName}
+                                                    onChange={e => setNewBatchName(e.target.value)}
+                                                    placeholder="e.g. March 2026 Batch"
+                                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                        <div className="flex justify-end gap-2 p-5 border-t bg-gray-50">
+                            <Button variant="outline" onClick={() => setBatchModal(false)}>Skip</Button>
+                            <Button
+                                variant="primary"
+                                onClick={handleAssignToBatch}
+                                disabled={batchAssigning || batchesLoading || (!createNewBatch && !selectedBatchId) || (createNewBatch && !newBatchMonth)}
+                            >
+                                {batchAssigning ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Layers className="w-4 h-4 mr-1" />}
+                                {createNewBatch ? 'Create & Assign' : 'Assign to Batch'}
+                            </Button>
+                        </div>
                     </div>
                 </div>
             )}

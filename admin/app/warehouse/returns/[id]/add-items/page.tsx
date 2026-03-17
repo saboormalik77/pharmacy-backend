@@ -16,6 +16,7 @@ import {
     scanBarcode,
     addTransactionItem,
 } from '@/lib/store/returnTransactionsSlice';
+import { checkReturnability } from '@/lib/store/policiesSlice';
 import { BarcodeScanResponse, ReturnabilityCheckResult } from '@/lib/types';
 
 // Dynamically imported so it only loads in the browser (uses WebRTC APIs)
@@ -80,6 +81,8 @@ export default function AddItemsPage() {
     const [lastWarning, setLastWarning] = useState('');
     const [lastClassification, setLastClassification] = useState<{ item: string; status: string; policyCheck?: ReturnabilityCheckResult; wineCellarItem?: any } | null>(null);
     const [scannedPrices, setScannedPrices] = useState<ScannedPrices | null>(null);
+    const [preCheckResult, setPreCheckResult] = useState<ReturnabilityCheckResult | null>(null);
+    const [isPreChecking, setIsPreChecking] = useState(false);
 
     const showToast = (message: string, type: Toast['type'] = 'success') => {
         const id = Date.now().toString();
@@ -120,6 +123,8 @@ export default function AddItemsPage() {
         if (!raw.trim()) return;
         setScanError('');
         setLastWarning('');
+        setPreCheckResult(null);
+        setIsPreChecking(false);
 
         const result = await dispatch(scanBarcode(raw.trim()));
 
@@ -198,10 +203,26 @@ export default function AddItemsPage() {
 
     // ── Save item ──────────────────────────────────────────────
 
-    const handleSave = async () => {
+    const handleSave = async (skipWineCellarCheck = false) => {
         if (!form.ndc && !form.proprietaryName) {
             showToast('Please scan or enter a product first.', 'error');
             return;
+        }
+
+        // Before saving: check if the product is too early to return (wine cellar).
+        // If so, intercept and show wine cellar confirmation buttons.
+        if (!skipWineCellarCheck && !preCheckResult && form.ndc && form.expirationDate) {
+            setIsPreChecking(true);
+            const checkResult = await dispatch(checkReturnability({
+                ndc: form.ndc,
+                expirationDate: form.expirationDate,
+                dosageForm: form.dosageForm || undefined,
+            }));
+            setIsPreChecking(false);
+            if (checkReturnability.fulfilled.match(checkResult) && checkResult.payload?.expectedReturnableDate) {
+                setPreCheckResult(checkResult.payload);
+                return; // Stop — show wine cellar buttons instead
+            }
         }
 
         // ── Compute quantity / partial from the new Qty Returned field ──
@@ -298,6 +319,7 @@ export default function AddItemsPage() {
             setScannedPrices(null);
             setScanError('');
             setScanInput('');
+            setPreCheckResult(null);
             if (mode === 'usb') scanInputRef.current?.focus();
         } else {
             showToast(result.payload as string || 'Failed to save item', 'error');
@@ -310,6 +332,8 @@ export default function AddItemsPage() {
         setScanError('');
         setLastWarning('');
         setLastClassification(null);
+        setPreCheckResult(null);
+        setIsPreChecking(false);
         if (mode === 'usb') scanInputRef.current?.focus();
     };
 
@@ -776,24 +800,60 @@ export default function AddItemsPage() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-wrap gap-2 mt-5 pt-4 border-t border-gray-200">
-                    <Button
-                        variant="primary"
-                        onClick={handleSave}
-                        disabled={isItemActionLoading || (!form.ndc && !form.proprietaryName)}
-                    >
-                        {isItemActionLoading ? (
-                            <><Loader2 className="w-4 h-4 animate-spin mr-1" />Saving...</>
-                        ) : (
-                            <><CheckCircle className="w-4 h-4 mr-1" />Save &amp; Scan Next</>
-                        )}
-                    </Button>
-                    <Button variant="outline" onClick={handleClearForm}>
-                        <RotateCcw className="w-4 h-4 mr-1" /> Clear Form
-                    </Button>
-                    <Button variant="ghost" onClick={() => router.push(`/warehouse/returns/${transactionId}`)}>
-                        <X className="w-4 h-4 mr-1" /> Cancel
-                    </Button>
+                <div className="mt-5 pt-4 border-t border-gray-200">
+                    {isPreChecking ? (
+                        <div className="flex items-center gap-2 text-sm text-gray-500 py-1">
+                            <Loader2 className="w-4 h-4 animate-spin" /> Checking return policy...
+                        </div>
+                    ) : preCheckResult?.expectedReturnableDate ? (
+                        <>
+                            <div className="mb-4 bg-purple-50 border border-purple-200 rounded-lg p-3 flex items-start gap-2">
+                                <Archive className="w-4 h-4 text-purple-600 mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <p className="text-sm font-semibold text-purple-800">This product is too early to return</p>
+                                    <p className="text-xs text-purple-700 mt-0.5">
+                                        It will be shelved in the Wine Cellar. Return window opens:{' '}
+                                        <span className="font-semibold">{preCheckResult.expectedReturnableDate}</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                <Button
+                                    variant="primary"
+                                    onClick={() => handleSave(true)}
+                                    disabled={isItemActionLoading}
+                                >
+                                    {isItemActionLoading
+                                        ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Moving...</>
+                                        : <><Archive className="w-4 h-4 mr-1" />Move to Wine Cellar</>
+                                    }
+                                </Button>
+                                <Button variant="outline" onClick={handleClearForm}>
+                                    <X className="w-4 h-4 mr-1" /> Cancel
+                                </Button>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="flex flex-wrap gap-2">
+                            <Button
+                                variant="primary"
+                                onClick={() => handleSave()}
+                                disabled={isItemActionLoading || isPreChecking || (!form.ndc && !form.proprietaryName)}
+                            >
+                                {isItemActionLoading || isPreChecking ? (
+                                    <><Loader2 className="w-4 h-4 animate-spin mr-1" />{isPreChecking ? 'Checking...' : 'Saving...'}</>
+                                ) : (
+                                    <><CheckCircle className="w-4 h-4 mr-1" />Save &amp; Scan Next</>
+                                )}
+                            </Button>
+                            <Button variant="outline" onClick={handleClearForm}>
+                                <RotateCcw className="w-4 h-4 mr-1" /> Clear Form
+                            </Button>
+                            <Button variant="ghost" onClick={() => router.push(`/warehouse/returns/${transactionId}`)}>
+                                <X className="w-4 h-4 mr-1" /> Cancel
+                            </Button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
