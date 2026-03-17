@@ -1,0 +1,41 @@
+# ============================================================
+# FCR Email Integration Configuration Template
+# Copy this to .env and fill in your actual values
+# ============================================================
+
+# Resend API Configuration
+RESEND_API_KEY=re_your_api_key_here
+
+# Email Configuration
+FROM_EMAIL=ra-requests@your-domain.com
+REPLY_TO_EMAIL=support@your-domain.com
+
+# Contact Information (used in email templates)
+CONTACT_NAME=Returns Department
+CONTACT_EMAIL=returns@your-domain.com
+CONTACT_PHONE=(555) 123-4567
+
+# Webhook Configuration (optional)
+RESEND_WEBHOOK_SECRET=your_webhook_secret_here
+
+# Supabase Configuration (should already be set)
+SUPABASE_URL=your_supabase_url
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+# ============================================================
+# Instructions:
+# 
+# 1. Create a Resend account at https://resend.com
+# 2. Verify your domain in Resend dashboard
+# 3. Generate an API key in Resend dashboard
+# 4. Update FROM_EMAIL to use your verified domain
+# 5. Set REPLY_TO_EMAIL to your support email
+# 6. Update contact information for email templates
+# 7. Add these variables to your Supabase Edge Functions secrets:
+#    supabase secrets set RESEND_API_KEY=your_key_here
+#    supabase secrets set FROM_EMAIL=ra-requests@your-domain.com
+#    supabase secrets set REPLY_TO_EMAIL=support@your-domain.com
+#    supabase secrets set CONTACT_NAME="Returns Department"
+#    supabase secrets set CONTACT_EMAIL=returns@your-domain.com
+#    supabase secrets set CONTACT_PHONE="(555) 123-4567"
+# ============================================================

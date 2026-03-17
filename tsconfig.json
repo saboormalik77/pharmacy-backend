@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "commonjs",
-    "lib": ["ES2020"],
+    "lib": ["ES2020", "DOM"],
     "outDir": "./dist",
     "strict": true,
     "esModuleInterop": true,
@@ -12,7 +12,9 @@
     "moduleResolution": "node",
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "jsx": "react-jsx",
+    "allowSyntheticDefaultImports": true
   },
   "include": ["src/**/*", "scripts/**/*", "api/**/*"],
   "exclude": ["node_modules", "dist"],

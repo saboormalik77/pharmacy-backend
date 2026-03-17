@@ -661,10 +661,10 @@ BEGIN
   -- Pharmacy info
   SELECT pharmacy_name,
     CONCAT_WS(', ',
-      NULLIF(TRIM(address->>'street'), ''),
-      NULLIF(TRIM(address->>'city'), ''),
-      NULLIF(TRIM(address->>'state'), ''),
-      NULLIF(TRIM(address->>'zip'), '')
+      NULLIF(TRIM(physical_address->>'street'), ''),
+      NULLIF(TRIM(physical_address->>'city'), ''),
+      NULLIF(TRIM(physical_address->>'state'), ''),
+      NULLIF(TRIM(physical_address->>'zip'), '')
     )
   INTO v_pharm_name, v_pharm_addr
   FROM pharmacy WHERE id = v_memo.pharmacy_id;

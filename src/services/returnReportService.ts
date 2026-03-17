@@ -85,7 +85,7 @@ const submitDocumentToAzure = async (pdfBuffer: Buffer): Promise<string> => {
       'Content-Type': 'application/pdf',
       'Ocp-Apim-Subscription-Key': AZURE_DOCUMENT_API_KEY,
     },
-    body: pdfBuffer
+    body: pdfBuffer as any
   });
 
   if (!response.ok) {
