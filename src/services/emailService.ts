@@ -1,21 +1,10 @@
-import { Resend } from 'resend';
-
-// Resend configuration (Supabase's recommended email service)
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const EMAIL_FROM = process.env.EMAIL_FROM || 'Pharma Collect <noreply@pharmadmin.com>';
-
-// Initialize Resend client
-let resend: Resend | null = null;
-
-if (RESEND_API_KEY) {
-  resend = new Resend(RESEND_API_KEY);
-}
+import { sendMail, isSmtpConfigured } from './nodemailerService';
 
 /**
  * Check if email service is configured
  */
 export const isEmailConfigured = (): boolean => {
-  return !!RESEND_API_KEY;
+  return isSmtpConfigured();
 };
 
 interface SendEmailOptions {
@@ -26,40 +15,23 @@ interface SendEmailOptions {
 }
 
 /**
- * Send an email using Resend (Supabase's recommended email service)
+ * Send an email using Nodemailer (SMTP)
  */
 export const sendEmail = async (options: SendEmailOptions): Promise<boolean> => {
-  if (!resend) {
-    console.error('[EmailService] Cannot send email - RESEND_API_KEY not configured');
+  if (!isSmtpConfigured()) {
+    console.error('[EmailService] Cannot send email - SMTP not configured');
     return false;
   }
 
   try {
-    // Build the email payload with proper types
-    const emailPayload: {
-      from: string;
-      to: string;
-      subject: string;
-      text?: string;
-      html?: string;
-    } = {
-      from: EMAIL_FROM,
+    const result = await sendMail({
       to: options.to,
       subject: options.subject,
-    };
+      html: options.html || options.text || '',
+      text: options.text,
+    });
 
-    // Add text and html if provided
-    if (options.text) emailPayload.text = options.text;
-    if (options.html) emailPayload.html = options.html;
-
-    const { data, error } = await resend.emails.send(emailPayload as any);
-
-    if (error) {
-      console.error('[EmailService] Resend error:', error);
-      return false;
-    }
-
-    console.log(`[EmailService] Email sent successfully to ${options.to}, ID: ${data?.id}`);
+    console.log(`[EmailService] Email sent to ${options.to}, messageId: ${result.messageId}`);
     return true;
   } catch (error) {
     console.error('[EmailService] Failed to send email:', error);
@@ -88,7 +60,7 @@ export const sendAdminPasswordResetEmail = async (
     <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f4f4f4;">
       <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-          <h1 style="color: white; margin: 0; font-size: 28px;">🔐 Password Reset</h1>
+          <h1 style="color: white; margin: 0; font-size: 28px;">Password Reset</h1>
         </div>
         
         <div style="background-color: white; padding: 40px; border-radius: 0 0 10px 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
@@ -114,14 +86,14 @@ export const sendAdminPasswordResetEmail = async (
           <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
           
           <p style="color: #999; font-size: 13px;">
-            ⏰ This link will expire in <strong>1 hour</strong>.
+            This link will expire in <strong>1 hour</strong>.
             <br><br>
             If you didn't request this password reset, please ignore this email or contact support if you have concerns.
           </p>
         </div>
         
         <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
-          <p>© ${new Date().getFullYear()} Pharma Collect. All rights reserved.</p>
+          <p>&copy; ${new Date().getFullYear()} Pharma Collect. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -172,7 +144,7 @@ export const sendPharmacyPasswordResetEmail = async (
     <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f4f4f4;">
       <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-          <h1 style="color: white; margin: 0; font-size: 28px;">🔐 Password Reset</h1>
+          <h1 style="color: white; margin: 0; font-size: 28px;">Password Reset</h1>
         </div>
         
         <div style="background-color: white; padding: 40px; border-radius: 0 0 10px 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
@@ -198,14 +170,14 @@ export const sendPharmacyPasswordResetEmail = async (
           <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
           
           <p style="color: #999; font-size: 13px;">
-            ⏰ This link will expire in <strong>1 hour</strong>.
+            This link will expire in <strong>1 hour</strong>.
             <br><br>
             If you didn't request this password reset, please ignore this email or contact support if you have concerns.
           </p>
         </div>
         
         <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
-          <p>© ${new Date().getFullYear()} Pharma Collect. All rights reserved.</p>
+          <p>&copy; ${new Date().getFullYear()} Pharma Collect. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -237,7 +209,6 @@ If you didn't request this password reset, please ignore this email.
 
 /**
  * Send inventory reminder email
- * Used for monthly follow-ups when pharmacy still has products to return
  */
 export const sendInventoryReminderEmail = async (
   email: string,
@@ -252,7 +223,7 @@ export const sendInventoryReminderEmail = async (
   }>,
   dashboardLink: string
 ): Promise<boolean> => {
-  const subject = `💰 Inventory Reminder: $${totalPotentialValue.toFixed(2)} in Potential Returns - Pharma Collect`;
+  const subject = `Inventory Reminder: $${totalPotentialValue.toFixed(2)} in Potential Returns - Pharma Collect`;
 
   const itemsHtml = topItems.slice(0, 5).map(item => `
     <tr>
@@ -277,7 +248,7 @@ export const sendInventoryReminderEmail = async (
     <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f4f7fa;">
       <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 35px 30px; text-align: center; border-radius: 12px 12px 0 0;">
-          <h1 style="color: white; margin: 0; font-size: 26px;">💊 Inventory Reminder</h1>
+          <h1 style="color: white; margin: 0; font-size: 26px;">Inventory Reminder</h1>
           <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">You still have products that could be returned!</p>
         </div>
         <div style="background-color: white; padding: 35px; border-radius: 0 0 12px 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
@@ -287,7 +258,7 @@ export const sendInventoryReminderEmail = async (
             <p style="margin: 0; color: #166534; font-size: 14px; text-transform: uppercase;">Total Potential Value</p>
             <p style="margin: 8px 0 0 0; color: #059669; font-size: 42px; font-weight: bold;">$${totalPotentialValue.toFixed(2)}</p>
           </div>
-          <p style="color: #333;"><strong>🔝 Top Products to Return:</strong></p>
+          <p style="color: #333;"><strong>Top Products to Return:</strong></p>
           <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
             <thead><tr style="background-color: #f8fafc;">
               <th style="padding: 12px; text-align: left; color: #64748b; font-size: 12px;">Product</th>
@@ -297,15 +268,15 @@ export const sendInventoryReminderEmail = async (
           </table>
           <div style="text-align: center; margin: 30px 0;">
             <a href="${dashboardLink}" style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 16px 45px; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: bold;">
-              View All Recommendations →
+              View All Recommendations
             </a>
           </div>
           <div style="background-color: #fefce8; border-left: 4px solid #eab308; padding: 15px; margin-bottom: 20px;">
-            <p style="margin: 0; color: #854d0e; font-size: 14px;"><strong>💡 Pro Tip:</strong> Return products before they expire to maximize your return value.</p>
+            <p style="margin: 0; color: #854d0e; font-size: 14px;"><strong>Pro Tip:</strong> Return products before they expire to maximize your return value.</p>
           </div>
         </div>
         <div style="text-align: center; padding: 25px; color: #999; font-size: 12px;">
-          <p>© ${new Date().getFullYear()} Pharma Collect. All rights reserved.</p>
+          <p>&copy; ${new Date().getFullYear()} Pharma Collect. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -313,7 +284,7 @@ export const sendInventoryReminderEmail = async (
   `;
 
   const itemsText = topItems.slice(0, 5).map(item => 
-    `• ${item.productName || 'Unknown'} (${item.ndcCode}): $${item.estimatedValue.toFixed(2)}`
+    `- ${item.productName || 'Unknown'} (${item.ndcCode}): $${item.estimatedValue.toFixed(2)}`
   ).join('\n');
 
   const text = `
@@ -330,7 +301,7 @@ ${itemsText}
 
 View recommendations: ${dashboardLink}
 
-© ${new Date().getFullYear()} Pharma Collect
+© ${new Date().getFullYear()} Pharma Collect. All rights reserved.
   `;
 
   return sendEmail({ to: email, subject, html, text });
@@ -338,7 +309,6 @@ View recommendations: ${dashboardLink}
 
 /**
  * Send expiration warning email
- * Used when products are close to expiration date
  */
 export const sendExpirationWarningEmail = async (
   email: string,
@@ -352,7 +322,7 @@ export const sendExpirationWarningEmail = async (
   dashboardLink: string
 ): Promise<boolean> => {
   const totalValue = expiringItems.reduce((sum, item) => sum + item.estimatedValue, 0);
-  const subject = `⚠️ ${expiringItems.length} Products Expiring Soon - Return Before They Lose Value`;
+  const subject = `${expiringItems.length} Products Expiring Soon - Return Before They Lose Value`;
 
   const itemsHtml = expiringItems.slice(0, 10).map(item => `
     <tr>
@@ -376,14 +346,14 @@ export const sendExpirationWarningEmail = async (
     <body style="font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background-color: #f4f7fa;">
       <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding: 35px; text-align: center; border-radius: 12px 12px 0 0;">
-          <h1 style="color: white; margin: 0; font-size: 26px;">⚠️ Expiration Warning</h1>
+          <h1 style="color: white; margin: 0; font-size: 26px;">Expiration Warning</h1>
           <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">Act now before these products lose value!</p>
         </div>
         <div style="background-color: white; padding: 35px; border-radius: 0 0 12px 12px;">
           <p style="color: #333;">Hi <strong>${pharmacyName}</strong>,</p>
           <p style="color: #555;"><strong style="color: #dc2626;">${expiringItems.length} products</strong> are expiring soon! Return them now for <strong style="color: #10b981;">$${totalValue.toFixed(2)}</strong>.</p>
           <div style="background: #fef2f2; border: 2px solid #fecaca; padding: 20px; margin: 25px 0; border-radius: 12px;">
-            <p style="margin: 0; color: #991b1b;"><strong>⏰ Time is running out!</strong> Expired products cannot be returned for credit.</p>
+            <p style="margin: 0; color: #991b1b;"><strong>Time is running out!</strong> Expired products cannot be returned for credit.</p>
           </div>
           <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
             <thead><tr style="background-color: #fef2f2;">
@@ -395,19 +365,19 @@ export const sendExpirationWarningEmail = async (
           </table>
           <div style="text-align: center; margin: 30px 0;">
             <a href="${dashboardLink}" style="display: inline-block; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 16px 45px; text-decoration: none; border-radius: 8px; font-weight: bold;">
-              Return These Products Now →
+              Return These Products Now
             </a>
           </div>
         </div>
         <div style="text-align: center; padding: 25px; color: #999; font-size: 12px;">
-          <p>© ${new Date().getFullYear()} Pharma Collect</p>
+          <p>&copy; ${new Date().getFullYear()} Pharma Collect</p>
         </div>
       </div>
     </body>
     </html>
   `;
 
-  const text = `⚠️ Expiration Warning\n\n${expiringItems.length} products expiring soon.\nTotal value: $${totalValue.toFixed(2)}\n\nTake action: ${dashboardLink}`;
+  const text = `Expiration Warning\n\n${expiringItems.length} products expiring soon.\nTotal value: $${totalValue.toFixed(2)}\n\nTake action: ${dashboardLink}`;
 
   return sendEmail({ to: email, subject, html, text });
 };

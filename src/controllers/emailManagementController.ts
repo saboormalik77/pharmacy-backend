@@ -129,7 +129,7 @@ export const getEmailHealthHandler = catchAsync(
 
 // ============================================================
 // POST /api/admin/emails/test
-// Sends via Resend from Node (no Edge Function required)
+// Sends a test email via Supabase Edge Function
 // ============================================================
 export const sendTestEmailHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
@@ -139,18 +139,69 @@ export const sendTestEmailHandler = catchAsync(
       throw new AppError('Recipient email is required', 400);
     }
 
-    const { sendRaTestEmailFromNode } = await import('../services/resendRaEmailService');
+    const { supabaseAdmin } = await import('../config/supabase');
+    
+    if (!supabaseAdmin) {
+      throw new AppError('Supabase admin client not configured', 500);
+    }
 
-    const result = await sendRaTestEmailFromNode({
-      to,
-      templateType: templateType === 'ra-reminder' ? 'ra-reminder' : 'ra-request',
+    // Prepare test data
+    const testData = templateType === 'ra-reminder' ? {
+      memoNumber: 'TEST-001',
+      pharmacyName: 'Test Pharmacy',
+      requestCount: 2,
+      daysSinceRequest: 14,
+      originalDate: new Date(Date.now() - 14 * 86400000).toISOString(),
+      destination: 'Test Destination',
+      labelerName: 'Test Manufacturer',
+      totalItems: 3,
+      totalAskValue: 1250.0,
+      items: [
+        { ndc: '12345-678-90', productName: 'Test Product A', quantity: 2, askPrice: 500.0, lotNumber: 'LOT123', expirationDate: '12/2026' },
+        { ndc: '98765-432-10', productName: 'Test Product B', quantity: 1, askPrice: 750.0, lotNumber: 'LOT456', expirationDate: '06/2027' },
+      ],
+    } : {
+      memoNumber: 'TEST-001',
+      pharmacyName: 'Test Pharmacy',
+      destination: 'Test Destination',
+      labelerName: 'Test Manufacturer',
+      totalItems: 3,
+      totalAskValue: 1250.0,
+      items: [
+        { ndc: '12345-678-90', productName: 'Test Product A', quantity: 2, askPrice: 500.0, lotNumber: 'LOT123', expirationDate: '12/2026' },
+        { ndc: '98765-432-10', productName: 'Test Product B', quantity: 1, askPrice: 750.0, lotNumber: 'LOT456', expirationDate: '06/2027' },
+      ],
+    };
+
+    const contactInfo = {
+      name: process.env.CONTACT_NAME || 'Returns Department',
+      email: process.env.CONTACT_EMAIL || 'returns@fcr-system.com',
+      phone: process.env.CONTACT_PHONE || '+1-555-0123',
+    };
+
+    const { data, error } = await supabaseAdmin.functions.invoke('send-email', {
+      body: {
+        to,
+        templateType,
+        templateData: testData,
+        recipientName: 'Test Recipient',
+        contactInfo
+      }
     });
+
+    if (error) {
+      throw new AppError(`Failed to send test email via Edge Function: ${error.message}`, 500);
+    }
+
+    if (!data?.success) {
+      throw new AppError(`Test email failed: ${data?.error || 'Unknown error'}`, 500);
+    }
 
     res.status(200).json({
       status: 'success',
-      message: `Test ${templateType} email sent successfully`,
+      message: `Test ${templateType} email sent successfully via Edge Function`,
       data: {
-        emailId: result.emailId,
+        messageId: data.messageId,
         recipient: to,
         templateType,
       },

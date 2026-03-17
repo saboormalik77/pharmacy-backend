@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '../config/supabase';
 import { AppError } from '../utils/appError';
+import type { RARequestData, RAReminderData } from './nodemailerService';
 
 function ensureAdmin() {
   if (!supabaseAdmin) throw new AppError('Supabase admin client not configured', 500);
@@ -29,7 +30,6 @@ export interface RARequest {
   sentAt: string;
   errorMessage: string | null;
   createdAt: string;
-  /** Resend API email id, set after sending via Resend */
   resend_email_id?: string | null;
 }
 
@@ -67,76 +67,39 @@ export interface RATrackingSummary {
 }
 
 // ============================================================
-// Email sending functionality
+// Edge Function Email Sending
 // ============================================================
 
-export const sendRAEmail = async (emailData: RAEmailTemplate): Promise<any> => {
-  const sb = ensureAdmin();
-  
-  const { data, error } = await sb.functions.invoke('send-ra-email', {
-    body: {
-      to: emailData.to,
-      subject: emailData.subject,
-      html: emailData.body,
-      memoNumber: emailData.memoNumber
-    }
-  });
-  
-  if (error) throw new AppError(`Failed to send RA email: ${error.message}`, 500);
-  if (!data?.success) throw new AppError(`Email sending failed: ${data?.error || 'Unknown error'}`, 500);
-  
-  return data;
-};
-
-export const sendEnhancedRAEmail = async (
+async function sendEmailViaEdgeFunction(
   templateType: 'ra-request' | 'ra-reminder',
-  templateData: any,
+  templateData: RARequestData | RAReminderData,
   recipient: { to: string; name?: string },
   contactInfo?: { name?: string; email?: string; phone?: string }
-): Promise<any> => {
+): Promise<{ messageId: string }> {
   const sb = ensureAdmin();
-  
-  try {
-    // Try Edge Function first
-    const { data, error } = await sb.functions.invoke('send-ra-email-enhanced', {
-      body: {
-        templateType,
-        templateData,
-        recipient,
-        contactInfo
-      }
-    });
-    
-    if (error) {
-      console.warn('Edge Function failed, falling back to direct Resend API:', error.message);
-      throw new Error('Edge Function failed');
+
+  const { data, error } = await sb.functions.invoke('send-email', {
+    body: {
+      to: recipient.to,
+      templateType,
+      templateData,
+      recipientName: recipient.name,
+      contactInfo
     }
-    
-    if (!data?.success) {
-      console.warn('Edge Function returned error, falling back to direct Resend API:', data?.error);
-      throw new Error('Edge Function returned error');
-    }
-    
-    return data;
-  } catch (edgeFunctionError: any) {
-    console.log('Falling back to direct Resend API due to Edge Function error:', edgeFunctionError.message);
-    
-    // Fallback: Use direct Resend API
-    try {
-      const { sendDirectRAEmail } = await import('./resendRaEmailService');
-      const result = await sendDirectRAEmail(templateType, templateData, recipient, contactInfo);
-      
-      console.log('Successfully sent email via direct Resend API fallback');
-      return {
-        success: true,
-        emailId: result.emailId,
-        message: 'Email sent via direct API (Edge Function unavailable)'
-      };
-    } catch (fallbackError: any) {
-      throw new AppError(`Both Edge Function and direct API failed: ${fallbackError.message}`, 500);
-    }
+  });
+
+  if (error) {
+    console.error('Edge Function error:', error);
+    throw new AppError(`Failed to send email via Edge Function: ${error.message}`, 500);
   }
-};
+
+  if (!data?.success) {
+    console.error('Edge Function returned error:', data?.error);
+    throw new AppError(`Email sending failed: ${data?.error || 'Unknown error'}`, 500);
+  }
+
+  return { messageId: data.messageId };
+}
 
 // ============================================================
 // RA Request operations
@@ -148,18 +111,16 @@ export const sendRARequest = async (
   emailOverride?: string
 ): Promise<{ memo: any; request: RARequest }> => {
   const sb = ensureAdmin();
-  
-  // First, generate the RA request and get the email template
+
   const { data, error } = await sb.rpc('ra_send_request', {
     p_debit_memo_id: debitMemoId,
     p_sent_by: sentBy || null,
     p_email_override: emailOverride || null,
   });
   handleRpcError(data, error, 'Failed to create RA request');
-  
+
   const result = data.data as { memo: any; request: RARequest };
-  
-  // Generate email template
+
   let emailTemplate: RAEmailTemplate;
   try {
     emailTemplate = await generateRequestEmail(debitMemoId, emailOverride);
@@ -167,63 +128,59 @@ export const sendRARequest = async (
     console.error('Failed to generate email template:', templateError.message);
     throw new AppError(`Failed to generate email template: ${templateError.message}`, 500);
   }
-  
-  // Send the enhanced email
+
   try {
     const contactInfo = {
       name: process.env.CONTACT_NAME || 'Returns Department',
       email: process.env.CONTACT_EMAIL || 'returns@fcr-system.com',
-      phone: process.env.CONTACT_PHONE || undefined
+      phone: process.env.CONTACT_PHONE || undefined,
     };
 
-    const enhancedTemplateData = {
+    const raData: RARequestData = {
       memoNumber: emailTemplate.memoNumber,
       pharmacyName: emailTemplate.pharmacyName,
       destination: emailTemplate.destination,
       labelerName: emailTemplate.labelerName,
       totalItems: emailTemplate.totalItems,
       totalAskValue: emailTemplate.totalAskValue,
-      items: emailTemplate.items || []
+      items: emailTemplate.items || [],
     };
 
-    console.log(`Attempting to send RA email for memo ${emailTemplate.memoNumber} to ${emailTemplate.to}`);
+    console.log(
+      `Sending RA email (Edge Function) for memo ${raData.memoNumber} to ${emailTemplate.to}`
+    );
 
-    const emailResult = await sendEnhancedRAEmail(
+    const mailResult = await sendEmailViaEdgeFunction(
       'ra-request',
-      enhancedTemplateData,
+      raData,
       { to: emailTemplate.to!, name: emailTemplate.toName || undefined },
       contactInfo
     );
-    
-    console.log(`Enhanced RA email sent successfully for memo ${result.memo.memoNumber}: ${emailResult.emailId}`);
-    
-    // Update request status to 'sent'
+
+    console.log(`RA email sent via Edge Function: messageId=${mailResult.messageId}`);
+
     await sb.rpc('ra_update_request_status', {
       p_request_id: result.request.id,
       p_status: 'sent',
-      p_resend_email_id: emailResult.emailId
+      p_resend_email_id: mailResult.messageId,
     });
-    
-    // Update the request object with sent status
+
     result.request.status = 'sent';
-    
   } catch (emailError: any) {
-    console.error('Failed to send enhanced RA email:', emailError.message);
-    
-    // Update request status to 'failed'
+    console.error('Failed to send RA email:', emailError.message);
+
     await sb.rpc('ra_update_request_status', {
       p_request_id: result.request.id,
       p_status: 'failed',
-      p_error_message: emailError.message
+      p_error_message: emailError.message,
     });
-    
-    // Update the request object with failed status
+
     result.request.status = 'failed';
     result.request.errorMessage = emailError.message;
-    
+
     throw emailError;
   }
-  
+
   return result;
 };
 
@@ -248,81 +205,110 @@ export const resendRARequest = async (
   emailOverride?: string
 ): Promise<{ memo: any; request: RARequest }> => {
   const sb = ensureAdmin();
-  
-  // Create resend request record
+
   const { data, error } = await sb.rpc('ra_resend_request', {
     p_debit_memo_id: debitMemoId,
     p_sent_by: sentBy || null,
     p_email_override: emailOverride || null,
   });
   handleRpcError(data, error, 'Failed to create RA resend request');
-  
+
   const result = data.data as { memo: any; request: RARequest };
-  
-  // Generate reminder email template
+
   let reminderTemplate: RAReminderTemplate;
   try {
     reminderTemplate = await generateReminderEmail(debitMemoId, emailOverride);
   } catch (templateError: any) {
     console.error('Failed to generate reminder email template:', templateError.message);
-    throw new AppError(`Failed to generate reminder email template: ${templateError.message}`, 500);
+    throw new AppError(
+      `Failed to generate reminder email template: ${templateError.message}`,
+      500
+    );
   }
-  
-  // Send the enhanced reminder email
+
   try {
     const contactInfo = {
       name: process.env.CONTACT_NAME || 'Returns Department',
       email: process.env.CONTACT_EMAIL || 'returns@fcr-system.com',
-      phone: process.env.CONTACT_PHONE || undefined
+      phone: process.env.CONTACT_PHONE || undefined,
     };
 
-    // Calculate days since original request
-    const daysSinceRequest = reminderTemplate.originalDate 
-      ? Math.floor((Date.now() - new Date(reminderTemplate.originalDate).getTime()) / (1000 * 60 * 60 * 24))
-      : 14; // Default to 14 days if no original date
+    const daysSinceRequest = reminderTemplate.originalDate
+      ? Math.floor(
+          (Date.now() - new Date(reminderTemplate.originalDate).getTime()) / (1000 * 60 * 60 * 24)
+        )
+      : 14;
 
-    const enhancedReminderData = {
+    // Get complete memo data for enhanced reminder
+    let requestEmailTemplate: RAEmailTemplate;
+    try {
+      requestEmailTemplate = await generateRequestEmail(debitMemoId, emailOverride);
+    } catch (error) {
+      console.warn('Could not fetch complete memo data for reminder, using basic data:', error);
+      requestEmailTemplate = {
+        to: reminderTemplate.to,
+        toName: reminderTemplate.toName,
+        subject: '',
+        body: '',
+        memoNumber: reminderTemplate.memoNumber,
+        pharmacyName: reminderTemplate.pharmacyName,
+        destination: null,
+        labelerName: null,
+        totalItems: 0,
+        totalAskValue: 0,
+        items: []
+      };
+    }
+
+    const reminderData: RAReminderData = {
       memoNumber: reminderTemplate.memoNumber,
       pharmacyName: reminderTemplate.pharmacyName,
       requestCount: reminderTemplate.requestCount,
+      daysSinceRequest,
       originalDate: reminderTemplate.originalDate,
-      daysSinceRequest
+      // Enhanced data from original request
+      destination: requestEmailTemplate.destination,
+      labelerName: requestEmailTemplate.labelerName,
+      totalItems: requestEmailTemplate.totalItems,
+      totalAskValue: requestEmailTemplate.totalAskValue,
+      items: requestEmailTemplate.items || [],
     };
 
-    const emailResult = await sendEnhancedRAEmail(
+    console.log(
+      `Sending RA reminder (Edge Function) for memo ${reminderData.memoNumber} to ${reminderTemplate.to}`
+    );
+
+    const mailResult = await sendEmailViaEdgeFunction(
       'ra-reminder',
-      enhancedReminderData,
+      reminderData,
       { to: reminderTemplate.to!, name: reminderTemplate.toName || undefined },
       contactInfo
     );
-    
-    console.log(`Enhanced RA reminder email sent successfully for memo ${result.memo.memoNumber}: ${emailResult.emailId}`);
-    
-    // Update request status to 'sent'
+
+    console.log(`RA reminder sent via Edge Function: messageId=${mailResult.messageId}`);
+
     await sb.rpc('ra_update_request_status', {
       p_request_id: result.request.id,
       p_status: 'sent',
-      p_resend_email_id: emailResult.emailId
+      p_resend_email_id: mailResult.messageId,
     });
-    
+
     result.request.status = 'sent';
-    
   } catch (emailError: any) {
-    console.error('Failed to send enhanced RA reminder email:', emailError.message);
-    
-    // Update request status to 'failed'
+    console.error('Failed to send RA reminder email:', emailError.message);
+
     await sb.rpc('ra_update_request_status', {
       p_request_id: result.request.id,
       p_status: 'failed',
-      p_error_message: emailError.message
+      p_error_message: emailError.message,
     });
-    
+
     result.request.status = 'failed';
     result.request.errorMessage = emailError.message;
-    
+
     throw emailError;
   }
-  
+
   return result;
 };
 
@@ -422,7 +408,7 @@ export const listOutboundShipments = async (
 };
 
 // ============================================================
-// Email templates
+// Email templates (RPC-generated)
 // ============================================================
 
 export const generateRequestEmail = async (
