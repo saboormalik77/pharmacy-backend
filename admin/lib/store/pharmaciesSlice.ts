@@ -20,6 +20,9 @@ export interface PharmaciesState {
   };
   isLoading: boolean;
   error: string | null;
+  pendingInvites: any[];
+  invitesLoading: boolean;
+  invitesError: string | null;
 }
 
 const initialState: PharmaciesState = {
@@ -31,6 +34,9 @@ const initialState: PharmaciesState = {
   },
   isLoading: false,
   error: null,
+  pendingInvites: [],
+  invitesLoading: false,
+  invitesError: null,
 };
 
 export interface FetchPharmaciesParams {
@@ -104,6 +110,58 @@ export const updatePharmacy = createAsyncThunk(
     } catch (error: any) {
       const errorMessage = error?.message || 'An error occurred while updating pharmacy';
       return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// Async thunk for creating a pharmacy (admin-initiated)
+export const createPharmacy = createAsyncThunk(
+  'pharmacies/create',
+  async (payload: Record<string, any>, { rejectWithValue }) => {
+    try {
+      const { apiClient } = await import('@/lib/api/apiClient');
+      const response = await apiClient.post<{ status: string; data: any; message: string }>(
+        '/admin/pharmacies',
+        payload,
+        true
+      );
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error?.message || 'Failed to create pharmacy');
+    }
+  }
+);
+
+// Async thunk for fetching pending invites
+export const fetchPendingInvites = createAsyncThunk(
+  'pharmacies/fetchPendingInvites',
+  async (_, { rejectWithValue }) => {
+    try {
+      const { apiClient } = await import('@/lib/api/apiClient');
+      const response = await apiClient.get<{ status: string; data: { invites: any[] } }>(
+        '/admin/pharmacies/invites',
+        true
+      );
+      return response.data.invites;
+    } catch (error: any) {
+      return rejectWithValue(error?.message || 'Failed to fetch pending invites');
+    }
+  }
+);
+
+// Async thunk for canceling an invite
+export const cancelInvite = createAsyncThunk(
+  'pharmacies/cancelInvite',
+  async (inviteId: string, { rejectWithValue }) => {
+    try {
+      const { apiClient } = await import('@/lib/api/apiClient');
+      const response = await apiClient.delete<{ status: string; message: string }>(
+        `/admin/pharmacies/invites/${inviteId}`,
+        true
+      );
+      return { inviteId, message: response.message };
+    } catch (error: any) {
+      return rejectWithValue(error?.message || 'Failed to cancel invite');
     }
   }
 );
@@ -198,6 +256,38 @@ const pharmaciesSlice = createSlice({
       .addCase(updatePharmacyStatus.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
+      });
+
+    // Fetch pending invites
+    builder
+      .addCase(fetchPendingInvites.pending, (state) => {
+        state.invitesLoading = true;
+        state.invitesError = null;
+      })
+      .addCase(fetchPendingInvites.fulfilled, (state, action) => {
+        state.invitesLoading = false;
+        state.pendingInvites = action.payload;
+        state.invitesError = null;
+      })
+      .addCase(fetchPendingInvites.rejected, (state, action) => {
+        state.invitesLoading = false;
+        state.invitesError = action.payload as string;
+      });
+
+    // Cancel invite
+    builder
+      .addCase(cancelInvite.pending, (state) => {
+        state.invitesLoading = true;
+        state.invitesError = null;
+      })
+      .addCase(cancelInvite.fulfilled, (state, action) => {
+        state.invitesLoading = false;
+        state.pendingInvites = state.pendingInvites.filter(invite => invite.id !== action.payload.inviteId);
+        state.invitesError = null;
+      })
+      .addCase(cancelInvite.rejected, (state, action) => {
+        state.invitesLoading = false;
+        state.invitesError = action.payload as string;
       });
   },
 });

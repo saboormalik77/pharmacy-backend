@@ -1,5 +1,5 @@
 import express from 'express';
-import { signupHandler, signinHandler, refreshTokenHandler, logoutHandler, logoutAllHandler, forgotPasswordHandler, resetPasswordHandler, verifyResetTokenHandler } from '../controllers/authController';
+import { signupHandler, signinHandler, refreshTokenHandler, logoutHandler, logoutAllHandler, forgotPasswordHandler, resetPasswordHandler, verifyResetTokenHandler, verifyInviteHandler, completeSetupHandler } from '../controllers/authController';
 import { loginHandler, adminForgotPasswordHandler, adminVerifyResetTokenHandler, adminResetPasswordHandler } from '../controllers/adminController';
 import { authenticate } from '../middleware/auth';
 
@@ -500,6 +500,12 @@ router.post('/reset-password', resetPasswordHandler);
  *                       example: pharmacy@example.com
  */
 router.post('/verify-reset-token', verifyResetTokenHandler);
+
+// ============================================================
+// Pharmacy Invite / Setup Routes (public — no auth required)
+// ============================================================
+router.post('/verify-invite', verifyInviteHandler);
+router.post('/complete-setup', completeSetupHandler);
 
 // ============================================================
 // Admin Password Reset Routes

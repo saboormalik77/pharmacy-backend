@@ -6,6 +6,9 @@ import {
   updatePharmacyStatusHandler,
   getPharmacyStoreSettingsHandler,
   updatePharmacyStoreSettingsHandler,
+  createPharmacyHandler,
+  getPendingInvitesHandler,
+  cancelInviteHandler,
 } from '../controllers/adminPharmaciesController';
 import { authenticateAdmin } from '../middleware/adminAuth';
 
@@ -147,6 +150,9 @@ router.use(authenticateAdmin);
  *         description: Unauthorized - invalid or missing token
  */
 router.get('/', getPharmaciesHandler);
+router.post('/', createPharmacyHandler);
+router.get('/invites', getPendingInvitesHandler);
+router.delete('/invites/:id', cancelInviteHandler);
 
 /**
  * @swagger

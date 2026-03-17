@@ -1168,7 +1168,7 @@ export default function SettingsPage() {
                     </div>
 
                     {/* Assigned Staff (Read-Only) */}
-                    {(storeSettings.assignedProcessorName || storeSettings.assignedProcessorId) && (
+                    {(storeSettings.assignedProcessorName || storeSettings.assignedProcessorId || storeSettings.assignedSalesPersonId) && (
                       <div className="pt-3 border-t-2 border-indigo-200">
                         <div className="flex items-center gap-2 mb-3">
                           <User className="h-4 w-4 text-indigo-600" />
@@ -1179,6 +1179,14 @@ export default function SettingsPage() {
                             <label className="block text-xs font-bold text-gray-900 mb-1">Assigned Processor</label>
                             <Input
                               value={storeSettings.assignedProcessorName || 'Not assigned'}
+                              disabled
+                              className="text-xs h-7 bg-gray-50"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-gray-900 mb-1">Assigned Sales Person</label>
+                            <Input
+                              value={storeSettings.assignedSalesPersonId ? storeSettings.assignedSalesPersonId : 'Not assigned'}
                               disabled
                               className="text-xs h-7 bg-gray-50"
                             />

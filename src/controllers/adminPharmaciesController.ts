@@ -8,6 +8,9 @@ import {
   updatePharmacyStoreSettings,
 } from '../services/adminPharmaciesService';
 import { AppError } from '../utils/appError';
+import { supabaseAdmin } from '../config/supabase';
+
+const db = supabaseAdmin!;
 
 /**
  * Get list of pharmacies
@@ -323,6 +326,182 @@ export const updatePharmacyStoreSettingsHandler = async (
       status: 'success',
       message: 'Pharmacy store settings updated successfully',
       data: { storeSettings: settings },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Create a new pharmacy (admin-initiated)
+ * POST /api/admin/pharmacies
+ */
+export const createPharmacyHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const {
+      pharmacyName, email, contactName, phone, fax,
+      street, city, state, zip,
+      wholesaler, wholesalerAccount,
+      deaNumber, deaExpiration,
+      serviceType, daysBetweenVisits,
+      lastVisitDate, nextVisitDate,
+      processorId, salesPersonId,
+    } = req.body;
+
+    if (!pharmacyName || !email) {
+      throw new AppError('Pharmacy name and email are required', 400);
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw new AppError('Invalid email format', 400);
+    }
+
+    // Call the RPC function to create pharmacy + invite
+    const { data: rpcResult, error: rpcError } = await db.rpc('admin_create_pharmacy', {
+      p_pharmacy_name: pharmacyName,
+      p_email: email,
+      p_contact_name: contactName || null,
+      p_phone: phone || null,
+      p_fax: fax || null,
+      p_street: street || null,
+      p_city: city || null,
+      p_state: state || null,
+      p_zip: zip || null,
+      p_wholesaler: wholesaler || null,
+      p_wholesaler_account: wholesalerAccount || null,
+      p_dea_number: deaNumber || null,
+      p_dea_expiration: deaExpiration || null,
+      p_service_type: serviceType || 'full_service',
+      p_days_between_visits: daysBetweenVisits ? parseInt(daysBetweenVisits) : 120,
+      p_last_visit_date: lastVisitDate || null,
+      p_next_visit_date: nextVisitDate || null,
+      p_processor_id: processorId || null,
+      p_sales_person_id: salesPersonId || null,
+      p_created_by: (req as any).adminId || (req as any).user?.email || null,
+    });
+
+    if (rpcError) {
+      throw new AppError(rpcError.message || 'Failed to create pharmacy', 500);
+    }
+
+    if (rpcResult?.error) {
+      throw new AppError(rpcResult.message, rpcResult.code || 400);
+    }
+
+    const { inviteId, inviteToken, email: pharmacyEmail, pharmacyName: name } = rpcResult.data;
+
+    // Send invite email via Edge Function
+    const portalBaseUrl = process.env.PHARMACY_PORTAL_URL || 'http://localhost:3002';
+    try {
+      const { data: emailResult, error: emailError } = await db.functions.invoke('send-pharmacy-invite', {
+        body: {
+          to: pharmacyEmail,
+          pharmacyName: name,
+          contactName: contactName || name,
+          inviteToken,
+          portalBaseUrl,
+        },
+      });
+
+      if (emailError) {
+        console.error('Failed to send invite email:', emailError);
+      } else {
+        console.log(`✅ Invite email sent to ${pharmacyEmail}, messageId: ${emailResult?.messageId}`);
+      }
+    } catch (emailErr: any) {
+      console.error('Failed to send invite email:', emailErr.message);
+    }
+
+    res.status(201).json({
+      status: 'success',
+      message: 'Pharmacy created successfully. Invite email has been sent.',
+      data: {
+        inviteId,
+        email: pharmacyEmail,
+        pharmacyName: name,
+        inviteToken,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get pending pharmacy invites
+ * GET /api/admin/pharmacies/invites
+ */
+export const getPendingInvitesHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { data, error } = await db
+      .from('pharmacy_invites')
+      .select('id, email, pharmacy_name, contact_name, created_at, expires_at, created_by')
+      .eq('status', 'pending')
+      .gt('expires_at', new Date().toISOString())
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new AppError(error.message || 'Failed to fetch pending invites', 500);
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: { invites: data || [] },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Cancel a pending pharmacy invite
+ * DELETE /api/admin/pharmacies/invites/:id
+ */
+export const cancelInviteHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      throw new AppError('Invite ID is required', 400);
+    }
+
+    // Update the invite status to cancelled
+    const { data, error } = await db
+      .from('pharmacy_invites')
+      .update({ 
+        status: 'expired',
+        completed_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .eq('status', 'pending')
+      .select('email, pharmacy_name')
+      .single();
+
+    if (error) {
+      throw new AppError(error.message || 'Failed to cancel invite', 500);
+    }
+
+    if (!data) {
+      throw new AppError('Invite not found or already processed', 404);
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: `Invite for ${data.pharmacy_name} (${data.email}) has been cancelled`,
+      data: { cancelledInvite: data },
     });
   } catch (error) {
     next(error);

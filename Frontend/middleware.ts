@@ -36,7 +36,7 @@ const externalRedirectRoutes = [
 ]
 
 // Public routes that don't require authentication
-const publicRoutes = ['/login', '/register', '/']
+const publicRoutes = ['/login', '/register', '/', '/setup-account']
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -74,6 +74,11 @@ export function middleware(request: NextRequest) {
   // If accessing login/register with a token, redirect to dashboard
   if ((pathname === '/login' || pathname === '/register') && token) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
+
+  // Allow setup-account page (even with token, don't redirect)
+  if (pathname.startsWith('/setup-account')) {
+    return NextResponse.next()
   }
 
   // Allow the request to proceed
