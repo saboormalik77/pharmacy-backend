@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-    Plus, Loader2, AlertCircle, ChevronLeft, ChevronRight, Search,
-    Layers, CheckCircle, Send, Calendar, DollarSign,
+    Plus, Loader2, AlertCircle, ChevronLeft, ChevronRight,
+    Layers, CheckCircle, Send, Calendar, Lock,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -169,6 +169,7 @@ export default function BatchesPage() {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Value</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cardinal</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
@@ -209,6 +210,16 @@ export default function BatchesPage() {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {formatDate(batch.createdAt)}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap" onClick={e => e.stopPropagation()}>
+                                                {batch.status === 'open' && (
+                                                    <button
+                                                        onClick={() => router.push(`/warehouse/batches/${batch.id}?action=closeout`)}
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md bg-yellow-100 text-yellow-800 border border-yellow-300 hover:bg-yellow-200 transition-colors"
+                                                    >
+                                                        <Lock className="w-3.5 h-3.5" /> Closeout
+                                                    </button>
+                                                )}
                                             </td>
                                         </tr>
                                     );
