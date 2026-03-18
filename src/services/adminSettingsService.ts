@@ -15,6 +15,14 @@ export interface AdminSettings {
   documentApprovalNotif: boolean;
   paymentNotif: boolean;
   shipmentNotif: boolean;
+  warehouseName: string | null;
+  warehouseStreet: string | null;
+  warehouseCity: string | null;
+  warehouseState: string | null;
+  warehouseZip: string | null;
+  warehouseCountry: string | null;
+  warehousePhone: string | null;
+  warehouseContactName: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -28,6 +36,14 @@ export interface UpdateSettingsData {
   documentApprovalNotif?: boolean;
   paymentNotif?: boolean;
   shipmentNotif?: boolean;
+  warehouseName?: string;
+  warehouseStreet?: string;
+  warehouseCity?: string;
+  warehouseState?: string;
+  warehouseZip?: string;
+  warehouseCountry?: string;
+  warehousePhone?: string;
+  warehouseContactName?: string;
 }
 
 export interface TimezoneOption {
@@ -104,6 +120,14 @@ export const updateAdminSettings = async (
     p_document_approval_notif: updateData.documentApprovalNotif ?? null,
     p_payment_notif: updateData.paymentNotif ?? null,
     p_shipment_notif: updateData.shipmentNotif ?? null,
+    p_warehouse_name: updateData.warehouseName || null,
+    p_warehouse_street: updateData.warehouseStreet || null,
+    p_warehouse_city: updateData.warehouseCity || null,
+    p_warehouse_state: updateData.warehouseState || null,
+    p_warehouse_zip: updateData.warehouseZip || null,
+    p_warehouse_country: updateData.warehouseCountry || null,
+    p_warehouse_phone: updateData.warehousePhone || null,
+    p_warehouse_contact_name: updateData.warehouseContactName || null,
   });
 
   if (error) {

@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import {
     ArrowLeft, Loader2, AlertCircle, X, Pause, Play, CheckCircle, Lock,
     Trash2, Edit, ClipboardList, Building2, UserCog, Package, Truck, Clock,
-    Plus, Search, ScanLine, Archive, FileText, Download, AlertTriangle, Printer,
+    Plus, Search, ScanLine, Archive, FileText, Download, AlertTriangle, Printer, QrCode,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -21,6 +21,9 @@ import {
     completeReturnTransaction,
     finalizeReturnTransaction,
     deleteReturnTransaction,
+    createFedexShipment,
+    scheduleFedexPickup,
+    cancelFedexShipment,
     clearCurrentTransaction,
     fetchTransactionItems,
     deleteTransactionItem,
@@ -105,6 +108,27 @@ export default function ReturnDetailPage() {
     const [finalizeStepsDone, setFinalizeStepsDone] = useState({ printManifest: false, fedexEntered: false, printJobSheets: false });
     const [pdfLoading, setPdfLoading] = useState<string | null>(null);
 
+    // FedEx/USPS tracking sub-modal state
+    const [fedexSubModal, setFedexSubModal] = useState(false);
+    const [fedexMode, setFedexMode] = useState<'choose' | 'api' | 'manual'>('choose');
+    const [fedexApiLoading, setFedexApiLoading] = useState(false);
+    const [fedexApiResult, setFedexApiResult] = useState<{
+        masterTrackingNumber: string;
+        shipmentId: string;
+        packages: { trackingNumber: string; hasLabel: boolean }[];
+    } | null>(null);
+    const [fedexForm, setFedexForm] = useState({
+        boxCount: '',
+        prpNumber: '',
+        packages: Array(12).fill('') as string[],
+    });
+    const [pickupForm, setPickupForm] = useState({
+        readyTime: '09:00',
+        closeTime: '17:00',
+        pickupDate: new Date().toISOString().split('T')[0],
+    });
+    const [pickupLoading, setPickupLoading] = useState(false);
+
     const showToast = (message: string, type: Toast['type'] = 'success') => {
         const tid = Date.now().toString();
         setToasts(prev => [...prev, { id: tid, message, type }]);
@@ -151,6 +175,7 @@ export default function ReturnDetailPage() {
             refresh();
             if (wasComplete) {
                 setFinalizeForm({ fedexTracking: '', boxCount: '' });
+                setFedexForm({ boxCount: '', prpNumber: '', packages: Array(12).fill('') });
                 setFinalizeStepsDone({ printManifest: false, fedexEntered: false, printJobSheets: false });
                 setFinalizeModal(true);
             }
@@ -322,6 +347,20 @@ export default function ReturnDetailPage() {
         .reduce((sum, i) => sum + (i.estimatedValue ?? 0), 0);
     const nonWcTotalValue = nonWcReturnableValue + nonWcNonReturnableValue;
 
+    // ── Print helpers ─────────────────────────────────────────────
+
+    const printJobSheet = () => {
+        printHtml('job-sheet', 'job-sheet');
+    };
+
+    const printShippingLabels = () => {
+        printHtml('shipping-labels', 'shipping-labels');
+    };
+
+    const printSingleLabel = (packageNumber: number) => {
+        printHtml(`shipping-label/${packageNumber}`, `shipping-label-${packageNumber}`);
+    };
+
     const tbdItems = items.filter(i => i.returnStatus === 'tbd');
     const ciiItems = items.filter(i => i.deaForm222Required);
     const hasTbdItems = tbdItems.length > 0;
@@ -330,7 +369,15 @@ export default function ReturnDetailPage() {
 
     const openFinalizeModal = () => {
         if (!tx) return;
+        const existingPkgTracking = tx.packageTracking || {};
+        const pkgs = Array(12).fill('').map((_, i) => existingPkgTracking[`package${i + 1}`] || '');
+
         setFinalizeForm({ fedexTracking: tx.fedexTracking || '', boxCount: tx.boxCount ? String(tx.boxCount) : '' });
+        setFedexForm({
+            boxCount: tx.boxCount ? String(tx.boxCount) : '',
+            prpNumber: tx.prpNumber || '',
+            packages: pkgs,
+        });
         setFinalizeStepsDone({
             printManifest: false,
             fedexEntered: !!(tx.fedexTracking),
@@ -362,6 +409,45 @@ export default function ReturnDetailPage() {
         setPdfLoading(null);
     };
 
+    const printHtml = async (endpoint: string, loadingKey: string) => {
+        setPdfLoading(loadingKey);
+        try {
+            const { cookieUtils } = await import('@/lib/utils/cookies');
+            const token = cookieUtils.getAuthToken();
+            const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+            const res = await fetch(`${baseUrl}/return-transactions/${encodeURIComponent(id)}/${endpoint}`, {
+                headers: { 
+                    Authorization: `Bearer ${token}`,
+                    Accept: 'text/html'
+                },
+            });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({ message: 'Print failed' }));
+                throw new Error(err.message || 'Print failed');
+            }
+            const htmlContent = await res.text();
+            
+            // Create a new window with the HTML content
+            const printWindow = window.open('', '_blank');
+            if (printWindow) {
+                printWindow.document.write(htmlContent);
+                printWindow.document.close();
+                
+                // Wait for content to load, then print
+                printWindow.onload = () => {
+                    setTimeout(() => {
+                        printWindow.print();
+                    }, 500);
+                };
+            } else {
+                throw new Error('Unable to open print window. Please check popup blockers.');
+            }
+        } catch (e: any) {
+            showToast(e.message || 'Failed to print document', 'error');
+        }
+        setPdfLoading(null);
+    };
+
     const handleFinalize = async () => {
         if (!tx) return;
         const fedexTracking = finalizeForm.fedexTracking.trim();
@@ -370,7 +456,20 @@ export default function ReturnDetailPage() {
             showToast('FedEx tracking number is required', 'error');
             return;
         }
-        const result = await dispatch(finalizeReturnTransaction({ id: tx.id, fedexTracking, boxCount }));
+
+        // Build package tracking object from non-empty entries
+        const packageTracking: Record<string, string> = {};
+        fedexForm.packages.forEach((val, i) => {
+            if (val.trim()) packageTracking[`package${i + 1}`] = val.trim();
+        });
+
+        const result = await dispatch(finalizeReturnTransaction({
+            id: tx.id,
+            fedexTracking,
+            boxCount,
+            prpNumber: fedexForm.prpNumber.trim() || undefined,
+            packageTracking: Object.keys(packageTracking).length > 0 ? packageTracking : undefined,
+        }));
         if (finalizeReturnTransaction.fulfilled.match(result)) {
             showToast(`Return ${tx.licensePlate} finalized successfully!`);
             setFinalizeModal(false);
@@ -461,6 +560,18 @@ export default function ReturnDetailPage() {
                             <Button variant="danger" size="sm" onClick={openFinalizeModal}>
                                 <Lock className="w-4 h-4 mr-1" /> Finalize
                             </Button>
+                        )}
+                        {/* Print Job Sheet - Available for completed/finalized transactions with tracking */}
+                        {(tx.status === 'completed' || tx.status === 'finalized') && (tx.fedexTracking || (tx.packageTracking && Object.keys(tx.packageTracking).length > 0)) && (
+                            <button
+                                onClick={printJobSheet}
+                                disabled={pdfLoading === 'job-sheet'}
+                                className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors disabled:opacity-50"
+                                title="Print job sheet with addresses and barcodes"
+                            >
+                                {pdfLoading === 'job-sheet' ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <FileText className="w-4 h-4 mr-1" />}
+                                Print Job Sheet
+                            </button>
                         )}
                         {canDoAction(tx, 'delete') && (
                             <Button variant="danger" size="sm" onClick={() => setDeleteModal(true)}>
@@ -590,6 +701,80 @@ export default function ReturnDetailPage() {
                             <div className="flex justify-between">
                                 <dt className="text-gray-500">Box Count</dt>
                                 <dd className="text-gray-900 font-semibold">{tx.boxCount}</dd>
+                            </div>
+                        )}
+                        {tx.prpNumber && (
+                            <div className="flex justify-between">
+                                <dt className="text-gray-500">PRP Number</dt>
+                                <dd className="text-gray-900 font-mono text-xs">{tx.prpNumber}</dd>
+                            </div>
+                        )}
+                        {tx.fedexShipmentId && (
+                            <div className="flex justify-between">
+                                <dt className="text-gray-500">Shipment ID</dt>
+                                <dd className="text-gray-900 font-mono text-xs">{tx.fedexShipmentId}</dd>
+                            </div>
+                        )}
+                        {tx.packageTracking && Object.keys(tx.packageTracking).length > 0 && (
+                            <div className="pt-2 border-t border-gray-100">
+                                <dt className="text-gray-500 mb-1 flex items-center justify-between">
+                                    <span>Package Tracking</span>
+                                    <div className="flex items-center gap-1">
+                                        <button
+                                            onClick={printShippingLabels}
+                                            disabled={pdfLoading === 'shipping-labels'}
+                                            className="flex items-center gap-1 px-2 py-1 bg-green-100 hover:bg-green-200 text-xs text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
+                                            title="Print all shipping labels with addresses and barcodes"
+                                        >
+                                            {pdfLoading === 'shipping-labels' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
+                                            Print All Labels
+                                        </button>
+
+                                    </div>
+                                </dt>
+                                <dd className="space-y-1.5 mt-1">
+                                    {Object.entries(tx.packageTracking)
+                                        .filter(([, v]) => v)
+                                        .map(([key, val], idx) => (
+                                            <div key={key} className="flex justify-between items-center text-xs">
+                                                <span className="text-gray-500 capitalize">{key.replace(/([0-9]+)/, ' $1')}</span>
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className="font-mono text-gray-900">{val}</span>
+                                                    <button
+                                                        onClick={() => printSingleLabel(idx + 1)}
+                                                        disabled={pdfLoading === `shipping-label-${idx + 1}`}
+                                                        className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
+                                                        title={`Print shipping label for ${val}`}
+                                                    >
+                                                        {pdfLoading === `shipping-label-${idx + 1}` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
+                                                    </button>
+
+                                                </div>
+                                            </div>
+                                        ))
+                                    }
+                                </dd>
+                            </div>
+                        )}
+                        {tx.fedexLabels && Object.keys(tx.fedexLabels).length > 0 && (
+                            <div className="pt-2 border-t border-gray-100">
+                                <dt className="text-gray-500 mb-1 flex items-center gap-1"><Printer className="w-3.5 h-3.5" /> Shipping Labels</dt>
+                                <dd className="flex flex-wrap gap-2">
+                                    {Object.keys(tx.fedexLabels).map((key) => {
+                                        const num = key.replace('package', '');
+                                        return (
+                                            <a
+                                                key={key}
+                                                href={`${process.env.NEXT_PUBLIC_API_URL}/return-transactions/${tx.id}/labels/${num}/download`}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="flex items-center gap-1 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-xs text-gray-700 rounded border border-gray-200 transition-colors"
+                                            >
+                                                <Download className="w-3 h-3" /> Label {num}
+                                            </a>
+                                        );
+                                    })}
+                                </dd>
                             </div>
                         )}
                     </dl>
@@ -1037,38 +1222,42 @@ export default function ReturnDetailPage() {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className={`text-sm font-semibold ${finalizeStepsDone.fedexEntered && finalizeForm.fedexTracking.trim() ? 'text-green-800' : 'text-gray-800'}`}>
-                                            Enter FedEx Tracking
+                                            FedEx / USPS Shipping
                                         </p>
-                                        <p className="text-xs text-gray-500 mt-0.5">Enter the FedEx tracking number for this shipment.</p>
-                                        <div className="mt-2 space-y-2">
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700 mb-1">
-                                                    Tracking Number <span className="text-red-500">*</span>
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    value={finalizeForm.fedexTracking}
-                                                    onChange={e => {
-                                                        const val = e.target.value;
-                                                        setFinalizeForm(prev => ({ ...prev, fedexTracking: val }));
-                                                        setFinalizeStepsDone(prev => ({ ...prev, fedexEntered: val.trim().length > 0 }));
-                                                    }}
-                                                    placeholder="Enter FedEx tracking number"
-                                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-xs font-medium text-gray-700 mb-1">Box Count</label>
-                                                <input
-                                                    type="number"
-                                                    min="1"
-                                                    value={finalizeForm.boxCount}
-                                                    onChange={e => setFinalizeForm(prev => ({ ...prev, boxCount: e.target.value }))}
-                                                    placeholder="Number of boxes"
-                                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                                />
-                                            </div>
+                                        <p className="text-xs text-gray-500 mt-0.5">Create a shipment via FedEx API or enter tracking info manually.</p>
+                                        <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                            <button
+                                                onClick={() => { setFedexMode('api'); setFedexSubModal(true); }}
+                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition-colors"
+                                            >
+                                                <Truck className="w-3.5 h-3.5" />
+                                                {finalizeStepsDone.fedexEntered ? 'Edit Shipment' : 'Create FedEx Shipment'}
+                                            </button>
+                                            <button
+                                                onClick={() => { setFedexMode('manual'); setFedexSubModal(true); }}
+                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded-md transition-colors border border-gray-300"
+                                            >
+                                                <Edit className="w-3.5 h-3.5" />
+                                                Enter Manually
+                                            </button>
+                                            {finalizeStepsDone.fedexEntered && finalizeForm.fedexTracking.trim() && (
+                                                <span className="text-xs text-green-700 font-medium flex items-center gap-1">
+                                                    <CheckCircle className="w-3.5 h-3.5" /> Saved
+                                                </span>
+                                            )}
                                         </div>
+                                        {finalizeStepsDone.fedexEntered && finalizeForm.fedexTracking.trim() && (
+                                            <div className="mt-2 text-xs text-gray-600 space-y-0.5">
+                                                <p><span className="font-medium">Tracking:</span> <span className="font-mono">{fedexForm.prpNumber || finalizeForm.fedexTracking || '—'}</span></p>
+                                                <p><span className="font-medium">Boxes:</span> {finalizeForm.boxCount || '—'}</p>
+                                                {fedexForm.packages.filter(p => p.trim()).length > 0 && (
+                                                    <p><span className="font-medium">Packages:</span> {fedexForm.packages.filter(p => p.trim()).length} tracking number(s)</p>
+                                                )}
+                                                {tx.fedexPickupConfirmation && (
+                                                    <p><span className="font-medium">Pickup:</span> <span className="font-mono">{tx.fedexPickupConfirmation}</span></p>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -1252,6 +1441,371 @@ export default function ReturnDetailPage() {
                             <Button variant="outline" onClick={() => setWcModal(false)}>Cancel</Button>
                             <Button variant="primary" onClick={handleAddWcItems} disabled={wcAdding || wcSelected.size === 0}>
                                 {wcAdding ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Adding...</> : `Add ${wcSelected.size} Item${wcSelected.size !== 1 ? 's' : ''}`}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── FedEx / USPS Tracking Sub-Modal ─────────── */}
+            {fedexSubModal && (
+                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-[60] p-4" onClick={() => { if (!fedexApiLoading && !pickupLoading) setFedexSubModal(false); }}>
+                    <div className="bg-white rounded-lg max-w-2xl w-full shadow-xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+
+                        {/* Header */}
+                        <div className={`p-4 rounded-t-lg ${fedexMode === 'api' ? 'bg-blue-600' : 'bg-amber-400'}`}>
+                            <h2 className={`text-center text-lg font-bold ${fedexMode === 'api' ? 'text-white' : 'text-gray-900'}`}>
+                                {fedexMode === 'api' ? 'FedEx API Shipment' : 'FedEX or USPS Info'} — <span className="underline font-mono">{tx.licensePlate}</span>
+                            </h2>
+                        </div>
+
+                        <div className="p-5 flex-1 overflow-y-auto space-y-4">
+
+                            {/* ── API Mode ── */}
+                            {fedexMode === 'api' && (
+                                <>
+                                    {!fedexApiResult ? (
+                                        <>
+                                            <p className="text-sm text-gray-600 text-center">
+                                                Create a FedEx Ground shipment via the FedEx API. Tracking numbers and shipping labels will be generated automatically.
+                                            </p>
+
+                                            <div className="flex items-center justify-center gap-4">
+                                                <div>
+                                                    <label className="text-sm font-medium text-gray-700">Number of Boxes:</label>
+                                                    <input
+                                                        type="number"
+                                                        min="1"
+                                                        max="99"
+                                                        value={fedexForm.boxCount}
+                                                        onChange={e => setFedexForm(prev => ({ ...prev, boxCount: e.target.value }))}
+                                                        className="ml-2 w-20 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+                                                        disabled={fedexApiLoading}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-xs text-blue-800 text-center space-y-1">
+                                                <p>The shipment will be created as <strong>FedEx Ground</strong> from the pharmacy address to the warehouse.</p>
+                                                <p>Make sure both pharmacy and warehouse addresses are configured correctly.</p>
+                                            </div>
+
+                                            <div className="flex justify-center">
+                                                <button
+                                                    onClick={async () => {
+                                                        if (!tx) return;
+                                                        setFedexApiLoading(true);
+                                                        try {
+                                                            const result = await dispatch(createFedexShipment({
+                                                                id: tx.id,
+                                                                boxCount: parseInt(fedexForm.boxCount) || 1,
+                                                            }));
+                                                            if (createFedexShipment.fulfilled.match(result)) {
+                                                                const shipment = result.payload.shipment;
+                                                                setFedexApiResult(shipment);
+                                                                const updatedPkgs = [...fedexForm.packages];
+                                                                shipment.packages.forEach((p, i) => {
+                                                                    if (i < 12) updatedPkgs[i] = p.trackingNumber;
+                                                                });
+                                                                setFedexForm(prev => ({
+                                                                    ...prev,
+                                                                    prpNumber: shipment.masterTrackingNumber,
+                                                                    packages: updatedPkgs,
+                                                                    boxCount: String(shipment.packages.length || prev.boxCount),
+                                                                }));
+                                                                setFinalizeForm(prev => ({
+                                                                    ...prev,
+                                                                    fedexTracking: shipment.masterTrackingNumber,
+                                                                    boxCount: String(shipment.packages.length),
+                                                                }));
+                                                                setFinalizeStepsDone(prev => ({ ...prev, fedexEntered: true }));
+                                                                showToast('FedEx shipment created successfully!', 'success');
+                                                            } else {
+                                                                showToast(result.payload as string || 'Failed to create shipment', 'error');
+                                                            }
+                                                        } catch {
+                                                            showToast('Unexpected error creating shipment', 'error');
+                                                        } finally {
+                                                            setFedexApiLoading(false);
+                                                        }
+                                                    }}
+                                                    disabled={fedexApiLoading || !fedexForm.boxCount}
+                                                    className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-medium rounded-lg transition-colors"
+                                                >
+                                                    {fedexApiLoading ? (
+                                                        <><Loader2 className="w-4 h-4 animate-spin" /> Creating Shipment...</>
+                                                    ) : (
+                                                        <><Truck className="w-4 h-4" /> Create FedEx Shipment</>
+                                                    )}
+                                                </button>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            {/* API Result */}
+                                            <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-3">
+                                                <div className="flex items-center gap-2">
+                                                    <CheckCircle className="w-5 h-5 text-green-600" />
+                                                    <p className="text-sm font-semibold text-green-800">Shipment Created Successfully</p>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-2 text-xs">
+                                                    <div>
+                                                        <span className="text-gray-500">Master Tracking:</span>
+                                                        <span className="ml-1 font-mono font-medium text-gray-900">{fedexApiResult.masterTrackingNumber}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-gray-500">Packages:</span>
+                                                        <span className="ml-1 font-medium text-gray-900">{fedexApiResult.packages.length}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Package Tracking Numbers */}
+                                            <div className="space-y-2">
+                                                <div className="flex items-center justify-between">
+                                                    <p className="text-sm font-medium text-gray-700">Package Tracking Numbers:</p>
+                                                    <div className="flex items-center gap-1">
+                                                        <button
+                                                            onClick={printShippingLabels}
+                                                            disabled={pdfLoading === 'shipping-labels'}
+                                                            className="flex items-center gap-1 px-2 py-1 bg-green-100 hover:bg-green-200 text-xs text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
+                                                            title="Print all shipping labels"
+                                                        >
+                                                            <Printer className="w-3 h-3" /> Print Labels
+                                                        </button>
+                                                        <a
+                                                            href={`${process.env.NEXT_PUBLIC_API_URL}/return-transactions/${tx.id}/barcodes/tracking`}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className="flex items-center gap-1 px-2 py-1 bg-blue-100 hover:bg-blue-200 text-xs text-blue-700 rounded border border-blue-200 transition-colors"
+                                                            title="Download all tracking barcodes as ZIP"
+                                                        >
+                                                            <QrCode className="w-3 h-3" /> Barcodes
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-1 gap-2">
+                                                    {fedexApiResult.packages.map((pkg, i) => (
+                                                        <div key={i} className="flex items-center justify-between text-xs">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-gray-500">Package {i + 1}:</span>
+                                                                <span className="font-mono text-gray-900">{pkg.trackingNumber}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-1">
+                                                                <button
+                                                                    onClick={() => printSingleLabel(i + 1)}
+                                                                    disabled={pdfLoading === `shipping-label-${i + 1}`}
+                                                                    className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
+                                                                    title={`Print shipping label for ${pkg.trackingNumber}`}
+                                                                >
+                                                                    {pdfLoading === `shipping-label-${i + 1}` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
+                                                                </button>
+                                                                <a
+                                                                    href={`${process.env.NEXT_PUBLIC_API_URL}/return-transactions/${tx.id}/barcodes/tracking/${pkg.trackingNumber}`}
+                                                                    target="_blank"
+                                                                    rel="noreferrer"
+                                                                    className="flex items-center gap-1 px-1.5 py-0.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded border border-gray-200 transition-colors"
+                                                                    title={`Download barcode for ${pkg.trackingNumber}`}
+                                                                >
+                                                                    <QrCode className="w-3 h-3" />
+                                                                </a>
+                                                                {pkg.hasLabel && (
+                                                                    <a
+                                                                        href={`${process.env.NEXT_PUBLIC_API_URL}/return-transactions/${tx.id}/labels/${i + 1}/download`}
+                                                                        target="_blank"
+                                                                        rel="noreferrer"
+                                                                        className="text-blue-600 hover:text-blue-800"
+                                                                        title="Download Label"
+                                                                    >
+                                                                        <Download className="w-3.5 h-3.5" />
+                                                                    </a>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* Download All Labels */}
+                                            {fedexApiResult.packages.some(p => p.hasLabel) && (
+                                                <div className="flex justify-center">
+                                                    <a
+                                                        href={`${process.env.NEXT_PUBLIC_API_URL}/return-transactions/${tx.id}/labels?packageNumber=1`}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="flex items-center gap-1.5 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded-md border border-gray-300 transition-colors"
+                                                    >
+                                                        <Printer className="w-3.5 h-3.5" />
+                                                        Download Labels
+                                                    </a>
+                                                </div>
+                                            )}
+
+                                            {/* Schedule Pickup */}
+                                            <div className="border-t border-gray-200 pt-4 space-y-3">
+                                                <p className="text-sm font-medium text-gray-700">Schedule FedEx Pickup (Optional)</p>
+                                                <div className="bg-amber-50 border border-amber-200 rounded-md p-3 mb-3">
+                                                    <p className="text-xs text-amber-800">
+                                                        <strong>Note:</strong> Pickup scheduling may not work in sandbox/test mode. 
+                                                        You can also call FedEx directly at <strong>1-800-463-3339</strong> and say &quot;Ground Return Pickup&quot;.
+                                                    </p>
+                                                </div>
+                                                <div className="flex items-center gap-4 flex-wrap">
+                                                    <div>
+                                                        <label className="text-xs text-gray-500">Pickup Date</label>
+                                                        <input
+                                                            type="date"
+                                                            value={pickupForm.pickupDate}
+                                                            onChange={e => setPickupForm(prev => ({ ...prev, pickupDate: e.target.value }))}
+                                                            className="block w-36 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                            disabled={pickupLoading}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-xs text-gray-500">Ready Time</label>
+                                                        <input
+                                                            type="time"
+                                                            value={pickupForm.readyTime}
+                                                            onChange={e => setPickupForm(prev => ({ ...prev, readyTime: e.target.value }))}
+                                                            className="block w-28 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                            disabled={pickupLoading}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-xs text-gray-500">Close Time</label>
+                                                        <input
+                                                            type="time"
+                                                            value={pickupForm.closeTime}
+                                                            onChange={e => setPickupForm(prev => ({ ...prev, closeTime: e.target.value }))}
+                                                            className="block w-28 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                            disabled={pickupLoading}
+                                                        />
+                                                    </div>
+                                                    <div className="flex items-end">
+                                                        <button
+                                                            onClick={async () => {
+                                                                setPickupLoading(true);
+                                                                try {
+                                                                    const result = await dispatch(scheduleFedexPickup({
+                                                                        id: tx.id,
+                                                                        ...pickupForm,
+                                                                    }));
+                                                                    if (scheduleFedexPickup.fulfilled.match(result)) {
+                                                                        showToast(`Pickup scheduled: ${result.payload.pickup.pickupConfirmationNumber}`, 'success');
+                                                                    } else {
+                                                                        showToast(result.payload as string || 'Failed to schedule pickup', 'error');
+                                                                    }
+                                                                } catch {
+                                                                    showToast('Unexpected error scheduling pickup', 'error');
+                                                                } finally {
+                                                                    setPickupLoading(false);
+                                                                }
+                                                            }}
+                                                            disabled={pickupLoading}
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white text-xs font-medium rounded-md transition-colors"
+                                                        >
+                                                            {pickupLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Truck className="w-3.5 h-3.5" />}
+                                                            Schedule Pickup
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+                                </>
+                            )}
+
+                            {/* ── Manual Mode ── */}
+                            {fedexMode === 'manual' && (
+                                <>
+                                    {/* Number of Boxes */}
+                                    <div className="text-center">
+                                        <label className="text-sm font-medium text-gray-700">Number of Boxes on this Return:</label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            max="99"
+                                            value={fedexForm.boxCount}
+                                            onChange={e => setFedexForm(prev => ({ ...prev, boxCount: e.target.value }))}
+                                            className="ml-2 w-20 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-center"
+                                        />
+                                    </div>
+
+                                    {/* Instructions */}
+                                    <div className="text-center text-xs text-gray-600 space-y-1">
+                                        <p>For FedEX Call <strong>1-(800) 463-3339</strong> and say &quot;Ground Return Pickup&quot;</p>
+                                        <p>Once you have the Fed EX PRP Number Enter Below, Then Scan Tracking BarCodes Into &quot;Package Fields&quot;</p>
+                                        <p>If This Is A USPS Shipment Enter &quot;USPS&quot; In the PRP Field, Then Scan Tracking BarCodes Into &quot;Package Fields&quot;</p>
+                                    </div>
+
+                                    {/* PRP Number */}
+                                    <div className="text-center">
+                                        <label className="text-sm font-medium text-gray-700">PRP Number:</label>
+                                        <input
+                                            type="text"
+                                            value={fedexForm.prpNumber}
+                                            onChange={e => setFedexForm(prev => ({ ...prev, prpNumber: e.target.value }))}
+                                            placeholder="Enter PRP Number or USPS"
+                                            className="ml-2 w-64 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
+                                        />
+                                    </div>
+
+                                    <div className="border-t-2 border-amber-400" />
+
+                                    {/* Package Tracking Fields */}
+                                    <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                                        {fedexForm.packages.map((val, i) => (
+                                            <div key={i} className="flex items-center gap-2">
+                                                <label className="text-sm text-gray-700 w-24 text-right flex-shrink-0">Package {i + 1}:</label>
+                                                <input
+                                                    type="text"
+                                                    value={val}
+                                                    onChange={e => {
+                                                        const updated = [...fedexForm.packages];
+                                                        updated[i] = e.target.value;
+                                                        setFedexForm(prev => ({ ...prev, packages: updated }));
+                                                    }}
+                                                    className="flex-1 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </>
+                            )}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="flex justify-between items-center p-4 border-t border-gray-200 bg-gray-100">
+                            {fedexMode === 'manual' ? (
+                                <Button
+                                    variant="primary"
+                                    onClick={() => {
+                                        const tracking = fedexForm.prpNumber.trim();
+                                        setFinalizeForm(prev => ({
+                                            ...prev,
+                                            fedexTracking: tracking,
+                                            boxCount: fedexForm.boxCount,
+                                        }));
+                                        setFinalizeStepsDone(prev => ({
+                                            ...prev,
+                                            fedexEntered: tracking.length > 0,
+                                        }));
+                                        setFedexSubModal(false);
+                                    }}
+                                    disabled={!fedexForm.prpNumber.trim()}
+                                >
+                                    <Truck className="w-4 h-4 mr-1" />
+                                    Save FedEX or USPS Info
+                                </Button>
+                            ) : (
+                                <div />
+                            )}
+                            <Button
+                                variant="outline"
+                                onClick={() => setFedexSubModal(false)}
+                                disabled={fedexApiLoading || pickupLoading}
+                            >
+                                {fedexApiResult ? 'Close' : 'Cancel'}
                             </Button>
                         </div>
                     </div>

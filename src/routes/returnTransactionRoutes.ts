@@ -13,6 +13,23 @@ import {
   deaForm222Handler,
   deleteHandler,
 } from '../controllers/returnTransactionController';
+import {
+  createShipmentHandler,
+  schedulePickupHandler,
+  cancelShipmentHandler,
+  getLabelsHandler,
+  downloadLabelHandler,
+} from '../controllers/fedexController';
+import {
+  generateTrackingBarcodes,
+  generateSpecificTrackingBarcode,
+} from '../controllers/barcodeController';
+import {
+  generateJobSheetHandler,
+  printJobSheetHandler,
+  shippingLabelHandler,
+  allShippingLabelsHandler,
+} from '../controllers/jobSheetController';
 import { authenticateAdmin } from '../middleware/adminAuth';
 import { authenticateProcessor } from '../middleware/processorAuth';
 
@@ -396,6 +413,151 @@ router.get('/:id/manifest-data', authenticateAny, manifestDataHandler);
 router.get('/:id/dea-form-222', authenticateAny, deaForm222Handler);
 
 // ============================================================
+// POST   /api/return-transactions/:id/create-shipment — FedEx API
+// ============================================================
+/**
+ * @swagger
+ * /api/return-transactions/{id}/create-shipment:
+ *   post:
+ *     summary: Create FedEx shipment via API
+ *     description: |
+ *       Creates a multi-piece FedEx Ground shipment for this return.
+ *       Obtains tracking numbers and shipping labels from FedEx API.
+ *       Saves all data to the return transaction.
+ *     tags: [Return Transactions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               boxCount: { type: integer, description: Number of boxes }
+ *               packageWeight: { type: number, description: Weight per box in LB }
+ *               serviceType: { type: string, default: FEDEX_GROUND }
+ *     responses:
+ *       200:
+ *         description: Shipment created with tracking numbers and labels
+ */
+router.post('/:id/create-shipment', authenticateAny, createShipmentHandler);
+
+// ============================================================
+// POST   /api/return-transactions/:id/schedule-pickup — FedEx API
+// ============================================================
+/**
+ * @swagger
+ * /api/return-transactions/{id}/schedule-pickup:
+ *   post:
+ *     summary: Schedule FedEx pickup at pharmacy
+ *     tags: [Return Transactions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               readyTime: { type: string, description: "HH:MM format", default: "09:00" }
+ *               closeTime: { type: string, description: "HH:MM format", default: "17:00" }
+ *               pickupDate: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Pickup scheduled
+ */
+router.post('/:id/schedule-pickup', authenticateAny, schedulePickupHandler);
+
+// ============================================================
+// DELETE /api/return-transactions/:id/cancel-shipment — FedEx API
+// ============================================================
+/**
+ * @swagger
+ * /api/return-transactions/{id}/cancel-shipment:
+ *   delete:
+ *     summary: Cancel FedEx shipment
+ *     tags: [Return Transactions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: Shipment cancelled
+ */
+router.delete('/:id/cancel-shipment', authenticateAny, cancelShipmentHandler);
+
+// ============================================================
+// GET    /api/return-transactions/:id/labels — Shipping labels
+// ============================================================
+/**
+ * @swagger
+ * /api/return-transactions/{id}/labels:
+ *   get:
+ *     summary: Get shipping label info or download specific label
+ *     tags: [Return Transactions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *       - in: query
+ *         name: packageNumber
+ *         schema: { type: integer }
+ *         description: If provided, returns the PDF label for that package
+ *     responses:
+ *       200:
+ *         description: Label data
+ */
+router.get('/:id/labels', authenticateAny, getLabelsHandler);
+
+// ============================================================
+// GET    /api/return-transactions/:id/labels/:packageNumber/download
+// ============================================================
+/**
+ * @swagger
+ * /api/return-transactions/{id}/labels/{packageNumber}/download:
+ *   get:
+ *     summary: Download a specific package label as PDF
+ *     tags: [Return Transactions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *       - in: path
+ *         name: packageNumber
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: PDF label file
+ *         content:
+ *           application/pdf:
+ *             schema:
+ *               type: string
+ *               format: binary
+ */
+router.get('/:id/labels/:packageNumber/download', authenticateAny, downloadLabelHandler);
+
+// ============================================================
 // DELETE  /api/return-transactions/:id
 // ============================================================
 /**
@@ -417,5 +579,127 @@ router.get('/:id/dea-form-222', authenticateAny, deaForm222Handler);
  *         description: Return deleted
  */
 router.delete('/:id', authenticateAny, deleteHandler);
+
+// ============================================================
+// Barcode Generation Routes
+// ============================================================
+
+/**
+ * @swagger
+ * /return-transactions/{id}/barcodes/tracking:
+ *   get:
+ *     summary: Generate barcodes for all tracking numbers
+ *     tags: [Return Transactions]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *       - in: query
+ *         name: format
+ *         schema: { type: string, enum: [zip, single] }
+ *         description: Output format (zip for multiple, single for one barcode)
+ *     responses:
+ *       200:
+ *         description: Barcode file(s)
+ *         content:
+ *           image/png:
+ *             description: Single barcode image
+ *           application/zip:
+ *             description: ZIP file containing multiple barcodes
+ */
+router.get('/:id/barcodes/tracking', authenticateAny, generateTrackingBarcodes);
+
+/**
+ * @swagger
+ * /return-transactions/{id}/barcodes/tracking/{trackingNumber}:
+ *   get:
+ *     summary: Generate barcode for specific tracking number
+ *     tags: [Return Transactions]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *       - in: path
+ *         name: trackingNumber
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Barcode image
+ *         content:
+ *           image/png:
+ *             description: PNG barcode image
+ */
+router.get('/:id/barcodes/tracking/:trackingNumber', authenticateAny, generateSpecificTrackingBarcode);
+
+// ============================================================
+// Job Sheet Routes
+// ============================================================
+
+/**
+ * @swagger
+ * /return-transactions/{id}/job-sheet:
+ *   get:
+ *     summary: Generate printable job sheet
+ *     tags: [Return Transactions]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *       - in: query
+ *         name: format
+ *         schema: { type: string, enum: [html, pdf] }
+ *         description: Output format (html for browser printing)
+ *     responses:
+ *       200:
+ *         description: Job sheet HTML or PDF
+ *         content:
+ *           text/html:
+ *             description: HTML job sheet for printing
+ *           application/pdf:
+ *             description: PDF job sheet (future implementation)
+ */
+router.get('/:id/job-sheet', authenticateAny, generateJobSheetHandler);
+
+/**
+ * @swagger
+ * /return-transactions/{id}/job-sheet/print:
+ *   get:
+ *     summary: Open job sheet in print-ready window
+ *     tags: [Return Transactions]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: HTML job sheet with auto-print functionality
+ *         content:
+ *           text/html:
+ *             description: Print-ready HTML job sheet
+ */
+router.get('/:id/job-sheet/print', authenticateAny, printJobSheetHandler);
+
+/**
+ * @swagger
+ * /return-transactions/{id}/shipping-labels:
+ *   get:
+ *     summary: Print all shipping labels (FROM/TO + barcode)
+ *     tags: [Return Transactions]
+ */
+router.get('/:id/shipping-labels', authenticateAny, allShippingLabelsHandler);
+
+/**
+ * @swagger
+ * /return-transactions/{id}/shipping-label/{packageNumber}:
+ *   get:
+ *     summary: Print shipping label for a specific package
+ *     tags: [Return Transactions]
+ */
+router.get('/:id/shipping-label/:packageNumber', authenticateAny, shippingLabelHandler);
 
 export default router;

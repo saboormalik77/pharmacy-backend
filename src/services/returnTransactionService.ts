@@ -28,6 +28,10 @@ export interface ReturnTransaction {
   finalizedAt: string | null;
   boxCount: number | null;
   manifestGeneratedAt: string | null;
+  prpNumber: string | null;
+  packageTracking: Record<string, string> | null;
+  fedexShipmentId: string | null;
+  fedexLabels: Record<string, string> | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -208,7 +212,9 @@ export const completeReturnTransaction = async (
 export const finalizeReturnTransaction = async (
   transactionId: string,
   fedexTracking?: string,
-  boxCount?: number
+  boxCount?: number,
+  prpNumber?: string,
+  packageTracking?: Record<string, string>
 ): Promise<ReturnTransaction> => {
   const sb = ensureAdmin();
 
@@ -216,6 +222,8 @@ export const finalizeReturnTransaction = async (
     p_id: transactionId,
     p_fedex_tracking: fedexTracking || null,
     p_box_count: boxCount ?? null,
+    p_prp_number: prpNumber || null,
+    p_package_tracking: packageTracking || null,
   });
 
   handleRpcError(data, error, 'Failed to finalize return transaction');

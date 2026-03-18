@@ -250,7 +250,13 @@ export const completeReturnTransaction = createAsyncThunk(
 
 export const finalizeReturnTransaction = createAsyncThunk(
     'returnTransactions/finalize',
-    async ({ id, fedexTracking, boxCount }: { id: string; fedexTracking?: string; boxCount?: number }, { rejectWithValue }) => {
+    async ({ id, fedexTracking, boxCount, prpNumber, packageTracking }: {
+        id: string;
+        fedexTracking?: string;
+        boxCount?: number;
+        prpNumber?: string;
+        packageTracking?: Record<string, string>;
+    }, { rejectWithValue }) => {
         try {
             const { apiClient } = await import('@/lib/api/apiClient');
             const { cookieUtils } = await import('@/lib/utils/cookies');
@@ -258,7 +264,7 @@ export const finalizeReturnTransaction = createAsyncThunk(
 
             const response = await apiClient.post<{ status: string; data: ReturnTransaction }>(
                 `/return-transactions/${id}/finalize`,
-                { fedexTracking, boxCount },
+                { fedexTracking, boxCount, prpNumber, packageTracking },
                 true
             );
             return response.data;
@@ -280,6 +286,94 @@ export const deleteReturnTransaction = createAsyncThunk(
             return id;
         } catch (error: any) {
             return rejectWithValue(error?.message || 'Failed to delete return transaction');
+        }
+    }
+);
+
+// ── FedEx API Thunks ─────────────────────────────────────────
+
+export const createFedexShipment = createAsyncThunk(
+    'returnTransactions/createFedexShipment',
+    async ({ id, boxCount, packageWeight, serviceType }: {
+        id: string;
+        boxCount?: number;
+        packageWeight?: number;
+        serviceType?: string;
+    }, { rejectWithValue }) => {
+        try {
+            const { apiClient } = await import('@/lib/api/apiClient');
+            const { cookieUtils } = await import('@/lib/utils/cookies');
+            if (!cookieUtils.getAuthToken()) return rejectWithValue('Authentication required.');
+
+            const response = await apiClient.post<{
+                status: string;
+                data: {
+                    transaction: ReturnTransaction;
+                    shipment: {
+                        masterTrackingNumber: string;
+                        shipmentId: string;
+                        packageCount: number;
+                        packages: { trackingNumber: string; hasLabel: boolean }[];
+                    };
+                };
+            }>(
+                `/return-transactions/${id}/create-shipment`,
+                { boxCount, packageWeight, serviceType },
+                true
+            );
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error?.message || 'Failed to create FedEx shipment');
+        }
+    }
+);
+
+export const scheduleFedexPickup = createAsyncThunk(
+    'returnTransactions/scheduleFedexPickup',
+    async ({ id, readyTime, closeTime, pickupDate }: {
+        id: string;
+        readyTime?: string;
+        closeTime?: string;
+        pickupDate?: string;
+    }, { rejectWithValue }) => {
+        try {
+            const { apiClient } = await import('@/lib/api/apiClient');
+            const { cookieUtils } = await import('@/lib/utils/cookies');
+            if (!cookieUtils.getAuthToken()) return rejectWithValue('Authentication required.');
+
+            const response = await apiClient.post<{
+                status: string;
+                data: {
+                    transaction: ReturnTransaction;
+                    pickup: { pickupConfirmationNumber: string; pickupDate: string };
+                };
+            }>(
+                `/return-transactions/${id}/schedule-pickup`,
+                { readyTime, closeTime, pickupDate },
+                true
+            );
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error?.message || 'Failed to schedule FedEx pickup');
+        }
+    }
+);
+
+export const cancelFedexShipment = createAsyncThunk(
+    'returnTransactions/cancelFedexShipment',
+    async (id: string, { rejectWithValue }) => {
+        try {
+            const { apiClient } = await import('@/lib/api/apiClient');
+            const { cookieUtils } = await import('@/lib/utils/cookies');
+            if (!cookieUtils.getAuthToken()) return rejectWithValue('Authentication required.');
+
+            const response = await apiClient.delete<{ status: string; data: ReturnTransaction }>(
+                `/return-transactions/${id}/cancel-shipment`,
+                true
+            );
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error?.message || 'Failed to cancel FedEx shipment');
         }
     }
 );
@@ -553,6 +647,41 @@ const returnTransactionsSlice = createSlice({
                 state.transactions = state.transactions.filter(t => t.id !== action.payload);
             })
             .addCase(deleteReturnTransaction.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
+
+            // ── FedEx API ──────────────────────────────────
+
+            // createFedexShipment
+            .addCase(createFedexShipment.pending, (state) => { state.isActionLoading = true; state.error = null; })
+            .addCase(createFedexShipment.fulfilled, (state, action) => {
+                state.isActionLoading = false;
+                const tx = action.payload.transaction;
+                const idx = state.transactions.findIndex(t => t.id === tx.id);
+                if (idx !== -1) state.transactions[idx] = tx;
+                if (state.currentTransaction?.id === tx.id) state.currentTransaction = tx;
+            })
+            .addCase(createFedexShipment.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
+
+            // scheduleFedexPickup
+            .addCase(scheduleFedexPickup.pending, (state) => { state.isActionLoading = true; state.error = null; })
+            .addCase(scheduleFedexPickup.fulfilled, (state, action) => {
+                state.isActionLoading = false;
+                const tx = action.payload.transaction;
+                const idx = state.transactions.findIndex(t => t.id === tx.id);
+                if (idx !== -1) state.transactions[idx] = tx;
+                if (state.currentTransaction?.id === tx.id) state.currentTransaction = tx;
+            })
+            .addCase(scheduleFedexPickup.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
+
+            // cancelFedexShipment
+            .addCase(cancelFedexShipment.pending, (state) => { state.isActionLoading = true; state.error = null; })
+            .addCase(cancelFedexShipment.fulfilled, (state, action) => {
+                state.isActionLoading = false;
+                const tx = action.payload;
+                const idx = state.transactions.findIndex(t => t.id === tx.id);
+                if (idx !== -1) state.transactions[idx] = tx;
+                if (state.currentTransaction?.id === tx.id) state.currentTransaction = tx;
+            })
+            .addCase(cancelFedexShipment.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
 
             // ── Items ─────────────────────────────────────
 

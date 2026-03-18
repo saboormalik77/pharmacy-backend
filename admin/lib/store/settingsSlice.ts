@@ -9,6 +9,14 @@ export interface Settings {
   documentApprovalNotif: boolean;
   paymentNotif: boolean;
   shipmentNotif: boolean;
+  warehouseName: string | null;
+  warehouseStreet: string | null;
+  warehouseCity: string | null;
+  warehouseState: string | null;
+  warehouseZip: string | null;
+  warehouseCountry: string | null;
+  warehousePhone: string | null;
+  warehouseContactName: string | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -25,6 +33,17 @@ export interface UpdateNotificationSettingsPayload {
   documentApprovalNotif: boolean;
   paymentNotif: boolean;
   shipmentNotif: boolean;
+}
+
+export interface UpdateWarehouseAddressPayload {
+  warehouseName?: string;
+  warehouseStreet?: string;
+  warehouseCity?: string;
+  warehouseState?: string;
+  warehouseZip?: string;
+  warehouseCountry?: string;
+  warehousePhone?: string;
+  warehouseContactName?: string;
 }
 
 export interface ResetPasswordPayload {
@@ -120,6 +139,33 @@ export const updateNotificationSettings = createAsyncThunk(
   }
 );
 
+// Async thunk for updating warehouse address
+export const updateWarehouseAddress = createAsyncThunk(
+  'settings/updateWarehouseAddress',
+  async (payload: UpdateWarehouseAddressPayload, { rejectWithValue }) => {
+    try {
+      const { apiClient } = await import('@/lib/api/apiClient');
+      const { cookieUtils } = await import('@/lib/utils/cookies');
+
+      const token = cookieUtils.getAuthToken();
+      if (!token) {
+        return rejectWithValue('Authentication required. Please login again.');
+      }
+
+      const data: SettingsResponse = await apiClient.patch<SettingsResponse>(
+        '/admin/settings',
+        payload,
+        true
+      );
+
+      return data.data.settings;
+    } catch (error: any) {
+      const errorMessage = error?.message || error?.data?.message || 'An error occurred while updating warehouse address';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 // Async thunk for resetting password
 export const resetPassword = createAsyncThunk(
   'settings/resetPassword',
@@ -193,6 +239,22 @@ const settingsSlice = createSlice({
         state.error = null;
       })
       .addCase(updateNotificationSettings.rejected, (state, action) => {
+        state.isUpdating = false;
+        state.error = action.payload as string;
+      });
+
+    // Update warehouse address
+    builder
+      .addCase(updateWarehouseAddress.pending, (state) => {
+        state.isUpdating = true;
+        state.error = null;
+      })
+      .addCase(updateWarehouseAddress.fulfilled, (state, action: PayloadAction<Settings>) => {
+        state.isUpdating = false;
+        state.settings = action.payload;
+        state.error = null;
+      })
+      .addCase(updateWarehouseAddress.rejected, (state, action) => {
         state.isUpdating = false;
         state.error = action.payload as string;
       });

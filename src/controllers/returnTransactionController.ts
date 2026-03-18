@@ -150,12 +150,19 @@ export const completeHandler = catchAsync(
 // ============================================================
 export const finalizeHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
-    const { fedexTracking, fedex_tracking, boxCount, box_count } = req.body;
+    const {
+      fedexTracking, fedex_tracking,
+      boxCount, box_count,
+      prpNumber, prp_number,
+      packageTracking, package_tracking,
+    } = req.body;
 
     const transaction = await rtService.finalizeReturnTransaction(
       req.params.id,
       fedexTracking || fedex_tracking,
-      boxCount ?? box_count
+      boxCount ?? box_count,
+      prpNumber || prp_number,
+      packageTracking || package_tracking
     );
 
     res.status(200).json({ status: 'success', data: transaction });

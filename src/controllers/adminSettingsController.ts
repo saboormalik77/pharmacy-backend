@@ -43,6 +43,22 @@ export const updateAdminSettingsHandler = catchAsync(
       documentApprovalNotif,
       paymentNotif,
       shipmentNotif,
+      warehouseName,
+      warehouseStreet,
+      warehouseCity,
+      warehouseState,
+      warehouseZip,
+      warehouseCountry,
+      warehousePhone,
+      warehouseContactName,
+      warehouse_name,
+      warehouse_street,
+      warehouse_city,
+      warehouse_state,
+      warehouse_zip,
+      warehouse_country,
+      warehouse_phone,
+      warehouse_contact_name,
     } = req.body;
 
     const settings = await adminSettingsService.updateAdminSettings({
@@ -54,6 +70,14 @@ export const updateAdminSettingsHandler = catchAsync(
       documentApprovalNotif,
       paymentNotif,
       shipmentNotif,
+      warehouseName: warehouseName ?? warehouse_name,
+      warehouseStreet: warehouseStreet ?? warehouse_street,
+      warehouseCity: warehouseCity ?? warehouse_city,
+      warehouseState: warehouseState ?? warehouse_state,
+      warehouseZip: warehouseZip ?? warehouse_zip,
+      warehouseCountry: warehouseCountry ?? warehouse_country,
+      warehousePhone: warehousePhone ?? warehouse_phone,
+      warehouseContactName: warehouseContactName ?? warehouse_contact_name,
     });
 
     res.status(200).json({

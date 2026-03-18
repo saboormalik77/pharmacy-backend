@@ -144,7 +144,7 @@ app.use('/api/product-lists', productListsRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/credits', creditsRoutes);
 app.use('/api/documents', documentsRoutes);
-app.use('/api/barcode', barcodeRoutes);
+app.use('/api/barcodes', barcodeRoutes);
 app.use('/api/optimization', optimizationRoutes);
 app.use('/api/distributors', distributorsRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
