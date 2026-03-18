@@ -213,74 +213,66 @@ export default function ProcessorsPage() {
 
     // ── Render ─────────────────────────────────────────────────
     return (
-        <div className="space-y-6">
+        <div className="space-y-3">
             <ToastContainer toasts={toasts} onClose={removeToast} />
 
             {/* Header */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Processors</h1>
-                    <p className="text-sm text-gray-600 mt-1">Manage field processors and their store assignments</p>
+                    <h1 className="text-lg font-bold text-gray-900">Processors</h1>
+                    <p className="text-xs text-gray-500">Manage field processors and their store assignments</p>
                 </div>
-                <Button variant="primary" size="md" onClick={() => setAddModal(true)} className="w-full sm:w-auto whitespace-nowrap">
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    Add Processor
-                </Button>
+                <button
+                    onClick={() => setAddModal(true)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary-600 text-white text-xs font-medium hover:bg-primary-700 transition-colors whitespace-nowrap"
+                >
+                    <UserPlus className="w-3.5 h-3.5" /> Add Processor
+                </button>
             </div>
 
             {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-xs flex items-center gap-2">
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
                     {error}
                 </div>
             )}
 
-            {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-white rounded-lg shadow-md p-3">
-                    <div className="flex justify-between items-center">
-                        <p className="text-xs text-gray-600">Total Processors</p>
-                        <p className="text-sm font-bold text-gray-900">{pagination?.totalCount ?? processors.length}</p>
+            {/* Stats — compact strip */}
+            <div className="grid grid-cols-4 gap-2">
+                {[
+                    { icon: <UserCog className="w-3.5 h-3.5 text-gray-500" />,  label: 'Total',    value: pagination?.totalCount ?? processors.length, color: 'text-gray-700',  bg: 'bg-gray-50'  },
+                    { icon: <CheckCircle className="w-3.5 h-3.5 text-green-500" />, label: 'Active', value: totalActive,   color: 'text-green-700', bg: 'bg-green-50' },
+                    { icon: <Power className="w-3.5 h-3.5 text-gray-400" />,    label: 'Inactive', value: totalInactive, color: 'text-gray-600',  bg: 'bg-gray-50'  },
+                    { icon: <Store className="w-3.5 h-3.5 text-blue-500" />,    label: 'Stores',   value: totalStores,  color: 'text-blue-700',  bg: 'bg-blue-50'  },
+                ].map(card => (
+                    <div key={card.label} className={`${card.bg} rounded-lg border border-gray-100 px-3 py-2 flex items-center gap-2`}>
+                        {card.icon}
+                        <div>
+                            <p className="text-[10px] text-gray-500 leading-none">{card.label}</p>
+                            <p className={`text-base font-bold leading-tight ${card.color}`}>{card.value}</p>
+                        </div>
                     </div>
-                </div>
-                <div className="bg-white rounded-lg shadow-md p-3">
-                    <div className="flex justify-between items-center">
-                        <p className="text-xs text-gray-600">Active</p>
-                        <p className="text-sm font-bold text-green-600">{totalActive}</p>
-                    </div>
-                </div>
-                <div className="bg-white rounded-lg shadow-md p-3">
-                    <div className="flex justify-between items-center">
-                        <p className="text-xs text-gray-600">Inactive</p>
-                        <p className="text-sm font-bold text-gray-500">{totalInactive}</p>
-                    </div>
-                </div>
-                <div className="bg-white rounded-lg shadow-md p-3">
-                    <div className="flex justify-between items-center">
-                        <p className="text-xs text-gray-600">Total Stores Assigned</p>
-                        <p className="text-sm font-bold text-blue-600">{totalStores}</p>
-                    </div>
-                </div>
+                ))}
             </div>
 
             {/* Table Card */}
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-lg shadow overflow-hidden">
                 {/* Filters */}
-                <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                <div className="px-3 py-2 border-b border-gray-100 flex gap-2">
                     <div className="flex-1 relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
                         <input
                             type="text"
                             placeholder="Search by name or email"
                             value={searchTerm}
                             onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            className="w-full pl-8 pr-3 py-1.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-primary-500"
                         />
                     </div>
                     <select
                         value={statusFilter}
                         onChange={(e) => { setStatusFilter(e.target.value as typeof statusFilter); setCurrentPage(1); }}
-                        className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className="px-2 py-1.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-primary-500"
                     >
                         <option value="all">All Status</option>
                         <option value="active">Active</option>
@@ -289,9 +281,15 @@ export default function ProcessorsPage() {
                 </div>
 
                 {isLoading ? (
-                    <div className="text-center py-12">
-                        <Loader2 className="w-6 h-6 animate-spin text-primary-500 mx-auto mb-2" />
-                        <p className="text-gray-500 text-sm">Loading processors...</p>
+                    <div className="text-center py-10">
+                        <Loader2 className="w-5 h-5 animate-spin text-primary-500 mx-auto mb-1" />
+                        <p className="text-gray-400 text-xs">Loading processors...</p>
+                    </div>
+                ) : processors.length === 0 ? (
+                    <div className="text-center py-10">
+                        <UserCog className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                        <p className="text-gray-500 text-sm font-medium">No processors found</p>
+                        <p className="text-gray-400 text-xs mt-1">Add your first processor using the button above</p>
                     </div>
                 ) : (
                     <>
@@ -299,50 +297,50 @@ export default function ProcessorsPage() {
                             <table className="w-full table-auto">
                                 <thead className="bg-gray-50 border-b border-gray-200">
                                     <tr>
-                                        <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                        <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                                        <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                                        <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stores</th>
-                                        <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                                        <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-[160px]">Actions</th>
+                                        <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Name</th>
+                                        <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Email</th>
+                                        <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Phone</th>
+                                        <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Stores</th>
+                                        <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Created</th>
+                                        <th className="px-3 py-2 text-center text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
+                                <tbody className="divide-y divide-gray-100">
                                     {processors.map((processor) => (
                                         <tr key={processor.id} className="hover:bg-gray-50 transition-colors">
-                                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">
+                                            <td className="px-3 py-1.5 whitespace-nowrap">
                                                 <div className="flex items-center gap-2">
-                                                    <div className="w-7 h-7 bg-indigo-500 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
+                                                    <div className="w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
                                                         {getInitials(processor.name)}
                                                     </div>
-                                                    <span className="font-medium truncate max-w-[140px]" title={processor.name}>{processor.name}</span>
+                                                    <span className="text-xs font-medium text-gray-900 truncate max-w-[120px]" title={processor.name}>{processor.name}</span>
                                                 </div>
                                             </td>
-                                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-600 truncate max-w-[180px]" title={processor.email || ''}>
+                                            <td className="px-3 py-1.5 text-xs text-gray-600 truncate max-w-[160px] whitespace-nowrap" title={processor.email || ''}>
                                                 {processor.email || <span className="text-gray-400 italic">—</span>}
                                             </td>
-                                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-600">
+                                            <td className="px-3 py-1.5 text-xs text-gray-600 whitespace-nowrap">
                                                 {processor.phone || <span className="text-gray-400 italic">—</span>}
                                             </td>
-                                            <td className="px-2 py-2 whitespace-nowrap">
+                                            <td className="px-3 py-1.5 whitespace-nowrap">
                                                 <Badge variant={processor.status === 'active' ? 'success' : 'default'}>
-                                                    {processor.status}
+                                                    <span className="text-[10px]">{processor.status}</span>
                                                 </Badge>
                                             </td>
-                                            <td className="px-2 py-2 whitespace-nowrap text-xs">
+                                            <td className="px-3 py-1.5 whitespace-nowrap">
                                                 <button
                                                     onClick={() => openStoresModal(processor)}
-                                                    className="flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium"
+                                                    className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-medium"
                                                 >
-                                                    <Store className="w-3.5 h-3.5" />
-                                                    {processor.assignedStoresCount ?? 0} stores
+                                                    <Store className="w-3 h-3" />
+                                                    {processor.assignedStoresCount ?? 0}
                                                 </button>
                                             </td>
-                                            <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-600">
-                                                {processor.createdAt ? formatDate(processor.createdAt) : 'N/A'}
+                                            <td className="px-3 py-1.5 text-xs text-gray-500 whitespace-nowrap">
+                                                {processor.createdAt ? formatDate(processor.createdAt) : '—'}
                                             </td>
-                                            <td className="px-2 py-2 whitespace-nowrap text-xs">
+                                            <td className="px-3 py-1.5 whitespace-nowrap">
                                                 <div className="flex items-center gap-1 justify-center">
                                                     <button onClick={() => setViewModal(processor)} className="p-1 text-blue-600 hover:bg-blue-50 rounded" title="View">
                                                         <Eye className="w-3.5 h-3.5" />
@@ -366,37 +364,27 @@ export default function ProcessorsPage() {
                             </table>
                         </div>
 
-                        {processors.length === 0 && !isLoading && (
-                            <div className="text-center py-12">
-                                <UserCog className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                                <p className="text-gray-500 font-medium">No processors found</p>
-                                <p className="text-gray-400 text-sm mt-1">Add your first processor using the button above</p>
-                            </div>
-                        )}
-
                         {/* Pagination */}
                         {pagination && pagination.totalPages > 1 && (
-                            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 pt-6 border-t border-gray-200">
-                                <div className="text-xs text-gray-600">
-                                    Showing {((pagination.page - 1) * pagination.limit) + 1}–{Math.min(pagination.page * pagination.limit, pagination.totalCount)} of {pagination.totalCount} processors
-                                </div>
-                                <div className="flex items-center gap-2">
+                            <div className="flex items-center justify-between px-3 py-2 border-t border-gray-100">
+                                <p className="text-xs text-gray-500">
+                                    {((pagination.page - 1) * pagination.limit) + 1}–{Math.min(pagination.page * pagination.limit, pagination.totalCount)} of {pagination.totalCount}
+                                </p>
+                                <div className="flex items-center gap-1.5">
                                     <button
                                         onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                         disabled={!pagination.hasPreviousPage}
-                                        className="p-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                                        className="p-1.5 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                                     >
-                                        <ChevronLeft className="w-4 h-4" />
+                                        <ChevronLeft className="w-3.5 h-3.5" />
                                     </button>
-                                    <span className="px-3 py-2 text-xs text-gray-700">
-                                        Page {pagination.page} of {pagination.totalPages}
-                                    </span>
+                                    <span className="text-xs text-gray-600">Page {pagination.page} of {pagination.totalPages}</span>
                                     <button
                                         onClick={() => setCurrentPage(p => p + 1)}
                                         disabled={!pagination.hasNextPage}
-                                        className="p-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                                        className="p-1.5 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                                     >
-                                        <ChevronRight className="w-4 h-4" />
+                                        <ChevronRight className="w-3.5 h-3.5" />
                                     </button>
                                 </div>
                             </div>

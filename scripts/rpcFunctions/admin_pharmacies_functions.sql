@@ -158,6 +158,7 @@ BEGIN
             COALESCE(p.physical_address->>'street', '') AS address,
             COALESCE(p.physical_address->>'zip', '') AS "zipCode",
             COALESCE(p.state_license_number, p.npi_number, p.dea_number, '') AS "licenseNumber",
+            p.secondary_wholesaler AS "secondaryWholesaler",
             p.created_at AS "createdAt",
             -- Count total returns (documents) for this pharmacy
             (SELECT COUNT(*)::INTEGER FROM uploaded_documents ud WHERE ud.pharmacy_id = p.id) AS "totalReturns"
@@ -190,6 +191,7 @@ BEGIN
             'address', pd.address,
             'zipCode', pd."zipCode",
             'licenseNumber', pd."licenseNumber",
+            'secondaryWholesaler', pd."secondaryWholesaler",
             'totalReturns', pd."totalReturns",
             'createdAt', pd."createdAt"
         )
@@ -270,6 +272,7 @@ BEGIN
         'totalReturnsValue', (SELECT COALESCE(SUM(total_credit_amount), 0)::NUMERIC FROM uploaded_documents ud WHERE ud.pharmacy_id = p.id AND total_credit_amount IS NOT NULL),
         'physicalAddress', p.physical_address,
         'billingAddress', p.billing_address,
+        'secondaryWholesaler', p.secondary_wholesaler,
         'subscriptionTier', p.subscription_tier,
         'subscriptionStatus', p.subscription_status,
         'createdAt', p.created_at,
@@ -384,6 +387,10 @@ BEGIN
         subscription_tier = CASE 
             WHEN p_updates ? 'subscriptionTier' THEN p_updates->>'subscriptionTier'
             ELSE subscription_tier
+        END,
+        secondary_wholesaler = CASE
+            WHEN p_updates ? 'secondaryWholesaler' THEN p_updates->>'secondaryWholesaler'
+            ELSE secondary_wholesaler
         END,
         subscription_status = CASE 
             WHEN p_updates ? 'subscriptionStatus' THEN p_updates->>'subscriptionStatus'

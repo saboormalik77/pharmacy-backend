@@ -227,29 +227,29 @@ export default function WarehouseVerificationPage() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-3">
             <ToastContainer toasts={toasts} onClose={removeToast} />
 
             {/* Header */}
             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <button onClick={() => router.push('/warehouse/receiving')} className="text-gray-400 hover:text-gray-600"><ArrowLeft className="w-5 h-5" /></button>
+                <div className="flex items-center gap-2">
+                    <button onClick={() => router.push('/warehouse/receiving')} className="text-gray-400 hover:text-gray-600"><ArrowLeft className="w-4 h-4" /></button>
                     <div>
-                        <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                            <ClipboardCheck className="w-5 h-5 text-primary-600" />
+                        <h1 className="text-base font-bold text-gray-900 flex items-center gap-1.5">
+                            <ClipboardCheck className="w-4 h-4 text-primary-600" />
                             Verify: {currentReturn.licensePlate}
                         </h1>
-                        <p className="text-sm text-gray-500">{currentReturn.pharmacyName} — Received {currentReturn.receivedInWarehouseDate ? formatDateTime(currentReturn.receivedInWarehouseDate) : '—'}</p>
+                        <p className="text-xs text-gray-500">{currentReturn.pharmacyName} — Received {currentReturn.receivedInWarehouseDate ? formatDateTime(currentReturn.receivedInWarehouseDate) : '—'}</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    {currentReturn.verifiedIntegrity && <Badge variant="success">Verified</Badge>}
-                    <Badge variant="info">{currentReturn.status}</Badge>
+                <div className="flex items-center gap-1.5">
+                    {currentReturn.verifiedIntegrity && <Badge variant="success"><span className="text-[10px]">Verified</span></Badge>}
+                    <Badge variant="info"><span className="text-[10px]">{currentReturn.status}</span></Badge>
                 </div>
             </div>
 
             {/* Return Summary Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                 {[
                     { label: 'Total Items', value: totalCount },
                     { label: 'Verified Items', value: `${verifiedCount} / ${totalCount}` },
@@ -257,161 +257,165 @@ export default function WarehouseVerificationPage() {
                     { label: 'FedEx Tracking', value: currentReturn.fedexTracking || '—' },
                     { label: 'Box Count', value: currentReturn.boxCount ?? '—' },
                 ].map(c => (
-                    <div key={c.label} className="bg-white rounded-lg shadow-sm border p-3">
-                        <p className="text-xs text-gray-500">{c.label}</p>
-                        <p className="text-sm font-semibold text-gray-900 mt-0.5 font-mono">{c.value}</p>
+                    <div key={c.label} className="bg-white rounded-lg shadow-sm border px-3 py-2">
+                        <p className="text-[10px] text-gray-500">{c.label}</p>
+                        <p className="text-xs font-semibold text-gray-900 mt-0.5 font-mono">{c.value}</p>
                     </div>
                 ))}
             </div>
 
             {/* Verification Checklist */}
-            <div className="bg-white rounded-lg shadow-md p-5 space-y-4">
-                <h2 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-primary-600" />Verification Checklist
+            <div className="bg-white rounded-lg shadow px-4 py-3 space-y-3">
+                <h2 className="text-xs font-semibold text-gray-800 flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-primary-600" />Verification Checklist
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {/* Pieces count */}
-                    <div className="flex items-center gap-3 p-3 border rounded-lg bg-gray-50">
-                        <div className={`w-6 h-6 rounded flex items-center justify-center ${piecesReceived ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-400'}`}>
-                            {piecesReceived ? <Check className="w-4 h-4" /> : <span className="text-xs">1</span>}
+                    <div className="flex items-center gap-2 px-3 py-2 border rounded-lg bg-gray-50">
+                        <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ${piecesReceived ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-400'}`}>
+                            {piecesReceived ? <Check className="w-3.5 h-3.5" /> : <span className="text-[10px]">1</span>}
                         </div>
                         <div className="flex-1">
-                            <label className="text-xs font-medium text-gray-700">Pieces Received</label>
-                            <div className="flex items-center gap-2 mt-1">
+                            <label className="text-[10px] font-medium text-gray-700">Pieces Received</label>
+                            <div className="flex items-center gap-1.5 mt-0.5">
                                 <input
                                     type="number"
                                     value={piecesReceived}
                                     onChange={e => setPiecesReceived(e.target.value)}
                                     placeholder="Count"
-                                    className="w-20 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                    className="w-16 px-2 py-0.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
                                     min={0}
                                 />
-                                <span className="text-xs text-gray-500">/ {currentReturn.boxCount ?? '?'} expected</span>
+                                <span className="text-[10px] text-gray-500">/ {currentReturn.boxCount ?? '?'} expected</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Items verified */}
-                    <div className="flex items-center gap-3 p-3 border rounded-lg bg-gray-50">
-                        <div className={`w-6 h-6 rounded flex items-center justify-center ${allItemsVerified ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-400'}`}>
-                            {allItemsVerified ? <Check className="w-4 h-4" /> : <span className="text-xs">2</span>}
+                    <div className="flex items-center gap-2 px-3 py-2 border rounded-lg bg-gray-50">
+                        <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ${allItemsVerified ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-400'}`}>
+                            {allItemsVerified ? <Check className="w-3.5 h-3.5" /> : <span className="text-[10px]">2</span>}
                         </div>
                         <div className="flex-1">
-                            <label className="text-xs font-medium text-gray-700">All Items Verified</label>
-                            <p className="text-xs text-gray-500 mt-0.5">{verifiedCount} of {totalCount} verified</p>
+                            <label className="text-[10px] font-medium text-gray-700">All Items Verified</label>
+                            <p className="text-[10px] text-gray-500">{verifiedCount} of {totalCount} verified</p>
                         </div>
                     </div>
 
                     {/* Integrity confirmed */}
-                    <label className="flex items-center gap-3 p-3 border rounded-lg bg-gray-50 cursor-pointer">
+                    <label className="flex items-center gap-2 px-3 py-2 border rounded-lg bg-gray-50 cursor-pointer">
                         <input
                             type="checkbox"
                             checked={integrityConfirmed}
                             onChange={e => setIntegrityConfirmed(e.target.checked)}
-                            className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                            className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
                         />
                         <div>
-                            <span className="text-xs font-medium text-gray-700">Integrity Confirmed</span>
-                            <p className="text-xs text-gray-500">No leaking, broken, or damaged bottles</p>
+                            <span className="text-[10px] font-medium text-gray-700">Integrity Confirmed</span>
+                            <p className="text-[10px] text-gray-500">No leaking, broken, or damaged bottles</p>
                         </div>
                     </label>
 
                     {/* Notes */}
-                    <div className="p-3 border rounded-lg bg-gray-50">
-                        <label className="text-xs font-medium text-gray-700">Verification Notes</label>
+                    <div className="px-3 py-2 border rounded-lg bg-gray-50">
+                        <label className="text-[10px] font-medium text-gray-700">Verification Notes</label>
                         <textarea
                             value={verifyNotes}
                             onChange={e => setVerifyNotes(e.target.value)}
                             rows={2}
                             placeholder="Any issues or notes..."
-                            className="w-full mt-1 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none"
+                            className="w-full mt-0.5 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none"
                         />
                     </div>
                 </div>
 
-                <div className="flex gap-3 pt-2">
-                    <Button
-                        variant="success"
+                <div className="flex gap-2 pt-1">
+                    <button
                         onClick={handleCompleteVerification}
                         disabled={isActionLoading}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded text-xs font-medium bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
                     >
-                        {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <CheckCircle className="w-4 h-4 mr-1" />}
+                        {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
                         Complete Verification
-                    </Button>
-                    <Button
-                        variant="warning"
+                    </button>
+                    <button
                         onClick={() => setDiscModal(true)}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border border-yellow-300 transition-colors"
                     >
-                        <AlertTriangle className="w-4 h-4 mr-1" />Report Discrepancy
-                    </Button>
+                        <AlertTriangle className="w-3.5 h-3.5" />Report Discrepancy
+                    </button>
                 </div>
             </div>
 
             {/* Items Grid */}
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                <div className="flex items-center justify-between px-5 py-3 border-b bg-gray-50">
-                    <h2 className="text-sm font-semibold text-gray-800">Items ({totalCount})</h2>
-                    <div className="flex items-center gap-3">
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-2 border-b bg-gray-50">
+                    <h2 className="text-xs font-semibold text-gray-800">Items ({totalCount})</h2>
+                    <div className="flex items-center gap-2">
                         <div className="relative">
-                            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <Search className="w-3 h-3 absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
                             <input
                                 type="text"
                                 value={itemSearch}
                                 onChange={e => setItemSearch(e.target.value)}
                                 placeholder="Filter items..."
-                                className="pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 w-48"
+                                className="pl-7 pr-3 py-1 text-[11px] border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 w-40"
                             />
                         </div>
                         {verifiedCount < totalCount && (
-                            <Button variant="outline" size="sm" onClick={handleVerifyAll} disabled={isActionLoading}>
-                                <Check className="w-3 h-3 mr-1" />Verify All
-                            </Button>
+                            <button
+                                onClick={handleVerifyAll}
+                                disabled={isActionLoading}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+                            >
+                                <Check className="w-3 h-3" />Verify All
+                            </button>
                         )}
                     </div>
                 </div>
 
                 {filteredItems.length === 0 ? (
-                    <div className="py-8 text-center text-sm text-gray-400">No items found</div>
+                    <div className="py-6 text-center text-xs text-gray-400">No items found</div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full text-xs">
+                        <table className="w-full">
                             <thead>
-                                <tr className="bg-gray-50 border-b">
-                                    <th className="text-center px-3 py-2 font-medium text-gray-600 w-12">✓</th>
-                                    <th className="text-left px-3 py-2 font-medium text-gray-600">NDC</th>
-                                    <th className="text-left px-3 py-2 font-medium text-gray-600">Product</th>
-                                    <th className="text-left px-3 py-2 font-medium text-gray-600">Manufacturer</th>
-                                    <th className="text-left px-3 py-2 font-medium text-gray-600">Lot</th>
-                                    <th className="text-left px-3 py-2 font-medium text-gray-600">Expires</th>
-                                    <th className="text-center px-3 py-2 font-medium text-gray-600">QTY</th>
-                                    <th className="text-center px-3 py-2 font-medium text-gray-600">Status</th>
-                                    <th className="text-center px-3 py-2 font-medium text-gray-600">Destination</th>
+                                <tr className="bg-gray-50 border-b border-gray-200">
+                                    <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 w-10">✓</th>
+                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">NDC</th>
+                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Product</th>
+                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Manufacturer</th>
+                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Lot</th>
+                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Expires</th>
+                                    <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Qty</th>
+                                    <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
+                                    <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Destination</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y divide-gray-100">
                                 {filteredItems.map(item => (
-                                    <tr key={item.id} className={`border-b border-gray-100 ${item.verified ? 'bg-green-50/50' : 'hover:bg-gray-50'}`}>
-                                        <td className="px-3 py-2 text-center">
+                                    <tr key={item.id} className={`${item.verified ? 'bg-green-50/50' : 'hover:bg-gray-50'}`}>
+                                        <td className="px-3 py-1.5 text-center">
                                             <input
                                                 type="checkbox"
                                                 checked={item.verified}
                                                 onChange={e => handleVerifyItem(item, e.target.checked)}
-                                                className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                                                className="w-3.5 h-3.5 text-green-600 border-gray-300 rounded focus:ring-green-500"
                                                 disabled={isActionLoading}
                                             />
                                         </td>
-                                        <td className="px-3 py-2 font-mono text-gray-900">{item.ndc || '—'}</td>
-                                        <td className="px-3 py-2 text-gray-900 max-w-[150px] truncate" title={item.proprietaryName || ''}>{item.proprietaryName || item.genericName || '—'}</td>
-                                        <td className="px-3 py-2 text-gray-600 max-w-[120px] truncate">{item.manufacturer || '—'}</td>
-                                        <td className="px-3 py-2 text-gray-600 font-mono">{item.lotNumber || '—'}</td>
-                                        <td className="px-3 py-2 text-gray-600">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
-                                        <td className="px-3 py-2 text-center text-gray-900">{item.quantity}</td>
-                                        <td className="px-3 py-2 text-center">
+                                        <td className="px-3 py-1.5 text-[11px] font-mono text-gray-900 whitespace-nowrap">{item.ndc || '—'}</td>
+                                        <td className="px-3 py-1.5 text-[11px] text-gray-900 max-w-[140px] truncate" title={item.proprietaryName || ''}>{item.proprietaryName || item.genericName || '—'}</td>
+                                        <td className="px-3 py-1.5 text-[11px] text-gray-600 max-w-[110px] truncate">{item.manufacturer || '—'}</td>
+                                        <td className="px-3 py-1.5 text-[11px] text-gray-600 font-mono whitespace-nowrap">{item.lotNumber || '—'}</td>
+                                        <td className="px-3 py-1.5 text-[11px] text-gray-600 whitespace-nowrap">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
+                                        <td className="px-3 py-1.5 text-[11px] text-center text-gray-900 font-semibold">{item.quantity}</td>
+                                        <td className="px-3 py-1.5 text-center">
                                             <Badge variant={item.returnStatus === 'returnable' ? 'success' : item.returnStatus === 'non_returnable' ? 'danger' : 'warning'}>
-                                                {item.returnStatus === 'non_returnable' ? 'non-ret' : item.returnStatus}
+                                                <span className="text-[10px]">{item.returnStatus === 'non_returnable' ? 'non-ret' : item.returnStatus}</span>
                                             </Badge>
                                         </td>
-                                        <td className="px-3 py-2 text-center capitalize text-gray-600">{item.destination || '—'}</td>
+                                        <td className="px-3 py-1.5 text-[11px] text-center capitalize text-gray-600">{item.destination || '—'}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -422,39 +426,41 @@ export default function WarehouseVerificationPage() {
 
             {/* Discrepancies */}
             {discrepancies.length > 0 && (
-                <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div className="px-5 py-3 border-b bg-red-50">
-                        <h2 className="text-sm font-semibold text-red-800 flex items-center gap-2">
-                            <AlertTriangle className="w-4 h-4" /> Discrepancies ({discrepancies.length})
+                <div className="bg-white rounded-lg shadow overflow-hidden">
+                    <div className="px-4 py-2 border-b bg-red-50">
+                        <h2 className="text-xs font-semibold text-red-800 flex items-center gap-1.5">
+                            <AlertTriangle className="w-3.5 h-3.5" /> Discrepancies ({discrepancies.length})
                         </h2>
                     </div>
                     <div className="overflow-x-auto">
-                        <table className="w-full text-xs">
+                        <table className="w-full">
                             <thead>
-                                <tr className="bg-gray-50 border-b">
-                                    <th className="text-left px-4 py-2 font-medium text-gray-600">Type</th>
-                                    <th className="text-left px-4 py-2 font-medium text-gray-600">Product</th>
-                                    <th className="text-left px-4 py-2 font-medium text-gray-600">NDC</th>
-                                    <th className="text-center px-4 py-2 font-medium text-gray-600">Expected</th>
-                                    <th className="text-center px-4 py-2 font-medium text-gray-600">Actual</th>
-                                    <th className="text-left px-4 py-2 font-medium text-gray-600">Notes</th>
-                                    <th className="text-center px-4 py-2 font-medium text-gray-600">Status</th>
-                                    <th className="text-left px-4 py-2 font-medium text-gray-600">Reported</th>
+                                <tr className="bg-gray-50 border-b border-gray-200">
+                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Type</th>
+                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Product</th>
+                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">NDC</th>
+                                    <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Expected</th>
+                                    <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Actual</th>
+                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Notes</th>
+                                    <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
+                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Reported</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y divide-gray-100">
                                 {discrepancies.map(d => (
-                                    <tr key={d.id} className="border-b border-gray-100">
-                                        <td className="px-4 py-2">{discTypeBadge(d.type)}</td>
-                                        <td className="px-4 py-2 text-gray-900 max-w-[140px] truncate">{d.productName || '—'}</td>
-                                        <td className="px-4 py-2 font-mono text-gray-600">{d.ndc || '—'}</td>
-                                        <td className="px-4 py-2 text-center text-gray-900">{d.expectedQuantity ?? '—'}</td>
-                                        <td className="px-4 py-2 text-center text-gray-900">{d.actualQuantity ?? '—'}</td>
-                                        <td className="px-4 py-2 text-gray-600 max-w-[160px] truncate">{d.notes || '—'}</td>
-                                        <td className="px-4 py-2 text-center">
-                                            <Badge variant={d.status === 'open' ? 'warning' : d.status === 'resolved' ? 'success' : 'secondary'}>{d.status}</Badge>
+                                    <tr key={d.id} className="hover:bg-gray-50">
+                                        <td className="px-3 py-1.5">{discTypeBadge(d.type)}</td>
+                                        <td className="px-3 py-1.5 text-[11px] text-gray-900 max-w-[130px] truncate">{d.productName || '—'}</td>
+                                        <td className="px-3 py-1.5 text-[11px] font-mono text-gray-600">{d.ndc || '—'}</td>
+                                        <td className="px-3 py-1.5 text-[11px] text-center text-gray-900">{d.expectedQuantity ?? '—'}</td>
+                                        <td className="px-3 py-1.5 text-[11px] text-center text-gray-900">{d.actualQuantity ?? '—'}</td>
+                                        <td className="px-3 py-1.5 text-[11px] text-gray-600 max-w-[150px] truncate">{d.notes || '—'}</td>
+                                        <td className="px-3 py-1.5 text-center">
+                                            <Badge variant={d.status === 'open' ? 'warning' : d.status === 'resolved' ? 'success' : 'secondary'}>
+                                                <span className="text-[10px]">{d.status}</span>
+                                            </Badge>
                                         </td>
-                                        <td className="px-4 py-2 text-gray-500">{formatDate(d.createdAt)}</td>
+                                        <td className="px-3 py-1.5 text-[11px] text-gray-500">{formatDate(d.createdAt)}</td>
                                     </tr>
                                 ))}
                             </tbody>

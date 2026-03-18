@@ -157,98 +157,98 @@ export default function BatchDetailPage() {
     const sb = getStatusBadge(batch.status);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-3">
             <ToastContainer toasts={toasts} onClose={id => setToasts(t => t.filter(x => x.id !== id))} />
 
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="flex items-center gap-3">
-                    <Button variant="ghost" size="sm" onClick={() => router.push('/warehouse/batches')}>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div className="flex items-center gap-2">
+                    <button onClick={() => router.push('/warehouse/batches')} className="text-gray-400 hover:text-gray-600 p-0.5">
                         <ArrowLeft className="w-4 h-4" />
-                    </Button>
+                    </button>
                     <div>
-                        <div className="flex items-center gap-2">
-                            <h1 className="text-2xl font-bold text-gray-900">{batch.batchName}</h1>
-                            <Badge variant={sb.variant}>{sb.label}</Badge>
+                        <div className="flex items-center gap-1.5">
+                            <h1 className="text-base font-bold text-gray-900">{batch.batchName}</h1>
+                            <Badge variant={sb.variant}><span className="text-[10px]">{sb.label}</span></Badge>
                         </div>
-                        <p className="text-gray-500 text-sm">{formatBatchMonth(batch.batchMonth)}</p>
+                        <p className="text-xs text-gray-500">{formatBatchMonth(batch.batchMonth)}</p>
                     </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                     {batch.status === 'open' && (
                         <>
-                            <Button variant="primary" onClick={openAssignModal}>
-                                <Plus className="w-4 h-4 mr-1" /> Assign Returns
-                            </Button>
-                            <Button variant="warning" onClick={() => setShowClose(true)} disabled={batch.totalReturns === 0}>
-                                <Lock className="w-4 h-4 mr-1" /> Close Batch
-                            </Button>
+                            <button onClick={openAssignModal} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors">
+                                <Plus className="w-3.5 h-3.5" /> Assign Returns
+                            </button>
+                            <button onClick={() => setShowClose(true)} disabled={batch.totalReturns === 0} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-300 hover:bg-yellow-200 disabled:opacity-40 transition-colors">
+                                <Lock className="w-3.5 h-3.5" /> Close Batch
+                            </button>
                         </>
                     )}
                     {batch.status === 'closed' && !batch.cardinalSubmittedAt && (
-                        <Button variant="success" onClick={() => setShowSubmit(true)}>
-                            <Send className="w-4 h-4 mr-1" /> Mark Cardinal Submitted
-                        </Button>
+                        <button onClick={() => setShowSubmit(true)} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium bg-green-600 text-white hover:bg-green-700 transition-colors">
+                            <Send className="w-3.5 h-3.5" /> Mark Cardinal Submitted
+                        </button>
                     )}
                 </div>
             </div>
 
             {/* Batch Info Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-white rounded-lg shadow p-4">
-                    <p className="text-xs text-gray-500 uppercase font-medium">Returns</p>
-                    <p className="text-2xl font-bold mt-1">{batch.totalReturns}</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <div className="bg-white rounded-lg shadow px-3 py-2">
+                    <p className="text-[10px] text-gray-500 uppercase font-medium">Returns</p>
+                    <p className="text-lg font-bold mt-0.5">{batch.totalReturns}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow p-4">
-                    <p className="text-xs text-gray-500 uppercase font-medium">Debit Memos</p>
-                    <p className="text-2xl font-bold mt-1">{batch.totalDebitMemos}</p>
+                <div className="bg-white rounded-lg shadow px-3 py-2">
+                    <p className="text-[10px] text-gray-500 uppercase font-medium">Debit Memos</p>
+                    <p className="text-lg font-bold mt-0.5">{batch.totalDebitMemos}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow p-4">
-                    <p className="text-xs text-gray-500 uppercase font-medium">Total Value</p>
-                    <p className="text-2xl font-bold mt-1 text-green-700">{formatCurrency(batch.totalValue)}</p>
+                <div className="bg-white rounded-lg shadow px-3 py-2">
+                    <p className="text-[10px] text-gray-500 uppercase font-medium">Total Value</p>
+                    <p className="text-lg font-bold mt-0.5 text-green-700">{formatCurrency(batch.totalValue)}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow p-4">
-                    <p className="text-xs text-gray-500 uppercase font-medium">Cardinal Status</p>
-                    <div className="mt-1">
+                <div className="bg-white rounded-lg shadow px-3 py-2">
+                    <p className="text-[10px] text-gray-500 uppercase font-medium">Cardinal Status</p>
+                    <div className="mt-0.5">
                         {batch.cardinalSubmittedAt ? (
                             <div>
-                                <Badge variant="success">Submitted</Badge>
-                                <p className="text-xs text-gray-500 mt-1">{formatDate(batch.cardinalSubmittedAt)}</p>
+                                <Badge variant="success"><span className="text-[10px]">Submitted</span></Badge>
+                                <p className="text-[10px] text-gray-500 mt-0.5">{formatDate(batch.cardinalSubmittedAt)}</p>
                             </div>
                         ) : batch.cardinalFileGenerated ? (
-                            <Badge variant="info">File Ready</Badge>
+                            <Badge variant="info"><span className="text-[10px]">File Ready</span></Badge>
                         ) : (
-                            <Badge variant="default">Pending</Badge>
+                            <Badge variant="default"><span className="text-[10px]">Pending</span></Badge>
                         )}
                     </div>
                 </div>
             </div>
 
             {/* Batch Metadata */}
-            <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Batch Details</h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div className="bg-white rounded-lg shadow px-4 py-3">
+                <h2 className="text-xs font-semibold text-gray-900 mb-2">Batch Details</h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div>
-                        <p className="text-gray-500">Created</p>
-                        <p className="font-medium">{formatDateTime(batch.createdAt)}</p>
+                        <p className="text-[10px] text-gray-500">Created</p>
+                        <p className="text-xs font-medium">{formatDateTime(batch.createdAt)}</p>
                     </div>
                     {batch.closedAt && (
                         <div>
-                            <p className="text-gray-500">Closed</p>
-                            <p className="font-medium">{formatDateTime(batch.closedAt)}</p>
+                            <p className="text-[10px] text-gray-500">Closed</p>
+                            <p className="text-xs font-medium">{formatDateTime(batch.closedAt)}</p>
                         </div>
                     )}
                     {batch.cardinalApprovedAt && (
                         <div>
-                            <p className="text-gray-500">Cardinal Approved</p>
-                            <p className="font-medium">{formatDateTime(batch.cardinalApprovedAt)}</p>
+                            <p className="text-[10px] text-gray-500">Cardinal Approved</p>
+                            <p className="text-xs font-medium">{formatDateTime(batch.cardinalApprovedAt)}</p>
                         </div>
                     )}
                     {batch.cardinalFileUrl && (
                         <div>
-                            <p className="text-gray-500">Cardinal File</p>
+                            <p className="text-[10px] text-gray-500">Cardinal File</p>
                             <a href={batch.cardinalFileUrl} target="_blank" rel="noopener noreferrer"
-                               className="text-primary-600 hover:underline flex items-center gap-1">
+                               className="text-xs text-primary-600 hover:underline flex items-center gap-1">
                                 Download <ExternalLink className="w-3 h-3" />
                             </a>
                         </div>
@@ -260,43 +260,43 @@ export default function BatchDetailPage() {
             <div className="bg-white rounded-lg shadow overflow-hidden">
                 <button
                     onClick={() => setReturnsExpanded(e => !e)}
-                    className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors"
+                    className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 transition-colors"
                 >
-                    <div className="flex items-center gap-2">
-                        <Package className="w-5 h-5 text-gray-600" />
-                        <h2 className="text-lg font-semibold text-gray-900">Returns in Batch</h2>
-                        <Badge variant="default">{batchReturns.length}</Badge>
+                    <div className="flex items-center gap-1.5">
+                        <Package className="w-3.5 h-3.5 text-gray-600" />
+                        <h2 className="text-xs font-semibold text-gray-900">Returns in Batch</h2>
+                        <Badge variant="default"><span className="text-[10px]">{batchReturns.length}</span></Badge>
                     </div>
-                    {returnsExpanded ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
+                    {returnsExpanded ? <ChevronUp className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
                 </button>
 
                 {returnsExpanded && (
                     <div className="border-t border-gray-200">
                         {batchReturns.length === 0 ? (
-                            <p className="text-center py-8 text-gray-500">No returns assigned yet.</p>
+                            <p className="text-center py-6 text-xs text-gray-500">No returns assigned yet.</p>
                         ) : (
                             <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-50">
+                                <table className="min-w-full">
+                                    <thead className="bg-gray-50 border-b border-gray-200">
                                         <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">License Plate</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pharmacy</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Items</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Value</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tracking</th>
+                                            <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">License Plate</th>
+                                            <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Pharmacy</th>
+                                            <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Status</th>
+                                            <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Items</th>
+                                            <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Value</th>
+                                            <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Tracking</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-200">
+                                    <tbody className="divide-y divide-gray-100">
                                         {batchReturns.map((rt: ReturnTransaction) => (
                                             <tr key={rt.id} className="hover:bg-gray-50 cursor-pointer"
                                                 onClick={() => router.push(`/warehouse/returns/${rt.id}`)}>
-                                                <td className="px-6 py-3 text-sm font-medium text-gray-900">{rt.licensePlate}</td>
-                                                <td className="px-6 py-3 text-sm text-gray-700">{rt.pharmacyName}</td>
-                                                <td className="px-6 py-3 text-sm"><Badge variant="default">{rt.status?.replace(/_/g, ' ')}</Badge></td>
-                                                <td className="px-6 py-3 text-sm text-gray-700">{rt.totalItems}</td>
-                                                <td className="px-6 py-3 text-sm font-medium">{formatCurrency(rt.totalReturnableValue || 0)}</td>
-                                                <td className="px-6 py-3 text-sm text-gray-500">{rt.fedexTracking || '—'}</td>
+                                                <td className="px-3 py-1.5 text-xs font-medium text-gray-900">{rt.licensePlate}</td>
+                                                <td className="px-3 py-1.5 text-xs text-gray-700">{rt.pharmacyName}</td>
+                                                <td className="px-3 py-1.5"><Badge variant="default"><span className="text-[10px]">{rt.status?.replace(/_/g, ' ')}</span></Badge></td>
+                                                <td className="px-3 py-1.5 text-xs text-gray-700">{rt.totalItems}</td>
+                                                <td className="px-3 py-1.5 text-xs font-medium">{formatCurrency(rt.totalReturnableValue || 0)}</td>
+                                                <td className="px-3 py-1.5 text-[11px] text-gray-500">{rt.fedexTracking || '—'}</td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -310,35 +310,35 @@ export default function BatchDetailPage() {
             {/* ── Assign Returns Modal ──────────────────────────────── */}
             {showAssign && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowAssign(false)}>
-                    <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
-                        <div className="p-6 border-b border-gray-200">
+                    <div className="bg-white rounded-lg shadow-xl max-w-xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                        <div className="px-4 py-3 border-b border-gray-200">
                             <div className="flex items-center justify-between">
-                                <h2 className="text-lg font-bold text-gray-900">Assign Returns to Batch</h2>
-                                <button onClick={() => setShowAssign(false)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                                <h2 className="text-sm font-bold text-gray-900">Assign Returns to Batch</h2>
+                                <button onClick={() => setShowAssign(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
                             </div>
-                            <div className="relative mt-3">
-                                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <div className="relative mt-2">
+                                <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                                 <input
                                     type="text"
                                     placeholder="Search by license plate, pharmacy, tracking..."
-                                    className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary-500"
+                                    className="w-full pl-8 pr-3 py-1.5 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary-500"
                                     value={assignSearch}
                                     onChange={e => setAssignSearch(e.target.value)}
                                 />
                             </div>
                         </div>
 
-                        <div className="overflow-y-auto flex-1 p-6">
+                        <div className="overflow-y-auto flex-1 p-3">
                             {filteredReceived.length === 0 ? (
-                                <p className="text-center py-8 text-gray-500">No received returns available for assignment.</p>
+                                <p className="text-center py-6 text-xs text-gray-500">No received returns available for assignment.</p>
                             ) : (
-                                <div className="space-y-2">
+                                <div className="space-y-1.5">
                                     {filteredReceived.map(rt => {
                                         const selected = selectedReturnIds.includes(rt.id);
                                         return (
                                             <label
                                                 key={rt.id}
-                                                className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
+                                                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border-2 cursor-pointer transition-colors ${
                                                     selected ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-gray-300'
                                                 }`}
                                             >
@@ -346,13 +346,13 @@ export default function BatchDetailPage() {
                                                     type="checkbox"
                                                     checked={selected}
                                                     onChange={() => toggleReturnSelection(rt.id)}
-                                                    className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
+                                                    className="w-3.5 h-3.5 text-primary-600 rounded focus:ring-primary-500"
                                                 />
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium text-gray-900">{rt.licensePlate}</p>
-                                                    <p className="text-xs text-gray-500">{rt.pharmacyName} · {rt.totalItems} items · {formatCurrency(rt.totalReturnableValue || 0)}</p>
+                                                    <p className="text-xs font-medium text-gray-900">{rt.licensePlate}</p>
+                                                    <p className="text-[10px] text-gray-500">{rt.pharmacyName} · {rt.totalItems} items · {formatCurrency(rt.totalReturnableValue || 0)}</p>
                                                 </div>
-                                                <Badge variant="default">{rt.status?.replace(/_/g, ' ')}</Badge>
+                                                <Badge variant="default"><span className="text-[10px]">{rt.status?.replace(/_/g, ' ')}</span></Badge>
                                             </label>
                                         );
                                     })}
@@ -360,14 +360,14 @@ export default function BatchDetailPage() {
                             )}
                         </div>
 
-                        <div className="p-6 border-t border-gray-200 flex items-center justify-between">
-                            <p className="text-sm text-gray-500">{selectedReturnIds.length} selected</p>
-                            <div className="flex gap-3">
-                                <Button variant="ghost" onClick={() => setShowAssign(false)}>Cancel</Button>
-                                <Button variant="primary" onClick={handleAssign} disabled={isActionLoading || selectedReturnIds.length === 0}>
-                                    {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Plus className="w-4 h-4 mr-1" />}
+                        <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
+                            <p className="text-xs text-gray-500">{selectedReturnIds.length} selected</p>
+                            <div className="flex gap-2">
+                                <button onClick={() => setShowAssign(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                                <button onClick={handleAssign} disabled={isActionLoading || selectedReturnIds.length === 0} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                                    {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
                                     Assign ({selectedReturnIds.length})
-                                </Button>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -377,30 +377,30 @@ export default function BatchDetailPage() {
             {/* ── Close Batch Confirm ──────────────────────────────── */}
             {showClose && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowClose(false)}>
-                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-                                <Lock className="w-5 h-5 text-yellow-600" />
+                    <div className="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 p-4" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center gap-2.5 mb-3">
+                            <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <Lock className="w-4 h-4 text-yellow-600" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-bold text-gray-900">Close Batch</h3>
-                                <p className="text-sm text-gray-500">This will generate debit memos and cannot be undone.</p>
+                                <h3 className="text-sm font-bold text-gray-900">Close Batch</h3>
+                                <p className="text-xs text-gray-500">This will generate debit memos and cannot be undone.</p>
                             </div>
                         </div>
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-800 mb-4">
-                            <p className="font-medium">This action will:</p>
-                            <ul className="list-disc ml-5 mt-1 space-y-1">
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2.5 text-xs text-yellow-800 mb-3">
+                            <p className="font-medium mb-1">This action will:</p>
+                            <ul className="list-disc ml-4 space-y-0.5">
                                 <li>Lock the batch from further changes</li>
                                 <li>Generate debit memos grouped by pharmacy + destination + labeler</li>
                                 <li>Validate all items have destinations (no TBD items allowed)</li>
                             </ul>
                         </div>
-                        <div className="flex justify-end gap-3">
-                            <Button variant="ghost" onClick={() => setShowClose(false)}>Cancel</Button>
-                            <Button variant="warning" onClick={handleClose} disabled={isActionLoading}>
-                                {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Lock className="w-4 h-4 mr-1" />}
+                        <div className="flex justify-end gap-2">
+                            <button onClick={() => setShowClose(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button onClick={handleClose} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-50 transition-colors">
+                                {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Lock className="w-3.5 h-3.5" />}
                                 Close Batch
-                            </Button>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -409,25 +409,25 @@ export default function BatchDetailPage() {
             {/* ── Submit Cardinal Confirm ──────────────────────────── */}
             {showSubmit && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowSubmit(false)}>
-                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                                <Send className="w-5 h-5 text-green-600" />
+                    <div className="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 p-4" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center gap-2.5 mb-3">
+                            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <Send className="w-4 h-4 text-green-600" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-bold text-gray-900">Submit to Cardinal</h3>
-                                <p className="text-sm text-gray-500">Mark this batch as submitted to Cardinal.</p>
+                                <h3 className="text-sm font-bold text-gray-900">Submit to Cardinal</h3>
+                                <p className="text-xs text-gray-500">Mark this batch as submitted to Cardinal.</p>
                             </div>
                         </div>
-                        <p className="text-sm text-gray-600 mb-4">
+                        <p className="text-xs text-gray-600 mb-3">
                             This records that the Cardinal file for batch <strong>{batch.batchName}</strong> has been submitted.
                         </p>
-                        <div className="flex justify-end gap-3">
-                            <Button variant="ghost" onClick={() => setShowSubmit(false)}>Cancel</Button>
-                            <Button variant="success" onClick={handleSubmitCardinal} disabled={isActionLoading}>
-                                {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Send className="w-4 h-4 mr-1" />}
+                        <div className="flex justify-end gap-2">
+                            <button onClick={() => setShowSubmit(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button onClick={handleSubmitCardinal} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors">
+                                {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                                 Confirm Submission
-                            </Button>
+                            </button>
                         </div>
                     </div>
                 </div>

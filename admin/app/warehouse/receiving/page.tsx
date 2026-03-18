@@ -93,15 +93,15 @@ export default function WarehouseReceivingPage() {
     ];
 
     return (
-        <div className="space-y-6">
-            <ToastContainer toasts={toasts} removeToast={removeToast} />
+        <div className="space-y-3">
+            <ToastContainer toasts={toasts} onClose={removeToast} />
 
             {/* Header */}
             <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
-                    <PackageCheck className="w-6 h-6 text-primary-600" /> Warehouse Receiving
+                <h1 className="text-lg font-bold text-gray-900 flex items-center gap-1.5">
+                    <PackageCheck className="w-4 h-4 text-primary-600" /> Warehouse Receiving
                 </h1>
-                <p className="text-sm text-gray-500 mt-1">Scan FedEx tracking to receive returns, then verify contents</p>
+                <p className="text-xs text-gray-500">Scan FedEx tracking to receive returns, then verify contents</p>
             </div>
 
             {/* Tabs */}
@@ -110,25 +110,25 @@ export default function WarehouseReceivingPage() {
                     <button
                         key={t.key}
                         onClick={() => setTab(t.key)}
-                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                        className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                             tab === t.key ? 'bg-white text-primary-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'
                         }`}
                     >
-                        <t.icon className="w-4 h-4" />{t.label}
+                        <t.icon className="w-3.5 h-3.5" />{t.label}
                     </button>
                 ))}
             </div>
 
             {/* ── Tab: Scan & Receive ─────────────────────── */}
             {tab === 'scan' && (
-                <div className="space-y-4">
-                    <div className="bg-white rounded-lg shadow-md p-6">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            <Truck className="w-4 h-4 inline mr-1" />Scan FedEx Tracking Number
+                <div className="space-y-3">
+                    <div className="bg-white rounded-lg shadow px-4 py-3">
+                        <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                            <Truck className="w-3.5 h-3.5 inline mr-1" />Scan FedEx Tracking Number
                         </label>
-                        <div className="flex gap-3">
+                        <div className="flex gap-2">
                             <div className="relative flex-1">
-                                <ScanLine className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                <ScanLine className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                                 <input
                                     ref={inputRef}
                                     type="text"
@@ -136,7 +136,7 @@ export default function WarehouseReceivingPage() {
                                     onChange={e => setTrackingInput(e.target.value)}
                                     onKeyDown={handleScanKeyDown}
                                     placeholder="Scan or type FedEx tracking number, then press Enter"
-                                    className="w-full pl-10 pr-4 py-3 text-lg border-2 border-primary-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-primary-50 font-mono"
+                                    className="w-full pl-9 pr-3 py-2 text-sm border-2 border-primary-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-primary-50 font-mono"
                                     autoFocus
                                     disabled={isActionLoading}
                                 />
@@ -145,21 +145,21 @@ export default function WarehouseReceivingPage() {
                                 variant="primary"
                                 onClick={handleScan}
                                 disabled={isActionLoading || !trackingInput.trim()}
-                                className="px-6"
+                                className="px-4"
                             >
-                                {isActionLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Receive'}
+                                {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Receive'}
                             </Button>
                         </div>
-                        <p className="text-xs text-gray-400 mt-2">Use a barcode scanner pointed at the FedEx label, or type the tracking number manually.</p>
+                        <p className="text-[10px] text-gray-400 mt-1">Use a barcode scanner pointed at the FedEx label, or type the tracking number manually.</p>
                     </div>
 
                     {/* Error */}
                     {receiveError && (
-                        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
-                            <XCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                        <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-2.5 flex items-start gap-2.5">
+                            <XCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
                             <div>
-                                <p className="text-sm font-medium text-red-800">Could not receive return</p>
-                                <p className="text-sm text-red-600 mt-0.5">{receiveError}</p>
+                                <p className="text-xs font-medium text-red-800">Could not receive return</p>
+                                <p className="text-xs text-red-600">{receiveError}</p>
                             </div>
                         </div>
                     )}
@@ -167,54 +167,34 @@ export default function WarehouseReceivingPage() {
                     {/* Success — received return details */}
                     {receivedReturn && (
                         <div className="bg-green-50 border-2 border-green-300 rounded-lg overflow-hidden">
-                            <div className="bg-green-100 px-5 py-3 flex items-center gap-3">
-                                <CheckCircle className="w-6 h-6 text-green-600" />
-                                <h3 className="text-lg font-semibold text-green-800">Return Received Successfully</h3>
+                            <div className="bg-green-100 px-4 py-2 flex items-center gap-2">
+                                <CheckCircle className="w-4 h-4 text-green-600" />
+                                <h3 className="text-sm font-semibold text-green-800">Return Received Successfully</h3>
                             </div>
-                            <div className="p-5 space-y-4">
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    <div>
-                                        <p className="text-xs text-gray-500">License Plate</p>
-                                        <p className="text-sm font-mono font-bold text-gray-900">{receivedReturn.licensePlate}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-500">Pharmacy</p>
-                                        <p className="text-sm font-medium text-gray-900">{receivedReturn.pharmacyName}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-500">Total Items</p>
-                                        <p className="text-sm font-medium text-gray-900">{receivedReturn.totalItems}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-500">FedEx Tracking</p>
-                                        <p className="text-sm font-mono text-gray-900">{receivedReturn.fedexTracking}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-500">Returnable Value</p>
-                                        <p className="text-sm font-medium text-green-700">${Number(receivedReturn.totalReturnableValue).toFixed(2)}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-500">Box Count</p>
-                                        <p className="text-sm text-gray-900">{receivedReturn.boxCount ?? '—'}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-500">Status</p>
-                                        <Badge variant="success">Received</Badge>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-500">Received At</p>
-                                        <p className="text-sm text-gray-900">{receivedReturn.receivedInWarehouseDate ? formatDateTime(receivedReturn.receivedInWarehouseDate) : 'Just now'}</p>
-                                    </div>
+                            <div className="p-4 space-y-3">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                    {[
+                                        { label: 'License Plate', value: <span className="font-mono font-bold">{receivedReturn.licensePlate}</span> },
+                                        { label: 'Pharmacy', value: receivedReturn.pharmacyName },
+                                        { label: 'Total Items', value: receivedReturn.totalItems },
+                                        { label: 'FedEx Tracking', value: <span className="font-mono">{receivedReturn.fedexTracking}</span> },
+                                        { label: 'Returnable Value', value: <span className="text-green-700">${Number(receivedReturn.totalReturnableValue).toFixed(2)}</span> },
+                                        { label: 'Box Count', value: receivedReturn.boxCount ?? '—' },
+                                        { label: 'Status', value: <Badge variant="success"><span className="text-[10px]">Received</span></Badge> },
+                                        { label: 'Received At', value: receivedReturn.receivedInWarehouseDate ? formatDateTime(receivedReturn.receivedInWarehouseDate) : 'Just now' },
+                                    ].map(({ label, value }) => (
+                                        <div key={label}>
+                                            <p className="text-[10px] text-gray-500">{label}</p>
+                                            <p className="text-xs font-medium text-gray-900 mt-0.5">{value}</p>
+                                        </div>
+                                    ))}
                                 </div>
-                                <div className="flex gap-3 pt-2 border-t border-green-200">
-                                    <Button
-                                        variant="primary"
-                                        onClick={() => router.push(`/warehouse/receiving/${receivedReturn.id}`)}
-                                    >
-                                        <ArrowRight className="w-4 h-4 mr-1" />Start Verification
+                                <div className="flex gap-2 pt-2 border-t border-green-200">
+                                    <Button variant="primary" size="sm" onClick={() => router.push(`/warehouse/receiving/${receivedReturn.id}`)}>
+                                        <ArrowRight className="w-3.5 h-3.5 mr-1" />Start Verification
                                     </Button>
-                                    <Button variant="outline" onClick={handleReceiveAnother}>
-                                        <RotateCcw className="w-4 h-4 mr-1" />Receive Another
+                                    <Button variant="outline" size="sm" onClick={handleReceiveAnother}>
+                                        <RotateCcw className="w-3.5 h-3.5 mr-1" />Receive Another
                                     </Button>
                                 </div>
                             </div>
@@ -225,55 +205,55 @@ export default function WarehouseReceivingPage() {
 
             {/* ── Tab: Pending ────────────────────────────── */}
             {tab === 'pending' && (
-                <div className="space-y-4">
-                    <div className="bg-white rounded-lg shadow-md p-4">
+                <div className="space-y-2">
+                    <div className="bg-white rounded-lg shadow px-3 py-2">
                         <div className="relative">
-                            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                             <input
                                 type="text"
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
                                 placeholder="Search by license plate, tracking, or pharmacy..."
-                                className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
                             />
                         </div>
                     </div>
 
                     {isLoading ? (
-                        <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-primary-600" /></div>
+                        <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 animate-spin text-primary-600" /></div>
                     ) : pendingReturns.length === 0 ? (
-                        <div className="bg-white rounded-lg shadow-md p-12 text-center">
-                            <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                            <p className="text-gray-500">No finalized returns awaiting check-in</p>
+                        <div className="bg-white rounded-lg shadow p-10 text-center">
+                            <Package className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                            <p className="text-xs text-gray-500">No finalized returns awaiting check-in</p>
                         </div>
                     ) : (
-                        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                            <table className="w-full text-sm">
+                        <div className="bg-white rounded-lg shadow overflow-hidden">
+                            <table className="w-full">
                                 <thead>
-                                    <tr className="bg-gray-50 border-b">
-                                        <th className="text-left px-4 py-3 font-medium text-gray-600">License Plate</th>
-                                        <th className="text-left px-4 py-3 font-medium text-gray-600">Pharmacy</th>
-                                        <th className="text-left px-4 py-3 font-medium text-gray-600">FedEx Tracking</th>
-                                        <th className="text-center px-4 py-3 font-medium text-gray-600">Items</th>
-                                        <th className="text-center px-4 py-3 font-medium text-gray-600">Boxes</th>
-                                        <th className="text-left px-4 py-3 font-medium text-gray-600">Finalized</th>
+                                    <tr className="bg-gray-50 border-b border-gray-200">
+                                        <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">License Plate</th>
+                                        <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Pharmacy</th>
+                                        <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">FedEx Tracking</th>
+                                        <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Items</th>
+                                        <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Boxes</th>
+                                        <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Finalized</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody className="divide-y divide-gray-100">
                                     {pendingReturns.map(r => (
-                                        <tr key={r.id} className="border-b border-gray-100 hover:bg-gray-50">
-                                            <td className="px-4 py-3 font-mono font-semibold text-gray-900">{r.licensePlate}</td>
-                                            <td className="px-4 py-3 text-gray-700">{r.pharmacyName}</td>
-                                            <td className="px-4 py-3 font-mono text-xs text-gray-600">{r.fedexTracking || '—'}</td>
-                                            <td className="px-4 py-3 text-center text-gray-900">{r.totalItems}</td>
-                                            <td className="px-4 py-3 text-center text-gray-900">{r.boxCount ?? '—'}</td>
-                                            <td className="px-4 py-3 text-gray-500 text-xs">{r.finalizedAt ? formatDate(r.finalizedAt) : '—'}</td>
+                                        <tr key={r.id} className="hover:bg-gray-50">
+                                            <td className="px-3 py-1.5 text-xs font-mono font-semibold text-gray-900">{r.licensePlate}</td>
+                                            <td className="px-3 py-1.5 text-xs text-gray-700">{r.pharmacyName}</td>
+                                            <td className="px-3 py-1.5 text-[11px] font-mono text-gray-600">{r.fedexTracking || '—'}</td>
+                                            <td className="px-3 py-1.5 text-xs text-center text-gray-900">{r.totalItems}</td>
+                                            <td className="px-3 py-1.5 text-xs text-center text-gray-900">{r.boxCount ?? '—'}</td>
+                                            <td className="px-3 py-1.5 text-[11px] text-gray-500">{r.finalizedAt ? formatDate(r.finalizedAt) : '—'}</td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                             {pendingPagination && pendingPagination.totalPages > 1 && (
-                                <div className="flex justify-between items-center px-4 py-3 border-t bg-gray-50 text-xs text-gray-500">
+                                <div className="flex justify-between items-center px-3 py-2 border-t bg-gray-50 text-[10px] text-gray-500">
                                     <span>Page {pendingPagination.page} of {pendingPagination.totalPages} ({pendingPagination.total} total)</span>
                                 </div>
                             )}
@@ -284,69 +264,68 @@ export default function WarehouseReceivingPage() {
 
             {/* ── Tab: Received ───────────────────────────── */}
             {tab === 'received' && (
-                <div className="space-y-4">
-                    <div className="bg-white rounded-lg shadow-md p-4">
+                <div className="space-y-2">
+                    <div className="bg-white rounded-lg shadow px-3 py-2">
                         <div className="relative">
-                            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                             <input
                                 type="text"
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
                                 placeholder="Search by license plate, tracking, or pharmacy..."
-                                className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
                             />
                         </div>
                     </div>
 
                     {isLoading ? (
-                        <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-primary-600" /></div>
+                        <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 animate-spin text-primary-600" /></div>
                     ) : receivedReturns.length === 0 ? (
-                        <div className="bg-white rounded-lg shadow-md p-12 text-center">
-                            <CheckCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                            <p className="text-gray-500">No received returns awaiting verification</p>
+                        <div className="bg-white rounded-lg shadow p-10 text-center">
+                            <CheckCircle className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                            <p className="text-xs text-gray-500">No received returns awaiting verification</p>
                         </div>
                     ) : (
-                        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                            <table className="w-full text-sm">
+                        <div className="bg-white rounded-lg shadow overflow-hidden">
+                            <table className="w-full">
                                 <thead>
-                                    <tr className="bg-gray-50 border-b">
-                                        <th className="text-left px-4 py-3 font-medium text-gray-600">License Plate</th>
-                                        <th className="text-left px-4 py-3 font-medium text-gray-600">Pharmacy</th>
-                                        <th className="text-center px-4 py-3 font-medium text-gray-600">Items</th>
-                                        <th className="text-left px-4 py-3 font-medium text-gray-600">Received</th>
-                                        <th className="text-center px-4 py-3 font-medium text-gray-600">Verified</th>
-                                        <th className="text-right px-4 py-3 font-medium text-gray-600">Actions</th>
+                                    <tr className="bg-gray-50 border-b border-gray-200">
+                                        <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">License Plate</th>
+                                        <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Pharmacy</th>
+                                        <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Items</th>
+                                        <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Received</th>
+                                        <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Verified</th>
+                                        <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody className="divide-y divide-gray-100">
                                     {receivedReturns.map(r => (
-                                        <tr key={r.id} className="border-b border-gray-100 hover:bg-gray-50">
-                                            <td className="px-4 py-3 font-mono font-semibold text-gray-900">{r.licensePlate}</td>
-                                            <td className="px-4 py-3 text-gray-700">{r.pharmacyName}</td>
-                                            <td className="px-4 py-3 text-center text-gray-900">{r.totalItems}</td>
-                                            <td className="px-4 py-3 text-gray-500 text-xs">{r.receivedInWarehouseDate ? formatDateTime(r.receivedInWarehouseDate) : '—'}</td>
-                                            <td className="px-4 py-3 text-center">
+                                        <tr key={r.id} className="hover:bg-gray-50">
+                                            <td className="px-3 py-1.5 text-xs font-mono font-semibold text-gray-900">{r.licensePlate}</td>
+                                            <td className="px-3 py-1.5 text-xs text-gray-700">{r.pharmacyName}</td>
+                                            <td className="px-3 py-1.5 text-xs text-center text-gray-900">{r.totalItems}</td>
+                                            <td className="px-3 py-1.5 text-[11px] text-gray-500">{r.receivedInWarehouseDate ? formatDateTime(r.receivedInWarehouseDate) : '—'}</td>
+                                            <td className="px-3 py-1.5 text-center">
                                                 {r.verifiedIntegrity ? (
-                                                    <Badge variant="success">Verified</Badge>
+                                                    <Badge variant="success"><span className="text-[10px]">Verified</span></Badge>
                                                 ) : (
-                                                    <Badge variant="warning">Pending</Badge>
+                                                    <Badge variant="warning"><span className="text-[10px]">Pending</span></Badge>
                                                 )}
                                             </td>
-                                            <td className="px-4 py-3 text-right">
-                                                <Button
-                                                    variant="primary"
-                                                    size="sm"
+                                            <td className="px-3 py-1.5 text-right">
+                                                <button
                                                     onClick={() => router.push(`/warehouse/receiving/${r.id}`)}
+                                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors whitespace-nowrap"
                                                 >
-                                                    Verify <ArrowRight className="w-3 h-3 ml-1" />
-                                                </Button>
+                                                    Verify <ArrowRight className="w-3 h-3" />
+                                                </button>
                                             </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                             {receivedPagination && receivedPagination.totalPages > 1 && (
-                                <div className="flex justify-between items-center px-4 py-3 border-t bg-gray-50 text-xs text-gray-500">
+                                <div className="flex justify-between items-center px-3 py-2 border-t bg-gray-50 text-[10px] text-gray-500">
                                     <span>Page {receivedPagination.page} of {receivedPagination.totalPages} ({receivedPagination.total} total)</span>
                                 </div>
                             )}

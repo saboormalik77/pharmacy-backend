@@ -94,41 +94,44 @@ export default function PoliciesPage() {
     };
 
     return (
-        <div className="space-y-6">
-            <ToastContainer toasts={toasts} removeToast={removeToast} />
+        <div className="space-y-3">
+            <ToastContainer toasts={toasts} onClose={removeToast} />
 
             {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
-                        <Shield className="w-6 h-6 text-primary-600" /> Manufacturer Policies
+                    <h1 className="text-lg font-bold text-gray-900 flex items-center gap-1.5">
+                        <Shield className="w-4 h-4 text-primary-600" /> Manufacturer Policies
                     </h1>
-                    <p className="text-sm text-gray-500 mt-1">Manage return policies, exceptions, and timing rules</p>
+                    <p className="text-xs text-gray-500">Manage return policies, exceptions, and timing rules</p>
                 </div>
-                <Button variant="primary" onClick={() => setAddModal(true)}>
-                    <Plus className="w-4 h-4 mr-1" /> Add Policy
-                </Button>
+                <button
+                    onClick={() => setAddModal(true)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary-600 text-white text-xs font-medium hover:bg-primary-700 transition-colors whitespace-nowrap"
+                >
+                    <Plus className="w-3.5 h-3.5" /> Add Policy
+                </button>
             </div>
 
             {/* Filters */}
-            <div className="bg-white rounded-lg shadow-md p-4">
-                <div className="flex flex-col sm:flex-row gap-3">
-                    <div className="relative flex-1">
-                        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <div className="bg-white rounded-lg shadow px-3 py-2">
+                <div className="flex flex-wrap gap-2">
+                    <div className="relative flex-1 min-w-[160px]">
+                        <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                         <input
                             type="text"
                             value={search}
                             onChange={e => setSearch(e.target.value)}
-                            placeholder="Search by manufacturer name, labeler ID, or email..."
-                            className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            placeholder="Search manufacturer, labeler ID, email..."
+                            className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
                         />
                     </div>
-                    <select value={labelerType} onChange={e => setLabelerType(e.target.value)} className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <select value={labelerType} onChange={e => setLabelerType(e.target.value)} className="px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500">
                         <option value="all">All Types</option>
                         <option value="generic">Generic</option>
                         <option value="brand">Brand</option>
                     </select>
-                    <select value={destination} onChange={e => setDestination(e.target.value)} className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <select value={destination} onChange={e => setDestination(e.target.value)} className="px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500">
                         <option value="all">All Destinations</option>
                         <option value="inmar">Inmar</option>
                         <option value="qualanex">Qualanex</option>
@@ -138,36 +141,36 @@ export default function PoliciesPage() {
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="bg-white rounded-lg shadow overflow-hidden">
                 {isLoading ? (
-                    <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-primary-600" /></div>
+                    <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary-600" /></div>
                 ) : error ? (
-                    <div className="text-center py-16">
-                        <AlertCircle className="w-10 h-10 text-red-400 mx-auto mb-3" />
-                        <p className="text-red-600 text-sm">{error}</p>
+                    <div className="text-center py-12">
+                        <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-2" />
+                        <p className="text-red-600 text-xs">{error}</p>
                     </div>
                 ) : policies.length === 0 ? (
-                    <div className="text-center py-16">
-                        <Shield className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                        <p className="text-gray-500 font-medium">No policies found</p>
-                        <p className="text-gray-400 text-sm mt-1">Add your first manufacturer policy to get started.</p>
+                    <div className="text-center py-12">
+                        <Shield className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                        <p className="text-gray-500 text-sm font-medium">No policies found</p>
+                        <p className="text-gray-400 text-xs mt-1">Add your first manufacturer policy to get started.</p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
+                        <table className="w-full">
                             <thead>
                                 <tr className="bg-gray-50 border-b border-gray-200">
-                                    <th className="text-left px-4 py-3 font-medium text-gray-500 uppercase text-xs tracking-wider">Labeler ID</th>
-                                    <th className="text-left px-4 py-3 font-medium text-gray-500 uppercase text-xs tracking-wider">Manufacturer</th>
-                                    <th className="text-left px-4 py-3 font-medium text-gray-500 uppercase text-xs tracking-wider">Type</th>
-                                    <th className="text-left px-4 py-3 font-medium text-gray-500 uppercase text-xs tracking-wider">Destinations</th>
-                                    <th className="text-center px-4 py-3 font-medium text-gray-500 uppercase text-xs tracking-wider">Partials</th>
-                                    <th className="text-right px-4 py-3 font-medium text-gray-500 uppercase text-xs tracking-wider">Avg Pay %</th>
-                                    <th className="text-right px-4 py-3 font-medium text-gray-500 uppercase text-xs tracking-wider">Avg Days</th>
-                                    <th className="text-right px-4 py-3 font-medium text-gray-500 uppercase text-xs tracking-wider">Actions</th>
+                                    <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Labeler ID</th>
+                                    <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Manufacturer</th>
+                                    <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Type</th>
+                                    <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Destinations</th>
+                                    <th className="text-center px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Partials</th>
+                                    <th className="text-right px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Avg Pay %</th>
+                                    <th className="text-right px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Avg Days</th>
+                                    <th className="text-right px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y divide-gray-100">
                                 {policies.map(p => {
                                     const dests = getDestinations(p);
                                     const hasPartials = (p.returnPolicies || []).some(rp => rp.partialsAccepted);
@@ -175,38 +178,40 @@ export default function PoliciesPage() {
                                         <tr
                                             key={p.id}
                                             onClick={() => router.push(`/policies/${p.id}`)}
-                                            className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
+                                            className="hover:bg-gray-50 cursor-pointer transition-colors"
                                         >
-                                            <td className="px-4 py-3 font-mono text-gray-900 font-medium">{p.labelerId}</td>
-                                            <td className="px-4 py-3 text-gray-900 max-w-[200px] truncate" title={p.manufacturerName}>{p.manufacturerName}</td>
-                                            <td className="px-4 py-3">
+                                            <td className="px-3 py-1.5 text-xs font-mono text-gray-900 font-semibold whitespace-nowrap">{p.labelerId}</td>
+                                            <td className="px-3 py-1.5 text-xs text-gray-800 max-w-[180px] truncate" title={p.manufacturerName}>{p.manufacturerName}</td>
+                                            <td className="px-3 py-1.5">
                                                 <Badge variant={p.labelerType === 'brand' ? 'info' : 'default'}>
-                                                    {p.labelerType === 'brand' ? 'Brand' : 'Generic'}
+                                                    <span className="text-[10px]">{p.labelerType === 'brand' ? 'Brand' : 'Generic'}</span>
                                                 </Badge>
                                             </td>
-                                            <td className="px-4 py-3">
+                                            <td className="px-3 py-1.5">
                                                 <div className="flex flex-wrap gap-1">
                                                     {dests.length > 0 ? dests.map(d => (
-                                                        <Badge key={d} variant={getDestBadgeVariant(d)}>{d}</Badge>
+                                                        <Badge key={d} variant={getDestBadgeVariant(d)}><span className="text-[10px]">{d}</span></Badge>
                                                     )) : <span className="text-gray-400 text-xs">—</span>}
                                                 </div>
                                             </td>
-                                            <td className="px-4 py-3 text-center">
-                                                {hasPartials ? <Badge variant="success">Yes</Badge> : <span className="text-gray-400 text-xs">No</span>}
+                                            <td className="px-3 py-1.5 text-center">
+                                                {hasPartials
+                                                    ? <Badge variant="success"><span className="text-[10px]">Yes</span></Badge>
+                                                    : <span className="text-gray-400 text-xs">No</span>}
                                             </td>
-                                            <td className="px-4 py-3 text-right text-gray-700">
+                                            <td className="px-3 py-1.5 text-right text-xs text-gray-700 whitespace-nowrap">
                                                 {p.averagePayPercent != null ? `${p.averagePayPercent}%` : '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-right text-gray-700">
+                                            <td className="px-3 py-1.5 text-right text-xs text-gray-700 whitespace-nowrap">
                                                 {p.averageDaysToPay != null ? p.averageDaysToPay : '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-right">
+                                            <td className="px-3 py-1.5 text-right">
                                                 <button
                                                     onClick={e => { e.stopPropagation(); setDeleteModal(p); }}
-                                                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                                    className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                                                     title="Delete"
                                                 >
-                                                    <Trash2 className="w-4 h-4" />
+                                                    <Trash2 className="w-3.5 h-3.5" />
                                                 </button>
                                             </td>
                                         </tr>
@@ -219,17 +224,17 @@ export default function PoliciesPage() {
 
                 {/* Pagination */}
                 {pagination && pagination.totalPages > 1 && (
-                    <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 bg-gray-50">
+                    <div className="flex items-center justify-between px-3 py-2 border-t border-gray-100">
                         <span className="text-xs text-gray-500">
-                            Showing {((pagination.page - 1) * pagination.limit) + 1}–{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
+                            {((pagination.page - 1) * pagination.limit) + 1}–{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
                         </span>
-                        <div className="flex gap-1">
-                            <button disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="p-1.5 rounded hover:bg-gray-200 disabled:opacity-40">
-                                <ChevronLeft className="w-4 h-4" />
+                        <div className="flex items-center gap-1">
+                            <button disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40">
+                                <ChevronLeft className="w-3.5 h-3.5" />
                             </button>
-                            <span className="px-3 py-1 text-xs text-gray-700 font-medium">Page {page}</span>
-                            <button disabled={page >= (pagination.totalPages)} onClick={() => setPage(p => p + 1)} className="p-1.5 rounded hover:bg-gray-200 disabled:opacity-40">
-                                <ChevronRight className="w-4 h-4" />
+                            <span className="text-xs text-gray-600 px-1">Page {page} of {pagination.totalPages}</span>
+                            <button disabled={page >= pagination.totalPages} onClick={() => setPage(p => p + 1)} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40">
+                                <ChevronRight className="w-3.5 h-3.5" />
                             </button>
                         </div>
                     </div>

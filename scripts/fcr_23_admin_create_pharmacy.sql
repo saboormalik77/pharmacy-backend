@@ -143,6 +143,11 @@ BEGIN
     ALTER TABLE pharmacy_invites ADD COLUMN sales_person_id UUID;
   END IF;
 
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                 WHERE table_name = 'pharmacy_invites' AND column_name = 'secondary_wholesaler') THEN
+    ALTER TABLE pharmacy_invites ADD COLUMN secondary_wholesaler TEXT;
+  END IF;
+
 END $$;
 
 CREATE INDEX IF NOT EXISTS idx_pharmacy_invites_token   ON pharmacy_invites(invite_token);
@@ -167,6 +172,9 @@ CREATE POLICY "Service role full access on pharmacy_invites"
 --    Returns the pharmacy ID and invite token.
 -- ────────────────────────────────────────────────────────────
 
+-- Drop old signature (without p_secondary_wholesaler) to avoid ambiguity
+DROP FUNCTION IF EXISTS admin_create_pharmacy(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, DATE, TEXT, INTEGER, DATE, DATE, UUID, UUID, TEXT);
+
 CREATE OR REPLACE FUNCTION admin_create_pharmacy(
   p_pharmacy_name     TEXT,
   p_email             TEXT,
@@ -179,6 +187,7 @@ CREATE OR REPLACE FUNCTION admin_create_pharmacy(
   p_zip               TEXT DEFAULT NULL,
   p_wholesaler        TEXT DEFAULT NULL,
   p_wholesaler_account TEXT DEFAULT NULL,
+  p_secondary_wholesaler TEXT DEFAULT NULL,
   p_dea_number        TEXT DEFAULT NULL,
   p_dea_expiration    DATE DEFAULT NULL,
   p_service_type      TEXT DEFAULT 'full_service',
@@ -226,7 +235,7 @@ BEGIN
     invite_token, email, status, expires_at, created_by,
     pharmacy_name, contact_name, phone, fax,
     street, city, state, zip,
-    wholesaler, wholesaler_account,
+    wholesaler, wholesaler_account, secondary_wholesaler,
     dea_number, dea_expiration,
     service_type, days_between_visits,
     last_visit_date, next_visit_date,
@@ -247,6 +256,7 @@ BEGIN
     p_zip,
     p_wholesaler,
     p_wholesaler_account,
+    p_secondary_wholesaler,
     p_dea_number,
     p_dea_expiration,
     p_service_type,
@@ -380,7 +390,7 @@ BEGIN
     id, email, name, pharmacy_name, phone,
     physical_address, status,
     dea_number, dea_expiration_date, fax_number,
-    primary_wholesaler, wholesaler_account_number,
+    primary_wholesaler, wholesaler_account_number, secondary_wholesaler,
     service_type, days_between_visits,
     last_visit_date, next_visit_date,
     assigned_processor_id, assigned_sales_person_id,
@@ -398,6 +408,7 @@ BEGIN
     v_invite.fax,
     v_invite.wholesaler,
     v_invite.wholesaler_account,
+    v_invite.secondary_wholesaler,
     v_invite.service_type,
     v_invite.days_between_visits,
     v_invite.last_visit_date,
@@ -429,9 +440,9 @@ $$;
 -- ────────────────────────────────────────────────────────────
 
 GRANT ALL ON pharmacy_invites TO service_role;
-GRANT EXECUTE ON FUNCTION admin_create_pharmacy TO service_role;
-GRANT EXECUTE ON FUNCTION verify_pharmacy_invite TO service_role;
-GRANT EXECUTE ON FUNCTION complete_pharmacy_setup TO service_role;
+GRANT EXECUTE ON FUNCTION admin_create_pharmacy(TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,DATE,TEXT,INTEGER,DATE,DATE,UUID,UUID,TEXT) TO service_role;
+GRANT EXECUTE ON FUNCTION verify_pharmacy_invite(TEXT) TO service_role;
+GRANT EXECUTE ON FUNCTION complete_pharmacy_setup(TEXT,UUID) TO service_role;
 
 
 -- ────────────────────────────────────────────────────────────
@@ -439,6 +450,6 @@ GRANT EXECUTE ON FUNCTION complete_pharmacy_setup TO service_role;
 -- ────────────────────────────────────────────────────────────
 
 COMMENT ON TABLE pharmacy_invites IS 'Stores invite tokens for admin-created pharmacy accounts';
-COMMENT ON FUNCTION admin_create_pharmacy IS 'Admin creates a pharmacy record and generates an invite token';
-COMMENT ON FUNCTION verify_pharmacy_invite IS 'Validates an invite token and returns pharmacy details for setup';
+COMMENT ON FUNCTION admin_create_pharmacy(TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,DATE,TEXT,INTEGER,DATE,DATE,UUID,UUID,TEXT) IS 'Admin creates a pharmacy record and generates an invite token';
+COMMENT ON FUNCTION verify_pharmacy_invite(TEXT) IS 'Validates an invite token and returns pharmacy details for setup';
 COMMENT ON FUNCTION complete_pharmacy_setup IS 'Marks invite as completed and activates the pharmacy account';

@@ -27,7 +27,7 @@ const US_STATES = [
 const INITIAL_CREATE_FORM = {
   pharmacyName: '', email: '', contactName: '', phone: '', fax: '',
   street: '', city: '', state: '', zip: '',
-  wholesaler: '', wholesalerAccount: '',
+  wholesaler: '', wholesalerAccount: '', secondaryWholesaler: '',
   deaNumber: '', deaExpiration: '',
   serviceType: 'full_service',
   daysBetweenVisits: '120',
@@ -138,6 +138,7 @@ function PharmaciesPageContent() {
                 licenseExpiryDate: editModal.licenseExpiryDate,
                 npiNumber: editModal.npiNumber,
                 deaNumber: editModal.deaNumber,
+                secondaryWholesaler: editModal.secondaryWholesaler,
                 physicalAddress: editModal.physicalAddress,
                 billingAddress: editModal.billingAddress,
                 subscriptionTier: editModal.subscriptionTier,
@@ -616,6 +617,10 @@ function PharmaciesPageContent() {
                                     <p className="text-sm text-gray-900 mt-0.5">{viewModal.zipCode}</p>
                                 </div>
                                 <div>
+                                    <label className="text-xs font-medium text-gray-500">Secondary Wholesaler</label>
+                                    <p className="text-sm text-gray-900 mt-0.5 break-words">{viewModal.secondaryWholesaler || '—'}</p>
+                                </div>
+                                <div>
                                     <label className="text-xs font-medium text-gray-500">Total Returns</label>
                                     <p className="text-sm text-gray-900 mt-0.5">{viewModal.totalReturns}</p>
                                 </div>
@@ -729,6 +734,16 @@ function PharmaciesPageContent() {
                                         value={editFormData.zipCode || ''}
                                         onChange={(e) => setEditFormData({ ...editFormData, zipCode: e.target.value })}
                                         className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                    />
+                                </div>
+                                <div className="col-span-2">
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Secondary Wholesaler</label>
+                                    <input
+                                        type="text"
+                                        value={editFormData.secondaryWholesaler || ''}
+                                        onChange={(e) => setEditFormData({ ...editFormData, secondaryWholesaler: e.target.value })}
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        placeholder="Optional"
                                     />
                                 </div>
                             </div>
@@ -909,12 +924,16 @@ function PharmaciesPageContent() {
                                 <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-3">Wholesaler & Compliance</h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">Wholesaler</label>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Primary Wholesaler</label>
                                         <input type="text" value={createForm.wholesaler} onChange={e => setCreateForm({...createForm, wholesaler: e.target.value})} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Cardinal Health" />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">Wholesaler Account</label>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Primary Wholesaler Account</label>
                                         <input type="text" value={createForm.wholesalerAccount} onChange={e => setCreateForm({...createForm, wholesalerAccount: e.target.value})} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Account #" />
+                                    </div>
+                                    <div className="sm:col-span-2">
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Secondary Wholesaler</label>
+                                        <input type="text" value={createForm.secondaryWholesaler} onChange={e => setCreateForm({...createForm, secondaryWholesaler: e.target.value})} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Optional" />
                                     </div>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-1">DEA Number</label>
