@@ -19,6 +19,7 @@ export interface Pharmacy {
     licenseExpiryDate?: string;
     npiNumber?: string;
     deaNumber?: string;
+    secondaryWholesaler?: string;
     physicalAddress?: {
         street: string;
         city: string;
@@ -49,6 +50,7 @@ export interface PharmacyUpdatePayload {
     licenseExpiryDate?: string;
     npiNumber?: string;
     deaNumber?: string;
+    secondaryWholesaler?: string;
     physicalAddress?: {
         street: string;
         city: string;
