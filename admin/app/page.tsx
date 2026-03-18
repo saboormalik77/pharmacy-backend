@@ -134,24 +134,26 @@ export default function Dashboard() {
   const { recentActivity, isLoadingRecentActivity } = useAppSelector((state) => state.recentActivity);
   const { user } = useAppSelector((state) => state.auth);
 
-  // Show processor dashboard for processor role
-  if (user?.role === 'processor') {
-    return <ProcessorDashboard />;
-  }
+  const isProcessor = user?.role === 'processor';
 
+  // Always call hooks before any early return (Rules of Hooks)
   useEffect(() => {
-    // Fetch dashboard data on mount
+    if (isProcessor) return;
     dispatch(fetchDashboard({
       periodType: 'monthly',
       periods: 12,
     }));
-    // Fetch recent activity on mount
     dispatch(fetchRecentActivity({
       limit: 20,
       offset: 0,
       filter: 'recentactivity',
     }));
-  }, [dispatch]);
+  }, [dispatch, isProcessor]);
+
+  // Show processor dashboard for processor role
+  if (isProcessor) {
+    return <ProcessorDashboard />;
+  }
 
   // Format activity message based on activity type
   const formatActivityMessage = (activity: Activity): string => {
