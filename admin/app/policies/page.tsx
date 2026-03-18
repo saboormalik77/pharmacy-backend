@@ -14,9 +14,23 @@ import {
     fetchPolicies,
     createPolicy,
     deletePolicy,
+    addReturnPolicy,
+    addNote,
     FetchPoliciesParams,
 } from '@/lib/store/policiesSlice';
-import { ManufacturerPolicyCreatePayload, ManufacturerPolicy } from '@/lib/types';
+import { ManufacturerPolicyCreatePayload, ManufacturerPolicy, ReturnPolicyCreatePayload, PolicyNotePayload } from '@/lib/types';
+
+const US_STATES = [
+    'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD',
+    'MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC',
+    'SD','TN','TX','UT','VT','VA','WA','WV','WI','WY','DC'
+];
+
+const INITIAL_RETURN_POLICY = {
+    destination: '', autoRaEmail: '', policyNumber: undefined as number | undefined,
+    policyDescription: '', discountRate: undefined as number | undefined,
+    partialsAccepted: false, reimbursementType: 'batch' as 'batch' | 'per_item',
+};
 
 // ── Page ───────────────────────────────────────────────────────
 
@@ -37,6 +51,8 @@ export default function PoliciesPage() {
     const [newPolicy, setNewPolicy] = useState<ManufacturerPolicyCreatePayload>({
         labelerId: '', manufacturerName: '', labelerType: 'generic',
     });
+    const [newReturnPolicy, setNewReturnPolicy] = useState({ ...INITIAL_RETURN_POLICY });
+    const [newNote, setNewNote] = useState('');
 
     const showToast = (message: string, type: Toast['type'] = 'success') => {
         setToasts(prev => [...prev, { id: Date.now().toString(), message, type }]);
@@ -60,9 +76,31 @@ export default function PoliciesPage() {
         }
         const result = await dispatch(createPolicy(newPolicy));
         if (createPolicy.fulfilled.match(result)) {
+            const createdId = result.payload?.id;
+
+            if (createdId && newReturnPolicy.destination) {
+                const rpPayload: ReturnPolicyCreatePayload = {
+                    destination: newReturnPolicy.destination,
+                    autoRaEmail: newReturnPolicy.autoRaEmail || undefined,
+                    policyNumber: newReturnPolicy.policyNumber,
+                    policyDescription: newReturnPolicy.policyDescription || undefined,
+                    discountRate: newReturnPolicy.discountRate,
+                    partialsAccepted: newReturnPolicy.partialsAccepted,
+                    reimbursementType: newReturnPolicy.reimbursementType,
+                };
+                await dispatch(addReturnPolicy({ policyId: createdId, payload: rpPayload }));
+            }
+
+            if (createdId && newNote.trim()) {
+                const notePayload: PolicyNotePayload = { noteText: newNote.trim() };
+                await dispatch(addNote({ policyId: createdId, payload: notePayload }));
+            }
+
             showToast(`Policy for ${newPolicy.manufacturerName} created!`);
             setAddModal(false);
             setNewPolicy({ labelerId: '', manufacturerName: '', labelerType: 'generic' });
+            setNewReturnPolicy({ ...INITIAL_RETURN_POLICY });
+            setNewNote('');
             dispatch(fetchPolicies({ page, limit: 20 }));
         } else {
             showToast(result.payload as string || 'Failed to create policy', 'error');
@@ -101,7 +139,7 @@ export default function PoliciesPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-lg font-bold text-gray-900 flex items-center gap-1.5">
-                        <Shield className="w-4 h-4 text-primary-600" /> Manufacturer Policies
+                        <Shield className="w-4 h-4 text-primary-600" /> Labeler Info
                     </h1>
                     <p className="text-xs text-gray-500">Manage return policies, exceptions, and timing rules</p>
                 </div>
@@ -244,59 +282,181 @@ export default function PoliciesPage() {
             {/* ── Add Policy Modal ─────────────────────────── */}
             {addModal && (
                 <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setAddModal(false)}>
-                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50 sticky top-0">
-                            <h2 className="text-lg font-semibold text-gray-900">Add Manufacturer Policy</h2>
-                            <button onClick={() => setAddModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                    <div className="bg-white rounded-lg max-w-3xl w-full shadow-xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+                            <h2 className="text-sm font-semibold text-gray-900">Master Labeler Information</h2>
+                            <button onClick={() => setAddModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
                         </div>
-                        <div className="p-5 space-y-3">
-                            <div className="grid grid-cols-2 gap-3">
+                        <div className="px-5 py-4 overflow-y-auto flex-1 space-y-4">
+
+                            {/* Row 1: Labeler ID, Type, Avg Pay %, Avg Days */}
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Labeler ID <span className="text-red-500">*</span></label>
-                                    <input type="text" value={newPolicy.labelerId} onChange={e => setNewPolicy({ ...newPolicy, labelerId: e.target.value })} placeholder="e.g. 43547" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    <input type="text" value={newPolicy.labelerId} onChange={e => setNewPolicy({ ...newPolicy, labelerId: e.target.value })} placeholder="e.g. 00032" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-1">Type</label>
-                                    <select value={newPolicy.labelerType || 'generic'} onChange={e => setNewPolicy({ ...newPolicy, labelerType: e.target.value as 'generic' | 'brand' })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Labeler Type</label>
+                                    <select value={newPolicy.labelerType || 'generic'} onChange={e => setNewPolicy({ ...newPolicy, labelerType: e.target.value as 'generic' | 'brand' })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
                                         <option value="generic">Generic</option>
                                         <option value="brand">Brand</option>
                                     </select>
                                 </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Average Pay Percent</label>
+                                    <div className="flex items-center gap-1">
+                                        <input type="number" step="0.1" value={newPolicy.averagePayPercent ?? ''} onChange={e => setNewPolicy({ ...newPolicy, averagePayPercent: e.target.value ? parseFloat(e.target.value) : undefined })} placeholder="%" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                        <span className="text-xs text-gray-500">%</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Average Days to Pay</label>
+                                    <input type="number" value={newPolicy.averageDaysToPay ?? ''} onChange={e => setNewPolicy({ ...newPolicy, averageDaysToPay: e.target.value ? parseInt(e.target.value) : undefined })} placeholder="e.g. 297" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                </div>
                             </div>
+
+                            {/* Labeler Name */}
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Manufacturer Name <span className="text-red-500">*</span></label>
-                                <input type="text" value={newPolicy.manufacturerName} onChange={e => setNewPolicy({ ...newPolicy, manufacturerName: e.target.value })} placeholder="Full manufacturer name" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Labeler Name <span className="text-red-500">*</span></label>
+                                <input type="text" value={newPolicy.manufacturerName} onChange={e => setNewPolicy({ ...newPolicy, manufacturerName: e.target.value })} placeholder="e.g. AbbVie Inc." className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
                             </div>
-                            <div className="grid grid-cols-2 gap-3">
+
+                            {/* Address */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Address 1</label>
+                                    <input type="text" value={newPolicy.address1 || ''} onChange={e => setNewPolicy({ ...newPolicy, address1: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Address 2</label>
+                                    <input type="text" value={newPolicy.address2 || ''} onChange={e => setNewPolicy({ ...newPolicy, address2: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                </div>
+                            </div>
+
+                            {/* City, State, Zip */}
+                            <div className="grid grid-cols-3 gap-3">
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">City</label>
+                                    <input type="text" value={newPolicy.city || ''} onChange={e => setNewPolicy({ ...newPolicy, city: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">State</label>
+                                    <select value={newPolicy.state || ''} onChange={e => setNewPolicy({ ...newPolicy, state: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                        <option value="">Select</option>
+                                        {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Zip</label>
+                                    <input type="text" value={newPolicy.zip || ''} onChange={e => setNewPolicy({ ...newPolicy, zip: e.target.value })} maxLength={10} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                </div>
+                            </div>
+
+                            {/* Main Contact, Main Phone, Fax */}
+                            <div className="grid grid-cols-3 gap-3">
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Main Contact</label>
-                                    <input type="text" value={newPolicy.mainContact || ''} onChange={e => setNewPolicy({ ...newPolicy, mainContact: e.target.value })} placeholder="Contact name" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    <input type="text" value={newPolicy.mainContact || ''} onChange={e => setNewPolicy({ ...newPolicy, mainContact: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Main Phone</label>
-                                    <input type="text" value={newPolicy.mainPhone || ''} onChange={e => setNewPolicy({ ...newPolicy, mainPhone: e.target.value })} placeholder="Phone" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    <input type="text" value={newPolicy.mainPhone || ''} onChange={e => setNewPolicy({ ...newPolicy, mainPhone: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Fax</label>
+                                    <input type="text" value={newPolicy.fax || ''} onChange={e => setNewPolicy({ ...newPolicy, fax: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
                                 </div>
                             </div>
+
+                            {/* Credit Request Email */}
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Credit Request Email</label>
-                                <input type="email" value={newPolicy.creditRequestEmail || ''} onChange={e => setNewPolicy({ ...newPolicy, creditRequestEmail: e.target.value })} placeholder="returns@manufacturer.com" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Credit Request E-Mail</label>
+                                <input type="email" value={newPolicy.creditRequestEmail || ''} onChange={e => setNewPolicy({ ...newPolicy, creditRequestEmail: e.target.value })} placeholder="e.g. holli.rein@abbvie.com" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
                             </div>
-                            <div className="grid grid-cols-2 gap-3">
+
+                            {/* Contact 2, Phone 2, E-Mail 2 */}
+                            <div className="grid grid-cols-3 gap-3">
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-1">Avg Pay %</label>
-                                    <input type="number" step="0.1" value={newPolicy.averagePayPercent ?? ''} onChange={e => setNewPolicy({ ...newPolicy, averagePayPercent: e.target.value ? parseFloat(e.target.value) : undefined })} placeholder="e.g. 73.2" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Contact 2</label>
+                                    <input type="text" value={newPolicy.contact2Name || ''} onChange={e => setNewPolicy({ ...newPolicy, contact2Name: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-1">Avg Days to Pay</label>
-                                    <input type="number" value={newPolicy.averageDaysToPay ?? ''} onChange={e => setNewPolicy({ ...newPolicy, averageDaysToPay: e.target.value ? parseInt(e.target.value) : undefined })} placeholder="e.g. 297" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Phone 2</label>
+                                    <input type="text" value={newPolicy.contact2Phone || ''} onChange={e => setNewPolicy({ ...newPolicy, contact2Phone: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">E-Mail 2</label>
+                                    <input type="email" value={newPolicy.contact2Email || ''} onChange={e => setNewPolicy({ ...newPolicy, contact2Email: e.target.value })} placeholder="e.g. gpopharm@abbvie.com" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                </div>
+                            </div>
+
+                            {/* Notes */}
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
+                                <textarea rows={3} value={newNote} onChange={e => setNewNote(e.target.value)} placeholder="e.g. 1/18/2022 - SB - norvir tricor humira creon depakote kaletra no credit per policy 1% synthroid credit if mfg s/dated" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none" />
+                            </div>
+
+                            {/* ── Labeler Return Information ── */}
+                            <div className="border-2 border-blue-200 rounded-lg p-4 space-y-3 bg-blue-50/30">
+                                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider">Labeler Return Information</h3>
+
+                                {/* Destination, Auto RA Email */}
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Destination</label>
+                                        <select value={newReturnPolicy.destination} onChange={e => setNewReturnPolicy({ ...newReturnPolicy, destination: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white">
+                                            <option value="">Select</option>
+                                            <option value="qualanex">Qualanex</option>
+                                            <option value="inmar">Inmar</option>
+                                            <option value="pharmalink">PharmaLink</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Auto RA E-Mail</label>
+                                        <input type="email" value={newReturnPolicy.autoRaEmail} onChange={e => setNewReturnPolicy({ ...newReturnPolicy, autoRaEmail: e.target.value })} placeholder="e.g. CustomerService@Qualanex.com" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    </div>
+                                </div>
+
+                                {/* Policy #, Policy Description */}
+                                <div className="grid grid-cols-3 gap-3">
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Policy #</label>
+                                        <input type="number" value={newReturnPolicy.policyNumber ?? ''} onChange={e => setNewReturnPolicy({ ...newReturnPolicy, policyNumber: e.target.value ? parseInt(e.target.value) : undefined })} placeholder="e.g. 1" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    </div>
+                                    <div className="col-span-2">
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Policy Description</label>
+                                        <input type="text" value={newReturnPolicy.policyDescription} onChange={e => setNewReturnPolicy({ ...newReturnPolicy, policyDescription: e.target.value })} placeholder="e.g. 6 Months Prior to 12 Months Post Drug Expiration" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    </div>
+                                </div>
+
+                                {/* Discount Rate, Partials?, Reimbursement */}
+                                <div className="grid grid-cols-3 gap-3">
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Discount Rate</label>
+                                        <input type="number" step="0.01" value={newReturnPolicy.discountRate ?? ''} onChange={e => setNewReturnPolicy({ ...newReturnPolicy, discountRate: e.target.value ? parseFloat(e.target.value) : undefined })} placeholder="e.g. 0.6" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Partials?</label>
+                                        <select value={newReturnPolicy.partialsAccepted ? 'yes' : 'no'} onChange={e => setNewReturnPolicy({ ...newReturnPolicy, partialsAccepted: e.target.value === 'yes' })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white">
+                                            <option value="yes">YES</option>
+                                            <option value="no">NO</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Reimbursement</label>
+                                        <select value={newReturnPolicy.reimbursementType} onChange={e => setNewReturnPolicy({ ...newReturnPolicy, reimbursementType: e.target.value as 'batch' | 'per_item' })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white">
+                                            <option value="batch">BATCH</option>
+                                            <option value="per_item">PER ITEM</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="flex justify-end gap-2 p-5 border-t border-gray-200 bg-gray-50 sticky bottom-0">
-                            <Button variant="outline" onClick={() => setAddModal(false)}>Cancel</Button>
-                            <Button variant="primary" onClick={handleAdd} disabled={isActionLoading}>
-                                {isActionLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Creating...</> : 'Create Policy'}
-                            </Button>
+                        <div className="flex justify-end gap-2 px-5 py-3 border-t border-gray-200 bg-gray-50 flex-shrink-0">
+                            <button onClick={() => setAddModal(false)} className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button onClick={handleAdd} disabled={isActionLoading} className="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 disabled:opacity-50 transition-colors inline-flex items-center">
+                                {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />Creating...</> : 'Save Contact Info'}
+                            </button>
                         </div>
                     </div>
                 </div>

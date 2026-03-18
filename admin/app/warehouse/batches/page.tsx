@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
     Plus, Loader2, AlertCircle, ChevronLeft, ChevronRight,
     Layers, CheckCircle, Send, Calendar, Lock,
@@ -95,6 +96,9 @@ export default function BatchesPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
+                    <Link href="/warehouse" className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-primary-600 mb-1.5 transition-colors">
+                        <ChevronLeft className="w-3 h-3" /> Back to Warehouse
+                    </Link>
                     <h1 className="text-lg font-bold text-gray-900">Monthly Batches</h1>
                     <p className="text-xs text-gray-500">Manage return batches and close-outs</p>
                 </div>

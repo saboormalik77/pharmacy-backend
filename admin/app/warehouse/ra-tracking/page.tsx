@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import {
     Search, Loader2, ChevronLeft, ChevronRight, X, Clock,
     Mail, MailCheck, CheckCircle, Truck, AlertTriangle, Send,
@@ -241,6 +242,9 @@ export default function RATrackingPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
+                    <Link href="/warehouse" className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-primary-600 mb-1.5 transition-colors">
+                        <ChevronLeft className="w-3 h-3" /> Back to Warehouse
+                    </Link>
                     <h1 className="text-lg font-bold text-gray-900">RA Tracking</h1>
                     <p className="text-xs text-gray-500">Track Return Authorization requests, receipts, and shipments</p>
                 </div>

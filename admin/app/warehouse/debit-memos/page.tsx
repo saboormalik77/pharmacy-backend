@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import {
     Search, Loader2, ChevronLeft, ChevronRight, X, Edit,
     Receipt, FileText, DollarSign, Truck, AlertCircle,
@@ -150,6 +151,9 @@ export default function DebitMemosPage() {
 
             {/* Header */}
             <div>
+                <Link href="/warehouse" className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-primary-600 mb-1.5 transition-colors">
+                    <ChevronLeft className="w-3 h-3" /> Back to Warehouse
+                </Link>
                 <h1 className="text-lg font-bold text-gray-900">Debit Memos</h1>
                 <p className="text-xs text-gray-500">View and manage debit memos generated from closed batches</p>
             </div>
