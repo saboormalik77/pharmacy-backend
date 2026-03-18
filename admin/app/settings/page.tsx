@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, Bell, Shield, Globe, Loader2, Eye, EyeOff } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Save, Shield, Globe, Loader2, Eye, EyeOff } from 'lucide-react';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { fetchSettings, updateNotificationSettings, resetPassword } from '@/lib/store/settingsSlice';
@@ -154,46 +153,33 @@ export default function SettingsPage() {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-3">
             <div>
-                <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-                <p className="text-gray-600 mt-1">Manage system configuration and preferences</p>
+                <h1 className="text-lg font-bold text-gray-900">Settings</h1>
+                <p className="text-xs text-gray-500">Manage system configuration and preferences</p>
             </div>
 
             {/* General Settings */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-                <div className="flex items-center gap-3 mb-6">
-                    <Globe className="w-5 h-5 text-primary-500" />
-                    <h2 className="text-lg font-semibold text-gray-900">General Settings</h2>
+            <div className="bg-white rounded-lg shadow px-4 py-3">
+                <div className="flex items-center gap-2 mb-3">
+                    <Globe className="w-4 h-4 text-primary-500" />
+                    <h2 className="text-sm font-semibold text-gray-900">General Settings</h2>
                 </div>
 
                 {isLoading && !settings ? (
-                    <div className="flex items-center justify-center py-12">
-                        <div className="flex flex-col items-center gap-3">
-                            <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
-                            <p className="text-sm text-gray-600">Loading settings...</p>
-                        </div>
+                    <div className="flex items-center justify-center py-8">
+                        <Loader2 className="w-6 h-6 animate-spin text-primary-500 mr-2" />
+                        <p className="text-xs text-gray-500">Loading settings...</p>
                     </div>
                 ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-2.5">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Site Name</label>
-                            <input
-                                type="text"
-                                value={settings?.siteName || ''}
-                                readOnly
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
-                            />
+                            <label className="block text-xs font-medium text-gray-700 mb-0.5">Site Name</label>
+                            <input type="text" value={settings?.siteName || ''} readOnly className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded bg-gray-50 text-gray-600 cursor-not-allowed" />
                         </div>
-
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Site Email</label>
-                            <input
-                                type="email"
-                                value={settings?.siteEmail || ''}
-                                readOnly
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
-                            />
+                            <label className="block text-xs font-medium text-gray-700 mb-0.5">Site Email</label>
+                            <input type="email" value={settings?.siteEmail || ''} readOnly className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded bg-gray-50 text-gray-600 cursor-not-allowed" />
                         </div>
                     </div>
                 )}
@@ -332,154 +318,70 @@ export default function SettingsPage() {
             </div> */}
 
             {/* Security Settings - Reset Password */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-                <div className="flex items-center gap-3 mb-6">
-                    <Shield className="w-5 h-5 text-primary-500" />
-                    <h2 className="text-lg font-semibold text-gray-900">Security Settings</h2>
+            <div className="bg-white rounded-lg shadow px-4 py-3">
+                <div className="flex items-center gap-2 mb-3">
+                    <Shield className="w-4 h-4 text-primary-500" />
+                    <h2 className="text-sm font-semibold text-gray-900">Security Settings</h2>
                 </div>
 
-                <div className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Current Password
-                        </label>
-                        <div className="relative">
-                            <input
-                                type={showPasswords.currentPassword ? "text" : "password"}
-                                value={passwordForm.currentPassword}
-                                onChange={(e) => {
-                                    setPasswordForm({ ...passwordForm, currentPassword: e.target.value });
-                                    if (passwordErrors.currentPassword) {
-                                        setPasswordErrors({ ...passwordErrors, currentPassword: '' });
-                                    }
-                                }}
-                                className={`w-full px-4 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 ${
-                                    passwordErrors.currentPassword
-                                        ? 'border-red-300 focus:ring-red-500'
-                                        : 'border-gray-300 focus:ring-primary-500'
-                                }`}
-                                disabled={isResettingPassword}
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setShowPasswords({ ...showPasswords, currentPassword: !showPasswords.currentPassword })}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-                                disabled={isResettingPassword}
-                            >
-                                {showPasswords.currentPassword ? (
-                                    <EyeOff className="w-5 h-5" />
-                                ) : (
-                                    <Eye className="w-5 h-5" />
-                                )}
-                            </button>
+                <div className="space-y-2.5 max-w-md">
+                    {[
+                        {
+                            key: 'currentPassword' as const,
+                            label: 'Current Password',
+                            hint: '',
+                        },
+                        {
+                            key: 'newPassword' as const,
+                            label: 'New Password',
+                            hint: 'Minimum 8 characters',
+                        },
+                        {
+                            key: 'confirmPassword' as const,
+                            label: 'Confirm New Password',
+                            hint: '',
+                        },
+                    ].map(({ key, label, hint }) => (
+                        <div key={key}>
+                            <label className="block text-xs font-medium text-gray-700 mb-0.5">{label}</label>
+                            <div className="relative">
+                                <input
+                                    type={showPasswords[key] ? 'text' : 'password'}
+                                    value={passwordForm[key]}
+                                    onChange={(e) => {
+                                        setPasswordForm({ ...passwordForm, [key]: e.target.value });
+                                        if (passwordErrors[key]) setPasswordErrors({ ...passwordErrors, [key]: '' });
+                                        if (key === 'newPassword' && passwordErrors.confirmPassword && e.target.value === passwordForm.confirmPassword) {
+                                            setPasswordErrors(prev => ({ ...prev, confirmPassword: '' }));
+                                        }
+                                    }}
+                                    className={`w-full px-2.5 py-1.5 pr-8 text-xs border rounded focus:outline-none focus:ring-1 ${
+                                        passwordErrors[key] ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-primary-500'
+                                    }`}
+                                    disabled={isResettingPassword}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPasswords({ ...showPasswords, [key]: !showPasswords[key] })}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    disabled={isResettingPassword}
+                                >
+                                    {showPasswords[key] ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                </button>
+                            </div>
+                            {passwordErrors[key] && <p className="mt-0.5 text-[10px] text-red-600">{passwordErrors[key]}</p>}
+                            {hint && !passwordErrors[key] && <p className="mt-0.5 text-[10px] text-gray-400">{hint}</p>}
                         </div>
-                        {passwordErrors.currentPassword && (
-                            <p className="mt-1 text-sm text-red-600">{passwordErrors.currentPassword}</p>
-                        )}
-                    </div>
+                    ))}
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            New Password
-                        </label>
-                        <div className="relative">
-                            <input
-                                type={showPasswords.newPassword ? "text" : "password"}
-                                value={passwordForm.newPassword}
-                                onChange={(e) => {
-                                    setPasswordForm({ ...passwordForm, newPassword: e.target.value });
-                                    if (passwordErrors.newPassword) {
-                                        setPasswordErrors({ ...passwordErrors, newPassword: '' });
-                                    }
-                                    // Clear confirm password error if passwords now match
-                                    if (passwordErrors.confirmPassword && e.target.value === passwordForm.confirmPassword) {
-                                        setPasswordErrors({ ...passwordErrors, confirmPassword: '' });
-                                    }
-                                }}
-                                className={`w-full px-4 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 ${
-                                    passwordErrors.newPassword
-                                        ? 'border-red-300 focus:ring-red-500'
-                                        : 'border-gray-300 focus:ring-primary-500'
-                                }`}
-                                disabled={isResettingPassword}
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setShowPasswords({ ...showPasswords, newPassword: !showPasswords.newPassword })}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-                                disabled={isResettingPassword}
-                            >
-                                {showPasswords.newPassword ? (
-                                    <EyeOff className="w-5 h-5" />
-                                ) : (
-                                    <Eye className="w-5 h-5" />
-                                )}
-                            </button>
-                        </div>
-                        {passwordErrors.newPassword && (
-                            <p className="mt-1 text-sm text-red-600">{passwordErrors.newPassword}</p>
-                        )}
-                        <p className="mt-1 text-sm text-gray-500">Minimum 8 characters</p>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Confirm New Password
-                        </label>
-                        <div className="relative">
-                            <input
-                                type={showPasswords.confirmPassword ? "text" : "password"}
-                                value={passwordForm.confirmPassword}
-                                onChange={(e) => {
-                                    setPasswordForm({ ...passwordForm, confirmPassword: e.target.value });
-                                    if (passwordErrors.confirmPassword) {
-                                        setPasswordErrors({ ...passwordErrors, confirmPassword: '' });
-                                    }
-                                }}
-                                className={`w-full px-4 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 ${
-                                    passwordErrors.confirmPassword
-                                        ? 'border-red-300 focus:ring-red-500'
-                                        : 'border-gray-300 focus:ring-primary-500'
-                                }`}
-                                disabled={isResettingPassword}
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setShowPasswords({ ...showPasswords, confirmPassword: !showPasswords.confirmPassword })}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-                                disabled={isResettingPassword}
-                            >
-                                {showPasswords.confirmPassword ? (
-                                    <EyeOff className="w-5 h-5" />
-                                ) : (
-                                    <Eye className="w-5 h-5" />
-                                )}
-                            </button>
-                        </div>
-                        {passwordErrors.confirmPassword && (
-                            <p className="mt-1 text-sm text-red-600">{passwordErrors.confirmPassword}</p>
-                        )}
-                    </div>
-
-                    <div className="flex justify-end pt-4">
-                        <Button 
-                            variant="primary" 
-                            size="lg" 
-                            onClick={handleResetPassword}
-                            disabled={isResettingPassword}
-                        >
+                    <div className="flex justify-end pt-1">
+                        <button onClick={handleResetPassword} disabled={isResettingPassword} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
                             {isResettingPassword ? (
-                                <>
-                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Resetting Password...
-                                </>
+                                <><Loader2 className="w-3.5 h-3.5 animate-spin" />Resetting...</>
                             ) : (
-                                <>
-                                    <Save className="w-4 h-4 mr-2" />
-                                    Reset Password
-                                </>
+                                <><Save className="w-3.5 h-3.5" />Reset Password</>
                             )}
-                        </Button>
+                        </button>
                     </div>
                 </div>
             </div>

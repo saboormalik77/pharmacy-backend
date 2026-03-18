@@ -60,7 +60,7 @@ const processorSidebarLinks = [
     { href: '/warehouse/returns/create', icon: Scan, label: 'Create Return' },
     { href: '/warehouse/tbd-items', icon: AlertTriangle, label: 'TBD Items' },
     // { href: '/warehouse/wine-cellar', icon: Archive, label: 'Wine Cellar' },
-    { href: '/settings', icon: Settings, label: 'Settings' },
+    // { href: '/settings', icon: Settings, label: 'Settings' },
 ];
 
 interface SidebarProps {
