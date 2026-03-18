@@ -89,90 +89,80 @@ export default function BatchesPage() {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-3">
             <ToastContainer toasts={toasts} onClose={id => setToasts(t => t.filter(x => x.id !== id))} />
 
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Monthly Batches</h1>
-                    <p className="text-gray-500 mt-1">Manage return batches and close-outs</p>
+                    <h1 className="text-lg font-bold text-gray-900">Monthly Batches</h1>
+                    <p className="text-xs text-gray-500">Manage return batches and close-outs</p>
                 </div>
-                <Button variant="primary" onClick={() => setShowCreate(true)}>
-                    <Plus className="w-4 h-4 mr-1" /> New Batch
-                </Button>
+                <button
+                    onClick={() => setShowCreate(true)}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors"
+                >
+                    <Plus className="w-3.5 h-3.5" /> New Batch
+                </button>
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-white rounded-lg shadow p-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center"><Layers className="w-5 h-5 text-gray-600" /></div>
-                        <div><p className="text-sm text-gray-500">Total</p><p className="text-xl font-bold">{stats.total}</p></div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {[
+                    { icon: Layers, bg: 'bg-gray-100', color: 'text-gray-600', label: 'Total', value: stats.total, valueColor: '' },
+                    { icon: Calendar, bg: 'bg-yellow-100', color: 'text-yellow-600', label: 'Open', value: stats.open, valueColor: 'text-yellow-600' },
+                    { icon: CheckCircle, bg: 'bg-blue-100', color: 'text-blue-600', label: 'Closed', value: stats.closed, valueColor: 'text-blue-600' },
+                    { icon: Send, bg: 'bg-green-100', color: 'text-green-600', label: 'Submitted', value: stats.submitted, valueColor: 'text-green-600' },
+                ].map(({ icon: Icon, bg, color, label, value, valueColor }) => (
+                    <div key={label} className="bg-white rounded-lg shadow px-3 py-2">
+                        <div className="flex items-center gap-2">
+                            <div className={`w-7 h-7 ${bg} rounded flex items-center justify-center flex-shrink-0`}><Icon className={`w-3.5 h-3.5 ${color}`} /></div>
+                            <div><p className="text-[10px] text-gray-500">{label}</p><p className={`text-base font-bold ${valueColor}`}>{value}</p></div>
+                        </div>
                     </div>
-                </div>
-                <div className="bg-white rounded-lg shadow p-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center"><Calendar className="w-5 h-5 text-yellow-600" /></div>
-                        <div><p className="text-sm text-gray-500">Open</p><p className="text-xl font-bold text-yellow-600">{stats.open}</p></div>
-                    </div>
-                </div>
-                <div className="bg-white rounded-lg shadow p-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><CheckCircle className="w-5 h-5 text-blue-600" /></div>
-                        <div><p className="text-sm text-gray-500">Closed</p><p className="text-xl font-bold text-blue-600">{stats.closed}</p></div>
-                    </div>
-                </div>
-                <div className="bg-white rounded-lg shadow p-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center"><Send className="w-5 h-5 text-green-600" /></div>
-                        <div><p className="text-sm text-gray-500">Submitted</p><p className="text-xl font-bold text-green-600">{stats.submitted}</p></div>
-                    </div>
-                </div>
+                ))}
             </div>
 
             {/* Filters */}
-            <div className="bg-white rounded-lg shadow p-4">
-                <div className="flex items-center gap-4">
-                    <select
-                        className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                        value={statusFilter}
-                        onChange={e => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-                    >
-                        {STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                    </select>
-                </div>
+            <div className="bg-white rounded-lg shadow px-3 py-2">
+                <select
+                    className="border border-gray-300 rounded px-2.5 py-1 text-xs focus:ring-1 focus:ring-primary-500 focus:border-transparent"
+                    value={statusFilter}
+                    onChange={e => { setStatusFilter(e.target.value); setCurrentPage(1); }}
+                >
+                    {STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
             </div>
 
             {/* Table */}
             <div className="bg-white rounded-lg shadow overflow-hidden">
                 {isLoading ? (
-                    <div className="flex items-center justify-center py-20">
-                        <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
+                    <div className="flex items-center justify-center py-14">
+                        <Loader2 className="w-6 h-6 animate-spin text-primary-500" />
                     </div>
                 ) : batches.length === 0 ? (
-                    <div className="text-center py-20 text-gray-500">
-                        <Layers className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                        <p className="text-lg font-medium">No batches found</p>
-                        <p className="text-sm mt-1">Create a new batch to get started.</p>
+                    <div className="text-center py-14 text-gray-500">
+                        <Layers className="w-10 h-10 mx-auto mb-2 text-gray-300" />
+                        <p className="text-sm font-medium">No batches found</p>
+                        <p className="text-xs mt-0.5">Create a new batch to get started.</p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
+                        <table className="min-w-full">
+                            <thead className="bg-gray-50 border-b border-gray-200">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Batch Month</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Returns</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Debit Memos</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Value</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cardinal</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Batch Month</th>
+                                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Name</th>
+                                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Status</th>
+                                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Returns</th>
+                                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Debit Memos</th>
+                                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Total Value</th>
+                                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Cardinal</th>
+                                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Created</th>
+                                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-200">
+                            <tbody className="divide-y divide-gray-100">
                                 {batches.map(batch => {
                                     const sb = getStatusBadge(batch.status);
                                     return (
@@ -181,43 +171,43 @@ export default function BatchesPage() {
                                             onClick={() => router.push(`/warehouse/batches/${batch.id}`)}
                                             className="hover:bg-gray-50 cursor-pointer transition-colors"
                                         >
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            <td className="px-3 py-1.5 text-xs font-medium text-gray-900 whitespace-nowrap">
                                                 {formatBatchMonth(batch.batchMonth)}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                            <td className="px-3 py-1.5 text-xs text-gray-700 whitespace-nowrap">
                                                 {batch.batchName}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <Badge variant={sb.variant}>{sb.label}</Badge>
+                                            <td className="px-3 py-1.5 whitespace-nowrap">
+                                                <Badge variant={sb.variant}><span className="text-[10px]">{sb.label}</span></Badge>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                            <td className="px-3 py-1.5 text-xs text-gray-700 whitespace-nowrap">
                                                 {batch.totalReturns}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                            <td className="px-3 py-1.5 text-xs text-gray-700 whitespace-nowrap">
                                                 {batch.totalDebitMemos}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            <td className="px-3 py-1.5 text-xs font-medium text-gray-900 whitespace-nowrap">
                                                 {formatCurrency(batch.totalValue)}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            <td className="px-3 py-1.5 whitespace-nowrap">
                                                 {batch.cardinalSubmittedAt ? (
-                                                    <Badge variant="success">Submitted</Badge>
+                                                    <Badge variant="success"><span className="text-[10px]">Submitted</span></Badge>
                                                 ) : batch.cardinalFileGenerated ? (
-                                                    <Badge variant="info">File Ready</Badge>
+                                                    <Badge variant="info"><span className="text-[10px]">File Ready</span></Badge>
                                                 ) : (
-                                                    <Badge variant="default">Pending</Badge>
+                                                    <Badge variant="default"><span className="text-[10px]">Pending</span></Badge>
                                                 )}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td className="px-3 py-1.5 text-[11px] text-gray-500 whitespace-nowrap">
                                                 {formatDate(batch.createdAt)}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap" onClick={e => e.stopPropagation()}>
+                                            <td className="px-3 py-1.5 whitespace-nowrap" onClick={e => e.stopPropagation()}>
                                                 {batch.status === 'open' && (
                                                     <button
                                                         onClick={() => router.push(`/warehouse/batches/${batch.id}?action=closeout`)}
-                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md bg-yellow-100 text-yellow-800 border border-yellow-300 hover:bg-yellow-200 transition-colors"
+                                                        className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded bg-yellow-100 text-yellow-800 border border-yellow-300 hover:bg-yellow-200 transition-colors"
                                                     >
-                                                        <Lock className="w-3.5 h-3.5" /> Closeout
+                                                        <Lock className="w-3 h-3" /> Closeout
                                                     </button>
                                                 )}
                                             </td>
@@ -231,17 +221,17 @@ export default function BatchesPage() {
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                    <div className="flex items-center justify-between px-6 py-3 border-t border-gray-200">
-                        <p className="text-sm text-gray-500">
+                    <div className="flex items-center justify-between px-3 py-2 border-t border-gray-200">
+                        <p className="text-[10px] text-gray-500">
                             Page {currentPage} of {totalPages}{batchPagination?.total != null && ` · ${batchPagination.total} batches`}
                         </p>
-                        <div className="flex items-center gap-2">
-                            <Button variant="outline" size="sm" disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)}>
-                                <ChevronLeft className="w-4 h-4" />
-                            </Button>
-                            <Button variant="outline" size="sm" disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)}>
-                                <ChevronRight className="w-4 h-4" />
-                            </Button>
+                        <div className="flex items-center gap-1.5">
+                            <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="p-1 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-50">
+                                <ChevronLeft className="w-3.5 h-3.5 text-gray-600" />
+                            </button>
+                            <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="p-1 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-50">
+                                <ChevronRight className="w-3.5 h-3.5 text-gray-600" />
+                            </button>
                         </div>
                     </div>
                 )}
@@ -250,24 +240,24 @@ export default function BatchesPage() {
             {/* Create Batch Modal */}
             {showCreate && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowCreate(false)}>
-                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6" onClick={e => e.stopPropagation()}>
-                        <h2 className="text-lg font-bold text-gray-900 mb-4">Create New Batch</h2>
+                    <div className="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 p-5" onClick={e => e.stopPropagation()}>
+                        <h2 className="text-sm font-bold text-gray-900 mb-3">Create New Batch</h2>
 
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Batch Month *</label>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Batch Month <span className="text-red-500">*</span></label>
                                 <input
                                     type="month"
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                    className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-primary-500 focus:border-transparent"
                                     value={newBatch.batchMonth}
                                     onChange={e => setNewBatch(prev => ({ ...prev, batchMonth: e.target.value }))}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Batch Name (optional)</label>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Batch Name <span className="text-gray-400 font-normal">(optional)</span></label>
                                 <input
                                     type="text"
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                    className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-primary-500 focus:border-transparent"
                                     placeholder="e.g. March 2026 Returns"
                                     value={newBatch.batchName}
                                     onChange={e => setNewBatch(prev => ({ ...prev, batchName: e.target.value }))}
@@ -275,12 +265,12 @@ export default function BatchesPage() {
                             </div>
                         </div>
 
-                        <div className="flex justify-end gap-3 mt-6">
-                            <Button variant="ghost" onClick={() => setShowCreate(false)}>Cancel</Button>
-                            <Button variant="primary" onClick={handleCreate} disabled={isActionLoading}>
-                                {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Plus className="w-4 h-4 mr-1" />}
+                        <div className="flex justify-end gap-2 mt-4">
+                            <button onClick={() => setShowCreate(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button onClick={handleCreate} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                                {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
                                 Create Batch
-                            </Button>
+                            </button>
                         </div>
                     </div>
                 </div>

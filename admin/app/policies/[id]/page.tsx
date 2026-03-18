@@ -228,31 +228,37 @@ export default function PolicyDetailPage() {
     const notes = policy.notes || [];
 
     return (
-        <div className="space-y-6">
-            <ToastContainer toasts={toasts} removeToast={removeToast} />
+        <div className="space-y-3">
+            <ToastContainer toasts={toasts} onClose={removeToast} />
 
             {/* Header */}
             <div>
-                <button onClick={() => router.push('/policies')} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 mb-3">
-                    <ArrowLeft className="w-4 h-4" /> Back to Policies
+                <button onClick={() => router.push('/policies')} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-800 mb-2">
+                    <ArrowLeft className="w-3.5 h-3.5" /> Back to Policies
                 </button>
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{policy.manufacturerName}</h1>
-                        <Badge variant={policy.labelerType === 'brand' ? 'info' : 'default'}>{policy.labelerType === 'brand' ? 'Brand' : 'Generic'}</Badge>
+                <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 min-w-0">
+                        <h1 className="text-lg font-bold text-gray-900 truncate">{policy.manufacturerName}</h1>
+                        <Badge variant={policy.labelerType === 'brand' ? 'info' : 'default'}>
+                            <span className="text-[10px]">{policy.labelerType === 'brand' ? 'Brand' : 'Generic'}</span>
+                        </Badge>
                     </div>
-                    <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => setEditInfoModal(true)}><Edit className="w-4 h-4 mr-1" /> Edit</Button>
-                        <Button variant="danger" size="sm" onClick={() => setDeleteModal(true)}><Trash2 className="w-4 h-4 mr-1" /> Delete</Button>
+                    <div className="flex gap-1.5 flex-shrink-0">
+                        <button onClick={() => setEditInfoModal(true)} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded border border-gray-300 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
+                            <Edit className="w-3 h-3" /> Edit
+                        </button>
+                        <button onClick={() => setDeleteModal(true)} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded border border-red-200 text-xs text-red-600 hover:bg-red-50 transition-colors">
+                            <Trash2 className="w-3 h-3" /> Delete
+                        </button>
                     </div>
                 </div>
             </div>
 
             {/* ── Basic Info + Metrics ──────────────────────── */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white rounded-lg shadow-md p-5">
-                    <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2"><Shield className="w-4 h-4" /> Policy Info</h2>
-                    <dl className="space-y-2.5 text-sm">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                <div className="bg-white rounded-lg shadow p-4">
+                    <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5"><Shield className="w-3.5 h-3.5" /> Policy Info</h2>
+                    <dl className="space-y-1.5 text-xs">
                         <Row label="Labeler ID" value={<span className="font-mono font-semibold">{policy.labelerId}</span>} />
                         <Row label="Type" value={policy.labelerType === 'brand' ? 'Brand' : 'Generic'} />
                         {policy.mainContact && <Row label="Contact" value={<><Phone className="w-3 h-3 inline mr-1" />{policy.mainContact}{policy.mainPhone ? ` — ${policy.mainPhone}` : ''}</>} />}
@@ -262,19 +268,19 @@ export default function PolicyDetailPage() {
                     </dl>
                 </div>
 
-                <div className="bg-white rounded-lg shadow-md p-5">
-                    <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2"><Clock className="w-4 h-4" /> Metrics</h2>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-green-50 rounded-lg p-4 text-center">
-                            <p className="text-xs text-green-600">Average Pay %</p>
-                            <p className="text-2xl font-bold text-green-800">{policy.averagePayPercent != null ? `${policy.averagePayPercent}%` : '—'}</p>
+                <div className="bg-white rounded-lg shadow p-4">
+                    <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> Metrics</h2>
+                    <div className="grid grid-cols-2 gap-2 mb-3">
+                        <div className="bg-green-50 rounded-lg px-3 py-2 text-center">
+                            <p className="text-[10px] text-green-600">Avg Pay %</p>
+                            <p className="text-lg font-bold text-green-800">{policy.averagePayPercent != null ? `${policy.averagePayPercent}%` : '—'}</p>
                         </div>
-                        <div className="bg-blue-50 rounded-lg p-4 text-center">
-                            <p className="text-xs text-blue-600">Average Days to Pay</p>
-                            <p className="text-2xl font-bold text-blue-800">{policy.averageDaysToPay ?? '—'}</p>
+                        <div className="bg-blue-50 rounded-lg px-3 py-2 text-center">
+                            <p className="text-[10px] text-blue-600">Avg Days to Pay</p>
+                            <p className="text-lg font-bold text-blue-800">{policy.averageDaysToPay ?? '—'}</p>
                         </div>
                     </div>
-                    <dl className="space-y-2 mt-4 text-sm">
+                    <dl className="space-y-1.5 text-xs">
                         <Row label="Created" value={formatDate(policy.createdAt)} />
                         <Row label="Updated" value={formatDate(policy.updatedAt)} />
                     </dl>
@@ -282,38 +288,38 @@ export default function PolicyDetailPage() {
             </div>
 
             {/* ── Return Policies ───────────────────────────── */}
-            <div className="bg-white rounded-lg shadow-md p-5">
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2"><CheckCircle className="w-4 h-4" /> Return Policies ({rps.length})</h2>
-                    <Button variant="outline" size="sm" onClick={() => { setRpForm({ destination: 'inmar' }); setAddRPModal(true); }}>
-                        <Plus className="w-4 h-4 mr-1" /> Add
-                    </Button>
+            <div className="bg-white rounded-lg shadow p-4">
+                <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5" /> Return Policies ({rps.length})</h2>
+                    <button onClick={() => { setRpForm({ destination: 'inmar' }); setAddRPModal(true); }} className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-gray-300 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
+                        <Plus className="w-3 h-3" /> Add
+                    </button>
                 </div>
                 {rps.length === 0 ? (
-                    <p className="text-gray-400 text-sm text-center py-6">No return policies defined yet.</p>
+                    <p className="text-gray-400 text-xs text-center py-4">No return policies defined yet.</p>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full text-xs">
-                            <thead><tr className="bg-gray-50 border-b">
-                                <th className="text-left px-3 py-2 font-medium text-gray-500">Destination</th>
-                                <th className="text-left px-3 py-2 font-medium text-gray-500">Window</th>
-                                <th className="text-center px-3 py-2 font-medium text-gray-500">Partials</th>
-                                <th className="text-right px-3 py-2 font-medium text-gray-500">Discount</th>
-                                <th className="text-left px-3 py-2 font-medium text-gray-500">Description</th>
-                                <th className="text-right px-3 py-2 font-medium text-gray-500">Actions</th>
+                        <table className="w-full">
+                            <thead><tr className="bg-gray-50 border-b border-gray-200">
+                                <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Destination</th>
+                                <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Window</th>
+                                <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Partials</th>
+                                <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Discount</th>
+                                <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Description</th>
+                                <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
                             </tr></thead>
-                            <tbody>
+                            <tbody className="divide-y divide-gray-100">
                                 {rps.map(rp => (
-                                    <tr key={rp.id} className="border-b border-gray-100 hover:bg-gray-50">
-                                        <td className="px-3 py-2"><Badge variant={destBadge(rp.destination)}>{rp.destination}</Badge></td>
-                                        <td className="px-3 py-2 text-gray-700">{rp.monthsBeforeExpiration ?? '?'}mo before – {rp.monthsAfterExpiration ?? '?'}mo after</td>
-                                        <td className="px-3 py-2 text-center">{rp.partialsAccepted ? <Badge variant="success">Yes</Badge> : 'No'}</td>
-                                        <td className="px-3 py-2 text-right text-gray-700">{rp.discountRate != null ? `${(rp.discountRate * 100).toFixed(0)}%` : '—'}</td>
-                                        <td className="px-3 py-2 text-gray-600 max-w-[180px] truncate" title={rp.policyDescription || ''}>{rp.policyDescription || '—'}</td>
-                                        <td className="px-3 py-2 text-right">
+                                    <tr key={rp.id} className="hover:bg-gray-50">
+                                        <td className="px-3 py-1.5"><Badge variant={destBadge(rp.destination)}><span className="text-[10px]">{rp.destination}</span></Badge></td>
+                                        <td className="px-3 py-1.5 text-xs text-gray-700 whitespace-nowrap">{rp.monthsBeforeExpiration ?? '?'}mo before – {rp.monthsAfterExpiration ?? '?'}mo after</td>
+                                        <td className="px-3 py-1.5 text-center">{rp.partialsAccepted ? <Badge variant="success"><span className="text-[10px]">Yes</span></Badge> : <span className="text-xs text-gray-400">No</span>}</td>
+                                        <td className="px-3 py-1.5 text-right text-xs text-gray-700">{rp.discountRate != null ? `${(rp.discountRate * 100).toFixed(0)}%` : '—'}</td>
+                                        <td className="px-3 py-1.5 text-xs text-gray-600 max-w-[160px] truncate" title={rp.policyDescription || ''}>{rp.policyDescription || '—'}</td>
+                                        <td className="px-3 py-1.5 text-right">
                                             <div className="flex justify-end gap-1">
-                                                <button onClick={() => setEditRPModal(rp)} className="p-1 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded"><Edit className="w-3.5 h-3.5" /></button>
-                                                <button onClick={() => setDeleteRPModal(rp)} className="p-1 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded"><Trash2 className="w-3.5 h-3.5" /></button>
+                                                <button onClick={() => setEditRPModal(rp)} className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"><Edit className="w-3 h-3" /></button>
+                                                <button onClick={() => setDeleteRPModal(rp)} className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded"><Trash2 className="w-3 h-3" /></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -325,30 +331,32 @@ export default function PolicyDetailPage() {
             </div>
 
             {/* ── Exceptions (Non-Returnable Products) ──────── */}
-            <div className="bg-white rounded-lg shadow-md p-5">
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2"><Ban className="w-4 h-4" /> Non-Returnable Exceptions ({excs.length})</h2>
-                    <Button variant="outline" size="sm" onClick={() => setAddExcModal(true)}><Plus className="w-4 h-4 mr-1" /> Add</Button>
+            <div className="bg-white rounded-lg shadow p-4">
+                <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5"><Ban className="w-3.5 h-3.5" /> Non-Returnable Exceptions ({excs.length})</h2>
+                    <button onClick={() => setAddExcModal(true)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-gray-300 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
+                        <Plus className="w-3 h-3" /> Add
+                    </button>
                 </div>
                 {excs.length === 0 ? (
-                    <p className="text-gray-400 text-sm text-center py-6">No exceptions defined.</p>
+                    <p className="text-gray-400 text-xs text-center py-4">No exceptions defined.</p>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full text-xs">
-                            <thead><tr className="bg-gray-50 border-b">
-                                <th className="text-left px-3 py-2 font-medium text-gray-500">NDC</th>
-                                <th className="text-left px-3 py-2 font-medium text-gray-500">Product Name</th>
-                                <th className="text-left px-3 py-2 font-medium text-gray-500">Reason</th>
-                                <th className="text-right px-3 py-2 font-medium text-gray-500">Actions</th>
+                        <table className="w-full">
+                            <thead><tr className="bg-gray-50 border-b border-gray-200">
+                                <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">NDC</th>
+                                <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Product Name</th>
+                                <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Reason</th>
+                                <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
                             </tr></thead>
-                            <tbody>
+                            <tbody className="divide-y divide-gray-100">
                                 {excs.map(e => (
-                                    <tr key={e.id} className="border-b border-gray-100 hover:bg-gray-50">
-                                        <td className="px-3 py-2 font-mono text-gray-900">{e.ndc}</td>
-                                        <td className="px-3 py-2 text-gray-700">{e.productName || '—'}</td>
-                                        <td className="px-3 py-2 text-gray-600">{e.reason || '—'}</td>
-                                        <td className="px-3 py-2 text-right">
-                                            <button onClick={() => setDeleteExcModal(e)} className="p-1 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded"><Trash2 className="w-3.5 h-3.5" /></button>
+                                    <tr key={e.id} className="hover:bg-gray-50">
+                                        <td className="px-3 py-1.5 text-xs font-mono text-gray-900 whitespace-nowrap">{e.ndc}</td>
+                                        <td className="px-3 py-1.5 text-xs text-gray-700">{e.productName || '—'}</td>
+                                        <td className="px-3 py-1.5 text-xs text-gray-600">{e.reason || '—'}</td>
+                                        <td className="px-3 py-1.5 text-right">
+                                            <button onClick={() => setDeleteExcModal(e)} className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded"><Trash2 className="w-3 h-3" /></button>
                                         </td>
                                     </tr>
                                 ))}
@@ -359,26 +367,28 @@ export default function PolicyDetailPage() {
             </div>
 
             {/* ── Notes ─────────────────────────────────────── */}
-            <div className="bg-white rounded-lg shadow-md p-5">
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2"><FileText className="w-4 h-4" /> Notes ({notes.length})</h2>
-                    <Button variant="outline" size="sm" onClick={() => setAddNoteModal(true)}><Plus className="w-4 h-4 mr-1" /> Add</Button>
+            <div className="bg-white rounded-lg shadow p-4">
+                <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5"><FileText className="w-3.5 h-3.5" /> Notes ({notes.length})</h2>
+                    <button onClick={() => setAddNoteModal(true)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-gray-300 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
+                        <Plus className="w-3 h-3" /> Add
+                    </button>
                 </div>
                 {notes.length === 0 ? (
-                    <p className="text-gray-400 text-sm text-center py-6">No notes yet.</p>
+                    <p className="text-gray-400 text-xs text-center py-4">No notes yet.</p>
                 ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                         {notes.map(n => (
-                            <div key={n.id} className="flex items-start gap-3 bg-gray-50 rounded-lg p-3">
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
+                            <div key={n.id} className="flex items-start gap-2 bg-gray-50 rounded-lg px-3 py-2">
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 text-[10px] text-gray-400 mb-0.5">
                                         <CalendarDays className="w-3 h-3" />
                                         {n.noteDate ? formatDate(n.noteDate) : formatDate(n.createdAt)}
-                                        {n.authorInitials && <Badge variant="default">{n.authorInitials}</Badge>}
+                                        {n.authorInitials && <Badge variant="default"><span className="text-[10px]">{n.authorInitials}</span></Badge>}
                                     </div>
-                                    <p className="text-sm text-gray-700">{n.noteText}</p>
+                                    <p className="text-xs text-gray-700">{n.noteText}</p>
                                 </div>
-                                <button onClick={() => setDeleteNoteModal(n)} className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded flex-shrink-0"><Trash2 className="w-3.5 h-3.5" /></button>
+                                <button onClick={() => setDeleteNoteModal(n)} className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded flex-shrink-0"><Trash2 className="w-3 h-3" /></button>
                             </div>
                         ))}
                     </div>
@@ -499,8 +509,8 @@ export default function PolicyDetailPage() {
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
     return (
         <div className="flex justify-between gap-4">
-            <dt className="text-gray-500 flex-shrink-0">{label}</dt>
-            <dd className="text-gray-900 text-right">{value}</dd>
+            <dt className="text-gray-500 flex-shrink-0 text-xs">{label}</dt>
+            <dd className="text-gray-900 text-right text-xs">{value}</dd>
         </div>
     );
 }

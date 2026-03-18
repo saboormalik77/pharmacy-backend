@@ -101,7 +101,7 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose }: SidebarProps) 
                 className="h-full overflow-y-auto overflow-x-hidden p-4 pb-8"
                 style={{ scrollbarWidth: 'thin', scrollbarColor: '#334155 transparent' }}
             >
-                <nav className="space-y-1">
+                <nav className="space-y-0.5">
                     {sidebarLinks.map((link) => {
                         const Icon = link.icon;
                         const isActive = pathname === link.href;
@@ -112,15 +112,15 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose }: SidebarProps) 
                                 href={link.href}
                                 onClick={handleLinkClick}
                                 className={cn(
-                                    'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all',
+                                    'flex items-center gap-2.5 px-3 py-1.5 rounded-lg transition-all',
                                     'hover:bg-[#334155]',
                                     isActive && 'bg-[#334155] text-[#4CAF50]',
                                     isCollapsed && 'justify-center'
                                 )}
                             >
-                                <Icon className="w-5 h-5 flex-shrink-0" />
+                                <Icon className="w-4 h-4 flex-shrink-0" />
                                 {!isCollapsed && (
-                                    <span className="text-sm font-medium">{link.label}</span>
+                                    <span className="text-xs font-medium">{link.label}</span>
                                 )}
                             </Link>
                         );

@@ -136,115 +136,116 @@ export default function TbdItemsPage() {
     };
 
     return (
-        <div className="space-y-6">
-            <ToastContainer toasts={toasts} removeToast={removeToast} />
+        <div className="space-y-3">
+            <ToastContainer toasts={toasts} onClose={removeToast} />
 
             {/* Header */}
-            <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
-                    <AlertTriangle className="w-6 h-6 text-yellow-500" /> TBD Items
-                </h1>
-                <p className="text-sm text-gray-500 mt-1">Items requiring manual review — resolve as Returnable or Non-Returnable</p>
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-lg font-bold text-gray-900 flex items-center gap-1.5">
+                        <AlertTriangle className="w-4 h-4 text-yellow-500" /> TBD Items
+                    </h1>
+                    <p className="text-xs text-gray-500">Items requiring manual review — resolve as Returnable or Non-Returnable</p>
+                </div>
             </div>
 
             {/* Search */}
-            <div className="bg-white rounded-lg shadow-md p-4">
+            <div className="bg-white rounded-lg shadow px-3 py-2">
                 <div className="relative">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
                         type="text"
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         placeholder="Search by NDC, product name, manufacturer, or lot..."
-                        className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
                     />
                 </div>
             </div>
 
             {/* Transaction Groups */}
             {isLoading ? (
-                <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-primary-600" /></div>
+                <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary-600" /></div>
             ) : groups.length === 0 ? (
-                <div className="bg-white rounded-lg shadow-md p-12 text-center">
-                    <CheckCircle className="w-12 h-12 text-green-300 mx-auto mb-3" />
-                    <p className="text-gray-500 font-medium">No active returns found</p>
+                <div className="bg-white rounded-lg shadow p-10 text-center">
+                    <CheckCircle className="w-10 h-10 text-green-300 mx-auto mb-2" />
+                    <p className="text-gray-500 text-sm font-medium">No active returns found</p>
                 </div>
             ) : (
-                <div className="space-y-3">
+                <div className="space-y-2">
                     {groups.map(({ transaction: tx, items, loading, loaded }) => {
                         const isExpanded = expandedTx.has(tx.id);
                         return (
-                            <div key={tx.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                            <div key={tx.id} className={`bg-white rounded-lg shadow overflow-hidden ${isExpanded ? 'ring-1 ring-yellow-300' : ''}`}>
                                 {/* Transaction header — clickable to expand */}
                                 <button
                                     onClick={() => toggleExpand(tx.id)}
-                                    className="w-full flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors text-left"
+                                    className={`w-full flex items-center justify-between px-4 py-2 transition-colors text-left ${isExpanded ? 'bg-yellow-50 hover:bg-yellow-100' : 'hover:bg-gray-50'}`}
                                 >
-                                    <div className="flex items-center gap-3">
-                                        {isExpanded ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronRight className="w-4 h-4 text-gray-400" />}
-                                        <span className="font-mono font-semibold text-gray-900 text-sm">{tx.licensePlate}</span>
-                                        <span className="text-sm text-gray-500">{tx.pharmacyName}</span>
+                                    <div className="flex items-center gap-2">
+                                        {isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-yellow-500" /> : <ChevronRight className="w-3.5 h-3.5 text-gray-400" />}
+                                        <span className="font-mono font-semibold text-gray-900 text-xs">{tx.licensePlate}</span>
+                                        <span className="text-xs text-gray-500 truncate max-w-[160px]">{tx.pharmacyName}</span>
                                         <Badge variant={tx.status === 'in_progress' ? 'info' : tx.status === 'paused' ? 'warning' : 'success'}>
-                                            {tx.status.replace(/_/g, ' ')}
+                                            <span className="text-[10px]">{tx.status.replace(/_/g, ' ')}</span>
                                         </Badge>
                                     </div>
-                                    <div className="flex items-center gap-2 text-xs text-gray-400">
+                                    <div className="flex items-center gap-2 flex-shrink-0">
                                         {loaded && items.length > 0 && (
-                                            <Badge variant="warning">{items.length} TBD</Badge>
+                                            <Badge variant="warning"><span className="text-[10px]">{items.length} TBD</span></Badge>
                                         )}
                                         {loaded && items.length === 0 && (
-                                            <span className="text-green-500">No TBD items</span>
+                                            <span className="text-[10px] text-green-500">✓ Clear</span>
                                         )}
-                                        <span>{formatDate(tx.createdAt)}</span>
+                                        <span className="text-[10px] text-gray-400">{formatDate(tx.createdAt)}</span>
                                     </div>
                                 </button>
 
                                 {/* Expanded — TBD items table */}
                                 {isExpanded && (
-                                    <div className="border-t border-gray-200">
+                                    <div className="border-t border-yellow-200 bg-yellow-50/30">
                                         {loading ? (
-                                            <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-primary-600" /></div>
+                                            <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 animate-spin text-primary-600" /></div>
                                         ) : items.length === 0 ? (
-                                            <div className="py-6 text-center text-sm text-gray-400">
-                                                <CheckCircle className="w-6 h-6 text-green-300 mx-auto mb-1" />
-                                                No TBD items in this return
+                                            <div className="py-4 text-center">
+                                                <CheckCircle className="w-5 h-5 text-green-300 mx-auto mb-1" />
+                                                <p className="text-xs text-gray-400">No TBD items in this return</p>
                                             </div>
                                         ) : (
                                             <div className="overflow-x-auto">
-                                                <table className="w-full text-xs">
+                                                <table className="w-full">
                                                     <thead>
-                                                        <tr className="bg-yellow-50 border-b border-yellow-200">
-                                                            <th className="text-left px-4 py-2 font-medium text-yellow-700">NDC</th>
-                                                            <th className="text-left px-4 py-2 font-medium text-yellow-700">Product</th>
-                                                            <th className="text-left px-4 py-2 font-medium text-yellow-700">Manufacturer</th>
-                                                            <th className="text-left px-4 py-2 font-medium text-yellow-700">Lot</th>
-                                                            <th className="text-left px-4 py-2 font-medium text-yellow-700">Expires</th>
-                                                            <th className="text-center px-4 py-2 font-medium text-yellow-700">QTY</th>
-                                                            <th className="text-right px-4 py-2 font-medium text-yellow-700">Actions</th>
+                                                        <tr className="bg-yellow-100 border-b border-yellow-200">
+                                                            <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-yellow-800 uppercase">NDC</th>
+                                                            <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-yellow-800 uppercase">Product</th>
+                                                            <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-yellow-800 uppercase">Manufacturer</th>
+                                                            <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-yellow-800 uppercase">Lot</th>
+                                                            <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-yellow-800 uppercase">Expires</th>
+                                                            <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-yellow-800 uppercase">Qty</th>
+                                                            <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-yellow-800 uppercase">Actions</th>
                                                         </tr>
                                                     </thead>
-                                                    <tbody>
+                                                    <tbody className="divide-y divide-yellow-100">
                                                         {items.map(item => (
-                                                            <tr key={item.id} className="border-b border-gray-100 hover:bg-yellow-50/50">
-                                                                <td className="px-4 py-2 font-mono text-gray-900">{item.ndc || '—'}</td>
-                                                                <td className="px-4 py-2 text-gray-900 max-w-[160px] truncate" title={item.proprietaryName || ''}>
+                                                            <tr key={item.id} className="hover:bg-yellow-50">
+                                                                <td className="px-3 py-1.5 text-xs font-mono text-gray-900 whitespace-nowrap">{item.ndc || '—'}</td>
+                                                                <td className="px-3 py-1.5 text-xs text-gray-900 max-w-[140px] truncate" title={item.proprietaryName || ''}>
                                                                     {item.proprietaryName || item.genericName || '—'}
                                                                 </td>
-                                                                <td className="px-4 py-2 text-gray-600 max-w-[120px] truncate">{item.manufacturer || '—'}</td>
-                                                                <td className="px-4 py-2 text-gray-600 font-mono">{item.lotNumber || '—'}</td>
-                                                                <td className="px-4 py-2 text-gray-600">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
-                                                                <td className="px-4 py-2 text-center text-gray-900">{item.quantity}</td>
-                                                                <td className="px-4 py-2 text-right">
-                                                                    <Button
-                                                                        variant="warning"
-                                                                        size="sm"
+                                                                <td className="px-3 py-1.5 text-xs text-gray-600 max-w-[100px] truncate">{item.manufacturer || '—'}</td>
+                                                                <td className="px-3 py-1.5 text-xs text-gray-600 font-mono whitespace-nowrap">{item.lotNumber || '—'}</td>
+                                                                <td className="px-3 py-1.5 text-xs text-gray-600 whitespace-nowrap">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
+                                                                <td className="px-3 py-1.5 text-xs text-center text-gray-900 font-semibold">{item.quantity}</td>
+                                                                <td className="px-3 py-1.5 text-right">
+                                                                    <button
                                                                         onClick={() => {
                                                                             setResolveModal({ item, txId: tx.id });
                                                                             setResolveForm({ new_status: 'returnable', reason: '', destination: '', memo: '' });
                                                                         }}
+                                                                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border border-yellow-300 transition-colors whitespace-nowrap"
                                                                     >
                                                                         Resolve
-                                                                    </Button>
+                                                                    </button>
                                                                 </td>
                                                             </tr>
                                                         ))}

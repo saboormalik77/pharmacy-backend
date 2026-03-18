@@ -423,173 +423,163 @@ export default function ReturnDetailPage() {
     const badge = getStatusBadge(tx.status);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-3">
             <ToastContainer toasts={toasts} onClose={removeToast} />
 
             {/* Back + Header */}
             <div>
-                <button onClick={() => router.push(tx.batchId ? `/warehouse/batches/${tx.batchId}` : '/warehouse/returns')} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 mb-3">
-                    <ArrowLeft className="w-4 h-4" /> Back to {tx.batchId ? 'Batch' : 'Returns'}
+                <button onClick={() => router.push(tx.batchId ? `/warehouse/batches/${tx.batchId}` : '/warehouse/returns')} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 mb-1.5">
+                    <ArrowLeft className="w-3.5 h-3.5" /> Back to {tx.batchId ? 'Batch' : 'Returns'}
                 </button>
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-xl sm:text-2xl font-bold font-mono text-gray-900">{tx.licensePlate}</h1>
-                        <Badge variant={badge.variant}>{badge.label}</Badge>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <div className="flex items-center gap-2">
+                        <h1 className="text-base font-bold font-mono text-gray-900">{tx.licensePlate}</h1>
+                        <Badge variant={badge.variant}><span className="text-[10px]">{badge.label}</span></Badge>
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1.5">
                         {canDoAction(tx, 'edit') && (
-                            <Button variant="outline" size="sm" onClick={() => setEditModal(true)}>
-                                <Edit className="w-4 h-4 mr-1" /> Edit
-                            </Button>
+                            <button onClick={() => setEditModal(true)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors">
+                                <Edit className="w-3 h-3" /> Edit
+                            </button>
                         )}
                         {canDoAction(tx, 'pause') && (
-                            <Button variant="warning" size="sm" onClick={() => setActionModal('pause')}>
-                                <Pause className="w-4 h-4 mr-1" /> Pause
-                            </Button>
+                            <button onClick={() => setActionModal('pause')} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-300 hover:bg-yellow-200 transition-colors">
+                                <Pause className="w-3 h-3" /> Pause
+                            </button>
                         )}
                         {canDoAction(tx, 'resume') && (
-                            <Button variant="success" size="sm" onClick={() => setActionModal('resume')}>
-                                <Play className="w-4 h-4 mr-1" /> Resume
-                            </Button>
+                            <button onClick={() => setActionModal('resume')} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-green-100 text-green-800 border border-green-300 hover:bg-green-200 transition-colors">
+                                <Play className="w-3 h-3" /> Resume
+                            </button>
                         )}
                         {canDoAction(tx, 'complete') && (
-                            <Button variant="primary" size="sm" onClick={() => setActionModal('complete')}>
-                                <CheckCircle className="w-4 h-4 mr-1" /> Complete
-                            </Button>
+                            <button onClick={() => setActionModal('complete')} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors">
+                                <CheckCircle className="w-3 h-3" /> Complete
+                            </button>
                         )}
                         {canDoAction(tx, 'finalize') && (
-                            <Button variant="danger" size="sm" onClick={openFinalizeModal}>
-                                <Lock className="w-4 h-4 mr-1" /> Finalize
-                            </Button>
+                            <button onClick={openFinalizeModal} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-red-600 text-white hover:bg-red-700 transition-colors">
+                                <Lock className="w-3 h-3" /> Finalize
+                            </button>
                         )}
                         {canDoAction(tx, 'delete') && (
-                            <Button variant="danger" size="sm" onClick={() => setDeleteModal(true)}>
-                                <Trash2 className="w-4 h-4 mr-1" /> Delete
-                            </Button>
+                            <button onClick={() => setDeleteModal(true)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-red-100 text-red-800 border border-red-300 hover:bg-red-200 transition-colors">
+                                <Trash2 className="w-3 h-3" /> Delete
+                            </button>
                         )}
                     </div>
                 </div>
             </div>
 
             {/* Detail Cards */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 {/* General Info */}
-                <div className="bg-white rounded-lg shadow-md p-5">
-                    <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                        <ClipboardList className="w-4 h-4" /> General Information
+                <div className="bg-white rounded-lg shadow px-4 py-3">
+                    <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                        <ClipboardList className="w-3.5 h-3.5" /> General Information
                     </h2>
-                    <dl className="space-y-3 text-sm">
-                        <div className="flex justify-between">
-                            <dt className="text-gray-500">License Plate</dt>
-                            <dd className="font-mono font-semibold text-gray-900">{tx.licensePlate}</dd>
-                        </div>
-                        <div className="flex justify-between">
-                            <dt className="text-gray-500">Service Type</dt>
-                            <dd className="text-gray-900">{tx.serviceType.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</dd>
-                        </div>
-                        <div className="flex justify-between">
-                            <dt className="text-gray-500">Created</dt>
-                            <dd className="text-gray-900">{formatDate(tx.createdAt)}</dd>
-                        </div>
-                        <div className="flex justify-between">
-                            <dt className="text-gray-500">Last Updated</dt>
-                            <dd className="text-gray-900">{formatDate(tx.updatedAt)}</dd>
-                        </div>
-                        {tx.finalizedAt && (
-                            <div className="flex justify-between">
-                                <dt className="text-gray-500">Finalized</dt>
-                                <dd className="text-gray-900">{formatDate(tx.finalizedAt)}</dd>
+                    <dl className="space-y-1.5">
+                        {[
+                            { label: 'License Plate', value: <span className="font-mono font-semibold">{tx.licensePlate}</span> },
+                            { label: 'Service Type', value: tx.serviceType.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) },
+                            { label: 'Created', value: formatDate(tx.createdAt) },
+                            { label: 'Last Updated', value: formatDate(tx.updatedAt) },
+                            ...(tx.finalizedAt ? [{ label: 'Finalized', value: formatDate(tx.finalizedAt) }] : []),
+                        ].map(({ label, value }) => (
+                            <div key={label} className="flex justify-between">
+                                <dt className="text-[11px] text-gray-500">{label}</dt>
+                                <dd className="text-[11px] text-gray-900">{value}</dd>
                             </div>
-                        )}
+                        ))}
                         {tx.notes && (
-                            <div className="pt-2 border-t border-gray-100">
-                                <dt className="text-gray-500 mb-1">Notes</dt>
-                                <dd className="text-gray-700">{tx.notes}</dd>
+                            <div className="pt-1.5 border-t border-gray-100">
+                                <dt className="text-[11px] text-gray-500 mb-0.5">Notes</dt>
+                                <dd className="text-[11px] text-gray-700">{tx.notes}</dd>
                             </div>
                         )}
                     </dl>
                 </div>
 
                 {/* Store & Processor */}
-                <div className="bg-white rounded-lg shadow-md p-5">
-                    <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                        <Building2 className="w-4 h-4" /> Store & Processor
+                <div className="bg-white rounded-lg shadow px-4 py-3">
+                    <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                        <Building2 className="w-3.5 h-3.5" /> Store & Processor
                     </h2>
-                    <dl className="space-y-3 text-sm">
+                    <dl className="space-y-1.5">
                         <div className="flex justify-between">
-                            <dt className="text-gray-500">Store Name</dt>
-                            <dd className="font-medium text-gray-900">{tx.pharmacyName || '—'}</dd>
+                            <dt className="text-[11px] text-gray-500">Store Name</dt>
+                            <dd className="text-[11px] font-medium text-gray-900">{tx.pharmacyName || '—'}</dd>
                         </div>
                         <div className="flex justify-between">
-                            <dt className="text-gray-500">Processor</dt>
-                            <dd className="text-gray-900 flex items-center gap-1">
-                                <UserCog className="w-3.5 h-3.5 text-gray-400" /> {tx.processorName || '—'}
+                            <dt className="text-[11px] text-gray-500">Processor</dt>
+                            <dd className="text-[11px] text-gray-900 flex items-center gap-1">
+                                <UserCog className="w-3 h-3 text-gray-400" /> {tx.processorName || '—'}
                             </dd>
                         </div>
                     </dl>
                 </div>
 
                 {/* Values */}
-                <div className="bg-white rounded-lg shadow-md p-5">
-                    <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                        <Package className="w-4 h-4" /> Items & Values
+                <div className="bg-white rounded-lg shadow px-4 py-3">
+                    <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                        <Package className="w-3.5 h-3.5" /> Items & Values
                     </h2>
-                    <dl className="space-y-3 text-sm">
+                    <dl className="space-y-1.5">
                         <div className="flex justify-between">
-                            <dt className="text-gray-500">Total Items</dt>
-                            <dd className="font-semibold text-gray-900">{nonWcItems.length}</dd>
+                            <dt className="text-[11px] text-gray-500">Total Items</dt>
+                            <dd className="text-[11px] font-semibold text-gray-900">{nonWcItems.length}</dd>
                         </div>
                         <div className="flex justify-between">
-                            <dt className="text-gray-500">Returnable Value</dt>
-                            <dd className="font-semibold text-green-700">{formatCurrency(nonWcReturnableValue)}</dd>
+                            <dt className="text-[11px] text-gray-500">Returnable Value</dt>
+                            <dd className="text-[11px] font-semibold text-green-700">{formatCurrency(nonWcReturnableValue)}</dd>
                         </div>
                         <div className="flex justify-between">
-                            <dt className="text-gray-500">Non-Returnable Value</dt>
-                            <dd className="font-semibold text-red-700">{formatCurrency(nonWcNonReturnableValue)}</dd>
+                            <dt className="text-[11px] text-gray-500">Non-Returnable Value</dt>
+                            <dd className="text-[11px] font-semibold text-red-700">{formatCurrency(nonWcNonReturnableValue)}</dd>
                         </div>
-                        <div className="flex justify-between pt-2 border-t border-gray-100">
-                            <dt className="text-gray-500 font-medium">Total Value</dt>
-                            <dd className="font-bold text-gray-900">{formatCurrency(nonWcTotalValue)}</dd>
+                        <div className="flex justify-between pt-1.5 border-t border-gray-100">
+                            <dt className="text-[11px] text-gray-500 font-medium">Total Value</dt>
+                            <dd className="text-[11px] font-bold text-gray-900">{formatCurrency(nonWcTotalValue)}</dd>
                         </div>
                     </dl>
                 </div>
 
                 {/* Shipping & Times */}
-                <div className="bg-white rounded-lg shadow-md p-5">
-                    <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                        <Truck className="w-4 h-4" /> Shipping & Processing
+                <div className="bg-white rounded-lg shadow px-4 py-3">
+                    <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                        <Truck className="w-3.5 h-3.5" /> Shipping & Processing
                     </h2>
-                    <dl className="space-y-3 text-sm">
+                    <dl className="space-y-1.5">
                         <div className="flex justify-between">
-                            <dt className="text-gray-500">FedEx Tracking</dt>
-                            <dd className="text-gray-900 font-mono text-xs">{tx.fedexTracking || '—'}</dd>
+                            <dt className="text-[11px] text-gray-500">FedEx Tracking</dt>
+                            <dd className="text-[11px] text-gray-900 font-mono">{tx.fedexTracking || '—'}</dd>
                         </div>
                         <div className="flex justify-between">
-                            <dt className="text-gray-500">Pickup Confirmation</dt>
-                            <dd className="text-gray-900">{tx.fedexPickupConfirmation || '—'}</dd>
+                            <dt className="text-[11px] text-gray-500">Pickup Confirmation</dt>
+                            <dd className="text-[11px] text-gray-900">{tx.fedexPickupConfirmation || '—'}</dd>
                         </div>
                         <div className="flex justify-between">
-                            <dt className="text-gray-500 flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> Time In</dt>
-                            <dd className="text-gray-900">{tx.timeIn ? formatDate(tx.timeIn) : '—'}</dd>
+                            <dt className="text-[11px] text-gray-500 flex items-center gap-1"><Clock className="w-3 h-3" /> Time In</dt>
+                            <dd className="text-[11px] text-gray-900">{tx.timeIn ? formatDate(tx.timeIn) : '—'}</dd>
                         </div>
                         <div className="flex justify-between">
-                            <dt className="text-gray-500 flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> Time Out</dt>
-                            <dd className="text-gray-900">{tx.timeOut ? formatDate(tx.timeOut) : '—'}</dd>
+                            <dt className="text-[11px] text-gray-500 flex items-center gap-1"><Clock className="w-3 h-3" /> Time Out</dt>
+                            <dd className="text-[11px] text-gray-900">{tx.timeOut ? formatDate(tx.timeOut) : '—'}</dd>
                         </div>
                         {tx.receivedInWarehouseDate && (
                             <div className="flex justify-between">
-                                <dt className="text-gray-500">Received in Warehouse</dt>
-                                <dd className="text-gray-900">{formatDate(tx.receivedInWarehouseDate)}</dd>
+                                <dt className="text-[11px] text-gray-500">Received in Warehouse</dt>
+                                <dd className="text-[11px] text-gray-900">{formatDate(tx.receivedInWarehouseDate)}</dd>
                             </div>
                         )}
                         <div className="flex justify-between">
-                            <dt className="text-gray-500">Verified Integrity</dt>
-                            <dd className="text-gray-900">{tx.verifiedIntegrity ? 'Yes' : 'No'}</dd>
+                            <dt className="text-[11px] text-gray-500">Verified Integrity</dt>
+                            <dd className="text-[11px] text-gray-900">{tx.verifiedIntegrity ? 'Yes' : 'No'}</dd>
                         </div>
                         {tx.boxCount != null && (
                             <div className="flex justify-between">
-                                <dt className="text-gray-500">Box Count</dt>
-                                <dd className="text-gray-900 font-semibold">{tx.boxCount}</dd>
+                                <dt className="text-[11px] text-gray-500">Box Count</dt>
+                                <dd className="text-[11px] text-gray-900 font-semibold">{tx.boxCount}</dd>
                             </div>
                         )}
                     </dl>
@@ -598,17 +588,17 @@ export default function ReturnDetailPage() {
 
             {/* ── Documents Section (post-finalization) ──────── */}
             {isFinalized && (
-                <div className="bg-white rounded-lg shadow-md p-5">
-                    <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                        <FileText className="w-4 h-4" /> Documents
+                <div className="bg-white rounded-lg shadow px-4 py-3">
+                    <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                        <FileText className="w-3.5 h-3.5" /> Documents
                     </h2>
-                    <div className="flex flex-wrap gap-3">
+                    <div className="flex flex-wrap gap-2">
                         <button
                             onClick={() => downloadPdf('manifest', `manifest-${tx.licensePlate}.pdf`)}
                             disabled={pdfLoading === 'manifest'}
-                            className="flex items-center gap-2 px-4 py-2.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg text-sm text-blue-700 font-medium transition-colors disabled:opacity-50"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded text-xs text-blue-700 font-medium transition-colors disabled:opacity-50"
                         >
-                            {pdfLoading === 'manifest' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                            {pdfLoading === 'manifest' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
                             Download Manifest
                         </button>
                         {/* <button
@@ -621,67 +611,67 @@ export default function ReturnDetailPage() {
                         </button> */}
                     </div>
                     {tx.manifestGeneratedAt && (
-                        <p className="text-xs text-gray-400 mt-3">Manifest last generated: {formatDate(tx.manifestGeneratedAt)}</p>
+                        <p className="text-[10px] text-gray-400 mt-2">Manifest last generated: {formatDate(tx.manifestGeneratedAt)}</p>
                     )}
                 </div>
             )}
 
             {/* ── Items Section ──────────────────────────────── */}
-            <div className="bg-white rounded-lg shadow-md p-5">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-                    <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
-                        <ScanLine className="w-4 h-4" /> Products ({nonWcItems.length})
+            <div className="bg-white rounded-lg shadow px-4 py-3">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2">
+                    <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                        <ScanLine className="w-3.5 h-3.5" /> Products ({nonWcItems.length})
                     </h2>
                     {isProcessor && canDoAction(tx, 'edit') && (
-                        <div className="flex gap-2">
-                            <Button variant="primary" size="sm" onClick={() => router.push(`/warehouse/returns/${id}/add-items`)}>
-                                <Plus className="w-4 h-4 mr-1" /> Add Items
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={openWcModal}>
-                                <Archive className="w-4 h-4 mr-1" /> Wine Cellar Items
-                            </Button>
+                        <div className="flex gap-1.5">
+                            <button onClick={() => router.push(`/warehouse/returns/${id}/add-items`)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors">
+                                <Plus className="w-3 h-3" /> Add Items
+                            </button>
+                            <button onClick={openWcModal} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors">
+                                <Archive className="w-3 h-3" /> Wine Cellar Items
+                            </button>
                         </div>
                     )}
                 </div>
 
                 {/* Summary Bar */}
                 {nonWcItems.length > 0 && (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                        <div className="bg-gray-50 rounded-lg p-2.5 text-center">
-                            <p className="text-xs text-gray-500">Items</p>
-                            <p className="text-sm font-bold text-gray-900">{nonWcItems.length}</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2">
+                        <div className="bg-gray-50 rounded px-2.5 py-1.5 text-center">
+                            <p className="text-[10px] text-gray-500">Items</p>
+                            <p className="text-xs font-bold text-gray-900">{nonWcItems.length}</p>
                         </div>
-                        <div className="bg-green-50 rounded-lg p-2.5 text-center">
-                            <p className="text-xs text-green-600">Returnable</p>
-                            <p className="text-sm font-bold text-green-800">{formatCurrency(nonWcReturnableValue)}</p>
+                        <div className="bg-green-50 rounded px-2.5 py-1.5 text-center">
+                            <p className="text-[10px] text-green-600">Returnable</p>
+                            <p className="text-xs font-bold text-green-800">{formatCurrency(nonWcReturnableValue)}</p>
                         </div>
-                        <div className="bg-red-50 rounded-lg p-2.5 text-center">
-                            <p className="text-xs text-red-600">Non-Returnable</p>
-                            <p className="text-sm font-bold text-red-800">{formatCurrency(nonWcNonReturnableValue)}</p>
+                        <div className="bg-red-50 rounded px-2.5 py-1.5 text-center">
+                            <p className="text-[10px] text-red-600">Non-Returnable</p>
+                            <p className="text-xs font-bold text-red-800">{formatCurrency(nonWcNonReturnableValue)}</p>
                         </div>
-                        <div className="bg-blue-50 rounded-lg p-2.5 text-center">
-                            <p className="text-xs text-blue-600">Total Value</p>
-                            <p className="text-sm font-bold text-blue-800">{formatCurrency(nonWcTotalValue)}</p>
+                        <div className="bg-blue-50 rounded px-2.5 py-1.5 text-center">
+                            <p className="text-[10px] text-blue-600">Total Value</p>
+                            <p className="text-xs font-bold text-blue-800">{formatCurrency(nonWcTotalValue)}</p>
                         </div>
                     </div>
                 )}
 
                 {/* Items Filters */}
-                <div className="flex flex-col sm:flex-row gap-2 mb-3">
+                <div className="flex flex-col sm:flex-row gap-1.5 mb-2">
                     <div className="relative flex-1">
-                        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                         <input
                             type="text"
                             value={itemSearch}
                             onChange={e => setItemSearch(e.target.value)}
                             placeholder="Search by NDC, name, manufacturer, lot..."
-                            className="w-full pl-9 pr-4 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            className="w-full pl-8 pr-3 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
                         />
                     </div>
                     <select
                         value={itemStatusFilter}
                         onChange={e => setItemStatusFilter(e.target.value)}
-                        className="px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className="px-2.5 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
                     >
                         <option value="">All Statuses</option>
                         <option value="returnable">Returnable</option>
@@ -692,98 +682,84 @@ export default function ReturnDetailPage() {
 
                 {/* Items Table */}
                 {isItemsLoading ? (
-                    <div className="flex justify-center py-8">
-                        <Loader2 className="w-6 h-6 animate-spin text-primary-600" />
+                    <div className="flex justify-center py-6">
+                        <Loader2 className="w-5 h-5 animate-spin text-primary-600" />
                     </div>
                 ) : nonWcItems.length === 0 ? (
-                    <div className="text-center py-8">
-                        <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                        <p className="text-gray-500 text-sm font-medium">No items yet</p>
+                    <div className="text-center py-6">
+                        <Package className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                        <p className="text-gray-500 text-xs font-medium">No items yet</p>
                         {isProcessor && canDoAction(tx, 'edit') && (
-                            <Button variant="primary" size="sm" className="mt-3" onClick={() => router.push(`/warehouse/returns/${id}/add-items`)}>
-                                <Plus className="w-4 h-4 mr-1" /> Start Scanning
-                            </Button>
+                            <button onClick={() => router.push(`/warehouse/returns/${id}/add-items`)} className="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors">
+                                <Plus className="w-3 h-3" /> Start Scanning
+                            </button>
                         )}
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full table-auto text-xs">
+                        <table className="w-full table-auto">
                             <thead>
                                 <tr className="bg-gray-50 border-b border-gray-200">
-                                    <th className="text-left px-2 py-2 font-medium text-gray-500 uppercase tracking-wider">NDC</th>
-                                    <th className="text-left px-2 py-2 font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                    <th className="text-left px-2 py-2 font-medium text-gray-500 uppercase tracking-wider">Manufacturer</th>
-                                    <th className="text-center px-2 py-2 font-medium text-gray-500 uppercase tracking-wider">QTY</th>
-                                    <th className="text-right px-2 py-2 font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                                    <th className="text-right px-2 py-2 font-medium text-gray-500 uppercase tracking-wider">Est. Value</th>
-                                    <th className="text-left px-2 py-2 font-medium text-gray-500 uppercase tracking-wider">Expires</th>
-                                    <th className="text-left px-2 py-2 font-medium text-gray-500 uppercase tracking-wider">Lot</th>
-                                    <th className="text-left px-2 py-2 font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th className="text-right px-2 py-2 font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">NDC</th>
+                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Name</th>
+                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Manufacturer</th>
+                                    <th className="text-center px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Qty</th>
+                                    <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Price</th>
+                                    <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Est. Value</th>
+                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Expires</th>
+                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Lot</th>
+                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
+                                    <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y divide-gray-100">
                                 {nonWcItems.map((item) => {
                                     const sBadge = getItemStatusBadge(item.returnStatus);
                                     return (
-                                        <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
-                                            <td className="px-2 py-2 font-mono text-gray-900">{item.ndc || '—'}</td>
-                                            <td className="px-2 py-2 text-gray-900 max-w-[140px] truncate" title={item.proprietaryName || ''}>
+                                        <tr key={item.id} className="hover:bg-gray-50">
+                                            <td className="px-2 py-1.5 text-[11px] font-mono text-gray-900">{item.ndc || '—'}</td>
+                                            <td className="px-2 py-1.5 text-[11px] text-gray-900 max-w-[130px] truncate" title={item.proprietaryName || ''}>
                                                 {item.proprietaryName || item.genericName || '—'}
                                             </td>
-                                            <td className="px-2 py-2 text-gray-600 max-w-[120px] truncate" title={item.manufacturer || ''}>
+                                            <td className="px-2 py-1.5 text-[11px] text-gray-600 max-w-[110px] truncate" title={item.manufacturer || ''}>
                                                 {item.manufacturer || '—'}
                                             </td>
-                                            <td className="px-2 py-2 text-center text-gray-900">
+                                            <td className="px-2 py-1.5 text-[11px] text-center text-gray-900">
                                                 {item.quantity}{item.isPartial && <span className="text-yellow-600 ml-0.5">P</span>}
                                             </td>
-                                            <td className="px-2 py-2 text-right text-gray-900">
+                                            <td className="px-2 py-1.5 text-[11px] text-right text-gray-900">
                                                 {item.standardPrice != null ? formatCurrency(item.standardPrice) : '—'}
                                             </td>
-                                            <td className="px-2 py-2 text-right font-medium text-gray-900">
+                                            <td className="px-2 py-1.5 text-[11px] text-right font-medium text-gray-900">
                                                 {item.estimatedValue != null ? formatCurrency(item.estimatedValue) : '—'}
                                             </td>
-                                            <td className="px-2 py-2 text-gray-600">
+                                            <td className="px-2 py-1.5 text-[11px] text-gray-600 whitespace-nowrap">
                                                 {item.expirationDate ? formatDate(item.expirationDate) : '—'}
                                             </td>
-                                            <td className="px-2 py-2 text-gray-600 font-mono">{item.lotNumber || '—'}</td>
-                                            <td className="px-2 py-2">
+                                            <td className="px-2 py-1.5 text-[11px] text-gray-600 font-mono whitespace-nowrap">{item.lotNumber || '—'}</td>
+                                            <td className="px-2 py-1.5">
                                                 <div className="flex items-center gap-1">
-                                                    <Badge variant={sBadge.variant}>{sBadge.label}</Badge>
+                                                    <Badge variant={sBadge.variant}><span className="text-[10px]">{sBadge.label}</span></Badge>
                                                     {item.wineCellarId && (
-                                                        <Badge variant="info">
-                                                            <Archive className="w-3 h-3 mr-0.5 inline" />WC
-                                                        </Badge>
+                                                        <Badge variant="info"><span className="text-[10px]"><Archive className="w-2.5 h-2.5 mr-0.5 inline" />WC</span></Badge>
                                                     )}
                                                 </div>
                                             </td>
-                                            <td className="px-2 py-2">
-                                                <div className="flex items-center justify-end gap-1">
+                                            <td className="px-2 py-1.5">
+                                                <div className="flex items-center justify-end gap-0.5">
                                                     {canDoAction(tx, 'edit') && item.nonReturnableReason === 'date' && !item.wineCellarId && (
-                                                        <button
-                                                            onClick={() => handleMoveToWineCellar(item)}
-                                                            className="p-1 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded"
-                                                            title="Move to Wine Cellar"
-                                                        >
-                                                            <Archive className="w-3.5 h-3.5" />
+                                                        <button onClick={() => handleMoveToWineCellar(item)} className="p-1 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded" title="Move to Wine Cellar">
+                                                            <Archive className="w-3 h-3" />
                                                         </button>
                                                     )}
                                                     {canDoAction(tx, 'edit') && (
-                                                        <button
-                                                            onClick={() => setEditItemModal(item)}
-                                                            className="p-1 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded"
-                                                            title="Edit item"
-                                                        >
-                                                            <Edit className="w-3.5 h-3.5" />
+                                                        <button onClick={() => setEditItemModal(item)} className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title="Edit item">
+                                                            <Edit className="w-3 h-3" />
                                                         </button>
                                                     )}
                                                     {canDoAction(tx, 'edit') && (
-                                                        <button
-                                                            onClick={() => setDeleteItemModal(item)}
-                                                            className="p-1 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded"
-                                                            title="Delete item"
-                                                        >
-                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                        <button onClick={() => setDeleteItemModal(item)} className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded" title="Delete item">
+                                                            <Trash2 className="w-3 h-3" />
                                                         </button>
                                                     )}
                                                 </div>
@@ -800,43 +776,43 @@ export default function ReturnDetailPage() {
             {/* ── Edit Item Modal ───────────────────────────── */}
             {editItemModal && (
                 <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setEditItemModal(null)}>
-                    <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-lg font-semibold text-gray-900">Edit Item</h2>
-                            <button onClick={() => setEditItemModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                    <div className="bg-white rounded-lg max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
+                            <h2 className="text-sm font-semibold text-gray-900">Edit Item</h2>
+                            <button onClick={() => setEditItemModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
                         </div>
-                        <div className="p-5">
-                            <p className="text-xs text-gray-500 mb-3">{editItemModal.proprietaryName || editItemModal.ndc} — Lot: {editItemModal.lotNumber || '—'}</p>
-                            <div className="space-y-3">
-                                <div className="grid grid-cols-2 gap-3">
+                        <div className="px-4 py-3">
+                            <p className="text-[11px] text-gray-500 mb-2">{editItemModal.proprietaryName || editItemModal.ndc} — Lot: {editItemModal.lotNumber || '—'}</p>
+                            <div className="space-y-2">
+                                <div className="grid grid-cols-2 gap-2">
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">Quantity</label>
-                                        <input type="number" min="1" value={editItemForm.quantity} onChange={e => setEditItemForm({ ...editItemForm, quantity: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                        <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Quantity</label>
+                                        <input type="number" min="1" value={editItemForm.quantity} onChange={e => setEditItemForm({ ...editItemForm, quantity: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">Price ($)</label>
-                                        <input type="number" step="0.01" min="0" value={editItemForm.standardPrice} onChange={e => setEditItemForm({ ...editItemForm, standardPrice: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                        <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Price ($)</label>
+                                        <input type="number" step="0.01" min="0" value={editItemForm.standardPrice} onChange={e => setEditItemForm({ ...editItemForm, standardPrice: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-1">Return Status</label>
-                                    <select value={editItemForm.returnStatus} onChange={e => setEditItemForm({ ...editItemForm, returnStatus: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Return Status</label>
+                                    <select value={editItemForm.returnStatus} onChange={e => setEditItemForm({ ...editItemForm, returnStatus: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500">
                                         <option value="tbd">TBD</option>
                                         <option value="returnable">Returnable</option>
                                         <option value="non_returnable">Non-Returnable</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-1">Memo</label>
-                                    <input type="text" value={editItemForm.memo} onChange={e => setEditItemForm({ ...editItemForm, memo: e.target.value })} placeholder="Optional memo" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Memo</label>
+                                    <input type="text" value={editItemForm.memo} onChange={e => setEditItemForm({ ...editItemForm, memo: e.target.value })} placeholder="Optional memo" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
                                 </div>
                             </div>
                         </div>
-                        <div className="flex justify-end gap-2 p-5 border-t border-gray-200 bg-gray-50">
-                            <Button variant="outline" onClick={() => setEditItemModal(null)}>Cancel</Button>
-                            <Button variant="primary" onClick={handleUpdateItem} disabled={isItemActionLoading}>
-                                {isItemActionLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Saving...</> : 'Save'}
-                            </Button>
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
+                            <button onClick={() => setEditItemModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button onClick={handleUpdateItem} disabled={isItemActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                                {isItemActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Saving...</> : 'Save'}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -845,22 +821,22 @@ export default function ReturnDetailPage() {
             {/* ── Delete Item Modal ────────────────────────── */}
             {deleteItemModal && (
                 <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setDeleteItemModal(null)}>
-                    <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-lg font-semibold text-gray-900">Delete Item</h2>
-                            <button onClick={() => setDeleteItemModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                    <div className="bg-white rounded-lg max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
+                            <h2 className="text-sm font-semibold text-gray-900">Delete Item</h2>
+                            <button onClick={() => setDeleteItemModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
                         </div>
-                        <div className="p-6">
-                            <p className="text-gray-700">
+                        <div className="px-4 py-3">
+                            <p className="text-xs text-gray-700">
                                 Delete <strong>{deleteItemModal.proprietaryName || deleteItemModal.ndc || 'this item'}</strong>
                                 {deleteItemModal.lotNumber && <> (Lot: {deleteItemModal.lotNumber})</>}?
                             </p>
                         </div>
-                        <div className="flex justify-end gap-2 p-5 border-t border-gray-200 bg-gray-50">
-                            <Button variant="outline" onClick={() => setDeleteItemModal(null)}>Cancel</Button>
-                            <Button variant="danger" onClick={handleDeleteItem} disabled={isItemActionLoading}>
-                                {isItemActionLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Deleting...</> : 'Delete'}
-                            </Button>
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
+                            <button onClick={() => setDeleteItemModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button onClick={handleDeleteItem} disabled={isItemActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors">
+                                {isItemActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Deleting...</> : 'Delete'}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -869,48 +845,30 @@ export default function ReturnDetailPage() {
             {/* ── Edit Modal ────────────────────────────────── */}
             {editModal && (
                 <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setEditModal(false)}>
-                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-lg font-semibold text-gray-900">Edit Return — {tx.licensePlate}</h2>
-                            <button onClick={() => setEditModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                    <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
+                            <h2 className="text-sm font-semibold text-gray-900">Edit Return — {tx.licensePlate}</h2>
+                            <button onClick={() => setEditModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
                         </div>
-                        <div className="p-6 space-y-3">
+                        <div className="px-4 py-3 space-y-2">
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">FedEx Tracking Number</label>
-                                <input
-                                    type="text"
-                                    value={editForm.fedexTracking}
-                                    onChange={e => setEditForm({ ...editForm, fedexTracking: e.target.value })}
-                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                    placeholder="Enter tracking number"
-                                />
+                                <label className="block text-[11px] font-medium text-gray-700 mb-0.5">FedEx Tracking Number</label>
+                                <input type="text" value={editForm.fedexTracking} onChange={e => setEditForm({ ...editForm, fedexTracking: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" placeholder="Enter tracking number" />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">FedEx Pickup Confirmation</label>
-                                <input
-                                    type="text"
-                                    value={editForm.fedexPickupConfirmation}
-                                    onChange={e => setEditForm({ ...editForm, fedexPickupConfirmation: e.target.value })}
-                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                    placeholder="Enter pickup confirmation"
-                                />
+                                <label className="block text-[11px] font-medium text-gray-700 mb-0.5">FedEx Pickup Confirmation</label>
+                                <input type="text" value={editForm.fedexPickupConfirmation} onChange={e => setEditForm({ ...editForm, fedexPickupConfirmation: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" placeholder="Enter pickup confirmation" />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
-                                <textarea
-                                    value={editForm.notes}
-                                    onChange={e => setEditForm({ ...editForm, notes: e.target.value })}
-                                    rows={3}
-                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
-                                    placeholder="Optional notes"
-                                />
+                                <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Notes</label>
+                                <textarea value={editForm.notes} onChange={e => setEditForm({ ...editForm, notes: e.target.value })} rows={3} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none" placeholder="Optional notes" />
                             </div>
                         </div>
-                        <div className="flex justify-end gap-2 p-5 border-t border-gray-200 bg-gray-50">
-                            <Button variant="outline" onClick={() => setEditModal(false)}>Cancel</Button>
-                            <Button variant="primary" onClick={handleUpdate} disabled={isActionLoading}>
-                                {isActionLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Saving...</> : 'Save Changes'}
-                            </Button>
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
+                            <button onClick={() => setEditModal(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button onClick={handleUpdate} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                                {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Saving...</> : 'Save Changes'}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -919,25 +877,25 @@ export default function ReturnDetailPage() {
             {/* ── Status Action Modal ──────────────────────── */}
             {actionModal && (
                 <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setActionModal(null)}>
-                    <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-lg font-semibold text-gray-900">
+                    <div className="bg-white rounded-lg max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
+                            <h2 className="text-sm font-semibold text-gray-900">
                                 {actionModal === 'pause' && 'Pause Return'}
                                 {actionModal === 'resume' && 'Resume Return'}
                                 {actionModal === 'complete' && 'Mark as Completed'}
                             </h2>
-                            <button onClick={() => setActionModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                            <button onClick={() => setActionModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
                         </div>
-                        <div className="p-6">
-                            <p className="text-gray-700">
+                        <div className="px-4 py-3">
+                            <p className="text-xs text-gray-700">
                                 Are you sure you want to <strong>{actionModal}</strong> return <strong>{tx.licensePlate}</strong>?
                             </p>
                         </div>
-                        <div className="flex justify-end gap-2 p-5 border-t border-gray-200 bg-gray-50">
-                            <Button variant="outline" onClick={() => setActionModal(null)}>Cancel</Button>
-                            <Button variant="primary" onClick={handleStatusAction} disabled={isActionLoading}>
-                                {isActionLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Processing...</> : 'Confirm'}
-                            </Button>
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
+                            <button onClick={() => setActionModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button onClick={handleStatusAction} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                                {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Processing...</> : 'Confirm'}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -946,21 +904,21 @@ export default function ReturnDetailPage() {
             {/* ── Delete Modal ─────────────────────────────── */}
             {deleteModal && (
                 <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setDeleteModal(false)}>
-                    <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-lg font-semibold text-gray-900">Delete Return</h2>
-                            <button onClick={() => setDeleteModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                    <div className="bg-white rounded-lg max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
+                            <h2 className="text-sm font-semibold text-gray-900">Delete Return</h2>
+                            <button onClick={() => setDeleteModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
                         </div>
-                        <div className="p-6">
-                            <p className="text-gray-700">
+                        <div className="px-4 py-3">
+                            <p className="text-xs text-gray-700">
                                 Are you sure you want to delete return <strong>{tx.licensePlate}</strong>? This action cannot be undone.
                             </p>
                         </div>
-                        <div className="flex justify-end gap-2 p-5 border-t border-gray-200 bg-gray-50">
-                            <Button variant="outline" onClick={() => setDeleteModal(false)}>Cancel</Button>
-                            <Button variant="danger" onClick={handleDelete} disabled={isActionLoading}>
-                                {isActionLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Deleting...</> : 'Delete'}
-                            </Button>
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
+                            <button onClick={() => setDeleteModal(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button onClick={handleDelete} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors">
+                                {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Deleting...</> : 'Delete'}
+                            </button>
                         </div>
                     </div>
                 </div>

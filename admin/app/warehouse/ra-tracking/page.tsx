@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
     Search, Loader2, ChevronLeft, ChevronRight, X, Clock,
     Mail, MailCheck, CheckCircle, Truck, AlertTriangle, Send,
-    Eye, RefreshCw, Package,
+    RefreshCw,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -235,73 +235,60 @@ export default function RATrackingPage() {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-3">
             <ToastContainer toasts={toasts} onClose={id => setToasts(t => t.filter(x => x.id !== id))} />
 
             {/* Header */}
-            <div>
-                <h1 className="text-2xl font-bold text-gray-900">RA Tracking</h1>
-                <p className="text-gray-500 mt-1">Track Return Authorization requests, receipts, and shipments</p>
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-lg font-bold text-gray-900">RA Tracking</h1>
+                    <p className="text-xs text-gray-500">Track Return Authorization requests, receipts, and shipments</p>
+                </div>
             </div>
 
-            {/* Summary Cards */}
+            {/* Summary Cards — compact inline strip */}
             {summary && (
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    <div className="bg-white rounded-lg shadow p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center"><Clock className="w-5 h-5 text-gray-600" /></div>
-                            <div><p className="text-sm text-gray-500">Pending</p><p className="text-xl font-bold">{summary.pending}</p></div>
+                <div className="grid grid-cols-5 gap-2">
+                    {[
+                        { icon: <Clock className="w-3.5 h-3.5 text-gray-500" />, label: 'Pending',   value: summary.pending,   color: 'text-gray-700',   bg: 'bg-gray-50'   },
+                        { icon: <Mail className="w-3.5 h-3.5 text-blue-500" />,  label: 'Requested', value: summary.requested, color: 'text-blue-700',   bg: 'bg-blue-50'   },
+                        { icon: <MailCheck className="w-3.5 h-3.5 text-green-500" />, label: 'Received', value: summary.received, color: 'text-green-700', bg: 'bg-green-50' },
+                        { icon: <Truck className="w-3.5 h-3.5 text-purple-500" />, label: 'Shipped', value: summary.shipped,   color: 'text-purple-700', bg: 'bg-purple-50' },
+                        { icon: <AlertTriangle className="w-3.5 h-3.5 text-red-500" />, label: 'Overdue', value: summary.overdue, color: 'text-red-700',  bg: 'bg-red-50'   },
+                    ].map(card => (
+                        <div key={card.label} className={`${card.bg} rounded-lg border border-gray-100 px-3 py-2 flex items-center gap-2`}>
+                            {card.icon}
+                            <div>
+                                <p className="text-[10px] text-gray-500 leading-none">{card.label}</p>
+                                <p className={`text-base font-bold leading-tight ${card.color}`}>{card.value}</p>
+                            </div>
                         </div>
-                    </div>
-                    <div className="bg-white rounded-lg shadow p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><Mail className="w-5 h-5 text-blue-600" /></div>
-                            <div><p className="text-sm text-gray-500">Requested</p><p className="text-xl font-bold text-blue-600">{summary.requested}</p></div>
-                        </div>
-                    </div>
-                    <div className="bg-white rounded-lg shadow p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center"><MailCheck className="w-5 h-5 text-green-600" /></div>
-                            <div><p className="text-sm text-gray-500">Received</p><p className="text-xl font-bold text-green-600">{summary.received}</p></div>
-                        </div>
-                    </div>
-                    <div className="bg-white rounded-lg shadow p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center"><Truck className="w-5 h-5 text-purple-600" /></div>
-                            <div><p className="text-sm text-gray-500">Shipped</p><p className="text-xl font-bold text-purple-600">{summary.shipped}</p></div>
-                        </div>
-                    </div>
-                    <div className="bg-white rounded-lg shadow p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center"><AlertTriangle className="w-5 h-5 text-red-600" /></div>
-                            <div><p className="text-sm text-gray-500">Overdue</p><p className="text-xl font-bold text-red-600">{summary.overdue}</p></div>
-                        </div>
-                    </div>
+                    ))}
                 </div>
             )}
 
-            {/* Filters */}
-            <div className="bg-white rounded-lg shadow p-4">
-                <div className="flex flex-wrap items-center gap-4">
-                    <div className="relative flex-1 min-w-[200px]">
-                        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            {/* Filters — single compact row */}
+            <div className="bg-white rounded-lg shadow px-3 py-2">
+                <div className="flex flex-wrap items-center gap-2">
+                    <div className="relative flex-1 min-w-[160px]">
+                        <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                         <input
-                            type="text" placeholder="Search memo #, pharmacy, labeler, RA #..."
-                            className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                            type="text" placeholder="Search memo #, pharmacy, RA #..."
+                            className="w-full pl-8 pr-2 py-1.5 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
                             value={search} onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
                         />
                     </div>
-                    <select className="border border-gray-300 rounded-md px-3 py-2 text-sm" value={raStatus}
+                    <select className="border border-gray-300 rounded px-2 py-1.5 text-xs focus:ring-1 focus:ring-primary-500" value={raStatus}
                         onChange={e => { setRaStatus(e.target.value); setCurrentPage(1); }}>
                         {RA_STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                     </select>
-                    <select className="border border-gray-300 rounded-md px-3 py-2 text-sm" value={destination}
+                    <select className="border border-gray-300 rounded px-2 py-1.5 text-xs focus:ring-1 focus:ring-primary-500" value={destination}
                         onChange={e => { setDestination(e.target.value); setCurrentPage(1); }}>
                         {DESTINATION_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                     </select>
-                    <input type="date" className="border border-gray-300 rounded-md px-3 py-2 text-sm" value={dateFrom}
+                    <input type="date" className="border border-gray-300 rounded px-2 py-1.5 text-xs focus:ring-1 focus:ring-primary-500" value={dateFrom}
                         onChange={e => { setDateFrom(e.target.value); setCurrentPage(1); }} title="From date" />
-                    <input type="date" className="border border-gray-300 rounded-md px-3 py-2 text-sm" value={dateTo}
+                    <input type="date" className="border border-gray-300 rounded px-2 py-1.5 text-xs focus:ring-1 focus:ring-primary-500" value={dateTo}
                         onChange={e => { setDateTo(e.target.value); setCurrentPage(1); }} title="To date" />
                 </div>
             </div>
@@ -309,59 +296,95 @@ export default function RATrackingPage() {
             {/* Table */}
             <div className="bg-white rounded-lg shadow overflow-hidden">
                 {isLoading ? (
-                    <div className="flex items-center justify-center py-20">
-                        <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
+                    <div className="flex items-center justify-center py-12">
+                        <Loader2 className="w-6 h-6 animate-spin text-primary-500" />
                     </div>
                 ) : memos.length === 0 ? (
-                    <div className="text-center py-20 text-gray-500">
-                        <MailCheck className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                        <p className="text-lg font-medium">No RA records found</p>
-                        <p className="text-sm mt-1">RA tracking entries appear after batches are closed and debit memos generated.</p>
+                    <div className="text-center py-12 text-gray-500">
+                        <MailCheck className="w-10 h-10 mx-auto mb-2 text-gray-300" />
+                        <p className="text-sm font-medium">No RA records found</p>
+                        <p className="text-xs mt-1">RA tracking entries appear after batches are closed and debit memos generated.</p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                                 <tr>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Memo #</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pharmacy</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Destination</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Labeler</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ask Value</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Requested</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tickler</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">RA #</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                    <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Memo #</th>
+                                    <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Pharmacy</th>
+                                    <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Dest.</th>
+                                    <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Labeler</th>
+                                    <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Ask</th>
+                                    <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Requested</th>
+                                    <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Tickler</th>
+                                    <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">RA #</th>
+                                    <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th className="px-3 py-2 text-right text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-200">
+                            <tbody className="divide-y divide-gray-100">
                                 {memos.map(memo => {
                                     const sb = getRAStatusBadge(memo.raStatus || 'pending');
                                     const overdue = isOverdue(memo);
                                     return (
                                         <tr key={memo.id} className={`hover:bg-gray-50 transition-colors ${overdue ? 'bg-red-50' : ''}`}>
-                                            <td className="px-4 py-3 text-sm font-medium text-primary-600 whitespace-nowrap">{memo.memoNumber}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-700 max-w-[160px] truncate">{memo.pharmacyName}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-700">{memo.destination || '—'}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-700 max-w-[140px] truncate">{memo.labelerName || '—'}</td>
-                                            <td className="px-4 py-3 text-sm font-medium whitespace-nowrap">{formatCurrency(memo.totalAskValue)}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
+                                            <td className="px-3 py-1.5 text-xs font-semibold text-primary-600 whitespace-nowrap">{memo.memoNumber}</td>
+                                            <td className="px-3 py-1.5 text-xs text-gray-700 max-w-[130px] truncate">{memo.pharmacyName}</td>
+                                            <td className="px-3 py-1.5 text-xs text-gray-600 whitespace-nowrap">{memo.destination || '—'}</td>
+                                            <td className="px-3 py-1.5 text-xs text-gray-600 max-w-[120px] truncate">{memo.labelerName || '—'}</td>
+                                            <td className="px-3 py-1.5 text-xs font-medium whitespace-nowrap">{formatCurrency(memo.totalAskValue)}</td>
+                                            <td className="px-3 py-1.5 text-xs text-gray-500 whitespace-nowrap">
                                                 {memo.raRequestedAt ? formatDate(memo.raRequestedAt) : '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-sm whitespace-nowrap">
+                                            <td className="px-3 py-1.5 text-xs whitespace-nowrap">
                                                 {memo.ticklerDate ? (
                                                     <span className={overdue ? 'text-red-600 font-semibold' : 'text-gray-500'}>
-                                                        {formatDate(memo.ticklerDate)}
-                                                        {overdue && ' (!)'}
+                                                        {formatDate(memo.ticklerDate)}{overdue && ' ⚠'}
                                                     </span>
                                                 ) : '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-sm font-medium text-gray-900">{memo.raNumber || '—'}</td>
-                                            <td className="px-4 py-3"><Badge variant={sb.variant}>{sb.label}</Badge></td>
-                                            <td className="px-4 py-3 text-right">
-                                                <div className="flex items-center justify-end gap-1.5">
-                                                    {getRowActions(memo)}
+                                            <td className="px-3 py-1.5 text-xs font-medium text-gray-800 whitespace-nowrap">{memo.raNumber || '—'}</td>
+                                            <td className="px-3 py-1.5">
+                                                <Badge variant={sb.variant}><span className="text-[10px]">{sb.label}</span></Badge>
+                                            </td>
+                                            <td className="px-3 py-1.5 text-right">
+                                                <div className="flex items-center justify-end gap-1">
+                                                    {memo.raStatus === 'pending' && (
+                                                        <button
+                                                            onClick={e => { e.stopPropagation(); openRequest(memo); }}
+                                                            title="Send RA Request"
+                                                            className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-primary-50 text-primary-700 hover:bg-primary-100 border border-primary-200 transition-colors whitespace-nowrap"
+                                                        >
+                                                            <Mail className="w-3 h-3" /> Request
+                                                        </button>
+                                                    )}
+                                                    {(memo.raStatus === 'requested' || memo.raStatus === 'overdue') && (
+                                                        <>
+                                                            <button
+                                                                onClick={e => { e.stopPropagation(); openResend(memo); }}
+                                                                title="Resend Reminder"
+                                                                className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border border-yellow-200 transition-colors whitespace-nowrap"
+                                                            >
+                                                                <RefreshCw className="w-3 h-3" /> Resend
+                                                            </button>
+                                                            <button
+                                                                onClick={e => { e.stopPropagation(); openReceive(memo); }}
+                                                                title="Record RA Received"
+                                                                className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 transition-colors whitespace-nowrap"
+                                                            >
+                                                                <CheckCircle className="w-3 h-3" /> Record
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                    {memo.raStatus === 'received' && (
+                                                        <button
+                                                            onClick={e => { e.stopPropagation(); openShip(memo); }}
+                                                            title="Record Shipment"
+                                                            className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 transition-colors whitespace-nowrap"
+                                                        >
+                                                            <Truck className="w-3 h-3" /> Ship
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
@@ -373,16 +396,16 @@ export default function RATrackingPage() {
                 )}
 
                 {totalPages > 1 && (
-                    <div className="flex items-center justify-between px-6 py-3 border-t border-gray-200">
-                        <p className="text-sm text-gray-500">
+                    <div className="flex items-center justify-between px-4 py-2 border-t border-gray-200">
+                        <p className="text-xs text-gray-500">
                             Page {currentPage} of {totalPages}{pagination?.total != null && ` · ${pagination.total} memos`}
                         </p>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5">
                             <Button variant="outline" size="sm" disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)}>
-                                <ChevronLeft className="w-4 h-4" />
+                                <ChevronLeft className="w-3.5 h-3.5" />
                             </Button>
                             <Button variant="outline" size="sm" disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)}>
-                                <ChevronRight className="w-4 h-4" />
+                                <ChevronRight className="w-3.5 h-3.5" />
                             </Button>
                         </div>
                     </div>

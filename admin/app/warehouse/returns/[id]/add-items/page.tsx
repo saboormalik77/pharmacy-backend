@@ -325,6 +325,7 @@ export default function AddItemsPage() {
         if (form.memo) payload.memo = form.memo;
         payload.scanSource = form.scanSource;
         if (form.rawScanData) payload.rawScanData = form.rawScanData;
+        if (policyAutoCheck?.destination) payload.destination = policyAutoCheck.destination;
 
         const result = await dispatch(addTransactionItem({ transactionId, payload }));
 
