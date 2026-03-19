@@ -38,6 +38,46 @@ const initialState: WarehouseState = {
 
 // ── Thunks ────────────────────────────────────────────────────
 
+export interface ScanProgress {
+    totalPackages: number;
+    scannedCount: number;
+    allScanned: boolean;
+    scannedKeys?: string[];
+}
+
+export interface ScanBoxResult {
+    transaction: ReturnTransaction;
+    scanProgress: ScanProgress;
+    alreadyScanned: boolean;
+    message: string;
+}
+
+export const scanBox = createAsyncThunk<
+    ScanBoxResult,
+    string,
+    { rejectValue: string }
+>('warehouse/scanBox', async (trackingNumber, { rejectWithValue }) => {
+    try {
+        const { apiClient } = await import('@/lib/api/apiClient');
+        const res = await apiClient.post<{
+            status: string;
+            data: ReturnTransaction;
+            scanProgress: ScanProgress;
+            alreadyScanned: boolean;
+            message: string;
+        }>('/admin/warehouse/scan-box', { trackingNumber }, true);
+        return {
+            transaction: res.data,
+            scanProgress: res.scanProgress,
+            alreadyScanned: res.alreadyScanned,
+            message: res.message,
+        };
+    } catch (err: any) {
+        return rejectWithValue(err?.message || 'Failed to scan box');
+    }
+});
+
+// Legacy: kept for backward compatibility
 export const receiveReturn = createAsyncThunk<
     ReturnTransaction,
     string,
@@ -206,7 +246,12 @@ const warehouseSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // receiveReturn
+            // scanBox
+            .addCase(scanBox.pending, (state) => { state.isActionLoading = true; state.error = null; })
+            .addCase(scanBox.fulfilled, (state, action) => { state.isActionLoading = false; state.currentReturn = action.payload.transaction; })
+            .addCase(scanBox.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
+
+            // receiveReturn (legacy)
             .addCase(receiveReturn.pending, (state) => { state.isActionLoading = true; state.error = null; })
             .addCase(receiveReturn.fulfilled, (state, action) => { state.isActionLoading = false; state.currentReturn = action.payload; })
             .addCase(receiveReturn.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })

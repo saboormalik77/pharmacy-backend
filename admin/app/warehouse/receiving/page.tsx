@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     PackageCheck, Loader2, Search, ScanLine, CheckCircle, XCircle, Package,
-    ArrowRight, RotateCcw, Truck, Clock,
+    ArrowRight, RotateCcw, Truck, Clock, Box, AlertTriangle,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -13,14 +13,22 @@ import { useDebounce } from '@/lib/hooks/useDebounce';
 import { formatDate, formatDateTime } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import {
-    receiveReturn,
+    scanBox,
     fetchPendingReturns,
     fetchReceivedReturns,
     clearCurrentReturn,
+    ScanBoxResult,
+    ScanProgress,
 } from '@/lib/store/warehouseSlice';
 import { ReturnTransaction } from '@/lib/types';
 
 type Tab = 'scan' | 'pending' | 'received';
+
+interface ScanState {
+    currentReturn: ReturnTransaction | null;
+    scanProgress: ScanProgress | null;
+    scannedNumbers: string[];
+}
 
 export default function WarehouseReceivingPage() {
     const dispatch = useAppDispatch();
@@ -28,13 +36,18 @@ export default function WarehouseReceivingPage() {
     const {
         pendingReturns, receivedReturns,
         pendingPagination, receivedPagination,
-        currentReturn, isLoading, isActionLoading, error,
+        isLoading, isActionLoading,
     } = useAppSelector(s => s.warehouse);
 
     const [tab, setTab] = useState<Tab>('scan');
     const [trackingInput, setTrackingInput] = useState('');
-    const [receivedReturn, setReceivedReturn] = useState<ReturnTransaction | null>(null);
-    const [receiveError, setReceiveError] = useState('');
+    const [scanState, setScanState] = useState<ScanState>({
+        currentReturn: null,
+        scanProgress: null,
+        scannedNumbers: [],
+    });
+    const [scanError, setScanError] = useState('');
+    const [scanMessage, setScanMessage] = useState('');
     const [search, setSearch] = useState('');
     const debouncedSearch = useDebounce(search, 400);
     const [toasts, setToasts] = useState<Toast[]>([]);
@@ -58,16 +71,37 @@ export default function WarehouseReceivingPage() {
         const tracking = trackingInput.trim();
         if (!tracking) return;
 
-        setReceiveError('');
-        setReceivedReturn(null);
+        setScanError('');
+        setScanMessage('');
 
-        const result = await dispatch(receiveReturn(tracking));
+        const result = await dispatch(scanBox(tracking));
 
-        if (receiveReturn.fulfilled.match(result)) {
-            setReceivedReturn(result.payload);
-            showToast('Return received in warehouse!');
+        if (scanBox.fulfilled.match(result)) {
+            const { transaction, scanProgress, alreadyScanned, message } = result.payload;
+
+            setScanState(prev => ({
+                currentReturn: transaction,
+                scanProgress,
+                scannedNumbers: alreadyScanned
+                    ? prev.scannedNumbers
+                    : [...prev.scannedNumbers, tracking],
+            }));
+
+            if (alreadyScanned) {
+                setScanMessage(message);
+                showToast(message, 'warning');
+            } else if (scanProgress.allScanned) {
+                setScanMessage(message);
+                showToast('All boxes scanned! Return is now received.', 'success');
+            } else {
+                setScanMessage(message);
+                showToast(message, 'success');
+            }
+
+            setTrackingInput('');
+            setTimeout(() => inputRef.current?.focus(), 100);
         } else {
-            setReceiveError(result.payload as string || 'Failed to receive return');
+            setScanError(result.payload as string || 'Failed to scan box');
         }
     };
 
@@ -78,13 +112,23 @@ export default function WarehouseReceivingPage() {
         }
     };
 
-    const handleReceiveAnother = () => {
+    const handleReset = () => {
         setTrackingInput('');
-        setReceivedReturn(null);
-        setReceiveError('');
+        setScanState({ currentReturn: null, scanProgress: null, scannedNumbers: [] });
+        setScanError('');
+        setScanMessage('');
         dispatch(clearCurrentReturn());
         setTimeout(() => inputRef.current?.focus(), 100);
     };
+
+    const { currentReturn: scannedReturn, scanProgress } = scanState;
+
+    const allPackageTrackingNumbers: string[] = [];
+    if (scannedReturn?.packageTracking && typeof scannedReturn.packageTracking === 'object') {
+        Object.values(scannedReturn.packageTracking).forEach((v: any) => {
+            if (v && !allPackageTrackingNumbers.includes(v)) allPackageTrackingNumbers.push(v);
+        });
+    }
 
     const tabs: { key: Tab; label: string; icon: React.ElementType }[] = [
         { key: 'scan', label: 'Scan & Receive', icon: ScanLine },
@@ -101,7 +145,7 @@ export default function WarehouseReceivingPage() {
                 <h1 className="text-lg font-bold text-gray-900 flex items-center gap-1.5">
                     <PackageCheck className="w-4 h-4 text-primary-600" /> Warehouse Receiving
                 </h1>
-                <p className="text-xs text-gray-500">Scan FedEx tracking to receive returns, then verify contents</p>
+                <p className="text-xs text-gray-500">Scan each box's tracking number. All boxes must be scanned before the return is marked as received.</p>
             </div>
 
             {/* Tabs */}
@@ -122,9 +166,14 @@ export default function WarehouseReceivingPage() {
             {/* ── Tab: Scan & Receive ─────────────────────── */}
             {tab === 'scan' && (
                 <div className="space-y-3">
+                    {/* Scanner input */}
                     <div className="bg-white rounded-lg shadow px-4 py-3">
                         <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                            <Truck className="w-3.5 h-3.5 inline mr-1" />Scan FedEx Tracking Number
+                            <Truck className="w-3.5 h-3.5 inline mr-1" />
+                            {scanProgress && !scanProgress.allScanned
+                                ? `Scan next box (${scanProgress.scannedCount} of ${scanProgress.totalPackages} scanned)`
+                                : 'Scan Box Tracking Number'
+                            }
                         </label>
                         <div className="flex gap-2">
                             <div className="relative flex-1">
@@ -135,53 +184,91 @@ export default function WarehouseReceivingPage() {
                                     value={trackingInput}
                                     onChange={e => setTrackingInput(e.target.value)}
                                     onKeyDown={handleScanKeyDown}
-                                    placeholder="Scan or type FedEx tracking number, then press Enter"
+                                    placeholder={scanProgress && !scanProgress.allScanned
+                                        ? 'Scan next box tracking number...'
+                                        : 'Scan or type a box tracking number, then press Enter'
+                                    }
                                     className="w-full pl-9 pr-3 py-2 text-sm border-2 border-primary-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-primary-50 font-mono"
                                     autoFocus
-                                    disabled={isActionLoading}
+                                    disabled={isActionLoading || (scanProgress?.allScanned ?? false)}
                                 />
                             </div>
                             <Button
                                 variant="primary"
                                 onClick={handleScan}
-                                disabled={isActionLoading || !trackingInput.trim()}
+                                disabled={isActionLoading || !trackingInput.trim() || (scanProgress?.allScanned ?? false)}
                                 className="px-4"
                             >
-                                {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Receive'}
+                                {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Scan'}
                             </Button>
+                            {scannedReturn && (
+                                <Button variant="outline" onClick={handleReset} className="px-3">
+                                    <RotateCcw className="w-4 h-4" />
+                                </Button>
+                            )}
                         </div>
-                        <p className="text-[10px] text-gray-400 mt-1">Use a barcode scanner pointed at the FedEx label, or type the tracking number manually.</p>
+                        <p className="text-[10px] text-gray-400 mt-1">
+                            Use a barcode scanner pointed at the FedEx label on each box, or type the tracking number manually.
+                        </p>
                     </div>
 
                     {/* Error */}
-                    {receiveError && (
+                    {scanError && (
                         <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-2.5 flex items-start gap-2.5">
                             <XCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
                             <div>
-                                <p className="text-xs font-medium text-red-800">Could not receive return</p>
-                                <p className="text-xs text-red-600">{receiveError}</p>
+                                <p className="text-xs font-medium text-red-800">Could not scan box</p>
+                                <p className="text-xs text-red-600">{scanError}</p>
                             </div>
                         </div>
                     )}
 
-                    {/* Success — received return details */}
-                    {receivedReturn && (
-                        <div className="bg-green-50 border-2 border-green-300 rounded-lg overflow-hidden">
-                            <div className="bg-green-100 px-4 py-2 flex items-center gap-2">
-                                <CheckCircle className="w-4 h-4 text-green-600" />
-                                <h3 className="text-sm font-semibold text-green-800">Return Received Successfully</h3>
+                    {/* Scan Progress Card */}
+                    {scannedReturn && scanProgress && (
+                        <div className={`border-2 rounded-lg overflow-hidden ${
+                            scanProgress.allScanned
+                                ? 'bg-green-50 border-green-300'
+                                : 'bg-blue-50 border-blue-300'
+                        }`}>
+                            {/* Header */}
+                            <div className={`px-4 py-2 flex items-center justify-between ${
+                                scanProgress.allScanned ? 'bg-green-100' : 'bg-blue-100'
+                            }`}>
+                                <div className="flex items-center gap-2">
+                                    {scanProgress.allScanned
+                                        ? <CheckCircle className="w-4 h-4 text-green-600" />
+                                        : <Box className="w-4 h-4 text-blue-600" />
+                                    }
+                                    <h3 className={`text-sm font-semibold ${
+                                        scanProgress.allScanned ? 'text-green-800' : 'text-blue-800'
+                                    }`}>
+                                        {scanProgress.allScanned
+                                            ? 'All Boxes Scanned — Return Received!'
+                                            : `Scanning in Progress — ${scanProgress.scannedCount} of ${scanProgress.totalPackages} boxes`
+                                        }
+                                    </h3>
+                                </div>
+                                {!scanProgress.allScanned && (
+                                    <Badge variant="warning">
+                                        <span className="text-[10px]">{scanProgress.totalPackages - scanProgress.scannedCount} remaining</span>
+                                    </Badge>
+                                )}
                             </div>
+
                             <div className="p-4 space-y-3">
+                                {/* Return info */}
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                     {[
-                                        { label: 'License Plate', value: <span className="font-mono font-bold">{receivedReturn.licensePlate}</span> },
-                                        { label: 'Pharmacy', value: receivedReturn.pharmacyName },
-                                        { label: 'Total Items', value: receivedReturn.totalItems },
-                                        { label: 'FedEx Tracking', value: <span className="font-mono">{receivedReturn.fedexTracking}</span> },
-                                        { label: 'Returnable Value', value: <span className="text-green-700">${Number(receivedReturn.totalReturnableValue).toFixed(2)}</span> },
-                                        { label: 'Box Count', value: receivedReturn.boxCount ?? '—' },
-                                        { label: 'Status', value: <Badge variant="success"><span className="text-[10px]">Received</span></Badge> },
-                                        { label: 'Received At', value: receivedReturn.receivedInWarehouseDate ? formatDateTime(receivedReturn.receivedInWarehouseDate) : 'Just now' },
+                                        { label: 'License Plate', value: <span className="font-mono font-bold">{scannedReturn.licensePlate}</span> },
+                                        { label: 'Pharmacy', value: scannedReturn.pharmacyName },
+                                        { label: 'Total Items', value: scannedReturn.totalItems },
+                                        { label: 'Box Count', value: scannedReturn.boxCount ?? scanProgress.totalPackages },
+                                        { label: 'Returnable Value', value: <span className="text-green-700">${Number(scannedReturn.totalReturnableValue || 0).toFixed(2)}</span> },
+                                        { label: 'Status', value: (
+                                            <Badge variant={scanProgress.allScanned ? 'success' : 'warning'}>
+                                                <span className="text-[10px]">{scanProgress.allScanned ? 'Received' : 'Scanning'}</span>
+                                            </Badge>
+                                        )},
                                     ].map(({ label, value }) => (
                                         <div key={label}>
                                             <p className="text-[10px] text-gray-500">{label}</p>
@@ -189,12 +276,88 @@ export default function WarehouseReceivingPage() {
                                         </div>
                                     ))}
                                 </div>
-                                <div className="flex gap-2 pt-2 border-t border-green-200">
-                                    <Button variant="primary" size="sm" onClick={() => router.push(`/warehouse/receiving/${receivedReturn.id}`)}>
-                                        <ArrowRight className="w-3.5 h-3.5 mr-1" />Start Verification
-                                    </Button>
-                                    <Button variant="outline" size="sm" onClick={handleReceiveAnother}>
-                                        <RotateCcw className="w-3.5 h-3.5 mr-1" />Receive Another
+
+                                {/* Progress bar */}
+                                <div>
+                                    <div className="flex justify-between text-[10px] text-gray-600 mb-1">
+                                        <span>Scan progress</span>
+                                        <span>{scanProgress.scannedCount} / {scanProgress.totalPackages}</span>
+                                    </div>
+                                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                        <div
+                                            className={`h-2.5 rounded-full transition-all duration-500 ${
+                                                scanProgress.allScanned ? 'bg-green-500' : 'bg-blue-500'
+                                            }`}
+                                            style={{ width: `${(scanProgress.scannedCount / scanProgress.totalPackages) * 100}%` }}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Package list with scan status */}
+                                {allPackageTrackingNumbers.length > 0 && (
+                                    <div>
+                                        <p className="text-[10px] font-semibold text-gray-600 uppercase mb-1.5">Package Tracking Numbers</p>
+                                        <div className="space-y-1">
+                                            {allPackageTrackingNumbers.map((num, idx) => {
+                                                const isScanned = scanState.scannedNumbers.some(
+                                                    s => s.toLowerCase() === num.toLowerCase()
+                                                );
+                                                return (
+                                                    <div
+                                                        key={idx}
+                                                        className={`flex items-center justify-between px-3 py-1.5 rounded-md border ${
+                                                            isScanned
+                                                                ? 'bg-green-50 border-green-200'
+                                                                : 'bg-white border-gray-200'
+                                                        }`}
+                                                    >
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[10px] text-gray-500 w-16">Box {idx + 1}</span>
+                                                            <span className="font-mono text-xs font-medium text-gray-900">{num}</span>
+                                                        </div>
+                                                        {isScanned ? (
+                                                            <div className="flex items-center gap-1 text-green-600">
+                                                                <CheckCircle className="w-3.5 h-3.5" />
+                                                                <span className="text-[10px] font-medium">Scanned</span>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="flex items-center gap-1 text-gray-400">
+                                                                <Clock className="w-3.5 h-3.5" />
+                                                                <span className="text-[10px] font-medium">Waiting</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Info message */}
+                                {scanMessage && (
+                                    <div className={`flex items-center gap-2 px-3 py-2 rounded text-xs ${
+                                        scanProgress.allScanned
+                                            ? 'bg-green-100 text-green-800'
+                                            : 'bg-blue-100 text-blue-800'
+                                    }`}>
+                                        {scanProgress.allScanned
+                                            ? <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                                            : <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+                                        }
+                                        {scanMessage}
+                                    </div>
+                                )}
+
+                                {/* Actions */}
+                                <div className="flex gap-2 pt-2 border-t border-gray-200">
+                                    {scanProgress.allScanned && (
+                                        <Button variant="primary" size="sm" onClick={() => router.push(`/warehouse/receiving/${scannedReturn.id}`)}>
+                                            <ArrowRight className="w-3.5 h-3.5 mr-1" />Start Verification
+                                        </Button>
+                                    )}
+                                    <Button variant="outline" size="sm" onClick={handleReset}>
+                                        <RotateCcw className="w-3.5 h-3.5 mr-1" />
+                                        {scanProgress.allScanned ? 'Receive Another' : 'Reset'}
                                     </Button>
                                 </div>
                             </div>
@@ -236,20 +399,40 @@ export default function WarehouseReceivingPage() {
                                         <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">FedEx Tracking</th>
                                         <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Items</th>
                                         <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Boxes</th>
+                                        <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Scan Status</th>
                                         <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Finalized</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
-                                    {pendingReturns.map(r => (
-                                        <tr key={r.id} className="hover:bg-gray-50">
-                                            <td className="px-3 py-1.5 text-xs font-mono font-semibold text-gray-900">{r.licensePlate}</td>
-                                            <td className="px-3 py-1.5 text-xs text-gray-700">{r.pharmacyName}</td>
-                                            <td className="px-3 py-1.5 text-[11px] font-mono text-gray-600">{r.fedexTracking || '—'}</td>
-                                            <td className="px-3 py-1.5 text-xs text-center text-gray-900">{r.totalItems}</td>
-                                            <td className="px-3 py-1.5 text-xs text-center text-gray-900">{r.boxCount ?? '—'}</td>
-                                            <td className="px-3 py-1.5 text-[11px] text-gray-500">{r.finalizedAt ? formatDate(r.finalizedAt) : '—'}</td>
-                                        </tr>
-                                    ))}
+                                    {pendingReturns.map(r => {
+                                        const totalPkgs = r.packageTracking && typeof r.packageTracking === 'object'
+                                            ? Object.keys(r.packageTracking).length
+                                            : 1;
+                                        const scannedPkgs = r.scannedPackages && typeof r.scannedPackages === 'object'
+                                            ? Object.keys(r.scannedPackages).length
+                                            : 0;
+                                        return (
+                                            <tr key={r.id} className="hover:bg-gray-50">
+                                                <td className="px-3 py-1.5 text-xs font-mono font-semibold text-gray-900">{r.licensePlate}</td>
+                                                <td className="px-3 py-1.5 text-xs text-gray-700">{r.pharmacyName}</td>
+                                                <td className="px-3 py-1.5 text-[11px] font-mono text-gray-600">{r.fedexTracking || '—'}</td>
+                                                <td className="px-3 py-1.5 text-xs text-center text-gray-900">{r.totalItems}</td>
+                                                <td className="px-3 py-1.5 text-xs text-center text-gray-900">{r.boxCount ?? '—'}</td>
+                                                <td className="px-3 py-1.5 text-center">
+                                                    {scannedPkgs > 0 ? (
+                                                        <Badge variant="warning">
+                                                            <span className="text-[10px]">{scannedPkgs}/{totalPkgs} scanned</span>
+                                                        </Badge>
+                                                    ) : (
+                                                        <Badge variant="default">
+                                                            <span className="text-[10px]">Not scanned</span>
+                                                        </Badge>
+                                                    )}
+                                                </td>
+                                                <td className="px-3 py-1.5 text-[11px] text-gray-500">{r.finalizedAt ? formatDate(r.finalizedAt) : '—'}</td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                             {pendingPagination && pendingPagination.totalPages > 1 && (

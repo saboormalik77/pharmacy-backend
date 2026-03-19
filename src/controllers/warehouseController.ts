@@ -4,7 +4,7 @@ import { AppError } from '../utils/appError';
 import * as warehouseService from '../services/warehouseService';
 
 // ============================================================
-// POST /api/admin/warehouse/receive
+// POST /api/admin/warehouse/receive  (legacy — kept for compat)
 // ============================================================
 export const receiveHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
@@ -14,12 +14,37 @@ export const receiveHandler = catchAsync(
       throw new AppError('fedexTracking is required', 400);
     }
 
-    const transaction = await warehouseService.receiveReturn(fedexTracking.trim());
+    const result = await warehouseService.scanBox(fedexTracking.trim());
 
     res.status(200).json({
       status: 'success',
-      message: 'Return received in warehouse',
-      data: transaction,
+      message: result.message,
+      data: result.transaction,
+      scanProgress: result.scanProgress,
+      alreadyScanned: result.alreadyScanned,
+    });
+  }
+);
+
+// ============================================================
+// POST /api/admin/warehouse/scan-box
+// ============================================================
+export const scanBoxHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { trackingNumber } = req.body;
+
+    if (!trackingNumber || !trackingNumber.trim()) {
+      throw new AppError('trackingNumber is required', 400);
+    }
+
+    const result = await warehouseService.scanBox(trackingNumber.trim());
+
+    res.status(200).json({
+      status: 'success',
+      message: result.message,
+      data: result.transaction,
+      scanProgress: result.scanProgress,
+      alreadyScanned: result.alreadyScanned,
     });
   }
 );

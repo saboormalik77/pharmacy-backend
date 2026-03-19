@@ -599,6 +599,7 @@ export interface ReturnTransaction {
     manifestGeneratedAt: string | null;
     prpNumber: string | null;
     packageTracking: Record<string, string> | null;
+    scannedPackages: Record<string, string> | null;
     fedexShipmentId: string | null;
     fedexLabels: Record<string, string> | null;
     verifiedAt: string | null;

@@ -56,20 +56,49 @@ export interface VerifiedItem {
 }
 
 // ============================================================
-// Task 9.1: Receive a return by FedEx tracking
+// Task 9.1: Scan a single box tracking number
+//   - Scans one tracking number at a time
+//   - When all packages for a return are scanned → status = 'received'
 // ============================================================
 
+export interface ScanProgress {
+  totalPackages: number;
+  scannedCount: number;
+  allScanned: boolean;
+  scannedKeys?: string[];
+}
+
+export interface ScanBoxResult {
+  transaction: ReturnTransaction;
+  scanProgress: ScanProgress;
+  alreadyScanned: boolean;
+  message: string;
+}
+
+export const scanBox = async (
+  trackingNumber: string
+): Promise<ScanBoxResult> => {
+  const sb = ensureAdmin();
+
+  const { data, error } = await sb.rpc('warehouse_scan_box', {
+    p_tracking_number: trackingNumber,
+  });
+
+  handleRpcError(data, error, 'Failed to scan box');
+  return {
+    transaction: data.data as ReturnTransaction,
+    scanProgress: data.scanProgress as ScanProgress,
+    alreadyScanned: data.alreadyScanned ?? false,
+    message: data.message ?? '',
+  };
+};
+
+// Legacy: single-scan receive (kept for backward compatibility)
 export const receiveReturn = async (
   fedexTracking: string
 ): Promise<ReturnTransaction> => {
-  const sb = ensureAdmin();
-
-  const { data, error } = await sb.rpc('warehouse_receive_return', {
-    p_fedex_tracking: fedexTracking,
-  });
-
-  handleRpcError(data, error, 'Failed to receive return');
-  return data.data as ReturnTransaction;
+  const result = await scanBox(fedexTracking);
+  return result.transaction;
 };
 
 // ============================================================

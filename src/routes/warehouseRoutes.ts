@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authenticateAdmin } from '../middleware/adminAuth';
 import {
   receiveHandler,
+  scanBoxHandler,
   pendingHandler,
   receivedHandler,
   verifyReturnHandler,
@@ -45,6 +46,37 @@ const router = Router();
  *         description: No return found with that tracking number
  */
 router.post('/receive', authenticateAdmin, receiveHandler);
+
+/**
+ * @swagger
+ * /api/admin/warehouse/scan-box:
+ *   post:
+ *     summary: Scan a single box tracking number for warehouse receiving
+ *     description: |
+ *       Scans one tracking number at a time. Matches against any package
+ *       tracking number in the return. When ALL packages have been scanned,
+ *       the return status automatically changes to 'received'.
+ *     tags: [Warehouse Receiving]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [trackingNumber]
+ *             properties:
+ *               trackingNumber: { type: string, description: Individual box tracking number }
+ *     responses:
+ *       200:
+ *         description: Box scanned — returns scan progress and transaction details
+ *       400:
+ *         description: Invalid or missing tracking number
+ *       404:
+ *         description: No finalized return found with that tracking number
+ */
+router.post('/scan-box', authenticateAdmin, scanBoxHandler);
 
 /**
  * @swagger
