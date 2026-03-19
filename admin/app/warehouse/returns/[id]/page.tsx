@@ -582,8 +582,10 @@ export default function ReturnDetailPage() {
                 </div>
             </div>
 
-            {/* Detail Cards */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            {/* Detail Cards - Conditional Layout */}
+            {(tx.fedexTracking || tx.fedexPickupConfirmation) ? (
+                /* Layout with Shipping & Processing: 2x2 grid */
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 {/* General Info */}
                 <div className="bg-white rounded-lg shadow px-4 py-3">
                     <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
@@ -655,38 +657,42 @@ export default function ReturnDetailPage() {
                     </dl>
                 </div>
 
-                {/* Shipping & Times */}
-                <div className="bg-white rounded-lg shadow px-4 py-3">
-                    <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                        <Truck className="w-3.5 h-3.5" /> Shipping & Processing
-                    </h2>
-                    <dl className="space-y-1.5">
-                        <div className="flex justify-between">
-                            <dt className="text-[11px] text-gray-500">FedEx Tracking</dt>
-                            <dd className="text-[11px] text-gray-900 font-mono">{tx.fedexTracking || '—'}</dd>
-                        </div>
-                        <div className="flex justify-between">
-                            <dt className="text-[11px] text-gray-500">Pickup Confirmation</dt>
-                            <dd className="text-[11px] text-gray-900">{tx.fedexPickupConfirmation || '—'}</dd>
-                        </div>
-                        <div className="flex justify-between">
-                            <dt className="text-[11px] text-gray-500 flex items-center gap-1"><Clock className="w-3 h-3" /> Time In</dt>
-                            <dd className="text-[11px] text-gray-900">{tx.timeIn ? formatDate(tx.timeIn) : '—'}</dd>
-                        </div>
-                        <div className="flex justify-between">
-                            <dt className="text-[11px] text-gray-500 flex items-center gap-1"><Clock className="w-3 h-3" /> Time Out</dt>
-                            <dd className="text-[11px] text-gray-900">{tx.timeOut ? formatDate(tx.timeOut) : '—'}</dd>
-                        </div>
-                        {tx.receivedInWarehouseDate && (
+                    {/* Shipping & Processing */}
+                    <div className="bg-white rounded-lg shadow px-4 py-3">
+                        <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                            <Truck className="w-3.5 h-3.5" /> Shipping & Processing
+                        </h2>
+                        <dl className="space-y-1.5">
                             <div className="flex justify-between">
-                                <dt className="text-[11px] text-gray-500">Received in Warehouse</dt>
-                                <dd className="text-[11px] text-gray-900">{formatDate(tx.receivedInWarehouseDate)}</dd>
+                                <dt className="text-[11px] text-gray-500">FedEx Tracking</dt>
+                                <dd className="text-[11px] text-gray-900 font-mono">{tx.fedexTracking || '—'}</dd>
                             </div>
-                        )}
-                        <div className="flex justify-between">
-                            <dt className="text-[11px] text-gray-500">Verified Integrity</dt>
-                            <dd className="text-[11px] text-gray-900">{tx.verifiedIntegrity ? 'Yes' : 'No'}</dd>
-                        </div>
+                            <div className="flex justify-between">
+                                <dt className="text-[11px] text-gray-500">Pickup Confirmation</dt>
+                                <dd className="text-[11px] text-gray-900">{tx.fedexPickupConfirmation || '—'}</dd>
+                            </div>
+                            {/* Commented out as requested:
+                            <div className="flex justify-between">
+                                <dt className="text-[11px] text-gray-500 flex items-center gap-1"><Clock className="w-3 h-3" /> Time In</dt>
+                                <dd className="text-[11px] text-gray-900">{tx.timeIn ? formatDate(tx.timeIn) : '—'}</dd>
+                            </div>
+                            <div className="flex justify-between">
+                                <dt className="text-[11px] text-gray-500 flex items-center gap-1"><Clock className="w-3 h-3" /> Time Out</dt>
+                                <dd className="text-[11px] text-gray-900">{tx.timeOut ? formatDate(tx.timeOut) : '—'}</dd>
+                            </div>
+                            */}
+                            {tx.receivedInWarehouseDate && (
+                                <div className="flex justify-between">
+                                    <dt className="text-[11px] text-gray-500">Received in Warehouse</dt>
+                                    <dd className="text-[11px] text-gray-900">{formatDate(tx.receivedInWarehouseDate)}</dd>
+                                </div>
+                            )}
+                            {/* Commented out as requested:
+                            <div className="flex justify-between">
+                                <dt className="text-[11px] text-gray-500">Verified Integrity</dt>
+                                <dd className="text-[11px] text-gray-900">{tx.verifiedIntegrity ? 'Yes' : 'No'}</dd>
+                            </div>
+                            */}
                         {tx.boxCount != null && (
                             <div className="flex justify-between">
                                 <dt className="text-[11px] text-gray-500">Box Count</dt>
@@ -767,9 +773,94 @@ export default function ReturnDetailPage() {
                                 </dd>
                             </div>
                         )}
-                    </dl>
+                        </dl>
+                    </div>
                 </div>
-            </div>
+            ) : (
+                /* Layout without Shipping & Processing: 3 cards in one row */
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    {/* General Information */}
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-sm border border-blue-100 px-5 py-4 hover:shadow-md transition-shadow">
+                        <h2 className="text-xs font-bold text-blue-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <div className="p-1.5 bg-blue-100 rounded-lg">
+                                <ClipboardList className="w-4 h-4 text-blue-600" />
+                            </div>
+                            General Information
+                        </h2>
+                        <dl className="space-y-2.5">
+                            {[
+                                { label: 'License Plate', value: <span className="font-mono font-bold text-gray-800">{tx.licensePlate}</span> },
+                                { label: 'Service Type', value: tx.serviceType.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) },
+                                { label: 'Created', value: formatDate(tx.createdAt) },
+                                { label: 'Last Updated', value: formatDate(tx.updatedAt) },
+                                ...(tx.finalizedAt ? [{ label: 'Finalized', value: formatDate(tx.finalizedAt) }] : []),
+                            ].map(({ label, value }) => (
+                                <div key={label} className="flex justify-between items-center">
+                                    <dt className="text-xs text-blue-700 font-medium">{label}</dt>
+                                    <dd className="text-xs text-gray-800 font-semibold">{value}</dd>
+                                </div>
+                            ))}
+                            {tx.notes && (
+                                <div className="pt-2 border-t border-blue-200">
+                                    <dt className="text-xs text-blue-700 font-medium mb-1">Notes</dt>
+                                    <dd className="text-xs text-gray-700 bg-white/60 rounded px-2 py-1">{tx.notes}</dd>
+                                </div>
+                            )}
+                        </dl>
+                    </div>
+
+                    {/* Store & Processor */}
+                    <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl shadow-sm border border-emerald-100 px-5 py-4 hover:shadow-md transition-shadow">
+                        <h2 className="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <div className="p-1.5 bg-emerald-100 rounded-lg">
+                                <Building2 className="w-4 h-4 text-emerald-600" />
+                            </div>
+                            Store & Processor
+                        </h2>
+                        <dl className="space-y-2.5">
+                            <div className="flex justify-between items-center">
+                                <dt className="text-xs text-emerald-700 font-medium">Store Name</dt>
+                                <dd className="text-xs font-bold text-gray-800">{tx.pharmacyName || '—'}</dd>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <dt className="text-xs text-emerald-700 font-medium">Processor</dt>
+                                <dd className="text-xs text-gray-800 font-semibold flex items-center gap-1">
+                                    <UserCog className="w-3.5 h-3.5 text-emerald-500" /> 
+                                    {tx.processorName || '—'}
+                                </dd>
+                            </div>
+                        </dl>
+                    </div>
+
+                    {/* Items & Values */}
+                    <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl shadow-sm border border-amber-100 px-5 py-4 hover:shadow-md transition-shadow">
+                        <h2 className="text-xs font-bold text-amber-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <div className="p-1.5 bg-amber-100 rounded-lg">
+                                <Package className="w-4 h-4 text-amber-600" />
+                            </div>
+                            Items & Values
+                        </h2>
+                        <dl className="space-y-2.5">
+                            <div className="flex justify-between items-center">
+                                <dt className="text-xs text-amber-700 font-medium">Total Items</dt>
+                                <dd className="text-xs font-bold text-gray-800">{nonWcItems.length}</dd>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <dt className="text-xs text-amber-700 font-medium">Returnable Value</dt>
+                                <dd className="text-xs font-bold text-green-700">{formatCurrency(nonWcReturnableValue)}</dd>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <dt className="text-xs text-amber-700 font-medium">Non-Returnable Value</dt>
+                                <dd className="text-xs font-bold text-red-700">{formatCurrency(nonWcNonReturnableValue)}</dd>
+                            </div>
+                            <div className="flex justify-between items-center pt-2 border-t border-amber-200">
+                                <dt className="text-xs text-amber-800 font-bold">Total Value</dt>
+                                <dd className="text-sm font-black text-gray-900 bg-white/70 px-2 py-0.5 rounded">{formatCurrency(nonWcTotalValue)}</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+            )}
 
             {/* ── Documents Section (post-finalization) ──────── */}
             {isFinalized && (
