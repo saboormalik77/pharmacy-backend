@@ -15,6 +15,7 @@ import {
     fetchReturnTransactionById,
     scanBarcode,
     addTransactionItem,
+    addToWineCellarDirect,
 } from '@/lib/store/returnTransactionsSlice';
 import { checkReturnability } from '@/lib/store/policiesSlice';
 import { BarcodeScanResponse, ReturnabilityCheckResult } from '@/lib/types';
@@ -89,6 +90,8 @@ export default function AddItemsPage() {
     const [policyModalOpen, setPolicyModalOpen] = useState(false);
     // Field-level validation errors
     const [formErrors, setFormErrors] = useState<Set<string>>(new Set());
+    // Expected returnable date for manual wine cellar move
+    const [wineCellarDate, setWineCellarDate] = useState('');
 
     const showToast = (message: string, type: Toast['type'] = 'success') => {
         const id = Date.now().toString();
@@ -414,9 +417,76 @@ export default function AddItemsPage() {
         }
     };
 
+    // ── Manual Wine Cellar move (no policy + user selected non-returnable) ──
+    // Calls POST /api/admin/wine-cellar directly — does NOT touch return items table.
+
+    const handleMoveToWineCellarManual = async () => {
+        if (!validateForm()) return;
+        if (!wineCellarDate) {
+            showToast('Please enter the Expected Returnable Date before moving to Wine Cellar.', 'error');
+            return;
+        }
+
+        const pkgSize = parseFloat(form.fullPackageSize) || 0;
+        const qtyInput = parseFloat(form.fullPackageQtyReturned) || 0;
+        let wcQty = 1;
+        let wcIsPartial = false;
+        let wcPartialPct: number | null = null;
+        if (form.fullPackageQtyReturned.trim() && qtyInput > 0 && pkgSize > 0) {
+            const units = form.qtyMode === 'units' ? qtyInput : (qtyInput / 100) * pkgSize;
+            const pct = form.qtyMode === 'units' ? (qtyInput / pkgSize) * 100 : qtyInput;
+            if (units < pkgSize && pct < 100) { wcIsPartial = true; wcPartialPct = Math.min(100, Math.max(1, pct)); }
+        } else if (form.fullPackageQtyReturned.trim() && qtyInput > 0) {
+            wcQty = Math.round(qtyInput) || 1;
+        }
+
+        const payload: Record<string, any> = {
+            pharmacyId: tx!.pharmacyId,
+            expectedReturnableDate: wineCellarDate,
+            notes: form.memo || 'Manually moved — no return policy found',
+            quantity: wcQty,
+            isPartial: wcIsPartial,
+        };
+        if (form.ndc) payload.ndc = form.ndc;
+        if (form.ndc10) payload.ndc10 = form.ndc10;
+        if (form.proprietaryName || form.genericName)
+            payload.productName = form.proprietaryName || form.genericName;
+        if (form.manufacturer) payload.manufacturer = form.manufacturer;
+        if (form.lotNumber) payload.lotNumber = form.lotNumber;
+        if (form.serialNumber) payload.serialNumber = form.serialNumber;
+        if (form.expirationDate) payload.expirationDate = form.expirationDate;
+        if (form.standardPrice) payload.standardPrice = parseFloat(form.standardPrice);
+        if (form.fullPackageSize) payload.fullPackageSize = parseInt(form.fullPackageSize);
+        if (wcIsPartial && wcPartialPct != null) payload.partialPercentage = wcPartialPct;
+
+        const result = await dispatch(addToWineCellarDirect(payload));
+        const name = form.proprietaryName || form.ndc || 'Item';
+
+        if (addToWineCellarDirect.fulfilled.match(result)) {
+            showToast(`${name} moved to Wine Cellar. Expected return: ${wineCellarDate}.`);
+            setLastClassification({ item: name, status: 'non_returnable', policyCheck: undefined, wineCellarItem: result.payload });
+        } else {
+            showToast(friendlyError(result.payload as string), 'error');
+            return;
+        }
+
+        setForm({ ...EMPTY_FORM });
+        setFormErrors(new Set());
+        setWineCellarDate('');
+        setScannedPrices(null);
+        setScanError('');
+        setScanInput('');
+        setPreCheckResult(null);
+        setPolicyAutoCheck(null);
+        setIsPolicyChecking(false);
+        setPolicyModalOpen(false);
+        if (mode === 'usb') scanInputRef.current?.focus();
+    };
+
     const handleClearForm = () => {
         setForm({ ...EMPTY_FORM });
         setFormErrors(new Set());
+        setWineCellarDate('');
         setScannedPrices(null);
         setScanError('');
         setLastWarning('');
@@ -844,21 +914,67 @@ export default function AddItemsPage() {
                                 </button>
                             </div>
                         </>
-                    ) : (
-                        <div className="flex flex-wrap gap-1.5">
-                            <button onClick={() => handleSave()} disabled={isItemActionLoading || isPreChecking || (!form.ndc && !form.proprietaryName)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
-                                {isItemActionLoading || isPreChecking
-                                    ? <><Loader2 className="w-3 h-3 animate-spin" />{isPreChecking ? 'Checking...' : 'Saving...'}</>
-                                    : <><CheckCircle className="w-3 h-3" />Save &amp; Scan Next</>}
-                            </button>
-                            <button onClick={handleClearForm} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
-                                <RotateCcw className="w-3 h-3" /> Clear
-                            </button>
-                            <button onClick={() => router.push(`/warehouse/returns/${transactionId}`)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded text-gray-500 hover:bg-gray-100 transition-colors">
-                                <X className="w-3 h-3" /> Cancel
-                            </button>
-                        </div>
-                    )}
+                    ) : (() => {
+                        // No policy found + user manually selected Non-Returnable → offer Wine Cellar
+                        const noPolicy = !policyAutoCheck || policyAutoCheck.status === 'tbd';
+                        const isManualNonReturnable = noPolicy && form.returnStatus === 'non_returnable';
+                        return isManualNonReturnable ? (
+                            <>
+                                <div className="mb-2 bg-purple-50 border border-purple-200 rounded px-3 py-2 space-y-2">
+                                    <div className="flex items-start gap-1.5">
+                                        <Archive className="w-3.5 h-3.5 text-purple-600 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p className="text-xs font-semibold text-purple-800">No return policy — move to Wine Cellar</p>
+                                            <p className="text-[10px] text-purple-700 mt-0.5">
+                                                Enter when this product will be eligible for return, then click Move to Wine Cellar.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-medium text-purple-700 mb-0.5">
+                                            Expected Returnable Date <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="date"
+                                            value={wineCellarDate}
+                                            onChange={e => setWineCellarDate(e.target.value)}
+                                            className={`w-44 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-purple-400 ${
+                                                !wineCellarDate ? 'border-red-300 bg-red-50' : 'border-purple-300 bg-white'
+                                            }`}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex flex-wrap gap-1.5">
+                                    <button
+                                        onClick={handleMoveToWineCellarManual}
+                                        disabled={isItemActionLoading || !wineCellarDate}
+                                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 transition-colors"
+                                    >
+                                        {isItemActionLoading
+                                            ? <><Loader2 className="w-3 h-3 animate-spin" />Moving...</>
+                                            : <><Archive className="w-3 h-3" />Move to Wine Cellar</>}
+                                    </button>
+                                    <button onClick={handleClearForm} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                                        <X className="w-3 h-3" /> Clear
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="flex flex-wrap gap-1.5">
+                                <button onClick={() => handleSave()} disabled={isItemActionLoading || isPreChecking || (!form.ndc && !form.proprietaryName)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                                    {isItemActionLoading || isPreChecking
+                                        ? <><Loader2 className="w-3 h-3 animate-spin" />{isPreChecking ? 'Checking...' : 'Saving...'}</>
+                                        : <><CheckCircle className="w-3 h-3" />Save &amp; Scan Next</>}
+                                </button>
+                                <button onClick={handleClearForm} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <RotateCcw className="w-3 h-3" /> Clear
+                                </button>
+                                <button onClick={() => router.push(`/warehouse/returns/${transactionId}`)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded text-gray-500 hover:bg-gray-100 transition-colors">
+                                    <X className="w-3 h-3" /> Cancel
+                                </button>
+                            </div>
+                        );
+                    })()}
                 </div>
             </div>
 
