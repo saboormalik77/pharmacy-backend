@@ -471,6 +471,26 @@ export const moveItemToWineCellar = createAsyncThunk(
     }
 );
 
+export const addToWineCellarDirect = createAsyncThunk(
+    'returnTransactions/addToWineCellarDirect',
+    async (payload: Record<string, any>, { rejectWithValue }) => {
+        try {
+            const { apiClient } = await import('@/lib/api/apiClient');
+            const { cookieUtils } = await import('@/lib/utils/cookies');
+            if (!cookieUtils.getAuthToken()) return rejectWithValue('Authentication required.');
+
+            const response = await apiClient.post<{ status: string; data: any }>(
+                '/admin/wine-cellar',
+                payload,
+                true
+            );
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error?.message || 'Failed to add item to wine cellar');
+        }
+    }
+);
+
 export const updateTransactionItem = createAsyncThunk(
     'returnTransactions/updateItem',
     async ({ transactionId, itemId, payload }: { transactionId: string; itemId: string; payload: Partial<AddItemPayload> }, { rejectWithValue }) => {
