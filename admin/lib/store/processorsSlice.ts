@@ -131,6 +131,22 @@ export const deactivateProcessor = createAsyncThunk(
   }
 );
 
+export const activateProcessor = createAsyncThunk(
+  'processors/activate',
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const { apiClient } = await import('@/lib/api/apiClient');
+      const { cookieUtils } = await import('@/lib/utils/cookies');
+      if (!cookieUtils.getAuthToken()) return rejectWithValue('Authentication required.');
+
+      await apiClient.patch<{ status: string }>(`/admin/processors/${id}/activate`, {}, true);
+      return id;
+    } catch (error: any) {
+      return rejectWithValue(error?.message || 'Failed to activate processor');
+    }
+  }
+);
+
 export const fetchProcessorStores = createAsyncThunk(
   'processors/fetchStores',
   async (processorId: string, { rejectWithValue }) => {
@@ -250,6 +266,17 @@ const processorsSlice = createSlice({
         state.error = null;
       })
       .addCase(deactivateProcessor.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; })
+
+      // activateProcessor
+      .addCase(activateProcessor.pending, (state) => { state.isLoading = true; state.error = null; })
+      .addCase(activateProcessor.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.processors = state.processors.map(p =>
+          p.id === action.payload ? { ...p, status: 'active' as const } : p
+        );
+        state.error = null;
+      })
+      .addCase(activateProcessor.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; })
 
       // fetchProcessorStores
       .addCase(fetchProcessorStores.pending, (state) => { state.isStoresLoading = true; })

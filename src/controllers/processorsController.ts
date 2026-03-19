@@ -133,6 +133,26 @@ export const deleteProcessorHandler = catchAsync(
 );
 
 // ============================================================
+// PATCH /api/admin/processors/:id/activate — Activate processor
+// ============================================================
+export const activateProcessorHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { id } = req.params;
+
+    if (!id) {
+      throw new AppError('Processor ID is required', 400);
+    }
+
+    await processorsService.activateProcessor(id);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Processor activated successfully',
+    });
+  }
+);
+
+// ============================================================
 // GET /api/admin/processors/:id/stores — Get assigned stores
 // ============================================================
 export const getProcessorStoresHandler = catchAsync(

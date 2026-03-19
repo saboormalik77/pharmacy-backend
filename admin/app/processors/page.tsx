@@ -16,6 +16,7 @@ import {
     createProcessor,
     updateProcessor,
     deactivateProcessor,
+    activateProcessor,
     fetchProcessorStores,
     assignStoresToProcessor,
     unassignStoreFromProcessor,
@@ -50,6 +51,7 @@ export default function ProcessorsPage() {
     const [editModal, setEditModal] = useState<Processor | null>(null);
     const [storesModal, setStoresModal] = useState<Processor | null>(null);
     const [deactivateModal, setDeactivateModal] = useState<Processor | null>(null);
+    const [activateModal, setActivateModal] = useState<Processor | null>(null);
     const [assignModal, setAssignModal] = useState<Processor | null>(null);
 
     // Forms
@@ -146,6 +148,18 @@ export default function ProcessorsPage() {
             refresh();
         } else {
             showToast(result.payload as string || 'Failed to deactivate processor', 'error');
+        }
+    };
+
+    const handleActivate = async () => {
+        if (!activateModal) return;
+        const result = await dispatch(activateProcessor(activateModal.id));
+        if (activateProcessor.fulfilled.match(result)) {
+            showToast('Processor activated successfully!');
+            setActivateModal(null);
+            refresh();
+        } else {
+            showToast(result.payload as string || 'Failed to activate processor', 'error');
         }
     };
 
@@ -356,6 +370,11 @@ export default function ProcessorsPage() {
                                                             <Power className="w-3.5 h-3.5" />
                                                         </button>
                                                     )}
+                                                    {processor.status === 'inactive' && (
+                                                        <button onClick={() => setActivateModal(processor)} className="p-1 text-green-600 hover:bg-green-50 rounded" title="Activate">
+                                                            <CheckCircle className="w-3.5 h-3.5" />
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
@@ -472,6 +491,7 @@ export default function ProcessorsPage() {
                                     onChange={e => setNewProcessor({ ...newProcessor, name: e.target.value })}
                                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     placeholder="Full name"
+                                    autoComplete="off"
                                 />
                             </div>
                             <div>
@@ -482,6 +502,7 @@ export default function ProcessorsPage() {
                                     onChange={e => setNewProcessor({ ...newProcessor, email: e.target.value })}
                                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     placeholder="email@example.com"
+                                    autoComplete="off"
                                 />
                                 <p className="text-xs text-gray-500 mt-1">Used as the login email for the admin panel.</p>
                             </div>
@@ -494,6 +515,7 @@ export default function ProcessorsPage() {
                                         onChange={e => setNewProcessor({ ...newProcessor, password: e.target.value })}
                                         className="w-full px-3 py-2 pr-10 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         placeholder="Min. 8 characters"
+                                        autoComplete="new-password"
                                     />
                                     <button
                                         type="button"
@@ -781,6 +803,37 @@ export default function ProcessorsPage() {
                             <Button variant="outline" onClick={() => setDeactivateModal(null)}>Cancel</Button>
                             <Button variant="danger" onClick={handleDeactivate} disabled={isLoading}>
                                 {isLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Deactivating...</> : 'Deactivate'}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Activate Confirmation Modal ─────────────────── */}
+            {activateModal && (
+                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setActivateModal(null)}>
+                    <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-5 border-b border-gray-200">
+                            <h2 className="text-lg font-semibold text-gray-900">Activate Processor</h2>
+                            <button onClick={() => setActivateModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                        </div>
+                        <div className="p-5">
+                            <div className="flex items-start gap-3 mb-4">
+                                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <CheckCircle className="w-5 h-5 text-green-600" />
+                                </div>
+                                <div>
+                                    <p className="text-gray-800 font-medium">Are you sure you want to activate <strong>{activateModal.name}</strong>?</p>
+                                    <p className="text-sm text-gray-500 mt-1">
+                                        This processor will regain access to the system and be able to log in again.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex justify-end gap-2 p-5 border-t border-gray-200">
+                            <Button variant="outline" onClick={() => setActivateModal(null)}>Cancel</Button>
+                            <Button variant="primary" onClick={handleActivate} disabled={isLoading}>
+                                {isLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Activating...</> : 'Activate'}
                             </Button>
                         </div>
                     </div>
