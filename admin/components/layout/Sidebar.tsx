@@ -7,7 +7,6 @@ import {
     Building2,
     Warehouse,
     ShoppingCart,
-    Package,
     FileText,
     CreditCard,
     BarChart3,
@@ -16,18 +15,28 @@ import {
     UserCog,
     ClipboardList,
     Scan,
-    Archive,
     Shield,
     AlertTriangle,
-    PackageCheck,
-    Layers,
-    Receipt,
-    MailCheck,
     CircleDollarSign,
-    DollarSign,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppSelector } from '@/lib/store/hooks';
+
+// Warehouse sub-routes that activate the Warehouse sidebar link
+const warehouseSubRoutes = [
+    '/warehouse/receiving',
+    '/warehouse/batches',
+    '/warehouse/debit-memos',
+    '/warehouse/ra-tracking',
+    '/warehouse/returns',
+];
+
+// Payout sub-routes that activate the Payout Management sidebar link
+const payoutSubRoutes = [
+    '/pharmacy-payments',
+    '/warehouse/unpaid',
+    '/gpo-payment',
+];
 
 // Admin navigation (for super_admin, manager, reviewer, support)
 const adminSidebarLinks = [
@@ -37,20 +46,14 @@ const adminSidebarLinks = [
     { href: '/marketplace', icon: ShoppingCart, label: 'Marketplace' },
     { href: '/documents', icon: FileText, label: 'Documents' },
     { href: '/payments', icon: CreditCard, label: 'Payments' },
-    { href: '/pharmacy-payments', icon: DollarSign, label: 'Pharmacy Payments' },
+    { href: '/payout-hub', icon: CircleDollarSign, label: 'Payout Mgmt' },
     { href: '/analytics', icon: BarChart3, label: 'Analytics' },
-    // { href: '/email-management', icon: MailCheck, label: 'Email Management' },
     { href: '/settings', icon: Settings, label: 'Settings' },
     { href: '/admins', icon: Users, label: 'Admins' },
     { href: '/processors', icon: UserCog, label: 'Processors' },
-    { href: '/policies', icon: Shield, label: 'Policies' },
+    { href: '/policies', icon: Shield, label: 'Labeler Info' },
     { href: '/warehouse/tbd-items', icon: AlertTriangle, label: 'TBD Items' },
-    { href: '/warehouse/receiving', icon: PackageCheck, label: 'Receiving' },
-    { href: '/warehouse/batches', icon: Layers, label: 'Batches' },
-    { href: '/warehouse/debit-memos', icon: Receipt, label: 'Debit Memos' },
-    { href: '/warehouse/ra-tracking', icon: MailCheck, label: 'RA Tracking' },
-    { href: '/warehouse/unpaid', icon: CircleDollarSign, label: 'Unpaid Memos' },
-    // { href: '/warehouse/wine-cellar', icon: Archive, label: 'Wine Cellar' },
+    { href: '/warehouse', icon: Warehouse, label: 'Warehouse', matchPrefix: '/warehouse' },
 ];
 
 // Processor navigation (for role = 'processor') — Receiving is warehouse-only
@@ -104,7 +107,12 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose }: SidebarProps) 
                 <nav className="space-y-0.5">
                     {sidebarLinks.map((link) => {
                         const Icon = link.icon;
-                        const isActive = pathname === link.href;
+                        const isActive =
+                            link.href === '/warehouse'
+                                ? pathname === '/warehouse' || warehouseSubRoutes.some(r => pathname.startsWith(r))
+                                : link.href === '/payout-hub'
+                                ? pathname === '/payout-hub' || payoutSubRoutes.some(r => pathname.startsWith(r))
+                                : pathname === link.href;
 
                         return (
                             <Link

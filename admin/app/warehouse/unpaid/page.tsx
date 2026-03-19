@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import {
     Search, Loader2, ChevronLeft, ChevronRight, X,
     DollarSign, Clock, AlertCircle, Send, CreditCard,
@@ -166,6 +167,9 @@ export default function UnpaidMemosPage() {
 
             {/* Header */}
             <div>
+                <Link href="/payout-hub" className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-primary-600 mb-1.5 transition-colors">
+                    <ChevronLeft className="w-3 h-3" /> Back to Payout Management
+                </Link>
                 <h1 className="text-lg font-bold text-gray-900">Payment Tracking</h1>
                 <p className="text-xs text-gray-500">Track manufacturer payments, record receipts, and view ask-vs-received analytics.</p>
             </div>

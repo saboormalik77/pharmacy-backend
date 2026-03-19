@@ -14,12 +14,20 @@ export interface Pharmacy {
     status: 'active' | 'suspended' | 'blacklisted' | 'pending';
     totalReturns: number;
     createdAt: string;
-    // Optional fields for update
+    // Optional fields
+    fax?: string;
+    deaNumber?: string;
+    deaExpiration?: string;
+    wholesaler?: string;
+    wholesalerAccount?: string;
+    secondaryWholesaler?: string;
+    serviceType?: string;
+    daysBetweenVisits?: number;
+    lastVisitDate?: string;
+    nextVisitDate?: string;
     stateLicenseNumber?: string;
     licenseExpiryDate?: string;
     npiNumber?: string;
-    deaNumber?: string;
-    secondaryWholesaler?: string;
     physicalAddress?: {
         street: string;
         city: string;
@@ -41,6 +49,7 @@ export interface PharmacyUpdatePayload {
     owner?: string;
     email?: string;
     phone?: string;
+    fax?: string;
     address?: string;
     city?: string;
     state?: string;
@@ -50,7 +59,14 @@ export interface PharmacyUpdatePayload {
     licenseExpiryDate?: string;
     npiNumber?: string;
     deaNumber?: string;
+    deaExpiration?: string;
+    wholesaler?: string;
+    wholesalerAccount?: string;
     secondaryWholesaler?: string;
+    serviceType?: string;
+    daysBetweenVisits?: number;
+    lastVisitDate?: string;
+    nextVisitDate?: string;
     physicalAddress?: {
         street: string;
         city: string;

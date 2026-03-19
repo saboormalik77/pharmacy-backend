@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { ApiClient } from '@/lib/api/apiClient';
+import { ReturnBatch, ReturnTransaction } from '@/lib/types';
 
 // Types
 export interface PharmacyPayment {
@@ -70,6 +71,11 @@ export interface Pagination {
     totalPages: number;
 }
 
+export interface BatchPharmacy {
+    id: string;
+    name: string;
+}
+
 export interface PharmacyPaymentsState {
     payments: PharmacyPayment[];
     currentPayment: PharmacyPayment | null;
@@ -83,6 +89,10 @@ export interface PharmacyPaymentsState {
         startDate: string;
         endDate: string;
     };
+    openBatches: ReturnBatch[];
+    batchPharmacies: BatchPharmacy[];
+    isLoadingOpenBatches: boolean;
+    isLoadingBatchPharmacies: boolean;
     isLoading: boolean;
     isCalculating: boolean;
     isCreating: boolean;
@@ -108,6 +118,10 @@ const initialState: PharmacyPaymentsState = {
         startDate: '',
         endDate: '',
     },
+    openBatches: [],
+    batchPharmacies: [],
+    isLoadingOpenBatches: false,
+    isLoadingBatchPharmacies: false,
     isLoading: false,
     isCalculating: false,
     isCreating: false,
@@ -177,6 +191,35 @@ export const createPharmacyPayment = createAsyncThunk(
     }
 );
 
+// Fetch only open batches (for the calculate payout modal dropdown)
+export const fetchOpenBatches = createAsyncThunk(
+    'pharmacyPayments/fetchOpenBatches',
+    async () => {
+        const q = new URLSearchParams({ status: 'open', limit: '100', page: '1' });
+        return apiClient.get<{ data: ReturnBatch[]; pagination: any }>(`/admin/batches?${q}`, true);
+    }
+);
+
+// Fetch pharmacies that have returns assigned in a specific batch
+export const fetchBatchPharmacies = createAsyncThunk(
+    'pharmacyPayments/fetchBatchPharmacies',
+    async (batchId: string) => {
+        const res = await apiClient.get<{ status: string; data: { batch: ReturnBatch; returns: ReturnTransaction[] } }>(
+            `/admin/batches/${batchId}`, true
+        );
+        const returns: ReturnTransaction[] = res.data?.returns || [];
+        const seen = new Set<string>();
+        const pharmacies: { id: string; name: string }[] = [];
+        for (const rt of returns) {
+            if (rt.pharmacyId && !seen.has(rt.pharmacyId)) {
+                seen.add(rt.pharmacyId);
+                pharmacies.push({ id: rt.pharmacyId, name: rt.pharmacyName || rt.pharmacyId });
+            }
+        }
+        return pharmacies;
+    }
+);
+
 export const updatePharmacyPayment = createAsyncThunk(
     'pharmacyPayments/update',
     async ({ id, updates }: {
@@ -207,6 +250,9 @@ const pharmacyPaymentsSlice = createSlice({
         },
         clearCalculation: (state) => {
             state.calculation = null;
+        },
+        clearBatchPharmacies: (state) => {
+            state.batchPharmacies = [];
         },
         clearError: (state) => {
             state.error = null;
@@ -296,8 +342,26 @@ const pharmacyPaymentsSlice = createSlice({
                 state.isUpdating = false;
                 state.error = action.error.message || 'Failed to update payment';
             });
+
+        // Fetch open batches
+        builder
+            .addCase(fetchOpenBatches.pending, (state) => { state.isLoadingOpenBatches = true; })
+            .addCase(fetchOpenBatches.fulfilled, (state, action) => {
+                state.isLoadingOpenBatches = false;
+                state.openBatches = action.payload.data || [];
+            })
+            .addCase(fetchOpenBatches.rejected, (state) => { state.isLoadingOpenBatches = false; });
+
+        // Fetch pharmacies in a batch
+        builder
+            .addCase(fetchBatchPharmacies.pending, (state) => { state.isLoadingBatchPharmacies = true; state.batchPharmacies = []; })
+            .addCase(fetchBatchPharmacies.fulfilled, (state, action) => {
+                state.isLoadingBatchPharmacies = false;
+                state.batchPharmacies = action.payload;
+            })
+            .addCase(fetchBatchPharmacies.rejected, (state) => { state.isLoadingBatchPharmacies = false; });
     },
 });
 
-export const { setFilters, clearCurrentPayment, clearCalculation, clearError } = pharmacyPaymentsSlice.actions;
+export const { setFilters, clearCurrentPayment, clearCalculation, clearBatchPharmacies, clearError } = pharmacyPaymentsSlice.actions;
 export default pharmacyPaymentsSlice.reducer;

@@ -2,9 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
     PackageCheck, Loader2, Search, ScanLine, CheckCircle, XCircle, Package,
-    ArrowRight, RotateCcw, Truck, Clock, Box, AlertTriangle,
+     Box, AlertTriangle,
+    ArrowRight, RotateCcw, Truck, Clock, ChevronLeft,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -140,8 +142,11 @@ export default function WarehouseReceivingPage() {
         <div className="space-y-3">
             <ToastContainer toasts={toasts} onClose={removeToast} />
 
-            {/* Header */}
+            {/* Back + Header */}
             <div>
+                <Link href="/warehouse" className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-primary-600 mb-1.5 transition-colors">
+                    <ChevronLeft className="w-3 h-3" /> Back to Warehouse
+                </Link>
                 <h1 className="text-lg font-bold text-gray-900 flex items-center gap-1.5">
                     <PackageCheck className="w-4 h-4 text-primary-600" /> Warehouse Receiving
                 </h1>
