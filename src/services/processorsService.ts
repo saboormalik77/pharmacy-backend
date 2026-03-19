@@ -331,6 +331,32 @@ export const deactivateProcessor = async (processorId: string): Promise<void> =>
   }
 };
 
+export const activateProcessor = async (processorId: string): Promise<void> => {
+  const sb = ensureAdmin();
+
+  const { data: proc } = await sb
+    .from('processors')
+    .select('admin_user_id')
+    .eq('id', processorId)
+    .single();
+
+  const { error } = await sb
+    .from('processors')
+    .update({ status: 'active' })
+    .eq('id', processorId);
+
+  if (error) {
+    throw new AppError(`Failed to activate processor: ${error.message}`, 400);
+  }
+
+  if (proc?.admin_user_id) {
+    await sb
+      .from('admin')
+      .update({ is_active: true })
+      .eq('id', proc.admin_user_id);
+  }
+};
+
 export const getProcessorStores = async (processorId: string): Promise<AssignedStore[]> => {
   const sb = ensureAdmin();
 

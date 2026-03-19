@@ -87,6 +87,8 @@ export default function AddItemsPage() {
     const [policyAutoCheck, setPolicyAutoCheck] = useState<ReturnabilityCheckResult | null>(null);
     const [isPolicyChecking, setIsPolicyChecking] = useState(false);
     const [policyModalOpen, setPolicyModalOpen] = useState(false);
+    // Field-level validation errors
+    const [formErrors, setFormErrors] = useState<Set<string>>(new Set());
 
     const showToast = (message: string, type: Toast['type'] = 'success') => {
         const id = Date.now().toString();
@@ -104,6 +106,7 @@ export default function AddItemsPage() {
 
     const updateField = useCallback((field: keyof FormState, value: string | boolean | number) => {
         setForm(prev => ({ ...prev, [field]: value }));
+        setFormErrors(prev => { const next = new Set(prev); next.delete(field as string); return next; });
     }, []);
 
     const estimatedValue = (() => {
@@ -236,13 +239,55 @@ export default function AddItemsPage() {
         setManualNdc('');
     };
 
+    // ── Validation ─────────────────────────────────────────────
+
+    const validateForm = (): boolean => {
+        const errors = new Set<string>();
+        if (!form.ndc.trim()) errors.add('ndc');
+        if (!form.proprietaryName.trim() && !form.genericName.trim()) {
+            errors.add('proprietaryName');
+            errors.add('genericName');
+        }
+        if (!form.manufacturer.trim()) errors.add('manufacturer');
+        if (!form.lotNumber.trim()) errors.add('lotNumber');
+        if (!form.expirationDate.trim()) errors.add('expirationDate');
+        setFormErrors(errors);
+        if (errors.size > 0) {
+            const missing: string[] = [];
+            if (errors.has('ndc')) missing.push('NDC');
+            if (errors.has('proprietaryName')) missing.push('Drug Name (Proprietary or Generic)');
+            if (errors.has('manufacturer')) missing.push('Manufacturer');
+            if (errors.has('lotNumber')) missing.push('Lot Number');
+            if (errors.has('expirationDate')) missing.push('Expiration Date');
+            showToast(`Please fill in required fields: ${missing.join(', ')}.`, 'error');
+            return false;
+        }
+        return true;
+    };
+
+    /** Converts raw API / DB error strings into user-friendly messages. */
+    const friendlyError = (raw: string): string => {
+        if (!raw) return 'Failed to save item. Please try again.';
+        const r = raw.toLowerCase();
+        if (r.includes('not-null') || r.includes('null value') || r.includes('violates not-null'))
+            return 'A required field is missing. Please check all required fields and try again.';
+        if (r.includes('duplicate') || r.includes('unique') || r.includes('already exists'))
+            return 'This item has already been added to this return.';
+        if (r.includes('invalid input syntax') || r.includes('invalid date'))
+            return 'One of the fields contains an invalid value. Please check the form and try again.';
+        if (r.includes('foreign key') || r.includes('not present in table'))
+            return 'A referenced record was not found. Please refresh and try again.';
+        if (r.includes('network') || r.includes('fetch') || r.includes('timeout'))
+            return 'Network error. Please check your connection and try again.';
+        if (r.includes('unauthorized') || r.includes('403') || r.includes('401'))
+            return 'You are not authorized to perform this action. Please log in again.';
+        return 'Failed to save item. Please try again.';
+    };
+
     // ── Save item ──────────────────────────────────────────────
 
     const handleSave = async (skipWineCellarCheck = false) => {
-        if (!form.ndc && !form.proprietaryName) {
-            showToast('Please scan or enter a product first.', 'error');
-            return;
-        }
+        if (!validateForm()) return;
 
         // Before saving: check if the product is too early to return (wine cellar).
         // If so, intercept and show wine cellar confirmation buttons.
@@ -355,6 +400,7 @@ export default function AddItemsPage() {
             });
 
             setForm({ ...EMPTY_FORM });
+            setFormErrors(new Set());
             setScannedPrices(null);
             setScanError('');
             setScanInput('');
@@ -364,12 +410,13 @@ export default function AddItemsPage() {
             setPolicyModalOpen(false);
             if (mode === 'usb') scanInputRef.current?.focus();
         } else {
-            showToast(result.payload as string || 'Failed to save item', 'error');
+            showToast(friendlyError(result.payload as string), 'error');
         }
     };
 
     const handleClearForm = () => {
         setForm({ ...EMPTY_FORM });
+        setFormErrors(new Set());
         setScannedPrices(null);
         setScanError('');
         setLastWarning('');
@@ -616,10 +663,10 @@ export default function AddItemsPage() {
                 <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Product Information</h2>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-                    <Field label="NDC" value={form.ndc} onChange={v => updateField('ndc', v)} placeholder="e.g. 43547-3250-06" />
-                    <Field label="Proprietary Name" value={form.proprietaryName} onChange={v => updateField('proprietaryName', v)} placeholder="Brand name" />
-                    <Field label="Generic Name" value={form.genericName} onChange={v => updateField('genericName', v)} placeholder="Generic name" />
-                    <Field label="Manufacturer" value={form.manufacturer} onChange={v => updateField('manufacturer', v)} placeholder="Manufacturer" />
+                    <Field label="NDC" value={form.ndc} onChange={v => updateField('ndc', v)} placeholder="e.g. 43547-3250-06" required hasError={formErrors.has('ndc')} />
+                    <Field label="Proprietary Name" value={form.proprietaryName} onChange={v => updateField('proprietaryName', v)} placeholder="Brand name" required hasError={formErrors.has('proprietaryName')} />
+                    <Field label="Generic Name" value={form.genericName} onChange={v => updateField('genericName', v)} placeholder="Generic name" hasError={formErrors.has('genericName')} />
+                    <Field label="Manufacturer" value={form.manufacturer} onChange={v => updateField('manufacturer', v)} placeholder="Manufacturer" required hasError={formErrors.has('manufacturer')} />
                     <Field label="Package Description" value={form.packageDescription} onChange={v => updateField('packageDescription', v)} placeholder="e.g. 60 TABLET in BOTTLE" />
                     <Field label="Dosage Form" value={form.dosageForm} onChange={v => updateField('dosageForm', v)} placeholder="e.g. TABLET" />
 
@@ -634,11 +681,23 @@ export default function AddItemsPage() {
 
                     <Field label="Route" value={form.route} onChange={v => updateField('route', v)} placeholder="e.g. ORAL" />
                     <Field label="DEA Schedule" value={form.deaSchedule} onChange={v => updateField('deaSchedule', v)} placeholder="e.g. CII" />
-                    <Field label="Lot Number" value={form.lotNumber} onChange={v => updateField('lotNumber', v)} placeholder="Lot #" />
+                    <Field label="Lot Number" value={form.lotNumber} onChange={v => updateField('lotNumber', v)} placeholder="Lot #" required hasError={formErrors.has('lotNumber')} />
                     <Field label="Serial Number" value={form.serialNumber} onChange={v => updateField('serialNumber', v)} placeholder="Serial #" />
                     <div>
-                        <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Expiration Date</label>
-                        <input type="date" value={form.expirationDate} onChange={e => updateField('expirationDate', e.target.value)} className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                        <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
+                            Expiration Date<span className="text-red-500 ml-0.5">*</span>
+                        </label>
+                        <input
+                            type="date"
+                            value={form.expirationDate}
+                            onChange={e => { updateField('expirationDate', e.target.value); }}
+                            className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
+                                formErrors.has('expirationDate')
+                                    ? 'border-red-400 bg-red-50 focus:ring-red-400'
+                                    : 'border-gray-300 focus:ring-primary-500'
+                            }`}
+                        />
+                        {formErrors.has('expirationDate') && <p className="text-[10px] text-red-500 mt-0.5">Required</p>}
                     </div>
                 </div>
 
@@ -901,17 +960,31 @@ export default function AddItemsPage() {
 
 // ── Reusable field component ───────────────────────────────────
 
-function Field({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
+function Field({ label, value, onChange, placeholder, required, hasError }: {
+    label: string;
+    value: string;
+    onChange: (v: string) => void;
+    placeholder?: string;
+    required?: boolean;
+    hasError?: boolean;
+}) {
     return (
         <div>
-            <label className="block text-[10px] font-medium text-gray-600 mb-0.5">{label}</label>
+            <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
+                {label}{required && <span className="text-red-500 ml-0.5">*</span>}
+            </label>
             <input
                 type="text"
                 value={value}
                 onChange={e => onChange(e.target.value)}
                 placeholder={placeholder}
-                className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
+                    hasError
+                        ? 'border-red-400 bg-red-50 focus:ring-red-400'
+                        : 'border-gray-300 focus:ring-primary-500'
+                }`}
             />
+            {hasError && <p className="text-[10px] text-red-500 mt-0.5">Required</p>}
         </div>
     );
 }

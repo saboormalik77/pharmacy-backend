@@ -5,6 +5,7 @@ import {
   createProcessorHandler,
   updateProcessorHandler,
   deleteProcessorHandler,
+  activateProcessorHandler,
   getProcessorStoresHandler,
   assignStoresHandler,
   unassignStoreHandler,
@@ -220,6 +221,8 @@ router.patch('/:id', updateProcessorHandler);
  *         description: Deactivated
  */
 router.delete('/:id', deleteProcessorHandler);
+
+router.patch('/:id/activate', activateProcessorHandler);
 
 /**
  * @swagger
