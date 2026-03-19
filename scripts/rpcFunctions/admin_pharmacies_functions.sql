@@ -152,13 +152,22 @@ BEGIN
             p.name AS owner,
             p.email,
             COALESCE(p.phone, p.contact_phone) AS phone,
+            p.fax_number AS fax,
             COALESCE(p.physical_address->>'city', '') AS city,
             COALESCE(p.physical_address->>'state', '') AS state,
             COALESCE(p.status, 'pending') AS status,
             COALESCE(p.physical_address->>'street', '') AS address,
             COALESCE(p.physical_address->>'zip', '') AS "zipCode",
             COALESCE(p.state_license_number, p.npi_number, p.dea_number, '') AS "licenseNumber",
+            p.dea_number AS "deaNumber",
+            p.dea_expiration_date AS "deaExpiration",
+            p.primary_wholesaler AS wholesaler,
+            p.wholesaler_account_number AS "wholesalerAccount",
             p.secondary_wholesaler AS "secondaryWholesaler",
+            p.service_type AS "serviceType",
+            p.days_between_visits AS "daysBetweenVisits",
+            p.last_visit_date AS "lastVisitDate",
+            p.next_visit_date AS "nextVisitDate",
             p.created_at AS "createdAt",
             -- Count total returns (documents) for this pharmacy
             (SELECT COUNT(*)::INTEGER FROM uploaded_documents ud WHERE ud.pharmacy_id = p.id) AS "totalReturns"
@@ -185,13 +194,22 @@ BEGIN
             'owner', pd.owner,
             'email', pd.email,
             'phone', pd.phone,
+            'fax', pd.fax,
             'city', pd.city,
             'state', pd.state,
             'status', pd.status,
             'address', pd.address,
             'zipCode', pd."zipCode",
             'licenseNumber', pd."licenseNumber",
+            'deaNumber', pd."deaNumber",
+            'deaExpiration', pd."deaExpiration",
+            'wholesaler', pd.wholesaler,
+            'wholesalerAccount', pd."wholesalerAccount",
             'secondaryWholesaler', pd."secondaryWholesaler",
+            'serviceType', pd."serviceType",
+            'daysBetweenVisits', pd."daysBetweenVisits",
+            'lastVisitDate', pd."lastVisitDate",
+            'nextVisitDate', pd."nextVisitDate",
             'totalReturns', pd."totalReturns",
             'createdAt', pd."createdAt"
         )
@@ -258,6 +276,7 @@ BEGIN
         'owner', p.name,
         'email', p.email,
         'phone', COALESCE(p.phone, p.contact_phone),
+        'fax', p.fax_number,
         'city', COALESCE(p.physical_address->>'city', ''),
         'state', COALESCE(p.physical_address->>'state', ''),
         'status', COALESCE(p.status, 'pending'),
@@ -268,6 +287,13 @@ BEGIN
         'licenseExpiryDate', p.license_expiry_date,
         'npiNumber', p.npi_number,
         'deaNumber', p.dea_number,
+        'deaExpiration', p.dea_expiration_date,
+        'wholesaler', p.primary_wholesaler,
+        'wholesalerAccount', p.wholesaler_account_number,
+        'serviceType', p.service_type,
+        'daysBetweenVisits', p.days_between_visits,
+        'lastVisitDate', p.last_visit_date,
+        'nextVisitDate', p.next_visit_date,
         'totalReturns', (SELECT COUNT(*)::INTEGER FROM uploaded_documents ud WHERE ud.pharmacy_id = p.id),
         'totalReturnsValue', (SELECT COALESCE(SUM(total_credit_amount), 0)::NUMERIC FROM uploaded_documents ud WHERE ud.pharmacy_id = p.id AND total_credit_amount IS NOT NULL),
         'physicalAddress', p.physical_address,
@@ -381,6 +407,38 @@ BEGIN
         dea_number = CASE 
             WHEN p_updates ? 'deaNumber' THEN p_updates->>'deaNumber'
             ELSE dea_number
+        END,
+        dea_expiration_date = CASE 
+            WHEN p_updates ? 'deaExpiration' THEN (p_updates->>'deaExpiration')::DATE
+            ELSE dea_expiration_date
+        END,
+        fax_number = CASE 
+            WHEN p_updates ? 'fax' THEN p_updates->>'fax'
+            ELSE fax_number
+        END,
+        primary_wholesaler = CASE 
+            WHEN p_updates ? 'wholesaler' THEN p_updates->>'wholesaler'
+            ELSE primary_wholesaler
+        END,
+        wholesaler_account_number = CASE 
+            WHEN p_updates ? 'wholesalerAccount' THEN p_updates->>'wholesalerAccount'
+            ELSE wholesaler_account_number
+        END,
+        service_type = CASE 
+            WHEN p_updates ? 'serviceType' THEN p_updates->>'serviceType'
+            ELSE service_type
+        END,
+        days_between_visits = CASE 
+            WHEN p_updates ? 'daysBetweenVisits' THEN (p_updates->>'daysBetweenVisits')::INTEGER
+            ELSE days_between_visits
+        END,
+        last_visit_date = CASE 
+            WHEN p_updates ? 'lastVisitDate' THEN (p_updates->>'lastVisitDate')::DATE
+            ELSE last_visit_date
+        END,
+        next_visit_date = CASE 
+            WHEN p_updates ? 'nextVisitDate' THEN (p_updates->>'nextVisitDate')::DATE
+            ELSE next_visit_date
         END,
         physical_address = v_physical_address,
         billing_address = v_billing_address,
