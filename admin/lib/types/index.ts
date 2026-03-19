@@ -618,6 +618,7 @@ export interface ReturnTransaction {
     scannedPackages: Record<string, string> | null;
     fedexShipmentId: string | null;
     fedexLabels: Record<string, string> | null;
+    finalizeSteps: { printManifest: boolean; fedexEntered: boolean; printJobSheets: boolean } | null;
     verifiedAt: string | null;
     verifiedBy: string | null;
     piecesReceived: number | null;

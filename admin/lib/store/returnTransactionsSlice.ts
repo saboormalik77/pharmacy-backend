@@ -274,6 +274,24 @@ export const finalizeReturnTransaction = createAsyncThunk(
     }
 );
 
+export const updateFinalizeSteps = createAsyncThunk(
+    'returnTransactions/updateFinalizeSteps',
+    async ({ id, steps }: { id: string; steps: Record<string, boolean> }, { rejectWithValue }) => {
+        try {
+            const { apiClient } = await import('@/lib/api/apiClient');
+            const { cookieUtils } = await import('@/lib/utils/cookies');
+            if (!cookieUtils.getAuthToken()) return rejectWithValue('Authentication required.');
+
+            const response = await apiClient.patch<{ status: string; data: ReturnTransaction }>(
+                `/return-transactions/${id}/finalize-steps`, { steps }, true
+            );
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error?.message || 'Failed to update finalize steps');
+        }
+    }
+);
+
 export const deleteReturnTransaction = createAsyncThunk(
     'returnTransactions/delete',
     async (id: string, { rejectWithValue }) => {
@@ -647,6 +665,15 @@ const returnTransactionsSlice = createSlice({
                 state.transactions = state.transactions.filter(t => t.id !== action.payload);
             })
             .addCase(deleteReturnTransaction.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
+
+            // updateFinalizeSteps
+            .addCase(updateFinalizeSteps.fulfilled, (state, action) => {
+                if (action.payload) {
+                    state.currentReturn = action.payload;
+                    const idx = state.transactions.findIndex(t => t.id === action.payload.id);
+                    if (idx >= 0) state.transactions[idx] = action.payload;
+                }
+            })
 
             // ── FedEx API ──────────────────────────────────
 

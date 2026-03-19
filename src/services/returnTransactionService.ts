@@ -230,6 +230,21 @@ export const finalizeReturnTransaction = async (
   return data.data as ReturnTransaction;
 };
 
+export const updateFinalizeSteps = async (
+  transactionId: string,
+  steps: Record<string, boolean>
+): Promise<ReturnTransaction> => {
+  const sb = ensureAdmin();
+
+  const { data, error } = await sb.rpc('update_finalize_steps', {
+    p_id: transactionId,
+    p_steps: steps,
+  });
+
+  handleRpcError(data, error, 'Failed to update finalize steps');
+  return data.data as ReturnTransaction;
+};
+
 export const getManifestData = async (
   transactionId: string
 ): Promise<any> => {

@@ -12,6 +12,7 @@ import {
   manifestDataHandler,
   deaForm222Handler,
   deleteHandler,
+  updateFinalizeStepsHandler,
 } from '../controllers/returnTransactionController';
 import {
   createShipmentHandler,
@@ -317,6 +318,11 @@ router.post('/:id/complete', authenticateAny, completeHandler);
  *         description: Validation failed (TBD items, missing tracking, wrong status)
  */
 router.post('/:id/finalize', authenticateAny, finalizeHandler);
+
+// ============================================================
+// PATCH  /api/return-transactions/:id/finalize-steps
+// ============================================================
+router.patch('/:id/finalize-steps', authenticateAny, updateFinalizeStepsHandler);
 
 // ============================================================
 // GET    /api/return-transactions/:id/manifest — PDF manifest

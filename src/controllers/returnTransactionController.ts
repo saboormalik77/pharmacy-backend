@@ -226,3 +226,20 @@ export const deleteHandler = catchAsync(
     res.status(200).json({ status: 'success', message: 'Return transaction deleted' });
   }
 );
+
+// ============================================================
+// PATCH /api/return-transactions/:id/finalize-steps
+// ============================================================
+export const updateFinalizeStepsHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { id } = req.params;
+    const { steps } = req.body;
+
+    if (!steps || typeof steps !== 'object') {
+      throw new AppError('steps object is required', 400);
+    }
+
+    const transaction = await rtService.updateFinalizeSteps(id, steps);
+    res.status(200).json({ status: 'success', data: transaction });
+  }
+);
