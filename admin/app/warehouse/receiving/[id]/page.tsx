@@ -94,6 +94,18 @@ export default function WarehouseVerificationPage() {
     const allItemsVerified = totalCount > 0 && verifiedCount === totalCount;
     const openDiscrepancies = discrepancies.filter(d => d.status === 'open').length;
 
+    const expectedBoxCount = currentReturn?.boxCount ?? null;
+
+    // All four checklist conditions must be met to enable Complete Verification
+    const checklistDone = {
+        pieces: !!piecesReceived && Number(piecesReceived) > 0 &&
+            (expectedBoxCount === null || Number(piecesReceived) <= expectedBoxCount),
+        integrity: integrityConfirmed,
+        items: allItemsVerified,
+        notes: !!verifyNotes.trim(),
+    };
+    const canComplete = checklistDone.pieces && checklistDone.integrity && checklistDone.items && checklistDone.notes;
+
     // ── Handlers ──────────────────────────────────────────────
 
     const handleVerifyItem = async (item: ReturnTransactionItem, verified: boolean) => {
@@ -270,70 +282,110 @@ export default function WarehouseVerificationPage() {
                     <ShieldCheck className="w-3.5 h-3.5 text-primary-600" />Verification Checklist
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {/* Pieces count */}
-                    <div className="flex items-center gap-2 px-3 py-2 border rounded-lg bg-gray-50">
-                        <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ${piecesReceived ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-400'}`}>
-                            {piecesReceived ? <Check className="w-3.5 h-3.5" /> : <span className="text-[10px]">1</span>}
+                    {/* 1. Pieces Received */}
+                    <div className={`flex items-center gap-2 px-3 py-2 border rounded-lg transition-colors ${checklistDone.pieces ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                        <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ${checklistDone.pieces ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-400'}`}>
+                            {checklistDone.pieces ? <Check className="w-3.5 h-3.5" /> : <span className="text-[10px] font-bold">1</span>}
                         </div>
                         <div className="flex-1">
-                            <label className="text-[10px] font-medium text-gray-700">Pieces Received</label>
+                            <label className="text-[10px] font-medium text-gray-700">
+                                Pieces Received <span className="text-red-500">*</span>
+                            </label>
                             <div className="flex items-center gap-1.5 mt-0.5">
                                 <input
                                     type="number"
                                     value={piecesReceived}
-                                    onChange={e => setPiecesReceived(e.target.value)}
+                                    onChange={e => {
+                                        const val = e.target.value;
+                                        if (expectedBoxCount !== null && Number(val) > expectedBoxCount) return;
+                                        setPiecesReceived(val);
+                                    }}
                                     placeholder="Count"
-                                    className="w-16 px-2 py-0.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                    className={`w-16 px-2 py-0.5 text-xs border rounded focus:outline-none focus:ring-1 ${checklistDone.pieces ? 'border-green-300 focus:ring-green-400' : 'border-gray-300 focus:ring-primary-500'}`}
                                     min={0}
+                                    max={expectedBoxCount ?? undefined}
                                 />
                                 <span className="text-[10px] text-gray-500">/ {currentReturn.boxCount ?? '?'} expected</span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Items verified */}
-                    <div className="flex items-center gap-2 px-3 py-2 border rounded-lg bg-gray-50">
-                        <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ${allItemsVerified ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-400'}`}>
-                            {allItemsVerified ? <Check className="w-3.5 h-3.5" /> : <span className="text-[10px]">2</span>}
+                    {/* 2. All Items Verified */}
+                    <div className={`flex items-center gap-2 px-3 py-2 border rounded-lg ${checklistDone.items ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                        <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ${checklistDone.items ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-400'}`}>
+                            {checklistDone.items ? <Check className="w-3.5 h-3.5" /> : <span className="text-[10px] font-bold">2</span>}
                         </div>
                         <div className="flex-1">
-                            <label className="text-[10px] font-medium text-gray-700">All Items Verified</label>
-                            <p className="text-[10px] text-gray-500">{verifiedCount} of {totalCount} verified</p>
+                            <label className="text-[10px] font-medium text-gray-700">
+                                All Items Verified <span className="text-red-500">*</span>
+                            </label>
+                            <p className={`text-[10px] ${checklistDone.items ? 'text-green-600 font-medium' : 'text-gray-500'}`}>
+                                {checklistDone.items ? `All ${totalCount} items verified ✓` : `${verifiedCount} of ${totalCount} verified — check each item below`}
+                            </p>
                         </div>
                     </div>
 
-                    {/* Integrity confirmed */}
-                    <label className="flex items-center gap-2 px-3 py-2 border rounded-lg bg-gray-50 cursor-pointer">
+                    {/* 3. Integrity Confirmed */}
+                    <label className={`flex items-center gap-2 px-3 py-2 border rounded-lg cursor-pointer transition-colors ${checklistDone.integrity ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                        <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ${checklistDone.integrity ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-400'}`}>
+                            {checklistDone.integrity ? <Check className="w-3.5 h-3.5" /> : <span className="text-[10px] font-bold">3</span>}
+                        </div>
+                        <div className="flex-1">
+                            <span className="text-[10px] font-medium text-gray-700">
+                                Integrity Confirmed <span className="text-red-500">*</span>
+                            </span>
+                            <p className="text-[10px] text-gray-500">No leaking, broken, or damaged bottles</p>
+                        </div>
                         <input
                             type="checkbox"
                             checked={integrityConfirmed}
                             onChange={e => setIntegrityConfirmed(e.target.checked)}
                             className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
                         />
-                        <div>
-                            <span className="text-[10px] font-medium text-gray-700">Integrity Confirmed</span>
-                            <p className="text-[10px] text-gray-500">No leaking, broken, or damaged bottles</p>
-                        </div>
                     </label>
 
-                    {/* Notes */}
-                    <div className="px-3 py-2 border rounded-lg bg-gray-50">
-                        <label className="text-[10px] font-medium text-gray-700">Verification Notes</label>
+                    {/* 4. Verification Notes */}
+                    <div className={`px-3 py-2 border rounded-lg transition-colors ${checklistDone.notes ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                            <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ${checklistDone.notes ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-400'}`}>
+                                {checklistDone.notes ? <Check className="w-3.5 h-3.5" /> : <span className="text-[10px] font-bold">4</span>}
+                            </div>
+                            <label className="text-[10px] font-medium text-gray-700">
+                                Verification Notes <span className="text-red-500">*</span>
+                            </label>
+                        </div>
                         <textarea
                             value={verifyNotes}
                             onChange={e => setVerifyNotes(e.target.value)}
                             rows={2}
-                            placeholder="Any issues or notes..."
-                            className="w-full mt-0.5 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none"
+                            placeholder="Required — enter any issues or confirm everything is OK..."
+                            className={`w-full mt-0.5 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 resize-none ${checklistDone.notes ? 'border-green-300 focus:ring-green-400' : 'border-gray-300 focus:ring-primary-500'}`}
                         />
                     </div>
                 </div>
 
+                {/* Completion hint */}
+                {!canComplete && (
+                    <div className="flex items-start gap-1.5 bg-amber-50 border border-amber-200 rounded px-3 py-2">
+                        <AlertTriangle className="w-3.5 h-3.5 text-amber-500 flex-shrink-0 mt-0.5" />
+                        <p className="text-[10px] text-amber-700">
+                            Complete all checklist items to enable verification:&nbsp;
+                            {[
+                                !checklistDone.pieces && 'Pieces Received',
+                                !checklistDone.items && 'All Items Verified',
+                                !checklistDone.integrity && 'Integrity Confirmed',
+                                !checklistDone.notes && 'Verification Notes',
+                            ].filter(Boolean).join(' · ')}
+                        </p>
+                    </div>
+                )}
+
                 <div className="flex gap-2 pt-1">
                     <button
                         onClick={handleCompleteVerification}
-                        disabled={isActionLoading}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded text-xs font-medium bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
+                        disabled={isActionLoading || !canComplete}
+                        title={!canComplete ? 'Complete all checklist items first' : 'Complete verification'}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded text-xs font-medium bg-green-600 text-white hover:bg-green-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                     >
                         {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
                         Complete Verification
