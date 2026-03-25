@@ -6,6 +6,7 @@ import { parseGS1 } from '../services/gs1ParserService';
 import { lookupNDC, lookupNDCFromCandidates, extractPackageSizeFromDescription } from '../services/ndcLookupService';
 import { checkReturnability, ReturnabilityResult } from '../services/policyEngineService';
 import { getPricingForSingleNDC } from '../services/pricingService';
+import { resolveNDCPrice } from '../services/ndcPricingBookService';
 import * as wcService from '../services/wineCellarService';
 import { getReturnTransactionById } from '../services/returnTransactionService';
 
@@ -393,7 +394,7 @@ export const scanBarcodeHandler = catchAsync(
       productInfo = await lookupNDC(trimmed);
     }
 
-    // 3. Lookup suggested price from return reports
+    // 3. Lookup suggested price from NDC pricing book (with fallback to return reports)
     const resolvedNdc = productInfo?.ndc || gs1.ndcCandidates[0] || null;
     let pricing: {
       suggestedPrice: number | null;
@@ -401,32 +402,54 @@ export const scanBarcodeHandler = catchAsync(
       bestPartialPrice: number | null;
       priceSource: string | null;
       distributorPricing: any[] | null;
+      estimatedStorePrice: number | null;
+      closeOutDestination: string | null;
     } = {
       suggestedPrice: null,
       bestFullPrice: null,
       bestPartialPrice: null,
       priceSource: null,
       distributorPricing: null,
+      estimatedStorePrice: null,
+      closeOutDestination: null,
     };
 
     if (resolvedNdc) {
       try {
-        const pricingResult = await getPricingForSingleNDC(resolvedNdc);
-        if (pricingResult && (pricingResult.bestFullPrice > 0 || pricingResult.bestPartialPrice > 0)) {
+        // First, try NDC pricing book (our new system)
+        const ndcPricing = await resolveNDCPrice(resolvedNdc);
+        
+        if (ndcPricing.found && ndcPricing.currentPrice && ndcPricing.currentPrice > 0) {
           pricing = {
-            suggestedPrice: pricingResult.bestFullPrice > 0
-              ? pricingResult.bestFullPrice
-              : pricingResult.bestPartialPrice,
-            bestFullPrice: pricingResult.bestFullPrice || null,
-            bestPartialPrice: pricingResult.bestPartialPrice || null,
-            priceSource: pricingResult.recommendedDistributor?.distributorName || 'return_reports',
-            distributorPricing: pricingResult.distributors.map(d => ({
-              distributorName: d.distributorName,
-              fullPrice: d.fullPrice,
-              partialPrice: d.partialPrice,
-              reportDate: d.reportDate || null,
-            })),
+            suggestedPrice: ndcPricing.currentPrice,
+            bestFullPrice: ndcPricing.currentPrice,
+            bestPartialPrice: ndcPricing.currentPrice,
+            priceSource: ndcPricing.priceSource || 'NDC Pricing Book',
+            distributorPricing: null, // NDC pricing book doesn't have distributor breakdown
+            estimatedStorePrice: ndcPricing.estimatedStorePrice,
+            closeOutDestination: ndcPricing.closeOutDestination,
           };
+        } else {
+          // Fallback to return_reports if not found in pricing book
+          const pricingResult = await getPricingForSingleNDC(resolvedNdc);
+          if (pricingResult && (pricingResult.bestFullPrice > 0 || pricingResult.bestPartialPrice > 0)) {
+            pricing = {
+              suggestedPrice: pricingResult.bestFullPrice > 0
+                ? pricingResult.bestFullPrice
+                : pricingResult.bestPartialPrice,
+              bestFullPrice: pricingResult.bestFullPrice || null,
+              bestPartialPrice: pricingResult.bestPartialPrice || null,
+              priceSource: pricingResult.recommendedDistributor?.distributorName || 'return_reports',
+              distributorPricing: pricingResult.distributors.map(d => ({
+                distributorName: d.distributorName,
+                fullPrice: d.fullPrice,
+                partialPrice: d.partialPrice,
+                reportDate: d.reportDate || null,
+              })),
+              estimatedStorePrice: null,
+              closeOutDestination: null,
+            };
+          }
         }
       } catch (err: any) {
         console.error('Pricing lookup failed (non-blocking):', err.message);
@@ -478,6 +501,9 @@ export const scanBarcodeHandler = catchAsync(
         productType: productInfo?.productType || null,
         fullPackageSize: productInfo?.fullPackageSize || null,
         standardPrice: pricing.suggestedPrice,
+        estimatedValue: pricing.suggestedPrice, // For calculated value
+        priceSource: pricing.priceSource,
+        destination: pricing.closeOutDestination,
         scanSource: gs1.gtin ? 'gs1_qr' : 'manual',
       },
     };

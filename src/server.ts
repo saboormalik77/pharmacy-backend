@@ -47,6 +47,7 @@ import raTrackingRoutes from './routes/raTrackingRoutes';
 import shipmentRoutes from './routes/shipmentRoutes';
 import { pharmacyPaymentAdminRouter, pharmacyPaymentRouter } from './routes/pharmacyPaymentRoutes';
 import pharmacyAnalyticsRoutes from './routes/pharmacyAnalyticsRoutes';
+import ndcPricingBookRoutes from './routes/ndcPricingBookRoutes';
 import { globalErrorHandler } from './controllers/errorController';
 import { checkExpiringProductsAndNotify } from './services/notificationCronService';
 import { surfaceReadyWineCellarItems } from './services/wineCellarCronService';
@@ -183,6 +184,7 @@ app.use('/api/admin/shipments', shipmentRoutes);
 app.use('/api/admin/pharmacy-payments', pharmacyPaymentAdminRouter);
 app.use('/api/pharmacy-payments', pharmacyPaymentRouter);
 app.use('/api/analytics', pharmacyAnalyticsRoutes);
+app.use('/api/admin/ndc-pricing', ndcPricingBookRoutes);
 
 /**
  * @swagger

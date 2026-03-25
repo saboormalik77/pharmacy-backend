@@ -1496,3 +1496,37 @@ export interface GpoSummaryResponse {
     data: GpoSummaryItem[];
     pagination: Pagination;
 }
+
+// NDC Pricing Book
+export interface NDCPricingRecord {
+    id: string;
+    ndc: string;
+    ndcNormalized: string;
+    productName: string | null; // Optional: for display purposes only
+    currentPrice: number | null;
+    lastPrice: number | null;
+    estimatedStorePrice: number | null;
+    lastReimbursement: number | null;
+    priceSource: string | null;
+    closeOutDestination: string | null;
+    lastPriceUpdate: string | null;
+    createdBy: string | null;
+    updatedBy: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface NDCPricingUpsertPayload {
+    ndc: string;
+    productName?: string; // Optional: for display purposes only
+    currentPrice?: number;
+    estimatedStorePrice?: number;
+    lastReimbursement?: number;
+    priceSource?: string;
+    closeOutDestination?: string;
+}
+
+export interface NDCPricingSearchResponse {
+    items: NDCPricingRecord[];
+    pagination: Pagination;
+}
