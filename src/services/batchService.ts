@@ -149,6 +149,85 @@ export const submitCardinal = async (
   return data.data as ReturnBatch;
 };
 
+export const fixBatchDestinations = async (
+  batchId: string
+): Promise<{ updated_count: number; message: string }> => {
+  const sb = ensureAdmin();
+  const { data, error } = await sb.rpc('fix_batch_destinations', { p_batch_id: batchId });
+  handleRpcError(data, error, 'Failed to fix batch destinations');
+  return data;
+};
+
+// ============================================================
+// New batch management operations
+// ============================================================
+
+export const deleteBatch = async (
+  batchId: string
+): Promise<{ message: string; deletedBatch: ReturnBatch; unassignedReturns: number }> => {
+  const sb = ensureAdmin();
+  const { data, error } = await sb.rpc('delete_batch', { p_batch_id: batchId });
+  handleRpcError(data, error, 'Failed to delete batch');
+  return {
+    message: data.message,
+    deletedBatch: data.deleted_batch as ReturnBatch,
+    unassignedReturns: data.unassigned_returns
+  };
+};
+
+export const unassignReturnsFromBatch = async (
+  batchId: string,
+  transactionIds: string[]
+): Promise<{ message: string; batch: ReturnBatch; unassignedCount: number; skippedCount: number }> => {
+  const sb = ensureAdmin();
+  const { data, error } = await sb.rpc('unassign_returns_from_batch', {
+    p_batch_id: batchId,
+    p_transaction_ids: transactionIds,
+  });
+  handleRpcError(data, error, 'Failed to unassign returns from batch');
+  return {
+    message: data.message,
+    batch: data.batch as ReturnBatch,
+    unassignedCount: data.unassigned_count,
+    skippedCount: data.skipped_count
+  };
+};
+
+export const unassignSingleReturn = async (
+  transactionId: string
+): Promise<{ message: string; batch: ReturnBatch; return: any }> => {
+  const sb = ensureAdmin();
+  const { data, error } = await sb.rpc('unassign_single_return', { p_transaction_id: transactionId });
+  handleRpcError(data, error, 'Failed to unassign return');
+  return {
+    message: data.message,
+    batch: data.batch as ReturnBatch,
+    return: data.return
+  };
+};
+
+export interface BatchPermissions {
+  batchId: string;
+  status: string;
+  canDelete: boolean;
+  canUnassignReturns: boolean;
+  canAssignReturns: boolean;
+  canClose: boolean;
+  canSubmitCardinal: boolean;
+  hasDebitMemos: boolean;
+  debitMemoCount: number;
+}
+
+export const getBatchPermissions = async (
+  batchId: string
+): Promise<BatchPermissions> => {
+  const sb = ensureAdmin();
+  const { data, error } = await sb.rpc('get_batch_permissions', { p_batch_id: batchId });
+  handleRpcError(data, error, 'Failed to get batch permissions');
+  return data.data as BatchPermissions;
+};
+
+
 // ============================================================
 // Debit memo operations
 // ============================================================

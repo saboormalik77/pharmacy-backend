@@ -215,6 +215,17 @@ export const updateReturn = async (
 
   const db = supabaseAdmin;
 
+  // Validate if return can be updated (check lock status)
+  const { data: validationResult, error: validationError } = await db.rpc('validate_legacy_return_update', {
+    p_id: returnId,
+    p_updates: input,
+  });
+
+  if (validationError || (validationResult && validationResult.error)) {
+    const errorMessage = validationResult?.message || validationError?.message || 'Failed to validate return update';
+    throw new AppError(errorMessage, validationResult?.code || 400);
+  }
+
   const updateData: any = {
     updated_at: new Date().toISOString(),
   };
@@ -257,6 +268,16 @@ export const deleteReturn = async (pharmacyId: string, returnId: string): Promis
 
   const db = supabaseAdmin;
 
+  // Validate if return can be deleted (check lock status)
+  const { data: validationResult, error: validationError } = await db.rpc('validate_legacy_return_deletion', {
+    p_id: returnId,
+  });
+
+  if (validationError || (validationResult && validationResult.error)) {
+    const errorMessage = validationResult?.message || validationError?.message || 'Failed to validate return deletion';
+    throw new AppError(errorMessage, validationResult?.code || 400);
+  }
+
   // Delete return items first (cascade should handle this, but being explicit)
   await db.from('return_items').delete().eq('return_id', returnId);
 
@@ -269,5 +290,30 @@ export const deleteReturn = async (pharmacyId: string, returnId: string): Promis
   if (error) {
     throw new AppError(`Failed to delete return: ${error.message}`, 400);
   }
+};
+
+export const checkReturnLockStatus = async (returnId: string): Promise<{
+  id: string;
+  status: string;
+  isLocked: boolean;
+  canEdit: boolean;
+  lockReason: string | null;
+}> => {
+  if (!supabaseAdmin) {
+    throw new AppError('Supabase admin client not configured', 500);
+  }
+
+  const db = supabaseAdmin;
+
+  const { data, error } = await db.rpc('check_legacy_return_lock_status', {
+    p_id: returnId,
+  });
+
+  if (error || (data && data.error)) {
+    const errorMessage = data?.message || error?.message || 'Failed to check lock status';
+    throw new AppError(errorMessage, data?.code || 400);
+  }
+
+  return data.data;
 };
 

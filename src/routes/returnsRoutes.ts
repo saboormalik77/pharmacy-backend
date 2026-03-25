@@ -5,6 +5,7 @@ import {
   getReturnByIdHandler,
   updateReturnHandler,
   deleteReturnHandler,
+  checkLockStatusHandler,
 } from '../controllers/returnsController';
 
 const router = express.Router();
@@ -214,6 +215,49 @@ router.patch('/:id', updateReturnHandler);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.delete('/:id', deleteReturnHandler);
+
+/**
+ * @swagger
+ * /api/returns/{id}/lock-status:
+ *   get:
+ *     summary: Check if return is locked for editing
+ *     tags: [Returns]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Return ID
+ *     responses:
+ *       200:
+ *         description: Lock status information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       format: uuid
+ *                     status:
+ *                       type: string
+ *                     isLocked:
+ *                       type: boolean
+ *                     canEdit:
+ *                       type: boolean
+ *                     lockReason:
+ *                       type: string
+ *                       nullable: true
+ */
+router.get('/:id/lock-status', checkLockStatusHandler);
 
 export default router;
 

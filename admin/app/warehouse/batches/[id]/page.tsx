@@ -5,7 +5,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import {
     ArrowLeft, Loader2, AlertCircle, Layers, Lock, Send,
     Plus, ChevronDown, ChevronUp, Package,
-    CheckCircle, X, Search, ExternalLink,
+    CheckCircle, X, Search, ExternalLink, Trash2, UserX,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -14,6 +14,7 @@ import { formatDate, formatDateTime } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import {
     fetchBatchDetail, assignReturnsToBatch, closeBatch, submitCardinal,
+    deleteBatch, unassignReturnsFromBatch, getBatchPermissions,
     clearCurrentBatch, clearError,
 } from '@/lib/store/batchSlice';
 import { fetchReceivedReturns } from '@/lib/store/warehouseSlice';
@@ -57,6 +58,10 @@ export default function BatchDetailPage() {
     const [showAssign, setShowAssign] = useState(false);
     const [showClose, setShowClose] = useState(false);
     const [showSubmit, setShowSubmit] = useState(false);
+    const [showDelete, setShowDelete] = useState(false);
+    const [showUnassign, setShowUnassign] = useState(false);
+    const [selectedUnassignIds, setSelectedUnassignIds] = useState<string[]>([]);
+    const [batchPermissions, setBatchPermissions] = useState<any>(null);
     const [selectedReturnIds, setSelectedReturnIds] = useState<string[]>([]);
     const [assignSearch, setAssignSearch] = useState('');
     const [returnsExpanded, setReturnsExpanded] = useState(true);
@@ -67,6 +72,11 @@ export default function BatchDetailPage() {
 
     useEffect(() => {
         dispatch(fetchBatchDetail(batchId));
+        dispatch(getBatchPermissions(batchId)).then((result) => {
+            if (getBatchPermissions.fulfilled.match(result)) {
+                setBatchPermissions(result.payload);
+            }
+        });
         return () => { dispatch(clearCurrentBatch()); };
     }, [dispatch, batchId]);
 
@@ -114,6 +124,38 @@ export default function BatchDetailPage() {
             setShowSubmit(false);
             dispatch(fetchBatchDetail(batchId));
         }
+    };
+
+    const handleDeleteBatch = async () => {
+        const result = await dispatch(deleteBatch(batchId));
+        if (deleteBatch.fulfilled.match(result)) {
+            addToast(result.payload.message, 'success');
+            router.push('/warehouse/batches');
+        }
+    };
+
+    const openUnassignModal = () => {
+        setShowUnassign(true);
+        setSelectedUnassignIds([]);
+    };
+
+    const handleUnassignReturns = async () => {
+        if (selectedUnassignIds.length === 0) {
+            addToast('Select at least one return to unassign', 'warning');
+            return;
+        }
+        const result = await dispatch(unassignReturnsFromBatch({ batchId, transactionIds: selectedUnassignIds }));
+        if (unassignReturnsFromBatch.fulfilled.match(result)) {
+            addToast(result.payload.message, 'success');
+            setShowUnassign(false);
+            dispatch(fetchBatchDetail(batchId));
+        }
+    };
+
+    const toggleUnassignSelection = (id: string) => {
+        setSelectedUnassignIds(prev =>
+            prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+        );
     };
 
     const toggleReturnSelection = (id: string) => {
@@ -180,9 +222,19 @@ export default function BatchDetailPage() {
                             <button onClick={openAssignModal} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors">
                                 <Plus className="w-3.5 h-3.5" /> Assign Returns
                             </button>
+                            {batchReturns.length > 0 && (
+                                <button onClick={openUnassignModal} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium bg-orange-100 text-orange-800 border border-orange-300 hover:bg-orange-200 transition-colors">
+                                    <UserX className="w-3.5 h-3.5" /> Unassign Returns
+                                </button>
+                            )}
                             <button onClick={() => setShowClose(true)} disabled={batch.totalReturns === 0} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-300 hover:bg-yellow-200 disabled:opacity-40 transition-colors">
                                 <Lock className="w-3.5 h-3.5" /> Close Batch
                             </button>
+                            {batchPermissions?.canDelete && (
+                                <button onClick={() => setShowDelete(true)} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium bg-red-100 text-red-800 border border-red-300 hover:bg-red-200 transition-colors">
+                                    <Trash2 className="w-3.5 h-3.5" /> Delete Batch
+                                </button>
+                            )}
                         </>
                     )}
                     {batch.status === 'closed' && !batch.cardinalSubmittedAt && (
@@ -428,6 +480,102 @@ export default function BatchDetailPage() {
                                 {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                                 Confirm Submission
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Delete Batch Confirm ──────────────────────────── */}
+            {showDelete && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowDelete(false)}>
+                    <div className="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 p-4" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center gap-2.5 mb-3">
+                            <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <Trash2 className="w-4 h-4 text-red-600" />
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-bold text-gray-900">Delete Batch</h3>
+                                <p className="text-xs text-gray-500">This action cannot be undone.</p>
+                            </div>
+                        </div>
+                        <p className="text-xs text-gray-600 mb-3">
+                            Are you sure you want to delete batch <strong>{batch.batchName}</strong>? 
+                            {batch.totalReturns > 0 && ` All ${batch.totalReturns} assigned return(s) will be unassigned.`}
+                        </p>
+                        <div className="flex justify-end gap-2">
+                            <button onClick={() => setShowDelete(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button onClick={handleDeleteBatch} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors">
+                                {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                                Delete Batch
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Unassign Returns Modal ──────────────────────────────── */}
+            {showUnassign && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowUnassign(false)}>
+                    <div className="bg-white rounded-lg shadow-xl max-w-xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                        <div className="px-4 py-3 border-b border-gray-200">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-sm font-bold text-gray-900">Unassign Returns from Batch</h2>
+                                <button onClick={() => setShowUnassign(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">Select returns to remove from this batch</p>
+                        </div>
+
+                        <div className="overflow-y-auto flex-1 p-3">
+                            {batchReturns.length === 0 ? (
+                                <div className="text-center py-8">
+                                    <Package className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                                    <p className="text-xs text-gray-500">No returns assigned to this batch</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-2">
+                                    {batchReturns.map(ret => (
+                                        <div key={ret.id} className="flex items-center gap-2 p-2 border border-gray-200 rounded hover:bg-gray-50">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedUnassignIds.includes(ret.id)}
+                                                onChange={() => toggleUnassignSelection(ret.id)}
+                                                className="w-3.5 h-3.5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                                            />
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-1.5 mb-0.5">
+                                                    <span className="text-xs font-medium text-gray-900">{ret.licensePlate}</span>
+                                                    <Badge variant={ret.status === 'received' ? 'success' : ret.status === 'verified' ? 'info' : 'default'}>
+                                                        <span className="text-[10px]">{ret.status}</span>
+                                                    </Badge>
+                                                </div>
+                                                <p className="text-[10px] text-gray-500">{ret.pharmacyName}</p>
+                                                <p className="text-[10px] text-gray-400">{formatCurrency(ret.totalReturnableValue + ret.totalNonReturnableValue)}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="px-4 py-3 border-t border-gray-200">
+                            <div className="flex items-center justify-between">
+                                <p className="text-xs text-gray-500">
+                                    {selectedUnassignIds.length} of {batchReturns.length} selected
+                                </p>
+                                <div className="flex gap-2">
+                                    <button onClick={() => setShowUnassign(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                                        Cancel
+                                    </button>
+                                    <button 
+                                        onClick={handleUnassignReturns} 
+                                        disabled={isActionLoading || selectedUnassignIds.length === 0}
+                                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-orange-600 text-white hover:bg-orange-700 disabled:opacity-50 transition-colors"
+                                    >
+                                        {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UserX className="w-3.5 h-3.5" />}
+                                        Unassign ({selectedUnassignIds.length})
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

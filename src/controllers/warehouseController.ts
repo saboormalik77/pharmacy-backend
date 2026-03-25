@@ -75,12 +75,13 @@ export const pendingHandler = catchAsync(
 // ============================================================
 export const receivedHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
-    const { search, page, limit } = req.query as Record<string, string>;
+    const { search, page, limit, verificationStatus } = req.query as Record<string, string>;
 
     const result = await warehouseService.listReceived(
       search,
       page ? Number(page) : undefined,
-      limit ? Number(limit) : undefined
+      limit ? Number(limit) : undefined,
+      verificationStatus
     );
 
     res.status(200).json({

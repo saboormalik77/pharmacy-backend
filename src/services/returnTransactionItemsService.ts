@@ -127,8 +127,9 @@ export const addItem = async (
 ): Promise<{ item: ReturnTransactionItem; duplicate: boolean; duplicateItemId: string | null }> => {
   const sb = ensureAdmin();
 
-  const { data, error } = await sb.rpc('add_return_transaction_item', {
-    p_data: itemData,
+  const { data, error } = await sb.rpc('add_return_transaction_item_with_validation', {
+    p_transaction_id: itemData.transactionId,
+    p_item_data: itemData,
   });
 
   handleRpcError(data, error, 'Failed to add item');
@@ -186,9 +187,50 @@ export const updateItem = async (
 export const deleteItem = async (itemId: string): Promise<void> => {
   const sb = ensureAdmin();
 
-  const { data, error } = await sb.rpc('delete_return_transaction_item', {
+  const { data, error } = await sb.rpc('delete_return_transaction_item_with_validation', {
     p_item_id: itemId,
   });
 
   handleRpcError(data, error, 'Failed to delete item');
+};
+
+export const checkReturnLockStatus = async (transactionId: string): Promise<{
+  id: string;
+  status: string;
+  isLocked: boolean;
+  canEdit: boolean;
+  lockReason: string | null;
+}> => {
+  const sb = ensureAdmin();
+
+  const { data, error } = await sb.rpc('check_return_transaction_lock_status', {
+    p_id: transactionId,
+  });
+
+  handleRpcError(data, error, 'Failed to check lock status');
+  return data.data;
+};
+
+// ============================================================
+// Resolve item with auto-destination assignment
+// ============================================================
+export const resolveItemWithAutoDestination = async (
+  itemId: string,
+  newStatus: string,
+  reason?: string,
+  destination?: string,
+  memo?: string
+): Promise<ReturnTransactionItem> => {
+  const sb = ensureAdmin();
+
+  const { data, error } = await sb.rpc('resolve_transaction_item_with_auto_destination', {
+    p_item_id: itemId,
+    p_new_status: newStatus,
+    p_reason: reason || null,
+    p_destination: destination || null,
+    p_memo: memo || null,
+  });
+
+  handleRpcError(data, error, 'Failed to resolve item');
+  return data.data;
 };

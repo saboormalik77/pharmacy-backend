@@ -13,6 +13,7 @@ import { ToastContainer, Toast } from '@/components/ui/Toast';
 import { formatDate } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { useDebounce } from '@/lib/hooks/useDebounce';
+import { useReturnEditProtection } from '@/hooks/useReturnLockStatus';
 import {
     fetchReturnTransactionById,
     updateReturnTransaction,
@@ -32,6 +33,7 @@ import {
     clearItems,
     updateFinalizeSteps,
 } from '@/lib/store/returnTransactionsSlice';
+import { unassignSingleReturn } from '@/lib/store/batchSlice';
 import { ReturnTransaction, ReturnTransactionItem, WineCellarItem } from '@/lib/types';
 
 // ── Helpers ────────────────────────────────────────────────────
@@ -58,8 +60,8 @@ function canDoAction(tx: ReturnTransaction, action: string): boolean {
         case 'resume': return tx.status === 'paused';
         case 'complete': return tx.status === 'in_progress' || tx.status === 'paused';
         case 'finalize': return tx.status === 'completed';
-        case 'edit': return tx.status !== 'finalized' && tx.status !== 'closed_out';
-        case 'delete': return tx.status !== 'finalized' && tx.status !== 'closed_out' && tx.status !== 'received';
+        case 'edit': return true; // Notes always editable; field-level control in the modal
+        case 'delete': return !['finalized', 'scanning', 'received', 'verified', 'closed', 'closed_out'].includes(tx.status);
         default: return false;
     }
 }
@@ -82,6 +84,51 @@ export default function ReturnDetailPage() {
     const currentUser = useAppSelector((state) => state.auth.user);
     const isProcessor = currentUser?.role === 'processor';
 
+    // Use browser history for back navigation instead of hardcoded paths
+    const handleBackNavigation = () => {
+        // Check if there's previous history to go back to
+        if (window.history.length > 1) {
+            router.back();
+        } else {
+            // Fallback to appropriate default page if no history
+            const fallbackPath = isProcessor ? '/warehouse/returns' : '/warehouse/receiving?tab=received';
+            router.push(fallbackPath);
+        }
+    };
+
+    // Return lock status protection (granular)
+    const {
+        isLocked: hookIsLocked,
+        canEditCoreData: hookCanEditCoreData,
+        canEditClassification: hookCanEditClassification,
+        canEditNotes: hookCanEditNotes,
+        canAddDeleteItems: hookCanAddDeleteItems,
+        checkActionAllowed,
+        getDisabledState,
+        lockReason,
+        error: lockError,
+    } = useReturnEditProtection(id);
+    
+    // Fallback lock check based on status (in case API fails)
+    const statusBasedLocked = tx ? ['finalized', 'scanning', 'received', 'verified', 'closed', 'closed_out'].includes(tx.status) : false;
+    
+    const isLocked = hookIsLocked || statusBasedLocked;
+    const canEditCoreData = hookCanEditCoreData && !statusBasedLocked;
+    const canEditClassification = hookCanEditClassification;
+    const canEditNotes = hookCanEditNotes;
+    const canAddDeleteItems = hookCanAddDeleteItems && !statusBasedLocked;
+    // canEdit = can edit everything (unlocked state)
+    const canEdit = canEditCoreData;
+    
+    // Helper to check action and show toast if blocked
+    const checkActionWithToast = (actionName: string, action: () => void) => {
+        if (canEdit && (checkActionAllowed(actionName) || !isLocked)) {
+            action();
+        } else {
+            showToast(`Cannot ${actionName}. Return is locked after finalization.`, 'error');
+        }
+    };
+
     const [toasts, setToasts] = useState<Toast[]>([]);
     const [editModal, setEditModal] = useState(false);
     const [editForm, setEditForm] = useState({ fedexTracking: '', fedexPickupConfirmation: '', notes: '' });
@@ -93,7 +140,7 @@ export default function ReturnDetailPage() {
     const [itemStatusFilter, setItemStatusFilter] = useState('');
     const [deleteItemModal, setDeleteItemModal] = useState<ReturnTransactionItem | null>(null);
     const [editItemModal, setEditItemModal] = useState<ReturnTransactionItem | null>(null);
-    const [editItemForm, setEditItemForm] = useState({ quantity: '', standardPrice: '', returnStatus: 'tbd', memo: '' });
+    const [editItemForm, setEditItemForm] = useState({ quantity: '', standardPrice: '', returnStatus: 'tbd', destination: '', memo: '' });
     const debouncedItemSearch = useDebounce(itemSearch, 500);
 
     // Wine Cellar integration state
@@ -205,7 +252,11 @@ export default function ReturnDetailPage() {
 
     const handleUpdate = async () => {
         if (!tx) return;
-        const result = await dispatch(updateReturnTransaction({ id: tx.id, payload: editForm }));
+        // When locked, only send notes to avoid backend rejection
+        const payload = isLocked 
+            ? { notes: editForm.notes } 
+            : editForm;
+        const result = await dispatch(updateReturnTransaction({ id: tx.id, payload }));
         if (updateReturnTransaction.fulfilled.match(result)) {
             showToast('Return updated successfully!');
             setEditModal(false);
@@ -215,13 +266,24 @@ export default function ReturnDetailPage() {
         }
     };
 
+    const handleUnassignFromBatch = async () => {
+        if (!tx?.batchId) return;
+        const result = await dispatch(unassignSingleReturn(tx.id));
+        if (unassignSingleReturn.fulfilled.match(result)) {
+            showToast(result.payload.message);
+            refresh(); // Refresh to show updated batch status
+        } else {
+            showToast(result.payload as string || 'Failed to unassign from batch', 'error');
+        }
+    };
+
     const handleDelete = async () => {
         if (!tx) return;
         const result = await dispatch(deleteReturnTransaction(tx.id));
         if (deleteReturnTransaction.fulfilled.match(result)) {
             showToast(`Return ${tx.licensePlate} deleted!`);
             setDeleteModal(false);
-            setTimeout(() => router.push(tx.batchId ? `/warehouse/batches/${tx.batchId}` : '/warehouse/returns'), 1000);
+            setTimeout(() => handleBackNavigation(), 1000);
         } else {
             showToast(result.payload as string || 'Failed to delete', 'error');
             setDeleteModal(false);
@@ -242,6 +304,7 @@ export default function ReturnDetailPage() {
                 quantity: String(editItemModal.quantity),
                 standardPrice: editItemModal.standardPrice != null ? String(editItemModal.standardPrice) : '',
                 returnStatus: editItemModal.returnStatus,
+                destination: editItemModal.destination || '',
                 memo: editItemModal.memo || '',
             });
         }
@@ -264,9 +327,16 @@ export default function ReturnDetailPage() {
     const handleUpdateItem = async () => {
         if (!editItemModal) return;
         const payload: Record<string, any> = {};
-        if (editItemForm.quantity) payload.quantity = parseInt(editItemForm.quantity);
-        if (editItemForm.standardPrice) payload.standardPrice = parseFloat(editItemForm.standardPrice);
+        
+        // Core data fields — only include if not locked
+        if (!isLocked) {
+            if (editItemForm.quantity) payload.quantity = parseInt(editItemForm.quantity);
+            if (editItemForm.standardPrice) payload.standardPrice = parseFloat(editItemForm.standardPrice);
+        }
+        
+        // Classification fields — always allowed
         payload.returnStatus = editItemForm.returnStatus;
+        if (editItemForm.destination) payload.destination = editItemForm.destination;
         if (editItemForm.memo) payload.memo = editItemForm.memo;
 
         const result = await dispatch(updateTransactionItem({ transactionId: id, itemId: editItemModal.id, payload }));
@@ -519,8 +589,8 @@ export default function ReturnDetailPage() {
     if (error || !tx) {
         return (
             <div className="space-y-4">
-                <button onClick={() => router.push(tx?.batchId ? `/warehouse/batches/${tx.batchId}` : '/warehouse/returns')} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800">
-                    <ArrowLeft className="w-4 h-4" /> Back to {tx?.batchId ? 'Batch' : 'Returns'}
+                <button onClick={handleBackNavigation} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800">
+                    <ArrowLeft className="w-4 h-4" /> Back
                 </button>
                 <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
                     <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-3" />
@@ -537,10 +607,24 @@ export default function ReturnDetailPage() {
         <div className="space-y-3">
             <ToastContainer toasts={toasts} onClose={removeToast} />
 
+            {/* Lock Status Warning */}
+            {isLocked && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                    <div className="flex items-center gap-2">
+                        <Lock className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                        <div>
+                            <p className="text-xs font-semibold text-amber-800">Partially Locked — Core data is frozen</p>
+                            <p className="text-[10px] text-amber-700">Item classification (status, destination, memo) and return notes can still be updated. Quantity, price, and other core fields are locked.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+
             {/* Back + Header */}
             <div>
-                <button onClick={() => router.push(tx.batchId ? `/warehouse/batches/${tx.batchId}` : '/warehouse/returns')} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 mb-1.5">
-                    <ArrowLeft className="w-3.5 h-3.5" /> Back to {tx.batchId ? 'Batch' : 'Returns'}
+                <button onClick={handleBackNavigation} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 mb-1.5">
+                    <ArrowLeft className="w-3.5 h-3.5" /> Back
                 </button>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                     <div className="flex items-center gap-2">
@@ -550,26 +634,26 @@ export default function ReturnDetailPage() {
                     <div className="flex flex-wrap gap-1.5">
                         {canDoAction(tx, 'edit') && (
                             <button onClick={() => setEditModal(true)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors">
-                                <Edit className="w-3 h-3" /> Edit
+                                <Edit className="w-3 h-3" /> {isLocked ? 'Edit Notes' : 'Edit'}
                             </button>
                         )}
-                        {canDoAction(tx, 'pause') && (
-                            <button onClick={() => setActionModal('pause')} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-300 hover:bg-yellow-200 transition-colors">
+                        {canDoAction(tx, 'pause') && canEdit && (
+                            <button onClick={() => checkActionWithToast('pause return', () => setActionModal('pause'))} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-300 hover:bg-yellow-200 transition-colors">
                                 <Pause className="w-3 h-3" /> Pause
                             </button>
                         )}
-                        {canDoAction(tx, 'resume') && (
-                            <button onClick={() => setActionModal('resume')} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-green-100 text-green-800 border border-green-300 hover:bg-green-200 transition-colors">
+                        {canDoAction(tx, 'resume') && canEdit && (
+                            <button onClick={() => checkActionWithToast('resume return', () => setActionModal('resume'))} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-green-100 text-green-800 border border-green-300 hover:bg-green-200 transition-colors">
                                 <Play className="w-3 h-3" /> Resume
                             </button>
                         )}
-                        {canDoAction(tx, 'complete') && (
-                            <button onClick={() => setActionModal('complete')} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors">
+                        {canDoAction(tx, 'complete') && canEdit && (
+                            <button onClick={() => checkActionWithToast('complete return', () => setActionModal('complete'))} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors">
                                 <CheckCircle className="w-3 h-3" /> Complete
                             </button>
                         )}
-                        {canDoAction(tx, 'finalize') && (
-                            <button onClick={openFinalizeModal} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-red-600 text-white hover:bg-red-700 transition-colors">
+                        {canDoAction(tx, 'finalize') && canEdit && (
+                            <button onClick={() => checkActionWithToast('finalize return', () => openFinalizeModal())} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-red-600 text-white hover:bg-red-700 transition-colors">
                                 <Lock className="w-3 h-3" /> Finalize
                             </button>
                         )}
@@ -585,9 +669,14 @@ export default function ReturnDetailPage() {
                                 Print Job Sheet
                             </button>
                         )}
-                        {canDoAction(tx, 'delete') && (
-                            <button onClick={() => setDeleteModal(true)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-red-100 text-red-800 border border-red-300 hover:bg-red-200 transition-colors">
+                        {canDoAction(tx, 'delete') && canEdit && (
+                            <button onClick={() => checkActionWithToast('delete return', () => setDeleteModal(true))} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-red-100 text-red-800 border border-red-300 hover:bg-red-200 transition-colors">
                                 <Trash2 className="w-3 h-3" /> Delete
+                            </button>
+                        )}
+                        {canDoAction(tx, 'delete') && !canEdit && (
+                            <button disabled className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-gray-100 text-gray-400 border border-gray-300 cursor-not-allowed">
+                                <Lock className="w-3 h-3" /> Locked
                             </button>
                         )}
                     </div>
@@ -610,6 +699,21 @@ export default function ReturnDetailPage() {
                             { label: 'Created', value: formatDate(tx.createdAt) },
                             { label: 'Last Updated', value: formatDate(tx.updatedAt) },
                             ...(tx.finalizedAt ? [{ label: 'Finalized', value: formatDate(tx.finalizedAt) }] : []),
+                            ...(tx.batchId ? [{ 
+                                label: 'Batch Assignment', 
+                                value: (
+                                    <div className="flex items-center gap-1">
+                                        <span className="text-[10px] text-blue-600 font-medium">Assigned</span>
+                                        <button
+                                            onClick={() => handleUnassignFromBatch()}
+                                            className="text-[9px] text-red-600 hover:text-red-800 underline ml-1"
+                                            title="Remove from batch"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                )
+                            }] : [{ label: 'Batch Assignment', value: <span className="text-[10px] text-gray-400">Not assigned</span> }]),
                         ].map(({ label, value }) => (
                             <div key={label} className="flex justify-between">
                                 <dt className="text-[11px] text-gray-500">{label}</dt>
@@ -806,6 +910,21 @@ export default function ReturnDetailPage() {
                                 { label: 'Created', value: formatDate(tx.createdAt) },
                                 { label: 'Last Updated', value: formatDate(tx.updatedAt) },
                                 ...(tx.finalizedAt ? [{ label: 'Finalized', value: formatDate(tx.finalizedAt) }] : []),
+                                ...(tx.batchId ? [{ 
+                                    label: 'Batch Assignment', 
+                                    value: (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs text-blue-600 font-medium">Assigned to Batch</span>
+                                            <button
+                                                onClick={() => handleUnassignFromBatch()}
+                                                className="text-xs text-red-600 hover:text-red-800 underline"
+                                                title="Remove from batch"
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                    )
+                                }] : [{ label: 'Batch Assignment', value: <span className="text-xs text-gray-400">Not assigned</span> }]),
                             ].map(({ label, value }) => (
                                 <div key={label} className="flex justify-between items-center">
                                     <dt className="text-xs text-blue-700 font-medium">{label}</dt>
@@ -910,13 +1029,20 @@ export default function ReturnDetailPage() {
                     <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
                         <ScanLine className="w-3.5 h-3.5" /> Products ({nonWcItems.length})
                     </h2>
-                    {isProcessor && canDoAction(tx, 'edit') && (
+                    {isProcessor && canAddDeleteItems && (
                         <div className="flex gap-1.5">
                             <button onClick={() => router.push(`/warehouse/returns/${id}/add-items`)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors">
                                 <Plus className="w-3 h-3" /> Add Items
                             </button>
-                            <button onClick={openWcModal} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors">
+                            <button onClick={() => openWcModal()} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors">
                                 <Archive className="w-3 h-3" /> Wine Cellar Items
+                            </button>
+                        </div>
+                    )}
+                    {isProcessor && canDoAction(tx, 'edit') && !canEdit && (
+                        <div className="flex gap-1.5">
+                            <button disabled className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-gray-100 text-gray-400 border border-gray-300 cursor-not-allowed">
+                                <Lock className="w-3 h-3" /> Locked
                             </button>
                         </div>
                     )}
@@ -977,9 +1103,14 @@ export default function ReturnDetailPage() {
                     <div className="text-center py-6">
                         <Package className="w-10 h-10 text-gray-300 mx-auto mb-2" />
                         <p className="text-gray-500 text-xs font-medium">No items yet</p>
-                        {isProcessor && canDoAction(tx, 'edit') && (
+                        {isProcessor && canAddDeleteItems && (
                             <button onClick={() => router.push(`/warehouse/returns/${id}/add-items`)} className="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors">
                                 <Plus className="w-3 h-3" /> Start Scanning
+                            </button>
+                        )}
+                        {isProcessor && canDoAction(tx, 'edit') && !canEdit && (
+                            <button disabled className="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-gray-100 text-gray-400 border border-gray-300 cursor-not-allowed">
+                                <Lock className="w-3 h-3" /> Locked
                             </button>
                         )}
                     </div>
@@ -997,6 +1128,7 @@ export default function ReturnDetailPage() {
                                     <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Expires</th>
                                     <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Lot</th>
                                     <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
+                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Destination</th>
                                     <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
                                 </tr>
                             </thead>
@@ -1033,6 +1165,15 @@ export default function ReturnDetailPage() {
                                                     )}
                                                 </div>
                                             </td>
+                                            <td className="px-2 py-1.5 text-[11px] text-gray-600">
+                                                {item.returnStatus === 'returnable' ? (
+                                                    item.destination ? (
+                                                        <span className="capitalize font-medium text-gray-900">{item.destination}</span>
+                                                    ) : (
+                                                        <span className="text-orange-600 font-medium">Missing</span>
+                                                    )
+                                                ) : '—'}
+                                            </td>
                                             <td className="px-2 py-1.5">
                                                 <div className="flex items-center justify-end gap-0.5">
                                                     {canDoAction(tx, 'edit') && item.nonReturnableReason === 'date' && !item.wineCellarId && (
@@ -1041,11 +1182,11 @@ export default function ReturnDetailPage() {
                                                         </button>
                                                     )}
                                                     {canDoAction(tx, 'edit') && (
-                                                        <button onClick={() => setEditItemModal(item)} className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title="Edit item">
+                                                        <button onClick={() => setEditItemModal(item)} className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title={isLocked ? 'Edit classification' : 'Edit item'}>
                                                             <Edit className="w-3 h-3" />
                                                         </button>
                                                     )}
-                                                    {canDoAction(tx, 'edit') && (
+                                                    {canAddDeleteItems && (
                                                         <button onClick={() => setDeleteItemModal(item)} className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded" title="Delete item">
                                                             <Trash2 className="w-3 h-3" />
                                                         </button>
@@ -1071,15 +1212,20 @@ export default function ReturnDetailPage() {
                         </div>
                         <div className="px-4 py-3">
                             <p className="text-[11px] text-gray-500 mb-2">{editItemModal.proprietaryName || editItemModal.ndc} — Lot: {editItemModal.lotNumber || '—'}</p>
+                            {isLocked && (
+                                <div className="bg-yellow-50 border border-yellow-200 rounded px-2.5 py-1.5 mb-2">
+                                    <p className="text-[10px] text-yellow-800">Core data (quantity, price) is locked. Classification fields can still be updated.</p>
+                                </div>
+                            )}
                             <div className="space-y-2">
                                 <div className="grid grid-cols-2 gap-2">
                                     <div>
                                         <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Quantity</label>
-                                        <input type="number" min="1" value={editItemForm.quantity} onChange={e => setEditItemForm({ ...editItemForm, quantity: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                        <input type="number" min="1" value={editItemForm.quantity} onChange={e => setEditItemForm({ ...editItemForm, quantity: e.target.value })} disabled={isLocked} className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} />
                                     </div>
                                     <div>
                                         <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Price ($)</label>
-                                        <input type="number" step="0.01" min="0" value={editItemForm.standardPrice} onChange={e => setEditItemForm({ ...editItemForm, standardPrice: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                        <input type="number" step="0.01" min="0" value={editItemForm.standardPrice} onChange={e => setEditItemForm({ ...editItemForm, standardPrice: e.target.value })} disabled={isLocked} className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} />
                                     </div>
                                 </div>
                                 <div>
@@ -1090,6 +1236,21 @@ export default function ReturnDetailPage() {
                                         <option value="non_returnable">Non-Returnable</option>
                                     </select>
                                 </div>
+                                {editItemForm.returnStatus === 'returnable' && (
+                                    <div>
+                                        <label className="block text-[11px] font-medium text-gray-700 mb-0.5">
+                                            Destination 
+                                            <span className="text-gray-400 font-normal">(auto-assigned if empty)</span>
+                                        </label>
+                                        <select value={editItemForm.destination} onChange={e => setEditItemForm({ ...editItemForm, destination: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500">
+                                            <option value="">— Auto-assign —</option>
+                                            <option value="inmar">Inmar</option>
+                                            <option value="qualanex">Qualanex</option>
+                                            <option value="pharmalink">PharmaLink</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                )}
                                 <div>
                                     <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Memo</label>
                                     <input type="text" value={editItemForm.memo} onChange={e => setEditItemForm({ ...editItemForm, memo: e.target.value })} placeholder="Optional memo" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
@@ -1139,13 +1300,18 @@ export default function ReturnDetailPage() {
                             <button onClick={() => setEditModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
                         </div>
                         <div className="px-4 py-3 space-y-2">
+                            {isLocked && (
+                                <div className="bg-yellow-50 border border-yellow-200 rounded px-2.5 py-1.5 mb-1">
+                                    <p className="text-[10px] text-yellow-800">Return is locked. Only notes can be updated.</p>
+                                </div>
+                            )}
                             <div>
                                 <label className="block text-[11px] font-medium text-gray-700 mb-0.5">FedEx Tracking Number</label>
-                                <input type="text" value={editForm.fedexTracking} onChange={e => setEditForm({ ...editForm, fedexTracking: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" placeholder="Enter tracking number" />
+                                <input type="text" value={editForm.fedexTracking} onChange={e => setEditForm({ ...editForm, fedexTracking: e.target.value })} disabled={isLocked} className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} placeholder="Enter tracking number" />
                             </div>
                             <div>
                                 <label className="block text-[11px] font-medium text-gray-700 mb-0.5">FedEx Pickup Confirmation</label>
-                                <input type="text" value={editForm.fedexPickupConfirmation} onChange={e => setEditForm({ ...editForm, fedexPickupConfirmation: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" placeholder="Enter pickup confirmation" />
+                                <input type="text" value={editForm.fedexPickupConfirmation} onChange={e => setEditForm({ ...editForm, fedexPickupConfirmation: e.target.value })} disabled={isLocked} className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} placeholder="Enter pickup confirmation" />
                             </div>
                             <div>
                                 <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Notes</label>

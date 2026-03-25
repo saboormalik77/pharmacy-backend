@@ -118,7 +118,7 @@ export const fetchPendingReturns = createAsyncThunk<
 
 export const fetchReceivedReturns = createAsyncThunk<
     { data: ReturnTransaction[]; pagination: any },
-    { search?: string; page?: number; limit?: number } | void,
+    { search?: string; page?: number; limit?: number; verificationStatus?: string } | void,
     { rejectValue: string }
 >('warehouse/fetchReceived', async (params, { rejectWithValue }) => {
     try {
@@ -128,6 +128,7 @@ export const fetchReceivedReturns = createAsyncThunk<
             if (params.search) query.search = params.search;
             if (params.page) query.page = String(params.page);
             if (params.limit) query.limit = String(params.limit);
+            if (params.verificationStatus) query.verificationStatus = params.verificationStatus;
         }
         const res = await apiClient.get<{ status: string; data: ReturnTransaction[]; pagination: any }>(
             '/admin/warehouse/received', true, query

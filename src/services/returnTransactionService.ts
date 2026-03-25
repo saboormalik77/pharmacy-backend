@@ -282,3 +282,20 @@ export const deleteReturnTransaction = async (
 
   handleRpcError(data, error, 'Failed to delete return transaction');
 };
+
+export const checkReturnLockStatus = async (transactionId: string): Promise<{
+  id: string;
+  status: string;
+  isLocked: boolean;
+  canEdit: boolean;
+  lockReason: string | null;
+}> => {
+  const sb = ensureAdmin();
+
+  const { data, error } = await sb.rpc('check_return_transaction_lock_status', {
+    p_id: transactionId,
+  });
+
+  handleRpcError(data, error, 'Failed to check lock status');
+  return data.data;
+};

@@ -101,3 +101,89 @@ export const submitCardinalHandler = catchAsync(
     });
   }
 );
+
+// ============================================================
+// POST /api/admin/batches/:id/fix-destinations — Fix missing destinations
+// ============================================================
+export const fixBatchDestinationsHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const result = await batchService.fixBatchDestinations(req.params.id);
+
+    res.status(200).json({
+      status: 'success',
+      message: result.message,
+      data: result,
+    });
+  }
+);
+
+// ============================================================
+// Batch Management Operations (FCR-32)
+// ============================================================
+
+// DELETE /api/admin/batches/:id — Delete batch
+export const deleteBatchHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const result = await batchService.deleteBatch(req.params.id);
+
+    res.status(200).json({
+      status: 'success',
+      message: result.message,
+      data: {
+        deletedBatch: result.deletedBatch,
+        unassignedReturns: result.unassignedReturns,
+      },
+    });
+  }
+);
+
+// POST /api/admin/batches/:id/unassign — Unassign returns from batch
+export const unassignReturnsFromBatchHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { transactionIds } = req.body;
+
+    if (!transactionIds || !Array.isArray(transactionIds) || transactionIds.length === 0) {
+      throw new AppError('transactionIds array is required', 400);
+    }
+
+    const result = await batchService.unassignReturnsFromBatch(req.params.id, transactionIds);
+
+    res.status(200).json({
+      status: 'success',
+      message: result.message,
+      data: {
+        batch: result.batch,
+        unassignedCount: result.unassignedCount,
+        skippedCount: result.skippedCount,
+      },
+    });
+  }
+);
+
+// POST /api/admin/return-transactions/:id/unassign — Unassign single return
+export const unassignSingleReturnHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const result = await batchService.unassignSingleReturn(req.params.id);
+
+    res.status(200).json({
+      status: 'success',
+      message: result.message,
+      data: {
+        batch: result.batch,
+        return: result.return,
+      },
+    });
+  }
+);
+
+// GET /api/admin/batches/:id/permissions — Get batch permissions
+export const getBatchPermissionsHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const permissions = await batchService.getBatchPermissions(req.params.id);
+
+    res.status(200).json({
+      status: 'success',
+      data: permissions,
+    });
+  }
+);

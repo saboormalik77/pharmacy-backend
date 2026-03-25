@@ -11,6 +11,7 @@ import {
 import { Badge } from '@/components/ui/Badge';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
+import { useReturnEditProtection } from '@/hooks/useReturnLockStatus';
 import {
     fetchReturnTransactionById,
     scanBarcode,
@@ -69,6 +70,9 @@ export default function AddItemsPage() {
     const { currentTransaction: tx, isScanLoading, isItemActionLoading } = useAppSelector(
         (state) => state.returnTransactions
     );
+
+    // Return lock status protection
+    const { canEdit, isLocked, checkActionAllowed } = useReturnEditProtection(transactionId);
 
     const scanInputRef = useRef<HTMLInputElement>(null);
     const [form, setForm] = useState<FormState>({ ...EMPTY_FORM });
@@ -153,6 +157,12 @@ export default function AddItemsPage() {
 
     const handleScan = async (raw: string) => {
         if (!raw.trim()) return;
+        
+        // Check if return is locked
+        if (!checkActionAllowed('scan items')) {
+            return;
+        }
+        
         setScanError('');
         setLastWarning('');
         setPreCheckResult(null);
@@ -291,6 +301,11 @@ export default function AddItemsPage() {
 
     const handleSave = async (skipWineCellarCheck = false) => {
         if (!validateForm()) return;
+        
+        // Check if return is locked
+        if (!checkActionAllowed('add items')) {
+            return;
+        }
 
         // Before saving: check if the product is too early to return (wine cellar).
         // If so, intercept and show wine cellar confirmation buttons.
@@ -513,6 +528,19 @@ export default function AddItemsPage() {
         <div className="space-y-3">
             <ToastContainer toasts={toasts} onClose={removeToast} />
 
+            {/* Lock Status Warning */}
+            {isLocked && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                    <div className="flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4 text-yellow-600" />
+                        <div>
+                            <p className="text-sm font-medium text-yellow-800">Return is Locked</p>
+                            <p className="text-xs text-yellow-700">This return cannot be modified after finalization to prevent data discrepancies.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Camera QR Scanner Modal */}
             {cameraOpen && (
                 <QrScannerModal
@@ -577,9 +605,17 @@ export default function AddItemsPage() {
                 {mode === 'camera' && (
                     <div>
                         <button
-                            onClick={() => setCameraOpen(true)}
-                            disabled={isScanLoading}
-                            className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 border border-dashed border-primary-300 rounded bg-primary-50 hover:bg-primary-100 hover:border-primary-400 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                            onClick={() => {
+                                if (checkActionAllowed('scan with camera')) {
+                                    setCameraOpen(true);
+                                }
+                            }}
+                            disabled={isScanLoading || !canEdit}
+                            className={`w-full flex items-center justify-center gap-2.5 px-4 py-2.5 border border-dashed rounded transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed ${
+                                !canEdit 
+                                    ? 'border-gray-300 bg-gray-100 text-gray-400' 
+                                    : 'border-primary-300 bg-primary-50 hover:bg-primary-100 hover:border-primary-400'
+                            }`}
                         >
                             {isScanLoading ? (
                                 <>
@@ -609,9 +645,14 @@ export default function AddItemsPage() {
                                 value={scanInput}
                                 onChange={e => setScanInput(e.target.value)}
                                 onKeyDown={handleScanKeyDown}
-                                placeholder="Scan with USB/Bluetooth scanner — press Enter after scan"
-                                className="w-full pl-8 pr-8 py-2 text-xs border-2 border-primary-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-primary-50"
-                                autoFocus
+                                disabled={!canEdit}
+                                placeholder={!canEdit ? "Return is locked - cannot scan items" : "Scan with USB/Bluetooth scanner — press Enter after scan"}
+                                className={`w-full pl-8 pr-8 py-2 text-xs border-2 rounded focus:outline-none focus:ring-2 ${
+                                    !canEdit 
+                                        ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed' 
+                                        : 'border-primary-300 bg-primary-50 focus:ring-primary-500 focus:border-primary-500'
+                                }`}
+                                autoFocus={canEdit}
                             />
                             {isScanLoading && (
                                 <div className="absolute right-2.5 top-1/2 -translate-y-1/2">
@@ -631,12 +672,21 @@ export default function AddItemsPage() {
                                 type="text"
                                 value={manualNdc}
                                 onChange={e => setManualNdc(e.target.value)}
-                                onKeyDown={e => e.key === 'Enter' && handleManualLookup()}
-                                placeholder="Enter NDC (e.g. 43547-3250-06) and press Enter or Lookup..."
-                                className="flex-1 px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
-                                autoFocus
+                                onKeyDown={e => e.key === 'Enter' && canEdit && handleManualLookup()}
+                                disabled={!canEdit}
+                                placeholder={!canEdit ? "Return is locked - cannot add items" : "Enter NDC (e.g. 43547-3250-06) and press Enter or Lookup..."}
+                                className={`flex-1 px-2.5 py-1.5 text-xs border rounded focus:outline-none focus:ring-1 ${
+                                    !canEdit 
+                                        ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed' 
+                                        : 'border-gray-300 focus:ring-primary-500'
+                                }`}
+                                autoFocus={canEdit}
                             />
-                            <button onClick={handleManualLookup} disabled={isScanLoading || !manualNdc.trim()} className="px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                            <button onClick={() => {
+                                if (checkActionAllowed('lookup NDC')) {
+                                    handleManualLookup();
+                                }
+                            }} disabled={isScanLoading || !manualNdc.trim() || !canEdit} className="px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
                                 {isScanLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Lookup'}
                             </button>
                         </div>
@@ -906,7 +956,7 @@ export default function AddItemsPage() {
                                 </div>
                             </div>
                             <div className="flex gap-1.5">
-                                <button onClick={() => handleSave(true)} disabled={isItemActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                                <button onClick={() => handleSave(true)} disabled={isItemActionLoading || !canEdit} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
                                     {isItemActionLoading ? <><Loader2 className="w-3 h-3 animate-spin" />Moving...</> : <><Archive className="w-3 h-3" />Move to Wine Cellar</>}
                                 </button>
                                 <button onClick={handleClearForm} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
@@ -961,7 +1011,7 @@ export default function AddItemsPage() {
                             </>
                         ) : (
                             <div className="flex flex-wrap gap-1.5">
-                                <button onClick={() => handleSave()} disabled={isItemActionLoading || isPreChecking || (!form.ndc && !form.proprietaryName)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                                <button onClick={() => handleSave()} disabled={isItemActionLoading || isPreChecking || (!form.ndc && !form.proprietaryName) || !canEdit} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
                                     {isItemActionLoading || isPreChecking
                                         ? <><Loader2 className="w-3 h-3 animate-spin" />{isPreChecking ? 'Checking...' : 'Saving...'}</>
                                         : <><CheckCircle className="w-3 h-3" />Save &amp; Scan Next</>}

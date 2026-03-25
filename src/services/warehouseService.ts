@@ -129,7 +129,8 @@ export const listPending = async (
 export const listReceived = async (
   search?: string,
   page?: number,
-  limit?: number
+  limit?: number,
+  verificationStatus?: string
 ): Promise<{ data: ReturnTransaction[]; pagination: any }> => {
   const sb = ensureAdmin();
 
@@ -137,6 +138,7 @@ export const listReceived = async (
     p_search: search || null,
     p_page: page || 1,
     p_limit: limit || 20,
+    p_verification_status: verificationStatus || null,
   });
 
   handleRpcError(data, error, 'Failed to list received returns');

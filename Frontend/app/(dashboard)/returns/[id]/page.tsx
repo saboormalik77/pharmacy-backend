@@ -13,12 +13,16 @@ import { formatCurrency, formatDate, formatNDC } from '@/lib/utils/format';
 import { ChainOfCustodyTracker } from '@/components/controlled-substance/ChainOfCustody';
 import { DEAForm222GeneratorComponent } from '@/components/dea/DEAForm222Generator';
 import { ReturnActionButtons } from '@/components/returns/ReturnActionButtons';
+import { useLegacyReturnLockStatus } from '@/hooks/useLegacyReturnLockStatus';
 import Link from 'next/link';
 
 export default function ReturnDetailPage() {
   const params = useParams();
   const id = params.id as string;
   const [returnItem, setReturnItem] = useState(mockReturns.find(r => r.id === id));
+  
+  // Check lock status for real returns (when not using mock data)
+  const { isLocked, lockReason } = useLegacyReturnLockStatus(id);
 
   useEffect(() => {
     setReturnItem(mockReturns.find(r => r.id === id));
@@ -69,6 +73,19 @@ export default function ReturnDetailPage() {
   return (
     <DashboardLayout>
       <div className="space-y-3">
+        {/* Lock Status Warning */}
+        {isLocked && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-yellow-600" />
+              <div>
+                <p className="text-sm font-medium text-yellow-800">Return is Locked</p>
+                <p className="text-xs text-yellow-700">{lockReason || 'This return cannot be modified after shipment to prevent data discrepancies.'}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Professional Medical Header */}
         <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-teal-50 via-cyan-50 to-teal-50 border-2 border-teal-200">
           <div className="flex items-center gap-3">
@@ -93,7 +110,7 @@ export default function ReturnDetailPage() {
               </p>
             </div>
           </div>
-          <ReturnActionButtons />
+          <ReturnActionButtons returnId={returnItem.id} returnStatus={returnItem.status} />
         </div>
 
         {/* Professional Metrics */}

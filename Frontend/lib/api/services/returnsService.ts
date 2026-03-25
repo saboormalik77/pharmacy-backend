@@ -118,5 +118,22 @@ export const returnsService = {
     }
     throw new Error(response.message || 'Failed to fetch return reports');
   },
+
+  /**
+   * Check if return is locked for editing
+   */
+  async checkLockStatus(id: string): Promise<{
+    id: string;
+    status: string;
+    isLocked: boolean;
+    canEdit: boolean;
+    lockReason: string | null;
+  }> {
+    const response = await apiClient.get<any>(`/returns/${id}/lock-status`);
+    if (response.status === 'success' && response.data) {
+      return response.data;
+    }
+    throw new Error(response.message || 'Failed to check lock status');
+  },
 };
 

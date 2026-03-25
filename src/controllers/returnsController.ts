@@ -5,6 +5,7 @@ import {
   getReturnById,
   updateReturn,
   deleteReturn,
+  checkReturnLockStatus,
 } from '../services/returnsService';
 import { catchAsync } from '../utils/catchAsync';
 import { AppError } from '../utils/appError';
@@ -117,6 +118,19 @@ export const deleteReturnHandler = catchAsync(
     res.status(204).json({
       status: 'success',
       data: null,
+    });
+  }
+);
+
+export const checkLockStatusHandler = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const returnId = req.params.id;
+    
+    const lockStatus = await checkReturnLockStatus(returnId);
+    
+    res.status(200).json({
+      status: 'success',
+      data: lockStatus,
     });
   }
 );

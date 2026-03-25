@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import {
   createHandler,
   listHandler,
@@ -14,6 +14,7 @@ import {
   deleteHandler,
   updateFinalizeStepsHandler,
 } from '../controllers/returnTransactionController';
+import { unassignSingleReturnHandler } from '../controllers/batchController';
 import {
   createShipmentHandler,
   schedulePickupHandler,
@@ -32,6 +33,8 @@ import {
   allShippingLabelsHandler,
 } from '../controllers/jobSheetController';
 import { authenticateAdmin } from '../middleware/adminAuth';
+import { catchAsync } from '../utils/catchAsync';
+import * as returnTransactionService from '../services/returnTransactionService';
 import { authenticateProcessor } from '../middleware/processorAuth';
 
 const router = Router();
@@ -587,6 +590,51 @@ router.get('/:id/labels/:packageNumber/download', authenticateAny, downloadLabel
 router.delete('/:id', authenticateAny, deleteHandler);
 
 // ============================================================
+// POST /api/return-transactions/:id/unassign — Unassign from batch
+// ============================================================
+/**
+ * @swagger
+ * /api/return-transactions/{id}/unassign:
+ *   post:
+ *     summary: Unassign return from its current batch
+ *     tags: [Return Transactions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: Return unassigned from batch
+ *       400:
+ *         description: Return not assigned to batch or batch not open
+ *       404:
+ *         description: Return not found
+ */
+router.post('/:id/unassign', authenticateAny, unassignSingleReturnHandler);
+
+// ============================================================
+// GET /api/return-transactions/:id/lock-status
+// Check if return is locked for editing
+// ============================================================
+export const checkLockStatusHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const transactionId = req.params.id;
+    
+    const lockStatus = await returnTransactionService.checkReturnLockStatus(transactionId);
+    
+    res.status(200).json({
+      success: true,
+      data: lockStatus,
+    });
+  }
+);
+
+router.get('/:id/lock-status', authenticateAny, checkLockStatusHandler);
+
+// ============================================================
 // Barcode Generation Routes
 // ============================================================
 
@@ -707,5 +755,28 @@ router.get('/:id/shipping-labels', authenticateAny, allShippingLabelsHandler);
  *     tags: [Return Transactions]
  */
 router.get('/:id/shipping-label/:packageNumber', authenticateAny, shippingLabelHandler);
+
+/**
+ * @swagger
+ * /return-transactions/{id}/unassign:
+ *   post:
+ *     summary: Unassign return from its current batch
+ *     tags: [Return Transactions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: Return unassigned from batch
+ *       400:
+ *         description: Return not assigned to batch or batch not open
+ *       404:
+ *         description: Return not found
+ */
+router.post('/:id/unassign', authenticateAdmin, unassignSingleReturnHandler);
 
 export default router;

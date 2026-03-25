@@ -327,40 +327,19 @@ export const resolveItemHandler = catchAsync(
       throw new AppError('new_status must be "returnable" or "non_returnable"', 400);
     }
 
-    const existingItem = await itemsService.getItem(itemId);
-    if (!existingItem) {
-      throw new AppError('Item not found', 404);
-    }
-
-    if (existingItem.returnStatus !== 'tbd') {
-      throw new AppError(
-        `Item is already classified as "${existingItem.returnStatus}". Only TBD items can be resolved.`,
-        400
-      );
-    }
-
-    const updates: Partial<itemsService.AddItemData> = {
-      returnStatus: new_status,
-    };
-
-    if (new_status === 'non_returnable') {
-      updates.nonReturnableReason = reason || 'manual_review';
-    }
-
-    if (destination) {
-      updates.destination = destination;
-    }
-
-    if (memo) {
-      updates.memo = memo;
-    }
-
-    const updatedItem = await itemsService.updateItem(itemId, updates);
+    // Use the new RPC function that handles auto-destination assignment
+    const result = await itemsService.resolveItemWithAutoDestination(
+      itemId,
+      new_status,
+      reason,
+      destination,
+      memo
+    );
 
     res.status(200).json({
       status: 'success',
-      data: updatedItem,
-      message: `Item resolved as ${new_status}`,
+      data: result,
+      message: `Item resolved as ${new_status}${result.destination ? ` with destination: ${result.destination}` : ''}`,
     });
   }
 );

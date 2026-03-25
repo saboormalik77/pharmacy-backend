@@ -135,6 +135,112 @@ export const submitCardinal = createAsyncThunk<
     }
 });
 
+// ── Batch Management thunks (FCR-32) ─────────────────────────
+
+export const deleteBatch = createAsyncThunk<
+    { message: string; deletedBatch: ReturnBatch; unassignedReturns: number },
+    string,
+    { rejectValue: string }
+>('batch/delete', async (batchId, { rejectWithValue }) => {
+    try {
+        const { apiClient } = await import('@/lib/api/apiClient');
+        const res = await apiClient.delete<{ 
+            status: string; 
+            message: string; 
+            data: { deletedBatch: ReturnBatch; unassignedReturns: number } 
+        }>(`/admin/batches/${batchId}`, true);
+        return {
+            message: res.message,
+            deletedBatch: res.data.deletedBatch,
+            unassignedReturns: res.data.unassignedReturns
+        };
+    } catch (error: any) {
+        return rejectWithValue(error.response?.data?.message || 'Failed to delete batch');
+    }
+});
+
+export const unassignReturnsFromBatch = createAsyncThunk<
+    { batch: ReturnBatch; unassignedCount: number; skippedCount: number; message: string },
+    { batchId: string; transactionIds: string[] },
+    { rejectValue: string }
+>('batch/unassignReturns', async ({ batchId, transactionIds }, { rejectWithValue }) => {
+    try {
+        const { apiClient } = await import('@/lib/api/apiClient');
+        const res = await apiClient.post<{ 
+            status: string; 
+            message: string; 
+            data: { batch: ReturnBatch; unassignedCount: number; skippedCount: number } 
+        }>(`/admin/batches/${batchId}/unassign`, { transactionIds }, true);
+        return {
+            batch: res.data.batch,
+            unassignedCount: res.data.unassignedCount,
+            skippedCount: res.data.skippedCount,
+            message: res.message
+        };
+    } catch (error: any) {
+        return rejectWithValue(error.response?.data?.message || 'Failed to unassign returns');
+    }
+});
+
+export const unassignSingleReturn = createAsyncThunk<
+    { batch: ReturnBatch; return: ReturnTransaction; message: string },
+    string,
+    { rejectValue: string }
+>('batch/unassignSingleReturn', async (transactionId, { rejectWithValue }) => {
+    try {
+        const { apiClient } = await import('@/lib/api/apiClient');
+        const res = await apiClient.post<{ 
+            status: string; 
+            message: string; 
+            data: { batch: ReturnBatch; return: ReturnTransaction } 
+        }>(`/return-transactions/${transactionId}/unassign`, {}, true);
+        return {
+            batch: res.data.batch,
+            return: res.data.return,
+            message: res.message
+        };
+    } catch (error: any) {
+        return rejectWithValue(error.response?.data?.message || 'Failed to unassign return');
+    }
+});
+
+export const getBatchPermissions = createAsyncThunk<
+    {
+        batchId: string;
+        status: string;
+        canDelete: boolean;
+        canUnassignReturns: boolean;
+        canAssignReturns: boolean;
+        canClose: boolean;
+        canSubmitCardinal: boolean;
+        hasDebitMemos: boolean;
+        debitMemoCount: number;
+    },
+    string,
+    { rejectValue: string }
+>('batch/getPermissions', async (batchId, { rejectWithValue }) => {
+    try {
+        const { apiClient } = await import('@/lib/api/apiClient');
+        const res = await apiClient.get<{ 
+            status: string; 
+            data: {
+                batchId: string;
+                status: string;
+                canDelete: boolean;
+                canUnassignReturns: boolean;
+                canAssignReturns: boolean;
+                canClose: boolean;
+                canSubmitCardinal: boolean;
+                hasDebitMemos: boolean;
+                debitMemoCount: number;
+            }
+        }>(`/admin/batches/${batchId}/permissions`, true);
+        return res.data;
+    } catch (error: any) {
+        return rejectWithValue(error.response?.data?.message || 'Failed to get batch permissions');
+    }
+});
+
 // ── Debit memo thunks ─────────────────────────────────────────
 
 export const fetchDebitMemos = createAsyncThunk<
@@ -248,7 +354,48 @@ const batchSlice = createSlice({
                 state.currentMemo = action.payload;
                 state.debitMemos = state.debitMemos.map(m => m.id === action.payload.id ? action.payload : m);
             })
-            .addCase(updateDebitMemo.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; });
+            .addCase(updateDebitMemo.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
+
+            // Batch Management reducers (FCR-32)
+            .addCase(deleteBatch.pending, (state) => { state.isActionLoading = true; state.error = null; })
+            .addCase(deleteBatch.fulfilled, (state, action) => {
+                state.isActionLoading = false;
+                state.batches = state.batches.filter(b => b.id !== action.payload.deletedBatch.id);
+                // Clear current batch if it was the deleted one
+                if (state.currentBatch?.id === action.payload.deletedBatch.id) {
+                    state.currentBatch = null;
+                    state.batchReturns = [];
+                    state.batchMemos = [];
+                }
+            })
+            .addCase(deleteBatch.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
+
+            .addCase(unassignReturnsFromBatch.pending, (state) => { state.isActionLoading = true; state.error = null; })
+            .addCase(unassignReturnsFromBatch.fulfilled, (state, action) => {
+                state.isActionLoading = false;
+                state.currentBatch = action.payload.batch;
+                // Remove unassigned returns from batchReturns
+                state.batchReturns = state.batchReturns.filter(r => r.batchId === action.payload.batch.id);
+            })
+            .addCase(unassignReturnsFromBatch.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
+
+            .addCase(unassignSingleReturn.pending, (state) => { state.isActionLoading = true; state.error = null; })
+            .addCase(unassignSingleReturn.fulfilled, (state, action) => {
+                state.isActionLoading = false;
+                // Remove the unassigned return from batchReturns if it was in current batch
+                state.batchReturns = state.batchReturns.filter(r => r.id !== action.payload.return.id);
+                // Update the batch totals if it's the current batch
+                if (state.currentBatch?.id === action.payload.batch.id) {
+                    state.currentBatch = action.payload.batch;
+                }
+            })
+            .addCase(unassignSingleReturn.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
+
+            .addCase(getBatchPermissions.pending, (state) => { state.error = null; })
+            .addCase(getBatchPermissions.fulfilled, (state, action) => {
+                // Permissions are handled in components, no state update needed
+            })
+            .addCase(getBatchPermissions.rejected, (state, action) => { state.error = action.payload as string; });
     },
 });
 

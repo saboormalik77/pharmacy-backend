@@ -7,6 +7,11 @@ import {
   assignReturnsToBatchHandler,
   closeBatchHandler,
   submitCardinalHandler,
+  fixBatchDestinationsHandler,
+  deleteBatchHandler,
+  unassignReturnsFromBatchHandler,
+  unassignSingleReturnHandler,
+  getBatchPermissionsHandler,
 } from '../controllers/batchController';
 
 const router = Router();
@@ -162,5 +167,108 @@ router.post('/:id/close', authenticateAdmin, closeBatchHandler);
  *         description: Batch must be closed first
  */
 router.post('/:id/submit-cardinal', authenticateAdmin, submitCardinalHandler);
+
+/**
+ * @swagger
+ * /api/admin/batches/{id}/fix-destinations:
+ *   post:
+ *     summary: Fix missing destinations for returnable items in batch
+ *     tags: [Batches]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: Destinations fixed successfully
+ *       404:
+ *         description: Batch not found
+ */
+router.post('/:id/fix-destinations', authenticateAdmin, fixBatchDestinationsHandler);
+
+// ============================================================
+// Batch Management Routes (FCR-32)
+// ============================================================
+
+/**
+ * @swagger
+ * /api/admin/batches/{id}:
+ *   delete:
+ *     summary: Delete a batch (only if open and no debit memos)
+ *     tags: [Batches]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: Batch deleted successfully
+ *       400:
+ *         description: Cannot delete batch (not open or has debit memos)
+ *       404:
+ *         description: Batch not found
+ */
+router.delete('/:id', authenticateAdmin, deleteBatchHandler);
+
+/**
+ * @swagger
+ * /api/admin/batches/{id}/unassign:
+ *   post:
+ *     summary: Unassign returns from a batch
+ *     tags: [Batches]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [transactionIds]
+ *             properties:
+ *               transactionIds:
+ *                 type: array
+ *                 items: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: Returns unassigned successfully
+ *       400:
+ *         description: Batch not open or validation error
+ *       404:
+ *         description: Batch not found
+ */
+router.post('/:id/unassign', authenticateAdmin, unassignReturnsFromBatchHandler);
+
+/**
+ * @swagger
+ * /api/admin/batches/{id}/permissions:
+ *   get:
+ *     summary: Get batch permissions (what operations are allowed)
+ *     tags: [Batches]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: Batch permissions
+ *       404:
+ *         description: Batch not found
+ */
+router.get('/:id/permissions', authenticateAdmin, getBatchPermissionsHandler);
 
 export default router;

@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import {
   addItemHandler,
   listItemsHandler,
@@ -8,6 +8,8 @@ import {
   resolveItemHandler,
   moveToWineCellarHandler,
 } from '../controllers/returnTransactionItemsController';
+import { catchAsync } from '../utils/catchAsync';
+import * as itemsService from '../services/returnTransactionItemsService';
 import { authenticateAdmin } from '../middleware/adminAuth';
 import { authenticateProcessor } from '../middleware/processorAuth';
 
@@ -278,5 +280,24 @@ router.delete('/:itemId', authenticateAny, deleteItemHandler);
  *         description: Item moved to wine cellar
  */
 router.post('/:itemId/wine-cellar', authenticateAny, moveToWineCellarHandler);
+
+// ============================================================
+// GET /api/return-transactions/:id/items/lock-status
+// Check if return is locked for editing
+// ============================================================
+export const checkLockStatusHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const transactionId = req.params.id;
+    
+    const lockStatus = await itemsService.checkReturnLockStatus(transactionId);
+    
+    res.status(200).json({
+      success: true,
+      data: lockStatus,
+    });
+  }
+);
+
+router.get('/lock-status', authenticateAny, checkLockStatusHandler);
 
 export default router;
