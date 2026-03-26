@@ -2,30 +2,17 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { AuthState, User, LoginCredentials, LoginResponse } from '@/lib/types/auth';
 import { cookieUtils } from '@/lib/utils/cookies';
 
+// isLoading starts true so the server and client both render a loading state
+// on the first paint. StoreProvider hydrates auth from cookies via a useEffect
+// (client-only), which avoids the server/client initial-state mismatch that
+// causes React hydration errors.
 const initialState: AuthState = {
   user: null,
   token: null,
-  isLoading: false,
+  isLoading: true,
   error: null,
   isAuthenticated: false,
 };
-
-// Load auth state from cookies on initialization
-if (typeof window !== 'undefined') {
-  const storedToken = cookieUtils.getAuthToken();
-  const storedUser = cookieUtils.getUser();
-
-  if (storedToken && storedUser) {
-    try {
-      initialState.token = storedToken;
-      initialState.user = storedUser;
-      initialState.isAuthenticated = true;
-    } catch (error) {
-      // Invalid stored data, clear it
-      cookieUtils.clearAuth();
-    }
-  }
-}
 
 // Async thunk for login
 export const loginUser = createAsyncThunk(
@@ -210,12 +197,17 @@ const authSlice = createSlice({
 
     // Check auth status cases
     builder
+      .addCase(checkAuthStatus.pending, (state) => {
+        state.isLoading = true;
+      })
       .addCase(checkAuthStatus.fulfilled, (state, action) => {
+        state.isLoading = false;
         state.token = action.payload.token;
         state.user = action.payload.user;
         state.isAuthenticated = true;
       })
       .addCase(checkAuthStatus.rejected, (state) => {
+        state.isLoading = false;
         state.token = null;
         state.user = null;
         state.isAuthenticated = false;

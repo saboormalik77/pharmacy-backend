@@ -170,7 +170,7 @@ export default function LoginPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-sm text-gray-500 mt-6">
+        <p className="text-center text-sm text-gray-500 mt-6" suppressHydrationWarning>
           © {new Date().getFullYear()} PharmAdmin. All rights reserved.
         </p>
       </div>

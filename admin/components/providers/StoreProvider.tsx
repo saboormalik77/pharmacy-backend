@@ -1,8 +1,9 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { makeStore, AppStore } from '@/lib/store/store';
+import { checkAuthStatus } from '@/lib/store/authSlice';
 
 export default function StoreProvider({
   children,
@@ -11,11 +12,17 @@ export default function StoreProvider({
 }) {
   const storeRef = useRef<AppStore | undefined>(undefined);
   if (!storeRef.current) {
-    // Create the store instance the first time this renders
     storeRef.current = makeStore();
   }
 
-  // At this point, storeRef.current is guaranteed to be defined
+  useEffect(() => {
+    // Hydrate auth state from cookies on the client only — after mount.
+    // This keeps the server and client initial renders identical (both start
+    // with isLoading:true, isAuthenticated:false), eliminating React hydration
+    // mismatches caused by reading cookies at module-evaluation time.
+    storeRef.current!.dispatch(checkAuthStatus() as any);
+  }, []);
+
   return <Provider store={storeRef.current!}>{children}</Provider>;
 }
 
