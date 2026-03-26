@@ -32,7 +32,7 @@ const warehouseSections = [
         href: '/warehouse/debit-memos',
         icon: Receipt,
         label: 'Debit Memos',
-        description: 'View auto-generated debit memos per manufacturer. Track RA status and payment.',
+        description: 'View auto-generated debit memos per reverse distributor. Track RA status and payment.',
         color: 'text-orange-600',
         bg: 'bg-orange-50',
         border: 'border-orange-100',

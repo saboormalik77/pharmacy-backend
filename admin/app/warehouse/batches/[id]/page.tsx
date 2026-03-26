@@ -71,7 +71,7 @@ const WORKFLOW_STEPS = [
         key: 'ra_requested',
         stateKey: 'raRequested' as const,
         label: 'Request RA',
-        description: 'Submit Return Authorization requests for all debit memos.',
+        description: 'Submit Return Authorization requests for all debit memos to reverse distributors.',
         icon: GitPullRequest,
         color: 'green',
     },
@@ -116,7 +116,7 @@ export default function BatchDetailPage() {
     const [cardinalFile, setCardinalFile] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // RA request step — track which manufacturer group's RA is being sent (by labelerId)
+    // RA request step — track which reverse distributor group's RA is being sent (by destination)
     const [raSendingGroup, setRaSendingGroup] = useState<string | null>(null);
 
     const addToast = useCallback((msg: string, type: Toast['type']) => {
@@ -308,16 +308,16 @@ export default function BatchDetailPage() {
     // Step 3: Confirm debit memos — stay in modal, advance to Step 4
     const handleConfirmDebitMemos = async () => {
         await handleCompleteStep('debit_memos_created');
-        addToast('Debit memos confirmed. Proceed to Request RA.', 'success');
+        addToast('Debit memos confirmed. Proceed to Request RA from reverse distributors.', 'success');
     };
 
-    // Step 4: Send RA requests for all unsent memos in a manufacturer group
-    const handleSendRAForGroup = async (labelerId: string, labelerName: string, memos: DebitMemo[]) => {
+    // Step 4: Send RA requests for all unsent memos in a reverse distributor group
+    const handleSendRAForGroup = async (destination: string, distributorName: string, memos: DebitMemo[]) => {
         const unsent = memos.filter(
             m => !m.raRequestedAt && m.raStatus !== 'requested' && m.raStatus !== 'received' && m.raStatus !== 'shipped'
         );
         if (unsent.length === 0) return;
-        setRaSendingGroup(labelerId);
+        setRaSendingGroup(destination);
         let sentCount = 0;
         for (const memo of unsent) {
             const result = await dispatch(sendRARequest({ memoId: memo.id }));
@@ -329,7 +329,7 @@ export default function BatchDetailPage() {
         }
         setRaSendingGroup(null);
         if (sentCount > 0) {
-            addToast(`RA request${sentCount > 1 ? 's' : ''} sent for ${labelerName}`, 'success');
+            addToast(`RA request${sentCount > 1 ? 's' : ''} sent to ${distributorName}`, 'success');
             dispatch(fetchBatchDetail(batchId));
         }
     };
@@ -736,47 +736,48 @@ export default function BatchDetailPage() {
                                                             </div>
                                                         )}
 
-                                                        {/* Step 4: Request RA — one row per manufacturer */}
+                                                        {/* Step 4: Request RA — one row per reverse distributor */}
                                                         {step.key === 'ra_requested' && (
                                                             <div className="space-y-2.5">
                                                                 {batchMemos.length > 0 ? (() => {
-                                                                    // Group memos by labelerId (manufacturer)
-                                                                    const groups: Record<string, { labelerId: string; labelerName: string; memos: DebitMemo[] }> = {};
+                                                                    // Group memos by destination (reverse distributor)
+                                                                    const groups: Record<string, { destination: string; distributorName: string; memos: DebitMemo[] }> = {};
                                                                     batchMemos.forEach(m => {
-                                                                        const key = m.labelerId || 'unknown';
+                                                                        const key = m.destination || 'unknown';
                                                                         if (!groups[key]) {
                                                                             groups[key] = {
-                                                                                labelerId: key,
-                                                                                labelerName: m.labelerName || m.labelerId || 'Unknown Manufacturer',
+                                                                                destination: key,
+                                                                                distributorName: key === 'unknown' ? 'Unknown Distributor' : 
+                                                                                    key.charAt(0).toUpperCase() + key.slice(1), // Capitalize first letter
                                                                                 memos: [],
                                                                             };
                                                                         }
                                                                         groups[key].memos.push(m);
                                                                     });
-                                                                    const labelerGroups = Object.values(groups);
+                                                                    const distributorGroups = Object.values(groups);
                                                                     return (
                                                                         <div className="space-y-1.5">
                                                                             <p className="text-[11px] text-gray-600">
-                                                                                Send one RA request per manufacturer ({labelerGroups.length} manufacturer{labelerGroups.length !== 1 ? 's' : ''}):
+                                                                                Send one RA request per reverse distributor ({distributorGroups.length} distributor{distributorGroups.length !== 1 ? 's' : ''}):
                                                                             </p>
                                                                             <div className="max-h-48 overflow-y-auto space-y-1 pr-1">
-                                                                                {labelerGroups.map(group => {
+                                                                                {distributorGroups.map(group => {
                                                                                     const allSent = group.memos.every(
                                                                                         m => m.raRequestedAt || m.raStatus === 'requested' || m.raStatus === 'received' || m.raStatus === 'shipped'
                                                                                     );
-                                                                                    const isSending = raSendingGroup === group.labelerId;
+                                                                                    const isSending = raSendingGroup === group.destination;
                                                                                     const sentCount = group.memos.filter(
                                                                                         m => m.raRequestedAt || m.raStatus === 'requested' || m.raStatus === 'received' || m.raStatus === 'shipped'
                                                                                     ).length;
                                                                                     return (
-                                                                                        <div key={group.labelerId} className={`flex items-center justify-between rounded px-2.5 py-1.5 text-[11px] border ${allSent ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'}`}>
+                                                                                        <div key={group.destination} className={`flex items-center justify-between rounded px-2.5 py-1.5 text-[11px] border ${allSent ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'}`}>
                                                                                             <div className="flex items-center gap-2 min-w-0">
                                                                                                 {allSent ? (
                                                                                                     <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
                                                                                                 ) : (
                                                                                                     <Mail className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
                                                                                                 )}
-                                                                                                <span className="font-semibold text-gray-900">{group.labelerName}</span>
+                                                                                                <span className="font-semibold text-gray-900">{group.distributorName}</span>
                                                                                                 <span className="text-gray-400">
                                                                                                     {group.memos.length} memo{group.memos.length !== 1 ? 's' : ''}
                                                                                                     {sentCount > 0 && !allSent && ` · ${sentCount} sent`}
@@ -787,7 +788,7 @@ export default function BatchDetailPage() {
                                                                                                     <span className="text-[10px] font-medium text-green-600 bg-green-100 px-1.5 py-0.5 rounded">RA Sent</span>
                                                                                                 ) : (
                                                                                                     <button
-                                                                                                        onClick={() => handleSendRAForGroup(group.labelerId, group.labelerName, group.memos)}
+                                                                                                        onClick={() => handleSendRAForGroup(group.destination, group.distributorName, group.memos)}
                                                                                                         disabled={isSending || !!raSendingGroup}
                                                                                                         className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors font-medium"
                                                                                                     >
