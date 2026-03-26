@@ -116,8 +116,8 @@ export default function BatchDetailPage() {
     const [cardinalFile, setCardinalFile] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // RA request step — track which memos are being sent
-    const [raSendingId, setRaSendingId] = useState<string | null>(null);
+    // RA request step — track which manufacturer group's RA is being sent (by labelerId)
+    const [raSendingGroup, setRaSendingGroup] = useState<string | null>(null);
 
     const addToast = useCallback((msg: string, type: Toast['type']) => {
         setToasts(prev => [...prev, { id: Date.now().toString(), message: msg, type }]);
@@ -311,16 +311,26 @@ export default function BatchDetailPage() {
         addToast('Debit memos confirmed. Proceed to Request RA.', 'success');
     };
 
-    // Step 4: Send RA request for a single memo
-    const handleSendRA = async (memo: DebitMemo) => {
-        setRaSendingId(memo.id);
-        const result = await dispatch(sendRARequest({ memoId: memo.id }));
-        setRaSendingId(null);
-        if (sendRARequest.fulfilled.match(result)) {
-            addToast(`RA request sent for ${memo.memoNumber}`, 'success');
+    // Step 4: Send RA requests for all unsent memos in a manufacturer group
+    const handleSendRAForGroup = async (labelerId: string, labelerName: string, memos: DebitMemo[]) => {
+        const unsent = memos.filter(
+            m => !m.raRequestedAt && m.raStatus !== 'requested' && m.raStatus !== 'received' && m.raStatus !== 'shipped'
+        );
+        if (unsent.length === 0) return;
+        setRaSendingGroup(labelerId);
+        let sentCount = 0;
+        for (const memo of unsent) {
+            const result = await dispatch(sendRARequest({ memoId: memo.id }));
+            if (sendRARequest.fulfilled.match(result)) {
+                sentCount++;
+            } else {
+                addToast(`Failed to send RA for ${memo.memoNumber}`, 'error');
+            }
+        }
+        setRaSendingGroup(null);
+        if (sentCount > 0) {
+            addToast(`RA request${sentCount > 1 ? 's' : ''} sent for ${labelerName}`, 'success');
             dispatch(fetchBatchDetail(batchId));
-        } else {
-            addToast((result.payload as string) || 'Failed to send RA request', 'error');
         }
     };
 
@@ -726,52 +736,73 @@ export default function BatchDetailPage() {
                                                             </div>
                                                         )}
 
-                                                        {/* Step 4: Request RA */}
+                                                        {/* Step 4: Request RA — one row per manufacturer */}
                                                         {step.key === 'ra_requested' && (
                                                             <div className="space-y-2.5">
-                                                                {/* Debit memos with RA send buttons */}
-                                                                {batchMemos.length > 0 ? (
-                                                                    <div className="space-y-1.5">
-                                                                        <p className="text-[11px] text-gray-600">
-                                                                            Send RA requests for each debit memo:
-                                                                        </p>
-                                                                        <div className="max-h-48 overflow-y-auto space-y-1 pr-1">
-                                                                            {batchMemos.map(m => {
-                                                                                const raSent = m.raRequestedAt || m.raStatus === 'requested' || m.raStatus === 'received' || m.raStatus === 'shipped';
-                                                                                const isSending = raSendingId === m.id;
-                                                                                return (
-                                                                                    <div key={m.id} className={`flex items-center justify-between rounded px-2.5 py-1.5 text-[11px] border ${raSent ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'}`}>
-                                                                                        <div className="flex items-center gap-2 min-w-0">
-                                                                                            {raSent ? (
-                                                                                                <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
-                                                                                            ) : (
-                                                                                                <Mail className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
-                                                                                            )}
-                                                                                            <span className="font-semibold text-gray-900">{m.memoNumber}</span>
-                                                                                            <span className="text-gray-500 truncate">{m.labelerName || m.pharmacyName}</span>
-                                                                                        </div>
-                                                                                        <div className="flex items-center gap-2 flex-shrink-0">
-                                                                                            {raSent ? (
-                                                                                                <span className="text-[10px] font-medium text-green-600 bg-green-100 px-1.5 py-0.5 rounded">
-                                                                                                    {m.raStatus === 'received' ? 'RA Received' : m.raStatus === 'shipped' ? 'Shipped' : 'Sent'}
+                                                                {batchMemos.length > 0 ? (() => {
+                                                                    // Group memos by labelerId (manufacturer)
+                                                                    const groups: Record<string, { labelerId: string; labelerName: string; memos: DebitMemo[] }> = {};
+                                                                    batchMemos.forEach(m => {
+                                                                        const key = m.labelerId || 'unknown';
+                                                                        if (!groups[key]) {
+                                                                            groups[key] = {
+                                                                                labelerId: key,
+                                                                                labelerName: m.labelerName || m.labelerId || 'Unknown Manufacturer',
+                                                                                memos: [],
+                                                                            };
+                                                                        }
+                                                                        groups[key].memos.push(m);
+                                                                    });
+                                                                    const labelerGroups = Object.values(groups);
+                                                                    return (
+                                                                        <div className="space-y-1.5">
+                                                                            <p className="text-[11px] text-gray-600">
+                                                                                Send one RA request per manufacturer ({labelerGroups.length} manufacturer{labelerGroups.length !== 1 ? 's' : ''}):
+                                                                            </p>
+                                                                            <div className="max-h-48 overflow-y-auto space-y-1 pr-1">
+                                                                                {labelerGroups.map(group => {
+                                                                                    const allSent = group.memos.every(
+                                                                                        m => m.raRequestedAt || m.raStatus === 'requested' || m.raStatus === 'received' || m.raStatus === 'shipped'
+                                                                                    );
+                                                                                    const isSending = raSendingGroup === group.labelerId;
+                                                                                    const sentCount = group.memos.filter(
+                                                                                        m => m.raRequestedAt || m.raStatus === 'requested' || m.raStatus === 'received' || m.raStatus === 'shipped'
+                                                                                    ).length;
+                                                                                    return (
+                                                                                        <div key={group.labelerId} className={`flex items-center justify-between rounded px-2.5 py-1.5 text-[11px] border ${allSent ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'}`}>
+                                                                                            <div className="flex items-center gap-2 min-w-0">
+                                                                                                {allSent ? (
+                                                                                                    <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                                                                                                ) : (
+                                                                                                    <Mail className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                                                                                                )}
+                                                                                                <span className="font-semibold text-gray-900">{group.labelerName}</span>
+                                                                                                <span className="text-gray-400">
+                                                                                                    {group.memos.length} memo{group.memos.length !== 1 ? 's' : ''}
+                                                                                                    {sentCount > 0 && !allSent && ` · ${sentCount} sent`}
                                                                                                 </span>
-                                                                                            ) : (
-                                                                                                <button
-                                                                                                    onClick={() => handleSendRA(m)}
-                                                                                                    disabled={isSending || raActionLoading}
-                                                                                                    className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors font-medium"
-                                                                                                >
-                                                                                                    {isSending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
-                                                                                                    Send RA
-                                                                                                </button>
-                                                                                            )}
+                                                                                            </div>
+                                                                                            <div className="flex-shrink-0">
+                                                                                                {allSent ? (
+                                                                                                    <span className="text-[10px] font-medium text-green-600 bg-green-100 px-1.5 py-0.5 rounded">RA Sent</span>
+                                                                                                ) : (
+                                                                                                    <button
+                                                                                                        onClick={() => handleSendRAForGroup(group.labelerId, group.labelerName, group.memos)}
+                                                                                                        disabled={isSending || !!raSendingGroup}
+                                                                                                        className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors font-medium"
+                                                                                                    >
+                                                                                                        {isSending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+                                                                                                        Send RA
+                                                                                                    </button>
+                                                                                                )}
+                                                                                            </div>
                                                                                         </div>
-                                                                                    </div>
-                                                                                );
-                                                                            })}
+                                                                                    );
+                                                                                })}
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                ) : (
+                                                                    );
+                                                                })() : (
                                                                     <p className="text-[11px] text-gray-500">No debit memos to send RA requests for.</p>
                                                                 )}
                                                                 {(() => {
