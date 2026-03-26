@@ -68,6 +68,17 @@ export default function QrScannerModal({ onScan, onClose }: QrScannerModalProps)
         let cancelled = false;
         scannedRef.current = false;
 
+        // Stop camera immediately when the page hides (navigation, logout, tab switch).
+        // This prevents "RenderedCameraImpl video surface onabort()" console errors
+        // that appear when the browser navigates while a live MediaStream is attached.
+        const handleHide = () => {
+            cancelled = true;
+            stopNative();
+            stopFallback();
+        };
+        document.addEventListener('visibilitychange', handleHide);
+        window.addEventListener('pagehide', handleHide);
+
         const start = async () => {
             try {
                 if (hasBarcodeDetector) {
@@ -166,6 +177,8 @@ export default function QrScannerModal({ onScan, onClose }: QrScannerModalProps)
 
         return () => {
             cancelled = true;
+            document.removeEventListener('visibilitychange', handleHide);
+            window.removeEventListener('pagehide', handleHide);
             stopNative();
             stopFallback();
         };
