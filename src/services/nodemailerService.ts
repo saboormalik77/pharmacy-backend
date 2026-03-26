@@ -14,7 +14,7 @@ const SMTP_USER = process.env.SMTP_USER || '';
 const SMTP_PASS = process.env.SMTP_PASS || '';
 const SMTP_FROM_EMAIL = process.env.SMTP_FROM_EMAIL || process.env.FROM_EMAIL || '';
 const SMTP_FROM_NAME = process.env.SMTP_FROM_NAME || process.env.CONTACT_NAME || 'Returns Department';
-const REPLY_TO = process.env.REPLY_TO_EMAIL || '';
+const REPLY_TO = process.env.SMTP_USER || process.env.REPLY_TO_EMAIL || '';
 
 let transporter: Transporter<SMTPTransport.SentMessageInfo> | null = null;
 

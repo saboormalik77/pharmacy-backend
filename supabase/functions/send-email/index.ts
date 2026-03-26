@@ -2,6 +2,7 @@
 // Uses nodemailer via npm: specifier for Deno runtime.
 // Deploy:  supabase functions deploy send-email --no-verify-jwt
 // Secrets: supabase secrets set SMTP_HOST=... SMTP_PORT=587 SMTP_USER=... SMTP_PASS=... SMTP_FROM_EMAIL=... SMTP_FROM_NAME="Returns Department" REPLY_TO_EMAIL=...
+// Note: SMTP_USER is used as the primary reply-to address, falling back to REPLY_TO_EMAIL
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { corsHeaders } from '../_shared/cors.ts';
@@ -232,7 +233,7 @@ serve(async (req: Request) => {
 
     const fromEmail = getEnv('SMTP_FROM_EMAIL', getEnv('FROM_EMAIL'));
     const fromName = getEnv('SMTP_FROM_NAME', getEnv('CONTACT_NAME', 'Returns Department'));
-    const replyTo = payload.replyTo || getEnv('REPLY_TO_EMAIL');
+    const replyTo = payload.replyTo || getEnv('SMTP_USER') || getEnv('REPLY_TO_EMAIL');
     const transporter = buildTransporter();
 
     let subject = payload.subject || '';

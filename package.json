@@ -14,7 +14,10 @@
     "email:deploy-functions": "supabase functions deploy send-ra-email && supabase functions deploy send-ra-email-enhanced && supabase functions deploy resend-webhook",
     "email:test": "curl -X POST \"http://localhost:3000/api/admin/emails/test\" -H \"Content-Type: application/json\" -d '{\"to\":\"test@example.com\",\"templateType\":\"ra-request\"}'",
     "email:stats": "curl -X GET \"http://localhost:3000/api/admin/emails/stats\"",
-    "email:health": "curl -X GET \"http://localhost:3000/api/admin/emails/health\""
+    "email:health": "curl -X GET \"http://localhost:3000/api/admin/emails/health\"",
+    "email-monitor:10s": "ts-node src/scripts/emailMonitor10s.ts",
+    "email:check-once": "curl -X POST \"https://mxdzmfgkjktbvjeonwiq.supabase.co/functions/v1/read-ra-emails\" -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im14ZHptZmdramt0YnZqZW9ud2lxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MzU0MTMwMSwiZXhwIjoyMDc5MTE3MzAxfQ.JoQDOPgEN0J81ZiS55wa-hbTev9LVM0vPvLqFtEhQ7A\" -H \"Content-Type: application/json\" -d '{\"maxEmails\": 50, \"markAsRead\": true}'",
+    "email:test-only": "curl -X POST \"https://mxdzmfgkjktbvjeonwiq.supabase.co/functions/v1/read-ra-emails\" -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im14ZHptZmdramt0YnZqZW9ud2lxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MzU0MTMwMSwiZXhwIjoyMDc5MTE3MzAxfQ.JoQDOPgEN0J81ZiS55wa-hbTev9LVM0vPvLqFtEhQ7A\" -H \"Content-Type: application/json\" -d '{\"maxEmails\": 10, \"markAsRead\": false}'"
   },
   "keywords": [],
   "author": "",
