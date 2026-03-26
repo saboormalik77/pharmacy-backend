@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import {
     ArrowLeft, Loader2, AlertCircle, Layers, Lock, Send,
     Plus, ChevronDown, ChevronUp, Package,
     CheckCircle, X, Search, ExternalLink, Trash2, UserX,
+    Download, Upload, FileText, GitPullRequest, ChevronRight, Mail,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -16,9 +17,11 @@ import {
     fetchBatchDetail, assignReturnsToBatch, closeBatch, submitCardinal,
     deleteBatch, unassignReturnsFromBatch, getBatchPermissions,
     clearCurrentBatch, clearError,
+    fetchBatchWorkflow, completeBatchWorkflowStep, generateBatchMemos,
 } from '@/lib/store/batchSlice';
+import { sendRARequest } from '@/lib/store/raTrackingSlice';
 import { fetchReceivedReturns } from '@/lib/store/warehouseSlice';
-import { ReturnTransaction } from '@/lib/types';
+import { ReturnTransaction, DebitMemo } from '@/lib/types';
 
 function formatCurrency(v: number) {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(v);
@@ -37,6 +40,45 @@ function getStatusBadge(status: string): { label: string; variant: 'success' | '
     }
 }
 
+// ── Stepper step definitions ──────────────────────────────────
+
+const WORKFLOW_STEPS = [
+    {
+        key: 'cardinal_generated',
+        stateKey: 'cardinalGenerated' as const,
+        label: 'Generate Cardinal',
+        description: 'Download the Cardinal CSV file for this batch.',
+        icon: Download,
+        color: 'blue',
+    },
+    {
+        key: 'cardinal_sent',
+        stateKey: 'cardinalSent' as const,
+        label: 'Send Cardinal',
+        description: 'Upload and send the Cardinal file.',
+        icon: Upload,
+        color: 'purple',
+    },
+    {
+        key: 'debit_memos_created',
+        stateKey: 'debitMemosCreated' as const,
+        label: 'Create Debit Memos',
+        description: 'Review and confirm debit memos generated for this batch.',
+        icon: FileText,
+        color: 'orange',
+    },
+    {
+        key: 'ra_requested',
+        stateKey: 'raRequested' as const,
+        label: 'Request RA',
+        description: 'Submit Return Authorization requests for all debit memos.',
+        icon: GitPullRequest,
+        color: 'green',
+    },
+] as const;
+
+type WorkflowStepKey = typeof WORKFLOW_STEPS[number]['stateKey'];
+
 export default function BatchDetailPage() {
     const params = useParams();
     const router = useRouter();
@@ -47,12 +89,15 @@ export default function BatchDetailPage() {
     const {
         currentBatch: batch,
         batchReturns,
+        batchMemos,
         isLoading,
         isActionLoading,
+        workflowState,
         error,
     } = useAppSelector(s => s.batch);
 
     const { receivedReturns } = useAppSelector(s => s.warehouse);
+    const raActionLoading = useAppSelector(s => s.raTracking.isActionLoading);
 
     const [toasts, setToasts] = useState<Toast[]>([]);
     const [showAssign, setShowAssign] = useState(false);
@@ -60,11 +105,19 @@ export default function BatchDetailPage() {
     const [showSubmit, setShowSubmit] = useState(false);
     const [showDelete, setShowDelete] = useState(false);
     const [showUnassign, setShowUnassign] = useState(false);
+    const [showStepper, setShowStepper] = useState(false);
     const [selectedUnassignIds, setSelectedUnassignIds] = useState<string[]>([]);
     const [batchPermissions, setBatchPermissions] = useState<any>(null);
     const [selectedReturnIds, setSelectedReturnIds] = useState<string[]>([]);
     const [assignSearch, setAssignSearch] = useState('');
     const [returnsExpanded, setReturnsExpanded] = useState(true);
+
+    // Cardinal send step — file upload state
+    const [cardinalFile, setCardinalFile] = useState<File | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // RA request step — track which memos are being sent
+    const [raSendingId, setRaSendingId] = useState<string | null>(null);
 
     const addToast = useCallback((msg: string, type: Toast['type']) => {
         setToasts(prev => [...prev, { id: Date.now().toString(), message: msg, type }]);
@@ -79,6 +132,13 @@ export default function BatchDetailPage() {
         });
         return () => { dispatch(clearCurrentBatch()); };
     }, [dispatch, batchId]);
+
+    // Load workflow state whenever batch is closed/submitted
+    useEffect(() => {
+        if (batch && (batch.status === 'closed' || batch.status === 'submitted')) {
+            dispatch(fetchBatchWorkflow(batchId));
+        }
+    }, [dispatch, batchId, batch?.status]);
 
     // Auto-open Close Batch modal when navigated via ?action=closeout
     useEffect(() => {
@@ -111,9 +171,12 @@ export default function BatchDetailPage() {
     const handleClose = async () => {
         const result = await dispatch(closeBatch(batchId));
         if (closeBatch.fulfilled.match(result)) {
-            addToast(`Batch closed. ${result.payload.memosGenerated} debit memo(s) generated.`, 'success');
+            addToast('Batch closed. Use the workflow stepper to create debit memos.', 'success');
             setShowClose(false);
             dispatch(fetchBatchDetail(batchId));
+            // Fetch workflow state then auto-open the stepper
+            await dispatch(fetchBatchWorkflow(batchId));
+            setShowStepper(true);
         }
     };
 
@@ -165,7 +228,6 @@ export default function BatchDetailPage() {
     };
 
     const filteredReceived = receivedReturns.filter(r => {
-        // Exclude returns already assigned to any batch
         if (r.batchId) return false;
         if (!assignSearch) return true;
         const s = assignSearch.toLowerCase();
@@ -175,6 +237,112 @@ export default function BatchDetailPage() {
             r.fedexTracking?.toLowerCase().includes(s)
         );
     });
+
+    // ── Workflow / stepper helpers ────────────────────────────
+
+    const openStepper = () => {
+        dispatch(fetchBatchWorkflow(batchId));
+        setShowStepper(true);
+    };
+
+    const handleCompleteStep = async (stepKey: string) => {
+        const result = await dispatch(completeBatchWorkflowStep({ batchId, step: stepKey }));
+        if (completeBatchWorkflowStep.rejected.match(result)) {
+            addToast(result.payload as string || 'Failed to save step', 'error');
+        }
+    };
+
+    // Step 1: Generate Cardinal — build a placeholder CSV from batch returns and download it
+    const handleGenerateCardinal = async () => {
+        if (!batch) return;
+
+        const rows: string[] = [
+            'License Plate,Pharmacy,Items,Returnable Value,Non-Returnable Value,Status',
+            ...batchReturns.map(r =>
+                [
+                    r.licensePlate || '',
+                    (r.pharmacyName || '').replace(/,/g, ' '),
+                    r.totalItems ?? 0,
+                    r.totalReturnableValue ?? 0,
+                    r.totalNonReturnableValue ?? 0,
+                    r.status || '',
+                ].join(',')
+            ),
+        ];
+        const csv = rows.join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `cardinal_${batch.batchName.replace(/\s+/g, '_')}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        await handleCompleteStep('cardinal_generated');
+        addToast('Cardinal file downloaded and step saved.', 'success');
+    };
+
+    // Step 2: Send Cardinal — mark file as sent
+    const handleSendCardinal = async () => {
+        if (!cardinalFile) {
+            addToast('Please select a file first', 'warning');
+            return;
+        }
+        await handleCompleteStep('cardinal_sent');
+        setCardinalFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        addToast('Cardinal file marked as sent.', 'success');
+    };
+
+    // Step 3: Generate debit memos then refresh batch (so memos list appears)
+    const handleCreateDebitMemos = async () => {
+        const result = await dispatch(generateBatchMemos(batchId));
+        if (generateBatchMemos.fulfilled.match(result)) {
+            addToast(`${result.payload.memosGenerated} debit memo(s) created.`, 'success');
+            dispatch(fetchBatchDetail(batchId));
+        } else {
+            addToast((result.payload as string) || 'Failed to create debit memos', 'error');
+        }
+    };
+
+    // Step 3: Confirm debit memos — stay in modal, advance to Step 4
+    const handleConfirmDebitMemos = async () => {
+        await handleCompleteStep('debit_memos_created');
+        addToast('Debit memos confirmed. Proceed to Request RA.', 'success');
+    };
+
+    // Step 4: Send RA request for a single memo
+    const handleSendRA = async (memo: DebitMemo) => {
+        setRaSendingId(memo.id);
+        const result = await dispatch(sendRARequest({ memoId: memo.id }));
+        setRaSendingId(null);
+        if (sendRARequest.fulfilled.match(result)) {
+            addToast(`RA request sent for ${memo.memoNumber}`, 'success');
+            dispatch(fetchBatchDetail(batchId));
+        } else {
+            addToast((result.payload as string) || 'Failed to send RA request', 'error');
+        }
+    };
+
+    // Step 4: Mark RA step as complete
+    const handleCompleteRAStep = async () => {
+        await handleCompleteStep('ra_requested');
+        addToast('RA request step completed.', 'success');
+    };
+
+    // Which step is currently active (first incomplete step)
+    const getActiveStepIndex = () => {
+        if (!workflowState) return 0;
+        for (let i = 0; i < WORKFLOW_STEPS.length; i++) {
+            if (!workflowState[WORKFLOW_STEPS[i].stateKey]) return i;
+        }
+        return WORKFLOW_STEPS.length; // all done
+    };
+
+    const activeStepIndex = getActiveStepIndex();
+    const allDone = workflowState !== null && activeStepIndex === WORKFLOW_STEPS.length;
+
+    // ─────────────────────────────────────────────────────────
 
     if (isLoading && !batch) {
         return (
@@ -237,9 +405,13 @@ export default function BatchDetailPage() {
                             )}
                         </>
                     )}
-                    {batch.status === 'closed' && !batch.cardinalSubmittedAt && (
-                        <button onClick={() => setShowSubmit(true)} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium bg-green-600 text-white hover:bg-green-700 transition-colors">
-                            <Send className="w-3.5 h-3.5" /> Mark Cardinal Submitted
+                    {(batch.status === 'closed' || batch.status === 'submitted') && (
+                        <button
+                            onClick={openStepper}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                        >
+                            <Layers className="w-3.5 h-3.5" />
+                            {allDone ? 'View Workflow' : 'Continue Workflow'}
                         </button>
                     )}
                 </div>
@@ -358,6 +530,313 @@ export default function BatchDetailPage() {
                     </div>
                 )}
             </div>
+
+            {/* ── Workflow Stepper Modal ──────────────────────────────── */}
+            {showStepper && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
+                        {/* Modal header */}
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
+                            <div>
+                                <h2 className="text-sm font-bold text-gray-900">Post-Closeout Workflow</h2>
+                                <p className="text-[11px] text-gray-500 mt-0.5">{batch.batchName} · {formatBatchMonth(batch.batchMonth)}</p>
+                            </div>
+                            <button onClick={() => setShowStepper(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        {/* Progress bar */}
+                        <div className="px-5 pt-4 pb-2">
+                            <div className="flex items-center gap-0">
+                                {WORKFLOW_STEPS.map((step, idx) => {
+                                    const done = workflowState?.[step.stateKey] ?? false;
+                                    const isLast = idx === WORKFLOW_STEPS.length - 1;
+                                    return (
+                                        <div key={step.key} className="flex items-center flex-1">
+                                            {/* Circle */}
+                                            <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold border-2 transition-colors ${
+                                                done
+                                                    ? 'bg-green-500 border-green-500 text-white'
+                                                    : idx === activeStepIndex
+                                                        ? 'bg-blue-600 border-blue-600 text-white'
+                                                        : 'bg-white border-gray-300 text-gray-400'
+                                            }`}>
+                                                {done ? <CheckCircle className="w-3.5 h-3.5" /> : idx + 1}
+                                            </div>
+                                            {/* Connector line */}
+                                            {!isLast && (
+                                                <div className={`flex-1 h-0.5 mx-1 transition-colors ${done ? 'bg-green-400' : 'bg-gray-200'}`} />
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <div className="flex justify-between mt-1">
+                                {WORKFLOW_STEPS.map((step) => (
+                                    <span key={step.key} className="text-[9px] text-gray-500 text-center flex-1">{step.label}</span>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Steps list */}
+                        <div className="overflow-y-auto flex-1 px-5 py-3 space-y-3">
+                            {WORKFLOW_STEPS.map((step, idx) => {
+                                const done = workflowState?.[step.stateKey] ?? false;
+                                const isActive = idx === activeStepIndex;
+                                const isLocked = idx > activeStepIndex;
+                                const Icon = step.icon;
+
+                                return (
+                                    <div
+                                        key={step.key}
+                                        className={`rounded-lg border-2 p-3.5 transition-all ${
+                                            done
+                                                ? 'border-green-200 bg-green-50'
+                                                : isActive
+                                                    ? 'border-blue-300 bg-blue-50'
+                                                    : 'border-gray-200 bg-gray-50 opacity-60'
+                                        }`}
+                                    >
+                                        <div className="flex items-start gap-3">
+                                            {/* Step icon */}
+                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                                                done
+                                                    ? 'bg-green-500'
+                                                    : isActive
+                                                        ? 'bg-blue-600'
+                                                        : 'bg-gray-300'
+                                            }`}>
+                                                {done
+                                                    ? <CheckCircle className="w-4 h-4 text-white" />
+                                                    : <Icon className="w-4 h-4 text-white" />
+                                                }
+                                            </div>
+
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2 mb-0.5">
+                                                    <p className="text-xs font-semibold text-gray-900">{step.label}</p>
+                                                    {done && <span className="text-[10px] font-medium text-green-600 bg-green-100 px-1.5 py-0.5 rounded">Done</span>}
+                                                    {isLocked && !done && <span className="text-[10px] text-gray-400">Locked</span>}
+                                                </div>
+                                                <p className="text-[11px] text-gray-500">{step.description}</p>
+
+                                                {/* Step actions — only shown when active */}
+                                                {isActive && !done && (
+                                                    <div className="mt-2.5">
+                                                        {/* Step 1: Generate Cardinal */}
+                                                        {step.key === 'cardinal_generated' && (
+                                                            <button
+                                                                onClick={handleGenerateCardinal}
+                                                                disabled={isActionLoading}
+                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors font-medium"
+                                                            >
+                                                                {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+                                                                Download Cardinal CSV
+                                                            </button>
+                                                        )}
+
+                                                        {/* Step 2: Send Cardinal */}
+                                                        {step.key === 'cardinal_sent' && (
+                                                            <div className="space-y-2">
+                                                                <div
+                                                                    onClick={() => fileInputRef.current?.click()}
+                                                                    className="flex items-center gap-2 px-3 py-2 border-2 border-dashed border-blue-300 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors"
+                                                                >
+                                                                    <Upload className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
+                                                                    <span className="text-[11px] text-blue-600 truncate">
+                                                                        {cardinalFile ? cardinalFile.name : 'Click to select file'}
+                                                                    </span>
+                                                                    <input
+                                                                        ref={fileInputRef}
+                                                                        type="file"
+                                                                        className="hidden"
+                                                                        onChange={e => setCardinalFile(e.target.files?.[0] || null)}
+                                                                    />
+                                                                </div>
+                                                                <button
+                                                                    onClick={handleSendCardinal}
+                                                                    disabled={isActionLoading || !cardinalFile}
+                                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 transition-colors font-medium"
+                                                                >
+                                                                    {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                                                                    Mark as Sent
+                                                                </button>
+                                                            </div>
+                                                        )}
+
+                                                        {/* Step 3: Create Debit Memos */}
+                                                        {step.key === 'debit_memos_created' && (
+                                                            <div className="space-y-2.5">
+                                                                {batchMemos.length === 0 ? (
+                                                                    /* Phase 1: no memos yet — show create button */
+                                                                    <div className="space-y-1.5">
+                                                                        <p className="text-[11px] text-gray-500">
+                                                                            No debit memos created yet. Click below to generate them grouped by pharmacy, destination and labeler.
+                                                                        </p>
+                                                                        <button
+                                                                            onClick={handleCreateDebitMemos}
+                                                                            disabled={isActionLoading}
+                                                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50 transition-colors font-medium"
+                                                                        >
+                                                                            {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
+                                                                            Create Debit Memos
+                                                                        </button>
+                                                                    </div>
+                                                                ) : (
+                                                                    /* Phase 2: memos exist — review and confirm */
+                                                                    <div className="space-y-2">
+                                                                        <p className="text-[11px] text-gray-600">
+                                                                            <span className="font-semibold text-orange-600">{batchMemos.length}</span> debit memo{batchMemos.length !== 1 ? 's' : ''} created for this batch:
+                                                                        </p>
+                                                                        <div className="max-h-36 overflow-y-auto space-y-1 pr-1">
+                                                                            {batchMemos.map(m => (
+                                                                                <div key={m.id} className="flex items-center justify-between bg-white border border-gray-200 rounded px-2.5 py-1.5 text-[11px]">
+                                                                                    <div className="flex items-center gap-2 min-w-0">
+                                                                                        <span className="font-semibold text-gray-900">{m.memoNumber}</span>
+                                                                                        <span className="text-gray-500 truncate">{m.pharmacyName}</span>
+                                                                                    </div>
+                                                                                    <div className="flex items-center gap-2 flex-shrink-0">
+                                                                                        <span className="text-gray-500">{m.destination || '—'}</span>
+                                                                                        <span className="font-medium text-green-700">{formatCurrency(m.totalAskValue)}</span>
+                                                                                    </div>
+                                                                                </div>
+                                                                            ))}
+                                                                        </div>
+                                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                                            <button
+                                                                                onClick={handleConfirmDebitMemos}
+                                                                                disabled={isActionLoading}
+                                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50 transition-colors font-medium"
+                                                                            >
+                                                                                {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                                                                                Confirm &amp; Next Step
+                                                                            </button>
+                                                                            <a
+                                                                                href={`/warehouse/debit-memos?batchId=${batchId}`}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                className="inline-flex items-center gap-1 text-[11px] text-orange-600 hover:underline"
+                                                                            >
+                                                                                View Details <ExternalLink className="w-3 h-3" />
+                                                                            </a>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        )}
+
+                                                        {/* Step 4: Request RA */}
+                                                        {step.key === 'ra_requested' && (
+                                                            <div className="space-y-2.5">
+                                                                {/* Debit memos with RA send buttons */}
+                                                                {batchMemos.length > 0 ? (
+                                                                    <div className="space-y-1.5">
+                                                                        <p className="text-[11px] text-gray-600">
+                                                                            Send RA requests for each debit memo:
+                                                                        </p>
+                                                                        <div className="max-h-48 overflow-y-auto space-y-1 pr-1">
+                                                                            {batchMemos.map(m => {
+                                                                                const raSent = m.raRequestedAt || m.raStatus === 'requested' || m.raStatus === 'received' || m.raStatus === 'shipped';
+                                                                                const isSending = raSendingId === m.id;
+                                                                                return (
+                                                                                    <div key={m.id} className={`flex items-center justify-between rounded px-2.5 py-1.5 text-[11px] border ${raSent ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'}`}>
+                                                                                        <div className="flex items-center gap-2 min-w-0">
+                                                                                            {raSent ? (
+                                                                                                <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                                                                                            ) : (
+                                                                                                <Mail className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                                                                                            )}
+                                                                                            <span className="font-semibold text-gray-900">{m.memoNumber}</span>
+                                                                                            <span className="text-gray-500 truncate">{m.labelerName || m.pharmacyName}</span>
+                                                                                        </div>
+                                                                                        <div className="flex items-center gap-2 flex-shrink-0">
+                                                                                            {raSent ? (
+                                                                                                <span className="text-[10px] font-medium text-green-600 bg-green-100 px-1.5 py-0.5 rounded">
+                                                                                                    {m.raStatus === 'received' ? 'RA Received' : m.raStatus === 'shipped' ? 'Shipped' : 'Sent'}
+                                                                                                </span>
+                                                                                            ) : (
+                                                                                                <button
+                                                                                                    onClick={() => handleSendRA(m)}
+                                                                                                    disabled={isSending || raActionLoading}
+                                                                                                    className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors font-medium"
+                                                                                                >
+                                                                                                    {isSending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+                                                                                                    Send RA
+                                                                                                </button>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                );
+                                                                            })}
+                                                                        </div>
+                                                                    </div>
+                                                                ) : (
+                                                                    <p className="text-[11px] text-gray-500">No debit memos to send RA requests for.</p>
+                                                                )}
+                                                                {(() => {
+                                                                    const anyRaSent = batchMemos.some(
+                                                                        m => m.raRequestedAt || m.raStatus === 'requested' || m.raStatus === 'received' || m.raStatus === 'shipped'
+                                                                    );
+                                                                    return (
+                                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                                            <button
+                                                                                onClick={handleCompleteRAStep}
+                                                                                disabled={isActionLoading || !anyRaSent}
+                                                                                title={!anyRaSent ? 'Send at least one RA request before completing this step' : undefined}
+                                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                                                                            >
+                                                                                {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                                                                                Complete Step
+                                                                            </button>
+                                                                            {!anyRaSent && (
+                                                                                <span className="text-[10px] text-amber-600">
+                                                                                    Send at least one RA request to enable
+                                                                                </span>
+                                                                            )}
+                                                                            <a
+                                                                                href="/warehouse/ra-tracking"
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                className="inline-flex items-center gap-1 text-[11px] text-green-700 hover:underline"
+                                                                            >
+                                                                                Open RA Tracking <ExternalLink className="w-3 h-3" />
+                                                                            </a>
+                                                                        </div>
+                                                                    );
+                                                                })()}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Modal footer */}
+                        <div className="px-5 py-3 border-t border-gray-200 flex items-center justify-between">
+                            {allDone ? (
+                                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-green-700">
+                                    <CheckCircle className="w-4 h-4 text-green-500" /> All steps completed
+                                </span>
+                            ) : (
+                                <span className="text-[11px] text-gray-500">
+                                    Step {Math.min(activeStepIndex + 1, WORKFLOW_STEPS.length)} of {WORKFLOW_STEPS.length}
+                                </span>
+                            )}
+                            <button
+                                onClick={() => setShowStepper(false)}
+                                className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* ── Assign Returns Modal ──────────────────────────────── */}
             {showAssign && (
@@ -499,7 +978,7 @@ export default function BatchDetailPage() {
                             </div>
                         </div>
                         <p className="text-xs text-gray-600 mb-3">
-                            Are you sure you want to delete batch <strong>{batch.batchName}</strong>? 
+                            Are you sure you want to delete batch <strong>{batch.batchName}</strong>?
                             {batch.totalReturns > 0 && ` All ${batch.totalReturns} assigned return(s) will be unassigned.`}
                         </p>
                         <div className="flex justify-end gap-2">
@@ -566,8 +1045,8 @@ export default function BatchDetailPage() {
                                     <button onClick={() => setShowUnassign(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
                                         Cancel
                                     </button>
-                                    <button 
-                                        onClick={handleUnassignReturns} 
+                                    <button
+                                        onClick={handleUnassignReturns}
                                         disabled={isActionLoading || selectedUnassignIds.length === 0}
                                         className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-orange-600 text-white hover:bg-orange-700 disabled:opacity-50 transition-colors"
                                     >

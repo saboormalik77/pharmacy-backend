@@ -209,29 +209,67 @@ CREATE TRIGGER prevent_locked_return_updates_trigger
   FOR EACH ROW EXECUTE FUNCTION prevent_locked_return_updates();
 
 -- Trigger function to prevent item updates on locked returns
+-- Allows: classification fields, warehouse verification fields (verified,
+-- actual_quantity, condition_notes), wine_cellar_id.
+-- Blocks: core immutable product data (ndc, lot, price, qty, etc.)
 CREATE OR REPLACE FUNCTION prevent_locked_return_item_updates()
 RETURNS trigger LANGUAGE plpgsql AS $$
 DECLARE
   v_return_status TEXT;
 BEGIN
-  -- Get the return transaction status
-  SELECT status INTO v_return_status 
-  FROM return_transactions 
+  SELECT status INTO v_return_status
+  FROM return_transactions
   WHERE id = COALESCE(NEW.transaction_id, OLD.transaction_id);
-  
-  -- Block modifications on locked returns
-  IF is_return_transaction_locked(v_return_status) THEN
-    RAISE EXCEPTION 'Cannot modify items on return with status "%". Return is locked after finalization.', v_return_status;
+
+  -- Not locked — allow everything
+  IF NOT is_return_transaction_locked(v_return_status) THEN
+    RETURN COALESCE(NEW, OLD);
   END IF;
-  
-  RETURN COALESCE(NEW, OLD);
+
+  IF TG_OP = 'INSERT' THEN
+    RAISE EXCEPTION 'Cannot add items to a "%" return. Return is locked.', v_return_status;
+  END IF;
+
+  IF TG_OP = 'DELETE' THEN
+    RAISE EXCEPTION 'Cannot delete items on a "%" return. Return is locked.', v_return_status;
+  END IF;
+
+  -- UPDATE: block only core immutable product data fields
+  IF OLD.ndc                   IS DISTINCT FROM NEW.ndc
+  OR OLD.ndc_10                IS DISTINCT FROM NEW.ndc_10
+  OR OLD.proprietary_name      IS DISTINCT FROM NEW.proprietary_name
+  OR OLD.generic_name          IS DISTINCT FROM NEW.generic_name
+  OR OLD.manufacturer          IS DISTINCT FROM NEW.manufacturer
+  OR OLD.package_description   IS DISTINCT FROM NEW.package_description
+  OR OLD.dosage_form           IS DISTINCT FROM NEW.dosage_form
+  OR OLD.strength              IS DISTINCT FROM NEW.strength
+  OR OLD.route                 IS DISTINCT FROM NEW.route
+  OR OLD.lot_number            IS DISTINCT FROM NEW.lot_number
+  OR OLD.serial_number         IS DISTINCT FROM NEW.serial_number
+  OR OLD.expiration_date       IS DISTINCT FROM NEW.expiration_date
+  OR OLD.standard_price        IS DISTINCT FROM NEW.standard_price
+  OR OLD.quantity              IS DISTINCT FROM NEW.quantity
+  OR OLD.full_package_size     IS DISTINCT FROM NEW.full_package_size
+  OR OLD.is_partial            IS DISTINCT FROM NEW.is_partial
+  OR OLD.partial_percentage    IS DISTINCT FROM NEW.partial_percentage
+  OR OLD.estimated_value       IS DISTINCT FROM NEW.estimated_value
+  OR OLD.dea_schedule          IS DISTINCT FROM NEW.dea_schedule
+  OR OLD.dea_form_222_required IS DISTINCT FROM NEW.dea_form_222_required
+  OR OLD.product_type          IS DISTINCT FROM NEW.product_type THEN
+    RAISE EXCEPTION
+      'Cannot modify core item data on a "%" return. '
+      'Only classification and warehouse verification fields can be updated.',
+      v_return_status;
+  END IF;
+
+  RETURN NEW;
 END;
 $$;
 
--- Apply trigger to return_transaction_items
+-- Apply trigger to return_transaction_items (covers INSERT too)
 DROP TRIGGER IF EXISTS prevent_locked_return_item_updates_trigger ON return_transaction_items;
 CREATE TRIGGER prevent_locked_return_item_updates_trigger
-  BEFORE UPDATE OR DELETE ON return_transaction_items
+  BEFORE INSERT OR UPDATE OR DELETE ON return_transaction_items
   FOR EACH ROW EXECUTE FUNCTION prevent_locked_return_item_updates();
 
 -- ────────────────────────────────────────────────────────────
@@ -245,6 +283,7 @@ RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER AS $$
 DECLARE
   v_return_status TEXT;
   v_result JSONB;
+  v_merged_data JSONB;
 BEGIN
   -- Check if return is locked
   SELECT status INTO v_return_status FROM return_transactions WHERE id = p_transaction_id;
@@ -258,8 +297,9 @@ BEGIN
       'message', format('Cannot add items to return with status "%s". Return is locked after finalization.', v_return_status));
   END IF;
   
-  -- Call the existing add function
-  SELECT add_return_transaction_item(p_transaction_id, p_item_data) INTO v_result;
+  -- Inject transactionId into the item data and call original single-arg function
+  v_merged_data := p_item_data || jsonb_build_object('transactionId', p_transaction_id::text);
+  SELECT add_return_transaction_item(v_merged_data) INTO v_result;
   RETURN v_result;
 END;
 $$;

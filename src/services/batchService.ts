@@ -137,7 +137,18 @@ export const closeBatch = async (
   const sb = ensureAdmin();
   const { data, error } = await sb.rpc('close_batch', { p_batch_id: batchId });
   handleRpcError(data, error, 'Failed to close batch');
-  return { batch: data.data as ReturnBatch, memosGenerated: data.memosGenerated };
+  return { batch: data.data as ReturnBatch, memosGenerated: data.memosGenerated ?? 0 };
+};
+
+export const generateBatchMemos = async (
+  batchId: string
+): Promise<{ batch: ReturnBatch; memosGenerated: number }> => {
+  const sb = ensureAdmin();
+  const { data, error } = await sb.rpc('generate_debit_memos_for_batch', {
+    p_batch_id: batchId,
+  });
+  handleRpcError(data, error, 'Failed to generate debit memos');
+  return { batch: data.data as ReturnBatch, memosGenerated: data.memosGenerated as number };
 };
 
 export const submitCardinal = async (
@@ -227,6 +238,72 @@ export const getBatchPermissions = async (
   return data.data as BatchPermissions;
 };
 
+
+// ============================================================
+// Batch workflow operations (FCR-36)
+// ============================================================
+
+export type WorkflowStepKey =
+  | 'cardinal_generated'
+  | 'cardinal_sent'
+  | 'debit_memos_created'
+  | 'ra_requested';
+
+export interface BatchWorkflowState {
+  cardinalGenerated: boolean;
+  cardinalSent: boolean;
+  debitMemosCreated: boolean;
+  raRequested: boolean;
+}
+
+const VALID_WORKFLOW_STEPS: WorkflowStepKey[] = [
+  'cardinal_generated',
+  'cardinal_sent',
+  'debit_memos_created',
+  'ra_requested',
+];
+
+export const getBatchWorkflow = async (
+  batchId: string
+): Promise<BatchWorkflowState> => {
+  const sb = ensureAdmin();
+  const { data, error } = await sb
+    .from('batch_workflow_steps')
+    .select('step_key')
+    .eq('batch_id', batchId);
+
+  if (error) throw new AppError(`Failed to get workflow: ${error.message}`, 400);
+
+  const done = new Set((data || []).map((r: { step_key: string }) => r.step_key));
+  return {
+    cardinalGenerated: done.has('cardinal_generated'),
+    cardinalSent: done.has('cardinal_sent'),
+    debitMemosCreated: done.has('debit_memos_created'),
+    raRequested: done.has('ra_requested'),
+  };
+};
+
+export const completeBatchWorkflowStep = async (
+  batchId: string,
+  stepKey: string,
+  metadata?: Record<string, unknown>
+): Promise<BatchWorkflowState> => {
+  if (!VALID_WORKFLOW_STEPS.includes(stepKey as WorkflowStepKey)) {
+    throw new AppError(`Invalid step key: ${stepKey}`, 400);
+  }
+
+  const sb = ensureAdmin();
+  const { error } = await sb
+    .from('batch_workflow_steps')
+    .upsert(
+      { batch_id: batchId, step_key: stepKey, metadata: metadata || {} },
+      { onConflict: 'batch_id,step_key' }
+    );
+
+  if (error) throw new AppError(`Failed to complete step: ${error.message}`, 400);
+
+  return getBatchWorkflow(batchId);
+};
 
 // ============================================================
 // Debit memo operations

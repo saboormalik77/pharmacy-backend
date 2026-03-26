@@ -72,7 +72,7 @@ export const assignReturnsToBatchHandler = catchAsync(
 );
 
 // ============================================================
-// POST /api/admin/batches/:id/close — Close batch
+// POST /api/admin/batches/:id/close — Close batch (no memos, Step 3 generates them)
 // ============================================================
 export const closeBatchHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
@@ -80,7 +80,23 @@ export const closeBatchHandler = catchAsync(
 
     res.status(200).json({
       status: 'success',
-      message: `Batch closed. ${result.memosGenerated} debit memo(s) generated.`,
+      message: 'Batch closed. Generate debit memos in Step 3 of the workflow.',
+      data: result.batch,
+      memosGenerated: 0,
+    });
+  }
+);
+
+// ============================================================
+// POST /api/admin/batches/:id/generate-memos — Generate debit memos (Step 3)
+// ============================================================
+export const generateBatchMemosHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const result = await batchService.generateBatchMemos(req.params.id);
+
+    res.status(200).json({
+      status: 'success',
+      message: `${result.memosGenerated} debit memo(s) generated.`,
       data: result.batch,
       memosGenerated: result.memosGenerated,
     });
@@ -184,6 +200,37 @@ export const getBatchPermissionsHandler = catchAsync(
     res.status(200).json({
       status: 'success',
       data: permissions,
+    });
+  }
+);
+
+// ============================================================
+// Batch Workflow Operations (FCR-36)
+// ============================================================
+
+// GET /api/admin/batches/:id/workflow — Get workflow state
+export const getBatchWorkflowHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const workflow = await batchService.getBatchWorkflow(req.params.id);
+    res.status(200).json({ status: 'success', data: workflow });
+  }
+);
+
+// POST /api/admin/batches/:id/workflow/complete — Mark a step as complete
+export const completeBatchWorkflowStepHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { step, metadata } = req.body;
+    if (!step) throw new AppError('step is required', 400);
+
+    const workflow = await batchService.completeBatchWorkflowStep(
+      req.params.id,
+      step,
+      metadata
+    );
+    res.status(200).json({
+      status: 'success',
+      message: `Step '${step}' marked as complete`,
+      data: workflow,
     });
   }
 );

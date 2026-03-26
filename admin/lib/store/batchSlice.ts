@@ -1,6 +1,15 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { ReturnBatch, ReturnTransaction, DebitMemo, DebitMemoItem } from '@/lib/types';
 
+// ── Workflow state type ───────────────────────────────────────
+
+export interface BatchWorkflowState {
+    cardinalGenerated: boolean;
+    cardinalSent: boolean;
+    debitMemosCreated: boolean;
+    raRequested: boolean;
+}
+
 // ── State ─────────────────────────────────────────────────────
 
 export interface BatchState {
@@ -13,6 +22,7 @@ export interface BatchState {
     memoPagination: { page: number; limit: number; total: number; totalPages: number } | null;
     currentMemo: DebitMemo | null;
     memoItems: DebitMemoItem[];
+    workflowState: BatchWorkflowState | null;
     isLoading: boolean;
     isActionLoading: boolean;
     error: string | null;
@@ -28,6 +38,7 @@ const initialState: BatchState = {
     memoPagination: null,
     currentMemo: null,
     memoItems: [],
+    workflowState: null,
     isLoading: false,
     isActionLoading: false,
     error: null,
@@ -241,6 +252,58 @@ export const getBatchPermissions = createAsyncThunk<
     }
 });
 
+// ── Batch workflow thunks (FCR-36) ────────────────────────────
+
+export const fetchBatchWorkflow = createAsyncThunk<
+    BatchWorkflowState,
+    string,
+    { rejectValue: string }
+>('batch/fetchWorkflow', async (batchId, { rejectWithValue }) => {
+    try {
+        const { apiClient } = await import('@/lib/api/apiClient');
+        const res = await apiClient.get<{ status: string; data: BatchWorkflowState }>(
+            `/admin/batches/${batchId}/workflow`, true
+        );
+        return res.data;
+    } catch (err: any) {
+        return rejectWithValue(err?.message || 'Failed to fetch workflow');
+    }
+});
+
+export const completeBatchWorkflowStep = createAsyncThunk<
+    BatchWorkflowState,
+    { batchId: string; step: string; metadata?: Record<string, unknown> },
+    { rejectValue: string }
+>('batch/completeWorkflowStep', async ({ batchId, step, metadata }, { rejectWithValue }) => {
+    try {
+        const { apiClient } = await import('@/lib/api/apiClient');
+        const res = await apiClient.post<{ status: string; data: BatchWorkflowState }>(
+            `/admin/batches/${batchId}/workflow/complete`,
+            { step, metadata },
+            true
+        );
+        return res.data;
+    } catch (err: any) {
+        return rejectWithValue(err?.message || 'Failed to complete workflow step');
+    }
+});
+
+export const generateBatchMemos = createAsyncThunk<
+    { batch: ReturnBatch; memosGenerated: number },
+    string,
+    { rejectValue: string }
+>('batch/generateMemos', async (batchId, { rejectWithValue }) => {
+    try {
+        const { apiClient } = await import('@/lib/api/apiClient');
+        const res = await apiClient.post<{ status: string; data: ReturnBatch; memosGenerated: number }>(
+            `/admin/batches/${batchId}/generate-memos`, {}, true
+        );
+        return { batch: res.data, memosGenerated: res.memosGenerated };
+    } catch (err: any) {
+        return rejectWithValue(err?.message || 'Failed to generate debit memos');
+    }
+});
+
 // ── Debit memo thunks ─────────────────────────────────────────
 
 export const fetchDebitMemos = createAsyncThunk<
@@ -306,8 +369,9 @@ const batchSlice = createSlice({
     initialState,
     reducers: {
         clearError: (state) => { state.error = null; },
-        clearCurrentBatch: (state) => { state.currentBatch = null; state.batchReturns = []; state.batchMemos = []; },
+        clearCurrentBatch: (state) => { state.currentBatch = null; state.batchReturns = []; state.batchMemos = []; state.workflowState = null; },
         clearCurrentMemo: (state) => { state.currentMemo = null; state.memoItems = []; },
+        clearWorkflowState: (state) => { state.workflowState = null; },
     },
     extraReducers: (builder) => {
         builder
@@ -392,12 +456,27 @@ const batchSlice = createSlice({
             .addCase(unassignSingleReturn.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
 
             .addCase(getBatchPermissions.pending, (state) => { state.error = null; })
-            .addCase(getBatchPermissions.fulfilled, (state, action) => {
+            .addCase(getBatchPermissions.fulfilled, (_state, _action) => {
                 // Permissions are handled in components, no state update needed
             })
-            .addCase(getBatchPermissions.rejected, (state, action) => { state.error = action.payload as string; });
+            .addCase(getBatchPermissions.rejected, (state, action) => { state.error = action.payload as string; })
+
+            .addCase(fetchBatchWorkflow.pending, (state) => { state.error = null; })
+            .addCase(fetchBatchWorkflow.fulfilled, (state, action) => { state.workflowState = action.payload; })
+            .addCase(fetchBatchWorkflow.rejected, (state, action) => { state.error = action.payload as string; })
+
+            .addCase(completeBatchWorkflowStep.pending, (state) => { state.isActionLoading = true; state.error = null; })
+            .addCase(completeBatchWorkflowStep.fulfilled, (state, action) => { state.isActionLoading = false; state.workflowState = action.payload; })
+            .addCase(completeBatchWorkflowStep.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
+
+            .addCase(generateBatchMemos.pending, (state) => { state.isActionLoading = true; state.error = null; })
+            .addCase(generateBatchMemos.fulfilled, (state, action) => {
+                state.isActionLoading = false;
+                state.currentBatch = action.payload.batch;
+            })
+            .addCase(generateBatchMemos.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; });
     },
 });
 
-export const { clearError, clearCurrentBatch, clearCurrentMemo } = batchSlice.actions;
+export const { clearError, clearCurrentBatch, clearCurrentMemo, clearWorkflowState } = batchSlice.actions;
 export default batchSlice.reducer;

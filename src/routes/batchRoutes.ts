@@ -6,12 +6,15 @@ import {
   getBatchHandler,
   assignReturnsToBatchHandler,
   closeBatchHandler,
+  generateBatchMemosHandler,
   submitCardinalHandler,
   fixBatchDestinationsHandler,
   deleteBatchHandler,
   unassignReturnsFromBatchHandler,
   unassignSingleReturnHandler,
   getBatchPermissionsHandler,
+  getBatchWorkflowHandler,
+  completeBatchWorkflowStepHandler,
 } from '../controllers/batchController';
 
 const router = Router();
@@ -146,6 +149,7 @@ router.post('/:id/assign', authenticateAdmin, assignReturnsToBatchHandler);
  *         description: TBD items, no-destination items, or batch not open
  */
 router.post('/:id/close', authenticateAdmin, closeBatchHandler);
+router.post('/:id/generate-memos', authenticateAdmin, generateBatchMemosHandler);
 
 /**
  * @swagger
@@ -270,5 +274,60 @@ router.post('/:id/unassign', authenticateAdmin, unassignReturnsFromBatchHandler)
  *         description: Batch not found
  */
 router.get('/:id/permissions', authenticateAdmin, getBatchPermissionsHandler);
+
+// ============================================================
+// Batch Workflow Routes (FCR-36)
+// ============================================================
+
+/**
+ * @swagger
+ * /api/admin/batches/{id}/workflow:
+ *   get:
+ *     summary: Get post-closeout workflow state for a batch
+ *     tags: [Batches]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: Workflow state with boolean flags for each step
+ */
+router.get('/:id/workflow', authenticateAdmin, getBatchWorkflowHandler);
+
+/**
+ * @swagger
+ * /api/admin/batches/{id}/workflow/complete:
+ *   post:
+ *     summary: Mark a workflow step as complete
+ *     tags: [Batches]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [step]
+ *             properties:
+ *               step:
+ *                 type: string
+ *                 enum: [cardinal_generated, cardinal_sent, debit_memos_created, ra_requested]
+ *               metadata:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Step marked complete, returns updated workflow state
+ */
+router.post('/:id/workflow/complete', authenticateAdmin, completeBatchWorkflowStepHandler);
 
 export default router;
