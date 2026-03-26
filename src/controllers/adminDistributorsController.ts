@@ -8,6 +8,7 @@ import {
   deleteDistributor,
   getDistributorUniqueProducts,
 } from '../services/adminDistributorsService';
+import { getReverseDistributors } from '../services/reverseDistributorsService';
 import { AppError } from '../utils/appError';
 
 /**
@@ -315,6 +316,28 @@ export const getDistributorProductsHandler = async (
       status: 'success',
       data: result,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * List all active reverse distributors (name + contact_email) for dropdown population
+ * GET /api/admin/reverse-distributors
+ */
+export const listReverseDistributorsHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const distributors = await getReverseDistributors();
+    const payload = distributors.map(d => ({
+      id: d.id,
+      name: d.name,
+      email: d.contact_email || '',
+    }));
+    res.status(200).json({ status: 'success', data: payload });
   } catch (error) {
     next(error);
   }

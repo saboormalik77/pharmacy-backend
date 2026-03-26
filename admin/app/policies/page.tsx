@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     Shield, Search, Plus, Loader2, AlertCircle, X, Trash2, ChevronLeft, ChevronRight,
@@ -19,6 +19,12 @@ import {
     FetchPoliciesParams,
 } from '@/lib/store/policiesSlice';
 import { ManufacturerPolicyCreatePayload, ManufacturerPolicy, ReturnPolicyCreatePayload, PolicyNotePayload } from '@/lib/types';
+
+interface ReverseDistributorOption {
+    id: string;
+    name: string;
+    email: string;
+}
 
 const US_STATES = [
     'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD',
@@ -54,6 +60,26 @@ export default function PoliciesPage() {
     const [newReturnPolicy, setNewReturnPolicy] = useState({ ...INITIAL_RETURN_POLICY });
     const [newNote, setNewNote] = useState('');
 
+    // Reverse distributors for the Destination dropdown
+    const [reverseDistributors, setReverseDistributors] = useState<ReverseDistributorOption[]>([]);
+    const [loadingDistributors, setLoadingDistributors] = useState(false);
+
+    const fetchReverseDistributors = useCallback(async () => {
+        if (reverseDistributors.length > 0) return; // already loaded
+        setLoadingDistributors(true);
+        try {
+            const { apiClient } = await import('@/lib/api/apiClient');
+            const res = await apiClient.get<{ status: string; data: ReverseDistributorOption[] }>(
+                '/admin/reverse-distributors', true
+            );
+            setReverseDistributors(res.data || []);
+        } catch {
+            // silently fall back — the field stays usable but without options
+        } finally {
+            setLoadingDistributors(false);
+        }
+    }, [reverseDistributors.length]);
+
     const showToast = (message: string, type: Toast['type'] = 'success') => {
         setToasts(prev => [...prev, { id: Date.now().toString(), message, type }]);
     };
@@ -70,10 +96,34 @@ export default function PoliciesPage() {
     useEffect(() => { setPage(1); }, [debouncedSearch, labelerType, destination]);
 
     const handleAdd = async () => {
-        if (!newPolicy.labelerId.trim() || !newPolicy.manufacturerName.trim()) {
-            showToast('Labeler ID and Manufacturer Name are required.', 'error');
+        if (!newPolicy.labelerId.trim()) {
+            showToast('Labeler ID is required.', 'error');
             return;
         }
+        if (newPolicy.labelerId.trim().length > 10) {
+            showToast('Labeler ID must be 10 characters or fewer (e.g. 00032).', 'error');
+            return;
+        }
+        if (!newPolicy.manufacturerName.trim()) {
+            showToast('Manufacturer Name is required.', 'error');
+            return;
+        }
+        // If any return-policy field is filled, destination is required
+        const returnFieldsFilled =
+            newReturnPolicy.autoRaEmail ||
+            newReturnPolicy.policyNumber ||
+            newReturnPolicy.policyDescription ||
+            newReturnPolicy.discountRate != null;
+        if (returnFieldsFilled && !newReturnPolicy.destination) {
+            showToast('Please select a Destination in the Labeler Return Information section.', 'error');
+            return;
+        }
+        // Discount rate must be a fraction between 0 and 1
+        if (newReturnPolicy.discountRate != null && (newReturnPolicy.discountRate < 0 || newReturnPolicy.discountRate > 1)) {
+            showToast('Discount Rate must be between 0 and 1 (e.g. 0.30 for 30%).', 'error');
+            return;
+        }
+
         const result = await dispatch(createPolicy(newPolicy));
         if (createPolicy.fulfilled.match(result)) {
             const createdId = result.payload?.id;
@@ -88,7 +138,10 @@ export default function PoliciesPage() {
                     partialsAccepted: newReturnPolicy.partialsAccepted,
                     reimbursementType: newReturnPolicy.reimbursementType,
                 };
-                await dispatch(addReturnPolicy({ policyId: createdId, payload: rpPayload }));
+                const rpResult = await dispatch(addReturnPolicy({ policyId: createdId, payload: rpPayload }));
+                if (addReturnPolicy.rejected.match(rpResult)) {
+                    showToast((rpResult.payload as string) || 'Policy created but failed to save return info.', 'error');
+                }
             }
 
             if (createdId && newNote.trim()) {
@@ -144,7 +197,7 @@ export default function PoliciesPage() {
                     <p className="text-xs text-gray-500">Manage return policies, exceptions, and timing rules</p>
                 </div>
                 <button
-                    onClick={() => setAddModal(true)}
+                    onClick={() => { setAddModal(true); fetchReverseDistributors(); }}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary-600 text-white text-xs font-medium hover:bg-primary-700 transition-colors whitespace-nowrap"
                 >
                     <Plus className="w-3.5 h-3.5" /> Add Policy
@@ -292,8 +345,25 @@ export default function PoliciesPage() {
                             {/* Row 1: Labeler ID, Type, Avg Pay %, Avg Days */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-1">Labeler ID <span className="text-red-500">*</span></label>
-                                    <input type="text" value={newPolicy.labelerId} onChange={e => setNewPolicy({ ...newPolicy, labelerId: e.target.value })} placeholder="e.g. 00032" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                                        Labeler ID <span className="text-red-500">*</span>
+                                        <span className="ml-1 text-[10px] text-gray-400 font-normal">max 10 chars</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={newPolicy.labelerId}
+                                        onChange={e => setNewPolicy({ ...newPolicy, labelerId: e.target.value })}
+                                        placeholder="e.g. 00032"
+                                        maxLength={10}
+                                        className={`w-full px-2.5 py-1.5 text-xs border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                                            newPolicy.labelerId.length > 10
+                                                ? 'border-red-400 focus:ring-red-400'
+                                                : 'border-gray-300'
+                                        }`}
+                                    />
+                                    {newPolicy.labelerId.length > 0 && (
+                                        <p className="text-[10px] text-gray-400 mt-0.5">{newPolicy.labelerId.length}/10</p>
+                                    )}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Labeler Type</label>
@@ -404,16 +474,45 @@ export default function PoliciesPage() {
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-1">Destination</label>
-                                        <select value={newReturnPolicy.destination} onChange={e => setNewReturnPolicy({ ...newReturnPolicy, destination: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white">
-                                            <option value="">Select</option>
-                                            <option value="qualanex">Qualanex</option>
-                                            <option value="inmar">Inmar</option>
-                                            <option value="pharmalink">PharmaLink</option>
-                                        </select>
+                                        <div className="relative">
+                                            <select
+                                                value={newReturnPolicy.destination}
+                                                onChange={e => {
+                                                    const selected = reverseDistributors.find(d => d.name === e.target.value);
+                                                    setNewReturnPolicy({
+                                                        ...newReturnPolicy,
+                                                        destination: e.target.value,
+                                                        autoRaEmail: selected?.email || '',
+                                                    });
+                                                }}
+                                                className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                                            >
+                                                <option value="">
+                                                    {loadingDistributors ? 'Loading...' : 'Select'}
+                                                </option>
+                                                {reverseDistributors.map(d => (
+                                                    <option key={d.id} value={d.name}>{d.name}</option>
+                                                ))}
+                                            </select>
+                                            {loadingDistributors && (
+                                                <Loader2 className="w-3 h-3 animate-spin absolute right-7 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                            )}
+                                        </div>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">Auto RA E-Mail</label>
-                                        <input type="email" value={newReturnPolicy.autoRaEmail} onChange={e => setNewReturnPolicy({ ...newReturnPolicy, autoRaEmail: e.target.value })} placeholder="e.g. CustomerService@Qualanex.com" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                                            Auto RA E-Mail
+                                            {newReturnPolicy.autoRaEmail && (
+                                                <span className="ml-1 text-[10px] text-blue-500 font-normal">(auto-filled)</span>
+                                            )}
+                                        </label>
+                                        <input
+                                            type="email"
+                                            value={newReturnPolicy.autoRaEmail}
+                                            readOnly
+                                            placeholder="Auto-filled from selected destination"
+                                            className="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-md bg-gray-50 text-gray-600 cursor-not-allowed"
+                                        />
                                     </div>
                                 </div>
 
@@ -432,8 +531,31 @@ export default function PoliciesPage() {
                                 {/* Discount Rate, Partials?, Reimbursement */}
                                 <div className="grid grid-cols-3 gap-3">
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">Discount Rate</label>
-                                        <input type="number" step="0.01" value={newReturnPolicy.discountRate ?? ''} onChange={e => setNewReturnPolicy({ ...newReturnPolicy, discountRate: e.target.value ? parseFloat(e.target.value) : undefined })} placeholder="e.g. 0.6" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                                            Discount Rate
+                                            <span className="ml-1 text-[10px] text-gray-400 font-normal">0–1 fraction</span>
+                                        </label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            max="1"
+                                            value={newReturnPolicy.discountRate ?? ''}
+                                            onChange={e => setNewReturnPolicy({ ...newReturnPolicy, discountRate: e.target.value ? parseFloat(e.target.value) : undefined })}
+                                            placeholder="e.g. 0.30"
+                                            className={`w-full px-2.5 py-1.5 text-xs border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                                                newReturnPolicy.discountRate != null && (newReturnPolicy.discountRate < 0 || newReturnPolicy.discountRate > 1)
+                                                    ? 'border-red-400 focus:ring-red-400'
+                                                    : 'border-gray-300'
+                                            }`}
+                                        />
+                                        <p className="text-[10px] text-gray-400 mt-0.5">
+                                            {newReturnPolicy.discountRate != null && newReturnPolicy.discountRate >= 0 && newReturnPolicy.discountRate <= 1
+                                                ? `= ${(newReturnPolicy.discountRate * 100).toFixed(0)}%`
+                                                : newReturnPolicy.discountRate != null
+                                                    ? <span className="text-red-500">Must be 0–1 (e.g. 0.30 for 30%)</span>
+                                                    : 'e.g. 0.30 = 30%'}
+                                        </p>
                                     </div>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-1">Partials?</label>
