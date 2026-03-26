@@ -46,7 +46,7 @@ const WORKFLOW_STEPS = [
     {
         key: 'cardinal_generated',
         stateKey: 'cardinalGenerated' as const,
-        label: 'Generate Cardinal',
+        label: 'Generate Cardinal Invoice',
         description: 'Download the Cardinal CSV file for this batch.',
         icon: Download,
         color: 'blue',
@@ -54,7 +54,7 @@ const WORKFLOW_STEPS = [
     {
         key: 'cardinal_sent',
         stateKey: 'cardinalSent' as const,
-        label: 'Send Cardinal',
+        label: 'Send Cardinal Invoice',
         description: 'Upload and send the Cardinal file.',
         icon: Upload,
         color: 'purple',
@@ -118,6 +118,7 @@ export default function BatchDetailPage() {
 
     // RA request step — track which reverse distributor group's RA is being sent (by destination)
     const [raSendingGroup, setRaSendingGroup] = useState<string | null>(null);
+    const [isSendingAllRA, setIsSendingAllRA] = useState(false);
 
     const addToast = useCallback((msg: string, type: Toast['type']) => {
         setToasts(prev => [...prev, { id: Date.now().toString(), message: msg, type }]);
@@ -330,6 +331,49 @@ export default function BatchDetailPage() {
         setRaSendingGroup(null);
         if (sentCount > 0) {
             addToast(`RA request${sentCount > 1 ? 's' : ''} sent to ${distributorName}`, 'success');
+            dispatch(fetchBatchDetail(batchId));
+        }
+    };
+
+    // Step 4: Send RA requests for ALL pending distributor groups at once
+    const handleSendAllRA = async () => {
+        const groups: Record<string, { destination: string; distributorName: string; memos: DebitMemo[] }> = {};
+        batchMemos.forEach(m => {
+            const key = m.destination || 'unknown';
+            if (!groups[key]) {
+                groups[key] = {
+                    destination: key,
+                    distributorName: key === 'unknown' ? 'Unknown Distributor' : key.charAt(0).toUpperCase() + key.slice(1),
+                    memos: [],
+                };
+            }
+            groups[key].memos.push(m);
+        });
+        const pendingGroups = Object.values(groups).filter(group =>
+            !group.memos.every(m => m.raRequestedAt || m.raStatus === 'requested' || m.raStatus === 'received' || m.raStatus === 'shipped')
+        );
+        if (pendingGroups.length === 0) return;
+
+        setIsSendingAllRA(true);
+        let totalSent = 0;
+        for (const group of pendingGroups) {
+            const unsent = group.memos.filter(
+                m => !m.raRequestedAt && m.raStatus !== 'requested' && m.raStatus !== 'received' && m.raStatus !== 'shipped'
+            );
+            setRaSendingGroup(group.destination);
+            for (const memo of unsent) {
+                const result = await dispatch(sendRARequest({ memoId: memo.id }));
+                if (sendRARequest.fulfilled.match(result)) {
+                    totalSent++;
+                } else {
+                    addToast(`Failed to send RA for ${memo.memoNumber}`, 'error');
+                }
+            }
+        }
+        setRaSendingGroup(null);
+        setIsSendingAllRA(false);
+        if (totalSent > 0) {
+            addToast(`${totalSent} RA request${totalSent > 1 ? 's' : ''} sent to all distributors.`, 'success');
             dispatch(fetchBatchDetail(batchId));
         }
     };
@@ -634,7 +678,7 @@ export default function BatchDetailPage() {
                                                 {/* Step actions — only shown when active */}
                                                 {isActive && !done && (
                                                     <div className="mt-2.5">
-                                                        {/* Step 1: Generate Cardinal */}
+                                                        {/* Step 1: Generate Cardinal Invoice */}
                                                         {step.key === 'cardinal_generated' && (
                                                             <button
                                                                 onClick={handleGenerateCardinal}
@@ -642,7 +686,7 @@ export default function BatchDetailPage() {
                                                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors font-medium"
                                                             >
                                                                 {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
-                                                                Download Cardinal CSV
+                                                                Generate Cardinal Invoice
                                                             </button>
                                                         )}
 
@@ -670,7 +714,7 @@ export default function BatchDetailPage() {
                                                                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 transition-colors font-medium"
                                                                 >
                                                                     {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-                                                                    Mark as Sent
+                                                                    Send Cardinal Invoice
                                                                 </button>
                                                             </div>
                                                         )}
@@ -755,6 +799,9 @@ export default function BatchDetailPage() {
                                                                         groups[key].memos.push(m);
                                                                     });
                                                                     const distributorGroups = Object.values(groups);
+                                                                    const pendingGroupsCount = distributorGroups.filter(g =>
+                                                                        !g.memos.every(m => m.raRequestedAt || m.raStatus === 'requested' || m.raStatus === 'received' || m.raStatus === 'shipped')
+                                                                    ).length;
                                                                     return (
                                                                         <div className="space-y-1.5">
                                                                             <p className="text-[11px] text-gray-600">
@@ -774,6 +821,8 @@ export default function BatchDetailPage() {
                                                                                             <div className="flex items-center gap-2 min-w-0">
                                                                                                 {allSent ? (
                                                                                                     <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                                                                                                ) : isSending ? (
+                                                                                                    <Loader2 className="w-3.5 h-3.5 text-green-500 animate-spin flex-shrink-0" />
                                                                                                 ) : (
                                                                                                     <Mail className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
                                                                                                 )}
@@ -789,7 +838,7 @@ export default function BatchDetailPage() {
                                                                                                 ) : (
                                                                                                     <button
                                                                                                         onClick={() => handleSendRAForGroup(group.destination, group.distributorName, group.memos)}
-                                                                                                        disabled={isSending || !!raSendingGroup}
+                                                                                                        disabled={isSending || !!raSendingGroup || isSendingAllRA}
                                                                                                         className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors font-medium"
                                                                                                     >
                                                                                                         {isSending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
@@ -810,6 +859,9 @@ export default function BatchDetailPage() {
                                                                     const anyRaSent = batchMemos.some(
                                                                         m => m.raRequestedAt || m.raStatus === 'requested' || m.raStatus === 'received' || m.raStatus === 'shipped'
                                                                     );
+                                                                    const hasPending = batchMemos.some(
+                                                                        m => !m.raRequestedAt && m.raStatus !== 'requested' && m.raStatus !== 'received' && m.raStatus !== 'shipped'
+                                                                    );
                                                                     return (
                                                                         <div className="flex items-center gap-2 flex-wrap">
                                                                             <button
@@ -821,6 +873,16 @@ export default function BatchDetailPage() {
                                                                                 {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
                                                                                 Complete Step
                                                                             </button>
+                                                                            {hasPending && (
+                                                                                <button
+                                                                                    onClick={handleSendAllRA}
+                                                                                    disabled={isSendingAllRA || !!raSendingGroup}
+                                                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-green-700 text-white hover:bg-green-800 disabled:opacity-50 transition-colors font-medium"
+                                                                                >
+                                                                                    {isSendingAllRA ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                                                                                    Send All RA
+                                                                                </button>
+                                                                            )}
                                                                             {!anyRaSent && (
                                                                                 <span className="text-[10px] text-amber-600">
                                                                                     Send at least one RA request to enable
