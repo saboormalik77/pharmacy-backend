@@ -244,16 +244,18 @@ BEGIN
   IF p_email_override IS NOT NULL AND p_email_override <> '' THEN
     v_dest_email := p_email_override;
   ELSE
-    SELECT credit_request_email, main_contact
+    SELECT rd.contact_email, rd.name
       INTO v_dest_email, v_dest_name
-      FROM manufacturer_policies
-      WHERE labeler_id = v_memo.labeler_id
+      FROM reverse_distributors rd
+      WHERE LOWER(rd.name) = LOWER(v_memo.destination)
+        AND rd.is_active = true
       LIMIT 1;
   END IF;
 
   IF v_dest_email IS NULL OR v_dest_email = '' THEN
     RETURN jsonb_build_object('error', true, 'code', 400,
-      'message', 'No email found for labeler. Provide email_override.');
+      'message', 'No contact email found for destination "' || COALESCE(v_memo.destination, 'NULL')
+        || '". Add a contact_email in reverse_distributors or provide email_override.');
   END IF;
 
   v_dest_name := COALESCE(v_dest_name, v_memo.labeler_name, '');

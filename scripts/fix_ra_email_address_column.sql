@@ -39,15 +39,16 @@ BEGIN
   INTO v_pharm_name, v_pharm_addr
   FROM pharmacy WHERE id = v_memo.pharmacy_id;
 
-  -- Destination email
+  -- Destination email: override > reverse_distributors lookup by destination
   IF p_email_override IS NOT NULL AND p_email_override <> '' THEN
     v_dest_email := p_email_override;
     v_dest_name  := COALESCE(v_memo.labeler_name, '');
   ELSE
-    SELECT credit_request_email, COALESCE(main_contact, manufacturer_name)
+    SELECT rd.contact_email, rd.name
       INTO v_dest_email, v_dest_name
-      FROM manufacturer_policies
-      WHERE labeler_id = v_memo.labeler_id
+      FROM reverse_distributors rd
+      WHERE LOWER(rd.name) = LOWER(v_memo.destination)
+        AND rd.is_active = true
       LIMIT 1;
   END IF;
 
