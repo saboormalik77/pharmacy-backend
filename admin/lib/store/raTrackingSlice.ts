@@ -163,6 +163,33 @@ export const shipMemo = createAsyncThunk<
     }
 });
 
+export const createDebitMemoFedexShipment = createAsyncThunk<
+    {
+        memo: { id: string; memoNumber: string; destination: string };
+        shipment: {
+            masterTrackingNumber: string;
+            shipmentId: string;
+            packageCount: number;
+            packages: { trackingNumber: string; hasLabel: boolean }[];
+        };
+        labels: Record<string, string>;
+    },
+    { memoId: string; boxCount?: number; packageWeight?: number; serviceType?: string },
+    { rejectValue: string }
+>('raTracking/createFedexShipment', async ({ memoId, boxCount, packageWeight, serviceType }, { rejectWithValue }) => {
+    try {
+        const { apiClient } = await import('@/lib/api/apiClient');
+        const res = await apiClient.post<{ status: string; data: any }>(
+            `/admin/debit-memos/${memoId}/create-fedex-shipment`,
+            { boxCount, packageWeight, serviceType },
+            true
+        );
+        return res.data;
+    } catch (err: any) {
+        return rejectWithValue(err?.message || 'Failed to create FedEx shipment');
+    }
+});
+
 export const fetchEmailPreview = createAsyncThunk<
     RAEmailTemplate,
     { memoId: string; type?: 'request' | 'reminder'; emailOverride?: string },
@@ -229,6 +256,10 @@ const raTrackingSlice = createSlice({
             .addCase(shipMemo.pending, (state) => { state.isActionLoading = true; state.error = null; })
             .addCase(shipMemo.fulfilled, (state, action) => { state.isActionLoading = false; updateMemoInList(state, action.payload); })
             .addCase(shipMemo.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
+
+            .addCase(createDebitMemoFedexShipment.pending, (state) => { state.isActionLoading = true; state.error = null; })
+            .addCase(createDebitMemoFedexShipment.fulfilled, (state) => { state.isActionLoading = false; })
+            .addCase(createDebitMemoFedexShipment.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
 
             .addCase(fetchEmailPreview.pending, (state) => { state.isPreviewLoading = true; })
             .addCase(fetchEmailPreview.fulfilled, (state, action) => { state.isPreviewLoading = false; state.emailPreview = action.payload; })

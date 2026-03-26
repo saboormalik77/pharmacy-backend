@@ -10,6 +10,7 @@ import {
   receiveRAHandler,
   resendRAHandler,
   shipDebitMemoHandler,
+  createDebitMemoFedexShipmentHandler,
   emailPreviewHandler,
 } from '../controllers/raController';
 import {
@@ -277,6 +278,36 @@ router.post('/:id/resend-ra', authenticateAdmin, resendRAHandler);
  *         description: Tracking number required / RA number required first
  */
 router.post('/:id/ship', authenticateAdmin, shipDebitMemoHandler);
+
+/**
+ * @swagger
+ * /api/admin/debit-memos/{id}/create-fedex-shipment:
+ *   post:
+ *     summary: Create FedEx shipment from warehouse to reverse distributor
+ *     tags: [Debit Memos, Shipping]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               boxCount: { type: integer, default: 1 }
+ *               packageWeight: { type: number, default: 10 }
+ *               serviceType: { type: string, default: FEDEX_GROUND }
+ *     responses:
+ *       200:
+ *         description: FedEx shipment created with tracking and labels
+ *       400:
+ *         description: Missing RA number or address issues
+ */
+router.post('/:id/create-fedex-shipment', authenticateAdmin, createDebitMemoFedexShipmentHandler);
 
 /**
  * @swagger

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
     Search, Loader2, ChevronLeft, ChevronRight, X, Clock,
     Mail, MailCheck, CheckCircle, Truck, AlertTriangle, Send,
-    RefreshCw,
+    RefreshCw, Download, Printer, Edit,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -15,6 +15,7 @@ import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { useDebounce } from '@/lib/hooks/useDebounce';
 import {
     fetchRATracking, sendRARequest, receiveRA, resendRA, shipMemo,
+    createDebitMemoFedexShipment,
     fetchEmailPreview, clearError, clearEmailPreview,
 } from '@/lib/store/raTrackingSlice';
 import { DebitMemo, RAEmailTemplate } from '@/lib/types';
@@ -86,6 +87,16 @@ export default function RATrackingPage() {
 
     // Ship modal state
     const [shipTracking, setShipTracking] = useState('');
+    const [shipMode, setShipMode] = useState<'choose' | 'fedex' | 'manual'>('choose');
+    const [fedexBoxCount, setFedexBoxCount] = useState('1');
+    const [fedexLoading, setFedexLoading] = useState(false);
+    const [fedexResult, setFedexResult] = useState<{
+        masterTrackingNumber: string;
+        shipmentId: string;
+        packageCount: number;
+        packages: { trackingNumber: string; hasLabel: boolean }[];
+    } | null>(null);
+    const [fedexLabels, setFedexLabels] = useState<Record<string, string>>({});
 
     const addToast = useCallback((msg: string, type: Toast['type']) => {
         setToasts(prev => [...prev, { id: Date.now().toString(), message: msg, type }]);
@@ -132,12 +143,19 @@ export default function RATrackingPage() {
     const openShip = (memo: DebitMemo) => {
         setSelectedMemo(memo);
         setShipTracking('');
+        setShipMode('choose');
+        setFedexBoxCount('1');
+        setFedexLoading(false);
+        setFedexResult(null);
+        setFedexLabels({});
         setActiveModal('ship');
     };
 
     const closeModal = () => {
         setActiveModal(null);
         setSelectedMemo(null);
+        setFedexResult(null);
+        setFedexLabels({});
         dispatch(clearEmailPreview());
     };
 
@@ -588,42 +606,230 @@ export default function RATrackingPage() {
                 </div>
             )}
 
-            {/* ── Ship Modal ─────────────────────────────────────── */}
+            {/* ── Ship Modal (FedEx + Manual) ──────────────────── */}
             {activeModal === 'ship' && selectedMemo && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={closeModal}>
-                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="p-6 border-b border-gray-200">
                             <div className="flex items-center justify-between">
-                                <h2 className="text-lg font-bold text-gray-900">Record Shipment</h2>
+                                <h2 className="text-lg font-bold text-gray-900">Ship to Reverse Distributor</h2>
                                 <button onClick={closeModal} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
                             </div>
                         </div>
                         <div className="p-6 space-y-4">
+                            {/* Memo Details */}
                             <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-1">
                                 <div className="flex justify-between"><span className="text-gray-500">Memo</span><span className="font-medium">{selectedMemo.memoNumber}</span></div>
                                 <div className="flex justify-between"><span className="text-gray-500">RA #</span><span className="font-medium text-green-700">{selectedMemo.raNumber}</span></div>
-                                <div className="flex justify-between"><span className="text-gray-500">Destination</span><span>{selectedMemo.destination || '—'}</span></div>
+                                <div className="flex justify-between"><span className="text-gray-500">Destination</span><span className="capitalize font-medium">{selectedMemo.destination || '—'}</span></div>
                                 <div className="flex justify-between"><span className="text-gray-500">Items</span><span>{selectedMemo.totalItems}</span></div>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Outbound Tracking # *</label>
-                                <input
-                                    type="text"
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
-                                    placeholder="FedEx/UPS tracking number..."
-                                    value={shipTracking}
-                                    onChange={e => setShipTracking(e.target.value)}
-                                    autoFocus
-                                />
-                            </div>
+                            {/* Mode Selection */}
+                            {shipMode === 'choose' && !fedexResult && (
+                                <div className="space-y-3">
+                                    <p className="text-sm text-gray-600 text-center">How would you like to ship this?</p>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <button
+                                            onClick={() => setShipMode('fedex')}
+                                            className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all"
+                                        >
+                                            <Truck className="w-6 h-6 text-blue-600" />
+                                            <span className="text-sm font-semibold text-gray-900">Create FedEx Shipment</span>
+                                            <span className="text-[10px] text-gray-500">Auto-generate labels & tracking</span>
+                                        </button>
+                                        <button
+                                            onClick={() => setShipMode('manual')}
+                                            className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-lg hover:border-gray-500 hover:bg-gray-50 transition-all"
+                                        >
+                                            <Edit className="w-6 h-6 text-gray-600" />
+                                            <span className="text-sm font-semibold text-gray-900">Enter Manually</span>
+                                            <span className="text-[10px] text-gray-500">Paste tracking number</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* FedEx API Mode */}
+                            {shipMode === 'fedex' && !fedexResult && (
+                                <div className="space-y-4">
+                                    <p className="text-sm text-gray-600 text-center">
+                                        Create a FedEx Ground shipment from the warehouse to <strong className="capitalize">{selectedMemo.destination}</strong>.
+                                    </p>
+
+                                    <div className="flex items-center justify-center gap-4">
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-700">Number of Boxes:</label>
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                max="99"
+                                                value={fedexBoxCount}
+                                                onChange={e => setFedexBoxCount(e.target.value)}
+                                                className="ml-2 w-20 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+                                                disabled={fedexLoading}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-xs text-blue-800 text-center space-y-1">
+                                        <p>Shipment: <strong>Warehouse</strong> → <strong className="capitalize">{selectedMemo.destination}</strong></p>
+                                        <p>Ensure the warehouse address and reverse distributor address are configured.</p>
+                                    </div>
+
+                                    <div className="flex justify-center gap-3">
+                                        <button
+                                            onClick={() => setShipMode('choose')}
+                                            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+                                        >
+                                            Back
+                                        </button>
+                                        <button
+                                            onClick={async () => {
+                                                if (!selectedMemo) return;
+                                                setFedexLoading(true);
+                                                try {
+                                                    const result = await dispatch(createDebitMemoFedexShipment({
+                                                        memoId: selectedMemo.id,
+                                                        boxCount: parseInt(fedexBoxCount) || 1,
+                                                    }));
+                                                    if (createDebitMemoFedexShipment.fulfilled.match(result)) {
+                                                        const { shipment, labels } = result.payload;
+                                                        setFedexResult(shipment);
+                                                        setFedexLabels(labels || {});
+                                                        setShipTracking(shipment.masterTrackingNumber);
+                                                        addToast('FedEx shipment created & recorded!', 'success');
+                                                        loadData();
+                                                    } else {
+                                                        addToast(result.payload as string || 'Failed to create FedEx shipment', 'error');
+                                                    }
+                                                } catch {
+                                                    addToast('Unexpected error creating shipment', 'error');
+                                                } finally {
+                                                    setFedexLoading(false);
+                                                }
+                                            }}
+                                            disabled={fedexLoading || !fedexBoxCount}
+                                            className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-medium rounded-lg transition-colors"
+                                        >
+                                            {fedexLoading ? (
+                                                <><Loader2 className="w-4 h-4 animate-spin" /> Creating Shipment...</>
+                                            ) : (
+                                                <><Truck className="w-4 h-4" /> Create FedEx Shipment</>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* FedEx Result */}
+                            {fedexResult && (
+                                <div className="space-y-4">
+                                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-3">
+                                        <div className="flex items-center gap-2">
+                                            <CheckCircle className="w-5 h-5 text-green-600" />
+                                            <p className="text-sm font-semibold text-green-800">Shipment Created & Recorded</p>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2 text-xs">
+                                            <div>
+                                                <span className="text-gray-500">Master Tracking:</span>
+                                                <span className="ml-1 font-mono font-medium text-gray-900">{fedexResult.masterTrackingNumber}</span>
+                                            </div>
+                                            <div>
+                                                <span className="text-gray-500">Packages:</span>
+                                                <span className="ml-1 font-medium text-gray-900">{fedexResult.packages.length}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Package Tracking Numbers */}
+                                    <div className="space-y-2">
+                                        <p className="text-sm font-medium text-gray-700">Package Tracking Numbers:</p>
+                                        <div className="grid grid-cols-1 gap-2">
+                                            {fedexResult.packages.map((pkg, i) => (
+                                                <div key={i} className="flex items-center justify-between text-xs bg-gray-50 rounded px-3 py-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-gray-500">Package {i + 1}:</span>
+                                                        <span className="font-mono text-gray-900">{pkg.trackingNumber}</span>
+                                                    </div>
+                                                    {pkg.hasLabel && fedexLabels[`package${i + 1}`] && (
+                                                        <button
+                                                            onClick={() => {
+                                                                const base64 = fedexLabels[`package${i + 1}`];
+                                                                const byteChars = atob(base64);
+                                                                const byteArr = new Uint8Array(byteChars.length);
+                                                                for (let j = 0; j < byteChars.length; j++) byteArr[j] = byteChars.charCodeAt(j);
+                                                                const blob = new Blob([byteArr], { type: 'application/pdf' });
+                                                                const url = URL.createObjectURL(blob);
+                                                                window.open(url, '_blank');
+                                                            }}
+                                                            className="flex items-center gap-1 px-2 py-0.5 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 text-[10px] transition-colors"
+                                                        >
+                                                            <Printer className="w-3 h-3" /> Label
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Print All Labels */}
+                                    {Object.keys(fedexLabels).length > 0 && (
+                                        <div className="flex justify-center">
+                                            <button
+                                                onClick={() => {
+                                                    Object.values(fedexLabels).forEach(base64 => {
+                                                        const byteChars = atob(base64);
+                                                        const byteArr = new Uint8Array(byteChars.length);
+                                                        for (let j = 0; j < byteChars.length; j++) byteArr[j] = byteChars.charCodeAt(j);
+                                                        const blob = new Blob([byteArr], { type: 'application/pdf' });
+                                                        const url = URL.createObjectURL(blob);
+                                                        window.open(url, '_blank');
+                                                    });
+                                                }}
+                                                className="flex items-center gap-1.5 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded-md border border-gray-300 transition-colors"
+                                            >
+                                                <Download className="w-3.5 h-3.5" /> Download All Labels
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Manual Mode */}
+                            {shipMode === 'manual' && !fedexResult && (
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Outbound Tracking # *</label>
+                                        <input
+                                            type="text"
+                                            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
+                                            placeholder="FedEx/UPS tracking number..."
+                                            value={shipTracking}
+                                            onChange={e => setShipTracking(e.target.value)}
+                                            autoFocus
+                                        />
+                                    </div>
+                                </div>
+                            )}
                         </div>
+
                         <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
-                            <Button variant="ghost" onClick={closeModal}>Cancel</Button>
-                            <Button variant="primary" onClick={handleShip} disabled={isActionLoading || !shipTracking.trim()}>
-                                {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Truck className="w-4 h-4 mr-1" />}
-                                Record Shipment
-                            </Button>
+                            {fedexResult ? (
+                                <Button variant="primary" onClick={closeModal}>
+                                    Done
+                                </Button>
+                            ) : shipMode === 'manual' ? (
+                                <>
+                                    <Button variant="ghost" onClick={() => setShipMode('choose')}>Back</Button>
+                                    <Button variant="primary" onClick={handleShip} disabled={isActionLoading || !shipTracking.trim()}>
+                                        {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Truck className="w-4 h-4 mr-1" />}
+                                        Record Shipment
+                                    </Button>
+                                </>
+                            ) : shipMode === 'choose' ? (
+                                <Button variant="ghost" onClick={closeModal}>Cancel</Button>
+                            ) : null}
                         </div>
                     </div>
                 </div>
