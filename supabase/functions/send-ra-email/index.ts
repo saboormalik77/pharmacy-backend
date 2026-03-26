@@ -53,7 +53,7 @@ serve(async (req) => {
 
     // Get email configuration from environment
     const fromEmail = from || Deno.env.get('FROM_EMAIL') || 'ra-requests@fcr-system.com'
-    const replyToEmail = replyTo || Deno.env.get('REPLY_TO_EMAIL') || 'support@fcr-system.com'
+    const replyToEmail = replyTo || Deno.env.get('SMTP_USER') || Deno.env.get('REPLY_TO_EMAIL') || 'support@fcr-system.com'
 
     console.log(`Sending RA email for memo ${memoNumber} to ${to}`)
 

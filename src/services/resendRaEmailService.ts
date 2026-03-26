@@ -8,7 +8,7 @@ import { AppError } from '../utils/appError';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev';
-const REPLY_TO_EMAIL = process.env.REPLY_TO_EMAIL || '';
+const REPLY_TO_EMAIL = process.env.SMTP_USER || process.env.REPLY_TO_EMAIL || '';
 
 let resendClient: Resend | null = null;
 if (RESEND_API_KEY) {
