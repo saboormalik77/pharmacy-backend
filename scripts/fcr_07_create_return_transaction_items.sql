@@ -42,8 +42,7 @@ CREATE TABLE IF NOT EXISTS return_transaction_items (
   non_returnable_reason TEXT
     CHECK (non_returnable_reason IS NULL OR non_returnable_reason IN ('date', 'policy', 'no_data', 'manual')),
   return_reason TEXT,
-  destination TEXT
-    CHECK (destination IS NULL OR destination IN ('inmar', 'qualanex', 'pharmalink', 'other')),
+  destination TEXT,
 
   -- Regulatory
   dea_schedule TEXT,

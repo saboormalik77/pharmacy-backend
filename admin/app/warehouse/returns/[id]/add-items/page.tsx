@@ -20,6 +20,7 @@ import {
 } from '@/lib/store/returnTransactionsSlice';
 import { checkReturnability } from '@/lib/store/policiesSlice';
 import { BarcodeScanResponse, ReturnabilityCheckResult } from '@/lib/types';
+import { apiClient } from '@/lib/api/apiClient';
 
 // Dynamically imported so it only loads in the browser (uses WebRTC APIs)
 const QrScannerModal = dynamic(() => import('@/components/scanner/QrScannerModal'), { ssr: false });
@@ -96,6 +97,23 @@ export default function AddItemsPage() {
     const [formErrors, setFormErrors] = useState<Set<string>>(new Set());
     // Expected returnable date for manual wine cellar move
     const [wineCellarDate, setWineCellarDate] = useState('');
+    // Manual destination when no policy found
+    const [manualDestination, setManualDestination] = useState('');
+    const [reverseDistributors, setReverseDistributors] = useState<{ id: string; name: string; email: string }[]>([]);
+
+    // Fetch reverse distributors once on mount for the manual destination dropdown
+    useEffect(() => {
+        (async () => {
+            try {
+                const res = await apiClient.get<{ status: string; data: { id: string; name: string; email: string }[] }>(
+                    '/admin/reverse-distributors', true
+                );
+                setReverseDistributors(res.data || []);
+            } catch {
+                // non-critical — dropdown stays empty
+            }
+        })();
+    }, []);
 
     const showToast = (message: string, type: Toast['type'] = 'success') => {
         const id = Date.now().toString();
@@ -168,6 +186,7 @@ export default function AddItemsPage() {
         setPreCheckResult(null);
         setIsPreChecking(false);
         setPolicyAutoCheck(null);
+        setManualDestination('');
 
         const result = await dispatch(scanBarcode(raw.trim()));
 
@@ -387,7 +406,8 @@ export default function AddItemsPage() {
         if (form.memo) payload.memo = form.memo;
         payload.scanSource = form.scanSource;
         if (form.rawScanData) payload.rawScanData = form.rawScanData;
-        if (policyAutoCheck?.destination) payload.destination = policyAutoCheck.destination;
+        const destinationToUse = policyAutoCheck?.destination || manualDestination;
+        if (destinationToUse) payload.destination = destinationToUse;
 
         const result = await dispatch(addTransactionItem({ transactionId, payload }));
 
@@ -419,6 +439,7 @@ export default function AddItemsPage() {
 
             setForm({ ...EMPTY_FORM });
             setFormErrors(new Set());
+            setManualDestination('');
             setScannedPrices(null);
             setScanError('');
             setScanInput('');
@@ -488,6 +509,7 @@ export default function AddItemsPage() {
         setForm({ ...EMPTY_FORM });
         setFormErrors(new Set());
         setWineCellarDate('');
+        setManualDestination('');
         setScannedPrices(null);
         setScanError('');
         setScanInput('');
@@ -502,6 +524,7 @@ export default function AddItemsPage() {
         setForm({ ...EMPTY_FORM });
         setFormErrors(new Set());
         setWineCellarDate('');
+        setManualDestination('');
         setScannedPrices(null);
         setScanError('');
         setLastWarning('');
@@ -937,6 +960,36 @@ export default function AddItemsPage() {
                         <input type="text" value={form.memo} onChange={e => updateField('memo', e.target.value)} placeholder="Optional memo" className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
                     </div>
                 </div>
+
+                {/* Manual Destination — shown only when no return policy is found */}
+                {(!policyAutoCheck || policyAutoCheck.status === 'tbd') && (
+                    <div className="mt-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg">
+                        <div className="flex items-center gap-1.5 mb-1.5">
+                            <AlertTriangle className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                            <p className="text-[10px] font-semibold text-amber-800">No return policy found — select destination manually</p>
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-medium text-amber-700 mb-0.5">
+                                Destination <span className="text-gray-500 font-normal">(optional)</span>
+                            </label>
+                            <select
+                                value={manualDestination}
+                                onChange={e => setManualDestination(e.target.value)}
+                                className="w-full px-2 py-1 text-xs border border-amber-300 rounded focus:outline-none focus:ring-1 focus:ring-amber-400 bg-white"
+                            >
+                                <option value="">— Select destination —</option>
+                                {reverseDistributors.map(d => (
+                                    <option key={d.id} value={d.name}>{d.name}</option>
+                                ))}
+                            </select>
+                            {manualDestination && (
+                                <p className="text-[10px] text-amber-700 mt-0.5">
+                                    Selected: <span className="font-semibold">{manualDestination}</span>
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                )}
 
                 {/* Action Buttons */}
                 <div className="mt-3 pt-3 border-t border-gray-100">
