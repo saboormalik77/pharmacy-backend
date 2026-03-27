@@ -44,6 +44,18 @@ const router = Router();
  *       - in: query
  *         name: limit
  *         schema: { type: integer, default: 20 }
+ *       - in: query
+ *         name: allMemosShipped
+ *         description: If true, only batches that have debit memos and where every memo has ra_status shipped
+ *         schema: { type: boolean, default: false }
+ *       - in: query
+ *         name: excludeCompletePharmacyPayouts
+ *         description: If true, exclude batches where every pharmacy with debit memos already has a non-failed pharmacy_payments row for that batch
+ *         schema: { type: boolean, default: false }
+ *       - in: query
+ *         name: allDebitMemosPaid
+ *         description: With excludeCompletePharmacyPayouts, requires at least one pharmacy whose memos in the batch are all paid/partial and who has no payout record (not whole-batch paid)
+ *         schema: { type: boolean, default: false }
  *     responses:
  *       200:
  *         description: Paginated list of batches

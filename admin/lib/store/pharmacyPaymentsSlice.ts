@@ -74,6 +74,8 @@ export interface Pagination {
 export interface BatchPharmacy {
     id: string;
     name: string;
+    /** True when a non-failed pharmacy_payments row exists for this batch (already recorded). */
+    payoutRecorded: boolean;
 }
 
 export interface PharmacyPaymentsState {
@@ -191,23 +193,44 @@ export const createPharmacyPayment = createAsyncThunk(
     }
 );
 
-// Fetch only open batches (for the calculate payout modal dropdown)
+// Fetch closed batches eligible for pharmacy payout (shipped memos, RD payment recorded, payout remaining)
 export const fetchOpenBatches = createAsyncThunk(
     'pharmacyPayments/fetchOpenBatches',
     async () => {
-        const q = new URLSearchParams({ status: 'open', limit: '100', page: '1' });
+        const q = new URLSearchParams({
+            status: 'closed',
+            limit: '100',
+            page: '1',
+            allMemosShipped: 'true',
+            excludeCompletePharmacyPayouts: 'true',
+            allDebitMemosPaid: 'true',
+        });
         return apiClient.get<{ data: ReturnBatch[]; pagination: any }>(`/admin/batches?${q}`, true);
     }
 );
 
-// Fetch pharmacies that have returns assigned in a specific batch
+// Pharmacies in the batch whose debit memos are all paid/partial (RD side); includes those with payout already recorded (disabled in UI).
 export const fetchBatchPharmacies = createAsyncThunk(
     'pharmacyPayments/fetchBatchPharmacies',
     async (batchId: string) => {
-        const res = await apiClient.get<{ status: string; data: { batch: ReturnBatch; returns: ReturnTransaction[] } }>(
-            `/admin/batches/${batchId}`, true
-        );
-        const returns: ReturnTransaction[] = res.data?.returns || [];
+        const [batchRes, payRes] = await Promise.all([
+            apiClient.get<{
+                status: string;
+                data: {
+                    batch: ReturnBatch;
+                    returns: ReturnTransaction[];
+                    debitMemos?: { pharmacyId?: string; pharmacyName?: string; paymentStatus?: string }[];
+                };
+            }>(`/admin/batches/${batchId}`, true),
+            apiClient.get<{ status: string; data: PharmacyPayment[] }>('/admin/pharmacy-payments', true, {
+                batch_id: batchId,
+                limit: 500,
+                page: 1,
+            }),
+        ]);
+        const inner = batchRes.data;
+        const returns: ReturnTransaction[] = inner?.returns || [];
+        const memos = inner?.debitMemos || [];
         const seen = new Set<string>();
         const pharmacies: { id: string; name: string }[] = [];
         for (const rt of returns) {
@@ -216,7 +239,41 @@ export const fetchBatchPharmacies = createAsyncThunk(
                 pharmacies.push({ id: rt.pharmacyId, name: rt.pharmacyName || rt.pharmacyId });
             }
         }
-        return pharmacies;
+        for (const m of memos) {
+            const pid = m.pharmacyId;
+            if (pid && !seen.has(pid)) {
+                seen.add(pid);
+                pharmacies.push({ id: pid, name: m.pharmacyName || pid });
+            }
+        }
+        const settledPharmacyIds = new Set(
+            (payRes.data || [])
+                .filter((p) => p.status !== 'failed')
+                .map((p) => p.pharmacyId)
+        );
+
+        const pharmacyMemosPaidForPayout = (pharmacyId: string): boolean => {
+            const mine = memos.filter((m) => m.pharmacyId === pharmacyId);
+            if (mine.length === 0) return false;
+            return mine.every((m) => {
+                const s = (m.paymentStatus || '').toLowerCase();
+                return s === 'paid' || s === 'partial';
+            });
+        };
+
+        const withFlags: BatchPharmacy[] = pharmacies.map((p) => ({
+            id: p.id,
+            name: p.name,
+            payoutRecorded: settledPharmacyIds.has(p.id),
+            debitMemosPaidForPayout: pharmacyMemosPaidForPayout(p.id),
+        }));
+
+        const paidReadyOnly = withFlags.filter((p) => p.debitMemosPaidForPayout);
+        paidReadyOnly.sort((a, b) => {
+            if (a.payoutRecorded !== b.payoutRecorded) return a.payoutRecorded ? 1 : -1;
+            return a.name.localeCompare(b.name);
+        });
+        return paidReadyOnly;
     }
 );
 

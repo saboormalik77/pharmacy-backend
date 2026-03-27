@@ -27,6 +27,10 @@ function pct(v: number | null | undefined) {
     return `${(v ?? 0).toFixed(1)}%`;
 }
 
+function isDebitMemoShipped(memo: DebitMemo): boolean {
+    return memo.raStatus === 'shipped';
+}
+
 function getPaymentBadge(s: string): { variant: 'success' | 'warning' | 'danger' | 'default' } {
     switch (s) {
         case 'paid': return { variant: 'success' };
@@ -323,12 +327,20 @@ export default function UnpaidMemosPage() {
                                                     </td>
                                                     <td className="px-3 py-1.5">
                                                         <div className="flex items-center justify-end gap-1">
-                                                            <button onClick={() => openPaymentModal(memo)} className="inline-flex items-center gap-0.5 px-2 py-1 rounded text-[11px] font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors whitespace-nowrap">
-                                                                <CreditCard className="w-3 h-3" /> Pay
-                                                            </button>
-                                                            <button onClick={() => setReminderMemo(memo)} className="inline-flex items-center gap-0.5 px-2 py-1 rounded text-[11px] font-medium bg-yellow-100 text-yellow-800 border border-yellow-300 hover:bg-yellow-200 transition-colors whitespace-nowrap">
-                                                                <Send className="w-3 h-3" /> Remind
-                                                            </button>
+                                                            {isDebitMemoShipped(memo) ? (
+                                                                <>
+                                                                    <button onClick={() => openPaymentModal(memo)} className="inline-flex items-center gap-0.5 px-2 py-1 rounded text-[11px] font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors whitespace-nowrap">
+                                                                        <CreditCard className="w-3 h-3" /> Pay
+                                                                    </button>
+                                                                    <button onClick={() => setReminderMemo(memo)} className="inline-flex items-center gap-0.5 px-2 py-1 rounded text-[11px] font-medium bg-yellow-100 text-yellow-800 border border-yellow-300 hover:bg-yellow-200 transition-colors whitespace-nowrap">
+                                                                        <Send className="w-3 h-3" /> Remind
+                                                                    </button>
+                                                                </>
+                                                            ) : (
+                                                                <span className="text-[10px] text-gray-400 whitespace-nowrap" title="Record outbound shipment in RA Tracking before payment actions">
+                                                                    Ship first
+                                                                </span>
+                                                            )}
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -736,7 +748,7 @@ export default function UnpaidMemosPage() {
 
                         <div className="px-4 py-3 space-y-3">
                             <div className="p-2.5 bg-blue-50 rounded text-xs text-blue-700">
-                                A payment reminder will be sent to the manufacturer's contact email. You can override the destination below.
+                                Sent to the <strong>reverse distributor</strong> contact email for this destination — same address as RA request emails (from Distributors). Use override below only if you need a different recipient.
                             </div>
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-0.5">Email Override (optional)</label>
