@@ -35,6 +35,7 @@ import {
 } from '@/lib/store/returnTransactionsSlice';
 import { unassignSingleReturn } from '@/lib/store/batchSlice';
 import { ReturnTransaction, ReturnTransactionItem, WineCellarItem } from '@/lib/types';
+import { apiClient } from '@/lib/api/apiClient';
 
 // ── Helpers ────────────────────────────────────────────────────
 
@@ -142,6 +143,21 @@ export default function ReturnDetailPage() {
     const [editItemModal, setEditItemModal] = useState<ReturnTransactionItem | null>(null);
     const [editItemForm, setEditItemForm] = useState({ quantity: '', standardPrice: '', returnStatus: 'tbd', destination: '', memo: '' });
     const debouncedItemSearch = useDebounce(itemSearch, 500);
+
+    // Reverse distributors for Destination select in edit item modal
+    const [reverseDistributors, setReverseDistributors] = useState<{ id: string; name: string }[]>([]);
+    useEffect(() => {
+        (async () => {
+            try {
+                const res = await apiClient.get<{ status: string; data: { id: string; name: string; email: string }[] }>(
+                    '/admin/reverse-distributors', true
+                );
+                setReverseDistributors(res.data || []);
+            } catch {
+                // non-critical — dropdown stays empty
+            }
+        })();
+    }, []);
 
     // Wine Cellar integration state
     const [wcModal, setWcModal] = useState(false);
@@ -1236,21 +1252,22 @@ export default function ReturnDetailPage() {
                                         <option value="non_returnable">Non-Returnable</option>
                                     </select>
                                 </div>
-                                {editItemForm.returnStatus === 'returnable' && (
-                                    <div>
-                                        <label className="block text-[11px] font-medium text-gray-700 mb-0.5">
-                                            Destination 
-                                            <span className="text-gray-400 font-normal">(auto-assigned if empty)</span>
-                                        </label>
-                                        <select value={editItemForm.destination} onChange={e => setEditItemForm({ ...editItemForm, destination: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500">
-                                            <option value="">— Auto-assign —</option>
-                                            <option value="inmar">Inmar</option>
-                                            <option value="qualanex">Qualanex</option>
-                                            <option value="pharmalink">PharmaLink</option>
-                                            <option value="other">Other</option>
-                                        </select>
-                                    </div>
-                                )}
+                                <div>
+                                    <label className="block text-[11px] font-medium text-gray-700 mb-0.5">
+                                        Destination
+                                        <span className="text-gray-400 font-normal ml-1">(auto-assigned if empty)</span>
+                                    </label>
+                                    <select
+                                        value={editItemForm.destination}
+                                        onChange={e => setEditItemForm({ ...editItemForm, destination: e.target.value })}
+                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                    >
+                                        <option value="">— Auto-assign —</option>
+                                        {reverseDistributors.map(d => (
+                                            <option key={d.id} value={d.name}>{d.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
                                 <div>
                                     <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Memo</label>
                                     <input type="text" value={editItemForm.memo} onChange={e => setEditItemForm({ ...editItemForm, memo: e.target.value })} placeholder="Optional memo" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
