@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { authenticateAdmin } from '../middleware/adminAuth';
+import { upload } from '../middleware/upload';
 import {
   listDebitMemosHandler,
   getDebitMemoHandler,
@@ -374,7 +375,7 @@ router.post('/:id/schedule-pickup', authenticateAdmin, scheduleDebitMemoPickupHa
  *       404:
  *         description: Debit memo not found
  */
-router.post('/:id/record-payment', authenticateAdmin, recordPaymentHandler);
+router.post('/:id/record-payment', authenticateAdmin, upload.single('creditMemo'), recordPaymentHandler);
 
 /**
  * @swagger

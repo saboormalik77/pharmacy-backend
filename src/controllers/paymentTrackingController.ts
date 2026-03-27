@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { catchAsync } from '../utils/catchAsync';
+import { AppError } from '../utils/appError';
+import { supabaseAdmin } from '../config/supabase';
 import * as paymentTrackingService from '../services/paymentTrackingService';
 
 // ============================================================
@@ -29,17 +31,56 @@ export const listUnpaidHandler = catchAsync(
 
 // ============================================================
 // POST /api/admin/debit-memos/:id/record-payment — Record payment
+// Accepts multipart/form-data with optional creditMemo PDF file
 // ============================================================
 export const recordPaymentHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const { amountReceived, paymentDate, reference, notes } = req.body;
+
+    if (!amountReceived) {
+      throw new AppError('amountReceived is required', 400);
+    }
+
+    // Upload credit memo PDF if provided
+    let creditMemoUrl: string | undefined;
+    const file = (req as any).file as Express.Multer.File | undefined;
+
+    if (!file) {
+      throw new AppError('Credit memo PDF is required', 400);
+    }
+
+    if (!supabaseAdmin) {
+      throw new AppError('Supabase admin client not configured', 500);
+    }
+
+    const timestamp = Date.now();
+    const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
+    const filePath = `memo-documents/${req.params.id}/${timestamp}-${sanitizedName}`;
+
+    const { error: uploadError } = await supabaseAdmin.storage
+      .from('documents')
+      .upload(filePath, file.buffer, {
+        contentType: file.mimetype,
+        upsert: false,
+      });
+
+    if (uploadError) {
+      throw new AppError(`Failed to upload credit memo: ${uploadError.message}`, 400);
+    }
+
+    const { data: urlData } = supabaseAdmin.storage
+      .from('documents')
+      .getPublicUrl(filePath);
+
+    creditMemoUrl = urlData?.publicUrl;
 
     const result = await paymentTrackingService.recordPayment(
       req.params.id,
       Number(amountReceived),
       paymentDate,
       reference,
-      notes
+      notes,
+      creditMemoUrl
     );
 
     res.status(200).json({ status: 'success', data: result });

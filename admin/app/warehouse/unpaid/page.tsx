@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
     Search, Loader2, ChevronLeft, ChevronRight, X,
     DollarSign, Clock, AlertCircle, Send, CreditCard,
-    TrendingUp, TrendingDown, BarChart3, CheckCircle,
+    TrendingUp, TrendingDown, BarChart3, CheckCircle, FileText, Upload,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
@@ -72,6 +72,7 @@ export default function UnpaidMemosPage() {
     const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
     const [paymentRef, setPaymentRef] = useState('');
     const [paymentNotes, setPaymentNotes] = useState('');
+    const [creditMemoFile, setCreditMemoFile] = useState<File | null>(null);
 
     // Reminder modal
     const [reminderMemo, setReminderMemo] = useState<DebitMemo | null>(null);
@@ -140,22 +141,26 @@ export default function UnpaidMemosPage() {
         setPaymentDate(new Date().toISOString().split('T')[0]);
         setPaymentRef('');
         setPaymentNotes('');
+        setCreditMemoFile(null);
     };
 
     const handleRecordPayment = async () => {
         if (!paymentMemo) return;
         const amt = parseFloat(paymentAmount);
         if (isNaN(amt) || amt < 0) { addToast('Enter a valid amount', 'error'); return; }
+        if (!creditMemoFile) { addToast('Credit memo PDF is required', 'error'); return; }
         const result = await dispatch(recordPayment({
             memoId: paymentMemo.id,
             amountReceived: amt,
             paymentDate: new Date(paymentDate).toISOString(),
             reference: paymentRef || undefined,
             notes: paymentNotes || undefined,
+            creditMemoFile,
         }));
         if (recordPayment.fulfilled.match(result)) {
             addToast(`Payment of ${fmt(amt)} recorded for ${paymentMemo.memoNumber}`, 'success');
             setPaymentMemo(null);
+            setCreditMemoFile(null);
             dispatch(fetchUnpaidMemos({ search: debouncedSearch || undefined, destination: destination || undefined, page }));
         }
     };
@@ -669,11 +674,58 @@ export default function UnpaidMemosPage() {
                                 <label className="block text-xs font-medium text-gray-700 mb-0.5">Notes</label>
                                 <textarea value={paymentNotes} onChange={e => setPaymentNotes(e.target.value)} rows={2} className="w-full px-2.5 py-1.5 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500 resize-none" placeholder="Optional notes..." />
                             </div>
+
+                            {/* Credit Memo Upload (required) */}
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-0.5">
+                                    Credit Memo <span className="text-red-500">*</span>
+                                    <span className="ml-1 text-[10px] font-normal text-gray-400">(PDF only)</span>
+                                </label>
+                                <label className={`flex items-center gap-3 w-full px-3 py-2.5 border-2 border-dashed rounded cursor-pointer transition-colors ${creditMemoFile ? 'border-green-400 bg-green-50' : 'border-gray-300 bg-gray-50 hover:border-primary-400 hover:bg-primary-50'}`}>
+                                    <input
+                                        type="file"
+                                        accept="application/pdf"
+                                        className="hidden"
+                                        onChange={e => {
+                                            const f = e.target.files?.[0] || null;
+                                            if (f && f.type !== 'application/pdf') {
+                                                addToast('Only PDF files are allowed', 'error');
+                                                return;
+                                            }
+                                            setCreditMemoFile(f);
+                                        }}
+                                    />
+                                    {creditMemoFile ? (
+                                        <>
+                                            <FileText className="w-4 h-4 text-green-600 flex-shrink-0" />
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-xs font-medium text-green-700 truncate">{creditMemoFile.name}</p>
+                                                <p className="text-[10px] text-green-600">{(creditMemoFile.size / 1024).toFixed(1)} KB — Click to change</p>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={e => { e.preventDefault(); setCreditMemoFile(null); }}
+                                                className="flex-shrink-0 text-gray-400 hover:text-red-500 transition-colors"
+                                            >
+                                                <X className="w-3.5 h-3.5" />
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Upload className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                                            <div>
+                                                <p className="text-xs text-gray-600 font-medium">Click to upload credit memo</p>
+                                                <p className="text-[10px] text-gray-400">PDF up to 10MB</p>
+                                            </div>
+                                        </>
+                                    )}
+                                </label>
+                            </div>
                         </div>
 
                         <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200">
-                            <button onClick={() => setPaymentMemo(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleRecordPayment} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors">
+                            <button onClick={() => { setPaymentMemo(null); setCreditMemoFile(null); }} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button onClick={handleRecordPayment} disabled={isActionLoading || !creditMemoFile} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors">
                                 {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CreditCard className="w-3.5 h-3.5" />}
                                 Record Payment
                             </button>

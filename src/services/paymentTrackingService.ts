@@ -100,7 +100,8 @@ export const recordPayment = async (
   amountReceived: number,
   paymentDate?: string,
   reference?: string,
-  notes?: string
+  notes?: string,
+  creditMemoUrl?: string
 ): Promise<any> => {
   const sb = ensureAdmin();
   await assertDebitMemoShippedForPaymentActions(sb, debitMemoId);
@@ -111,6 +112,7 @@ export const recordPayment = async (
     p_payment_date: paymentDate || new Date().toISOString(),
     p_reference: reference || null,
     p_notes: notes || null,
+    p_credit_memo_url: creditMemoUrl || null,
   });
   handleRpcError(data, error, 'Failed to record payment');
   return data.data;
