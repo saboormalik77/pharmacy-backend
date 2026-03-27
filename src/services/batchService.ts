@@ -97,13 +97,22 @@ export const createBatch = async (
 export const listBatches = async (
   status?: string,
   page?: number,
-  limit?: number
+  limit?: number,
+  options?: {
+    allDebitMemosShipped?: boolean;
+    excludeIfNoRemainingPharmacyPayout?: boolean;
+    allDebitMemosPaidOrPartial?: boolean;
+  }
 ): Promise<{ data: ReturnBatch[]; pagination: any }> => {
   const sb = ensureAdmin();
+  const o = options ?? {};
   const { data, error } = await sb.rpc('list_batches', {
     p_status: status || null,
     p_page: page || 1,
     p_limit: limit || 20,
+    p_all_debit_memos_shipped: Boolean(o.allDebitMemosShipped),
+    p_exclude_if_no_remaining_pharmacy_payout: Boolean(o.excludeIfNoRemainingPharmacyPayout),
+    p_all_debit_memos_paid_or_partial: Boolean(o.allDebitMemosPaidOrPartial),
   });
   handleRpcError(data, error, 'Failed to list batches');
   return { data: data.data as ReturnBatch[], pagination: data.pagination };

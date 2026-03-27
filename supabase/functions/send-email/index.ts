@@ -14,7 +14,7 @@ interface EmailPayload {
   html?: string;
   text?: string;
   replyTo?: string;
-  templateType?: 'ra-request' | 'ra-reminder';
+  templateType?: 'ra-request' | 'ra-reminder' | 'payment-reminder';
   templateData?: Record<string, unknown>;
   
   recipientName?: string;
@@ -204,6 +204,55 @@ function buildRAReminderHtml(
 </body></html>`;
 }
 
+function buildPaymentReminderHtml(
+  data: Record<string, any>,
+  recipientName?: string,
+  contactInfo?: { name?: string; email?: string; phone?: string }
+): string {
+  const cName = contactInfo?.name || 'Returns Department';
+  const cEmail = contactInfo?.email || '';
+  const cPhone = contactInfo?.phone || '';
+
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:20px;font-family:Arial,sans-serif;color:#374151;background:#f9fafb;">
+<div style="max-width:640px;margin:0 auto;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.1);overflow:hidden;">
+  <div style="background:#dc2626;color:#fff;padding:24px;text-align:center;">
+    <h1 style="margin:0;font-size:22px;">Payment Reminder</h1>
+  </div>
+  <div style="padding:32px;">
+    <p>Dear ${recipientName || 'Accounts Payable'},</p>
+    <p>This is a payment reminder for the following debit memo that remains outstanding.</p>
+    <div style="background:#fef2f2;border-left:4px solid #dc2626;padding:16px;margin-bottom:24px;">
+      <p style="margin:0;font-weight:bold;color:#991b1b;">Outstanding Payment:</p>
+      <p style="margin:8px 0 0;color:#991b1b;font-size:18px;font-weight:bold;">${fmt(data.outstandingAmount || 0)}</p>
+    </div>
+    <div style="background:#f3f4f6;padding:20px;border-radius:6px;margin-bottom:24px;">
+      <h3 style="margin:0 0 16px;">Payment Details</h3>
+      <table style="width:100%;border-collapse:collapse;">
+        <tr><td style="padding:4px 0;font-weight:bold;width:140px;">Debit Memo:</td><td>${data.memoNumber}</td></tr>
+        <tr><td style="padding:4px 0;font-weight:bold;">Pharmacy:</td><td>${data.pharmacyName}</td></tr>
+        <tr><td style="padding:4px 0;font-weight:bold;">Destination:</td><td>${data.destination || 'N/A'}</td></tr>
+        <tr><td style="padding:4px 0;font-weight:bold;">Original Amount:</td><td style="font-weight:bold;">${fmt(data.originalAmount || 0)}</td></tr>
+        <tr><td style="padding:4px 0;font-weight:bold;">Outstanding:</td><td style="font-weight:bold;color:#dc2626;">${fmt(data.outstandingAmount || 0)}</td></tr>
+      </table>
+    </div>
+    <div style="background:#eff6ff;border-left:4px solid #3b82f6;padding:16px;margin-bottom:24px;">
+      <p style="margin:0;font-weight:bold;color:#1e40af;">Payment Request:</p>
+      <p style="margin:8px 0 0;color:#1e40af;">Please process payment for the outstanding amount of <strong>${fmt(data.outstandingAmount || 0)}</strong> at your earliest convenience.</p>
+    </div>
+    <p>If you have any questions regarding this payment or need additional documentation, please don't hesitate to contact us.</p>
+    <p>Thank you for your prompt attention to this matter.</p>
+    <p>Best regards,</p>
+  </div>
+  <div style="background:#f9fafb;padding:24px;border-top:1px solid #e5e7eb;text-align:center;color:#6b7280;font-size:14px;">
+    <p style="margin:0 0 6px;font-weight:bold;">${cName}</p>
+    ${cEmail ? `<p style="margin:0 0 4px;">${cEmail}</p>` : ''}
+    ${cPhone ? `<p style="margin:0;">Phone: ${cPhone}</p>` : ''}
+  </div>
+</div>
+</body></html>`;
+}
+
 // ── Main handler ─────────────────────────────────────────────
 
 serve(async (req: Request) => {
@@ -247,6 +296,9 @@ serve(async (req: Request) => {
         const count = (templateData.requestCount as number) || 1;
         subject = subject || `REMINDER: RA Request — ${templateData.memoNumber} (Follow-up #${count})`;
         html = buildRAReminderHtml(templateData, recipientName, contactInfo);
+      } else if (templateType === 'payment-reminder') {
+        subject = subject || `Payment Reminder — ${templateData.memoNumber}`;
+        html = buildPaymentReminderHtml(templateData, recipientName, contactInfo);
       }
     }
 

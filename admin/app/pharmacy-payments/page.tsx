@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { Search, DollarSign, Calculator, ChevronLeft, ChevronRight, Clock, CheckCircle, AlertTriangle, Eye, Plus } from 'lucide-react';
+import { Search, DollarSign, Calculator, ChevronLeft, ChevronRight, Clock, CheckCircle, AlertTriangle, Plus } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { 
@@ -15,7 +15,8 @@ import {
   clearCalculation,
   clearBatchPharmacies,
   setFilters,
-  PharmacyPayment
+  PharmacyPayment,
+  BatchPharmacy,
 } from '@/lib/store/pharmacyPaymentsSlice';
 import { useDebounce } from '@/lib/hooks/useDebounce';
 
@@ -31,7 +32,7 @@ interface CalculatePayoutModalProps {
   isCalculating: boolean;
   isCreating: boolean;
   openBatches: { id: string; batchName: string }[];
-  batchPharmacies: { id: string; name: string }[];
+  batchPharmacies: BatchPharmacy[];
   isLoadingOpenBatches: boolean;
   isLoadingBatchPharmacies: boolean;
 }
@@ -53,6 +54,10 @@ function CalculatePayoutModal({
   const [pharmacyId, setPharmacyId] = useState('');
   const [batchId, setBatchId] = useState('');
 
+  const pharmacyEligible = (p: BatchPharmacy) =>
+    !p.payoutRecorded && p.debitMemosPaidForPayout;
+  const eligiblePharmacyCount = batchPharmacies.filter(pharmacyEligible).length;
+
   const handleBatchChange = (value: string) => {
     setBatchId(value);
     setPharmacyId('');
@@ -60,7 +65,10 @@ function CalculatePayoutModal({
   };
 
   const handleCalculate = () => {
-    if (pharmacyId && batchId) onCalculate(pharmacyId, batchId);
+    if (!pharmacyId || !batchId) return;
+    const picked = batchPharmacies.find((p) => p.id === pharmacyId);
+    if (!picked || !pharmacyEligible(picked)) return;
+    onCalculate(pharmacyId, batchId);
   };
 
   const handleClose = () => {
@@ -93,7 +101,12 @@ function CalculatePayoutModal({
             <div className="space-y-3">
               {/* Batch dropdown */}
               <div>
-                <label className="block text-[11px] font-medium text-gray-600 mb-1">Batch <span className="text-gray-400 font-normal">(open only)</span></label>
+                <label className="block text-[11px] font-medium text-gray-600 mb-1">
+                  Batch{' '}
+                  <span className="text-gray-400 font-normal">
+                    (closed, all memos shipped; at least one pharmacy fully RD-paid + payout remaining)
+                  </span>
+                </label>
                 {isLoadingOpenBatches ? (
                   <div className="flex items-center gap-1.5 text-xs text-gray-400 py-1.5">
                     <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-blue-500"></div>
@@ -105,14 +118,17 @@ function CalculatePayoutModal({
                     onChange={(e) => handleBatchChange(e.target.value)}
                     className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
                   >
-                    <option value="">Select an open batch...</option>
+                    <option value="">Select a closed batch...</option>
                     {openBatches.map((b) => (
                       <option key={b.id} value={b.id}>{b.batchName}</option>
                     ))}
                   </select>
                 )}
                 {!isLoadingOpenBatches && openBatches.length === 0 && (
-                  <p className="text-[10px] text-gray-400 mt-1">No open batches found.</p>
+                  <p className="text-[10px] text-gray-400 mt-1">
+                    No batches match: closed, all memos shipped, at least one pharmacy with all of its debit
+                    memos paid or partial on Unpaid, and that pharmacy still needs a payout record.
+                  </p>
                 )}
               </div>
 
@@ -125,19 +141,37 @@ function CalculatePayoutModal({
                     Loading pharmacies...
                   </div>
                 ) : (
-                  <select
-                    value={pharmacyId}
-                    onChange={(e) => setPharmacyId(e.target.value)}
-                    disabled={!batchId}
-                    className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
-                  >
-                    <option value="">
-                      {!batchId ? 'Select a batch first...' : batchPharmacies.length === 0 ? 'No pharmacies in this batch' : 'Select a pharmacy...'}
-                    </option>
-                    {batchPharmacies.map((p) => (
-                      <option key={p.id} value={p.id}>{p.name}</option>
-                    ))}
-                  </select>
+                  <>
+                    <select
+                      value={pharmacyId}
+                      onChange={(e) => setPharmacyId(e.target.value)}
+                      disabled={!batchId}
+                      className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
+                    >
+                      <option value="">
+                        {!batchId
+                          ? 'Select a batch first...'
+                          : batchPharmacies.length === 0
+                            ? 'No pharmacies with all debit memos paid/partial yet (Warehouse / Unpaid)'
+                            : eligiblePharmacyCount === 0
+                              ? 'All listed pharmacies already have a payout record'
+                              : 'Select a pharmacy...'}
+                      </option>
+                      {batchPharmacies.map((p) => (
+                        <option key={p.id} value={p.id} disabled={p.payoutRecorded}>
+                          {p.payoutRecorded ? `${p.name} — payout already recorded` : p.name}
+                        </option>
+                      ))}
+                    </select>
+                    {batchId &&
+                      batchPharmacies.length > 0 &&
+                      batchPharmacies.some((p) => p.payoutRecorded) &&
+                      eligiblePharmacyCount > 0 && (
+                        <p className="text-[10px] text-gray-400 mt-1">
+                          This batch stays listed until every pharmacy has a payout record. Entries with “payout already recorded” are read-only.
+                        </p>
+                      )}
+                  </>
                 )}
               </div>
             </div>
@@ -174,7 +208,16 @@ function CalculatePayoutModal({
           {!calculation ? (
             <button
               onClick={handleCalculate}
-              disabled={isCalculating || !pharmacyId || !batchId}
+              disabled={(() => {
+                const picked = batchPharmacies.find((p) => p.id === pharmacyId);
+                return (
+                  isCalculating ||
+                  !pharmacyId ||
+                  !batchId ||
+                  !picked ||
+                  !pharmacyEligible(picked)
+                );
+              })()}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-primary-500 text-white rounded hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <Calculator className={`w-3.5 h-3.5 ${isCalculating ? 'animate-spin' : ''}`} />
@@ -434,31 +477,31 @@ function PharmacyPaymentsPageContent() {
                       <td className="px-3 py-1.5 whitespace-nowrap text-xs text-gray-500">
                         {payment.createdAt ? new Date(payment.createdAt).toLocaleDateString() : 'N/A'}
                       </td>
-                      <td className="px-3 py-1.5 whitespace-nowrap">
-                        <div className="flex items-center gap-1">
+                      <td className="px-3 py-1.5">
+                        <div className="flex flex-wrap items-center gap-1">
                           <button
+                            type="button"
                             onClick={() => setViewModal(payment)}
-                            className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                            title="View Details"
+                            className="px-2 py-1 text-[10px] font-medium text-blue-800 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 transition-colors"
                           >
-                            <Eye className="w-3.5 h-3.5" />
+                            View
                           </button>
                           {payment.status === 'pending' && (
                             <button
+                              type="button"
                               onClick={() => handleStatusUpdate(payment.id, 'processing')}
-                              className="p-1 text-orange-600 hover:bg-orange-50 rounded transition-colors"
-                              title="Mark as Processing"
+                              className="px-2 py-1 text-[10px] font-medium text-orange-900 bg-orange-50 border border-orange-200 rounded hover:bg-orange-100 transition-colors"
                             >
-                              <Clock className="w-3.5 h-3.5" />
+                              Processing
                             </button>
                           )}
                           {payment.status === 'processing' && (
                             <button
+                              type="button"
                               onClick={() => handleStatusUpdate(payment.id, 'paid')}
-                              className="p-1 text-green-600 hover:bg-green-50 rounded transition-colors"
-                              title="Mark as Paid"
+                              className="px-2 py-1 text-[10px] font-medium text-green-900 bg-green-50 border border-green-200 rounded hover:bg-green-100 transition-colors"
                             >
-                              <CheckCircle className="w-3.5 h-3.5" />
+                              Mark paid
                             </button>
                           )}
                         </div>

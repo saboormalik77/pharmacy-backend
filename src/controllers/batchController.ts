@@ -8,12 +8,27 @@ import * as batchService from '../services/batchService';
 // ============================================================
 export const listBatchesHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
-    const { status, page, limit } = req.query as Record<string, string>;
+    const {
+      status,
+      page,
+      limit,
+      allMemosShipped,
+      excludeCompletePharmacyPayouts,
+      allDebitMemosPaid,
+    } = req.query as Record<string, string>;
+
+    const truthy = (v: string | undefined) =>
+      typeof v === 'string' && ['true', '1', 'yes'].includes(v.toLowerCase());
 
     const result = await batchService.listBatches(
       status,
       page ? Number(page) : undefined,
-      limit ? Number(limit) : undefined
+      limit ? Number(limit) : undefined,
+      {
+        allDebitMemosShipped: truthy(allMemosShipped),
+        excludeIfNoRemainingPharmacyPayout: truthy(excludeCompletePharmacyPayouts),
+        allDebitMemosPaidOrPartial: truthy(allDebitMemosPaid),
+      }
     );
 
     res.status(200).json({
