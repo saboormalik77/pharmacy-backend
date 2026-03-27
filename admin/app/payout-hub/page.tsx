@@ -22,8 +22,8 @@ const payoutSections = [
     {
         href: '/warehouse/unpaid',
         icon: CircleDollarSign,
-        label: 'Unpaid Memos',
-        description: 'Track unpaid debit memos from manufacturers. Record payments and send payment reminders.',
+        label: 'Memos',
+        description: 'Track debit memos from manufacturers. View unpaid and paid memos, record payments, and send payment reminders.',
         color: 'text-orange-600',
         bg: 'bg-orange-50',
         border: 'border-orange-100',

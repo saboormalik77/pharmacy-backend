@@ -7,6 +7,8 @@ export interface PaymentTrackingState {
     unpaidMemos: (DebitMemo & { daysOutstanding?: number; outstandingAmount?: number })[];
     unpaidPagination: { page: number; limit: number; total: number; totalPages: number } | null;
     unpaidSummary: UnpaidSummary | null;
+    paidMemos: DebitMemo[];
+    paidPagination: { page: number; limit: number; total: number; totalPages: number } | null;
     askVsReceived: AskVsReceivedRow[];
     askVsReceivedTotals: Record<string, any> | null;
     manufacturerSummary: ManufacturerPaymentSummary[];
@@ -20,6 +22,8 @@ const initialState: PaymentTrackingState = {
     unpaidMemos: [],
     unpaidPagination: null,
     unpaidSummary: null,
+    paidMemos: [],
+    paidPagination: null,
     askVsReceived: [],
     askVsReceivedTotals: null,
     manufacturerSummary: [],
@@ -85,6 +89,27 @@ export const sendPaymentReminder = createAsyncThunk<
     }
 });
 
+export const fetchPaidMemos = createAsyncThunk<
+    { data: DebitMemo[]; pagination: any },
+    { destination?: string; search?: string; page?: number; limit?: number } | void,
+    { rejectValue: string }
+>('paymentTracking/fetchPaid', async (params, { rejectWithValue }) => {
+    try {
+        const { apiClient } = await import('@/lib/api/apiClient');
+        const q: Record<string, string> = { payment_status: 'paid' };
+        if (params?.destination) q.destination = params.destination;
+        if (params?.search) q.search = params.search;
+        if (params?.page) q.page = String(params.page);
+        if (params?.limit) q.limit = String(params.limit);
+        const res = await apiClient.get<{
+            status: string; data: DebitMemo[]; pagination: any;
+        }>('/admin/debit-memos', true, q);
+        return { data: res.data ?? [], pagination: res.pagination ?? null };
+    } catch (err: any) {
+        return rejectWithValue(err?.message || 'Failed to fetch paid memos');
+    }
+});
+
 export const fetchAskVsReceived = createAsyncThunk<
     { data: AskVsReceivedRow[]; totals: any },
     { groupBy?: string; period?: string } | void,
@@ -143,6 +168,14 @@ const paymentTrackingSlice = createSlice({
             })
             .addCase(fetchUnpaidMemos.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; })
 
+            .addCase(fetchPaidMemos.pending, (state) => { state.isLoading = true; state.error = null; })
+            .addCase(fetchPaidMemos.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.paidMemos = action.payload.data ?? [];
+                state.paidPagination = action.payload.pagination ?? null;
+            })
+            .addCase(fetchPaidMemos.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; })
+
             .addCase(recordPayment.pending, (state) => { state.isActionLoading = true; state.error = null; })
             .addCase(recordPayment.fulfilled, (state, action) => {
                 state.isActionLoading = false;
@@ -177,5 +210,6 @@ const paymentTrackingSlice = createSlice({
     },
 });
 
+export { fetchPaidMemos };
 export const { clearError } = paymentTrackingSlice.actions;
 export default paymentTrackingSlice.reducer;
