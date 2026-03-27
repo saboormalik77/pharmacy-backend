@@ -190,6 +190,24 @@ export const createDebitMemoFedexShipment = createAsyncThunk<
     }
 });
 
+export const scheduleDebitMemoPickup = createAsyncThunk<
+    { memo: { id: string; memoNumber: string }; pickup: { pickupConfirmationNumber: string; pickupDate: string } },
+    { memoId: string; readyTime?: string; closeTime?: string; pickupDate?: string },
+    { rejectValue: string }
+>('raTracking/schedulePickup', async ({ memoId, readyTime, closeTime, pickupDate }, { rejectWithValue }) => {
+    try {
+        const { apiClient } = await import('@/lib/api/apiClient');
+        const res = await apiClient.post<{ status: string; data: any }>(
+            `/admin/debit-memos/${memoId}/schedule-pickup`,
+            { readyTime, closeTime, pickupDate },
+            true
+        );
+        return res.data;
+    } catch (err: any) {
+        return rejectWithValue(err?.message || 'Failed to schedule pickup');
+    }
+});
+
 export const fetchEmailPreview = createAsyncThunk<
     RAEmailTemplate,
     { memoId: string; type?: 'request' | 'reminder'; emailOverride?: string },

@@ -15,7 +15,7 @@ import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { useDebounce } from '@/lib/hooks/useDebounce';
 import {
     fetchRATracking, sendRARequest, receiveRA, resendRA, shipMemo,
-    createDebitMemoFedexShipment,
+    createDebitMemoFedexShipment, scheduleDebitMemoPickup,
     fetchEmailPreview, clearError, clearEmailPreview,
 } from '@/lib/store/raTrackingSlice';
 import { DebitMemo, RAEmailTemplate } from '@/lib/types';
@@ -97,6 +97,44 @@ export default function RATrackingPage() {
         packages: { trackingNumber: string; hasLabel: boolean }[];
     } | null>(null);
     const [fedexLabels, setFedexLabels] = useState<Record<string, string>>({});
+    // Schedule pickup state
+    const [pickupForm, setPickupForm] = useState({
+        readyTime: '09:00',
+        closeTime: '17:00',
+        pickupDate: new Date().toISOString().split('T')[0],
+    });
+    const [pickupLoading, setPickupLoading] = useState(false);
+    const [pickupConfirmation, setPickupConfirmation] = useState('');
+
+    const [printLabelLoading, setPrintLabelLoading] = useState<string | null>(null);
+
+    const printDebitMemoLabel = async (memoId: string) => {
+        setPrintLabelLoading(memoId);
+        try {
+            const { cookieUtils } = await import('@/lib/utils/cookies');
+            const token = cookieUtils.getAuthToken();
+            const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+            const res = await fetch(`${baseUrl}/admin/debit-memos/${encodeURIComponent(memoId)}/shipping-label`, {
+                headers: { Authorization: `Bearer ${token}`, Accept: 'text/html' },
+            });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({ message: 'Print failed' }));
+                throw new Error(err.message || 'Print failed');
+            }
+            const htmlContent = await res.text();
+            const printWindow = window.open('', '_blank');
+            if (printWindow) {
+                printWindow.document.write(htmlContent);
+                printWindow.document.close();
+                printWindow.onload = () => { setTimeout(() => printWindow.print(), 500); };
+            } else {
+                throw new Error('Unable to open print window. Please check popup blockers.');
+            }
+        } catch (e: any) {
+            addToast(e.message || 'Failed to print label', 'error');
+        }
+        setPrintLabelLoading(null);
+    };
 
     const addToast = useCallback((msg: string, type: Toast['type']) => {
         setToasts(prev => [...prev, { id: Date.now().toString(), message: msg, type }]);
@@ -148,6 +186,9 @@ export default function RATrackingPage() {
         setFedexLoading(false);
         setFedexResult(null);
         setFedexLabels({});
+        setPickupConfirmation('');
+        setPickupLoading(false);
+        setPickupForm({ readyTime: '09:00', closeTime: '17:00', pickupDate: new Date().toISOString().split('T')[0] });
         setActiveModal('ship');
     };
 
@@ -405,6 +446,20 @@ export default function RATrackingPage() {
                                                             className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 transition-colors whitespace-nowrap"
                                                         >
                                                             <Truck className="w-3 h-3" /> Ship
+                                                        </button>
+                                                    )}
+                                                    {memo.raStatus === 'shipped' && memo.outboundTracking && (
+                                                        <button
+                                                            onClick={e => { e.stopPropagation(); printDebitMemoLabel(memo.id); }}
+                                                            disabled={printLabelLoading === memo.id}
+                                                            title="Print shipping label"
+                                                            className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 transition-colors whitespace-nowrap disabled:opacity-50"
+                                                        >
+                                                            {printLabelLoading === memo.id
+                                                                ? <Loader2 className="w-3 h-3 animate-spin" />
+                                                                : <Printer className="w-3 h-3" />
+                                                            }
+                                                            Print Labels
                                                         </button>
                                                     )}
                                                 </div>
@@ -725,15 +780,22 @@ export default function RATrackingPage() {
                             {/* FedEx Result */}
                             {fedexResult && (
                                 <div className="space-y-4">
+                                    {/* Shipment header banner */}
+                                    <div className="bg-blue-600 rounded-lg px-4 py-3 flex items-center justify-between">
+                                        <p className="text-sm font-bold text-white">FedEx API Shipment</p>
+                                        <span className="text-sm font-bold text-white underline font-mono">{fedexResult.masterTrackingNumber}</span>
+                                    </div>
+
+                                    {/* Success info */}
                                     <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-3">
                                         <div className="flex items-center gap-2">
                                             <CheckCircle className="w-5 h-5 text-green-600" />
-                                            <p className="text-sm font-semibold text-green-800">Shipment Created & Recorded</p>
+                                            <p className="text-sm font-semibold text-green-800">Shipment Created Successfully</p>
                                         </div>
                                         <div className="grid grid-cols-2 gap-2 text-xs">
                                             <div>
                                                 <span className="text-gray-500">Master Tracking:</span>
-                                                <span className="ml-1 font-mono font-medium text-gray-900">{fedexResult.masterTrackingNumber}</span>
+                                                <span className="ml-1 font-mono font-bold text-gray-900">{fedexResult.masterTrackingNumber}</span>
                                             </div>
                                             <div>
                                                 <span className="text-gray-500">Packages:</span>
@@ -744,28 +806,40 @@ export default function RATrackingPage() {
 
                                     {/* Package Tracking Numbers */}
                                     <div className="space-y-2">
-                                        <p className="text-sm font-medium text-gray-700">Package Tracking Numbers:</p>
-                                        <div className="grid grid-cols-1 gap-2">
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-sm font-semibold text-gray-800">Package Tracking Numbers:</p>
+                                            {selectedMemo && (
+                                                <button
+                                                    onClick={() => printDebitMemoLabel(selectedMemo.id)}
+                                                    disabled={printLabelLoading === selectedMemo.id}
+                                                    className="flex items-center gap-1 px-2 py-1 bg-green-100 hover:bg-green-200 text-xs text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
+                                                    title="Print shipping label"
+                                                >
+                                                    {printLabelLoading === selectedMemo.id
+                                                        ? <><Loader2 className="w-3 h-3 animate-spin" /> Printing...</>
+                                                        : <><Printer className="w-3 h-3" /> Print Labels</>
+                                                    }
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className="border border-gray-200 rounded-lg overflow-hidden divide-y divide-gray-100">
                                             {fedexResult.packages.map((pkg, i) => (
-                                                <div key={i} className="flex items-center justify-between text-xs bg-gray-50 rounded px-3 py-2">
+                                                <div key={i} className="flex items-center justify-between text-xs bg-white px-4 py-2.5">
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-gray-500">Package {i + 1}:</span>
-                                                        <span className="font-mono text-gray-900">{pkg.trackingNumber}</span>
+                                                        <span className="text-gray-500 font-medium">Package {i + 1}:</span>
+                                                        <span className="font-mono font-semibold text-gray-900">{pkg.trackingNumber}</span>
                                                     </div>
-                                                    {pkg.hasLabel && fedexLabels[`package${i + 1}`] && (
+                                                    {selectedMemo && (
                                                         <button
-                                                            onClick={() => {
-                                                                const base64 = fedexLabels[`package${i + 1}`];
-                                                                const byteChars = atob(base64);
-                                                                const byteArr = new Uint8Array(byteChars.length);
-                                                                for (let j = 0; j < byteChars.length; j++) byteArr[j] = byteChars.charCodeAt(j);
-                                                                const blob = new Blob([byteArr], { type: 'application/pdf' });
-                                                                const url = URL.createObjectURL(blob);
-                                                                window.open(url, '_blank');
-                                                            }}
-                                                            className="flex items-center gap-1 px-2 py-0.5 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 text-[10px] transition-colors"
+                                                            onClick={() => printDebitMemoLabel(selectedMemo.id)}
+                                                            disabled={printLabelLoading === selectedMemo.id}
+                                                            className="flex items-center justify-center w-7 h-7 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
+                                                            title="Print shipping label"
                                                         >
-                                                            <Printer className="w-3 h-3" /> Label
+                                                            {printLabelLoading === selectedMemo.id
+                                                                ? <Loader2 className="w-3 h-3 animate-spin" />
+                                                                : <Printer className="w-3 h-3" />
+                                                            }
                                                         </button>
                                                     )}
                                                 </div>
@@ -773,26 +847,89 @@ export default function RATrackingPage() {
                                         </div>
                                     </div>
 
-                                    {/* Print All Labels */}
-                                    {Object.keys(fedexLabels).length > 0 && (
-                                        <div className="flex justify-center">
-                                            <button
-                                                onClick={() => {
-                                                    Object.values(fedexLabels).forEach(base64 => {
-                                                        const byteChars = atob(base64);
-                                                        const byteArr = new Uint8Array(byteChars.length);
-                                                        for (let j = 0; j < byteChars.length; j++) byteArr[j] = byteChars.charCodeAt(j);
-                                                        const blob = new Blob([byteArr], { type: 'application/pdf' });
-                                                        const url = URL.createObjectURL(blob);
-                                                        window.open(url, '_blank');
-                                                    });
-                                                }}
-                                                className="flex items-center gap-1.5 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded-md border border-gray-300 transition-colors"
-                                            >
-                                                <Download className="w-3.5 h-3.5" /> Download All Labels
-                                            </button>
-                                        </div>
-                                    )}
+                                    {/* Schedule Pickup */}
+                                    <div className="border-t border-gray-200 pt-4 space-y-3">
+                                        <p className="text-sm font-medium text-gray-700">Schedule FedEx Pickup (Optional)</p>
+                                        {pickupConfirmation ? (
+                                            <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
+                                                <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                                                <div className="text-xs">
+                                                    <span className="text-green-800 font-medium">Pickup scheduled!</span>
+                                                    <span className="ml-1 text-green-700">Confirmation: <span className="font-mono font-semibold">{pickupConfirmation}</span></span>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className="bg-amber-50 border border-amber-200 rounded-md p-3">
+                                                    <p className="text-xs text-amber-800">
+                                                        <strong>Note:</strong> Pickup scheduling may not work in sandbox/test mode.
+                                                        You can also call FedEx directly at <strong>1-800-463-3339</strong> and say &quot;Ground Return Pickup&quot;.
+                                                    </p>
+                                                </div>
+                                                <div className="flex items-center gap-4 flex-wrap">
+                                                    <div>
+                                                        <label className="text-xs text-gray-500">Pickup Date</label>
+                                                        <input
+                                                            type="date"
+                                                            value={pickupForm.pickupDate}
+                                                            onChange={e => setPickupForm(prev => ({ ...prev, pickupDate: e.target.value }))}
+                                                            className="block w-36 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                            disabled={pickupLoading}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-xs text-gray-500">Ready Time</label>
+                                                        <input
+                                                            type="time"
+                                                            value={pickupForm.readyTime}
+                                                            onChange={e => setPickupForm(prev => ({ ...prev, readyTime: e.target.value }))}
+                                                            className="block w-28 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                            disabled={pickupLoading}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-xs text-gray-500">Close Time</label>
+                                                        <input
+                                                            type="time"
+                                                            value={pickupForm.closeTime}
+                                                            onChange={e => setPickupForm(prev => ({ ...prev, closeTime: e.target.value }))}
+                                                            className="block w-28 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                            disabled={pickupLoading}
+                                                        />
+                                                    </div>
+                                                    <div className="flex items-end">
+                                                        <button
+                                                            onClick={async () => {
+                                                                if (!selectedMemo) return;
+                                                                setPickupLoading(true);
+                                                                try {
+                                                                    const result = await dispatch(scheduleDebitMemoPickup({
+                                                                        memoId: selectedMemo.id,
+                                                                        ...pickupForm,
+                                                                    }));
+                                                                    if (scheduleDebitMemoPickup.fulfilled.match(result)) {
+                                                                        setPickupConfirmation(result.payload.pickup.pickupConfirmationNumber);
+                                                                        addToast(`Pickup scheduled: ${result.payload.pickup.pickupConfirmationNumber}`, 'success');
+                                                                    } else {
+                                                                        addToast(result.payload as string || 'Failed to schedule pickup', 'error');
+                                                                    }
+                                                                } catch {
+                                                                    addToast('Unexpected error scheduling pickup', 'error');
+                                                                } finally {
+                                                                    setPickupLoading(false);
+                                                                }
+                                                            }}
+                                                            disabled={pickupLoading}
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white text-xs font-medium rounded-md transition-colors"
+                                                        >
+                                                            {pickupLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Truck className="w-3.5 h-3.5" />}
+                                                            Schedule Pickup
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
                             )}
 

@@ -4,6 +4,7 @@ import { AppError } from '../utils/appError';
 import { supabaseAdmin } from '../config/supabase';
 import * as raService from '../services/raService';
 import * as fedexService from '../services/fedexService';
+import { generateBarcode } from '../services/barcodeService';
 
 // ============================================================
 // POST /api/admin/debit-memos/:id/request-ra
@@ -192,8 +193,20 @@ export const createDebitMemoFedexShipmentHandler = catchAsync(
       serviceType: serviceType || 'FEDEX_GROUND',
     });
 
-    // Save the tracking to the debit memo
+    // Build labels map
+    const labelsMap = result.packages.reduce((acc, p, i) => {
+      if (p.labelBase64) acc[`package${i + 1}`] = p.labelBase64;
+      return acc;
+    }, {} as Record<string, string>);
+
+    // Save tracking and labels to the debit memo
     await raService.shipDebitMemo(id, result.masterTrackingNumber);
+    if (Object.keys(labelsMap).length > 0) {
+      await supabaseAdmin!
+        .from('debit_memos')
+        .update({ fedex_labels: labelsMap })
+        .eq('id', id);
+    }
 
     res.status(200).json({
       status: 'success',
@@ -208,10 +221,71 @@ export const createDebitMemoFedexShipmentHandler = catchAsync(
             hasLabel: !!p.labelBase64,
           })),
         },
-        labels: result.packages.reduce((acc, p, i) => {
-          if (p.labelBase64) acc[`package${i + 1}`] = p.labelBase64;
-          return acc;
-        }, {} as Record<string, string>),
+        labels: labelsMap,
+      },
+    });
+  }
+);
+
+// ============================================================
+// POST /api/admin/debit-memos/:id/schedule-pickup
+// ============================================================
+export const scheduleDebitMemoPickupHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { id } = req.params;
+    const { readyTime, closeTime, pickupDate } = req.body;
+
+    if (!supabaseAdmin) throw new AppError('Supabase admin client not configured', 500);
+
+    const { data: memo, error: memoErr } = await supabaseAdmin
+      .from('debit_memos')
+      .select('id, memo_number, destination, outbound_tracking')
+      .eq('id', id)
+      .single();
+
+    if (memoErr || !memo) throw new AppError('Debit memo not found', 404);
+    if (!memo.outbound_tracking) {
+      throw new AppError('Cannot schedule pickup: Create FedEx shipment first.', 400);
+    }
+
+    const { data: settings, error: settingsErr } = await supabaseAdmin.rpc('get_admin_settings');
+    if (settingsErr) throw new AppError(`Failed to load settings: ${settingsErr.message}`, 500);
+
+    const s = settings?.settings || settings;
+    if (!s?.warehouseStreet || !s?.warehouseCity || !s?.warehouseState || !s?.warehouseZip) {
+      throw new AppError('Warehouse address is not configured. Set it in Admin Settings.', 400);
+    }
+
+    const cleanPhone = (s.warehousePhone || '').replace(/\D/g, '');
+    if (cleanPhone.length !== 10) {
+      throw new AppError('Invalid warehouse phone. Must be 10 digits.', 400);
+    }
+
+    const result = await fedexService.schedulePickup({
+      pickupAddress: {
+        streetLines: [s.warehouseStreet],
+        city: s.warehouseCity,
+        stateOrProvinceCode: s.warehouseState,
+        postalCode: s.warehouseZip,
+        countryCode: s.warehouseCountry || 'US',
+      },
+      pickupContact: {
+        personName: s.warehouseContactName || s.warehouseName || 'Warehouse',
+        phoneNumber: cleanPhone,
+        companyName: s.warehouseName || undefined,
+      },
+      packageCount: 1,
+      totalWeight: 10,
+      readyTime: readyTime || '09:00',
+      closeTime: closeTime || '17:00',
+      pickupDate: pickupDate || new Date().toISOString().split('T')[0],
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        memo: { id: memo.id, memoNumber: memo.memo_number },
+        pickup: result,
       },
     });
   }
@@ -325,5 +399,133 @@ export const outboundShipmentsHandler = catchAsync(
       data: result.data,
       pagination: result.pagination,
     });
+  }
+);
+
+// ============================================================
+// GET /api/admin/debit-memos/:id/shipping-label
+// Returns a printable HTML shipping label page
+// ============================================================
+export const debitMemoShippingLabelHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { id } = req.params;
+
+    if (!supabaseAdmin) throw new AppError('Supabase admin client not configured', 500);
+
+    const { data: memo, error: memoErr } = await supabaseAdmin
+      .from('debit_memos')
+      .select('id, memo_number, destination, outbound_tracking, labeler_name, total_items')
+      .eq('id', id)
+      .single();
+
+    if (memoErr || !memo) throw new AppError('Debit memo not found', 404);
+    if (!memo.outbound_tracking) throw new AppError('No tracking number found for this memo', 400);
+
+    const { data: settings, error: settingsErr } = await supabaseAdmin.rpc('get_admin_settings');
+    if (settingsErr) throw new AppError(`Failed to load settings: ${settingsErr.message}`, 500);
+    const s = settings?.settings || settings;
+
+    const fromName = s?.warehouseName || 'Warehouse';
+    const fromContact = s?.warehouseContactName || '';
+    const fromPhone = s?.warehousePhone || '';
+    const fromStreet = s?.warehouseStreet || '';
+    const fromCity = s?.warehouseCity || '';
+    const fromState = s?.warehouseState || '';
+    const fromZip = s?.warehouseZip || '';
+
+    let toName = memo.destination || 'Reverse Distributor';
+    let toContact = '';
+    let toPhone = '';
+    let toStreet = '';
+    let toCity = '';
+    let toState = '';
+    let toZip = '';
+
+    if (memo.destination) {
+      const { data: dist } = await supabaseAdmin
+        .from('reverse_distributors')
+        .select('name, phone, address, city, state, zip_code, contact_name')
+        .ilike('name', memo.destination)
+        .maybeSingle();
+
+      if (dist) {
+        toName = dist.name || toName;
+        toContact = dist.contact_name || '';
+        toPhone = dist.phone || '';
+        toStreet = dist.address || '';
+        toCity = dist.city || '';
+        toState = dist.state || '';
+        toZip = dist.zip_code || '';
+      }
+    }
+
+    let barcodeDataUrl = '';
+    try {
+      const bc = generateBarcode(memo.outbound_tracking, { format: 'CODE128', width: 2, height: 60, displayValue: true, fontSize: 12, margin: 5 });
+      barcodeDataUrl = `data:image/png;base64,${bc.buffer.toString('base64')}`;
+    } catch { /* barcode is optional */ }
+
+    const esc = (v: string) => v.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const cityLine = (city: string, state: string, zip: string) =>
+      [city, state, zip].filter(Boolean).join(', ');
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Shipping Label - ${esc(memo.outbound_tracking)}</title>
+<style>
+  @page { margin:0.3in; size:4in 6in; }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:Arial,Helvetica,sans-serif;font-size:10pt;color:#000;background:#fff;}
+  .label{width:100%;max-width:3.6in;margin:0 auto;padding:10px 0;}
+  .label-box{border:2px solid #000;padding:12px;margin-bottom:14px;}
+  .label-heading{font-size:8pt;font-weight:bold;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;border-bottom:1px solid #aaa;padding-bottom:2px;}
+  .label-name{font-size:13pt;font-weight:bold;margin-bottom:2px;}
+  .label-line{font-size:10pt;margin-bottom:1px;}
+  .barcode-section{text-align:center;margin:12px 0 4px;}
+  .barcode-section img{max-width:100%;}
+  .tracking-text{font-family:'Courier New',monospace;font-size:14pt;font-weight:bold;margin-top:4px;text-align:center;}
+  .pkg-info{text-align:center;font-size:9pt;color:#555;margin-bottom:8px;}
+  .memo-info{text-align:center;font-size:8pt;color:#333;margin-top:10px;border-top:1px dashed #ccc;padding-top:6px;}
+  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}.label{max-width:none;}}
+</style>
+<script>window.onload=function(){setTimeout(function(){window.print();},400);}</script>
+</head>
+<body>
+<div class="label">
+  <div class="pkg-info">SHIPPING LABEL - Debit Memo ${esc(memo.memo_number)}</div>
+  <div class="label-box">
+    <div class="label-heading">From - Shipper</div>
+    <div class="label-name">${esc(fromName)}</div>
+    ${fromContact && fromContact !== fromName ? `<div class="label-line">${esc(fromContact)}</div>` : ''}
+    ${fromStreet ? `<div class="label-line">${esc(fromStreet)}</div>` : ''}
+    ${cityLine(fromCity,fromState,fromZip) ? `<div class="label-line">${esc(cityLine(fromCity,fromState,fromZip))}</div>` : ''}
+    ${fromPhone ? `<div class="label-line">Phone: ${esc(fromPhone)}</div>` : ''}
+  </div>
+  <div class="label-box">
+    <div class="label-heading">To - Recipient</div>
+    <div class="label-name">${esc(toName)}</div>
+    ${toContact ? `<div class="label-line">${esc(toContact)}</div>` : ''}
+    ${toStreet ? `<div class="label-line">${esc(toStreet)}</div>` : ''}
+    ${cityLine(toCity,toState,toZip) ? `<div class="label-line">${esc(cityLine(toCity,toState,toZip))}</div>` : ''}
+    ${toPhone ? `<div class="label-line">Phone: ${esc(toPhone)}</div>` : ''}
+  </div>
+  <div class="barcode-section">
+    ${barcodeDataUrl ? `<img src="${barcodeDataUrl}" alt="barcode">` : ''}
+  </div>
+  <div class="tracking-text">${esc(memo.outbound_tracking)}</div>
+  <div class="memo-info">
+    Memo: ${esc(memo.memo_number)} | Items: ${memo.total_items}${memo.labeler_name ? ` | Labeler: ${esc(memo.labeler_name)}` : ''}
+  </div>
+</div>
+</body>
+</html>`;
+
+    res.set({
+      'Content-Type': 'text/html; charset=utf-8',
+      'Content-Disposition': `inline; filename="label-${memo.outbound_tracking}.html"`,
+    });
+    res.send(html);
   }
 );

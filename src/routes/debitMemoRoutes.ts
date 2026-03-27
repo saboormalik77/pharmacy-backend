@@ -11,7 +11,9 @@ import {
   resendRAHandler,
   shipDebitMemoHandler,
   createDebitMemoFedexShipmentHandler,
+  scheduleDebitMemoPickupHandler,
   emailPreviewHandler,
+  debitMemoShippingLabelHandler,
 } from '../controllers/raController';
 import {
   listUnpaidHandler,
@@ -311,6 +313,36 @@ router.post('/:id/create-fedex-shipment', authenticateAdmin, createDebitMemoFede
 
 /**
  * @swagger
+ * /api/admin/debit-memos/{id}/schedule-pickup:
+ *   post:
+ *     summary: Schedule FedEx pickup for a debit memo shipment
+ *     tags: [Debit Memos, Shipping]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               readyTime: { type: string, default: '09:00' }
+ *               closeTime: { type: string, default: '17:00' }
+ *               pickupDate: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Pickup scheduled
+ *       400:
+ *         description: No shipment exists yet
+ */
+router.post('/:id/schedule-pickup', authenticateAdmin, scheduleDebitMemoPickupHandler);
+
+/**
+ * @swagger
  * /api/admin/debit-memos/{id}/record-payment:
  *   post:
  *     summary: Record payment received for a debit memo
@@ -399,5 +431,7 @@ router.post('/:id/send-reminder', authenticateAdmin, sendReminderHandler);
  *         description: Email template with to, subject, body, item details
  */
 router.get('/:id/email-preview', authenticateAdmin, emailPreviewHandler);
+
+router.get('/:id/shipping-label', authenticateAdmin, debitMemoShippingLabelHandler);
 
 export default router;
