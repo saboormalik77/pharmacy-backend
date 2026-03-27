@@ -5,11 +5,70 @@ import { AppError } from '../utils/appError';
 // Interfaces
 // ============================================================
 
+/** Parsed from pharmacy.physical_address (same rules as processor my-stores). */
+function parsePhysicalAddress(physicalAddress: unknown): {
+  street: string | null;
+  city: string | null;
+  state: string | null;
+} {
+  if (physicalAddress == null) {
+    return { street: null, city: null, state: null };
+  }
+  try {
+    const addressObj =
+      typeof physicalAddress === 'string' ? JSON.parse(physicalAddress) : physicalAddress;
+    const o = addressObj as Record<string, unknown>;
+    return {
+      street: (o?.street as string) || null,
+      city: (o?.city as string) || null,
+      state: (o?.state as string) || null,
+    };
+  } catch {
+    return {
+      street: typeof physicalAddress === 'string' ? physicalAddress : null,
+      city: null,
+      state: null,
+    };
+  }
+}
+
+async function attachPharmacyStoreDetails(
+  sb: ReturnType<typeof ensureAdmin>,
+  tx: ReturnTransaction
+): Promise<ReturnTransaction> {
+  if (!tx.pharmacyId) return tx;
+
+  const { data: pharm, error } = await sb
+    .from('pharmacy')
+    .select('store_number, physical_address, last_visit_date')
+    .eq('id', tx.pharmacyId)
+    .maybeSingle();
+
+  if (error || !pharm) return tx;
+
+  const { street, city, state } = parsePhysicalAddress(pharm.physical_address);
+  const sn = pharm.store_number;
+  return {
+    ...tx,
+    storeNumber: sn != null && sn !== '' ? String(sn) : null,
+    pharmacyStreetAddress: street,
+    pharmacyCity: city,
+    pharmacyState: state,
+    pharmacyLastVisitDate: pharm.last_visit_date ?? null,
+  };
+}
+
 export interface ReturnTransaction {
   id: string;
   licensePlate: string;
   pharmacyId: string;
   pharmacyName: string | null;
+  /** Enriched from pharmacy (processor my-stores parity); omitted when unavailable */
+  storeNumber?: string | null;
+  pharmacyStreetAddress?: string | null;
+  pharmacyCity?: string | null;
+  pharmacyState?: string | null;
+  pharmacyLastVisitDate?: string | null;
   processorId: string | null;
   processorName: string | null;
   serviceType: string;
@@ -113,7 +172,7 @@ export const createReturnTransaction = async (
   });
 
   handleRpcError(data, error, 'Failed to create return transaction');
-  return data.data as ReturnTransaction;
+  return attachPharmacyStoreDetails(sb, data.data as ReturnTransaction);
 };
 
 export const listReturnTransactions = async (
@@ -146,7 +205,7 @@ export const getReturnTransactionById = async (
   });
 
   handleRpcError(data, error, 'Failed to fetch return transaction');
-  return data.data as ReturnTransaction;
+  return attachPharmacyStoreDetails(sb, data.data as ReturnTransaction);
 };
 
 export const updateReturnTransaction = async (
@@ -164,7 +223,7 @@ export const updateReturnTransaction = async (
   });
 
   handleRpcError(data, error, 'Failed to update return transaction');
-  return data.data as ReturnTransaction;
+  return attachPharmacyStoreDetails(sb, data.data as ReturnTransaction);
 };
 
 export const pauseReturnTransaction = async (
@@ -178,7 +237,7 @@ export const pauseReturnTransaction = async (
   });
 
   handleRpcError(data, error, 'Failed to pause return transaction');
-  return data.data as ReturnTransaction;
+  return attachPharmacyStoreDetails(sb, data.data as ReturnTransaction);
 };
 
 export const resumeReturnTransaction = async (
@@ -192,7 +251,7 @@ export const resumeReturnTransaction = async (
   });
 
   handleRpcError(data, error, 'Failed to resume return transaction');
-  return data.data as ReturnTransaction;
+  return attachPharmacyStoreDetails(sb, data.data as ReturnTransaction);
 };
 
 export const completeReturnTransaction = async (
@@ -206,7 +265,7 @@ export const completeReturnTransaction = async (
   });
 
   handleRpcError(data, error, 'Failed to complete return transaction');
-  return data.data as ReturnTransaction;
+  return attachPharmacyStoreDetails(sb, data.data as ReturnTransaction);
 };
 
 export const finalizeReturnTransaction = async (
@@ -227,7 +286,7 @@ export const finalizeReturnTransaction = async (
   });
 
   handleRpcError(data, error, 'Failed to finalize return transaction');
-  return data.data as ReturnTransaction;
+  return attachPharmacyStoreDetails(sb, data.data as ReturnTransaction);
 };
 
 export const updateFinalizeSteps = async (
@@ -242,7 +301,7 @@ export const updateFinalizeSteps = async (
   });
 
   handleRpcError(data, error, 'Failed to update finalize steps');
-  return data.data as ReturnTransaction;
+  return attachPharmacyStoreDetails(sb, data.data as ReturnTransaction);
 };
 
 export const getManifestData = async (

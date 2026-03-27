@@ -9,6 +9,7 @@ import {
   completeHandler,
   finalizeHandler,
   manifestHandler,
+  manifestHtmlHandler,
   manifestDataHandler,
   deaForm222Handler,
   deleteHandler,
@@ -360,6 +361,11 @@ router.patch('/:id/finalize-steps', authenticateAny, updateFinalizeStepsHandler)
  *         description: Return transaction not found
  */
 router.get('/:id/manifest', authenticateAny, manifestHandler);
+
+// ============================================================
+// GET    /api/return-transactions/:id/manifest-html — Itemized manifest HTML (print dialog)
+// ============================================================
+router.get('/:id/manifest-html', authenticateAny, manifestHtmlHandler);
 
 // ============================================================
 // GET    /api/return-transactions/:id/manifest-data — Raw manifest JSON

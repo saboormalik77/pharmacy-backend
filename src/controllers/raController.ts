@@ -442,20 +442,40 @@ export const debitMemoShippingLabelHandler = catchAsync(
     let toZip = '';
 
     if (memo.destination) {
-      const { data: dist } = await supabaseAdmin
+      const destTrim = memo.destination.trim();
+      const norm = (s: string) => s.toLowerCase().replace(/\s+/g, ' ').trim();
+
+      let { data: dist } = await supabaseAdmin
         .from('reverse_distributors')
-        .select('name, phone, address, city, state, zip_code, contact_name')
-        .ilike('name', memo.destination)
+        .select('name, contact_phone, contact_person, address')
+        .ilike('name', destTrim)
+        .eq('is_active', true)
+        .limit(1)
         .maybeSingle();
+
+      if (!dist) {
+        const { data: allActive } = await supabaseAdmin
+          .from('reverse_distributors')
+          .select('name, contact_phone, contact_person, address')
+          .eq('is_active', true);
+        dist =
+          allActive?.find((d) => norm(d.name) === norm(destTrim)) ??
+          allActive?.find((d) => norm(destTrim).startsWith(norm(d.name))) ??
+          allActive?.find((d) => norm(d.name).startsWith(norm(destTrim))) ??
+          null;
+      }
 
       if (dist) {
         toName = dist.name || toName;
-        toContact = dist.contact_name || '';
-        toPhone = dist.phone || '';
-        toStreet = dist.address || '';
-        toCity = dist.city || '';
-        toState = dist.state || '';
-        toZip = dist.zip_code || '';
+        toContact = (dist.contact_person || '').trim();
+        toPhone = (dist.contact_phone || '').trim();
+        const addr = dist.address as Record<string, unknown> | null;
+        if (addr && typeof addr === 'object') {
+          toStreet = String(addr.street ?? addr.line1 ?? addr.addressLine1 ?? '').trim();
+          toCity = String(addr.city ?? '').trim();
+          toState = String(addr.state ?? '').trim();
+          toZip = String(addr.zipCode ?? addr.zip ?? addr.postalCode ?? '').trim();
+        }
       }
     }
 

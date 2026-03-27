@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { catchAsync } from '../utils/catchAsync';
 import { AppError } from '../utils/appError';
 import * as rtService from '../services/returnTransactionService';
-import { generateManifestPdf, generateDeaForm222Pdf } from '../services/manifestService';
+import { generateManifestPdf, generateManifestHtml, generateDeaForm222Pdf } from '../services/manifestService';
 
 // ============================================================
 // POST /api/return-transactions — Create new return
@@ -185,6 +185,24 @@ export const manifestHandler = catchAsync(
     res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
     res.setHeader('Content-Length', pdfBuffer.length);
     res.end(pdfBuffer);
+  }
+);
+
+// ============================================================
+// GET /api/return-transactions/:id/manifest-html — Itemized manifest as HTML (browser print)
+// ============================================================
+export const manifestHtmlHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { id } = req.params;
+
+    const manifestData = await rtService.getManifestData(id);
+    const html = generateManifestHtml(manifestData);
+
+    res.set({
+      'Content-Type': 'text/html; charset=utf-8',
+      'Content-Disposition': `inline; filename="manifest-${manifestData.transaction.licensePlate || id}.html"`,
+    });
+    res.send(html);
   }
 );
 
