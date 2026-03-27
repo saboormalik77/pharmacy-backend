@@ -1110,6 +1110,7 @@ export interface DebitMemo {
     baggieManifest: string | null;
     outboundTracking: string | null;
     shippedAt: string | null;
+    fedexLabels: Record<string, string> | null;
     paymentStatus: 'pending' | 'partial' | 'paid' | 'disputed';
     amountRequested: number;
     amountReceived: number;

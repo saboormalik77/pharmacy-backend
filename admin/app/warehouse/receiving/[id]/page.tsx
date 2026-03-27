@@ -123,10 +123,11 @@ export default function WarehouseVerificationPage() {
 
     const handleVerifyAll = async () => {
         const unverified = currentItems.filter(i => !i.verified);
-        for (const item of unverified) {
-            await dispatch(verifyItem({ transactionId, itemId: item.id, verified: true }));
-        }
-        showToast(`${unverified.length} items verified`);
+        if (unverified.length === 0) return;
+        await Promise.all(
+            unverified.map(item => dispatch(verifyItem({ transactionId, itemId: item.id, verified: true })))
+        );
+        showToast(`${unverified.length} item${unverified.length !== 1 ? 's' : ''} verified`);
     };
 
     const handleCompleteVerification = async () => {

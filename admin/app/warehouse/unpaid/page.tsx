@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
     Search, Loader2, ChevronLeft, ChevronRight, X,
     DollarSign, Clock, AlertCircle, Send, CreditCard,
-    TrendingUp, TrendingDown, BarChart3,
+    TrendingUp, TrendingDown, BarChart3, CheckCircle,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
@@ -13,11 +13,11 @@ import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { useDebounce } from '@/lib/hooks/useDebounce';
 import {
     fetchUnpaidMemos, recordPayment, sendPaymentReminder,
-    fetchAskVsReceived, fetchManufacturerSummary, clearError,
+    fetchAskVsReceived, fetchManufacturerSummary, fetchPaidMemos, clearError,
 } from '@/lib/store/paymentTrackingSlice';
 import { DebitMemo, AskVsReceivedRow, ManufacturerPaymentSummary } from '@/lib/types';
 
-type TabKey = 'unpaid' | 'askVsReceived' | 'manufacturers';
+type TabKey = 'unpaid' | 'paid' | 'askVsReceived' | 'manufacturers';
 
 function fmt(v: number | null | undefined) {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(v ?? 0);
@@ -44,6 +44,7 @@ export default function UnpaidMemosPage() {
     const dispatch = useAppDispatch();
     const {
         unpaidMemos, unpaidPagination, unpaidSummary,
+        paidMemos, paidPagination,
         askVsReceived, askVsReceivedTotals,
         manufacturerSummary, manufacturerPagination,
         isLoading, isActionLoading, error,
@@ -58,6 +59,12 @@ export default function UnpaidMemosPage() {
     const [page, setPage] = useState(1);
     const [mfgPage, setMfgPage] = useState(1);
     const [analyticsGroupBy, setAnalyticsGroupBy] = useState<'manufacturer' | 'period'>('manufacturer');
+
+    // Paid memos tab state
+    const [paidSearch, setPaidSearch] = useState('');
+    const [paidDestination, setPaidDestination] = useState('');
+    const [paidPage, setPaidPage] = useState(1);
+    const debouncedPaidSearch = useDebounce(paidSearch, 400);
 
     // Payment modal
     const [paymentMemo, setPaymentMemo] = useState<(DebitMemo & { daysOutstanding?: number; outstandingAmount?: number }) | null>(null);
@@ -89,6 +96,17 @@ export default function UnpaidMemosPage() {
             }));
         }
     }, [dispatch, activeTab, debouncedSearch, destination, page]);
+
+    // Fetch paid memos
+    useEffect(() => {
+        if (activeTab === 'paid') {
+            dispatch(fetchPaidMemos({
+                search: debouncedPaidSearch || undefined,
+                destination: paidDestination || undefined,
+                page: paidPage,
+            }));
+        }
+    }, [dispatch, activeTab, debouncedPaidSearch, paidDestination, paidPage]);
 
     // Fetch analytics
     useEffect(() => {
@@ -159,6 +177,7 @@ export default function UnpaidMemosPage() {
 
     const tabs: { key: TabKey; label: string; icon: React.ReactNode }[] = [
         { key: 'unpaid', label: 'Unpaid Memos', icon: <DollarSign className="w-3.5 h-3.5" /> },
+        { key: 'paid', label: 'Paid Memos', icon: <CheckCircle className="w-3.5 h-3.5" /> },
         { key: 'askVsReceived', label: 'Ask vs Received', icon: <BarChart3 className="w-3.5 h-3.5" /> },
         { key: 'manufacturers', label: 'Manufacturer Summary', icon: <TrendingUp className="w-3.5 h-3.5" /> },
     ];
@@ -347,7 +366,114 @@ export default function UnpaidMemosPage() {
                 </div>
             )}
 
-            {/* ─── TAB 2: Ask vs Received ──────────────────────── */}
+            {/* ─── TAB 2: Paid Memos ───────────────────────────── */}
+            {activeTab === 'paid' && (
+                <div className="space-y-2">
+                    {/* Summary card */}
+                    {paidPagination && (
+                        <div className="bg-white rounded-lg border border-gray-200 px-4 py-2.5 flex items-center gap-3 max-w-xs">
+                            <div className="p-2 bg-green-50 rounded-lg flex-shrink-0">
+                                <CheckCircle className="w-4 h-4 text-green-500" />
+                            </div>
+                            <div>
+                                <p className="text-[10px] text-gray-500">Total Paid Memos</p>
+                                <p className="text-lg font-bold text-gray-900">{paidPagination.total}</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Filters */}
+                    <div className="bg-white rounded-lg border border-gray-200 px-3 py-2 flex flex-wrap gap-2 items-center">
+                        <div className="relative flex-1 min-w-[180px]">
+                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                            <input
+                                value={paidSearch}
+                                onChange={e => { setPaidSearch(e.target.value); setPaidPage(1); }}
+                                placeholder="Search memos, manufacturer, pharmacy..."
+                                className="w-full pl-8 pr-3 py-1.5 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                            />
+                        </div>
+                        <select
+                            value={paidDestination}
+                            onChange={e => { setPaidDestination(e.target.value); setPaidPage(1); }}
+                            className="border border-gray-300 rounded px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-primary-500"
+                        >
+                            <option value="">All Destinations</option>
+                            <option value="Inmar">Inmar</option>
+                            <option value="PharmaLink">PharmaLink</option>
+                            <option value="Cardinal">Cardinal</option>
+                            <option value="Direct">Direct</option>
+                        </select>
+                    </div>
+
+                    {/* Table */}
+                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                        {isLoading ? (
+                            <div className="flex items-center justify-center py-14">
+                                <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                            </div>
+                        ) : (paidMemos ?? []).length === 0 ? (
+                            <div className="text-center py-14 text-gray-500">
+                                <CheckCircle className="w-10 h-10 mx-auto mb-2 text-gray-300" />
+                                <p className="text-sm font-medium">No paid memos found</p>
+                                <p className="text-xs mt-0.5">No debit memos have been marked as paid yet.</p>
+                            </div>
+                        ) : (
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead className="bg-gray-50 border-b border-gray-200">
+                                        <tr>
+                                            <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Memo #</th>
+                                            <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Manufacturer</th>
+                                            <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Pharmacy</th>
+                                            <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Destination</th>
+                                            <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Asked</th>
+                                            <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Received</th>
+                                            <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100">
+                                        {(paidMemos ?? []).map(memo => (
+                                            <tr key={memo.id} className="hover:bg-gray-50">
+                                                <td className="px-3 py-1.5 text-xs font-medium text-gray-900">{memo.memoNumber}</td>
+                                                <td className="px-3 py-1.5 text-xs text-gray-600">{memo.labelerName || '—'}</td>
+                                                <td className="px-3 py-1.5 text-xs text-gray-600">{memo.pharmacyName || '—'}</td>
+                                                <td className="px-3 py-1.5 text-xs text-gray-600">{memo.destination || '—'}</td>
+                                                <td className="px-3 py-1.5 text-xs text-right font-medium">{fmt(memo.amountRequested)}</td>
+                                                <td className="px-3 py-1.5 text-xs text-right text-green-600 font-semibold">{fmt(memo.amountReceived)}</td>
+                                                <td className="px-3 py-1.5 text-center">
+                                                    <Badge variant="success">
+                                                        <span className="text-[10px]">paid</span>
+                                                    </Badge>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+
+                        {/* Pagination */}
+                        {paidPagination && paidPagination.totalPages > 1 && (
+                            <div className="flex items-center justify-between px-3 py-2 border-t border-gray-200 bg-gray-50">
+                                <span className="text-[10px] text-gray-500">
+                                    Page {paidPagination.page} of {paidPagination.totalPages} ({paidPagination.total} memos)
+                                </span>
+                                <div className="flex gap-1.5">
+                                    <button disabled={paidPage <= 1} onClick={() => setPaidPage(p => p - 1)} className="p-1 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-50">
+                                        <ChevronLeft className="w-3.5 h-3.5 text-gray-600" />
+                                    </button>
+                                    <button disabled={paidPage >= paidPagination.totalPages} onClick={() => setPaidPage(p => p + 1)} className="p-1 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-50">
+                                        <ChevronRight className="w-3.5 h-3.5 text-gray-600" />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* ─── TAB 3: Ask vs Received ──────────────────────── */}
             {activeTab === 'askVsReceived' && (
                 <div className="space-y-2">
                     {/* Totals cards */}

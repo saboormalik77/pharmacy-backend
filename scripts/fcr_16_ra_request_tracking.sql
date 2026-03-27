@@ -117,6 +117,7 @@ RETURNS jsonb LANGUAGE sql STABLE AS $$
     'baggieManifest',     d.baggie_manifest,
     'outboundTracking',   d.outbound_tracking,
     'shippedAt',          d.shipped_at,
+    'fedexLabels',        d.fedex_labels,
     'paymentStatus',      d.payment_status,
     'amountRequested',    d.amount_requested,
     'amountReceived',     d.amount_received,

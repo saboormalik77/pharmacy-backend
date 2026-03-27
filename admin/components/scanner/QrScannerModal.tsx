@@ -30,10 +30,15 @@ export default function QrScannerModal({ onScan, onClose }: QrScannerModalProps)
     // ── Stop helpers ──────────────────────────────────────────
 
     // Synchronously stops the native getUserMedia stream + rAF loop.
+    // Pausing first tells the browser the video is no longer needed before we
+    // clear srcObject, which suppresses the "RenderedCameraImpl onabort()" log.
     const stopNative = () => {
         if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = 0; }
         if (streamRef.current) { streamRef.current.getTracks().forEach(t => t.stop()); streamRef.current = null; }
-        if (videoRef.current) { videoRef.current.srcObject = null; }
+        if (videoRef.current) {
+            videoRef.current.pause();
+            videoRef.current.srcObject = null;
+        }
     };
 
     // Synchronously stops any video tracks injected by html5-qrcode,
