@@ -648,11 +648,11 @@ export default function ReturnDetailPage() {
                         <Badge variant={badge.variant}><span className="text-[10px]">{badge.label}</span></Badge>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
-                        {canDoAction(tx, 'edit') && (
+                        {/* {canDoAction(tx, 'edit') && (
                             <button onClick={() => setEditModal(true)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors">
                                 <Edit className="w-3 h-3" /> {isLocked ? 'Edit Notes' : 'Edit'}
                             </button>
-                        )}
+                        )} */}
                         {canDoAction(tx, 'pause') && canEdit && (
                             <button onClick={() => checkActionWithToast('pause return', () => setActionModal('pause'))} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-300 hover:bg-yellow-200 transition-colors">
                                 <Pause className="w-3 h-3" /> Pause
