@@ -15,6 +15,8 @@ export interface WineCellarItem {
   quantity: number;
   standardPrice: number | null;
   estimatedValue: number | null;
+  estimatedStorePrice: number | null;
+  estimatedStoreValue: number | null;
   isPartial: boolean;
   partialPercentage: number | null;
   dateShelved: string;

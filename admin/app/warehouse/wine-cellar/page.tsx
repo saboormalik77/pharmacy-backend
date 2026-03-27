@@ -287,6 +287,7 @@ export default function WineCellarPage() {
                                         <th className="text-left px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">Pharmacy</th>
                                         <th className="text-center px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">QTY</th>
                                         <th className="text-right px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                                        <th className="text-right px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">Est. Store Price</th>
                                         <th className="text-left px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">Shelved</th>
                                         <th className="text-left px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">Expected Return</th>
                                         <th className="text-left px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">Location</th>
@@ -316,6 +317,9 @@ export default function WineCellarPage() {
                                                 </td>
                                                 <td className="px-3 py-2 text-right text-gray-900">
                                                     {item.standardPrice != null ? formatCurrency(item.standardPrice) : '—'}
+                                                </td>
+                                                <td className="px-3 py-2 text-right text-gray-900">
+                                                    {item.estimatedStorePrice != null ? formatCurrency(item.estimatedStorePrice) : '—'}
                                                 </td>
                                                 <td className="px-3 py-2 text-gray-600">{formatDate(item.dateShelved)}</td>
                                                 <td className="px-3 py-2 text-gray-600">

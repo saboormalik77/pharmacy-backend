@@ -216,7 +216,7 @@ export default function WineCellarPage() {
                       <th className="text-left px-4 py-3 font-medium text-muted-foreground">NDC</th>
                       <th className="text-left px-4 py-3 font-medium text-muted-foreground">Manufacturer</th>
                       <th className="text-center px-4 py-3 font-medium text-muted-foreground">QTY</th>
-                      <th className="text-right px-4 py-3 font-medium text-muted-foreground">Price</th>
+                      <th className="text-right px-4 py-3 font-medium text-muted-foreground">Est. Price</th>
                       <th className="text-left px-4 py-3 font-medium text-muted-foreground">Expires</th>
                       <th className="text-left px-4 py-3 font-medium text-muted-foreground">Returnable</th>
                       <th className="text-left px-4 py-3 font-medium text-muted-foreground">Shelved</th>
@@ -238,7 +238,7 @@ export default function WineCellarPage() {
                           {item.isPartial && <span className="text-amber-600 ml-0.5 text-xs">P</span>}
                         </td>
                         <td className="px-4 py-3 text-right text-foreground">
-                          {item.standardPrice != null ? formatCurrency(item.standardPrice) : '—'}
+                          {item.estimatedStorePrice != null ? formatCurrency(item.estimatedStorePrice) : '—'}
                         </td>
                         <td className="px-4 py-3 text-muted-foreground text-xs">
                           {item.expirationDate ? formatDate(item.expirationDate) : '—'}

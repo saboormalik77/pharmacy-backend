@@ -149,6 +149,25 @@ export default function AddItemsPage() {
         return price * (pct / 100);
     })();
 
+    /** Same rules as Est. Value, but list price is reduced by 30% first (matches DB `estimated_store_value`). */
+    const estimatedStoreValue = (() => {
+        const price = parseFloat(form.standardPrice) || 0;
+        if (price <= 0) return 0;
+        const storeBase = price * 0.70;
+        const pkgSize = parseFloat(form.fullPackageSize) || 0;
+        const qtyNum = parseFloat(form.fullPackageQtyReturned) || 0;
+
+        if (!form.fullPackageQtyReturned.trim() || qtyNum <= 0 || pkgSize <= 0) {
+            return Math.round(storeBase * 100) / 100;
+        }
+
+        const pct = form.qtyMode === 'units'
+            ? Math.min(100, (qtyNum / pkgSize) * 100)
+            : Math.min(100, qtyNum);
+
+        return Math.round(storeBase * (pct / 100) * 100) / 100;
+    })();
+
     // ── Barcode scan handler ───────────────────────────────────
 
     const runPolicyCheck = async (ndc: string, expirationDate: string, dosageForm?: string) => {
@@ -859,7 +878,8 @@ export default function AddItemsPage() {
                         isPartialDerived = unitsDerived < pkgSize && pctDerived < 100;
                     }
                     return (
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                             <div>
                                 <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Price ($)</label>
                                 <input type="number" step="0.01" min="0" value={form.standardPrice} onChange={e => updateField('standardPrice', e.target.value)} placeholder="0.00" className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
@@ -884,11 +904,18 @@ export default function AddItemsPage() {
                                     </p>
                                 )}
                             </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 mt-2">
                             <div>
                                 <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Est. Value</label>
                                 <input type="text" readOnly value={`$${estimatedValue.toFixed(2)}`} className="w-full px-2 py-1 text-xs border border-gray-200 rounded bg-gray-50 text-gray-700 font-medium" />
                             </div>
+                            <div>
+                                <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Est. Store Value <span className="text-gray-400 font-normal">(−30%)</span></label>
+                                <input type="text" readOnly value={`$${estimatedStoreValue.toFixed(2)}`} className="w-full px-2 py-1 text-xs border border-gray-200 rounded bg-gray-50 text-gray-700 font-medium" />
+                            </div>
                         </div>
+                        </>
                     );
                 })()}
 

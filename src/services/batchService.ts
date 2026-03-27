@@ -94,6 +94,22 @@ export const createBatch = async (
   return data.data as ReturnBatch;
 };
 
+/** Distinct YYYY-MM values for which a batch already exists (one batch per calendar month). */
+export const listUsedBatchMonths = async (): Promise<string[]> => {
+  const sb = ensureAdmin();
+  const { data, error } = await sb.from('return_batches').select('batch_month');
+  if (error) throw new AppError(`Failed to list batch months: ${error.message}`, 400);
+  const seen = new Set<string>();
+  for (const row of data ?? []) {
+    const raw = (row as { batch_month: string }).batch_month;
+    if (raw == null) continue;
+    const s = typeof raw === 'string' ? raw : String(raw);
+    const ym = s.length >= 7 ? s.slice(0, 7) : s;
+    if (/^\d{4}-\d{2}$/.test(ym)) seen.add(ym);
+  }
+  return Array.from(seen).sort();
+};
+
 export const listBatches = async (
   status?: string,
   page?: number,

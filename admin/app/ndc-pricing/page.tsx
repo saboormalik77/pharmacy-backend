@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import {
     DollarSign, Search, Plus, Loader2, AlertCircle, X, Trash2,
-    ChevronLeft, ChevronRight, Pencil, Save, Info,
+    ChevronLeft, ChevronRight, Pencil, Save, Info, Camera, ScanLine, Keyboard, AlertTriangle,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -14,10 +15,27 @@ import {
     fetchNDCPricing,
     upsertNDCPricing,
     deleteNDCPricing,
-    clearCurrent,
-    FetchNDCPricingParams,
 } from '@/lib/store/ndcPricingSlice';
-import { NDCPricingRecord, NDCPricingUpsertPayload } from '@/lib/types';
+import { NDCPricingRecord, NDCPricingUpsertPayload, BarcodeScanResponse } from '@/lib/types';
+
+const QrScannerModal = dynamic(() => import('@/components/scanner/QrScannerModal'), { ssr: false });
+
+function productNameFromScan(data: BarcodeScanResponse): string {
+    const af = data.autoFill;
+    const p = data.product;
+    const prop = af.proprietaryName || p?.proprietaryName || '';
+    const gen = af.genericName || p?.genericName || '';
+    if (prop && gen && prop.trim().toLowerCase() !== gen.trim().toLowerCase()) {
+        return `${prop.trim()} (${gen.trim()})`;
+    }
+    return prop.trim() || gen.trim() || '';
+}
+
+function ndcFromScan(data: BarcodeScanResponse): string {
+    const af = data.autoFill;
+    const p = data.product;
+    return (af.ndc || p?.ndc || data.scan.ndcCandidates?.[0] || '').trim();
+}
 
 const PRICE_SOURCES = [
     'Avella 2016 Price List',
@@ -50,6 +68,12 @@ const EMPTY_FORM: NDCPricingUpsertPayload = {
     closeOutDestination: '',
 };
 
+/** Est. store price = current list price minus 30% (70% of current), 2 decimals. */
+function estimatedStoreFromCurrent(current: number | undefined): number | undefined {
+    if (current == null || Number.isNaN(current) || current < 0) return undefined;
+    return Math.round(current * 0.7 * 100) / 100;
+}
+
 export default function NDCPricingPage() {
     const dispatch = useAppDispatch();
     const { items, pagination, isLoading, isActionLoading, error } = useAppSelector(s => s.ndcPricing);
@@ -68,6 +92,14 @@ export default function NDCPricingPage() {
         source: string;
         loading: boolean;
     } | null>(null);
+
+    const ndcScanInputRef = useRef<HTMLInputElement>(null);
+    const [ndcScanMode, setNdcScanMode] = useState<'camera' | 'usb' | 'manual'>('camera');
+    const [ndcCameraOpen, setNdcCameraOpen] = useState(false);
+    const [ndcScanInput, setNdcScanInput] = useState('');
+    const [ndcManualLookup, setNdcManualLookup] = useState('');
+    const [ndcScanLoading, setNdcScanLoading] = useState(false);
+    const [ndcScanError, setNdcScanError] = useState('');
 
     const showToast = (message: string, type: Toast['type'] = 'success') => {
         setToasts(prev => [...prev, { id: Date.now().toString(), message, type }]);
@@ -111,11 +143,80 @@ export default function NDCPricingPage() {
 
     const applySuggestedPrice = () => {
         if (suggestedPrice) {
-            setFormData(d => ({ ...d, currentPrice: suggestedPrice.price, priceSource: suggestedPrice.source }));
+            const cp = suggestedPrice.price;
+            setFormData(d => ({
+                ...d,
+                currentPrice: cp,
+                priceSource: suggestedPrice.source,
+                estimatedStorePrice: estimatedStoreFromCurrent(cp),
+            }));
             setSuggestedPrice(null);
             showToast(`Applied suggested price: $${suggestedPrice.price.toFixed(2)}`);
         }
     };
+
+    const handleNdcBarcodeScan = async (raw: string) => {
+        const trimmed = raw.trim();
+        if (!trimmed) return;
+        setNdcScanError('');
+        setNdcScanLoading(true);
+        try {
+            const { apiClient } = await import('@/lib/api/apiClient');
+            const { cookieUtils } = await import('@/lib/utils/cookies');
+            if (!cookieUtils.getAuthToken()) {
+                showToast('Authentication required.', 'error');
+                return;
+            }
+            const res = await apiClient.post<{ status: string; data: BarcodeScanResponse }>(
+                '/barcode/scan',
+                { scanData: trimmed },
+                true
+            );
+            const data = res.data;
+            if (!data) {
+                setNdcScanError('Unexpected scan response.');
+                return;
+            }
+            const ndc = ndcFromScan(data);
+            const name = productNameFromScan(data);
+            setFormData((d) => ({
+                ...d,
+                ndc: ndc || d.ndc,
+                productName: name || d.productName,
+            }));
+            setNdcScanInput('');
+            setNdcManualLookup('');
+            if (!ndc) {
+                setNdcScanError('Could not resolve NDC from scan — enter or correct NDC below.');
+            } else if (!name && !data.product) {
+                setNdcScanError('NDC resolved but product name not found — enter a name manually if needed.');
+            }
+        } catch (e: unknown) {
+            const msg = e && typeof e === 'object' && 'message' in e ? String((e as { message: string }).message) : 'Scan failed.';
+            setNdcScanError(msg);
+        } finally {
+            setNdcScanLoading(false);
+        }
+    };
+
+    const handleNdcCameraScan = (raw: string) => {
+        setNdcCameraOpen(false);
+        void handleNdcBarcodeScan(raw);
+    };
+
+    const onNdcUsbScanKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            void handleNdcBarcodeScan(ndcScanInput);
+        }
+    };
+
+    useEffect(() => {
+        if (formModal && !editingRecord && ndcScanMode === 'usb') {
+            const t = window.setTimeout(() => ndcScanInputRef.current?.focus(), 100);
+            return () => window.clearTimeout(t);
+        }
+    }, [formModal, editingRecord, ndcScanMode]);
 
     const loadData = useCallback((p: number = page) => {
         dispatch(fetchNDCPricing({ search: debouncedSearch, page: p, limit: 25 }));
@@ -128,16 +229,24 @@ export default function NDCPricingPage() {
         setEditingRecord(null);
         setFormData({ ...EMPTY_FORM });
         setSuggestedPrice(null);
+        setNdcScanMode('camera');
+        setNdcScanInput('');
+        setNdcManualLookup('');
+        setNdcScanError('');
+        setNdcCameraOpen(false);
         setFormModal(true);
     };
 
     const openEdit = (record: NDCPricingRecord) => {
+        setNdcScanError('');
+        setNdcCameraOpen(false);
         setEditingRecord(record);
+        const cp = record.currentPrice ?? undefined;
         setFormData({
             ndc: record.ndc,
             productName: record.productName || '',
-            currentPrice: record.currentPrice || undefined,
-            estimatedStorePrice: record.estimatedStorePrice || undefined,
+            currentPrice: cp,
+            estimatedStorePrice: estimatedStoreFromCurrent(cp),
             lastReimbursement: record.lastReimbursement || undefined,
             priceSource: record.priceSource || '',
             closeOutDestination: record.closeOutDestination || '',
@@ -178,7 +287,7 @@ export default function NDCPricingPage() {
 
     return (
         <div className="space-y-3">
-            <ToastContainer toasts={toasts} removeToast={removeToast} />
+            <ToastContainer toasts={toasts} onClose={removeToast} />
 
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -258,7 +367,7 @@ export default function NDCPricingPage() {
                                         <span className="text-xs text-gray-900 truncate block max-w-[200px]">{row.productName || '—'}</span>
                                     </td>
                                     <td className="px-3 py-2 text-right font-mono text-xs font-medium text-gray-900">{fmt(row.currentPrice)}</td>
-                                    <td className="px-3 py-2 text-right font-mono text-xs text-yellow-700">{fmt(row.estimatedStorePrice)}</td>
+                                    <td className="px-3 py-2 text-right font-mono text-xs text-gray-900">{fmt(row.estimatedStorePrice)}</td>
                                     <td className="px-3 py-2">
                                         {row.priceSource
                                             ? <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200 truncate max-w-[130px]">{row.priceSource}</span>
@@ -334,6 +443,106 @@ export default function NDCPricingPage() {
                         </div>
 
                         <div className="p-4 space-y-4">
+                            {/* Barcode / NDC scan (add only — same flow as return scan screen) */}
+                            {!editingRecord && (
+                                <div className="rounded-lg border border-gray-200 bg-gray-50/80 px-3 py-2.5 space-y-2">
+                                    <p className="text-[10px] font-semibold text-gray-600 uppercase tracking-wide">Scan barcode or NDC</p>
+                                    <div className="flex gap-1.5 flex-wrap">
+                                        {([
+                                            { key: 'camera' as const, icon: Camera, label: 'Camera QR' },
+                                            { key: 'usb' as const, icon: ScanLine, label: 'USB Scanner' },
+                                            { key: 'manual' as const, icon: Keyboard, label: 'Manual NDC' },
+                                        ]).map(({ key, icon: Icon, label }) => (
+                                            <button
+                                                key={key}
+                                                type="button"
+                                                onClick={() => setNdcScanMode(key)}
+                                                className={`flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-colors ${
+                                                    ndcScanMode === key
+                                                        ? 'bg-primary-100 text-primary-700 ring-1 ring-primary-300'
+                                                        : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-100'
+                                                }`}
+                                            >
+                                                <Icon className="w-3.5 h-3.5" /> {label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    {ndcScanMode === 'camera' && (
+                                        <div>
+                                            <button
+                                                type="button"
+                                                onClick={() => setNdcCameraOpen(true)}
+                                                disabled={ndcScanLoading}
+                                                className="w-full flex items-center justify-center gap-2 px-3 py-2 border border-dashed border-primary-300 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors disabled:opacity-60"
+                                            >
+                                                {ndcScanLoading ? (
+                                                    <>
+                                                        <Loader2 className="w-4 h-4 animate-spin text-primary-600" />
+                                                        <span className="text-xs font-medium text-primary-700">Looking up product…</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Camera className="w-4 h-4 text-primary-600" />
+                                                        <span className="text-xs font-semibold text-primary-800">Open camera scanner</span>
+                                                    </>
+                                                )}
+                                            </button>
+                                            <p className="text-[10px] text-gray-500 mt-1">QR, GS1, and standard barcodes — NDC and product name fill in below.</p>
+                                        </div>
+                                    )}
+                                    {ndcScanMode === 'usb' && (
+                                        <div>
+                                            <div className="relative">
+                                                <ScanLine className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                                                <input
+                                                    ref={ndcScanInputRef}
+                                                    type="text"
+                                                    value={ndcScanInput}
+                                                    onChange={e => setNdcScanInput(e.target.value)}
+                                                    onKeyDown={onNdcUsbScanKeyDown}
+                                                    disabled={ndcScanLoading}
+                                                    placeholder="Scan with USB/Bluetooth — press Enter after scan"
+                                                    className="w-full pl-8 pr-9 py-2 text-xs border-2 border-primary-200 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                />
+                                                {ndcScanLoading && (
+                                                    <div className="absolute right-2.5 top-1/2 -translate-y-1/2">
+                                                        <Loader2 className="w-4 h-4 animate-spin text-primary-600" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <p className="text-[10px] text-gray-500 mt-1">Same as the return add-items scan field.</p>
+                                        </div>
+                                    )}
+                                    {ndcScanMode === 'manual' && (
+                                        <div className="flex gap-1.5">
+                                            <input
+                                                type="text"
+                                                value={ndcManualLookup}
+                                                onChange={e => setNdcManualLookup(e.target.value)}
+                                                onKeyDown={e => e.key === 'Enter' && void handleNdcBarcodeScan(ndcManualLookup)}
+                                                disabled={ndcScanLoading}
+                                                placeholder="Type NDC (e.g. 00093-4175-73) and Lookup"
+                                                className="flex-1 px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => void handleNdcBarcodeScan(ndcManualLookup)}
+                                                disabled={ndcScanLoading || !ndcManualLookup.trim()}
+                                                className="px-3 py-1.5 text-xs rounded-lg bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50"
+                                            >
+                                                {ndcScanLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Lookup'}
+                                            </button>
+                                        </div>
+                                    )}
+                                    {ndcScanError && (
+                                        <div className="flex items-start gap-1.5 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded px-2 py-1.5">
+                                            <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                                            <span>{ndcScanError}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
                             {/* NDC Code */}
                             <div>
                                 <label className="block text-[11px] font-medium text-gray-700 mb-1">NDC Code <span className="text-red-500">*</span></label>
@@ -384,11 +593,11 @@ export default function NDCPricingPage() {
                                     type="text"
                                     value={formData.productName || ''}
                                     onChange={e => setFormData(d => ({ ...d, productName: e.target.value }))}
-                                    placeholder="e.g. Cephalexin — auto-filled from openFDA when scanned"
+                                    placeholder="Filled automatically after scan / lookup — edit if needed"
                                     className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500"
                                 />
                                 <p className="text-[10px] text-gray-400 mt-0.5">
-                                    Product details are automatically fetched from openFDA during barcode scanning.
+                                    Uses the same <span className="font-medium">/barcode/scan</span> lookup as the return scan screen (openFDA / product DB). Scan or use Manual NDC Lookup above.
                                 </p>
                             </div>
 
@@ -399,15 +608,34 @@ export default function NDCPricingPage() {
                             <div className="grid grid-cols-3 gap-3">
                                 <div>
                                     <label className="block text-[11px] font-medium text-gray-700 mb-1">Current Price ($)</label>
-                                    <input type="number" step="0.01" value={formData.currentPrice ?? ''} placeholder="e.g. 16.80"
-                                        onChange={e => setFormData(d => ({ ...d, currentPrice: e.target.value ? parseFloat(e.target.value) : undefined }))}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        value={formData.currentPrice ?? ''}
+                                        placeholder="e.g. 16.80"
+                                        onChange={e => {
+                                            const v = e.target.value;
+                                            const cp = v === '' ? undefined : parseFloat(v);
+                                            const parsed = cp !== undefined && !Number.isNaN(cp) ? cp : undefined;
+                                            setFormData(d => ({
+                                                ...d,
+                                                currentPrice: parsed,
+                                                estimatedStorePrice: estimatedStoreFromCurrent(parsed),
+                                            }));
+                                        }}
+                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                    />
                                 </div>
                                 <div>
                                     <label className="block text-[11px] font-medium text-gray-700 mb-1">Est. Store Price ($)</label>
-                                    <input type="number" step="0.01" value={formData.estimatedStorePrice ?? ''} placeholder="e.g. 8.40"
-                                        onChange={e => setFormData(d => ({ ...d, estimatedStorePrice: e.target.value ? parseFloat(e.target.value) : undefined }))}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                    <input
+                                        type="text"
+                                        readOnly
+                                        value={formData.estimatedStorePrice != null ? formData.estimatedStorePrice.toFixed(2) : ''}
+                                        placeholder="—"
+                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-gray-50 text-gray-700"
+                                    />
+                                    <p className="text-[10px] text-gray-400 mt-0.5">70% of current (30% less)</p>
                                 </div>
                                 <div>
                                     <label className="block text-[11px] font-medium text-gray-700 mb-1">Last Reimbursement ($)</label>
@@ -463,6 +691,10 @@ export default function NDCPricingPage() {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {ndcCameraOpen && formModal && !editingRecord && (
+                <QrScannerModal onScan={handleNdcCameraScan} onClose={() => setNdcCameraOpen(false)} />
             )}
 
             {/* ── Delete Confirmation Modal ─────────────────── */}

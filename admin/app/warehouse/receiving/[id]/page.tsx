@@ -23,7 +23,9 @@ import {
     fetchBatches,
     createBatch,
     assignReturnsToBatch,
+    fetchUsedBatchMonths,
 } from '@/lib/store/batchSlice';
+import { buildAvailableBatchMonthOptions } from '@/lib/utils/batchMonths';
 import { ReturnTransactionItem, ReturnBatch } from '@/lib/types';
 
 export default function WarehouseVerificationPage() {
@@ -52,6 +54,8 @@ export default function WarehouseVerificationPage() {
     const [newBatchMonth, setNewBatchMonth] = useState('');
     const [newBatchName, setNewBatchName] = useState('');
     const [batchAssigning, setBatchAssigning] = useState(false);
+    const [usedBatchMonths, setUsedBatchMonths] = useState<string[]>([]);
+    const [usedMonthsLoading, setUsedMonthsLoading] = useState(false);
 
     // Toasts
     const [toasts, setToasts] = useState<Toast[]>([]);
@@ -76,6 +80,34 @@ export default function WarehouseVerificationPage() {
             setIntegrityConfirmed(true);
         }
     }, [currentReturn]);
+
+    const availableNewBatchMonths = useMemo(
+        () => buildAvailableBatchMonthOptions(usedBatchMonths),
+        [usedBatchMonths]
+    );
+
+    useEffect(() => {
+        if (!batchModal) {
+            setUsedBatchMonths([]);
+            return;
+        }
+        let cancelled = false;
+        setUsedMonthsLoading(true);
+        dispatch(fetchUsedBatchMonths())
+            .unwrap()
+            .then((months) => { if (!cancelled) setUsedBatchMonths(months); })
+            .catch(() => { if (!cancelled) setUsedBatchMonths([]); })
+            .finally(() => { if (!cancelled) setUsedMonthsLoading(false); });
+        return () => { cancelled = true; };
+    }, [batchModal, dispatch]);
+
+    useEffect(() => {
+        if (!batchModal || !createNewBatch || usedMonthsLoading) return;
+        const opts = availableNewBatchMonths;
+        setNewBatchMonth((prev) =>
+            (prev && opts.some((o) => o.value === prev) ? prev : opts[0]?.value ?? '')
+        );
+    }, [batchModal, createNewBatch, usedMonthsLoading, availableNewBatchMonths]);
 
     // Filter items
     const filteredItems = useMemo(() => {
@@ -145,7 +177,7 @@ export default function WarehouseVerificationPage() {
             setBatchModal(true);
             setSelectedBatchId('');
             setCreateNewBatch(false);
-            setNewBatchMonth(new Date().toISOString().slice(0, 7)); // default YYYY-MM
+            setNewBatchMonth('');
             setNewBatchName('');
             const batchResult = await dispatch(fetchBatches({ status: 'open', limit: 100 }));
             if (fetchBatches.fulfilled.match(batchResult)) {
@@ -587,12 +619,25 @@ export default function WarehouseVerificationPage() {
                                         <div className="space-y-3">
                                             <div>
                                                 <label className="block text-xs font-medium text-gray-700 mb-1">Batch Month <span className="text-red-500">*</span></label>
-                                                <input
-                                                    type="month"
-                                                    value={newBatchMonth}
-                                                    onChange={e => setNewBatchMonth(e.target.value)}
-                                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                                />
+                                                {usedMonthsLoading ? (
+                                                    <div className="flex items-center gap-2 py-2 text-sm text-gray-500">
+                                                        <Loader2 className="w-4 h-4 animate-spin text-primary-600" /> Loading months…
+                                                    </div>
+                                                ) : availableNewBatchMonths.length === 0 ? (
+                                                    <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+                                                        No open month slots in the allowed range. Create a batch from Warehouse → Monthly Batches or free a month by deleting an unused open batch.
+                                                    </p>
+                                                ) : (
+                                                    <select
+                                                        value={newBatchMonth}
+                                                        onChange={e => setNewBatchMonth(e.target.value)}
+                                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                                                    >
+                                                        {availableNewBatchMonths.map(o => (
+                                                            <option key={o.value} value={o.value}>{o.label}</option>
+                                                        ))}
+                                                    </select>
+                                                )}
                                             </div>
                                             <div>
                                                 <label className="block text-xs font-medium text-gray-700 mb-1">Batch Name <span className="text-gray-400 font-normal">(optional)</span></label>
@@ -614,7 +659,11 @@ export default function WarehouseVerificationPage() {
                             <Button
                                 variant="primary"
                                 onClick={handleAssignToBatch}
-                                disabled={batchAssigning || batchesLoading || (!createNewBatch && !selectedBatchId) || (createNewBatch && !newBatchMonth)}
+                                disabled={
+                                    batchAssigning || batchesLoading
+                                    || (!createNewBatch && !selectedBatchId)
+                                    || (createNewBatch && (usedMonthsLoading || !newBatchMonth || availableNewBatchMonths.length === 0))
+                                }
                             >
                                 {batchAssigning ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Layers className="w-4 h-4 mr-1" />}
                                 {createNewBatch ? 'Create & Assign' : 'Assign to Batch'}

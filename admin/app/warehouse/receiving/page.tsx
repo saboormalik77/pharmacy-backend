@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
     PackageCheck, Loader2, Search, ScanLine, CheckCircle, XCircle, Package,
-     Box, AlertTriangle,
-    ArrowRight, RotateCcw, Truck, Clock, ChevronLeft,
+    Box, AlertTriangle,
+    ArrowRight, RotateCcw, Truck, Clock, ChevronLeft, Camera,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -23,6 +24,8 @@ import {
     ScanProgress,
 } from '@/lib/store/warehouseSlice';
 import { ReturnTransaction } from '@/lib/types';
+
+const QrScannerModal = dynamic(() => import('@/components/scanner/QrScannerModal'), { ssr: false });
 
 type Tab = 'scan' | 'pending' | 'received';
 
@@ -60,6 +63,8 @@ export default function WarehouseReceivingPage() {
     const debouncedSearch = useDebounce(search, 400);
     const [toasts, setToasts] = useState<Toast[]>([]);
     const inputRef = useRef<HTMLInputElement>(null);
+    const [receiveScanMode, setReceiveScanMode] = useState<'camera' | 'input'>('input');
+    const [cameraOpen, setCameraOpen] = useState(false);
 
     const showToast = (msg: string, type: Toast['type'] = 'success') => {
         setToasts(prev => [...prev, { id: Date.now().toString(), message: msg, type }]);
@@ -82,11 +87,18 @@ export default function WarehouseReceivingPage() {
     }, [tab, debouncedSearch, verificationFilter, dispatch]);
 
     useEffect(() => {
-        if (tab === 'scan') inputRef.current?.focus();
+        if (tab !== 'scan') setCameraOpen(false);
     }, [tab]);
 
-    const handleScan = async () => {
-        const tracking = trackingInput.trim();
+    useEffect(() => {
+        if (tab === 'scan' && receiveScanMode === 'input') {
+            const t = window.setTimeout(() => inputRef.current?.focus(), 100);
+            return () => window.clearTimeout(t);
+        }
+    }, [tab, receiveScanMode]);
+
+    const handleScan = async (overrideTracking?: string) => {
+        const tracking = (overrideTracking ?? trackingInput).trim();
         if (!tracking) return;
 
         setScanError('');
@@ -126,8 +138,13 @@ export default function WarehouseReceivingPage() {
     const handleScanKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            handleScan();
+            void handleScan();
         }
+    };
+
+    const handleCameraScan = (raw: string) => {
+        setCameraOpen(false);
+        void handleScan(raw);
     };
 
     const handleReset = () => {
@@ -187,51 +204,116 @@ export default function WarehouseReceivingPage() {
             {/* ── Tab: Scan & Receive ─────────────────────── */}
             {tab === 'scan' && (
                 <div className="space-y-3">
-                    {/* Scanner input */}
-                    <div className="bg-white rounded-lg shadow px-4 py-3">
-                        <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                            <Truck className="w-3.5 h-3.5 inline mr-1" />
-                            {scanProgress && !scanProgress.allScanned
-                                ? `Scan next box (${scanProgress.scannedCount} of ${scanProgress.totalPackages} scanned)`
-                                : 'Scan Box Tracking Number'
-                            }
-                        </label>
-                        <div className="flex gap-2">
-                            <div className="relative flex-1">
-                                <ScanLine className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                                <input
-                                    ref={inputRef}
-                                    type="text"
-                                    value={trackingInput}
-                                    onChange={e => setTrackingInput(e.target.value)}
-                                    onKeyDown={handleScanKeyDown}
-                                    placeholder={scanProgress && !scanProgress.allScanned
-                                        ? 'Scan next box tracking number...'
-                                        : 'Scan or type a box tracking number, then press Enter'
-                                    }
-                                    className="w-full pl-9 pr-3 py-2 text-sm border-2 border-primary-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-primary-50 font-mono"
-                                    autoFocus
-                                    disabled={isActionLoading || (scanProgress?.allScanned ?? false)}
-                                />
+                    {/* Scanner: camera (same modal as return add-items) or USB / keyboard */}
+                    <div className="bg-white rounded-lg shadow px-4 py-3 space-y-2">
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <label className="block text-xs font-medium text-gray-700">
+                                <Truck className="w-3.5 h-3.5 inline mr-1" />
+                                {scanProgress && !scanProgress.allScanned
+                                    ? `Next box (${scanProgress.scannedCount} of ${scanProgress.totalPackages} scanned)`
+                                    : 'Box tracking number'
+                                }
+                            </label>
+                            <div className="flex gap-1">
+                                {([
+                                    { key: 'camera' as const, icon: Camera, label: 'Camera' },
+                                    { key: 'input' as const, icon: ScanLine, label: 'USB / keyboard' },
+                                ]).map(({ key, icon: Icon, label }) => (
+                                    <button
+                                        key={key}
+                                        type="button"
+                                        onClick={() => setReceiveScanMode(key)}
+                                        className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium transition-colors ${
+                                            receiveScanMode === key
+                                                ? 'bg-primary-100 text-primary-700 ring-1 ring-primary-300'
+                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        <Icon className="w-3 h-3" /> {label}
+                                    </button>
+                                ))}
                             </div>
-                            <Button
-                                variant="primary"
-                                onClick={handleScan}
-                                disabled={isActionLoading || !trackingInput.trim() || (scanProgress?.allScanned ?? false)}
-                                className="px-4"
-                            >
-                                {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Scan'}
-                            </Button>
-                            {scannedReturn && (
-                                <Button variant="outline" onClick={handleReset} className="px-3">
-                                    <RotateCcw className="w-4 h-4" />
-                                </Button>
-                            )}
                         </div>
-                        <p className="text-[10px] text-gray-400 mt-1">
-                            Use a barcode scanner pointed at the FedEx label on each box, or type the tracking number manually.
-                        </p>
+
+                        {receiveScanMode === 'camera' && (
+                            <div>
+                                <button
+                                    type="button"
+                                    onClick={() => setCameraOpen(true)}
+                                    disabled={isActionLoading || (scanProgress?.allScanned ?? false)}
+                                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-dashed border-primary-300 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {isActionLoading ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 animate-spin text-primary-600" />
+                                            <span className="text-xs font-medium text-primary-700">Processing…</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Camera className="w-4 h-4 text-primary-600" />
+                                            <span className="text-xs font-semibold text-primary-800">Open camera scanner</span>
+                                        </>
+                                    )}
+                                </button>
+                                <p className="text-[10px] text-gray-400 mt-1">
+                                    Scan the FedEx/UPS barcode on the shipping label (same scanner as return add-items).
+                                </p>
+                            </div>
+                        )}
+
+                        {receiveScanMode === 'input' && (
+                            <div className="flex gap-2">
+                                <div className="relative flex-1">
+                                    <ScanLine className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                    <input
+                                        ref={inputRef}
+                                        type="text"
+                                        value={trackingInput}
+                                        onChange={e => setTrackingInput(e.target.value)}
+                                        onKeyDown={handleScanKeyDown}
+                                        placeholder={scanProgress && !scanProgress.allScanned
+                                            ? 'Scan next box tracking number…'
+                                            : 'USB wedge: scan barcode — or type — then Enter'
+                                        }
+                                        className="w-full pl-9 pr-3 py-2 text-sm border-2 border-primary-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-primary-50 font-mono"
+                                        autoFocus
+                                        disabled={isActionLoading || (scanProgress?.allScanned ?? false)}
+                                    />
+                                </div>
+                                <Button
+                                    variant="primary"
+                                    onClick={() => void handleScan()}
+                                    disabled={isActionLoading || !trackingInput.trim() || (scanProgress?.allScanned ?? false)}
+                                    className="px-4"
+                                >
+                                    {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Scan'}
+                                </Button>
+                                {scannedReturn && (
+                                    <Button variant="outline" onClick={handleReset} className="px-3">
+                                        <RotateCcw className="w-4 h-4" />
+                                    </Button>
+                                )}
+                            </div>
+                        )}
+
+                        {receiveScanMode === 'camera' && scannedReturn && (
+                            <div className="flex justify-end">
+                                <Button variant="outline" onClick={handleReset} className="px-3">
+                                    <RotateCcw className="w-4 h-4" /> Reset session
+                                </Button>
+                            </div>
+                        )}
+
+                        {receiveScanMode === 'input' && (
+                            <p className="text-[10px] text-gray-400">
+                                USB or Bluetooth handheld scanner types into the field and sends Enter; or type the tracking number and press Enter / Scan.
+                            </p>
+                        )}
                     </div>
+
+                    {cameraOpen && tab === 'scan' && (
+                        <QrScannerModal onScan={handleCameraScan} onClose={() => setCameraOpen(false)} />
+                    )}
 
                     {/* Error */}
                     {scanError && (

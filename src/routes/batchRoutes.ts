@@ -15,6 +15,7 @@ import {
   getBatchPermissionsHandler,
   getBatchWorkflowHandler,
   completeBatchWorkflowStepHandler,
+  listUsedBatchMonthsHandler,
 } from '../controllers/batchController';
 
 const router = Router();
@@ -61,6 +62,20 @@ const router = Router();
  *         description: Paginated list of batches
  */
 router.get('/', authenticateAdmin, listBatchesHandler);
+
+/**
+ * @swagger
+ * /api/admin/batches/used-months:
+ *   get:
+ *     summary: List calendar months (YYYY-MM) that already have a batch
+ *     tags: [Batches]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Array of YYYY-MM strings
+ */
+router.get('/used-months', authenticateAdmin, listUsedBatchMonthsHandler);
 
 /**
  * @swagger
