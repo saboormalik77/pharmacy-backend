@@ -138,6 +138,15 @@ function productName(item: { proprietaryName: string | null; genericName: string
   return item.proprietaryName || item.genericName || 'Unknown Product';
 }
 
+function escapeHtml(s: string | null | undefined): string {
+  if (s == null || s === '') return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 /**
  * Helper to collect PDF doc into a Buffer via a Promise
  */
@@ -287,6 +296,132 @@ export async function generateManifestPdf(data: ManifestData): Promise<Buffer> {
   }
 
   return pdfToBuffer(doc);
+}
+
+// ============================================================
+// Manifest HTML (browser print — same data as PDF manifest)
+// ============================================================
+
+function manifestItemsTableHtml(
+  title: string,
+  items: ManifestItem[],
+  showDestination: boolean
+): string {
+  if (items.length === 0) return '';
+  const th = showDestination
+    ? '<th>NDC</th><th>Product</th><th>Lot</th><th>Exp</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Value</th><th>Dest</th>'
+    : '<th>NDC</th><th>Product</th><th>Lot</th><th>Exp</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Value</th><th>Reason</th>';
+  const rows = items
+    .map((item, idx) => {
+      const namePlain = productName(item) + (item.isPartial ? ` (${item.partialPercentage || 0}%)` : '');
+      const destOrReason = showDestination
+        ? (item.destination || '—').toUpperCase()
+        : (item.nonReturnableReason || '—').toUpperCase();
+      const bg = idx % 2 === 0 ? ' class="alt"' : '';
+      return `<tr${bg}>
+        <td class="mono">${escapeHtml(item.ndc || '—')}</td>
+        <td>${escapeHtml(namePlain)}</td>
+        <td>${escapeHtml(item.lotNumber || '—')}</td>
+        <td>${escapeHtml(fmtDate(item.expirationDate))}</td>
+        <td class="num">${item.quantity}</td>
+        <td class="num">${escapeHtml(fmt$(item.standardPrice))}</td>
+        <td class="num">${escapeHtml(fmt$(item.estimatedValue))}</td>
+        <td>${escapeHtml(destOrReason)}</td>
+      </tr>`;
+    })
+    .join('');
+  const total = items.reduce((sum, i) => sum + (i.estimatedValue || 0), 0);
+  return `
+    <h2 class="section-title">${escapeHtml(title)}</h2>
+    <table class="items">
+      <thead><tr>${th}</tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <p class="subtotal"><strong>${escapeHtml(title)} total:</strong> ${items.length} items — ${escapeHtml(fmt$(total))}</p>
+  `;
+}
+
+export function generateManifestHtml(data: ManifestData): string {
+  const t = data.transaction;
+  const p = data.pharmacy;
+  const s = data.summary;
+  const proc = data.processor;
+  const dateStr = fmtDate(t.finalizedAt || t.createdAt);
+  const returnableBlock = manifestItemsTableHtml('RETURNABLE ITEMS', data.returnableItems, true);
+  const nonRetBlock = manifestItemsTableHtml('NON-RETURNABLE ITEMS', data.nonReturnableItems, false);
+  const notesBlock = t.notes
+    ? `<div class="notes"><strong>Notes:</strong> ${escapeHtml(t.notes)}</div>`
+    : '';
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Return manifest — ${escapeHtml(t.licensePlate)}</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 10pt; color: #111; margin: 0; padding: 24px; background: #fff; }
+  h1 { font-size: 18pt; text-align: center; margin: 0 0 4px; }
+  .subtitle { text-align: center; color: #666; font-size: 9pt; margin: 0 0 16px; }
+  .rule { border: 0; border-top: 1px solid #333; margin: 12px 0; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; margin-bottom: 12px; }
+  .grid dt { font-weight: bold; color: #333; }
+  .grid dd { margin: 0; }
+  .summary { background: #f0f4f8; border: 1px solid #ccc; padding: 10px 12px; margin: 12px 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; font-size: 9pt; }
+  .summary .wide { grid-column: span 2; }
+  h2.section-title { font-size: 11pt; margin: 16px 0 8px; }
+  table.items { width: 100%; border-collapse: collapse; font-size: 7pt; margin-bottom: 8px; }
+  table.items th { background: #e2e8f0; text-align: left; padding: 4px 3px; border: 1px solid #ccc; font-weight: bold; }
+  table.items td { padding: 3px; border: 1px solid #ddd; vertical-align: top; }
+  table.items tr.alt td { background: #f8fafc; }
+  table.items .num { text-align: right; white-space: nowrap; }
+  table.items .mono { font-family: 'Courier New', monospace; }
+  .subtotal { text-align: right; font-size: 8pt; margin: 0 0 12px; }
+  .notes { margin-top: 16px; font-size: 9pt; }
+  .footer { margin-top: 24px; font-size: 7pt; color: #999; text-align: center; }
+  @media print {
+    body { padding: 12px; }
+    table.items { page-break-inside: auto; }
+    tr { page-break-inside: avoid; page-break-after: auto; }
+    h2.section-title { page-break-after: avoid; }
+  }
+</style>
+</head>
+<body>
+  <h1>RETURN MANIFEST</h1>
+  <p class="subtitle">FCR Pharmacy Returns</p>
+  <hr class="rule" />
+  <div class="grid">
+    <dl style="margin:0;">
+      <dt>Pharmacy</dt><dd>${escapeHtml(p.name)}</dd>
+      ${p.deaNumber ? `<dt>DEA</dt><dd>${escapeHtml(p.deaNumber)}</dd>` : ''}
+      ${p.npiNumber ? `<dt>NPI</dt><dd>${escapeHtml(p.npiNumber)}</dd>` : ''}
+      ${p.phone ? `<dt>Phone</dt><dd>${escapeHtml(p.phone)}</dd>` : ''}
+    </dl>
+    <dl style="margin:0;">
+      <dt>License Plate</dt><dd>${escapeHtml(t.licensePlate)}</dd>
+      <dt>FedEx Tracking</dt><dd>${escapeHtml(t.fedexTracking || '—')}</dd>
+      <dt>Status</dt><dd>${escapeHtml(String(t.status).toUpperCase())}</dd>
+      ${t.boxCount != null ? `<dt>Box Count</dt><dd>${escapeHtml(String(t.boxCount))}</dd>` : ''}
+      <dt>Date</dt><dd>${escapeHtml(dateStr)}</dd>
+      ${proc.name ? `<dt>Processor</dt><dd>${escapeHtml(proc.name)}</dd>` : ''}
+    </dl>
+  </div>
+  <div class="summary">
+    <div>Total Items: <strong>${s.totalItems}</strong></div>
+    <div>Returnable: <strong>${s.returnableCount}</strong></div>
+    <div>Non-Returnable: <strong>${s.nonReturnableCount}</strong></div>
+    <div>CII Items: <strong>${s.hasCiiItems ? 'Yes' : 'No'}</strong></div>
+    <div class="wide">Returnable Value: <strong>${escapeHtml(fmt$(s.totalReturnableValue))}</strong></div>
+    <div class="wide">Non-Ret. Value: <strong>${escapeHtml(fmt$(s.totalNonReturnableValue))}</strong> &nbsp; Total: <strong>${escapeHtml(fmt$(s.totalValue))}</strong></div>
+  </div>
+  ${returnableBlock}
+  ${nonRetBlock}
+  ${notesBlock}
+  <p class="footer">Manifest generated ${escapeHtml(new Date().toLocaleString('en-US'))}</p>
+</body>
+</html>`;
 }
 
 

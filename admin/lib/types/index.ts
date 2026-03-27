@@ -595,6 +595,12 @@ export interface ReturnTransaction {
     licensePlate: string;
     pharmacyId: string;
     pharmacyName: string | null;
+    /** Enriched from pharmacy row (processor my-stores parity) */
+    storeNumber?: string | null;
+    pharmacyStreetAddress?: string | null;
+    pharmacyCity?: string | null;
+    pharmacyState?: string | null;
+    pharmacyLastVisitDate?: string | null;
     processorId: string | null;
     processorName: string | null;
     serviceType: string;

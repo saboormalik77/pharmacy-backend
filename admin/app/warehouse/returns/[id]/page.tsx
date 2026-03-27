@@ -55,6 +55,73 @@ function formatCurrency(value: number): string {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
 }
 
+/** Label left / value right — matches General Information and other detail cards */
+function ReturnTransactionStoreAndProcessorDl({
+    tx,
+    variant,
+}: {
+    tx: ReturnTransaction;
+    variant: 'plain' | 'emerald';
+}) {
+    const emerald = variant === 'emerald';
+    const dlCls = emerald ? 'space-y-2.5' : 'space-y-1.5';
+    const labelCls = emerald ? 'text-xs text-emerald-700 font-medium' : 'text-[11px] text-gray-500';
+    const valueCls = emerald ? 'text-xs font-bold text-gray-800' : 'text-[11px] font-medium text-gray-900';
+    const rowCls = emerald ? 'flex justify-between items-center gap-2' : 'flex justify-between gap-2';
+    const valueWrap = `${valueCls} text-right min-w-0 break-words max-w-[65%]`;
+
+    const cityState = [tx.pharmacyCity, tx.pharmacyState].filter(Boolean).join(', ');
+    const serviceLabel = tx.serviceType
+        ? tx.serviceType.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+        : '—';
+
+    return (
+        <dl className={dlCls}>
+            <div className={rowCls}>
+                <dt className={`${labelCls} shrink-0`}>Store Name</dt>
+                <dd className={valueWrap}>{tx.pharmacyName || '—'}</dd>
+            </div>
+            {tx.storeNumber ? (
+                <div className={rowCls}>
+                    <dt className={`${labelCls} shrink-0`}>Store #</dt>
+                    <dd className={`${valueCls} text-right`}>{tx.storeNumber}</dd>
+                </div>
+            ) : null}
+            {tx.pharmacyStreetAddress ? (
+                <div className={emerald ? 'flex justify-between items-start gap-2' : 'flex justify-between gap-2 items-start'}>
+                    <dt className={`${labelCls} shrink-0`}>Address</dt>
+                    <dd className={valueWrap}>{tx.pharmacyStreetAddress}</dd>
+                </div>
+            ) : null}
+            {cityState ? (
+                <div className={emerald ? 'flex justify-between items-start gap-2' : 'flex justify-between gap-2 items-start'}>
+                    <dt className={`${labelCls} shrink-0`}>City / State</dt>
+                    <dd className={valueWrap}>{cityState}</dd>
+                </div>
+            ) : null}
+            <div className={rowCls}>
+                <dt className={`${labelCls} shrink-0`}>Service Type</dt>
+                <dd className={`${valueCls} text-right min-w-0`}>{serviceLabel}</dd>
+            </div>
+            {tx.pharmacyLastVisitDate ? (
+                <div className={rowCls}>
+                    <dt className={`${labelCls} shrink-0`}>Last Visit</dt>
+                    <dd className={`${valueCls} text-right`}>
+                        {new Date(tx.pharmacyLastVisitDate).toLocaleDateString()}
+                    </dd>
+                </div>
+            ) : null}
+            <div className={rowCls}>
+                <dt className={`${labelCls} shrink-0`}>Processor</dt>
+                <dd className={`${valueCls} flex items-center gap-1 justify-end ${emerald ? 'font-semibold' : ''}`}>
+                    <UserCog className={emerald ? 'w-3.5 h-3.5 text-emerald-500 flex-shrink-0' : 'w-3 h-3 text-gray-400 flex-shrink-0'} />
+                    {tx.processorName || '—'}
+                </dd>
+            </div>
+        </dl>
+    );
+}
+
 function canDoAction(tx: ReturnTransaction, action: string): boolean {
     switch (action) {
         case 'pause': return tx.status === 'in_progress';
@@ -752,18 +819,7 @@ export default function ReturnDetailPage() {
                     <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                         <Building2 className="w-3.5 h-3.5" /> Store & Processor
                     </h2>
-                    <dl className="space-y-1.5">
-                        <div className="flex justify-between">
-                            <dt className="text-[11px] text-gray-500">Store Name</dt>
-                            <dd className="text-[11px] font-medium text-gray-900">{tx.pharmacyName || '—'}</dd>
-                        </div>
-                        <div className="flex justify-between">
-                            <dt className="text-[11px] text-gray-500">Processor</dt>
-                            <dd className="text-[11px] text-gray-900 flex items-center gap-1">
-                                <UserCog className="w-3 h-3 text-gray-400" /> {tx.processorName || '—'}
-                            </dd>
-                        </div>
-                    </dl>
+                    <ReturnTransactionStoreAndProcessorDl tx={tx} variant="plain" />
                 </div>
 
                 {/* Values */}
@@ -966,19 +1022,7 @@ export default function ReturnDetailPage() {
                             </div>
                             Store & Processor
                         </h2>
-                        <dl className="space-y-2.5">
-                            <div className="flex justify-between items-center">
-                                <dt className="text-xs text-emerald-700 font-medium">Store Name</dt>
-                                <dd className="text-xs font-bold text-gray-800">{tx.pharmacyName || '—'}</dd>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <dt className="text-xs text-emerald-700 font-medium">Processor</dt>
-                                <dd className="text-xs text-gray-800 font-semibold flex items-center gap-1">
-                                    <UserCog className="w-3.5 h-3.5 text-emerald-500" /> 
-                                    {tx.processorName || '—'}
-                                </dd>
-                            </div>
-                        </dl>
+                        <ReturnTransactionStoreAndProcessorDl tx={tx} variant="emerald" />
                     </div>
 
                     {/* Items & Values */}
@@ -1445,7 +1489,7 @@ export default function ReturnDetailPage() {
                                         <div className="flex items-center gap-3 mt-2">
                                             <button
                                                 onClick={() => {
-                                                    downloadPdf('manifest', `manifest-${tx.licensePlate}.pdf`);
+                                                    printHtml('manifest-html', 'manifest');
                                                     markStep({ printManifest: true });
                                                 }}
                                                 disabled={pdfLoading === 'manifest'}
