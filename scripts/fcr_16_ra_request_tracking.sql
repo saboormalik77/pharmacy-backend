@@ -119,6 +119,7 @@ RETURNS jsonb LANGUAGE sql STABLE AS $$
     'shippedAt',          d.shipped_at,
     'fedexLabels',        d.fedex_labels,
     'paymentStatus',      d.payment_status,
+    'creditMemoUrl',      d.credit_memo_url,
     'amountRequested',    d.amount_requested,
     'amountReceived',     d.amount_received,
     'createdAt',          d.created_at,

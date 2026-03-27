@@ -59,13 +59,19 @@ export const fetchUnpaidMemos = createAsyncThunk<
 
 export const recordPayment = createAsyncThunk<
     DebitMemo,
-    { memoId: string; amountReceived: number; paymentDate?: string; reference?: string; notes?: string },
+    { memoId: string; amountReceived: number; paymentDate?: string; reference?: string; notes?: string; creditMemoFile: File },
     { rejectValue: string }
->('paymentTracking/recordPayment', async ({ memoId, ...body }, { rejectWithValue }) => {
+>('paymentTracking/recordPayment', async ({ memoId, creditMemoFile, ...body }, { rejectWithValue }) => {
     try {
         const { apiClient } = await import('@/lib/api/apiClient');
-        const res = await apiClient.post<{ status: string; data: DebitMemo }>(
-            `/admin/debit-memos/${memoId}/record-payment`, body, true
+        const formData = new FormData();
+        formData.append('amountReceived', String(body.amountReceived));
+        if (body.paymentDate) formData.append('paymentDate', body.paymentDate);
+        if (body.reference) formData.append('reference', body.reference);
+        if (body.notes) formData.append('notes', body.notes);
+        formData.append('creditMemo', creditMemoFile);
+        const res = await apiClient.postFormData<{ status: string; data: DebitMemo }>(
+            `/admin/debit-memos/${memoId}/record-payment`, formData, true
         );
         return res.data;
     } catch (err: any) {
