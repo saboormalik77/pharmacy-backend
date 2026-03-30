@@ -76,6 +76,9 @@ export default function AddItemsPage() {
     const { canEdit, isLocked, checkActionAllowed } = useReturnEditProtection(transactionId);
 
     const scanInputRef = useRef<HTMLInputElement>(null);
+    /** `${ndc}|${exp}|${dosage}` for last successful policy check — avoids duplicate fetch after scan vs effect */
+    const policySyncKeyRef = useRef('');
+    const policyCheckRequestIdRef = useRef(0);
     const [form, setForm] = useState<FormState>({ ...EMPTY_FORM });
     const [mode, setMode] = useState<'camera' | 'usb' | 'manual'>('camera');
     const [cameraOpen, setCameraOpen] = useState(false);
@@ -170,27 +173,86 @@ export default function AddItemsPage() {
 
     // ── Barcode scan handler ───────────────────────────────────
 
+    const performPolicyCheck = useCallback(
+        async (ndc: string, expirationDate: string, dosageForm?: string) => {
+            const checkResult = await dispatch(checkReturnability({ ndc, expirationDate, dosageForm }));
+            if (checkReturnability.fulfilled.match(checkResult) && checkResult.payload) {
+                const policy = checkResult.payload;
+                setPolicyAutoCheck(policy);
+                if (policy.status === 'returnable' || policy.status === 'non_returnable') {
+                    setForm(prev => ({ ...prev, returnStatus: policy.status as 'returnable' | 'non_returnable' }));
+                }
+                if (policy.expectedReturnableDate) {
+                    setPreCheckResult(policy);
+                } else {
+                    setPreCheckResult(null);
+                }
+                return policy;
+            }
+            setPreCheckResult(null);
+            return null;
+        },
+        [dispatch]
+    );
+
+    /** Re-run policy (manual button / save path). Clears sync key so next effect run can still dedupe. */
     const runPolicyCheck = async (ndc: string, expirationDate: string, dosageForm?: string) => {
+        policySyncKeyRef.current = '';
         setIsPolicyChecking(true);
         setPolicyAutoCheck(null);
         setPreCheckResult(null);
-        const checkResult = await dispatch(checkReturnability({ ndc, expirationDate, dosageForm }));
-        setIsPolicyChecking(false);
-        if (checkReturnability.fulfilled.match(checkResult) && checkResult.payload) {
-            const policy = checkResult.payload;
-            setPolicyAutoCheck(policy);
-            // Auto-set return status from policy
-            if (policy.status === 'returnable' || policy.status === 'non_returnable') {
-                setForm(prev => ({ ...prev, returnStatus: policy.status as 'returnable' | 'non_returnable' }));
-            }
-            // Pre-set wine cellar flag if too early
-            if (policy.expectedReturnableDate) {
-                setPreCheckResult(policy);
+        const reqId = ++policyCheckRequestIdRef.current;
+        try {
+            const policy = await performPolicyCheck(ndc, expirationDate, dosageForm);
+            if (reqId !== policyCheckRequestIdRef.current) return policy;
+            if (policy) {
+                policySyncKeyRef.current = `${ndc}|${expirationDate}|${dosageForm || ''}`;
             }
             return policy;
+        } finally {
+            if (reqId === policyCheckRequestIdRef.current) {
+                setIsPolicyChecking(false);
+            }
         }
-        return null;
     };
+
+    // When NDC, expiration, or dosage form changes (e.g. user edits expiry after scan), re-check policy
+    useEffect(() => {
+        const ndc = form.ndc.trim();
+        const exp = form.expirationDate.trim();
+        const dosage = (form.dosageForm || '').trim();
+        if (!ndc || !exp) {
+            policySyncKeyRef.current = '';
+            setPolicyAutoCheck(null);
+            setPreCheckResult(null);
+            return;
+        }
+        const key = `${ndc}|${exp}|${dosage}`;
+        if (key === policySyncKeyRef.current) {
+            return;
+        }
+
+        const reqId = ++policyCheckRequestIdRef.current;
+        setIsPolicyChecking(true);
+        setPolicyAutoCheck(null);
+        setPreCheckResult(null);
+
+        (async () => {
+            try {
+                const policy = await performPolicyCheck(ndc, exp, dosage || undefined);
+                if (reqId !== policyCheckRequestIdRef.current) return;
+                if (policy) {
+                    policySyncKeyRef.current = key;
+                } else {
+                    policySyncKeyRef.current = '';
+                }
+            } finally {
+                if (reqId === policyCheckRequestIdRef.current) {
+                    setIsPolicyChecking(false);
+                }
+            }
+        })();
+    }, [form.ndc, form.expirationDate, form.dosageForm, performPolicyCheck]);
 
     const handleScan = async (raw: string) => {
         if (!raw.trim()) return;
@@ -205,6 +267,7 @@ export default function AddItemsPage() {
         setPreCheckResult(null);
         setIsPreChecking(false);
         setPolicyAutoCheck(null);
+        policySyncKeyRef.current = '';
         setManualDestination('');
 
         const result = await dispatch(scanBarcode(raw.trim()));
@@ -258,10 +321,7 @@ export default function AddItemsPage() {
 
             setScanInput('');
 
-            // Auto-run policy check if we have NDC + expiration
-            if (af.ndc && af.expirationDate) {
-                await runPolicyCheck(af.ndc, af.expirationDate, af.dosageForm || undefined);
-            }
+            // Policy check runs via useEffect when NDC + expiration are set (covers manual expiry edits too)
         } else {
             setScannedPrices(null);
             setScanError(result.payload as string || 'Scan failed. Try manual entry.');

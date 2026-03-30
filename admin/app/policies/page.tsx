@@ -575,15 +575,15 @@ export default function PoliciesPage() {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-1">Returnable inside policy window?</label>
-                                    <p className="text-[10px] text-gray-500 mb-1">If No, the months before/after window is informational only — items stay non-returnable even when the date falls in range.</p>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Return window mode</label>
+                                    <p className="text-[10px] text-gray-500 mb-1">Standard: returnable inside the months-before/after window (too early → Wine Cellar). Inverted: returnable outside that window; inside → Wine Cellar until the day after the window ends.</p>
                                     <select
                                         value={newReturnPolicy.returnableWithinPolicyPeriod ? 'yes' : 'no'}
                                         onChange={e => setNewReturnPolicy({ ...newReturnPolicy, returnableWithinPolicyPeriod: e.target.value === 'yes' })}
                                         className="w-full max-w-xs px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
                                     >
-                                        <option value="yes">Yes — returnable when date is in window</option>
-                                        <option value="no">No — not returnable in window</option>
+                                        <option value="yes">Standard — returnable in window</option>
+                                        <option value="no">Inverted — Wine Cellar in window</option>
                                     </select>
                                 </div>
                             </div>

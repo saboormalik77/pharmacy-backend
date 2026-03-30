@@ -8,7 +8,7 @@
  *   1. Extract labeler_id (NDC prefix) → lookup manufacturer_policies
  *   2. Check non_returnable_products for NDC-level exceptions
  *   3. Get return policy → calculate return window
- *   4. Check timing (too early / within window / too late)
+ *   4. Check timing: standard vs inverted window (returnable_within_policy_period)
  *   5. Check partial acceptance rules
  *   6. Return { status, reason, destination, ... }
  */
@@ -29,6 +29,8 @@ export type NonReturnableReason =
   | 'too_early'
   | 'too_late'
   | 'not_returnable_in_policy_window'
+  /** In-window hold: returnable_within_policy_period false — inside calendar window, defer until after window */
+  | 'deferred_inside_policy_period'
   | 'no_partials'
   | 'dosage_form_not_accepted';
 
@@ -44,7 +46,10 @@ export interface ReturnabilityResult {
   windowStart: string | null;
   windowEnd: string | null;
   partialsAccepted: boolean | null;
-  /** False when the policy documents a window but marks products non-returnable while in-window */
+  /**
+   * False = inverted window: returnable *outside* the calendar window (too early / too late);
+   * *inside* the window → deferred (Wine Cellar) until after window ends.
+   */
   returnableWithinPolicyPeriod: boolean | null;
   manufacturerName: string | null;
   manufacturerPolicyId: string | null;
@@ -79,6 +84,14 @@ function addMonths(date: Date, months: number): Date {
 
 function formatDate(date: Date): string {
   return date.toISOString().split('T')[0];
+}
+
+/** First calendar day after `date` (end-of-day safe). */
+function startOfNextDayAfter(date: Date): Date {
+  const d = new Date(date);
+  d.setDate(d.getDate() + 1);
+  d.setHours(0, 0, 0, 0);
+  return d;
 }
 
 // ============================================================
@@ -224,36 +237,43 @@ export async function checkReturnability(
     autoRaEmail: rp.auto_ra_email,
   };
 
-  // Step 6: Check timing
-  if (today < windowStart) {
-    return {
-      ...baseTbd,
-      ...commonFields,
-      status: 'non_returnable',
-      reason: 'too_early',
-      expectedReturnableDate: formatDate(windowStart),
-    };
-  }
+  const invertedReturnWindow = rp.returnable_within_policy_period === false;
+  const insideCalendarWindow = today >= windowStart && today <= windowEnd;
 
-  if (today > windowEnd) {
-    return {
-      ...baseTbd,
-      ...commonFields,
-      status: 'non_returnable',
-      reason: 'too_late',
-      expectedReturnableDate: null,
-    };
-  }
+  // Inverted window (returnable_within_policy_period = false):
+  // — Outside the calendar window → treat as returnable candidate (partials apply below).
+  // — Inside the calendar window → Wine Cellar until the day after window end.
+  if (invertedReturnWindow) {
+    if (insideCalendarWindow) {
+      return {
+        ...baseTbd,
+        ...commonFields,
+        status: 'non_returnable',
+        reason: 'deferred_inside_policy_period',
+        expectedReturnableDate: formatDate(startOfNextDayAfter(windowEnd)),
+      };
+    }
+  } else {
+    // Standard window
+    if (today < windowStart) {
+      return {
+        ...baseTbd,
+        ...commonFields,
+        status: 'non_returnable',
+        reason: 'too_early',
+        expectedReturnableDate: formatDate(windowStart),
+      };
+    }
 
-  // Step 6b: In calendar window, but this return policy marks the period as non-returnable (informational window only)
-  if (rp.returnable_within_policy_period === false) {
-    return {
-      ...baseTbd,
-      ...commonFields,
-      status: 'non_returnable',
-      reason: 'not_returnable_in_policy_window',
-      expectedReturnableDate: null,
-    };
+    if (today > windowEnd) {
+      return {
+        ...baseTbd,
+        ...commonFields,
+        status: 'non_returnable',
+        reason: 'too_late',
+        expectedReturnableDate: null,
+      };
+    }
   }
 
   // Step 7: Check partial acceptance

@@ -66,6 +66,7 @@ export const addItemHandler = catchAsync(
           const reasonMap: Record<string, string> = {
             too_early: 'date',
             too_late: 'date',
+            deferred_inside_policy_period: 'date',
             policy_exception: 'policy',
             no_partials: 'policy',
             dosage_form_not_accepted: 'policy',
@@ -122,14 +123,11 @@ export const addItemHandler = catchAsync(
       rawScanData: body.rawScanData,
     });
 
-    // ── Auto-add to wine cellar when reason is 'too_early' ──────
+    // ── Auto-add to wine cellar: too_early (standard window) or in-window hold (inverted window) ──────
     let wineCellarItem: any = null;
-    if (
-      policyResult &&
-      policyResult.reason === 'too_early' &&
-      policyResult.expectedReturnableDate &&
-      result.item
-    ) {
+    const wcAutoReason =
+      policyResult?.reason === 'too_early' || policyResult?.reason === 'deferred_inside_policy_period';
+    if (policyResult && wcAutoReason && policyResult.expectedReturnableDate && result.item) {
       try {
         const transaction = await getReturnTransactionById(transactionId);
         wineCellarItem = await wcService.addToWineCellar({

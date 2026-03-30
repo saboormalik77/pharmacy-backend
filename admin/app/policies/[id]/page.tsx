@@ -314,7 +314,7 @@ export default function PolicyDetailPage() {
                             <thead><tr className="bg-gray-50 border-b border-gray-200">
                                 <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Destination</th>
                                 <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Window</th>
-                                <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">In-window</th>
+                                <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Win. mode</th>
                                 <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Partials</th>
                                 <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Discount</th>
                                 <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Description</th>
@@ -327,9 +327,9 @@ export default function PolicyDetailPage() {
                                         <td className="px-3 py-1.5 text-xs text-gray-700 whitespace-nowrap">{rp.monthsBeforeExpiration ?? '?'}mo before – {rp.monthsAfterExpiration ?? '?'}mo after</td>
                                         <td className="px-3 py-1.5 text-center">
                                             {rp.returnableWithinPolicyPeriod !== false ? (
-                                                <Badge variant="success"><span className="text-[10px]">Yes</span></Badge>
+                                                <Badge variant="success"><span className="text-[10px]">Standard</span></Badge>
                                             ) : (
-                                                <Badge variant="danger"><span className="text-[10px]">No</span></Badge>
+                                                <Badge variant="warning"><span className="text-[10px]">Inverted</span></Badge>
                                             )}
                                         </td>
                                         <td className="px-3 py-1.5 text-center">{rp.partialsAccepted ? <Badge variant="success"><span className="text-[10px]">Yes</span></Badge> : <span className="text-xs text-gray-400">No</span>}</td>
@@ -500,15 +500,15 @@ export default function PolicyDetailPage() {
                         </div>
                     </div>
                     <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Returnable inside policy window?</label>
-                        <p className="text-[10px] text-gray-500 mb-1.5">No = the date window is informational; items are not returnable even when expiration falls in range.</p>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Return window mode</label>
+                        <p className="text-[10px] text-gray-500 mb-1.5">Standard: returnable inside the window. Inverted: returnable outside the window; dates inside the window go to Wine Cellar until the day after the window ends.</p>
                         <select
                             value={rpForm.returnableWithinPolicyPeriod !== false ? 'yes' : 'no'}
                             onChange={e => setRpForm({ ...rpForm, returnableWithinPolicyPeriod: e.target.value === 'yes' })}
                             className="w-full max-w-md px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
-                            <option value="yes">Yes — returnable when date is in window</option>
-                            <option value="no">No — not returnable in window</option>
+                            <option value="yes">Standard — returnable in window</option>
+                            <option value="no">Inverted — Wine Cellar in window</option>
                         </select>
                     </div>
                     <div className="flex items-center gap-3">
