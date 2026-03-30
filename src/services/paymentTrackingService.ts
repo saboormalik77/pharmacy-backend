@@ -19,7 +19,7 @@ async function assertDebitMemoShippedForPaymentActions(
 ): Promise<void> {
   const { data: memoRow, error: memoErr } = await sb
     .from('debit_memos')
-    .select('ra_status')
+    .select('ra_status, shipped_at, outbound_tracking')
     .eq('id', debitMemoId)
     .single();
 
@@ -27,8 +27,12 @@ async function assertDebitMemoShippedForPaymentActions(
     throw new AppError('Debit memo not found', 404);
   }
 
-  const raStatus = (memoRow as { ra_status: string }).ra_status;
-  if (raStatus !== 'shipped') {
+  const row = memoRow as { ra_status: string; shipped_at: string | null; outbound_tracking: string | null };
+  const hasTracking = row.outbound_tracking != null && String(row.outbound_tracking).trim() !== '';
+  const hasShippedAt = row.shipped_at != null && String(row.shipped_at).trim() !== '';
+  const shipped = row.ra_status === 'shipped' || hasShippedAt || hasTracking;
+
+  if (!shipped) {
     throw new AppError(
       'Cannot record payment or send payment reminders until the debit memo is shipped (outbound shipment recorded in RA Tracking).',
       400

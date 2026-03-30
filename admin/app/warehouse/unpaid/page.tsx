@@ -27,8 +27,12 @@ function pct(v: number | null | undefined) {
     return `${(v ?? 0).toFixed(1)}%`;
 }
 
+/** Matches backend: shipped when tracking or shipped_at exists, not only ra_status. */
 function isDebitMemoShipped(memo: DebitMemo): boolean {
-    return memo.raStatus === 'shipped';
+    if (memo.raStatus === 'shipped') return true;
+    if (memo.shippedAt != null && String(memo.shippedAt).trim() !== '') return true;
+    const tr = (memo.outboundTracking || '').trim();
+    return tr.length > 0;
 }
 
 function getPaymentBadge(s: string): { variant: 'success' | 'warning' | 'danger' | 'default' } {
