@@ -150,7 +150,7 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
 
     const handleLogout = async () => {
         await dispatch(logoutUser());
-        router.push('/login');
+        window.location.href = '/login';
     };
 
     return (

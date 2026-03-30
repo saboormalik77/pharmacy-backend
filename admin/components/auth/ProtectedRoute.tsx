@@ -45,7 +45,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
     const doLogout = () => {
       dispatch(logoutUser());
-      router.push('/login');
+      window.location.href = '/login';
     };
 
     if (msUntilExpiry <= 0) {
@@ -63,7 +63,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
     if (isLoading) return;
 
     if (!isAuthenticated && !isPublicPage) {
-      router.push('/login');
+      window.location.href = '/login';
     } else if (isAuthenticated && isPublicPage) {
       router.push('/');
     }

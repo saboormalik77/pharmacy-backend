@@ -89,10 +89,8 @@ export const fetchRecentActivity = createAsyncThunk(
       const { apiClient } = await import('@/lib/api/apiClient');
       const { cookieUtils } = await import('@/lib/utils/cookies');
       
-      // Check if token exists before making the call
       const token = cookieUtils.getAuthToken();
       if (!token) {
-        console.error('No auth token found');
         return rejectWithValue('Authentication required. Please login again.');
       }
       
@@ -143,10 +141,8 @@ export const markActivityAsRead = createAsyncThunk(
       const { apiClient } = await import('@/lib/api/apiClient');
       const { cookieUtils } = await import('@/lib/utils/cookies');
       
-      // Check if token exists before making the call
       const token = cookieUtils.getAuthToken();
       if (!token) {
-        console.error('No auth token found');
         return rejectWithValue('Authentication required. Please login again.');
       }
       
