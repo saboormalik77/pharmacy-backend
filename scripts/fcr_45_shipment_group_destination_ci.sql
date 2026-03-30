@@ -1,38 +1,5 @@
--- FCR 39c — Run after fcr_39b (or alongside if 39b list/create not yet deployed)
--- 1) list_memos_for_group_shipping: include memos in an unshipped shipment group (abandoned FedEx flow)
--- 2) create_shipment_group: idempotent when all memos already share the same unshipped group; case-insensitive ra_status
-
-CREATE OR REPLACE FUNCTION list_memos_for_group_shipping(
-  p_destination TEXT DEFAULT NULL
-)
-RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
-DECLARE
-  v_rows jsonb;
-  v_dest TEXT := NULLIF(TRIM(COALESCE(p_destination, '')), '');
-BEGIN
-  SELECT COALESCE(jsonb_agg(_debit_memo_to_json(d) ORDER BY d.destination, d.created_at), '[]'::jsonb)
-  INTO v_rows
-  FROM debit_memos d
-  WHERE LOWER(TRIM(COALESCE(d.ra_status, ''))) = 'received'
-    AND d.shipped_at IS NULL
-    AND (
-      d.shipment_group_id IS NULL
-      OR EXISTS (
-        SELECT 1 FROM shipment_groups sg
-        WHERE sg.id = d.shipment_group_id
-          AND sg.shipped_at IS NULL
-      )
-    )
-    AND d.ra_number IS NOT NULL
-    AND TRIM(d.ra_number) != ''
-    AND (v_dest IS NULL OR LOWER(TRIM(COALESCE(d.destination, ''))) = LOWER(v_dest));
-
-  RETURN jsonb_build_object(
-    'error', false,
-    'data', v_rows
-  );
-END;
-$$;
+-- FCR 45 — create_shipment_group: treat destination as same when names match case-insensitively
+-- (e.g. "Inmar" vs "inmar"). Stored shipment_groups.destination remains the first memo's value.
 
 CREATE OR REPLACE FUNCTION create_shipment_group(
   p_memo_ids     UUID[],

@@ -134,10 +134,10 @@ BEGIN
       RETURN jsonb_build_object('error', true, 'code', 400, 'message', 'Memo ' || v_memo.memo_number || ' is already in a shipment group');
     END IF;
 
-    -- Check destination consistency
+    -- Check destination consistency (case-insensitive, trimmed)
     IF v_destination IS NULL THEN
       v_destination := v_memo.destination;
-    ELSIF v_destination != v_memo.destination THEN
+    ELSIF LOWER(TRIM(COALESCE(v_destination, ''))) IS DISTINCT FROM LOWER(TRIM(COALESCE(v_memo.destination, ''))) THEN
       RETURN jsonb_build_object('error', true, 'code', 400, 'message', 'All memos must have the same destination');
     END IF;
   END LOOP;
