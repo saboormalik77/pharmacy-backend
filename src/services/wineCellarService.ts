@@ -20,6 +20,8 @@ export interface WineCellarItem {
   pharmacyId: string;
   pharmacyName: string | null;
   transactionItemId: string | null;
+  /** Return session when shelved without a return_transaction_items row (FCR 42) */
+  sourceReturnTransactionId?: string | null;
   ndc: string | null;
   ndc10: string | null;
   productName: string | null;
@@ -48,6 +50,8 @@ export interface WineCellarItem {
 export interface AddToWineCellarInput {
   pharmacyId: string;
   transactionItemId?: string;
+  /** When shelving from add-items without creating a return line */
+  sourceReturnTransactionId?: string;
   ndc?: string;
   ndc10?: string;
   productName?: string;
@@ -152,6 +156,7 @@ export const addToWineCellar = async (
     p_data: {
       pharmacy_id:              input.pharmacyId,
       transaction_item_id:      input.transactionItemId || null,
+      source_return_transaction_id: input.sourceReturnTransactionId || null,
       ndc:                      input.ndc || null,
       ndc_10:                   input.ndc10 || null,
       product_name:             input.productName || null,

@@ -1002,6 +1002,8 @@ export interface WineCellarItem {
     pharmacyId: string;
     pharmacyName: string | null;
     transactionItemId: string | null;
+    /** Shelved from add-items without a return line (FCR 42) */
+    sourceReturnTransactionId?: string | null;
     ndc: string | null;
     ndc10: string | null;
     productName: string | null;

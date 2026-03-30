@@ -452,7 +452,8 @@ export const addTransactionItem = createAsyncThunk(
 
             const response = await apiClient.post<{
                 status: string;
-                data: ReturnTransactionItem;
+                data: ReturnTransactionItem | null;
+                wineCellarOnly?: boolean;
                 warning?: string;
                 duplicateItemId?: string;
                 policyCheck?: ReturnabilityCheckResult;
@@ -462,7 +463,14 @@ export const addTransactionItem = createAsyncThunk(
                 payload,
                 true
             );
-            return { item: response.data, warning: response.warning, duplicateItemId: response.duplicateItemId, policyCheck: response.policyCheck, wineCellarItem: response.wineCellarItem };
+            return {
+                item: response.data,
+                wineCellarOnly: response.wineCellarOnly === true,
+                warning: response.warning,
+                duplicateItemId: response.duplicateItemId,
+                policyCheck: response.policyCheck,
+                wineCellarItem: response.wineCellarItem,
+            };
         } catch (error: any) {
             return rejectWithValue(error?.message || 'Failed to add item');
         }
@@ -750,7 +758,9 @@ const returnTransactionsSlice = createSlice({
             .addCase(addTransactionItem.pending, (state) => { state.isItemActionLoading = true; state.error = null; })
             .addCase(addTransactionItem.fulfilled, (state, action) => {
                 state.isItemActionLoading = false;
-                if (action.payload.item) state.items = [action.payload.item, ...state.items];
+                if (action.payload.item) {
+                    state.items = [action.payload.item, ...state.items];
+                }
             })
             .addCase(addTransactionItem.rejected, (state, action) => { state.isItemActionLoading = false; state.error = action.payload as string; })
 

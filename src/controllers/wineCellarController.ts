@@ -101,6 +101,8 @@ export const createHandler = catchAsync(
     const item = await wcService.addToWineCellar({
       pharmacyId: resolvedPharmacyId,
       transactionItemId: body.transactionItemId || body.transaction_item_id,
+      sourceReturnTransactionId:
+        body.sourceReturnTransactionId || body.source_return_transaction_id,
       ndc: body.ndc,
       ndc10: body.ndc10 || body.ndc_10,
       productName: body.productName || body.product_name,

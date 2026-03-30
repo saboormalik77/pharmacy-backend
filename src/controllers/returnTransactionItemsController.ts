@@ -23,6 +23,16 @@ const parsePartialPercentage = (value: unknown): number | undefined => {
   return parsed;
 };
 
+const POLICY_REASON_TO_DB: Record<string, string> = {
+  too_early: 'date',
+  too_late: 'date',
+  deferred_inside_policy_period: 'date',
+  policy_exception: 'policy',
+  no_partials: 'policy',
+  dosage_form_not_accepted: 'policy',
+  not_returnable_in_policy_window: 'policy',
+};
+
 // ============================================================
 // POST /api/return-transactions/:id/items — Add scanned item
 // Auto-classifies via policy engine when returnStatus is not provided
@@ -50,7 +60,9 @@ export const addItemHandler = catchAsync(
     const shouldAutoClassify =
       (!returnStatus || returnStatus === 'tbd') && body.ndc && body.expirationDate;
 
-    if (shouldAutoClassify) {
+    // Always run policy when we have NDC + expiration so Wine Cellar auto-add works even when the
+    // UI pre-locks returnStatus to non_returnable (shouldAutoClassify false).
+    if (body.ndc && body.expirationDate) {
       try {
         policyResult = await checkReturnability({
           ndc: body.ndc,
@@ -59,25 +71,75 @@ export const addItemHandler = catchAsync(
           dosageForm: body.dosageForm,
         });
 
-        returnStatus = policyResult.status;
-        destination = policyResult.destination || destination;
+        if (shouldAutoClassify) {
+          returnStatus = policyResult.status;
+          destination = policyResult.destination || destination;
 
-        if (policyResult.status === 'non_returnable' && policyResult.reason) {
-          const reasonMap: Record<string, string> = {
-            too_early: 'date',
-            too_late: 'date',
-            deferred_inside_policy_period: 'date',
-            policy_exception: 'policy',
-            no_partials: 'policy',
-            dosage_form_not_accepted: 'policy',
-            not_returnable_in_policy_window: 'policy',
-          };
-          nonReturnableReason = reasonMap[policyResult.reason] || 'policy';
+          if (policyResult.status === 'non_returnable' && policyResult.reason) {
+            nonReturnableReason = POLICY_REASON_TO_DB[policyResult.reason] || 'policy';
+          }
+        } else if (
+          returnStatus === 'non_returnable' &&
+          !nonReturnableReason &&
+          policyResult.status === 'non_returnable' &&
+          policyResult.reason
+        ) {
+          nonReturnableReason = POLICY_REASON_TO_DB[policyResult.reason] || 'policy';
         }
       } catch (err: any) {
-        console.error('Policy engine auto-classify failed (saving as TBD):', err.message);
-        returnStatus = 'tbd';
+        console.error('Policy engine check failed (add item):', err.message);
+        policyResult = null;
+        if (shouldAutoClassify) {
+          returnStatus = 'tbd';
+        }
       }
+    }
+
+    const wcAutoReason =
+      policyResult?.reason === 'too_early' || policyResult?.reason === 'deferred_inside_policy_period';
+    const shouldShelveWineCellarOnly =
+      policyResult &&
+      wcAutoReason &&
+      policyResult.expectedReturnableDate &&
+      returnStatus === 'non_returnable' &&
+      body.ndc &&
+      body.expirationDate;
+
+    // Too early / inverted-window hold: shelf in Wine Cellar only — no return_transaction_items row
+    if (shouldShelveWineCellarOnly && policyResult) {
+      const expectedDate = policyResult.expectedReturnableDate;
+      if (!expectedDate) {
+        throw new AppError('Policy check did not provide expectedReturnableDate for wine cellar', 500);
+      }
+      const transaction = await getReturnTransactionById(transactionId);
+      const wineCellarItem = await wcService.addToWineCellar({
+        pharmacyId: transaction.pharmacyId,
+        sourceReturnTransactionId: transactionId,
+        ndc: body.ndc,
+        ndc10: body.ndc10,
+        productName: body.proprietaryName || body.genericName,
+        manufacturer: body.manufacturer,
+        lotNumber: body.lotNumber,
+        serialNumber: body.serialNumber,
+        expirationDate: body.expirationDate,
+        quantity: body.quantity != null ? Number(body.quantity) : 1,
+        standardPrice: body.standardPrice != null ? Number(body.standardPrice) : undefined,
+        isPartial,
+        partialPercentage,
+        expectedReturnableDate: expectedDate,
+        notes:
+          body.memo ||
+          `Shelved from return ${transactionId} (${policyResult.reason?.replace(/_/g, ' ') || 'policy'})`,
+        createdBy: (req as any).adminId || (req as any).processorId,
+      });
+
+      return res.status(201).json({
+        status: 'success',
+        data: null,
+        wineCellarOnly: true,
+        wineCellarItem,
+        policyCheck: policyResult,
+      });
     }
 
     // Extract fullPackageSize from packageDescription if not explicitly provided
@@ -123,41 +185,6 @@ export const addItemHandler = catchAsync(
       rawScanData: body.rawScanData,
     });
 
-    // ── Auto-add to wine cellar: too_early (standard window) or in-window hold (inverted window) ──────
-    let wineCellarItem: any = null;
-    const wcAutoReason =
-      policyResult?.reason === 'too_early' || policyResult?.reason === 'deferred_inside_policy_period';
-    if (policyResult && wcAutoReason && policyResult.expectedReturnableDate && result.item) {
-      try {
-        const transaction = await getReturnTransactionById(transactionId);
-        wineCellarItem = await wcService.addToWineCellar({
-          pharmacyId: transaction.pharmacyId,
-          transactionItemId: result.item.id,
-          ndc: body.ndc,
-          ndc10: body.ndc10,
-          productName: body.proprietaryName || body.genericName,
-          manufacturer: body.manufacturer,
-          lotNumber: body.lotNumber,
-          serialNumber: body.serialNumber,
-          expirationDate: body.expirationDate,
-          quantity: body.quantity != null ? Number(body.quantity) : 1,
-          standardPrice: body.standardPrice != null ? Number(body.standardPrice) : undefined,
-          isPartial,
-          partialPercentage,
-          expectedReturnableDate: policyResult.expectedReturnableDate,
-          createdBy: (req as any).adminId || (req as any).processorId,
-        });
-
-        // Link wine_cellar_id back on the return item
-        await itemsService.updateItem(result.item.id, {
-          wineCellarId: wineCellarItem.id,
-        } as any);
-        result.item.wineCellarId = wineCellarItem.id;
-      } catch (wcErr: any) {
-        console.error('Auto wine-cellar add failed (non-blocking):', wcErr.message);
-      }
-    }
-
     const response: any = {
       status: 'success',
       data: result.item,
@@ -165,10 +192,6 @@ export const addItemHandler = catchAsync(
 
     if (policyResult) {
       response.policyCheck = policyResult;
-    }
-
-    if (wineCellarItem) {
-      response.wineCellarItem = wineCellarItem;
     }
 
     if (result.duplicate) {

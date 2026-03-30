@@ -491,13 +491,19 @@ export default function AddItemsPage() {
         const result = await dispatch(addTransactionItem({ transactionId, payload }));
 
         if (addTransactionItem.fulfilled.match(result)) {
-            setItemCount(prev => prev + 1);
             const name = form.proprietaryName || form.ndc || 'Item';
             const savedItem = result.payload.item;
             const pc = result.payload.policyCheck;
             const wcItem = result.payload.wineCellarItem;
+            const wcOnly = result.payload.wineCellarOnly === true;
 
-            if (wcItem) {
+            if (savedItem) {
+                setItemCount(prev => prev + 1);
+            }
+
+            if (wcOnly && wcItem) {
+                showToast(`${name} shelved in Wine Cellar only (not on this return). Eligible ${pc?.expectedReturnableDate || 'later'}.`);
+            } else if (wcItem) {
                 showToast(`${name} saved & moved to Wine Cellar! Will be returnable ${pc?.expectedReturnableDate || 'later'}.`);
             } else {
                 showToast(`${name} saved! Ready for next scan.`);
@@ -513,7 +519,7 @@ export default function AddItemsPage() {
                 item: name,
                 status: savedItem?.returnStatus || form.returnStatus,
                 policyCheck: pc,
-                wineCellarItem: wcItem,
+                wineCellarItem: wcItem ?? undefined,
             });
 
             setForm({ ...EMPTY_FORM });
@@ -1089,9 +1095,13 @@ export default function AddItemsPage() {
                             <div className="mb-2 bg-purple-50 border border-purple-200 rounded px-3 py-2 flex items-start gap-1.5">
                                 <Archive className="w-3.5 h-3.5 text-purple-600 mt-0.5 flex-shrink-0" />
                                 <div>
-                                    <p className="text-xs font-semibold text-purple-800">This product is too early to return</p>
+                                    <p className="text-xs font-semibold text-purple-800">
+                                        {preCheckResult.reason === 'deferred_inside_policy_period'
+                                            ? 'Hold in Wine Cellar until after the policy window'
+                                            : 'This product is too early to return'}
+                                    </p>
                                     <p className="text-[10px] text-purple-700 mt-0.5">
-                                        Will be shelved in Wine Cellar. Return window: <span className="font-semibold">{preCheckResult.expectedReturnableDate}</span>
+                                        Shelve in Wine Cellar. Eligible from: <span className="font-semibold">{preCheckResult.expectedReturnableDate}</span>
                                     </p>
                                 </div>
                             </div>
