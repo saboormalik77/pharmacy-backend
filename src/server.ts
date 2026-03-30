@@ -67,6 +67,8 @@ if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
 initializeFirebase();
 
 const app = express();
+// Avoid 304 + If-None-Match for JSON APIs; clients otherwise keep showing stale list/detail bodies.
+app.disable('etag');
 const PORT = process.env.PORT || 3000;
 
 const allowedOrigins = [

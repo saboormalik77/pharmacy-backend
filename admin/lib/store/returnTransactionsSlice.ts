@@ -566,7 +566,7 @@ export const deleteTransactionItem = createAsyncThunk(
             if (!cookieUtils.getAuthToken()) return rejectWithValue('Authentication required.');
 
             await apiClient.delete<{ status: string }>(`/return-transactions/${transactionId}/items/${itemId}`, true);
-            return itemId;
+            return { itemId, transactionId };
         } catch (error: any) {
             return rejectWithValue(error?.message || 'Failed to delete item');
         }
@@ -788,7 +788,18 @@ const returnTransactionsSlice = createSlice({
             .addCase(deleteTransactionItem.pending, (state) => { state.isItemActionLoading = true; })
             .addCase(deleteTransactionItem.fulfilled, (state, action) => {
                 state.isItemActionLoading = false;
-                state.items = state.items.filter(i => i.id !== action.payload);
+                const { itemId, transactionId } = action.payload;
+                state.items = state.items.filter(i => i.id !== itemId);
+                const bump = (n: number) => Math.max(0, n - 1);
+                if (state.currentTransaction?.id === transactionId) {
+                    state.currentTransaction = {
+                        ...state.currentTransaction,
+                        totalItems: bump(state.currentTransaction.totalItems ?? 0),
+                    };
+                }
+                state.transactions = state.transactions.map(t =>
+                    t.id === transactionId ? { ...t, totalItems: bump(t.totalItems ?? 0) } : t
+                );
             })
             .addCase(deleteTransactionItem.rejected, (state, action) => { state.isItemActionLoading = false; state.error = action.payload as string; });
     },
