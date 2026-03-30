@@ -66,13 +66,19 @@ export default function ProcessorsPage() {
     const [selectedPharmacyIds, setSelectedPharmacyIds] = useState<string[]>([]);
     const [loadingPharmacies, setLoadingPharmacies] = useState(false);
     const [assignSearch, setAssignSearch] = useState('');
+    const [isAssigning, setIsAssigning] = useState(false);
 
     const debouncedSearch = useDebounce(searchTerm, 500);
 
     // ── Toast helpers ──────────────────────────────────────────
     const showToast = (message: string, type: Toast['type'] = 'success') => {
-        const id = Math.random().toString(36).substring(7);
-        setToasts(prev => [...prev, { id, message, type }]);
+        setToasts(prev => {
+            if (prev.some(t => t.message === message && t.type === type)) {
+                return prev;
+            }
+            const id = Math.random().toString(36).substring(7);
+            return [...prev, { id, message, type }];
+        });
     };
     const removeToast = (id: string) => setToasts(prev => prev.filter(t => t.id !== id));
 
@@ -186,10 +192,20 @@ export default function ProcessorsPage() {
         setLoadingPharmacies(true);
         try {
             const { apiClient } = await import('@/lib/api/apiClient');
-            const res = await apiClient.get<any>('/admin/pharmacies', true, { limit: 200, status: 'active' });
-            const list = res?.data?.pharmacies || res?.pharmacies || [];
+            
+            const [pharmaciesRes, assignedRes] = await Promise.all([
+                apiClient.get<any>('/admin/pharmacies', true, { limit: 200, status: 'active' }),
+                apiClient.get<any>(`/admin/processors/${processor.id}/stores`, true),
+            ]);
+            
+            const list = pharmaciesRes?.data?.pharmacies || pharmaciesRes?.pharmacies || [];
+            const assigned = assignedRes?.data?.stores || assignedRes?.stores || [];
+            const assignedIds = new Set(assigned.map((s: any) => s.pharmacyId));
+            
+            const unassigned = list.filter((p: any) => !assignedIds.has(p.id));
+            
             setAvailablePharmacies(
-                list.map((p: any) => ({ id: p.id, name: p.businessName || p.pharmacy_name || p.name || 'Unknown' }))
+                unassigned.map((p: any) => ({ id: p.id, name: p.businessName || p.pharmacy_name || p.name || 'Unknown' }))
             );
         } catch {
             showToast('Failed to load pharmacies', 'error');
@@ -199,14 +215,21 @@ export default function ProcessorsPage() {
     };
 
     const handleAssignStores = async () => {
-        if (!assignModal || selectedPharmacyIds.length === 0) return;
-        const result = await dispatch(assignStoresToProcessor({ processorId: assignModal.id, pharmacyIds: selectedPharmacyIds }));
-        if (assignStoresToProcessor.fulfilled.match(result)) {
-            showToast(`${selectedPharmacyIds.length} store(s) assigned successfully!`);
-            setAssignModal(null);
-            dispatch(fetchProcessors({ page: currentPage, limit: 15 }));
-        } else {
-            showToast(result.payload as string || 'Failed to assign stores', 'error');
+        if (!assignModal || selectedPharmacyIds.length === 0 || isLoading || isAssigning) return;
+        
+        setIsAssigning(true);
+        try {
+            const result = await dispatch(assignStoresToProcessor({ processorId: assignModal.id, pharmacyIds: selectedPharmacyIds }));
+            if (assignStoresToProcessor.fulfilled.match(result)) {
+                showToast(`${selectedPharmacyIds.length} store(s) assigned successfully!`);
+                setAssignModal(null);
+                setSelectedPharmacyIds([]);
+                dispatch(fetchProcessors({ page: currentPage, limit: 15 }));
+            } else {
+                showToast(result.payload as string || 'Failed to assign stores', 'error');
+            }
+        } finally {
+            setIsAssigning(false);
         }
     };
 
@@ -765,10 +788,15 @@ export default function ProcessorsPage() {
                             <Button variant="outline" onClick={() => setAssignModal(null)}>Cancel</Button>
                             <Button
                                 variant="primary"
-                                onClick={handleAssignStores}
-                                disabled={selectedPharmacyIds.length === 0 || isLoading}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleAssignStores();
+                                }}
+                                disabled={selectedPharmacyIds.length === 0 || isLoading || isAssigning}
+                                type="button"
                             >
-                                {isLoading
+                                {isAssigning
                                     ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Assigning...</>
                                     : `Assign ${selectedPharmacyIds.length > 0 ? `(${selectedPharmacyIds.length})` : ''} Store${selectedPharmacyIds.length !== 1 ? 's' : ''}`
                                 }
