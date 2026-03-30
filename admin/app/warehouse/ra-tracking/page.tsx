@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
     Search, Loader2, ChevronLeft, ChevronRight, X, Clock,
     Mail, MailCheck, CheckCircle, Truck, AlertTriangle, Send,
-    RefreshCw, Download, Printer, Edit,
+    RefreshCw, Download, Printer, Edit, Layers, Package,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -18,6 +18,11 @@ import {
     createDebitMemoFedexShipment, scheduleDebitMemoPickup,
     fetchEmailPreview, clearError, clearEmailPreview,
 } from '@/lib/store/raTrackingSlice';
+import {
+    fetchAvailableMemosForGrouping, createShipmentGroup,
+    createGroupFedexShipment, fetchShippedShipmentGroups, scheduleShipmentGroupPickup,
+    clearError as clearGroupError,
+} from '@/lib/store/shipmentGroupSlice';
 import { DebitMemo, RAEmailTemplate } from '@/lib/types';
 
 // ── Helpers ────────────────────────────────────────────────────
@@ -65,6 +70,14 @@ export default function RATrackingPage() {
     const dispatch = useAppDispatch();
     const { memos, pagination, summary, emailPreview, isLoading, isActionLoading, isPreviewLoading, error } =
         useAppSelector(s => s.raTracking);
+    const {
+        availableMemos,
+        shippedGroups,
+        shippedPagination,
+        isLoading: isGroupLoading,
+        isActionLoading: isGroupActionLoading,
+        error: groupError,
+    } = useAppSelector(s => s.shipmentGroup);
 
     const [search, setSearch] = useState('');
     const debouncedSearch = useDebounce(search, 400);
@@ -73,6 +86,9 @@ export default function RATrackingPage() {
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
+    const [raView, setRaView] = useState<'memos' | 'group-shipments'>('memos');
+    const [shippedGroupsPage, setShippedGroupsPage] = useState(1);
+    const [expandedShippedGroupId, setExpandedShippedGroupId] = useState<string | null>(null);
     const [toasts, setToasts] = useState<Toast[]>([]);
 
     const [activeModal, setActiveModal] = useState<ModalType>(null);
@@ -97,6 +113,30 @@ export default function RATrackingPage() {
         packages: { trackingNumber: string; hasLabel: boolean }[];
     } | null>(null);
     const [fedexLabels, setFedexLabels] = useState<Record<string, string>>({});
+    
+    // Group shipping state
+    /** Memo IDs to include on one FedEx shipment from the Ship modal (always includes the opened memo). */
+    const [selectedMemosForGroup, setSelectedMemosForGroup] = useState<string[]>([]);
+    const [groupFedexLoading, setGroupFedexLoading] = useState(false);
+    /** Shown in group-ship modal overlay while create-group / create-fedex run sequentially */
+    const [groupShipSubmitPhase, setGroupShipSubmitPhase] = useState<'idle' | 'creating-group' | 'creating-fedex'>('idle');
+    const [groupFedexResult, setGroupFedexResult] = useState<{
+        masterTrackingNumber: string;
+        shipmentId: string;
+        packageCount: number;
+        packages: { trackingNumber: string; hasLabel: boolean }[];
+    } | null>(null);
+    const [groupShipGroupId, setGroupShipGroupId] = useState<string | null>(null);
+    const [groupShippedMemos, setGroupShippedMemos] = useState<DebitMemo[]>([]);
+    const [groupPickupForm, setGroupPickupForm] = useState({
+        readyTime: '09:00',
+        closeTime: '17:00',
+        pickupDate: new Date().toISOString().split('T')[0],
+    });
+    const [groupPickupLoading, setGroupPickupLoading] = useState(false);
+    const [groupPickupConfirmation, setGroupPickupConfirmation] = useState('');
+    const [printGroupLabelLoading, setPrintGroupLabelLoading] = useState(false);
+    
     // Schedule pickup state
     const [pickupForm, setPickupForm] = useState({
         readyTime: '09:00',
@@ -136,6 +176,34 @@ export default function RATrackingPage() {
         setPrintLabelLoading(null);
     };
 
+    const printShipmentGroupLabel = async (groupId: string) => {
+        setPrintGroupLabelLoading(true);
+        try {
+            const { cookieUtils } = await import('@/lib/utils/cookies');
+            const token = cookieUtils.getAuthToken();
+            const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+            const res = await fetch(`${baseUrl}/admin/shipment-groups/${encodeURIComponent(groupId)}/shipping-label`, {
+                headers: { Authorization: `Bearer ${token}`, Accept: 'text/html' },
+            });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({ message: 'Print failed' }));
+                throw new Error(err.message || 'Print failed');
+            }
+            const htmlContent = await res.text();
+            const printWindow = window.open('', '_blank');
+            if (printWindow) {
+                printWindow.document.write(htmlContent);
+                printWindow.document.close();
+                printWindow.onload = () => { setTimeout(() => printWindow.print(), 500); };
+            } else {
+                throw new Error('Unable to open print window. Please check popup blockers.');
+            }
+        } catch (e: any) {
+            addToast(e.message || 'Failed to print group label', 'error');
+        }
+        setPrintGroupLabelLoading(false);
+    };
+
     const addToast = useCallback((msg: string, type: Toast['type']) => {
         setToasts(prev => [...prev, { id: Date.now().toString(), message: msg, type }]);
     }, []);
@@ -152,8 +220,18 @@ export default function RATrackingPage() {
         }));
     }, [dispatch, raStatus, destination, dateFrom, dateTo, debouncedSearch, currentPage]);
 
-    useEffect(() => { loadData(); }, [loadData]);
+    const loadShippedGroups = useCallback(() => {
+        dispatch(fetchShippedShipmentGroups({
+            page: shippedGroupsPage,
+            limit: 15,
+            destination: destination?.trim() || undefined,
+        }));
+    }, [dispatch, shippedGroupsPage, destination]);
+
+    useEffect(() => { if (raView === 'memos') loadData(); }, [loadData, raView]);
+    useEffect(() => { if (raView === 'group-shipments') loadShippedGroups(); }, [loadShippedGroups, raView]);
     useEffect(() => { if (error) { addToast(error, 'error'); dispatch(clearError()); } }, [error, addToast, dispatch]);
+    useEffect(() => { if (groupError) { addToast(groupError, 'error'); dispatch(clearGroupError()); } }, [groupError, addToast, dispatch]);
 
     // ── Modal openers ──────────────────────────────────────────
 
@@ -189,6 +267,21 @@ export default function RATrackingPage() {
         setPickupConfirmation('');
         setPickupLoading(false);
         setPickupForm({ readyTime: '09:00', closeTime: '17:00', pickupDate: new Date().toISOString().split('T')[0] });
+        setGroupFedexResult(null);
+        setGroupShipGroupId(null);
+        setGroupShippedMemos([]);
+        setGroupPickupConfirmation('');
+        setGroupPickupLoading(false);
+        setGroupPickupForm({
+            readyTime: '09:00',
+            closeTime: '17:00',
+            pickupDate: new Date().toISOString().split('T')[0],
+        });
+        setGroupFedexLoading(false);
+        setGroupShipSubmitPhase('idle');
+        setSelectedMemosForGroup([memo.id]);
+        const memoDest = memo.destination?.trim();
+        dispatch(fetchAvailableMemosForGrouping(memoDest ? { destination: memoDest } : undefined));
         setActiveModal('ship');
     };
 
@@ -197,6 +290,14 @@ export default function RATrackingPage() {
         setSelectedMemo(null);
         setFedexResult(null);
         setFedexLabels({});
+        setGroupFedexResult(null);
+        setGroupShipGroupId(null);
+        setGroupShippedMemos([]);
+        setGroupPickupConfirmation('');
+        setGroupPickupLoading(false);
+        setGroupFedexLoading(false);
+        setGroupShipSubmitPhase('idle');
+        setSelectedMemosForGroup([]);
         dispatch(clearEmailPreview());
     };
 
@@ -257,6 +358,83 @@ export default function RATrackingPage() {
         }
     };
 
+    // ── Group Shipping Handlers ────────────────────────────────
+
+    const handleGroupFedexShip = async () => {
+        if (!selectedMemo) return;
+        let memoIds = selectedMemosForGroup.includes(selectedMemo.id)
+            ? selectedMemosForGroup
+            : [...selectedMemosForGroup, selectedMemo.id];
+        memoIds = [...new Set(memoIds)];
+        if (memoIds.length < 2) {
+            addToast('Select at least one additional memo to ship as a group, or use single-memo FedEx below.', 'warning');
+            return;
+        }
+
+        const boxCount = parseInt(fedexBoxCount, 10) || 1;
+        setGroupFedexLoading(true);
+        setGroupShipSubmitPhase('creating-group');
+        try {
+            const groupResult = await dispatch(createShipmentGroup({
+                memoIds,
+                boxCount,
+            }));
+
+            if (createShipmentGroup.rejected.match(groupResult) || !createShipmentGroup.fulfilled.match(groupResult)) {
+                return;
+            }
+
+            const groupId = groupResult.payload.group.id;
+            setGroupShipSubmitPhase('creating-fedex');
+
+            const fedexAction = await dispatch(createGroupFedexShipment({
+                groupId,
+                boxCount,
+            }));
+
+            if (!createGroupFedexShipment.fulfilled.match(fedexAction)) {
+                return;
+            }
+
+            const p = fedexAction.payload;
+            setGroupFedexResult(p.shipment);
+            setGroupShipGroupId(groupId);
+            setGroupShippedMemos(p.memos || []);
+            setGroupPickupConfirmation('');
+            addToast(`FedEx shipment created for ${p.memos?.length ?? memoIds.length} memos`, 'success');
+            loadData();
+            if (raView === 'group-shipments') loadShippedGroups();
+        } finally {
+            setGroupFedexLoading(false);
+            setGroupShipSubmitPhase('idle');
+        }
+    };
+
+    const toggleShipWithMemo = (memoId: string) => {
+        if (selectedMemo && memoId === selectedMemo.id) return;
+        setSelectedMemosForGroup((prev) =>
+            prev.includes(memoId) ? prev.filter((id) => id !== memoId) : [...prev, memoId]
+        );
+    };
+
+    const selectAllShipPeersSameDestination = () => {
+        if (!selectedMemo) return;
+        const norm = (s: string) => (s || '').toLowerCase().trim();
+        const nk = norm(selectedMemo.destination || '');
+        const ids = availableMemos.filter((m) => norm(m.destination || '') === nk).map((m) => m.id);
+        const withPrimary = ids.includes(selectedMemo.id) ? ids : [...ids, selectedMemo.id];
+        setSelectedMemosForGroup(withPrimary);
+    };
+
+    const normShipDest = (s: string) => (s || '').toLowerCase().trim();
+    const shipModalPeers = selectedMemo
+        ? availableMemos.filter(
+              (m) =>
+                  m.id !== selectedMemo.id &&
+                  normShipDest(m.destination || '') === normShipDest(selectedMemo.destination || '')
+          )
+        : [];
+
     const totalPages = pagination?.totalPages || 1;
 
     // ── Row action buttons based on RA status ──────────────────
@@ -309,6 +487,24 @@ export default function RATrackingPage() {
                 </div>
             </div>
 
+            <div className="flex flex-wrap gap-2">
+                <button
+                    type="button"
+                    onClick={() => setRaView('memos')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${raView === 'memos' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`}
+                >
+                    All debit memos
+                </button>
+                <button
+                    type="button"
+                    onClick={() => { setRaView('group-shipments'); setShippedGroupsPage(1); }}
+                    className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${raView === 'group-shipments' ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`}
+                >
+                    <Package className="w-3.5 h-3.5" /> Group shipments
+                </button>
+            </div>
+
+            {raView === 'memos' && (<>
             {/* Summary Cards — compact inline strip */}
             {summary && (
                 <div className="grid grid-cols-5 gap-2">
@@ -488,6 +684,147 @@ export default function RATrackingPage() {
                     </div>
                 )}
             </div>
+            </>)}
+
+            {raView === 'group-shipments' && (
+                <>
+                    <div className="bg-white rounded-lg shadow px-3 py-2">
+                        <p className="text-xs text-gray-600 mb-2">
+                            Shipments where multiple debit memos were sent together (one FedEx tracking). Use destination to narrow the list.
+                        </p>
+                        <select
+                            className="border border-gray-300 rounded px-2 py-1.5 text-xs focus:ring-1 focus:ring-purple-500"
+                            value={destination}
+                            onChange={e => { setDestination(e.target.value); setShippedGroupsPage(1); }}
+                        >
+                            {DESTINATION_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                        </select>
+                    </div>
+                    <div className="bg-white rounded-lg shadow overflow-hidden">
+                        {isGroupLoading ? (
+                            <div className="flex items-center justify-center py-12">
+                                <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
+                            </div>
+                        ) : shippedGroups.length === 0 ? (
+                            <div className="text-center py-12 text-gray-500">
+                                <Package className="w-10 h-10 mx-auto mb-2 text-gray-300" />
+                                <p className="text-sm font-medium">No group shipments found</p>
+                                <p className="text-xs mt-1">Ship a received memo from the list and include other memos with the same destination on one FedEx shipment.</p>
+                            </div>
+                        ) : (
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-3 py-2 w-8" />
+                                            <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase">Shipped</th>
+                                            <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase">Destination</th>
+                                            <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase">Tracking</th>
+                                            <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase">Boxes</th>
+                                            <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase">Memos</th>
+                                            <th className="px-3 py-2 text-right text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100">
+                                        {shippedGroups.map(row => {
+                                            const g = row.group;
+                                            const open = expandedShippedGroupId === g.id;
+                                            return (
+                                                <React.Fragment key={g.id}>
+                                                    <tr className="hover:bg-gray-50">
+                                                        <td className="px-3 py-1.5">
+                                                            <button
+                                                                type="button"
+                                                                className="p-1 rounded hover:bg-gray-200 text-gray-600"
+                                                                onClick={() => setExpandedShippedGroupId(open ? null : g.id)}
+                                                                aria-expanded={open}
+                                                            >
+                                                                <ChevronRight className={`w-4 h-4 transition-transform ${open ? 'rotate-90' : ''}`} />
+                                                            </button>
+                                                        </td>
+                                                        <td className="px-3 py-1.5 text-xs text-gray-700 whitespace-nowrap">
+                                                            {g.shippedAt ? formatDate(g.shippedAt) : '—'}
+                                                        </td>
+                                                        <td className="px-3 py-1.5 text-xs font-medium capitalize">{g.destination || '—'}</td>
+                                                        <td className="px-3 py-1.5 text-xs font-mono text-gray-800">{g.outboundTracking || '—'}</td>
+                                                        <td className="px-3 py-1.5 text-xs text-gray-600">{g.boxCount ?? 1}</td>
+                                                        <td className="px-3 py-1.5 text-xs text-gray-700">{row.memos?.length ?? g.totalMemos ?? 0}</td>
+                                                        <td className="px-3 py-1.5 text-right">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => printShipmentGroupLabel(g.id)}
+                                                                disabled={printGroupLabelLoading}
+                                                                className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 disabled:opacity-50"
+                                                            >
+                                                                {printGroupLabelLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
+                                                                Print label
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                    {open && (
+                                                        <tr className="bg-purple-50/40">
+                                                            <td colSpan={7} className="px-4 py-3">
+                                                                <p className="text-[10px] font-semibold text-gray-500 uppercase mb-2">Debit memos in this shipment</p>
+                                                                <div className="overflow-x-auto border border-gray-200 rounded-lg bg-white">
+                                                                    <table className="min-w-full text-xs">
+                                                                        <thead className="bg-gray-50 border-b border-gray-200">
+                                                                            <tr>
+                                                                                <th className="px-2 py-1.5 text-left font-semibold text-gray-500">Memo #</th>
+                                                                                <th className="px-2 py-1.5 text-left font-semibold text-gray-500">Pharmacy</th>
+                                                                                <th className="px-2 py-1.5 text-left font-semibold text-gray-500">RA #</th>
+                                                                                <th className="px-2 py-1.5 text-left font-semibold text-gray-500">Labeler</th>
+                                                                                <th className="px-2 py-1.5 text-right font-semibold text-gray-500">Items</th>
+                                                                                <th className="px-2 py-1.5 text-right font-semibold text-gray-500">Ask</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody className="divide-y divide-gray-100">
+                                                                            {(row.memos || []).map((m: DebitMemo) => (
+                                                                                <tr key={m.id}>
+                                                                                    <td className="px-2 py-1.5 font-medium text-primary-600">{m.memoNumber}</td>
+                                                                                    <td className="px-2 py-1.5 text-gray-700 max-w-[140px] truncate">{m.pharmacyName}</td>
+                                                                                    <td className="px-2 py-1.5 font-mono text-gray-800">{m.raNumber || '—'}</td>
+                                                                                    <td className="px-2 py-1.5 text-gray-600 max-w-[120px] truncate">{m.labelerName || '—'}</td>
+                                                                                    <td className="px-2 py-1.5 text-right">{m.totalItems}</td>
+                                                                                    <td className="px-2 py-1.5 text-right font-medium">{formatCurrency(m.totalAskValue)}</td>
+                                                                                </tr>
+                                                                            ))}
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </React.Fragment>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                        {(shippedPagination?.totalPages ?? 0) > 1 && (
+                            <div className="flex items-center justify-between px-4 py-2 border-t border-gray-200">
+                                <p className="text-xs text-gray-500">
+                                    Page {shippedGroupsPage} of {shippedPagination?.totalPages}
+                                    {shippedPagination?.total != null && ` · ${shippedPagination.total} groups`}
+                                </p>
+                                <div className="flex items-center gap-1.5">
+                                    <Button variant="outline" size="sm" disabled={shippedGroupsPage <= 1} onClick={() => setShippedGroupsPage(p => p - 1)}>
+                                        <ChevronLeft className="w-3.5 h-3.5" />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={shippedGroupsPage >= (shippedPagination?.totalPages || 1)}
+                                        onClick={() => setShippedGroupsPage(p => p + 1)}
+                                    >
+                                        <ChevronRight className="w-3.5 h-3.5" />
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </>
+            )}
 
             {/* ── Request RA Modal (Task 11.6) ──────────────────── */}
             {activeModal === 'request' && selectedMemo && (
@@ -663,122 +1000,206 @@ export default function RATrackingPage() {
 
             {/* ── Ship Modal (FedEx + Manual) ──────────────────── */}
             {activeModal === 'ship' && selectedMemo && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={closeModal}>
-                    <div className="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+                    onClick={() => {
+                        if (!fedexLoading && !groupFedexLoading) closeModal();
+                    }}
+                >
+                    <div
+                        className="bg-white rounded-xl shadow-xl max-w-2xl w-full mx-4 max-h-[85vh] overflow-y-auto relative"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        {groupFedexLoading && (
+                            <div
+                                className="absolute inset-0 z-30 bg-white/90 backdrop-blur-[1px] flex flex-col items-center justify-center px-6"
+                                role="status"
+                                aria-live="polite"
+                                aria-busy="true"
+                            >
+                                <Loader2 className="w-10 h-10 animate-spin text-purple-600" />
+                                <p className="mt-4 text-sm font-semibold text-gray-900">
+                                    {groupShipSubmitPhase === 'creating-group'
+                                        ? 'Creating shipment group…'
+                                        : 'Creating FedEx shipment…'}
+                                </p>
+                                <p className="mt-2 text-xs text-gray-500 text-center max-w-sm">
+                                    {groupShipSubmitPhase === 'creating-fedex'
+                                        ? 'Please wait for labels and tracking from FedEx.'
+                                        : 'Preparing your multi-memo shipment.'}
+                                </p>
+                            </div>
+                        )}
                         <div className="p-6 border-b border-gray-200">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-lg font-bold text-gray-900">Ship to Reverse Distributor</h2>
-                                <button onClick={closeModal} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                                <button
+                                    type="button"
+                                    onClick={closeModal}
+                                    disabled={fedexLoading || groupFedexLoading}
+                                    className="text-gray-400 hover:text-gray-600 disabled:opacity-40 disabled:pointer-events-none"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
                             </div>
                         </div>
                         <div className="p-6 space-y-4">
-                            {/* Memo Details */}
-                            <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-1">
-                                <div className="flex justify-between"><span className="text-gray-500">Memo</span><span className="font-medium">{selectedMemo.memoNumber}</span></div>
-                                <div className="flex justify-between"><span className="text-gray-500">RA #</span><span className="font-medium text-green-700">{selectedMemo.raNumber}</span></div>
-                                <div className="flex justify-between"><span className="text-gray-500">Destination</span><span className="capitalize font-medium">{selectedMemo.destination || '—'}</span></div>
-                                <div className="flex justify-between"><span className="text-gray-500">Items</span><span>{selectedMemo.totalItems}</span></div>
-                            </div>
-
-                            {/* Mode Selection */}
-                            {shipMode === 'choose' && !fedexResult && (
-                                <div className="space-y-3">
-                                    <p className="text-sm text-gray-600 text-center">How would you like to ship this?</p>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <button
-                                            onClick={() => setShipMode('fedex')}
-                                            className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all"
-                                        >
-                                            <Truck className="w-6 h-6 text-blue-600" />
-                                            <span className="text-sm font-semibold text-gray-900">Create FedEx Shipment</span>
-                                            <span className="text-[10px] text-gray-500">Auto-generate labels & tracking</span>
-                                        </button>
-                                        <button
-                                            onClick={() => setShipMode('manual')}
-                                            className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-lg hover:border-gray-500 hover:bg-gray-50 transition-all"
-                                        >
-                                            <Edit className="w-6 h-6 text-gray-600" />
-                                            <span className="text-sm font-semibold text-gray-900">Enter Manually</span>
-                                            <span className="text-[10px] text-gray-500">Paste tracking number</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* FedEx API Mode */}
-                            {shipMode === 'fedex' && !fedexResult && (
+                            {groupFedexResult && groupShipGroupId ? (
                                 <div className="space-y-4">
-                                    <p className="text-sm text-gray-600 text-center">
-                                        Create a FedEx Ground shipment from the warehouse to <strong className="capitalize">{selectedMemo.destination}</strong>.
-                                    </p>
-
-                                    <div className="flex items-center justify-center gap-4">
-                                        <div>
-                                            <label className="text-sm font-medium text-gray-700">Number of Boxes:</label>
-                                            <input
-                                                type="number"
-                                                min="1"
-                                                max="99"
-                                                value={fedexBoxCount}
-                                                onChange={e => setFedexBoxCount(e.target.value)}
-                                                className="ml-2 w-20 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
-                                                disabled={fedexLoading}
-                                            />
+                                    <div>
+                                        <h3 className="text-sm font-bold text-gray-900 mb-2">Group shipment</h3>
+                                        <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-2 max-h-40 overflow-y-auto">
+                                            <div className="flex justify-between text-gray-500"><span>Memos</span><span className="font-medium text-gray-900">{groupShippedMemos.length}</span></div>
+                                            <div className="flex justify-between text-gray-500"><span>Destination</span><span className="font-medium capitalize text-gray-900">{groupShippedMemos[0]?.destination || '—'}</span></div>
+                                            <ul className="text-xs text-gray-700 border-t border-gray-200 pt-2 mt-2 space-y-1">
+                                                {groupShippedMemos.map(m => (
+                                                    <li key={m.id} className="flex justify-between gap-2">
+                                                        <span className="font-medium text-purple-700">{m.memoNumber}</span>
+                                                        <span className="truncate">{m.pharmacyName}</span>
+                                                        <span className="text-gray-500 whitespace-nowrap">RA {m.raNumber}</span>
+                                                        <span>{m.totalItems} items</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
                                         </div>
                                     </div>
-
-                                    <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-xs text-blue-800 text-center space-y-1">
-                                        <p>Shipment: <strong>Warehouse</strong> → <strong className="capitalize">{selectedMemo.destination}</strong></p>
-                                        <p>Ensure the warehouse address and reverse distributor address are configured.</p>
+                                    <div className="bg-blue-600 rounded-lg px-4 py-3 flex items-center justify-between">
+                                        <p className="text-sm font-bold text-white">FedEx API Shipment</p>
+                                        <span className="text-sm font-bold text-white underline font-mono">{groupFedexResult.masterTrackingNumber}</span>
                                     </div>
-
-                                    <div className="flex justify-center gap-3">
-                                        <button
-                                            onClick={() => setShipMode('choose')}
-                                            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
-                                        >
-                                            Back
-                                        </button>
-                                        <button
-                                            onClick={async () => {
-                                                if (!selectedMemo) return;
-                                                setFedexLoading(true);
-                                                try {
-                                                    const result = await dispatch(createDebitMemoFedexShipment({
-                                                        memoId: selectedMemo.id,
-                                                        boxCount: parseInt(fedexBoxCount) || 1,
-                                                    }));
-                                                    if (createDebitMemoFedexShipment.fulfilled.match(result)) {
-                                                        const { shipment, labels } = result.payload;
-                                                        setFedexResult(shipment);
-                                                        setFedexLabels(labels || {});
-                                                        setShipTracking(shipment.masterTrackingNumber);
-                                                        addToast('FedEx shipment created & recorded!', 'success');
-                                                        loadData();
-                                                    } else {
-                                                        addToast(result.payload as string || 'Failed to create FedEx shipment', 'error');
-                                                    }
-                                                } catch {
-                                                    addToast('Unexpected error creating shipment', 'error');
-                                                } finally {
-                                                    setFedexLoading(false);
-                                                }
-                                            }}
-                                            disabled={fedexLoading || !fedexBoxCount}
-                                            className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-medium rounded-lg transition-colors"
-                                        >
-                                            {fedexLoading ? (
-                                                <><Loader2 className="w-4 h-4 animate-spin" /> Creating Shipment...</>
-                                            ) : (
-                                                <><Truck className="w-4 h-4" /> Create FedEx Shipment</>
-                                            )}
-                                        </button>
+                                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-3">
+                                        <div className="flex items-center gap-2">
+                                            <CheckCircle className="w-5 h-5 text-green-600" />
+                                            <p className="text-sm font-semibold text-green-800">Shipment Created Successfully</p>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2 text-xs">
+                                            <div>
+                                                <span className="text-gray-500">Master Tracking:</span>
+                                                <span className="ml-1 font-mono font-bold text-gray-900">{groupFedexResult.masterTrackingNumber}</span>
+                                            </div>
+                                            <div>
+                                                <span className="text-gray-500">Packages:</span>
+                                                <span className="ml-1 font-medium text-gray-900">{groupFedexResult.packages.length}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-sm font-semibold text-gray-800">Package Tracking Numbers:</p>
+                                            <button
+                                                type="button"
+                                                onClick={() => printShipmentGroupLabel(groupShipGroupId)}
+                                                disabled={printGroupLabelLoading}
+                                                className="flex items-center gap-1 px-2 py-1 bg-green-100 hover:bg-green-200 text-xs text-green-700 rounded border border-green-200 disabled:opacity-50"
+                                            >
+                                                {printGroupLabelLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
+                                                Print Labels
+                                            </button>
+                                        </div>
+                                        <div className="border border-gray-200 rounded-lg overflow-hidden divide-y divide-gray-100">
+                                            {groupFedexResult.packages.map((pkg, i) => (
+                                                <div key={i} className="flex items-center justify-between text-xs bg-white px-4 py-2.5">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-gray-500 font-medium">Package {i + 1}:</span>
+                                                        <span className="font-mono font-semibold text-gray-900">{pkg.trackingNumber}</span>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => printShipmentGroupLabel(groupShipGroupId)}
+                                                        disabled={printGroupLabelLoading}
+                                                        className="flex items-center justify-center w-7 h-7 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 disabled:opacity-50"
+                                                    >
+                                                        {printGroupLabelLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="border-t border-gray-200 pt-4 space-y-3">
+                                        <p className="text-sm font-medium text-gray-700">Schedule FedEx Pickup (Optional)</p>
+                                        {groupPickupConfirmation ? (
+                                            <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
+                                                <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                                                <div className="text-xs">
+                                                    <span className="text-green-800 font-medium">Pickup scheduled!</span>
+                                                    <span className="ml-1 text-green-700">Confirmation: <span className="font-mono font-semibold">{groupPickupConfirmation}</span></span>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className="bg-amber-50 border border-amber-200 rounded-md p-3">
+                                                    <p className="text-xs text-amber-800">
+                                                        <strong>Note:</strong> Pickup scheduling may not work in sandbox/test mode.
+                                                        You can also call FedEx directly at <strong>1-800-463-3339</strong> and say &quot;Ground Return Pickup&quot;.
+                                                    </p>
+                                                </div>
+                                                <div className="flex items-center gap-4 flex-wrap">
+                                                    <div>
+                                                        <label className="text-xs text-gray-500">Pickup Date</label>
+                                                        <input
+                                                            type="date"
+                                                            value={groupPickupForm.pickupDate}
+                                                            onChange={e => setGroupPickupForm(prev => ({ ...prev, pickupDate: e.target.value }))}
+                                                            className="block w-36 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                                            disabled={groupPickupLoading}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-xs text-gray-500">Ready Time</label>
+                                                        <input
+                                                            type="time"
+                                                            value={groupPickupForm.readyTime}
+                                                            onChange={e => setGroupPickupForm(prev => ({ ...prev, readyTime: e.target.value }))}
+                                                            className="block w-28 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                                            disabled={groupPickupLoading}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-xs text-gray-500">Close Time</label>
+                                                        <input
+                                                            type="time"
+                                                            value={groupPickupForm.closeTime}
+                                                            onChange={e => setGroupPickupForm(prev => ({ ...prev, closeTime: e.target.value }))}
+                                                            className="block w-28 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                                            disabled={groupPickupLoading}
+                                                        />
+                                                    </div>
+                                                    <div className="flex items-end">
+                                                        <button
+                                                            type="button"
+                                                            onClick={async () => {
+                                                                if (!groupShipGroupId) return;
+                                                                setGroupPickupLoading(true);
+                                                                try {
+                                                                    const result = await dispatch(scheduleShipmentGroupPickup({
+                                                                        groupId: groupShipGroupId,
+                                                                        ...groupPickupForm,
+                                                                    }));
+                                                                    if (scheduleShipmentGroupPickup.fulfilled.match(result)) {
+                                                                        setGroupPickupConfirmation(result.payload.pickup.pickupConfirmationNumber);
+                                                                        addToast(`Pickup scheduled: ${result.payload.pickup.pickupConfirmationNumber}`, 'success');
+                                                                    } else {
+                                                                        addToast(result.payload as string || 'Failed to schedule pickup', 'error');
+                                                                    }
+                                                                } catch {
+                                                                    addToast('Unexpected error scheduling pickup', 'error');
+                                                                } finally {
+                                                                    setGroupPickupLoading(false);
+                                                                }
+                                                            }}
+                                                            disabled={groupPickupLoading}
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white text-xs font-medium rounded-md transition-colors"
+                                                        >
+                                                            {groupPickupLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Truck className="w-3.5 h-3.5" />}
+                                                            Schedule Pickup
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
-                            )}
-
-                            {/* FedEx Result */}
-                            {fedexResult && (
+                            ) : fedexResult ? (
                                 <div className="space-y-4">
                                     {/* Shipment header banner */}
                                     <div className="bg-blue-600 rounded-lg px-4 py-3 flex items-center justify-between">
@@ -931,28 +1352,221 @@ export default function RATrackingPage() {
                                         )}
                                     </div>
                                 </div>
-                            )}
-
-                            {/* Manual Mode */}
-                            {shipMode === 'manual' && !fedexResult && (
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Outbound Tracking # *</label>
-                                        <input
-                                            type="text"
-                                            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
-                                            placeholder="FedEx/UPS tracking number..."
-                                            value={shipTracking}
-                                            onChange={e => setShipTracking(e.target.value)}
-                                            autoFocus
-                                        />
+                            ) : (
+                                <>
+                                    <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-1">
+                                        <div className="flex justify-between"><span className="text-gray-500">Memo</span><span className="font-medium">{selectedMemo.memoNumber}</span></div>
+                                        <div className="flex justify-between"><span className="text-gray-500">RA #</span><span className="font-medium text-green-700">{selectedMemo.raNumber}</span></div>
+                                        <div className="flex justify-between"><span className="text-gray-500">Destination</span><span className="capitalize font-medium">{selectedMemo.destination || '—'}</span></div>
+                                        <div className="flex justify-between"><span className="text-gray-500">Items</span><span>{selectedMemo.totalItems}</span></div>
                                     </div>
-                                </div>
+
+                                    <div className="border border-purple-200 bg-purple-50/70 rounded-lg p-4 space-y-3">
+                                        <div className="flex items-start gap-2">
+                                            <Layers className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                                            <div>
+                                                <p className="text-sm font-semibold text-gray-900">Ship together (same destination)</p>
+                                                <p className="text-xs text-gray-600 mt-1">
+                                                    Add other received memos going to <span className="font-medium capitalize">{selectedMemo.destination || 'this reverse distributor'}</span> on one FedEx shipment. This memo stays included.
+                                                </p>
+                                            </div>
+                                        </div>
+                                        {isGroupLoading ? (
+                                            <div className="flex items-center gap-2 text-xs text-gray-500 py-1">
+                                                <Loader2 className="w-4 h-4 animate-spin text-purple-600" />
+                                                Checking for other eligible memos…
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <label className="flex items-center gap-3 p-2 rounded bg-white border border-gray-100">
+                                                    <input type="checkbox" checked readOnly disabled className="rounded border-gray-300 text-purple-600 opacity-70" />
+                                                    <div className="flex-1 min-w-0 text-sm">
+                                                        <span className="font-medium text-purple-700">{selectedMemo.memoNumber}</span>
+                                                        <span className="text-gray-500 mx-2">{selectedMemo.pharmacyName}</span>
+                                                        <span className="text-gray-400 text-xs">RA {selectedMemo.raNumber}</span>
+                                                    </div>
+                                                    <span className="text-[10px] uppercase text-gray-400 shrink-0">This memo</span>
+                                                </label>
+                                                {shipModalPeers.map(memo => (
+                                                    <label key={memo.id} className="flex items-center gap-3 p-2 rounded hover:bg-white border border-transparent hover:border-gray-100 cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedMemosForGroup.includes(memo.id)}
+                                                            onChange={() => toggleShipWithMemo(memo.id)}
+                                                            className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                                                        />
+                                                        <div className="flex-1 min-w-0 text-sm flex flex-wrap gap-x-3 gap-y-0.5">
+                                                            <span className="font-medium text-purple-700">{memo.memoNumber}</span>
+                                                            <span className="text-gray-600">{memo.pharmacyName}</span>
+                                                            <span className="text-gray-400 text-xs">RA {memo.raNumber}</span>
+                                                            <span className="text-gray-500">{formatCurrency(memo.totalAskValue)}</span>
+                                                        </div>
+                                                    </label>
+                                                ))}
+                                                {shipModalPeers.length === 0 && (
+                                                    <p className="text-xs text-gray-500">No other eligible memos share this destination right now.</p>
+                                                )}
+                                                {shipModalPeers.length > 0 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={selectAllShipPeersSameDestination}
+                                                        className="text-xs font-medium text-purple-700 hover:text-purple-900"
+                                                    >
+                                                        Select all at this destination ({shipModalPeers.length + 1} memos)
+                                                    </button>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+
+                                    {shipMode === 'choose' && (
+                                        <div className="space-y-3">
+                                            <p className="text-sm text-gray-600 text-center">How would you like to ship?</p>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShipMode('fedex')}
+                                                    className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all"
+                                                >
+                                                    <Truck className="w-6 h-6 text-blue-600" />
+                                                    <span className="text-sm font-semibold text-gray-900">Create FedEx Shipment</span>
+                                                    <span className="text-[10px] text-gray-500">Auto-generate labels & tracking</span>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShipMode('manual')}
+                                                    className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-lg hover:border-gray-500 hover:bg-gray-50 transition-all"
+                                                >
+                                                    <Edit className="w-6 h-6 text-gray-600" />
+                                                    <span className="text-sm font-semibold text-gray-900">Enter Manually</span>
+                                                    <span className="text-[10px] text-gray-500">Paste tracking number</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {shipMode === 'fedex' && (
+                                        <div className="space-y-4">
+                                            <p className="text-sm text-gray-600 text-center">
+                                                Create a FedEx Ground shipment from the warehouse to <strong className="capitalize">{selectedMemo.destination}</strong>
+                                                {selectedMemosForGroup.length >= 2 && (
+                                                    <span className="block mt-2 font-semibold text-blue-800">
+                                                        {selectedMemosForGroup.length} memos will ship on one FedEx shipment.
+                                                    </span>
+                                                )}
+                                            </p>
+
+                                            <div className="flex items-center justify-center gap-4">
+                                                <div>
+                                                    <label className="text-sm font-medium text-gray-700">Number of Boxes:</label>
+                                                    <input
+                                                        type="number"
+                                                        min="1"
+                                                        max="99"
+                                                        value={fedexBoxCount}
+                                                        onChange={e => setFedexBoxCount(e.target.value)}
+                                                        className="ml-2 w-20 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+                                                        disabled={fedexLoading || groupFedexLoading}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-xs text-blue-800 text-center space-y-1">
+                                                <p>Shipment: <strong>Warehouse</strong> → <strong className="capitalize">{selectedMemo.destination}</strong></p>
+                                                <p>Ensure the warehouse address and reverse distributor address are configured.</p>
+                                            </div>
+
+                                            <div className="flex justify-center gap-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShipMode('choose')}
+                                                    className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+                                                >
+                                                    Back
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={async () => {
+                                                        if (!selectedMemo) return;
+                                                        const ids = [...new Set(
+                                                            selectedMemosForGroup.includes(selectedMemo.id)
+                                                                ? selectedMemosForGroup
+                                                                : [...selectedMemosForGroup, selectedMemo.id]
+                                                        )];
+                                                        if (ids.length >= 2) {
+                                                            await handleGroupFedexShip();
+                                                            return;
+                                                        }
+                                                        setFedexLoading(true);
+                                                        try {
+                                                            const result = await dispatch(createDebitMemoFedexShipment({
+                                                                memoId: selectedMemo.id,
+                                                                boxCount: parseInt(fedexBoxCount, 10) || 1,
+                                                            }));
+                                                            if (createDebitMemoFedexShipment.fulfilled.match(result)) {
+                                                                const { shipment, labels } = result.payload;
+                                                                setFedexResult(shipment);
+                                                                setFedexLabels(labels || {});
+                                                                setShipTracking(shipment.masterTrackingNumber);
+                                                                addToast('FedEx shipment created & recorded!', 'success');
+                                                                loadData();
+                                                            } else {
+                                                                addToast(result.payload as string || 'Failed to create FedEx shipment', 'error');
+                                                            }
+                                                        } catch {
+                                                            addToast('Unexpected error creating shipment', 'error');
+                                                        } finally {
+                                                            setFedexLoading(false);
+                                                        }
+                                                    }}
+                                                    disabled={fedexLoading || groupFedexLoading || !fedexBoxCount}
+                                                    className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-medium rounded-lg transition-colors"
+                                                >
+                                                    {(fedexLoading || groupFedexLoading) ? (
+                                                        <><Loader2 className="w-4 h-4 animate-spin" /> Creating Shipment...</>
+                                                    ) : (
+                                                        <>
+                                                            <Truck className="w-4 h-4" />
+                                                            {selectedMemosForGroup.length >= 2
+                                                                ? `Create FedEx Shipment (${selectedMemosForGroup.length} memos)`
+                                                                : 'Create FedEx Shipment'}
+                                                        </>
+                                                    )}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {shipMode === 'manual' && (
+                                        <div className="space-y-4">
+                                            {selectedMemosForGroup.length > 1 && (
+                                                <p className="text-xs text-amber-800 bg-amber-50 border border-amber-100 rounded-md p-2">
+                                                    Manual tracking applies to this memo only. Other checked memos are not updated on this step.
+                                                </p>
+                                            )}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Outbound Tracking # *</label>
+                                                <input
+                                                    type="text"
+                                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
+                                                    placeholder="FedEx/UPS tracking number..."
+                                                    value={shipTracking}
+                                                    onChange={e => setShipTracking(e.target.value)}
+                                                    autoFocus
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </div>
 
                         <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
-                            {fedexResult ? (
+                            {groupFedexResult && groupShipGroupId ? (
+                                <Button variant="primary" onClick={closeModal}>
+                                    Done
+                                </Button>
+                            ) : fedexResult ? (
                                 <Button variant="primary" onClick={closeModal}>
                                     Done
                                 </Button>
@@ -965,12 +1579,15 @@ export default function RATrackingPage() {
                                     </Button>
                                 </>
                             ) : shipMode === 'choose' ? (
-                                <Button variant="ghost" onClick={closeModal}>Cancel</Button>
+                                <Button variant="ghost" onClick={closeModal} disabled={groupFedexLoading}>
+                                    Cancel
+                                </Button>
                             ) : null}
                         </div>
                     </div>
                 </div>
             )}
+
         </div>
     );
 }

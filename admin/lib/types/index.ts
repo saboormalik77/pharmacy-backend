@@ -1127,6 +1127,7 @@ export interface DebitMemo {
     paymentReceivedAt: string | null;
     paymentReference: string | null;
     paymentNotes: string | null;
+    shipmentGroupId: string | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -1143,6 +1144,35 @@ export interface DebitMemoItem {
     lotNumber: string | null;
     expirationDate: string | null;
     createdAt: string;
+}
+
+// ── Shipment Groups (Module 39) ──────────────────────────────
+
+export interface ShipmentGroup {
+    id: string;
+    destination: string;
+    outboundTracking: string | null;
+    shippedAt: string | null;
+    boxCount: number;
+    totalMemos: number;
+    fedexShipmentId: string | null;
+    fedexLabels: any | null;
+    notes: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface CreateShipmentGroupRequest {
+    memoIds: string[];
+    boxCount?: number;
+    notes?: string;
+}
+
+export interface ShipGroupRequest {
+    outboundTracking: string;
+    shippedAt?: string;
+    fedexShipmentId?: string;
+    fedexLabels?: any;
 }
 
 // ── RA Request & Tracking (Module 11) ────────────────────────

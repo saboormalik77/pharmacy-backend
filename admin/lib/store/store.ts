@@ -21,6 +21,7 @@ import batchReducer from './batchSlice';
 import raTrackingReducer from './raTrackingSlice';
 import paymentTrackingReducer from './paymentTrackingSlice';
 import ndcPricingReducer from './ndcPricingSlice';
+import shipmentGroupReducer from './shipmentGroupSlice';
 
 export const makeStore = () => {
   return configureStore({
@@ -47,6 +48,7 @@ export const makeStore = () => {
       raTracking: raTrackingReducer,
       paymentTracking: paymentTrackingReducer,
       ndcPricing: ndcPricingReducer,
+      shipmentGroup: shipmentGroupReducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
