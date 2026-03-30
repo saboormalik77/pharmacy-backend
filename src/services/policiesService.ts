@@ -47,6 +47,8 @@ export interface ReturnPolicyInput {
   partialsAccepted?: boolean;
   partialDosageForms?: string[];
   reimbursementType?: 'batch' | 'per_item';
+  /** If false, expiration inside the months before/after window is still non-returnable */
+  returnableWithinPolicyPeriod?: boolean;
 }
 
 export interface NonReturnableProductInput {
@@ -73,6 +75,8 @@ export interface BulkImportRow {
   partialsAccepted?: boolean;
   reimbursementType?: string;
   autoRaEmail?: string;
+  /** Default true when omitted */
+  returnableWithinPolicyPeriod?: boolean;
 }
 
 interface ListPoliciesParams {
@@ -138,6 +142,7 @@ function returnPolicyToCamelCase(row: any): any {
     partialsAccepted: row.partials_accepted,
     partialDosageForms: row.partial_dosage_forms,
     reimbursementType: row.reimbursement_type,
+    returnableWithinPolicyPeriod: row.returnable_within_policy_period !== false,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -424,6 +429,7 @@ export async function addReturnPolicy(policyId: string, input: ReturnPolicyInput
       partials_accepted: input.partialsAccepted ?? false,
       partial_dosage_forms: input.partialDosageForms || null,
       reimbursement_type: input.reimbursementType || 'batch',
+      returnable_within_policy_period: input.returnableWithinPolicyPeriod !== false,
     })
     .select()
     .single();
@@ -447,6 +453,9 @@ export async function updateReturnPolicy(returnPolicyId: string, input: Partial<
   if (input.partialsAccepted !== undefined) updates.partials_accepted = input.partialsAccepted;
   if (input.partialDosageForms !== undefined) updates.partial_dosage_forms = input.partialDosageForms;
   if (input.reimbursementType !== undefined) updates.reimbursement_type = input.reimbursementType;
+  if (input.returnableWithinPolicyPeriod !== undefined) {
+    updates.returnable_within_policy_period = input.returnableWithinPolicyPeriod;
+  }
 
   if (Object.keys(updates).length === 0) {
     throw new AppError('No fields to update', 400);
@@ -685,6 +694,7 @@ export async function bulkImport(rows: BulkImportRow[]) {
             partials_accepted: row.partialsAccepted ?? false,
             reimbursement_type: row.reimbursementType || 'batch',
             auto_ra_email: row.autoRaEmail || null,
+            returnable_within_policy_period: row.returnableWithinPolicyPeriod !== false,
           });
       }
     } catch (err: any) {

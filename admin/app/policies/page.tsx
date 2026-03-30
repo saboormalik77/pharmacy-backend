@@ -36,6 +36,7 @@ const INITIAL_RETURN_POLICY = {
     destination: '', autoRaEmail: '', policyNumber: undefined as number | undefined,
     policyDescription: '', discountRate: undefined as number | undefined,
     partialsAccepted: false, reimbursementType: 'batch' as 'batch' | 'per_item',
+    returnableWithinPolicyPeriod: true,
 };
 
 // ── Page ───────────────────────────────────────────────────────
@@ -137,6 +138,7 @@ export default function PoliciesPage() {
                     discountRate: newReturnPolicy.discountRate,
                     partialsAccepted: newReturnPolicy.partialsAccepted,
                     reimbursementType: newReturnPolicy.reimbursementType,
+                    returnableWithinPolicyPeriod: newReturnPolicy.returnableWithinPolicyPeriod,
                 };
                 const rpResult = await dispatch(addReturnPolicy({ policyId: createdId, payload: rpPayload }));
                 if (addReturnPolicy.rejected.match(rpResult)) {
@@ -571,6 +573,18 @@ export default function PoliciesPage() {
                                             <option value="per_item">PER ITEM</option>
                                         </select>
                                     </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Returnable inside policy window?</label>
+                                    <p className="text-[10px] text-gray-500 mb-1">If No, the months before/after window is informational only — items stay non-returnable even when the date falls in range.</p>
+                                    <select
+                                        value={newReturnPolicy.returnableWithinPolicyPeriod ? 'yes' : 'no'}
+                                        onChange={e => setNewReturnPolicy({ ...newReturnPolicy, returnableWithinPolicyPeriod: e.target.value === 'yes' })}
+                                        className="w-full max-w-xs px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                                    >
+                                        <option value="yes">Yes — returnable when date is in window</option>
+                                        <option value="no">No — not returnable in window</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>

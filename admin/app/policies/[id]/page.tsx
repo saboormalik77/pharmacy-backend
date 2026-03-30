@@ -63,7 +63,12 @@ export default function PolicyDetailPage() {
 
     const [addRPModal, setAddRPModal] = useState(false);
     const [editRPModal, setEditRPModal] = useState<ReturnPolicyRecord | null>(null);
-    const [rpForm, setRpForm] = useState<ReturnPolicyCreatePayload>({ destination: 'inmar' });
+    const [rpForm, setRpForm] = useState<ReturnPolicyCreatePayload>({
+        destination: 'inmar',
+        returnableWithinPolicyPeriod: true,
+        partialsAccepted: false,
+        reimbursementType: 'batch',
+    });
     const [deleteRPModal, setDeleteRPModal] = useState<ReturnPolicyRecord | null>(null);
 
     const [addExcModal, setAddExcModal] = useState(false);
@@ -129,6 +134,7 @@ export default function PolicyDetailPage() {
                 reimbursementType: (editRPModal.reimbursementType as 'batch' | 'per_item') || undefined,
                 autoRaEmail: editRPModal.autoRaEmail || '',
                 policyNumber: editRPModal.policyNumber ?? undefined,
+                returnableWithinPolicyPeriod: editRPModal.returnableWithinPolicyPeriod !== false,
             });
         }
     }, [editRPModal]);
@@ -146,7 +152,12 @@ export default function PolicyDetailPage() {
             if (addReturnPolicy.fulfilled.match(result)) {
                 showToast('Return policy added!');
                 setAddRPModal(false);
-                setRpForm({ destination: 'inmar' });
+                setRpForm({
+                    destination: 'inmar',
+                    returnableWithinPolicyPeriod: true,
+                    partialsAccepted: false,
+                    reimbursementType: 'batch',
+                });
                 refresh();
             } else showToast(result.payload as string || 'Failed', 'error');
         }
@@ -291,7 +302,7 @@ export default function PolicyDetailPage() {
             <div className="bg-white rounded-lg shadow p-4">
                 <div className="flex items-center justify-between mb-3">
                     <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5" /> Return Policies ({rps.length})</h2>
-                    <button onClick={() => { setRpForm({ destination: 'inmar' }); setAddRPModal(true); }} className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-gray-300 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
+                    <button onClick={() => { setRpForm({ destination: 'inmar', returnableWithinPolicyPeriod: true, partialsAccepted: false, reimbursementType: 'batch' }); setAddRPModal(true); }} className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-gray-300 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
                         <Plus className="w-3 h-3" /> Add
                     </button>
                 </div>
@@ -303,6 +314,7 @@ export default function PolicyDetailPage() {
                             <thead><tr className="bg-gray-50 border-b border-gray-200">
                                 <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Destination</th>
                                 <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Window</th>
+                                <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">In-window</th>
                                 <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Partials</th>
                                 <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Discount</th>
                                 <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Description</th>
@@ -313,6 +325,13 @@ export default function PolicyDetailPage() {
                                     <tr key={rp.id} className="hover:bg-gray-50">
                                         <td className="px-3 py-1.5"><Badge variant={destBadge(rp.destination)}><span className="text-[10px]">{rp.destination}</span></Badge></td>
                                         <td className="px-3 py-1.5 text-xs text-gray-700 whitespace-nowrap">{rp.monthsBeforeExpiration ?? '?'}mo before – {rp.monthsAfterExpiration ?? '?'}mo after</td>
+                                        <td className="px-3 py-1.5 text-center">
+                                            {rp.returnableWithinPolicyPeriod !== false ? (
+                                                <Badge variant="success"><span className="text-[10px]">Yes</span></Badge>
+                                            ) : (
+                                                <Badge variant="danger"><span className="text-[10px]">No</span></Badge>
+                                            )}
+                                        </td>
                                         <td className="px-3 py-1.5 text-center">{rp.partialsAccepted ? <Badge variant="success"><span className="text-[10px]">Yes</span></Badge> : <span className="text-xs text-gray-400">No</span>}</td>
                                         <td className="px-3 py-1.5 text-right text-xs text-gray-700">{rp.discountRate != null ? `${(rp.discountRate * 100).toFixed(0)}%` : '—'}</td>
                                         <td className="px-3 py-1.5 text-xs text-gray-600 max-w-[160px] truncate" title={rp.policyDescription || ''}>{rp.policyDescription || '—'}</td>
@@ -479,6 +498,18 @@ export default function PolicyDetailPage() {
                                         : 'e.g. 0.30 = 30%'}
                             </p>
                         </div>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Returnable inside policy window?</label>
+                        <p className="text-[10px] text-gray-500 mb-1.5">No = the date window is informational; items are not returnable even when expiration falls in range.</p>
+                        <select
+                            value={rpForm.returnableWithinPolicyPeriod !== false ? 'yes' : 'no'}
+                            onChange={e => setRpForm({ ...rpForm, returnableWithinPolicyPeriod: e.target.value === 'yes' })}
+                            className="w-full max-w-md px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        >
+                            <option value="yes">Yes — returnable when date is in window</option>
+                            <option value="no">No — not returnable in window</option>
+                        </select>
                     </div>
                     <div className="flex items-center gap-3">
                         <label className="flex items-center gap-2 text-sm">

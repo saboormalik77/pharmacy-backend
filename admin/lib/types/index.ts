@@ -804,6 +804,8 @@ export interface ReturnPolicyRecord {
     partialsAccepted: boolean;
     partialDosageForms: string[] | null;
     reimbursementType: string | null;
+    /** When false, items inside the stated date window are still non-returnable */
+    returnableWithinPolicyPeriod: boolean;
     createdAt: string;
     updatedAt: string;
 }
@@ -858,6 +860,7 @@ export interface ReturnPolicyCreatePayload {
     partialsAccepted?: boolean;
     partialDosageForms?: string[];
     reimbursementType?: 'batch' | 'per_item';
+    returnableWithinPolicyPeriod?: boolean;
 }
 
 export interface NonReturnableProductPayload {
@@ -884,6 +887,7 @@ export interface ReturnabilityCheckResult {
     windowStart: string | null;
     windowEnd: string | null;
     partialsAccepted: boolean | null;
+    returnableWithinPolicyPeriod: boolean | null;
     manufacturerName: string | null;
     manufacturerPolicyId: string | null;
     autoRaEmail: string | null;

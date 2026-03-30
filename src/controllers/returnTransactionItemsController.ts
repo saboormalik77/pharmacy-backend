@@ -69,6 +69,7 @@ export const addItemHandler = catchAsync(
             policy_exception: 'policy',
             no_partials: 'policy',
             dosage_form_not_accepted: 'policy',
+            not_returnable_in_policy_window: 'policy',
           };
           nonReturnableReason = reasonMap[policyResult.reason] || 'policy';
         }

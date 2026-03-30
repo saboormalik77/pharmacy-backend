@@ -28,6 +28,7 @@ export type NonReturnableReason =
   | 'policy_exception'
   | 'too_early'
   | 'too_late'
+  | 'not_returnable_in_policy_window'
   | 'no_partials'
   | 'dosage_form_not_accepted';
 
@@ -43,6 +44,8 @@ export interface ReturnabilityResult {
   windowStart: string | null;
   windowEnd: string | null;
   partialsAccepted: boolean | null;
+  /** False when the policy documents a window but marks products non-returnable while in-window */
+  returnableWithinPolicyPeriod: boolean | null;
   manufacturerName: string | null;
   manufacturerPolicyId: string | null;
   autoRaEmail: string | null;
@@ -117,6 +120,7 @@ export async function checkReturnability(
     windowStart: null,
     windowEnd: null,
     partialsAccepted: null,
+    returnableWithinPolicyPeriod: null,
     manufacturerName: null,
     manufacturerPolicyId: null,
     autoRaEmail: null,
@@ -214,6 +218,7 @@ export async function checkReturnability(
     windowStart: formatDate(windowStart),
     windowEnd: formatDate(windowEnd),
     partialsAccepted: rp.partials_accepted,
+    returnableWithinPolicyPeriod: rp.returnable_within_policy_period !== false,
     manufacturerName,
     manufacturerPolicyId,
     autoRaEmail: rp.auto_ra_email,
@@ -236,6 +241,17 @@ export async function checkReturnability(
       ...commonFields,
       status: 'non_returnable',
       reason: 'too_late',
+      expectedReturnableDate: null,
+    };
+  }
+
+  // Step 6b: In calendar window, but this return policy marks the period as non-returnable (informational window only)
+  if (rp.returnable_within_policy_period === false) {
+    return {
+      ...baseTbd,
+      ...commonFields,
+      status: 'non_returnable',
+      reason: 'not_returnable_in_policy_window',
       expectedReturnableDate: null,
     };
   }

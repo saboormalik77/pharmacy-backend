@@ -69,6 +69,8 @@ CREATE TABLE IF NOT EXISTS manufacturer_return_policies (
   reimbursement_type TEXT NOT NULL DEFAULT 'batch'
     CHECK (reimbursement_type IN ('batch', 'per_item')),
 
+  returnable_within_policy_period BOOLEAN NOT NULL DEFAULT true,
+
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

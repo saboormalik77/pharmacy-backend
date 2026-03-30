@@ -1173,6 +1173,13 @@ export default function AddItemsPage() {
                                         {policyAutoCheck.discountRate != null && <PolicyDetail label="Discount Rate" value={`${policyAutoCheck.discountRate}%`} />}
                                         {policyAutoCheck.reimbursementType && <PolicyDetail label="Reimbursement" value={policyAutoCheck.reimbursementType} capitalize />}
                                         {policyAutoCheck.partialsAccepted != null && <PolicyDetail label="Partials" value={policyAutoCheck.partialsAccepted ? 'Yes' : 'No'} highlight={policyAutoCheck.partialsAccepted ? 'green' : 'red'} />}
+                                        {policyAutoCheck.returnableWithinPolicyPeriod != null && (
+                                            <PolicyDetail
+                                                label="Returnable in window"
+                                                value={policyAutoCheck.returnableWithinPolicyPeriod ? 'Yes' : 'No'}
+                                                highlight={policyAutoCheck.returnableWithinPolicyPeriod ? 'green' : 'red'}
+                                            />
+                                        )}
                                         {policyAutoCheck.policyNumber != null && <PolicyDetail label="Policy #" value={String(policyAutoCheck.policyNumber)} />}
                                         {policyAutoCheck.autoRaEmail && <PolicyDetail label="RA Email" value={policyAutoCheck.autoRaEmail} />}
                                     </div>
