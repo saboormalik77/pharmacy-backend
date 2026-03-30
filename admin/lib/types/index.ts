@@ -699,6 +699,8 @@ export interface ReturnTransactionItem {
     isPartial: boolean;
     partialPercentage: number | null;
     estimatedValue: number | null;
+    estimatedStorePrice: number | null;
+    estimatedStoreValue: number | null;
     returnStatus: 'returnable' | 'non_returnable' | 'tbd';
     nonReturnableReason: string | null;
     returnReason: string | null;
@@ -1006,6 +1008,8 @@ export interface WineCellarItem {
     quantity: number;
     standardPrice: number | null;
     estimatedValue: number | null;
+    estimatedStorePrice: number | null;
+    estimatedStoreValue: number | null;
     isPartial: boolean;
     partialPercentage: number | null;
     dateShelved: string;

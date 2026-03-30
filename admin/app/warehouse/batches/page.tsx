@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -12,7 +12,8 @@ import { Button } from '@/components/ui/Button';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
 import { formatDate } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
-import { fetchBatches, createBatch, clearError } from '@/lib/store/batchSlice';
+import { fetchBatches, createBatch, clearError, fetchUsedBatchMonths } from '@/lib/store/batchSlice';
+import { buildAvailableBatchMonthOptions } from '@/lib/utils/batchMonths';
 
 const STATUS_OPTIONS = [
     { value: '', label: 'All Statuses' },
@@ -49,6 +50,8 @@ export default function BatchesPage() {
     const [toasts, setToasts] = useState<Toast[]>([]);
     const [showCreate, setShowCreate] = useState(false);
     const [newBatch, setNewBatch] = useState({ batchMonth: '', batchName: '' });
+    const [usedBatchMonths, setUsedBatchMonths] = useState<string[]>([]);
+    const [usedMonthsLoading, setUsedMonthsLoading] = useState(false);
 
     const addToast = useCallback((message: string, type: Toast['type']) => {
         setToasts(prev => [...prev, { id: Date.now().toString(), message, type }]);
@@ -65,6 +68,23 @@ export default function BatchesPage() {
     useEffect(() => { loadBatches(); }, [loadBatches]);
 
     useEffect(() => { if (error) { addToast(error, 'error'); dispatch(clearError()); } }, [error, addToast, dispatch]);
+
+    useEffect(() => {
+        if (!showCreate) return;
+        let cancelled = false;
+        setUsedMonthsLoading(true);
+        dispatch(fetchUsedBatchMonths())
+            .unwrap()
+            .then((months) => { if (!cancelled) setUsedBatchMonths(months); })
+            .catch(() => { if (!cancelled) setUsedBatchMonths([]); })
+            .finally(() => { if (!cancelled) setUsedMonthsLoading(false); });
+        return () => { cancelled = true; };
+    }, [showCreate, dispatch]);
+
+    const availableBatchMonths = useMemo(
+        () => buildAvailableBatchMonthOptions(usedBatchMonths),
+        [usedBatchMonths]
+    );
 
     const handleCreate = async () => {
         if (!newBatch.batchMonth) { addToast('Please select a batch month', 'warning'); return; }
@@ -103,7 +123,10 @@ export default function BatchesPage() {
                     <p className="text-xs text-gray-500">Manage return batches and close-outs</p>
                 </div>
                 <button
-                    onClick={() => setShowCreate(true)}
+                    onClick={() => {
+                        setNewBatch({ batchMonth: '', batchName: '' });
+                        setShowCreate(true);
+                    }}
                     className="inline-flex items-center gap-1 px-3 py-1.5 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors"
                 >
                     <Plus className="w-3.5 h-3.5" /> New Batch
@@ -250,12 +273,26 @@ export default function BatchesPage() {
                         <div className="space-y-3">
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">Batch Month <span className="text-red-500">*</span></label>
-                                <input
-                                    type="month"
-                                    className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-primary-500 focus:border-transparent"
-                                    value={newBatch.batchMonth}
-                                    onChange={e => setNewBatch(prev => ({ ...prev, batchMonth: e.target.value }))}
-                                />
+                                {usedMonthsLoading ? (
+                                    <div className="flex items-center gap-2 py-2 text-xs text-gray-500">
+                                        <Loader2 className="w-3.5 h-3.5 animate-spin" /> Loading months…
+                                    </div>
+                                ) : availableBatchMonths.length === 0 ? (
+                                    <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2.5 py-2">
+                                        Every month in the allowed range already has a batch. Delete an open unused batch or contact support to add a month outside the window.
+                                    </p>
+                                ) : (
+                                    <select
+                                        className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-primary-500 focus:border-transparent bg-white"
+                                        value={newBatch.batchMonth}
+                                        onChange={e => setNewBatch(prev => ({ ...prev, batchMonth: e.target.value }))}
+                                    >
+                                        <option value="">Select month…</option>
+                                        {availableBatchMonths.map(o => (
+                                            <option key={o.value} value={o.value}>{o.label}</option>
+                                        ))}
+                                    </select>
+                                )}
                             </div>
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">Batch Name <span className="text-gray-400 font-normal">(optional)</span></label>
@@ -271,7 +308,11 @@ export default function BatchesPage() {
 
                         <div className="flex justify-end gap-2 mt-4">
                             <button onClick={() => setShowCreate(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleCreate} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                            <button
+                                onClick={handleCreate}
+                                disabled={isActionLoading || usedMonthsLoading || availableBatchMonths.length === 0}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors"
+                            >
                                 {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
                                 Create Batch
                             </button>

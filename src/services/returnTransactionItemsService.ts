@@ -35,6 +35,8 @@ export interface ReturnTransactionItem {
   isPartial: boolean;
   partialPercentage: number | null;
   estimatedValue: number | null;
+  estimatedStorePrice: number | null;
+  estimatedStoreValue: number | null;
   returnStatus: string;
   nonReturnableReason: string | null;
   returnReason: string | null;

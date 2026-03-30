@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import {
-    ArrowLeft, Loader2, AlertCircle, X, Pause, Play, CheckCircle, Lock,
+    ArrowLeft, Loader2, AlertCircle, X, Play, CheckCircle, Lock,
     Trash2, Edit, ClipboardList, Building2, UserCog, Package, Truck, Clock,
     Plus, Search, ScanLine, Archive, FileText, Download, AlertTriangle, Printer, QrCode,
 } from 'lucide-react';
@@ -720,11 +720,13 @@ export default function ReturnDetailPage() {
                                 <Edit className="w-3 h-3" /> {isLocked ? 'Edit Notes' : 'Edit'}
                             </button>
                         )} */}
+                        {/* Pause hidden on scan / return detail page — restore if needed
                         {canDoAction(tx, 'pause') && canEdit && (
                             <button onClick={() => checkActionWithToast('pause return', () => setActionModal('pause'))} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-300 hover:bg-yellow-200 transition-colors">
                                 <Pause className="w-3 h-3" /> Pause
                             </button>
                         )}
+                        */}
                         {canDoAction(tx, 'resume') && canEdit && (
                             <button onClick={() => checkActionWithToast('resume return', () => setActionModal('resume'))} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-green-100 text-green-800 border border-green-300 hover:bg-green-200 transition-colors">
                                 <Play className="w-3 h-3" /> Resume
@@ -1185,6 +1187,7 @@ export default function ReturnDetailPage() {
                                     <th className="text-center px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Qty</th>
                                     <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Price</th>
                                     <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Est. Value</th>
+                                    <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Est. Store Value</th>
                                     <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Expires</th>
                                     <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Lot</th>
                                     <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
@@ -1212,6 +1215,9 @@ export default function ReturnDetailPage() {
                                             </td>
                                             <td className="px-2 py-1.5 text-[11px] text-right font-medium text-gray-900">
                                                 {item.estimatedValue != null ? formatCurrency(item.estimatedValue) : '—'}
+                                            </td>
+                                            <td className="px-2 py-1.5 text-[11px] text-right font-medium text-gray-900">
+                                                {item.estimatedStoreValue != null ? formatCurrency(item.estimatedStoreValue) : '—'}
                                             </td>
                                             <td className="px-2 py-1.5 text-[11px] text-gray-600 whitespace-nowrap">
                                                 {item.expirationDate ? formatDate(item.expirationDate) : '—'}

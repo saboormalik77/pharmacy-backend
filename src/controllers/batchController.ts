@@ -40,6 +40,16 @@ export const listBatchesHandler = catchAsync(
 );
 
 // ============================================================
+// GET /api/admin/batches/used-months — Months that already have a batch
+// ============================================================
+export const listUsedBatchMonthsHandler = catchAsync(
+  async (_req: Request, res: Response, _next: NextFunction) => {
+    const months = await batchService.listUsedBatchMonths();
+    res.status(200).json({ status: 'success', data: months });
+  }
+);
+
+// ============================================================
 // POST /api/admin/batches — Create batch
 // ============================================================
 export const createBatchHandler = catchAsync(

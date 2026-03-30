@@ -82,6 +82,23 @@ export const createBatch = createAsyncThunk<
     }
 });
 
+/** Distinct YYYY-MM months that already have a batch (for create-batch UI). */
+export const fetchUsedBatchMonths = createAsyncThunk<string[], void, { rejectValue: string }>(
+    'batch/fetchUsedBatchMonths',
+    async (_, { rejectWithValue }) => {
+        try {
+            const { apiClient } = await import('@/lib/api/apiClient');
+            const res = await apiClient.get<{ status: string; data: string[] }>(
+                '/admin/batches/used-months',
+                true
+            );
+            return res.data;
+        } catch (err: any) {
+            return rejectWithValue(err?.message || 'Failed to fetch used batch months');
+        }
+    }
+);
+
 export const fetchBatchDetail = createAsyncThunk<
     { batch: ReturnBatch; debitMemos: DebitMemo[]; returns: ReturnTransaction[] },
     string,
