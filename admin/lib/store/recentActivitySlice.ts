@@ -82,18 +82,27 @@ export interface FetchRecentActivityParams {
 }
 
 // Async thunk for fetching recent activity
+const emptyRecentPayload = (params: FetchRecentActivityParams) => ({
+  activities: [] as Activity[],
+  pagination: {
+    total: 0,
+    limit: params.limit ?? 20,
+    offset: params.offset ?? 0,
+    hasMore: false,
+  },
+  generatedAt: new Date().toISOString(),
+});
+
 export const fetchRecentActivity = createAsyncThunk(
   'recentActivity/fetch',
   async (params: FetchRecentActivityParams = {}, { rejectWithValue }) => {
     try {
-      const { apiClient } = await import('@/lib/api/apiClient');
-      const { cookieUtils } = await import('@/lib/utils/cookies');
-      
-      const token = cookieUtils.getAuthToken();
-      if (!token) {
-        return rejectWithValue('Authentication required. Please login again.');
+      if (typeof window === 'undefined') {
+        return emptyRecentPayload(params);
       }
-      
+
+      const { apiClient } = await import('@/lib/api/apiClient');
+
       const queryParams: Record<string, string | number | undefined> = {};
 
       if (params.limit !== undefined) {
@@ -138,14 +147,12 @@ export const markActivityAsRead = createAsyncThunk(
   'recentActivity/markAsRead',
   async (activityId: string, { rejectWithValue, dispatch }) => {
     try {
-      const { apiClient } = await import('@/lib/api/apiClient');
-      const { cookieUtils } = await import('@/lib/utils/cookies');
-      
-      const token = cookieUtils.getAuthToken();
-      if (!token) {
-        return rejectWithValue('Authentication required. Please login again.');
+      if (typeof window === 'undefined') {
+        return { activityId, response: { updatedCount: 0 } };
       }
-      
+
+      const { apiClient } = await import('@/lib/api/apiClient');
+
       // Try sending activityId to mark just that one, or empty body to mark all
       const response = await apiClient.post<{ 
         success: boolean; 

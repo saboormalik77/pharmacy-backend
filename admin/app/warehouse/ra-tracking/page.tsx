@@ -59,9 +59,30 @@ function getRAStatusBadge(s: string): { label: string; variant: 'success' | 'war
     }
 }
 
+/**
+ * Workflow status for UI/actions. Uses timestamps and RA # when ra_status drifted
+ * (e.g. pending in DB but ra_number / outbound_tracking already set).
+ */
+function effectiveRaStatus(memo: DebitMemo): 'pending' | 'requested' | 'received' | 'shipped' | 'overdue' {
+    const outbound = (memo.outboundTracking || '').trim();
+    if (memo.shippedAt != null || outbound !== '' || memo.raStatus === 'shipped') return 'shipped';
+    if (memo.raReceivedAt != null || (memo.raNumber || '').trim() !== '' || memo.raStatus === 'received') {
+        return 'received';
+    }
+    if (memo.raStatus === 'overdue') return 'overdue';
+    if (
+        memo.ticklerDate &&
+        new Date(memo.ticklerDate) < new Date() &&
+        (memo.raRequestedAt != null || memo.raStatus === 'requested' || memo.raStatus === 'overdue')
+    ) {
+        return 'overdue';
+    }
+    if (memo.raRequestedAt != null || memo.raStatus === 'requested') return 'requested';
+    return 'pending';
+}
+
 function isOverdue(memo: DebitMemo): boolean {
-    if (!memo.ticklerDate || memo.raStatus === 'received' || memo.raStatus === 'shipped') return false;
-    return new Date(memo.ticklerDate) < new Date();
+    return effectiveRaStatus(memo) === 'overdue';
 }
 
 type ModalType = null | 'request' | 'receive' | 'resend' | 'ship' | 'preview';
@@ -441,7 +462,7 @@ export default function RATrackingPage() {
 
     const getRowActions = (memo: DebitMemo) => {
         const actions: React.ReactElement[] = [];
-        const s = memo.raStatus;
+        const s = effectiveRaStatus(memo);
 
         if (s === 'pending') {
             actions.push(
@@ -583,7 +604,8 @@ export default function RATrackingPage() {
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {memos.map(memo => {
-                                    const sb = getRAStatusBadge(memo.raStatus || 'pending');
+                                    const eff = effectiveRaStatus(memo);
+                                    const sb = getRAStatusBadge(eff);
                                     const overdue = isOverdue(memo);
                                     return (
                                         <tr key={memo.id} className={`hover:bg-gray-50 transition-colors ${overdue ? 'bg-red-50' : ''}`}>
@@ -608,7 +630,7 @@ export default function RATrackingPage() {
                                             </td>
                                             <td className="px-3 py-1.5 text-right">
                                                 <div className="flex items-center justify-end gap-1">
-                                                    {memo.raStatus === 'pending' && (
+                                                    {eff === 'pending' && (
                                                         <button
                                                             onClick={e => { e.stopPropagation(); openRequest(memo); }}
                                                             title="Send RA Request"
@@ -617,7 +639,7 @@ export default function RATrackingPage() {
                                                             <Mail className="w-3 h-3" /> Request
                                                         </button>
                                                     )}
-                                                    {(memo.raStatus === 'requested' || memo.raStatus === 'overdue') && (
+                                                    {(eff === 'requested' || eff === 'overdue') && (
                                                         <>
                                                             <button
                                                                 onClick={e => { e.stopPropagation(); openResend(memo); }}
@@ -635,7 +657,7 @@ export default function RATrackingPage() {
                                                             </button>
                                                         </>
                                                     )}
-                                                    {memo.raStatus === 'received' && (
+                                                    {eff === 'received' && (
                                                         <button
                                                             onClick={e => { e.stopPropagation(); openShip(memo); }}
                                                             title="Record Shipment"
@@ -644,7 +666,7 @@ export default function RATrackingPage() {
                                                             <Truck className="w-3 h-3" /> Ship
                                                         </button>
                                                     )}
-                                                    {memo.raStatus === 'shipped' && memo.outboundTracking && (
+                                                    {eff === 'shipped' && memo.outboundTracking && (
                                                         <button
                                                             onClick={e => { e.stopPropagation(); printDebitMemoLabel(memo.id); }}
                                                             disabled={printLabelLoading === memo.id}
