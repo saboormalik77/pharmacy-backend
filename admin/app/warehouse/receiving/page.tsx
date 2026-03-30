@@ -63,7 +63,7 @@ export default function WarehouseReceivingPage() {
     const debouncedSearch = useDebounce(search, 400);
     const [toasts, setToasts] = useState<Toast[]>([]);
     const inputRef = useRef<HTMLInputElement>(null);
-    const [receiveScanMode, setReceiveScanMode] = useState<'camera' | 'input'>('input');
+    const [receiveScanMode, setReceiveScanMode] = useState<'camera' | 'input'>('camera');
     const [cameraOpen, setCameraOpen] = useState(false);
 
     const showToast = (msg: string, type: Toast['type'] = 'success') => {
