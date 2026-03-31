@@ -59,16 +59,16 @@ export const fetchUnpaidMemos = createAsyncThunk<
 
 export const recordPayment = createAsyncThunk<
     DebitMemo,
-    { memoId: string; amountReceived: number; paymentDate?: string; reference?: string; notes?: string; creditMemoFile: File },
+    { memoId: string; amountReceived: number; paymentDate: string; reference: string; notes: string; creditMemoFile: File },
     { rejectValue: string }
->('paymentTracking/recordPayment', async ({ memoId, creditMemoFile, ...body }, { rejectWithValue }) => {
+>('paymentTracking/recordPayment', async ({ memoId, creditMemoFile, paymentDate, reference, notes, amountReceived }, { rejectWithValue }) => {
     try {
         const { apiClient } = await import('@/lib/api/apiClient');
         const formData = new FormData();
-        formData.append('amountReceived', String(body.amountReceived));
-        if (body.paymentDate) formData.append('paymentDate', body.paymentDate);
-        if (body.reference) formData.append('reference', body.reference);
-        if (body.notes) formData.append('notes', body.notes);
+        formData.append('amountReceived', String(amountReceived));
+        formData.append('paymentDate', new Date(paymentDate).toISOString());
+        formData.append('reference', reference);
+        formData.append('notes', notes);
         formData.append('creditMemo', creditMemoFile);
         const res = await apiClient.postFormData<{ status: string; data: DebitMemo }>(
             `/admin/debit-memos/${memoId}/record-payment`, formData, true
@@ -76,6 +76,30 @@ export const recordPayment = createAsyncThunk<
         return res.data;
     } catch (err: any) {
         return rejectWithValue(err?.message || 'Failed to record payment');
+    }
+});
+
+export const updatePayment = createAsyncThunk<
+    DebitMemo,
+    { memoId: string; amountReceived: number; paymentDate: string; reference: string; notes: string; creditMemoFile?: File },
+    { rejectValue: string }
+>('paymentTracking/updatePayment', async ({ memoId, creditMemoFile, paymentDate, reference, notes, amountReceived }, { rejectWithValue }) => {
+    try {
+        const { apiClient } = await import('@/lib/api/apiClient');
+        const formData = new FormData();
+        formData.append('amountReceived', String(amountReceived));
+        formData.append('paymentDate', new Date(paymentDate).toISOString());
+        formData.append('reference', reference);
+        formData.append('notes', notes);
+        if (creditMemoFile) {
+            formData.append('creditMemo', creditMemoFile);
+        }
+        const res = await apiClient.patchFormData<{ status: string; data: DebitMemo }>(
+            `/admin/debit-memos/${memoId}/update-payment`, formData, true
+        );
+        return res.data;
+    } catch (err: any) {
+        return rejectWithValue(err?.message || 'Failed to update payment');
     }
 });
 
@@ -193,6 +217,13 @@ const paymentTrackingSlice = createSlice({
                 }).map(m => m.id === action.payload.id ? { ...action.payload, daysOutstanding: m.daysOutstanding, outstandingAmount: action.payload.amountRequested - action.payload.amountReceived } : m);
             })
             .addCase(recordPayment.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
+
+            .addCase(updatePayment.pending, (state) => { state.isActionLoading = true; state.error = null; })
+            .addCase(updatePayment.fulfilled, (state, action) => {
+                state.isActionLoading = false;
+                state.paidMemos = state.paidMemos.map(m => m.id === action.payload.id ? action.payload : m);
+            })
+            .addCase(updatePayment.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
 
             .addCase(sendPaymentReminder.pending, (state) => { state.isActionLoading = true; state.error = null; })
             .addCase(sendPaymentReminder.fulfilled, (state) => { state.isActionLoading = false; })

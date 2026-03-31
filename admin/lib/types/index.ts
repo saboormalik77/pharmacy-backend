@@ -1133,6 +1133,7 @@ export interface DebitMemo {
     paymentReceivedAt: string | null;
     paymentReference: string | null;
     paymentNotes: string | null;
+    creditMemoUrl: string | null;
     shipmentGroupId: string | null;
     createdAt: string;
     updatedAt: string;
