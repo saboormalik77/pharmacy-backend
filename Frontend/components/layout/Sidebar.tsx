@@ -15,6 +15,7 @@ import {
   Bell,
   X,
   ScanLine,
+  Camera,
   TrendingUp,
   Building2,
   Search,
@@ -22,6 +23,8 @@ import {
   ClipboardList,
   Warehouse,
   Archive,
+  ShieldAlert,
+  AlertTriangle,
 } from 'lucide-react'
 
 interface NavItem {
@@ -95,6 +98,21 @@ const navItems: NavItem[] = [
     title: 'Wine Cellar',
     href: '/wine-cellar',
     icon: Archive,
+  },
+  {
+    title: 'Scan Returns',
+    href: '/returns/scan',
+    icon: Camera,
+  },
+  {
+    title: 'TBD Items',
+    href: '/returns/tbd-items',
+    icon: AlertTriangle,
+  },
+  {
+    title: 'Destruction',
+    href: '/returns/destruction',
+    icon: ShieldAlert,
   },
   // {
   //   title: 'Documents',

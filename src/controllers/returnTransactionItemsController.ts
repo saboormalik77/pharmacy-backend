@@ -343,23 +343,76 @@ export const moveToWineCellarHandler = catchAsync(
 // ============================================================
 export const resolveItemHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
-    const { itemId } = req.params;
-    const { new_status, reason, destination, memo } = req.body;
+    const { id: transactionId, itemId } = req.params;
+    const { new_status, reason, destination, memo, non_returnable_route, expected_returnable_date } = req.body;
 
     if (!new_status || !['returnable', 'non_returnable'].includes(new_status)) {
       throw new AppError('new_status must be "returnable" or "non_returnable"', 400);
     }
+
+    // Non-returnable route: Wine Cellar flow (pharmacy-side aging).
+    if (new_status === 'non_returnable' && non_returnable_route === 'wine_cellar') {
+      if (!expected_returnable_date) {
+        throw new AppError('expected_returnable_date is required for wine cellar route', 400);
+      }
+
+      const existingItem = await itemsService.getItem(itemId);
+      if (!existingItem) {
+        throw new AppError('Item not found', 404);
+      }
+      if (existingItem.wineCellarId) {
+        throw new AppError('Item is already in wine cellar', 400);
+      }
+
+      const transaction = await getReturnTransactionById(transactionId);
+      const wineCellarItem = await wcService.addToWineCellar({
+        pharmacyId: transaction.pharmacyId,
+        transactionItemId: existingItem.id,
+        ndc: existingItem.ndc || undefined,
+        ndc10: existingItem.ndc10 || undefined,
+        productName: existingItem.proprietaryName || existingItem.genericName || undefined,
+        manufacturer: existingItem.manufacturer || undefined,
+        lotNumber: existingItem.lotNumber || undefined,
+        serialNumber: existingItem.serialNumber || undefined,
+        expirationDate: existingItem.expirationDate || undefined,
+        quantity: existingItem.quantity,
+        standardPrice: existingItem.standardPrice ?? undefined,
+        isPartial: existingItem.isPartial,
+        partialPercentage: existingItem.partialPercentage ?? undefined,
+        expectedReturnableDate: expected_returnable_date,
+        notes: memo || undefined,
+        createdBy: (req as any).adminId || (req as any).processorId || (req as any).userId,
+      });
+
+      const updated = await itemsService.updateItem(itemId, {
+        wineCellarId: wineCellarItem.id,
+        returnStatus: 'non_returnable',
+        nonReturnableReason: 'date',
+        memo: memo || undefined,
+      } as any);
+
+      return res.status(200).json({
+        status: 'success',
+        data: updated,
+        message: `Item moved to wine cellar (eligible ${expected_returnable_date})`,
+      });
+    }
+
+    const destinationForResolve =
+      new_status === 'non_returnable' && non_returnable_route === 'destruction'
+        ? 'destruction'
+        : destination;
 
     // Use the new RPC function that handles auto-destination assignment
     const result = await itemsService.resolveItemWithAutoDestination(
       itemId,
       new_status,
       reason,
-      destination,
+      destinationForResolve,
       memo
     );
 
-    const normalizedDestination = String(result.destination || destination || '')
+    const normalizedDestination = String(result.destination || destinationForResolve || '')
       .trim()
       .toLowerCase();
     if (new_status === 'non_returnable' && normalizedDestination === 'destruction') {

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-    AlertTriangle, Loader2, Search, X, CheckCircle, Ban, ChevronDown, ChevronRight,
+    AlertTriangle, Loader2, Search, X, CheckCircle, Ban, Archive, ChevronDown, ChevronRight,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -33,6 +33,8 @@ export default function TbdItemsPage() {
     const debouncedSearch = useDebounce(search, 400);
     const [resolveModal, setResolveModal] = useState<{ item: ReturnTransactionItem; txId: string } | null>(null);
     const [resolveForm, setResolveForm] = useState({ new_status: 'returnable', reason: '', destination: '', memo: '' });
+    const [nonReturnableRoute, setNonReturnableRoute] = useState<'wine_cellar' | 'destruction'>('destruction');
+    const [expectedReturnableDate, setExpectedReturnableDate] = useState('');
     const [isResolving, setIsResolving] = useState(false);
     const [toasts, setToasts] = useState<Toast[]>([]);
 
@@ -114,32 +116,61 @@ export default function TbdItemsPage() {
             showToast('Please select a non-returnable reason', 'warning');
             return;
         }
-        if (resolveForm.new_status === 'non_returnable' && !resolveForm.destination) {
-            showToast('Please select a destination for non-returnable item', 'warning');
+        if (resolveForm.new_status === 'non_returnable' && nonReturnableRoute === 'wine_cellar' && !expectedReturnableDate) {
+            showToast('Please select expected returnable date for Wine Cellar', 'warning');
             return;
         }
         setIsResolving(true);
-
-        const result = await dispatch(resolveTransactionItem({
-            transactionId: resolveModal.txId,
-            itemId: resolveModal.item.id,
-            payload: {
-                new_status: resolveForm.new_status,
-                reason: resolveForm.reason || undefined,
-                destination: resolveForm.destination || undefined,
-                memo: resolveForm.memo || undefined,
-            },
-        }));
+        let success = false;
+        let errorMessage = 'Failed to resolve';
+        if (resolveForm.new_status === 'non_returnable' && nonReturnableRoute === 'wine_cellar') {
+            try {
+                const { apiClient } = await import('@/lib/api/apiClient');
+                await apiClient.post(
+                    `/return-transactions/${resolveModal.txId}/items/${resolveModal.item.id}/resolve`,
+                    {
+                        new_status: 'non_returnable',
+                        non_returnable_route: 'wine_cellar',
+                        expected_returnable_date: expectedReturnableDate,
+                        reason: resolveForm.reason || 'date',
+                        memo: resolveForm.memo || undefined,
+                    },
+                    true
+                );
+                success = true;
+            } catch (e: any) {
+                errorMessage = e?.message || errorMessage;
+            }
+        } else {
+            const result = await dispatch(resolveTransactionItem({
+                transactionId: resolveModal.txId,
+                itemId: resolveModal.item.id,
+                payload: {
+                    new_status: resolveForm.new_status,
+                    reason: resolveForm.reason || undefined,
+                    destination: resolveForm.new_status === 'non_returnable' ? undefined : resolveForm.destination || undefined,
+                    non_returnable_route: resolveForm.new_status === 'non_returnable' ? nonReturnableRoute : undefined,
+                    memo: resolveForm.memo || undefined,
+                },
+            }));
+            success = resolveTransactionItem.fulfilled.match(result);
+            if (!success) errorMessage = (result.payload as string) || errorMessage;
+        }
 
         setIsResolving(false);
-
-        if (resolveTransactionItem.fulfilled.match(result)) {
-            showToast(`Item resolved as ${resolveForm.new_status.replace('_', '-')}!`);
+        if (success) {
+            const msg =
+                resolveForm.new_status === 'non_returnable' && nonReturnableRoute === 'wine_cellar'
+                    ? `Item moved to Wine Cellar (eligible ${expectedReturnableDate})`
+                    : `Item resolved as ${resolveForm.new_status.replace('_', '-')}`;
+            showToast(msg);
             setResolveModal(null);
             setResolveForm({ new_status: 'returnable', reason: '', destination: '', memo: '' });
+            setNonReturnableRoute('destruction');
+            setExpectedReturnableDate('');
             fetchTbdItems(resolveModal.txId);
         } else {
-            showToast(result.payload as string || 'Failed to resolve', 'error');
+            showToast(errorMessage, 'error');
         }
     };
 
@@ -249,6 +280,8 @@ export default function TbdItemsPage() {
                                                                         onClick={() => {
                                                                             setResolveModal({ item, txId: tx.id });
                                                                             setResolveForm({ new_status: 'returnable', reason: '', destination: '', memo: '' });
+                                                                            setNonReturnableRoute('destruction');
+                                                                            setExpectedReturnableDate('');
                                                                         }}
                                                                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border border-yellow-300 transition-colors whitespace-nowrap"
                                                                     >
@@ -310,31 +343,60 @@ export default function TbdItemsPage() {
                                 </div>
                             </div>
 
-                            {/* Destination */}
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Destination</label>
-                                <select value={resolveForm.destination} onChange={e => setResolveForm({ ...resolveForm, destination: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
-                                    <option value="">— Select —</option>
-                                    <option value="inmar">Inmar</option>
-                                    <option value="qualanex">Qualanex</option>
-                                    <option value="pharmalink">PharmaLink</option>
-                                    <option value="destruction">Destruction</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
+                            {/* Destination (returnable only) */}
+                            {resolveForm.new_status === 'returnable' && (
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Destination</label>
+                                    <select value={resolveForm.destination} onChange={e => setResolveForm({ ...resolveForm, destination: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                        <option value="">— Select —</option>
+                                        <option value="inmar">Inmar</option>
+                                        <option value="qualanex">Qualanex</option>
+                                        <option value="pharmalink">PharmaLink</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            )}
 
                             {/* Reason (shown for non-returnable) */}
                             {resolveForm.new_status === 'non_returnable' && (
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-1">Reason</label>
-                                    <select value={resolveForm.reason} onChange={e => setResolveForm({ ...resolveForm, reason: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
-                                        <option value="">— Select Reason —</option>
-                                        <option value="date">Date (expired/outside return window)</option>
-                                        <option value="policy">Policy (manufacturer restriction)</option>
-                                        <option value="no_data">No Data (insufficient information)</option>
-                                        <option value="manual">Manual (staff decision)</option>
-                                    </select>
-                                </div>
+                                <>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Non-Returnable Route</label>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <label className={`flex items-center gap-2 px-3 py-2 border rounded cursor-pointer ${nonReturnableRoute === 'wine_cellar' ? 'border-purple-400 bg-purple-50' : 'border-gray-300'}`}>
+                                                <input type="radio" checked={nonReturnableRoute === 'wine_cellar'} onChange={() => setNonReturnableRoute('wine_cellar')} />
+                                                <Archive className="w-3.5 h-3.5 text-purple-600" />
+                                                <span className="text-xs font-medium text-purple-800">Wine Cellar</span>
+                                            </label>
+                                            <label className={`flex items-center gap-2 px-3 py-2 border rounded cursor-pointer ${nonReturnableRoute === 'destruction' ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}>
+                                                <input type="radio" checked={nonReturnableRoute === 'destruction'} onChange={() => setNonReturnableRoute('destruction')} />
+                                                <Ban className="w-3.5 h-3.5 text-red-600" />
+                                                <span className="text-xs font-medium text-red-800">Destruction</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {nonReturnableRoute === 'wine_cellar' && (
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700 mb-1">Expected Returnable Date <span className="text-red-500">*</span></label>
+                                            <input
+                                                type="date"
+                                                value={expectedReturnableDate}
+                                                onChange={e => setExpectedReturnableDate(e.target.value)}
+                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                            />
+                                        </div>
+                                    )}
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">Reason</label>
+                                        <select value={resolveForm.reason} onChange={e => setResolveForm({ ...resolveForm, reason: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                            <option value="">— Select Reason —</option>
+                                            <option value="date">Date (expired/outside return window)</option>
+                                            <option value="policy">Policy (manufacturer restriction)</option>
+                                            <option value="no_data">No Data (insufficient information)</option>
+                                            <option value="manual">Manual (staff decision)</option>
+                                        </select>
+                                    </div>
+                                </>
                             )}
 
                             {/* Memo */}

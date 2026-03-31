@@ -100,6 +100,7 @@ export default function AddItemsPage() {
     const [formErrors, setFormErrors] = useState<Set<string>>(new Set());
     // Expected returnable date for manual wine cellar move
     const [wineCellarDate, setWineCellarDate] = useState('');
+    const [nonReturnableRoute, setNonReturnableRoute] = useState<'wine_cellar' | 'destruction'>('destruction');
     // Manual destination when no policy found
     const [manualDestination, setManualDestination] = useState('');
     const [reverseDistributors, setReverseDistributors] = useState<{ id: string; name: string; email: string }[]>([]);
@@ -486,7 +487,12 @@ export default function AddItemsPage() {
         payload.scanSource = form.scanSource;
         if (form.rawScanData) payload.rawScanData = form.rawScanData;
         const destinationToUse = policyAutoCheck?.destination || manualDestination;
-        if (destinationToUse) payload.destination = destinationToUse;
+        if (form.returnStatus === 'returnable' && destinationToUse) {
+            payload.destination = destinationToUse;
+        }
+        if (form.returnStatus === 'non_returnable' && nonReturnableRoute === 'destruction') {
+            payload.destination = 'destruction';
+        }
 
         const result = await dispatch(addTransactionItem({ transactionId, payload }));
 
@@ -525,6 +531,7 @@ export default function AddItemsPage() {
             setForm({ ...EMPTY_FORM });
             setFormErrors(new Set());
             setManualDestination('');
+            setNonReturnableRoute('destruction');
             setScannedPrices(null);
             setScanError('');
             setScanInput('');
@@ -595,6 +602,7 @@ export default function AddItemsPage() {
         setFormErrors(new Set());
         setWineCellarDate('');
         setManualDestination('');
+        setNonReturnableRoute('destruction');
         setScannedPrices(null);
         setScanError('');
         setScanInput('');
@@ -610,6 +618,7 @@ export default function AddItemsPage() {
         setFormErrors(new Set());
         setWineCellarDate('');
         setManualDestination('');
+        setNonReturnableRoute('destruction');
         setScannedPrices(null);
         setScanError('');
         setLastWarning('');
@@ -1054,12 +1063,12 @@ export default function AddItemsPage() {
                     </div>
                 </div>
 
-                {/* Manual Destination — shown only when no return policy is found */}
-                {(!policyAutoCheck || policyAutoCheck.status === 'tbd') && (
+                {/* Manual Destination — shown only when item is returnable and no policy destination is available */}
+                {(!policyAutoCheck || policyAutoCheck.status === 'tbd') && form.returnStatus === 'returnable' && (
                     <div className="mt-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg">
                         <div className="flex items-center gap-1.5 mb-1.5">
                             <AlertTriangle className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
-                            <p className="text-[10px] font-semibold text-amber-800">No return policy found — select destination manually</p>
+                            <p className="text-[10px] font-semibold text-amber-800">No return policy found — select return destination manually</p>
                         </div>
                         <div>
                             <label className="block text-[10px] font-medium text-amber-700 mb-0.5">
@@ -1080,6 +1089,33 @@ export default function AddItemsPage() {
                                     Selected: <span className="font-semibold">{manualDestination}</span>
                                 </p>
                             )}
+                        </div>
+                    </div>
+                )}
+
+                {/* Non-returnable route selector */}
+                {form.returnStatus === 'non_returnable' && (
+                    <div className="mt-2 p-2.5 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="text-[10px] font-semibold text-red-800 mb-1.5">Non-Returnable Route</p>
+                        <div className="grid grid-cols-2 gap-2">
+                            <label className={`flex items-center gap-2 px-2 py-1.5 border rounded cursor-pointer ${nonReturnableRoute === 'wine_cellar' ? 'border-purple-400 bg-purple-50' : 'border-gray-300 bg-white'}`}>
+                                <input
+                                    type="radio"
+                                    checked={nonReturnableRoute === 'wine_cellar'}
+                                    onChange={() => setNonReturnableRoute('wine_cellar')}
+                                />
+                                <Archive className="w-3.5 h-3.5 text-purple-600" />
+                                <span className="text-xs font-medium text-purple-800">Wine Cellar</span>
+                            </label>
+                            <label className={`flex items-center gap-2 px-2 py-1.5 border rounded cursor-pointer ${nonReturnableRoute === 'destruction' ? 'border-red-400 bg-red-50' : 'border-gray-300 bg-white'}`}>
+                                <input
+                                    type="radio"
+                                    checked={nonReturnableRoute === 'destruction'}
+                                    onChange={() => setNonReturnableRoute('destruction')}
+                                />
+                                <Ban className="w-3.5 h-3.5 text-red-600" />
+                                <span className="text-xs font-medium text-red-800">Destruction</span>
+                            </label>
                         </div>
                     </div>
                 )}
@@ -1115,45 +1151,72 @@ export default function AddItemsPage() {
                             </div>
                         </>
                     ) : (() => {
-                        // No policy found + user manually selected Non-Returnable → offer Wine Cellar
+                        // No policy found + user manually selected Non-Returnable → route choice
                         const noPolicy = !policyAutoCheck || policyAutoCheck.status === 'tbd';
                         const isManualNonReturnable = noPolicy && form.returnStatus === 'non_returnable';
                         return isManualNonReturnable ? (
                             <>
-                                <div className="mb-2 bg-purple-50 border border-purple-200 rounded px-3 py-2 space-y-2">
-                                    <div className="flex items-start gap-1.5">
-                                        <Archive className="w-3.5 h-3.5 text-purple-600 mt-0.5 flex-shrink-0" />
+                                {nonReturnableRoute === 'wine_cellar' && (
+                                    <div className="mb-2 bg-purple-50 border border-purple-200 rounded px-3 py-2 space-y-2">
+                                        <div className="flex items-start gap-1.5">
+                                            <Archive className="w-3.5 h-3.5 text-purple-600 mt-0.5 flex-shrink-0" />
+                                            <div>
+                                                <p className="text-xs font-semibold text-purple-800">Wine Cellar route selected</p>
+                                                <p className="text-[10px] text-purple-700 mt-0.5">
+                                                    Enter expected returnable date, then move item to Wine Cellar.
+                                                </p>
+                                            </div>
+                                        </div>
                                         <div>
-                                            <p className="text-xs font-semibold text-purple-800">No return policy — move to Wine Cellar</p>
-                                            <p className="text-[10px] text-purple-700 mt-0.5">
-                                                Enter when this product will be eligible for return, then click Move to Wine Cellar.
-                                            </p>
+                                            <label className="block text-[10px] font-medium text-purple-700 mb-0.5">
+                                                Expected Returnable Date <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="date"
+                                                value={wineCellarDate}
+                                                onChange={e => setWineCellarDate(e.target.value)}
+                                                className={`w-44 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-purple-400 ${
+                                                    !wineCellarDate ? 'border-red-300 bg-red-50' : 'border-purple-300 bg-white'
+                                                }`}
+                                            />
                                         </div>
                                     </div>
-                                    <div>
-                                        <label className="block text-[10px] font-medium text-purple-700 mb-0.5">
-                                            Expected Returnable Date <span className="text-red-500">*</span>
-                                        </label>
-                                        <input
-                                            type="date"
-                                            value={wineCellarDate}
-                                            onChange={e => setWineCellarDate(e.target.value)}
-                                            className={`w-44 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-purple-400 ${
-                                                !wineCellarDate ? 'border-red-300 bg-red-50' : 'border-purple-300 bg-white'
-                                            }`}
-                                        />
+                                )}
+                                {nonReturnableRoute === 'destruction' && (
+                                    <div className="mb-2 bg-red-50 border border-red-200 rounded px-3 py-2">
+                                        <div className="flex items-start gap-1.5">
+                                            <Ban className="w-3.5 h-3.5 text-red-600 mt-0.5 flex-shrink-0" />
+                                            <div>
+                                                <p className="text-xs font-semibold text-red-800">Destruction route selected</p>
+                                                <p className="text-[10px] text-red-700 mt-0.5">
+                                                    Item will be saved as non-returnable and routed to destruction workflow.
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                                 <div className="flex flex-wrap gap-1.5">
-                                    <button
-                                        onClick={handleMoveToWineCellarManual}
-                                        disabled={isItemActionLoading || !wineCellarDate}
-                                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 transition-colors"
-                                    >
-                                        {isItemActionLoading
-                                            ? <><Loader2 className="w-3 h-3 animate-spin" />Moving...</>
-                                            : <><Archive className="w-3 h-3" />Move to Wine Cellar</>}
-                                    </button>
+                                    {nonReturnableRoute === 'wine_cellar' ? (
+                                        <button
+                                            onClick={handleMoveToWineCellarManual}
+                                            disabled={isItemActionLoading || !wineCellarDate}
+                                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 transition-colors"
+                                        >
+                                            {isItemActionLoading
+                                                ? <><Loader2 className="w-3 h-3 animate-spin" />Moving...</>
+                                                : <><Archive className="w-3 h-3" />Move to Wine Cellar</>}
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={() => handleSave()}
+                                            disabled={isItemActionLoading || isPreChecking || !canEdit}
+                                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
+                                        >
+                                            {isItemActionLoading || isPreChecking
+                                                ? <><Loader2 className="w-3 h-3 animate-spin" />Saving...</>
+                                                : <><Ban className="w-3 h-3" />Save to Destruction</>}
+                                        </button>
+                                    )}
                                     <button onClick={handleClearForm} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
                                         <X className="w-3 h-3" /> Clear
                                     </button>

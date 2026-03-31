@@ -9,9 +9,10 @@ import * as destructionService from '../services/destructionService';
 export const listHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const { pharmacy_id, status, search, page, limit } = req.query as Record<string, string>;
+    const scopedPharmacyId = req.pharmacyId || pharmacy_id;
 
     const result = await destructionService.listDestructionRecords({
-      pharmacyId: pharmacy_id,
+      pharmacyId: scopedPharmacyId,
       status,
       search,
       page: page ? Number(page) : undefined,
@@ -36,8 +37,9 @@ export const listHandler = catchAsync(
 export const pendingHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const { pharmacy_id } = req.query as Record<string, string>;
+    const scopedPharmacyId = req.pharmacyId || pharmacy_id;
 
-    const records = await destructionService.getPendingDestructionItems(pharmacy_id);
+    const records = await destructionService.getPendingDestructionItems(scopedPharmacyId);
 
     res.status(200).json({
       status: 'success',
@@ -53,8 +55,9 @@ export const pendingHandler = catchAsync(
 export const statsHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const { pharmacy_id } = req.query as Record<string, string>;
+    const scopedPharmacyId = req.pharmacyId || pharmacy_id;
 
-    const stats = await destructionService.getDestructionStats(pharmacy_id);
+    const stats = await destructionService.getDestructionStats(scopedPharmacyId);
 
     res.status(200).json({
       status: 'success',
@@ -69,6 +72,9 @@ export const statsHandler = catchAsync(
 export const getHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const record = await destructionService.getDestructionRecord(req.params.id);
+    if (req.pharmacyId && record.pharmacyId !== req.pharmacyId) {
+      throw new AppError('You do not have access to this destruction record', 403);
+    }
     res.status(200).json({ status: 'success', data: record });
   }
 );
@@ -79,13 +85,14 @@ export const getHandler = catchAsync(
 export const createHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const body = req.body;
+    const scopedPharmacyId = req.pharmacyId || body.pharmacyId || body.pharmacy_id;
 
-    if (!body.pharmacyId) {
+    if (!scopedPharmacyId) {
       throw new AppError('pharmacyId is required', 400);
     }
 
     const record = await destructionService.createDestructionRecord({
-      pharmacyId: body.pharmacyId,
+      pharmacyId: scopedPharmacyId,
       transactionItemId: body.transactionItemId,
       ndc: body.ndc,
       productName: body.productName,
@@ -97,7 +104,7 @@ export const createHandler = catchAsync(
       destructionCompany: body.destructionCompany,
       scheduledDate: body.scheduledDate,
       notes: body.notes,
-      createdBy: (req as any).adminId || (req as any).userId,
+      createdBy: (req as any).adminId || req.pharmacyId || (req as any).userId,
     });
 
     res.status(201).json({ status: 'success', data: record });
@@ -109,6 +116,13 @@ export const createHandler = catchAsync(
 // ============================================================
 export const updateHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
+    if (req.pharmacyId) {
+      const existing = await destructionService.getDestructionRecord(req.params.id);
+      if (existing.pharmacyId !== req.pharmacyId) {
+        throw new AppError('You do not have access to this destruction record', 403);
+      }
+    }
+
     const record = await destructionService.updateDestructionRecord(
       req.params.id,
       {
