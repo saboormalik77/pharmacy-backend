@@ -40,6 +40,22 @@ function getStatusBadge(status: string): { label: string; variant: 'success' | '
     }
 }
 
+function returnTransactionStatusBadgeVariant(status: ReturnTransaction['status']): 'success' | 'info' | 'warning' | 'default' {
+    switch (status) {
+        case 'received':
+            return 'success';
+        case 'completed':
+        case 'finalized':
+            return 'info';
+        case 'in_progress':
+            return 'warning';
+        case 'paused':
+        case 'closed_out':
+        default:
+            return 'default';
+    }
+}
+
 // ── Stepper step definitions ──────────────────────────────────
 
 const WORKFLOW_STEPS = [
@@ -1117,7 +1133,7 @@ export default function BatchDetailPage() {
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-1.5 mb-0.5">
                                                     <span className="text-xs font-medium text-gray-900">{ret.licensePlate}</span>
-                                                    <Badge variant={ret.status === 'received' ? 'success' : ret.status === 'verified' ? 'info' : 'default'}>
+                                                    <Badge variant={returnTransactionStatusBadgeVariant(ret.status)}>
                                                         <span className="text-[10px]">{ret.status}</span>
                                                     </Badge>
                                                 </div>

@@ -216,6 +216,5 @@ const paymentTrackingSlice = createSlice({
     },
 });
 
-export { fetchPaidMemos };
 export const { clearError } = paymentTrackingSlice.actions;
 export default paymentTrackingSlice.reducer;

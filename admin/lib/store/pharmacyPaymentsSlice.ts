@@ -76,6 +76,8 @@ export interface BatchPharmacy {
     name: string;
     /** True when a non-failed pharmacy_payments row exists for this batch (already recorded). */
     payoutRecorded: boolean;
+    /** True when all debit memos for this pharmacy in the batch are paid or partial. */
+    debitMemosPaidForPayout: boolean;
 }
 
 export interface PharmacyPaymentsState {

@@ -537,8 +537,8 @@ export default function UnpaidMemosPage() {
                                         {askVsReceived.map((row: AskVsReceivedRow, i: number) => (
                                             <tr key={i} className="hover:bg-gray-50">
                                                 <td className="px-3 py-1.5 text-xs font-medium text-gray-900">{analyticsGroupBy === 'manufacturer' ? (row.labelerName || row.labelerId || '—') : (row.period || '—')}</td>
-                                                <td className="px-3 py-1.5 text-xs text-center">{row.memoCount}</td>
-                                                <td className="px-3 py-1.5 text-xs text-right">{fmt(row.totalAskValue)}</td>
+                                                <td className="px-3 py-1.5 text-xs text-center">{row.memoCount ?? '—'}</td>
+                                                <td className="px-3 py-1.5 text-xs text-right">{fmt(row.totalAskValue ?? row.totalAsk ?? 0)}</td>
                                                 <td className="px-3 py-1.5 text-xs text-right text-green-600 font-medium">{fmt(row.totalReceived)}</td>
                                                 <td className="px-3 py-1.5 text-xs text-right text-red-600">{fmt(row.difference)}</td>
                                                 <td className="px-3 py-1.5 text-xs text-center">

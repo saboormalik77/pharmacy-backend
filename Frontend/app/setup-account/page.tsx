@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Loader2, CheckCircle, AlertCircle, Eye, EyeOff, Building2, Mail, Phone, MapPin, Shield } from 'lucide-react';
 
@@ -22,7 +22,7 @@ interface PharmacyInviteData {
 
 type PageState = 'loading' | 'form' | 'success' | 'error';
 
-export default function SetupAccountPage() {
+function SetupAccountContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token');
@@ -295,5 +295,24 @@ export default function SetupAccountPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function SetupAccountFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+        <p className="text-gray-600 text-lg">Loading...</p>
+      </div>
+    </div>
+  );
+}
+
+export default function SetupAccountPage() {
+  return (
+    <Suspense fallback={<SetupAccountFallback />}>
+      <SetupAccountContent />
+    </Suspense>
   );
 }

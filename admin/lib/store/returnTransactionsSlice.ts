@@ -697,9 +697,10 @@ const returnTransactionsSlice = createSlice({
             // updateFinalizeSteps
             .addCase(updateFinalizeSteps.fulfilled, (state, action) => {
                 if (action.payload) {
-                    state.currentReturn = action.payload;
-                    const idx = state.transactions.findIndex(t => t.id === action.payload.id);
-                    if (idx >= 0) state.transactions[idx] = action.payload;
+                    const tx = action.payload;
+                    const idx = state.transactions.findIndex(t => t.id === tx.id);
+                    if (idx >= 0) state.transactions[idx] = tx;
+                    if (state.currentTransaction?.id === tx.id) state.currentTransaction = tx;
                 }
             })
 

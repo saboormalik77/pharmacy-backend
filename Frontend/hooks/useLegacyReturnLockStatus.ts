@@ -17,6 +17,7 @@ interface UseLegacyReturnLockStatusResult {
   canEdit: boolean;
   isLocked: boolean;
   lockReason: string | null;
+  checkActionAllowed: (actionName?: string) => boolean;
 }
 
 export const useLegacyReturnLockStatus = (returnId: string | null): UseLegacyReturnLockStatusResult => {

@@ -1234,17 +1234,27 @@ export interface UnpaidSummary {
     totalOutstanding: number;
 }
 
+/** Ask vs received row — payment tracking + reporting analytics share this shape (fields vary by endpoint). */
 export interface AskVsReceivedRow {
-    labelerId: string | null;
-    labelerName: string;
-    memoCount: number;
+    labelerId?: string | null;
+    labelerName?: string;
+    ndc?: string;
+    productName?: string;
+    destination?: string;
+    memoCount?: number;
     totalItems?: number;
-    totalAskValue: number;
+    totalQty?: number;
+    /** Payment tracking / unpaid hub */
+    totalAskValue?: number;
+    /** Reporting analytics API (`/analytics/ask-vs-received` style) */
+    totalAsk?: number;
     totalReceived: number;
     difference: number;
     payPercent: number;
     paidCount?: number;
     unpaidCount?: number;
+    paidMemos?: number;
+    unpaidMemos?: number;
     period?: string;
 }
 
@@ -1308,24 +1318,6 @@ export interface ReturnsSummaryData {
     overall: ReturnsSummaryOverall;
     byStatus: ReturnsByStatus[];
     trend: ReturnsTrendItem[];
-}
-
-// Ask vs Received
-export interface AskVsReceivedRow {
-    labelerId?: string;
-    labelerName?: string;
-    ndc?: string;
-    productName?: string;
-    destination?: string;
-    memoCount?: number;
-    totalItems?: number;
-    totalQty?: number;
-    totalAsk: number;
-    totalReceived: number;
-    difference: number;
-    payPercent: number;
-    paidMemos?: number;
-    unpaidMemos?: number;
 }
 
 export interface AskVsReceivedTotals {

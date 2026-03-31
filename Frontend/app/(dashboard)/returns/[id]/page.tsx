@@ -6,7 +6,7 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { ArrowLeft, Package, Truck, DollarSign, Calendar, FileText, CheckCircle2, Clock, AlertCircle, XCircle, Eye, Warehouse, Send } from 'lucide-react';
+import { ArrowLeft, Package, Truck, DollarSign, Calendar, FileText, CheckCircle2, Clock, AlertCircle, AlertTriangle, XCircle, Eye, Warehouse, Send } from 'lucide-react';
 import { mockReturns } from '@/data/mockReturns';
 import { mockShipments } from '@/data/mockShipments';
 import { formatCurrency, formatDate, formatNDC } from '@/lib/utils/format';
