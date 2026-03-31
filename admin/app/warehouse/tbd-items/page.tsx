@@ -110,6 +110,14 @@ export default function TbdItemsPage() {
     // Resolve handler
     const handleResolve = async () => {
         if (!resolveModal) return;
+        if (resolveForm.new_status === 'non_returnable' && !resolveForm.reason) {
+            showToast('Please select a non-returnable reason', 'warning');
+            return;
+        }
+        if (resolveForm.new_status === 'non_returnable' && !resolveForm.destination) {
+            showToast('Please select a destination for non-returnable item', 'warning');
+            return;
+        }
         setIsResolving(true);
 
         const result = await dispatch(resolveTransactionItem({
@@ -310,6 +318,7 @@ export default function TbdItemsPage() {
                                     <option value="inmar">Inmar</option>
                                     <option value="qualanex">Qualanex</option>
                                     <option value="pharmalink">PharmaLink</option>
+                                    <option value="destruction">Destruction</option>
                                     <option value="other">Other</option>
                                 </select>
                             </div>
@@ -318,7 +327,13 @@ export default function TbdItemsPage() {
                             {resolveForm.new_status === 'non_returnable' && (
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Reason</label>
-                                    <input type="text" value={resolveForm.reason} onChange={e => setResolveForm({ ...resolveForm, reason: e.target.value })} placeholder="e.g. expired beyond window, no policy" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    <select value={resolveForm.reason} onChange={e => setResolveForm({ ...resolveForm, reason: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                        <option value="">— Select Reason —</option>
+                                        <option value="date">Date (expired/outside return window)</option>
+                                        <option value="policy">Policy (manufacturer restriction)</option>
+                                        <option value="no_data">No Data (insufficient information)</option>
+                                        <option value="manual">Manual (staff decision)</option>
+                                    </select>
                                 </div>
                             )}
 

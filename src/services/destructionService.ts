@@ -72,6 +72,24 @@ export interface DestructionListFilters {
   limit?: number;
 }
 
+export async function createDestructionRecordForTransactionItem(
+  transactionItemId: string,
+  createdBy?: string,
+  notes?: string
+): Promise<DestructionRecord> {
+  const sb = ensureAdmin();
+  const { data, error } = await sb.rpc('create_destruction_record_for_transaction_item', {
+    p_transaction_item_id: transactionItemId,
+    p_created_by: createdBy || null,
+    p_notes: notes || null,
+  });
+
+  if (error) throw new AppError(`Failed to create destruction record: ${error.message}`, 400);
+  if (!data) throw new AppError('Failed to create destruction record: no data returned', 500);
+  if (data.error) throw new AppError(data.message || 'Failed to create destruction record', data.code || 400);
+  return toCamelCase(data.data);
+}
+
 // ============================================================
 // Helpers
 // ============================================================

@@ -8,6 +8,7 @@ import { checkReturnability, ReturnabilityResult } from '../services/policyEngin
 import { getPricingForSingleNDC } from '../services/pricingService';
 import { resolveNDCPrice } from '../services/ndcPricingBookService';
 import * as wcService from '../services/wineCellarService';
+import * as destructionService from '../services/destructionService';
 import { getReturnTransactionById } from '../services/returnTransactionService';
 
 const parseBooleanInput = (value: unknown): boolean => value === true || value === 'true';
@@ -357,6 +358,17 @@ export const resolveItemHandler = catchAsync(
       destination,
       memo
     );
+
+    const normalizedDestination = String(result.destination || destination || '')
+      .trim()
+      .toLowerCase();
+    if (new_status === 'non_returnable' && normalizedDestination === 'destruction') {
+      await destructionService.createDestructionRecordForTransactionItem(
+        itemId,
+        (req as any).adminId || (req as any).processorId || (req as any).userId,
+        memo
+      );
+    }
 
     res.status(200).json({
       status: 'success',

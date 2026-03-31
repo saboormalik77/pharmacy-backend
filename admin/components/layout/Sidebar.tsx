@@ -19,6 +19,7 @@ import {
     AlertTriangle,
     CircleDollarSign,
     DollarSign,
+    Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppSelector } from '@/lib/store/hooks';
@@ -30,6 +31,7 @@ const warehouseSubRoutes = [
     '/warehouse/debit-memos',
     '/warehouse/ra-tracking',
     '/warehouse/returns',
+    '/warehouse/destruction',
 ];
 
 // Payout sub-routes that activate the Payout Management sidebar link
@@ -55,6 +57,7 @@ const adminSidebarLinks = [
     { href: '/policies', icon: Shield, label: 'Labeler Info' },
     { href: '/ndc-pricing', icon: DollarSign, label: 'NDC Pricing' },
     { href: '/warehouse/tbd-items', icon: AlertTriangle, label: 'TBD Items' },
+    { href: '/warehouse/destruction', icon: Trash2, label: 'Destruction' },
     { href: '/warehouse', icon: Warehouse, label: 'Warehouse', matchPrefix: '/warehouse' },
 ];
 
@@ -65,6 +68,7 @@ const processorSidebarLinks = [
     { href: '/warehouse/returns/create', icon: Scan, label: 'Create Return' },
     { href: '/ndc-pricing', icon: DollarSign, label: 'NDC Pricing' },
     { href: '/warehouse/tbd-items', icon: AlertTriangle, label: 'TBD Items' },
+    { href: '/warehouse/destruction', icon: Trash2, label: 'Destruction' },
     // { href: '/warehouse/wine-cellar', icon: Archive, label: 'Wine Cellar' },
     // { href: '/settings', icon: Settings, label: 'Settings' },
 ];
