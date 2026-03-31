@@ -191,7 +191,8 @@ export default function ReturnDetailPage() {
     // Edit forms
     const [editForm, setEditForm] = useState({ fedexTracking: '', fedexPickupConfirmation: '', notes: '' });
     const [editItemForm, setEditItemForm] = useState({
-        quantity: 0,
+        fullPackageSize: '',
+        fullPackageQtyReturned: '',
         standardPrice: 0,
         returnStatus: '',
         destination: '',
@@ -272,7 +273,8 @@ export default function ReturnDetailPage() {
     useEffect(() => {
         if (editItemModal) {
             setEditItemForm({
-                quantity: editItemModal.quantity,
+                fullPackageSize: editItemModal.fullPackageSize ? String(editItemModal.fullPackageSize) : '',
+                fullPackageQtyReturned: editItemModal.quantity ? String(editItemModal.quantity) : '',
                 standardPrice: editItemModal.standardPrice || 0,
                 returnStatus: editItemModal.returnStatus,
                 destination: editItemModal.destination || '',
@@ -571,9 +573,19 @@ export default function ReturnDetailPage() {
         if (!editItemModal) return;
         setIsActionLoading(true);
         try {
+            const payload: Record<string, any> = {
+                returnStatus: editItemForm.returnStatus,
+            };
+            
+            if (editItemForm.fullPackageSize) payload.fullPackageSize = parseInt(editItemForm.fullPackageSize);
+            if (editItemForm.fullPackageQtyReturned) payload.quantity = parseInt(editItemForm.fullPackageQtyReturned);
+            if (editItemForm.standardPrice) payload.standardPrice = editItemForm.standardPrice;
+            if (editItemForm.destination) payload.destination = editItemForm.destination;
+            if (editItemForm.memo) payload.memo = editItemForm.memo;
+
             const res = await apiClient.patch(
                 `/return-transactions/${id}/items/${editItemModal.id}`,
-                editItemForm,
+                payload,
                 true,
             );
             if (res.status === 'success') {
@@ -952,12 +964,13 @@ export default function ReturnDetailPage() {
                                         <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">NDC</th>
                                         <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Name</th>
                                         <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Manufacturer</th>
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Qty</th>
+                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Pkg Size</th>
+                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Qty Returned</th>
+                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Serial#</th>
                                         <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Price</th>
                                         <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Est. Value</th>
                                         <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Est. Store Value</th>
                                         <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Expires</th>
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Lot</th>
                                         <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
                                         <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Destination</th>
                                         <th className="text-right px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
@@ -980,9 +993,15 @@ export default function ReturnDetailPage() {
                                                     <span className="text-xs text-gray-700">{item.manufacturer || '—'}</span>
                                                 </td>
                                                 <td className="px-3 py-2">
+                                                    <span className="text-xs text-gray-900">{item.fullPackageSize || '—'}</span>
+                                                </td>
+                                                <td className="px-3 py-2">
                                                     <span className="text-xs text-gray-900">
                                                         {item.quantity}{item.isPartial && <span className="text-orange-500 font-semibold ml-0.5">P</span>}
                                                     </span>
+                                                </td>
+                                                <td className="px-3 py-2">
+                                                    <span className="text-xs font-mono text-gray-700">{item.serialNumber || '—'}</span>
                                                 </td>
                                                 <td className="px-3 py-2">
                                                     <span className="text-xs text-gray-900">{item.standardPrice ? formatCurrency(item.standardPrice) : '—'}</span>
@@ -995,9 +1014,6 @@ export default function ReturnDetailPage() {
                                                 </td>
                                                 <td className="px-3 py-2">
                                                     <span className="text-xs text-gray-700">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</span>
-                                                </td>
-                                                <td className="px-3 py-2">
-                                                    <span className="text-xs font-mono text-gray-700">{item.lotNumber || '—'}</span>
                                                 </td>
                                                 <td className="px-3 py-2">
                                                     <div className="flex items-center gap-1">
@@ -1164,15 +1180,29 @@ export default function ReturnDetailPage() {
                                 <button onClick={() => setEditItemModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
                             </div>
                             <div className="px-4 py-3 space-y-2.5">
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-0.5">Quantity</label>
-                                    <input
-                                        type="number"
-                                        value={editItemForm.quantity}
-                                        onChange={e => setEditItemForm({ ...editItemForm, quantity: Number(e.target.value) })}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
-                                        min="0"
-                                    />
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-0.5">Pkg Size</label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={editItemForm.fullPackageSize}
+                                            onChange={e => setEditItemForm({ ...editItemForm, fullPackageSize: e.target.value })}
+                                            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                            placeholder="e.g. 60"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-0.5">Qty Returned</label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={editItemForm.fullPackageQtyReturned}
+                                            onChange={e => setEditItemForm({ ...editItemForm, fullPackageQtyReturned: e.target.value })}
+                                            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                            placeholder="e.g. 45"
+                                        />
+                                    </div>
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-0.5">Price</label>
