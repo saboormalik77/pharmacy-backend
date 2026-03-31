@@ -186,6 +186,24 @@ export const addItemHandler = catchAsync(
       rawScanData: body.rawScanData,
     });
 
+    // Create destruction record if item is marked for destruction
+    const normalizedDestination = String(result.item.destination || '').trim().toLowerCase();
+    console.log('🔍 [Add Item] Status:', result.item.returnStatus, 'Destination:', normalizedDestination, 'Item ID:', result.item.id);
+    if (result.item.returnStatus === 'non_returnable' && normalizedDestination === 'destruction') {
+      console.log('💥 [Add Item] Creating destruction record for item:', result.item.id);
+      try {
+        await destructionService.createDestructionRecordForTransactionItem(
+          result.item.id,
+          (req as any).adminId || (req as any).processorId || (req as any).pharmacyId,
+          body.memo
+        );
+        console.log('✅ [Add Item] Destruction record created successfully');
+      } catch (err: any) {
+        console.error('❌ [Add Item] Failed to create destruction record:', err.message);
+        // Don't fail the item creation if destruction record fails
+      }
+    }
+
     const response: any = {
       status: 'success',
       data: result.item,
@@ -415,12 +433,15 @@ export const resolveItemHandler = catchAsync(
     const normalizedDestination = String(result.destination || destinationForResolve || '')
       .trim()
       .toLowerCase();
+    console.log('🔍 [Add Item] Status:', new_status, 'Destination:', normalizedDestination, 'Item ID:', itemId);
     if (new_status === 'non_returnable' && normalizedDestination === 'destruction') {
+      console.log('💥 [Add Item] Creating destruction record for item:', itemId);
       await destructionService.createDestructionRecordForTransactionItem(
         itemId,
         (req as any).adminId || (req as any).processorId || (req as any).userId,
         memo
       );
+      console.log('✅ [Add Item] Destruction record created successfully');
     }
 
     res.status(200).json({

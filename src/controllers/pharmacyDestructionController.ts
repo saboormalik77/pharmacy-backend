@@ -67,3 +67,62 @@ export const updateHandler = catchAsync(
   }
 );
 
+// GET /api/destruction/pending
+export const pendingHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const pharmacyId = req.pharmacyId;
+    if (!pharmacyId) throw new AppError('Pharmacy authentication required', 401);
+    
+    const records = await destructionService.getPendingDestructionItems(pharmacyId);
+    
+    res.status(200).json({
+      status: 'success',
+      data: records,
+      meta: { total: records.length },
+    });
+  }
+);
+
+// GET /api/destruction/:id
+export const getHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const pharmacyId = req.pharmacyId;
+    if (!pharmacyId) throw new AppError('Pharmacy authentication required', 401);
+    
+    const record = await destructionService.getDestructionRecord(req.params.id);
+    if (record.pharmacyId !== pharmacyId) {
+      throw new AppError('You do not have access to this destruction record', 403);
+    }
+    
+    res.status(200).json({ status: 'success', data: record });
+  }
+);
+
+// POST /api/destruction
+export const createHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const pharmacyId = req.pharmacyId;
+    if (!pharmacyId) throw new AppError('Pharmacy authentication required', 401);
+    
+    const body = req.body;
+    
+    const record = await destructionService.createDestructionRecord({
+      pharmacyId,
+      transactionItemId: body.transactionItemId,
+      ndc: body.ndc,
+      productName: body.productName,
+      manufacturer: body.manufacturer,
+      lotNumber: body.lotNumber,
+      quantity: body.quantity != null ? Number(body.quantity) : undefined,
+      weightLbs: body.weightLbs != null ? Number(body.weightLbs) : undefined,
+      destructionReason: body.destructionReason || 'non_returnable',
+      destructionCompany: body.destructionCompany,
+      scheduledDate: body.scheduledDate,
+      notes: body.notes,
+      createdBy: pharmacyId,
+    });
+    
+    res.status(201).json({ status: 'success', data: record });
+  }
+);
+

@@ -111,13 +111,20 @@ export default function DestructionPage() {
       if (statusFilter) q.status = statusFilter;
       if (debouncedSearch) q.search = debouncedSearch;
 
+      console.log('🔍 Loading destruction data with filters:', q);
+      
       const [listRes, statsRes] = await Promise.all([
         apiClient.get<any>('/destruction', q, true),
         apiClient.get<any>('/destruction/stats', {}, true),
       ]);
+      
+      console.log('📋 Destruction list response:', listRes);
+      console.log('📊 Destruction stats response:', statsRes);
+      
       setRows(listRes?.data || []);
       setStats(statsRes?.data || null);
     } catch (e: any) {
+      console.error('❌ Failed to load destruction data:', e);
       toast(e?.message || 'Failed to load destruction records', 'error');
     } finally {
       setLoading(false);
@@ -143,6 +150,20 @@ export default function DestructionPage() {
 
   const save = async () => {
     if (!selected) return;
+    
+    // Validate required fields based on status
+    const missingFields: string[] = [];
+    
+    if (form.status === 'scheduled') {
+      if (!form.destructionCompany.trim()) missingFields.push('Company');
+      if (!form.scheduledDate) missingFields.push('Scheduled Date');
+    }
+    
+    if (missingFields.length > 0) {
+      toast(`Please fill required fields: ${missingFields.join(', ')}`, 'error');
+      return;
+    }
+    
     setSaving(true);
     try {
       await apiClient.patch(
@@ -169,6 +190,20 @@ export default function DestructionPage() {
   };
 
   const quickMove = async (r: DestructionRecord, next: Status) => {
+    // Validate required fields for status transitions
+    const missingFields: string[] = [];
+    
+    if (next === 'scheduled') {
+      if (!r.destructionCompany) missingFields.push('Company');
+      if (!r.scheduledDate) missingFields.push('Scheduled Date');
+    }
+    
+    if (missingFields.length > 0) {
+      toast(`Please fill required fields first: ${missingFields.join(', ')}`, 'error');
+      openEdit(r); // Open edit modal to fill missing fields
+      return;
+    }
+    
     try {
       await apiClient.patch(`/destruction/${r.id}`, { status: next }, true);
       toast(`Updated to ${next.replace('_', ' ')}`, 'success');
@@ -218,13 +253,13 @@ export default function DestructionPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by NDC, product, manufacturer"
-              className="w-full pl-7 pr-2 py-1.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-teal-500"
+              className="w-full pl-7 pr-2 py-1.5 border border-gray-300 rounded text-xs"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-2 py-1.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-teal-500"
+            className="px-2 py-1.5 border border-gray-300 rounded text-xs"
           >
             <option value="">All statuses</option>
             {STATUS_OPTIONS.map((s) => (
@@ -314,7 +349,7 @@ export default function DestructionPage() {
                 <label className="text-xs text-gray-700 col-span-1">
                   Status
                   <select
-                    className="mt-1 w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-teal-500"
+                    className="mt-1 w-full border border-gray-300 rounded px-2 py-1.5"
                     value={form.status}
                     onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as Status }))}
                   >
@@ -326,18 +361,27 @@ export default function DestructionPage() {
                   </select>
                 </label>
                 <label className="text-xs text-gray-700 col-span-1">
-                  Company
+                  Company {form.status === 'scheduled' && <span className="text-red-500">*</span>}
                   <input
-                    className="mt-1 w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-teal-500"
+                    className={`mt-1 w-full border rounded px-2 py-1.5 ${
+                      form.status === 'scheduled' && !form.destructionCompany.trim()
+                        ? 'border-red-300 bg-red-50'
+                        : 'border-gray-300'
+                    }`}
                     value={form.destructionCompany}
                     onChange={(e) => setForm((f) => ({ ...f, destructionCompany: e.target.value }))}
+                    placeholder="Enter destruction company"
                   />
                 </label>
                 <label className="text-xs text-gray-700 col-span-1">
-                  Scheduled date
+                  Scheduled date {form.status === 'scheduled' && <span className="text-red-500">*</span>}
                   <input
                     type="date"
-                    className="mt-1 w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-teal-500"
+                    className={`mt-1 w-full border rounded px-2 py-1.5 ${
+                      form.status === 'scheduled' && !form.scheduledDate
+                        ? 'border-red-300 bg-red-50'
+                        : 'border-gray-300'
+                    }`}
                     value={form.scheduledDate}
                     onChange={(e) => setForm((f) => ({ ...f, scheduledDate: e.target.value }))}
                   />
@@ -345,7 +389,7 @@ export default function DestructionPage() {
                 <label className="text-xs text-gray-700 col-span-1">
                   Federal form #
                   <input
-                    className="mt-1 w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-teal-500"
+                    className="mt-1 w-full border border-gray-300 rounded px-2 py-1.5"
                     value={form.federalFormNumber}
                     onChange={(e) => setForm((f) => ({ ...f, federalFormNumber: e.target.value }))}
                   />
@@ -353,7 +397,7 @@ export default function DestructionPage() {
                 <label className="text-xs text-gray-700 col-span-1">
                   Form URL
                   <input
-                    className="mt-1 w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-teal-500"
+                    className="mt-1 w-full border border-gray-300 rounded px-2 py-1.5"
                     value={form.formUrl}
                     onChange={(e) => setForm((f) => ({ ...f, formUrl: e.target.value }))}
                   />
@@ -361,7 +405,7 @@ export default function DestructionPage() {
                 <label className="text-xs text-gray-700 col-span-1">
                   Weight (lbs)
                   <input
-                    className="mt-1 w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-teal-500"
+                    className="mt-1 w-full border border-gray-300 rounded px-2 py-1.5"
                     value={form.weightLbs}
                     onChange={(e) => setForm((f) => ({ ...f, weightLbs: e.target.value }))}
                   />
@@ -369,7 +413,7 @@ export default function DestructionPage() {
                 <label className="text-xs text-gray-700 col-span-2">
                   Notes
                   <textarea
-                    className="mt-1 w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-teal-500"
+                    className="mt-1 w-full border border-gray-300 rounded px-2 py-1.5"
                     rows={3}
                     value={form.notes}
                     onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}

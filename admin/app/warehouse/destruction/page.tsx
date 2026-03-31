@@ -97,6 +97,20 @@ export default function DestructionPage() {
 
   const save = async () => {
     if (!selected) return;
+    
+    // Validate required fields based on status
+    const missingFields: string[] = [];
+    
+    if (form.status === 'scheduled') {
+      if (!form.destructionCompany.trim()) missingFields.push('Company');
+      if (!form.scheduledDate) missingFields.push('Scheduled Date');
+    }
+    
+    if (missingFields.length > 0) {
+      toast(`Please fill required fields: ${missingFields.join(', ')}`, 'error');
+      return;
+    }
+    
     setSaving(true);
     try {
       const { apiClient } = await import('@/lib/api/apiClient');
@@ -124,6 +138,20 @@ export default function DestructionPage() {
   };
 
   const quickMove = async (r: DestructionRecord, next: Status) => {
+    // Validate required fields for status transitions
+    const missingFields: string[] = [];
+    
+    if (next === 'scheduled') {
+      if (!r.destructionCompany) missingFields.push('Company');
+      if (!r.scheduledDate) missingFields.push('Scheduled Date');
+    }
+    
+    if (missingFields.length > 0) {
+      toast(`Please fill required fields first: ${missingFields.join(', ')}`, 'error');
+      openEdit(r); // Open edit modal to fill missing fields
+      return;
+    }
+    
     try {
       const { apiClient } = await import('@/lib/api/apiClient');
       await apiClient.patch(`/admin/destruction/${r.id}`, { status: next }, true);
@@ -280,18 +308,27 @@ export default function DestructionPage() {
                 </select>
               </label>
               <label className="text-xs text-gray-700 col-span-1">
-                Company
+                Company {form.status === 'scheduled' && <span className="text-red-500">*</span>}
                 <input
-                  className="mt-1 w-full border border-gray-300 rounded px-2 py-1.5"
+                  className={`mt-1 w-full border rounded px-2 py-1.5 ${
+                    form.status === 'scheduled' && !form.destructionCompany.trim()
+                      ? 'border-red-300 bg-red-50'
+                      : 'border-gray-300'
+                  }`}
                   value={form.destructionCompany}
                   onChange={(e) => setForm((f) => ({ ...f, destructionCompany: e.target.value }))}
+                  placeholder="Enter destruction company"
                 />
               </label>
               <label className="text-xs text-gray-700 col-span-1">
-                Scheduled date
+                Scheduled date {form.status === 'scheduled' && <span className="text-red-500">*</span>}
                 <input
                   type="date"
-                  className="mt-1 w-full border border-gray-300 rounded px-2 py-1.5"
+                  className={`mt-1 w-full border rounded px-2 py-1.5 ${
+                    form.status === 'scheduled' && !form.scheduledDate
+                      ? 'border-red-300 bg-red-50'
+                      : 'border-gray-300'
+                  }`}
                   value={form.scheduledDate}
                   onChange={(e) => setForm((f) => ({ ...f, scheduledDate: e.target.value }))}
                 />
