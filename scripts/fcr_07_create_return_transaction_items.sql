@@ -94,41 +94,42 @@ CREATE POLICY "Allow all access via service role" ON return_transaction_items
 CREATE OR REPLACE FUNCTION _rti_to_json(r return_transaction_items)
 RETURNS jsonb LANGUAGE sql STABLE AS $$
   SELECT jsonb_build_object(
-    'id',                   r.id,
-    'transactionId',        r.transaction_id,
-    'ndc',                  r.ndc,
-    'ndc10',                r.ndc_10,
-    'gtin',                 r.gtin,
-    'proprietaryName',      r.proprietary_name,
-    'genericName',          r.generic_name,
-    'manufacturer',         r.manufacturer,
-    'packageDescription',   r.package_description,
-    'dosageForm',           r.dosage_form,
-    'strength',             r.strength,
-    'route',                r.route,
-    'lotNumber',            r.lot_number,
-    'serialNumber',         r.serial_number,
-    'expirationDate',       r.expiration_date,
-    'standardPrice',        r.standard_price,
-    'quantity',             r.quantity,
-    'fullPackageSize',      r.full_package_size,
-    'isPartial',            r.is_partial,
-    'partialPercentage',    r.partial_percentage,
-    'estimatedValue',       r.estimated_value,
-    'returnStatus',         r.return_status,
-    'nonReturnableReason',  r.non_returnable_reason,
-    'returnReason',         r.return_reason,
-    'destination',          r.destination,
-    'deaSchedule',          r.dea_schedule,
-    'deaForm222Required',   r.dea_form_222_required,
-    'productType',          r.product_type,
-    'coStatus',             r.co_status,
-    'bmpStatus',            r.bmp_status,
-    'memo',                 r.memo,
-    'wineCellarId',         r.wine_cellar_id,
-    'scanSource',           r.scan_source,
-    'createdAt',            r.created_at,
-    'updatedAt',            r.updated_at
+    'id',                   (r).id,
+    'transactionId',        (r).transaction_id,
+    'ndc',                  (r).ndc,
+    'ndc10',                (r).ndc_10,
+    'gtin',                 (r).gtin,
+    'proprietaryName',      (r).proprietary_name,
+    'genericName',          (r).generic_name,
+    'manufacturer',         (r).manufacturer,
+    'packageDescription',   (r).package_description,
+    'dosageForm',           (r).dosage_form,
+    'strength',             (r).strength,
+    'route',                (r).route,
+    'lotNumber',            (r).lot_number,
+    'serialNumber',         (r).serial_number,
+    'expirationDate',       (r).expiration_date,
+    'standardPrice',        (r).standard_price,
+    'quantity',             (r).quantity,
+    'quantityReturned',     (r).quantity_returned,
+    'fullPackageSize',      (r).full_package_size,
+    'isPartial',            (r).is_partial,
+    'partialPercentage',    (r).partial_percentage,
+    'estimatedValue',       (r).estimated_value,
+    'returnStatus',         (r).return_status,
+    'nonReturnableReason',  (r).non_returnable_reason,
+    'returnReason',         (r).return_reason,
+    'destination',          (r).destination,
+    'deaSchedule',          (r).dea_schedule,
+    'deaForm222Required',   (r).dea_form_222_required,
+    'productType',          (r).product_type,
+    'coStatus',             (r).co_status,
+    'bmpStatus',            (r).bmp_status,
+    'memo',                 (r).memo,
+    'wineCellarId',         (r).wine_cellar_id,
+    'scanSource',           (r).scan_source,
+    'createdAt',            (r).created_at,
+    'updatedAt',            (r).updated_at
   );
 $$;
 
@@ -160,7 +161,7 @@ BEGIN
       'message', format('Cannot add items to a return with status "%s"', v_txn.status));
   END IF;
 
-  -- 2. Check for duplicate NDC + lot in same transaction (warn, don't block)
+  -- 2. Check for duplicate NDC + lot + serial in same transaction (block if found)
   v_price := COALESCE((p_data->>'standardPrice')::decimal, 0);
   v_qty   := COALESCE((p_data->>'quantity')::int, 1);
   
@@ -172,13 +173,26 @@ BEGIN
     ELSE v_price * v_qty 
   END;
 
+  -- Check for duplicates based on NDC + lot number + serial number (only among returnable items)
   IF p_data->>'ndc' IS NOT NULL AND p_data->>'lotNumber' IS NOT NULL THEN
     SELECT id INTO v_dup
       FROM return_transaction_items
      WHERE transaction_id = (p_data->>'transactionId')::uuid
        AND ndc = p_data->>'ndc'
        AND lot_number = p_data->>'lotNumber'
+       AND COALESCE(serial_number, '') = COALESCE(p_data->>'serialNumber', '')
+       AND return_status = 'returnable'
      LIMIT 1;
+     
+    -- If duplicate found, return error instead of inserting
+    IF v_dup.id IS NOT NULL THEN
+      RETURN jsonb_build_object(
+        'error', true, 
+        'code', 409, 
+        'message', 'Duplicate item detected: This NDC, lot number, and serial number combination already exists in this return',
+        'duplicateItemId', v_dup.id
+      );
+    END IF;
   END IF;
 
   -- 3. Insert
@@ -247,9 +261,7 @@ BEGIN
 
   RETURN jsonb_build_object(
     'error', false,
-    'data', _rti_to_json(v_new),
-    'duplicate', v_dup.id IS NOT NULL,
-    'duplicateItemId', v_dup.id
+    'data', _rti_to_json(v_new)
   );
 END;
 $$;

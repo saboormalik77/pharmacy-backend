@@ -59,6 +59,7 @@ interface ReturnTransactionItem {
     expirationDate?: string;
     standardPrice?: number;
     quantity: number;
+    quantityReturned: number;
     isPartial?: boolean;
     partialPercentage?: number;
     fullPackageSize?: number;
@@ -128,6 +129,12 @@ export default function ReturnDetailPage() {
 
     const [tx, setTx] = useState<ReturnTransaction | null>(null);
     const [items, setItems] = useState<ReturnTransactionItem[]>([]);
+    const [itemsSummary, setItemsSummary] = useState<{
+        totalItems: number;
+        totalReturnableValue: number;
+        totalNonReturnableValue: number;
+        totalValue: number;
+    } | null>(null);
     const [reverseDistributors, setReverseDistributors] = useState<ReverseDistributor[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isActionLoading, setIsActionLoading] = useState(false);
@@ -230,6 +237,9 @@ export default function ReturnDetailPage() {
             const res = await apiClient.get<any>(`/return-transactions/${id}/items`, queryParams, true);
             if (res.status === 'success') {
                 setItems(res.data.items || []);
+                if (res.data.summary) {
+                    setItemsSummary(res.data.summary);
+                }
             } else {
                 throw new Error(res.message || 'Failed to fetch items');
             }
@@ -878,19 +888,19 @@ export default function ReturnDetailPage() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div className="bg-white rounded-lg shadow px-4 py-3 text-center">
                         <p className="text-[10px] uppercase tracking-wide text-gray-500 mb-1">Items</p>
-                        <p className="text-lg font-bold text-gray-900">{tx.totalItems}</p>
+                        <p className="text-lg font-bold text-gray-900">{itemsSummary?.totalItems ?? tx.totalItems}</p>
                     </div>
                     <div className="bg-white rounded-lg shadow px-4 py-3 text-center">
                         <p className="text-[10px] uppercase tracking-wide text-green-600 mb-1">Returnable</p>
-                        <p className="text-lg font-bold text-green-700">{formatCurrency(tx.totalReturnableValue)}</p>
+                        <p className="text-lg font-bold text-green-700">{formatCurrency(itemsSummary?.totalReturnableValue ?? tx.totalReturnableValue)}</p>
                     </div>
                     <div className="bg-white rounded-lg shadow px-4 py-3 text-center">
                         <p className="text-[10px] uppercase tracking-wide text-red-600 mb-1">Non-Returnable</p>
-                        <p className="text-lg font-bold text-red-700">{formatCurrency(tx.totalNonReturnableValue)}</p>
+                        <p className="text-lg font-bold text-red-700">{formatCurrency(itemsSummary?.totalNonReturnableValue ?? tx.totalNonReturnableValue)}</p>
                     </div>
                     <div className="bg-white rounded-lg shadow px-4 py-3 text-center">
                         <p className="text-[10px] uppercase tracking-wide text-blue-600 mb-1">Total Value</p>
-                        <p className="text-lg font-bold text-blue-700">{formatCurrency(tx.totalReturnableValue + tx.totalNonReturnableValue)}</p>
+                        <p className="text-lg font-bold text-blue-700">{formatCurrency(itemsSummary?.totalValue ?? (tx.totalReturnableValue + tx.totalNonReturnableValue))}</p>
                     </div>
                 </div>
 
@@ -899,7 +909,7 @@ export default function ReturnDetailPage() {
                     <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
                         <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                             <Package className="w-4 h-4 text-gray-500" />
-                            Products ({items.length})
+                            Products ({itemsSummary?.totalItems ?? items.length})
                         </h2>
                         {canDoAction(tx, 'add_items') && (
                             <button

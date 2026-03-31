@@ -454,8 +454,6 @@ export const addTransactionItem = createAsyncThunk(
                 status: string;
                 data: ReturnTransactionItem | null;
                 wineCellarOnly?: boolean;
-                warning?: string;
-                duplicateItemId?: string;
                 policyCheck?: ReturnabilityCheckResult;
                 wineCellarItem?: any;
             }>(
@@ -466,8 +464,6 @@ export const addTransactionItem = createAsyncThunk(
             return {
                 item: response.data,
                 wineCellarOnly: response.wineCellarOnly === true,
-                warning: response.warning,
-                duplicateItemId: response.duplicateItemId,
                 policyCheck: response.policyCheck,
                 wineCellarItem: response.wineCellarItem,
             };
