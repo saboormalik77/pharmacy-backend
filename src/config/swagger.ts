@@ -35,3 +35,10 @@ const options: swaggerJsdoc.Options = {
 
 export const swaggerSpec = swaggerJsdoc(options);
 
+/** OpenAPI spec with server URL set for the request host (Azure / Swagger UI). */
+export function getSwaggerSpecWithBaseUrl(baseUrl: string): ReturnType<typeof swaggerJsdoc> {
+  return {
+    ...swaggerSpec,
+    servers: [{ url: baseUrl, description: 'Current host' }],
+  };
+}

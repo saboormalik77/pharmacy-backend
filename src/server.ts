@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
 import authRoutes from './routes/authRoutes';
@@ -53,7 +53,7 @@ import ndcPricingBookRoutes from './routes/ndcPricingBookRoutes';
 import { globalErrorHandler } from './controllers/errorController';
 import { checkExpiringProductsAndNotify } from './services/notificationCronService';
 import { surfaceReadyWineCellarItems } from './services/wineCellarCronService';
-import { swaggerSpec } from './config/swagger';
+import { getSwaggerSpecWithBaseUrl } from './config/swagger';
 import { initializeFirebase } from './services/firebaseService';
 import cors from 'cors';
 
@@ -69,7 +69,12 @@ initializeFirebase();
 const app = express();
 // Avoid 304 + If-None-Match for JSON APIs; clients otherwise keep showing stale list/detail bodies.
 app.disable('etag');
-const PORT = process.env.PORT || 3000;
+
+// Trust Azure/reverse proxy (X-Forwarded-Proto, etc.)
+app.set('trust proxy', 1);
+
+// Azure: WEBSITES_PORT + PORT; production default 8080 (matches Dockerfile EXPOSE; non-root cannot bind <1024)
+const PORT = process.env.PORT || process.env.WEBSITES_PORT || (process.env.NODE_ENV === 'production' ? 8080 : 3000);
 
 const allowedOrigins = [
   'http://localhost:3000',
@@ -128,8 +133,19 @@ app.use(cors({
   maxAge: 86400, // 24 hours
 }));
 
-// Swagger Documentation
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+// Root: Azure startup/warmup probe hits GET / — must return 2xx on the container port
+app.get('/', (_req, res) => {
+  res.status(200).json({ status: 'ok', service: 'pharmacy-backend' });
+});
+
+// Swagger (dynamic base URL for HTTPS behind Azure)
+app.use('/api-docs', swaggerUi.serve, (req: Request, res: Response, next: NextFunction) => {
+  const protocol = req.get('x-forwarded-proto') || req.protocol;
+  const host = req.get('host') || '';
+  const baseUrl = process.env.API_BASE_URL || `${protocol}://${host}`;
+  const spec = getSwaggerSpecWithBaseUrl(baseUrl);
+  return swaggerUi.setup(spec)(req, res, next);
+});
 
 // Webhook route (must be before JSON middleware to get raw body)
 import { handleWebhook } from './controllers/webhookController';
@@ -228,7 +244,7 @@ export default app;
 
 // Only start server if not running on Vercels
 if (process.env.VERCEL !== '1') {
-  app.listen(PORT, () => {
+  app.listen(Number(PORT), '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
     console.log(`Swagger documentation available at http://localhost:${PORT}/api-docs`);
     
