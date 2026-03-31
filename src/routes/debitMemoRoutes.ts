@@ -19,6 +19,7 @@ import {
 import {
   listUnpaidHandler,
   recordPaymentHandler,
+  updatePaymentHandler,
   sendReminderHandler,
 } from '../controllers/paymentTrackingController';
 
@@ -376,6 +377,42 @@ router.post('/:id/schedule-pickup', authenticateAdmin, scheduleDebitMemoPickupHa
  *         description: Debit memo not found
  */
 router.post('/:id/record-payment', authenticateAdmin, upload.single('creditMemo'), recordPaymentHandler);
+
+/**
+ * @swagger
+ * /api/admin/debit-memos/{id}/update-payment:
+ *   patch:
+ *     summary: Update payment record for a debit memo
+ *     tags: [Payment Tracking]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required: [amountReceived]
+ *             properties:
+ *               amountReceived: { type: number, description: Amount received from manufacturer }
+ *               paymentDate: { type: string, format: date-time, description: Date payment was received }
+ *               reference: { type: string, description: Check/wire reference number }
+ *               notes: { type: string, description: Payment notes }
+ *               creditMemo: { type: string, format: binary, description: New credit memo PDF (optional) }
+ *     responses:
+ *       200:
+ *         description: Payment updated, returns updated debit memo
+ *       400:
+ *         description: Invalid amount
+ *       404:
+ *         description: Debit memo not found
+ */
+router.patch('/:id/update-payment', authenticateAdmin, upload.single('creditMemo'), updatePaymentHandler);
 
 /**
  * @swagger
