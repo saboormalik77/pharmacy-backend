@@ -1,5 +1,6 @@
 'use client';
 
+import { PermissionGate } from '@/components/auth/PermissionGate';
 import { useEffect, useState } from 'react';
 import { DollarSign, TrendingUp, Package, Building2, TrendingDown } from 'lucide-react';
 import { formatCurrency, formatNumber } from '@/lib/utils';
@@ -52,6 +53,7 @@ export default function AnalyticsPage() {
     };
 
     return (
+        <PermissionGate permission="analytics">
         <div className="space-y-6">
             {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
@@ -334,5 +336,6 @@ export default function AnalyticsPage() {
                 </>
             ) : null}
         </div>
+        </PermissionGate>
     );
 }

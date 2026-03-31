@@ -4,12 +4,13 @@ import {
   getDocumentByIdHandler,
   deleteDocumentHandler,
 } from '../controllers/adminDocumentsController';
-import { authenticateAdmin } from '../middleware/adminAuth';
+import { authenticateAdmin, requirePermission } from '../middleware/adminAuth';
 
 const router = Router();
 
 // Apply admin authentication middleware to all routes
 router.use(authenticateAdmin);
+router.use(requirePermission('documents'));
 
 /**
  * @swagger

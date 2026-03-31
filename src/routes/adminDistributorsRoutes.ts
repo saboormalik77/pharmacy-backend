@@ -8,12 +8,13 @@ import {
   deleteDistributorHandler,
   getDistributorProductsHandler,
 } from '../controllers/adminDistributorsController';
-import { authenticateAdmin } from '../middleware/adminAuth';
+import { authenticateAdmin, requirePermission } from '../middleware/adminAuth';
 
 const router = express.Router();
 
 // All routes require admin authentication
 router.use(authenticateAdmin);
+router.use(requirePermission('distributors'));
 
 /**
  * @swagger

@@ -1,5 +1,6 @@
 'use client';
 
+import { PermissionGate } from '@/components/auth/PermissionGate';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -212,6 +213,7 @@ export default function PoliciesPage() {
     };
 
     return (
+        <PermissionGate permission="policies">
         <div className="space-y-3">
             <ToastContainer toasts={toasts} onClose={removeToast} />
 
@@ -675,5 +677,6 @@ export default function PoliciesPage() {
                 </div>
             )}
         </div>
+        </PermissionGate>
     );
 }

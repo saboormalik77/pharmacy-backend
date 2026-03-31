@@ -34,6 +34,7 @@ interface ReturnTransactionItem {
     genericName?: string;
     manufacturer?: string;
     lotNumber?: string;
+    serialNumber?: string;
     expirationDate?: string;
     standardPrice?: number;
     quantity: number;
@@ -537,19 +538,20 @@ export default function AddItemsPage() {
 
         setIsItemActionLoading(true);
         try {
-            const res = await apiClient.post<any>(`/return-transactions/${transactionId}/items`, payload, true);
+            const res = await apiClient.post<any>(`/return-transactions/${transactionId}/items`, payload, true) as any;
 
             if (res.status === 'success' && res.data) {
                 const name = form.proprietaryName || form.ndc || 'Item';
-                const savedItem = res.data.item;
-                const pc = res.data.policyCheck;
-                const wcItem = res.data.wineCellarItem;
-                const wcOnly = res.data.wineCellarOnly === true;
+                const savedItem = res.data;
+                const pc = res.policyCheck;
+                const wcItem = res.wineCellarItem;
+                const wcOnly = res.wineCellarOnly === true;
 
                 if (savedItem) {
                     setItemCount(prev => prev + 1);
                     setRecentlyAddedItems(prev => [savedItem, ...prev]);
                     setActiveTab('list');
+                    await fetchItems();
                 }
 
                 if (wcOnly && wcItem) {
@@ -560,8 +562,8 @@ export default function AddItemsPage() {
                     showToast(`${name} saved! Ready for next scan.`);
                 }
 
-                if (res.data.warning) {
-                    setLastWarning(res.data.warning);
+                if (res.warning) {
+                    setLastWarning(res.warning);
                 } else {
                     setLastWarning('');
                 }
@@ -823,10 +825,13 @@ export default function AddItemsPage() {
                                             <div><span className="text-gray-500">Exp:</span> <span className="font-medium text-gray-800">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</span></div>
                                             <div><span className="text-gray-500">Value:</span> <span className="font-bold text-green-600">${item.estimatedValue?.toFixed(2) || '0.00'}</span></div>
                                             {item.manufacturer && (
-                                                <div className="col-span-2"><span className="text-gray-500">Manufacturer:</span> <span className="font-medium text-gray-800">{item.manufacturer}</span></div>
+                                                <div className="col-span-1"><span className="text-gray-500">Manufacturer:</span> <span className="font-medium text-gray-800">{item.manufacturer}</span></div>
                                             )}
                                             {item.destination && (
-                                                <div className="col-span-2"><span className="text-gray-500">Destination:</span> <span className="font-medium text-gray-800 capitalize">{item.destination}</span></div>
+                                                <div className="col-span-1"><span className="text-gray-500">Destination:</span> <span className="font-medium text-gray-800 capitalize">{item.destination}</span></div>
+                                            )}
+                                            {item.serialNumber && (
+                                                <div className="col-span-1"><span className="text-gray-500">Serial Number:</span> <span className="font-medium text-gray-800 capitalize">{item.serialNumber}</span></div>
                                             )}
                                         </div>
                                     </div>
@@ -852,7 +857,7 @@ export default function AddItemsPage() {
                         {/* Mode tabs */}
                         <div className="flex gap-1.5 mb-3">
                             {([
-                                { key: 'camera', icon: Camera,   label: 'Camera' },
+                                { key: 'camera', icon: Camera,   label: 'Camera QR' },
                                 { key: 'usb',    icon: ScanLine,  label: 'USB Scanner' },
                                 { key: 'manual', icon: Keyboard,  label: 'Manual NDC' },
                             ] as const).map(({ key, icon: Icon, label }) => (
@@ -875,14 +880,23 @@ export default function AddItemsPage() {
                             <div>
                                 <button
                                     onClick={() => setCameraOpen(true)}
-                                    className="w-full py-3 px-4 bg-primary-50 border border-primary-200 rounded-lg text-primary-700 hover:bg-primary-100 transition-colors flex items-center justify-center gap-2 text-sm font-medium"
+                                    disabled={isScanLoading}
+                                    className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 border border-dashed rounded transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed border-primary-300 bg-primary-50 hover:bg-primary-100 hover:border-primary-400"
                                 >
-                                    <Camera className="w-4 h-4" />
-                                    Open Camera Scanner
+                                    {isScanLoading ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 animate-spin text-primary-500 flex-shrink-0" />
+                                            <span className="text-xs font-medium text-primary-600">Looking up product...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Camera className="w-4 h-4 text-primary-600 flex-shrink-0" />
+                                            <span className="text-xs font-semibold text-primary-700">Open Camera Scanner</span>
+                                            <span className="text-[10px] text-primary-400">— tap to scan QR / barcode</span>
+                                        </>
+                                    )}
                                 </button>
-                                <p className="text-[10px] text-gray-400 mt-2 text-center">
-                                    Use your device camera to scan QR codes or barcodes
-                                </p>
+                                <p className="text-[10px] text-gray-400 mt-1">Works with QR codes, GS1 barcodes, and standard barcodes</p>
                             </div>
                         )}
 

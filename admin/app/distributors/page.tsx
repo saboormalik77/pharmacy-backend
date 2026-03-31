@@ -1,5 +1,6 @@
 'use client';
 
+import { PermissionGate } from '@/components/auth/PermissionGate';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Eye, Edit, Ban, CheckCircle, X, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -190,6 +191,7 @@ export default function DistributorsPage() {
     };
 
     return (
+        <PermissionGate permission="distributors">
         <div className="space-y-6">
             <div>
                 <h1 className="text-2xl font-bold text-gray-900">Distributors</h1>
@@ -789,5 +791,6 @@ export default function DistributorsPage() {
             )}
 
         </div>
+        </PermissionGate>
     );
 }

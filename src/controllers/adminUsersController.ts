@@ -88,7 +88,7 @@ export const getAdminByIdHandler = catchAsync(
 // ============================================================
 export const createAdminHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
-    const { email, password, name, role } = req.body;
+    const { email, password, name, role, permissions } = req.body;
 
     if (!email || !password || !name) {
       throw new AppError('Email, password, and name are required', 400);
@@ -99,6 +99,7 @@ export const createAdminHandler = catchAsync(
       password,
       name,
       role,
+      permissions,
     });
 
     res.status(201).json({
@@ -117,7 +118,7 @@ export const createAdminHandler = catchAsync(
 export const updateAdminHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const { id } = req.params;
-    const { name, email, role, isActive } = req.body;
+    const { name, email, role, isActive, permissions } = req.body;
 
     if (!id) {
       throw new AppError('Admin ID is required', 400);
@@ -128,6 +129,7 @@ export const updateAdminHandler = catchAsync(
       email,
       role,
       isActive,
+      permissions,
     });
 
     res.status(200).json({

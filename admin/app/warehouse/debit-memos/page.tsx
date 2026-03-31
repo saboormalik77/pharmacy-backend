@@ -1,5 +1,6 @@
 'use client';
 
+import { PermissionGate } from '@/components/auth/PermissionGate';
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -146,6 +147,7 @@ export default function DebitMemosPage() {
     const totalPages = memoPagination?.totalPages || 1;
 
     return (
+        <PermissionGate permission="warehouse">
         <div className="space-y-3">
             <ToastContainer toasts={toasts} onClose={id => setToasts(t => t.filter(x => x.id !== id))} />
 
@@ -456,5 +458,6 @@ export default function DebitMemosPage() {
                 )}
             </div>
         </div>
+        </PermissionGate>
     );
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { PermissionGate } from '@/components/auth/PermissionGate';
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Search, Eye, Edit, Ban, CheckCircle, X, ChevronLeft, ChevronRight, Plus, Loader2, Mail, Clock, Trash2 } from 'lucide-react';
@@ -1005,6 +1006,7 @@ function PharmaciesPageContent() {
 
 export default function PharmaciesPage() {
     return (
+        <PermissionGate permission="pharmacies">
         <Suspense fallback={
             <div className="flex items-center justify-center min-h-screen">
                 <div className="text-center">
@@ -1015,5 +1017,6 @@ export default function PharmaciesPage() {
         }>
             <PharmaciesPageContent />
         </Suspense>
+        </PermissionGate>
     );
 }

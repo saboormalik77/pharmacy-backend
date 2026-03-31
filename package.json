@@ -10,6 +10,8 @@
     "migrate": "ts-node scripts/migrate.ts",
     "import-excel": "node scripts/import_excel_to_supabase.js",
     "create-admin": "ts-node scripts/create_admin_account.ts",
+    "reset-pharmacy-password": "ts-node src/scripts/resetPharmacyPassword.ts",
+    "reset-fenonir-password": "ts-node src/scripts/resetFenonirPassword.ts",
     "cron:expiring-products": "ts-node src/scripts/runExpiringProductsCheck.ts",
     "email:deploy-functions": "supabase functions deploy send-ra-email && supabase functions deploy send-ra-email-enhanced && supabase functions deploy resend-webhook",
     "email:test": "curl -X POST \"http://localhost:3000/api/admin/emails/test\" -H \"Content-Type: application/json\" -d '{\"to\":\"test@example.com\",\"templateType\":\"ra-request\"}'",

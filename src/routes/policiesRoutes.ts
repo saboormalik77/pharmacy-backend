@@ -17,7 +17,7 @@ import {
   bulkImportHandler,
   checkReturnabilityHandler,
 } from '../controllers/policiesController';
-import { authenticateAdmin } from '../middleware/adminAuth';
+import { authenticateAdmin, requirePermission } from '../middleware/adminAuth';
 import { authenticateProcessor } from '../middleware/processorAuth';
 import { authenticate as authenticatePharmacy } from '../middleware/auth';
 
@@ -26,6 +26,7 @@ import { authenticate as authenticatePharmacy } from '../middleware/auth';
 // ============================================================
 export const adminPoliciesRouter = Router();
 adminPoliciesRouter.use(authenticateAdmin);
+adminPoliciesRouter.use(requirePermission('policies'));
 
 /**
  * @swagger

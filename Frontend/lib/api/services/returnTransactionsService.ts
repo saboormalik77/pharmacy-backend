@@ -16,11 +16,16 @@ export interface ReturnTransactionItem {
   genericName?: string;
   manufacturer?: string;
   lotNumber?: string;
+  serialNumber?: string;
   expirationDate?: string;
   quantity?: number;
   returnStatus: 'returnable' | 'non_returnable' | 'tbd';
   nonReturnableReason?: string;
   destination?: string;
+  isPartial?: boolean;
+  partialPercentage?: number;
+  estimatedValue?: number;
+  estimatedStoreValue?: number;
 }
 
 export const returnTransactionsService = {

@@ -208,7 +208,7 @@ export default function ReturnDetailPage() {
     const [itemStatusFilter, setItemStatusFilter] = useState('');
     const [deleteItemModal, setDeleteItemModal] = useState<ReturnTransactionItem | null>(null);
     const [editItemModal, setEditItemModal] = useState<ReturnTransactionItem | null>(null);
-    const [editItemForm, setEditItemForm] = useState({ quantity: '', standardPrice: '', returnStatus: 'tbd', destination: '', memo: '' });
+    const [editItemForm, setEditItemForm] = useState({ fullPackageSize: '', fullPackageQtyReturned: '', standardPrice: '', returnStatus: 'tbd', destination: '', memo: '' });
     const debouncedItemSearch = useDebounce(itemSearch, 500);
 
     // Reverse distributors for Destination select in edit item modal
@@ -384,7 +384,8 @@ export default function ReturnDetailPage() {
     useEffect(() => {
         if (editItemModal) {
             setEditItemForm({
-                quantity: String(editItemModal.quantity),
+                fullPackageSize: editItemModal.fullPackageSize ? String(editItemModal.fullPackageSize) : '',
+                fullPackageQtyReturned: editItemModal.quantity ? String(editItemModal.quantity) : '',
                 standardPrice: editItemModal.standardPrice != null ? String(editItemModal.standardPrice) : '',
                 returnStatus: editItemModal.returnStatus,
                 destination: editItemModal.destination || '',
@@ -413,7 +414,8 @@ export default function ReturnDetailPage() {
         
         // Core data fields — only include if not locked
         if (!isLocked) {
-            if (editItemForm.quantity) payload.quantity = parseInt(editItemForm.quantity);
+            if (editItemForm.fullPackageSize) payload.fullPackageSize = parseInt(editItemForm.fullPackageSize);
+            if (editItemForm.fullPackageQtyReturned) payload.quantity = parseInt(editItemForm.fullPackageQtyReturned);
             if (editItemForm.standardPrice) payload.standardPrice = parseFloat(editItemForm.standardPrice);
         }
         
@@ -1184,12 +1186,13 @@ export default function ReturnDetailPage() {
                                     <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">NDC</th>
                                     <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Name</th>
                                     <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Manufacturer</th>
-                                    <th className="text-center px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Qty</th>
+                                    <th className="text-center px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Pkg Size</th>
+                                    <th className="text-center px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Qty Returned</th>
+                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Serial#</th>
                                     <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Price</th>
                                     <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Est. Value</th>
                                     <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Est. Store Value</th>
                                     <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Expires</th>
-                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Lot</th>
                                     <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
                                     <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Destination</th>
                                     <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
@@ -1208,7 +1211,13 @@ export default function ReturnDetailPage() {
                                                 {item.manufacturer || '—'}
                                             </td>
                                             <td className="px-2 py-1.5 text-[11px] text-center text-gray-900">
+                                                {item.fullPackageSize || '—'}
+                                            </td>
+                                            <td className="px-2 py-1.5 text-[11px] text-center text-gray-900">
                                                 {item.quantity}{item.isPartial && <span className="text-yellow-600 ml-0.5">P</span>}
+                                            </td>
+                                            <td className="px-2 py-1.5 text-[11px] text-gray-600 font-mono whitespace-nowrap">
+                                                {item.serialNumber || '—'}
                                             </td>
                                             <td className="px-2 py-1.5 text-[11px] text-right text-gray-900">
                                                 {item.standardPrice != null ? formatCurrency(item.standardPrice) : '—'}
@@ -1222,7 +1231,6 @@ export default function ReturnDetailPage() {
                                             <td className="px-2 py-1.5 text-[11px] text-gray-600 whitespace-nowrap">
                                                 {item.expirationDate ? formatDate(item.expirationDate) : '—'}
                                             </td>
-                                            <td className="px-2 py-1.5 text-[11px] text-gray-600 font-mono whitespace-nowrap">{item.lotNumber || '—'}</td>
                                             <td className="px-2 py-1.5">
                                                 <div className="flex items-center gap-1">
                                                     <Badge variant={sBadge.variant}><span className="text-[10px]">{sBadge.label}</span></Badge>
@@ -1280,19 +1288,23 @@ export default function ReturnDetailPage() {
                             <p className="text-[11px] text-gray-500 mb-2">{editItemModal.proprietaryName || editItemModal.ndc} — Lot: {editItemModal.lotNumber || '—'}</p>
                             {isLocked && (
                                 <div className="bg-yellow-50 border border-yellow-200 rounded px-2.5 py-1.5 mb-2">
-                                    <p className="text-[10px] text-yellow-800">Core data (quantity, price) is locked. Classification fields can still be updated.</p>
+                                    <p className="text-[10px] text-yellow-800">Core data (pkg size, qty, price) is locked. Classification fields can still be updated.</p>
                                 </div>
                             )}
                             <div className="space-y-2">
                                 <div className="grid grid-cols-2 gap-2">
                                     <div>
-                                        <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Quantity</label>
-                                        <input type="number" min="1" value={editItemForm.quantity} onChange={e => setEditItemForm({ ...editItemForm, quantity: e.target.value })} disabled={isLocked} className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} />
+                                        <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Pkg Size</label>
+                                        <input type="number" min="1" value={editItemForm.fullPackageSize} onChange={e => setEditItemForm({ ...editItemForm, fullPackageSize: e.target.value })} disabled={isLocked} placeholder="e.g. 60" className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} />
                                     </div>
                                     <div>
-                                        <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Price ($)</label>
-                                        <input type="number" step="0.01" min="0" value={editItemForm.standardPrice} onChange={e => setEditItemForm({ ...editItemForm, standardPrice: e.target.value })} disabled={isLocked} className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} />
+                                        <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Qty Returned</label>
+                                        <input type="number" min="0" value={editItemForm.fullPackageQtyReturned} onChange={e => setEditItemForm({ ...editItemForm, fullPackageQtyReturned: e.target.value })} disabled={isLocked} placeholder="e.g. 45" className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} />
                                     </div>
+                                </div>
+                                <div>
+                                    <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Price ($)</label>
+                                    <input type="number" step="0.01" min="0" value={editItemForm.standardPrice} onChange={e => setEditItemForm({ ...editItemForm, standardPrice: e.target.value })} disabled={isLocked} className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} />
                                 </div>
                                 <div>
                                     <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Return Status</label>

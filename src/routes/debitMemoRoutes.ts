@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticateAdmin } from '../middleware/adminAuth';
+import { authenticateAdmin, requirePermission } from '../middleware/adminAuth';
 import { upload } from '../middleware/upload';
 import {
   listDebitMemosHandler,
@@ -24,6 +24,9 @@ import {
 } from '../controllers/paymentTrackingController';
 
 const router = Router();
+
+router.use(authenticateAdmin);
+router.use(requirePermission('warehouse'));
 
 /**
  * @swagger
@@ -64,7 +67,7 @@ const router = Router();
  *       200:
  *         description: Paginated list of unpaid debit memos with summary
  */
-router.get('/unpaid', authenticateAdmin, listUnpaidHandler);
+router.get('/unpaid', listUnpaidHandler);
 
 /**
  * @swagger
@@ -101,7 +104,7 @@ router.get('/unpaid', authenticateAdmin, listUnpaidHandler);
  *       200:
  *         description: Paginated list of debit memos
  */
-router.get('/', authenticateAdmin, listDebitMemosHandler);
+router.get('/', listDebitMemosHandler);
 
 /**
  * @swagger
@@ -122,7 +125,7 @@ router.get('/', authenticateAdmin, listDebitMemosHandler);
  *       404:
  *         description: Debit memo not found
  */
-router.get('/:id', authenticateAdmin, getDebitMemoHandler);
+router.get('/:id', getDebitMemoHandler);
 
 /**
  * @swagger
@@ -159,7 +162,7 @@ router.get('/:id', authenticateAdmin, getDebitMemoHandler);
  *       404:
  *         description: Debit memo not found
  */
-router.patch('/:id', authenticateAdmin, updateDebitMemoHandler);
+router.patch('/:id', updateDebitMemoHandler);
 
 /**
  * @swagger
@@ -190,7 +193,7 @@ router.patch('/:id', authenticateAdmin, updateDebitMemoHandler);
  *       404:
  *         description: Debit memo not found
  */
-router.post('/:id/request-ra', authenticateAdmin, requestRAHandler);
+router.post('/:id/request-ra', requestRAHandler);
 
 /**
  * @swagger
@@ -223,7 +226,7 @@ router.post('/:id/request-ra', authenticateAdmin, requestRAHandler);
  *       404:
  *         description: Debit memo not found
  */
-router.post('/:id/receive-ra', authenticateAdmin, receiveRAHandler);
+router.post('/:id/receive-ra', receiveRAHandler);
 
 /**
  * @swagger
@@ -250,7 +253,7 @@ router.post('/:id/receive-ra', authenticateAdmin, receiveRAHandler);
  *       200:
  *         description: RA reminder sent
  */
-router.post('/:id/resend-ra', authenticateAdmin, resendRAHandler);
+router.post('/:id/resend-ra', resendRAHandler);
 
 /**
  * @swagger
@@ -281,7 +284,7 @@ router.post('/:id/resend-ra', authenticateAdmin, resendRAHandler);
  *       400:
  *         description: Tracking number required / RA number required first
  */
-router.post('/:id/ship', authenticateAdmin, shipDebitMemoHandler);
+router.post('/:id/ship', shipDebitMemoHandler);
 
 /**
  * @swagger
@@ -311,7 +314,7 @@ router.post('/:id/ship', authenticateAdmin, shipDebitMemoHandler);
  *       400:
  *         description: Missing RA number or address issues
  */
-router.post('/:id/create-fedex-shipment', authenticateAdmin, createDebitMemoFedexShipmentHandler);
+router.post('/:id/create-fedex-shipment', createDebitMemoFedexShipmentHandler);
 
 /**
  * @swagger
@@ -341,7 +344,7 @@ router.post('/:id/create-fedex-shipment', authenticateAdmin, createDebitMemoFede
  *       400:
  *         description: No shipment exists yet
  */
-router.post('/:id/schedule-pickup', authenticateAdmin, scheduleDebitMemoPickupHandler);
+router.post('/:id/schedule-pickup', scheduleDebitMemoPickupHandler);
 
 /**
  * @swagger
@@ -376,7 +379,7 @@ router.post('/:id/schedule-pickup', authenticateAdmin, scheduleDebitMemoPickupHa
  *       404:
  *         description: Debit memo not found
  */
-router.post('/:id/record-payment', authenticateAdmin, upload.single('creditMemo'), recordPaymentHandler);
+router.post('/:id/record-payment', upload.single('creditMemo'), recordPaymentHandler);
 
 /**
  * @swagger
@@ -412,7 +415,7 @@ router.post('/:id/record-payment', authenticateAdmin, upload.single('creditMemo'
  *       404:
  *         description: Debit memo not found
  */
-router.patch('/:id/update-payment', authenticateAdmin, upload.single('creditMemo'), updatePaymentHandler);
+router.patch('/:id/update-payment', upload.single('creditMemo'), updatePaymentHandler);
 
 /**
  * @swagger
@@ -443,7 +446,7 @@ router.patch('/:id/update-payment', authenticateAdmin, upload.single('creditMemo
  *       404:
  *         description: Debit memo not found
  */
-router.post('/:id/send-reminder', authenticateAdmin, sendReminderHandler);
+router.post('/:id/send-reminder', sendReminderHandler);
 
 /**
  * @swagger
@@ -468,8 +471,8 @@ router.post('/:id/send-reminder', authenticateAdmin, sendReminderHandler);
  *       200:
  *         description: Email template with to, subject, body, item details
  */
-router.get('/:id/email-preview', authenticateAdmin, emailPreviewHandler);
+router.get('/:id/email-preview', emailPreviewHandler);
 
-router.get('/:id/shipping-label', authenticateAdmin, debitMemoShippingLabelHandler);
+router.get('/:id/shipping-label', debitMemoShippingLabelHandler);
 
 export default router;

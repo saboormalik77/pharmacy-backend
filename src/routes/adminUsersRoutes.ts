@@ -8,12 +8,14 @@ import {
   updateAdminPasswordHandler,
   deleteAdminHandler,
 } from '../controllers/adminUsersController';
-import { authenticateAdmin } from '../middleware/adminAuth';
+import { authenticateAdmin, requirePermission } from '../middleware/adminAuth';
+import { ALL_ADMIN_PERMISSIONS } from '../services/adminService';
 
 const router = Router();
 
 // Apply admin authentication to all routes
 router.use(authenticateAdmin);
+router.use(requirePermission('admins'));
 
 // ============================================================
 // Swagger Schemas
@@ -369,6 +371,17 @@ router.get('/', getAdminUsersHandler);
  *         description: Internal server error
  */
 router.get('/roles', getAdminRolesHandler);
+
+router.get('/permissions', (_req, res) => {
+  res.json({
+    status: 'success',
+    data: {
+      permissions: ALL_ADMIN_PERMISSIONS.filter(
+        (p) => p !== 'admins' && p !== 'dashboard'
+      ),
+    },
+  });
+});
 
 /**
  * @swagger

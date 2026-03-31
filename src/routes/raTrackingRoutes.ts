@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticateAdmin } from '../middleware/adminAuth';
+import { authenticateAdmin, requirePermission } from '../middleware/adminAuth';
 import {
   raTrackingDashboardHandler,
   raOutstandingHandler,
@@ -7,6 +7,9 @@ import {
 } from '../controllers/raController';
 
 const router = Router();
+
+router.use(authenticateAdmin);
+router.use(requirePermission('warehouse'));
 
 /**
  * @swagger
@@ -49,7 +52,7 @@ const router = Router();
  *       200:
  *         description: RA tracking dashboard with summary counts
  */
-router.get('/', authenticateAdmin, raTrackingDashboardHandler);
+router.get('/', raTrackingDashboardHandler);
 
 /**
  * @swagger
@@ -73,7 +76,7 @@ router.get('/', authenticateAdmin, raTrackingDashboardHandler);
  *       200:
  *         description: Outstanding RA requests
  */
-router.get('/outstanding', authenticateAdmin, raOutstandingHandler);
+router.get('/outstanding', raOutstandingHandler);
 
 /**
  * @swagger
@@ -97,6 +100,6 @@ router.get('/outstanding', authenticateAdmin, raOutstandingHandler);
  *       200:
  *         description: Overdue RA requests
  */
-router.get('/overdue', authenticateAdmin, raOverdueHandler);
+router.get('/overdue', raOverdueHandler);
 
 export default router;

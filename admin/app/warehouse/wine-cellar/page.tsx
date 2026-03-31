@@ -1,5 +1,6 @@
 'use client';
 
+import { PermissionGate } from '@/components/auth/PermissionGate';
 import { useState, useEffect, useCallback } from 'react';
 import {
     Archive, Search, Loader2, X, Edit, CheckCircle, RefreshCw,
@@ -147,6 +148,7 @@ export default function WineCellarPage() {
     };
 
     return (
+        <PermissionGate permission="warehouse">
         <div className="space-y-6">
             <ToastContainer toasts={toasts} onClose={removeToast} />
 
@@ -443,5 +445,6 @@ export default function WineCellarPage() {
                 </div>
             )}
         </div>
+        </PermissionGate>
     );
 }

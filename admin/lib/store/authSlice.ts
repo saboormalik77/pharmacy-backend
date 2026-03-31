@@ -27,12 +27,16 @@ export const loginUser = createAsyncThunk(
       // Extract token (supports multiple field names)
       const authToken = data.token || data.accessToken || data.access_token;
       
-      // Extract user data
-      const userData: User = data.user || {
+      // Extract user data (including permissions from the backend)
+      const rawUser = data.user || {
         id: data.id || data.userId || '',
         email: data.email || credentials.email,
         name: data.name || data.username || 'Admin User',
         role: data.role,
+      };
+      const userData: User = {
+        ...rawUser,
+        permissions: rawUser.permissions || (data as any).permissions || [],
       };
 
       if (!authToken) {

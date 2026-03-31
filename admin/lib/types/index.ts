@@ -468,6 +468,7 @@ export interface Admin {
     role: 'super_admin' | 'manager' | 'reviewer' | 'support';
     status: 'active' | 'inactive';
     isActive: boolean;
+    permissions?: string[];
     lastLoginAt?: string | null;
     createdAt: string;
     updatedAt: string;
@@ -519,6 +520,7 @@ export interface AdminCreatePayload {
     password: string;
     name: string;
     role: 'super_admin' | 'manager' | 'reviewer' | 'support';
+    permissions?: string[];
 }
 
 export interface AdminUpdatePayload {
@@ -526,6 +528,7 @@ export interface AdminUpdatePayload {
     email?: string;
     role?: 'super_admin' | 'manager' | 'reviewer' | 'support';
     isActive?: boolean;
+    permissions?: string[];
 }
 
 export interface AdminPasswordUpdatePayload {

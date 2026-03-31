@@ -152,6 +152,7 @@ export default function PharmacyScanPage() {
   const [nonReturnableRoute, setNonReturnableRoute] = useState<'wine_cellar' | 'destruction'>('destruction');
   const [wineCellarDate, setWineCellarDate] = useState('');
   const [manualDestination, setManualDestination] = useState('');
+  const [reverseDistributors, setReverseDistributors] = useState<{ id: string; name: string; email: string }[]>([]);
 
   const [policyAutoCheck, setPolicyAutoCheck] = useState<PolicyResult | null>(null);
   const [isPolicyChecking, setIsPolicyChecking] = useState(false);
@@ -177,6 +178,17 @@ export default function PharmacyScanPage() {
         }
       } catch {
         showToast('Failed to load transactions', 'error');
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await apiClient.get<any>('/reverse-distributors', {}, true);
+        setReverseDistributors(res.data || []);
+      } catch {
+        // non-critical: manual destination dropdown stays empty if endpoint fails
       }
     })();
   }, []);
@@ -951,10 +963,9 @@ export default function PharmacyScanPage() {
                     className="w-full px-2 py-1 text-xs border border-amber-300 rounded focus:outline-none focus:ring-1 focus:ring-amber-400 bg-white"
                   >
                     <option value="">— Select destination —</option>
-                    <option value="inmar">Inmar</option>
-                    <option value="qualanex">Qualanex</option>
-                    <option value="pharmalink">PharmaLink</option>
-                    <option value="other">Other</option>
+                    {reverseDistributors.map((d) => (
+                      <option key={d.id} value={d.name}>{d.name}</option>
+                    ))}
                   </select>
                 </div>
               )}

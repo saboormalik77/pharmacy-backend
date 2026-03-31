@@ -1,5 +1,6 @@
 'use client';
 
+import { PermissionGate } from '@/components/auth/PermissionGate';
 import { useState, useEffect, useCallback } from 'react';
 import {
     AlertTriangle, Loader2, Search, X, CheckCircle, Ban, Archive, ChevronDown, ChevronRight,
@@ -175,6 +176,7 @@ export default function TbdItemsPage() {
     };
 
     return (
+        <PermissionGate permission="tbd_items">
         <div className="space-y-3">
             <ToastContainer toasts={toasts} onClose={removeToast} />
 
@@ -419,5 +421,6 @@ export default function TbdItemsPage() {
                 </div>
             )}
         </div>
+        </PermissionGate>
     );
 }

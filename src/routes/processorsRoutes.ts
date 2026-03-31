@@ -10,11 +10,12 @@ import {
   assignStoresHandler,
   unassignStoreHandler,
 } from '../controllers/processorsController';
-import { authenticateAdmin } from '../middleware/adminAuth';
+import { authenticateAdmin, requirePermission } from '../middleware/adminAuth';
 
 const router = Router();
 
 router.use(authenticateAdmin);
+router.use(requirePermission('processors'));
 
 // ============================================================
 // Swagger Schemas

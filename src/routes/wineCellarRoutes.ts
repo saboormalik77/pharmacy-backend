@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticateAdmin } from '../middleware/adminAuth';
+import { authenticateAdmin, requirePermission } from '../middleware/adminAuth';
 import {
   listHandler,
   dueHandler,
@@ -12,6 +12,9 @@ import {
 } from '../controllers/wineCellarController';
 
 const router = Router();
+
+router.use(authenticateAdmin);
+router.use(requirePermission('warehouse'));
 
 /**
  * @swagger
@@ -57,7 +60,7 @@ const router = Router();
  *       200:
  *         description: Paginated list of wine cellar items with summary stats
  */
-router.get('/', authenticateAdmin, listHandler);
+router.get('/', listHandler);
 
 /**
  * @swagger
@@ -76,7 +79,7 @@ router.get('/', authenticateAdmin, listHandler);
  *       200:
  *         description: Items that are ready to be added back to a return
  */
-router.get('/due', authenticateAdmin, dueHandler);
+router.get('/due', dueHandler);
 
 /**
  * @swagger
@@ -95,7 +98,7 @@ router.get('/due', authenticateAdmin, dueHandler);
  *       200:
  *         description: Stats object with totalItems, shelved, readyToReturn, returned, destroyed, totalValue
  */
-router.get('/stats', authenticateAdmin, statsHandler);
+router.get('/stats', statsHandler);
 
 /**
  * @swagger
@@ -124,7 +127,7 @@ router.get('/stats', authenticateAdmin, statsHandler);
  *                     surfacedCount: { type: integer }
  *                     items: { type: array, items: { type: object } }
  */
-router.post('/check-ready', authenticateAdmin, checkReadyHandler);
+router.post('/check-ready', checkReadyHandler);
 
 // ── Parameterized routes ────────────────────────────────────
 
@@ -147,7 +150,7 @@ router.post('/check-ready', authenticateAdmin, checkReadyHandler);
  *       404:
  *         description: Item not found
  */
-router.get('/:id', authenticateAdmin, getHandler);
+router.get('/:id', getHandler);
 
 /**
  * @swagger
@@ -196,7 +199,7 @@ router.get('/:id', authenticateAdmin, getHandler);
  *       409:
  *         description: Item already in wine cellar
  */
-router.post('/', authenticateAdmin, createHandler);
+router.post('/', createHandler);
 
 /**
  * @swagger
@@ -234,7 +237,7 @@ router.post('/', authenticateAdmin, createHandler);
  *       404:
  *         description: Item not found
  */
-router.patch('/:id', authenticateAdmin, updateHandler);
+router.patch('/:id', updateHandler);
 
 /**
  * @swagger
@@ -269,6 +272,6 @@ router.patch('/:id', authenticateAdmin, updateHandler);
  *       404:
  *         description: Item or transaction not found
  */
-router.post('/:id/return', authenticateAdmin, returnHandler);
+router.post('/:id/return', returnHandler);
 
 export default router;

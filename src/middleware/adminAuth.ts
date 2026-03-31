@@ -10,6 +10,7 @@ declare global {
       adminEmail?: string;
       adminName?: string;
       adminRole?: string;
+      adminPermissions?: string[];
     }
   }
 }
@@ -45,6 +46,7 @@ export const authenticateAdmin = async (
     req.adminEmail = adminData.email;
     req.adminName = adminData.name;
     req.adminRole = adminData.role;
+    req.adminPermissions = adminData.permissions;
 
     next();
   } catch (error) {
@@ -54,5 +56,21 @@ export const authenticateAdmin = async (
       next(new AppError('Authentication failed', 401));
     }
   }
+};
+
+/**
+ * Permission-checking middleware factory.
+ * super_admin always passes; other roles must have the permission in their list.
+ */
+export const requirePermission = (permission: string) => {
+  return (req: Request, _res: Response, next: NextFunction): void => {
+    if (req.adminRole === 'super_admin') return next();
+
+    const perms: string[] = req.adminPermissions || [];
+    if (!perms.includes(permission)) {
+      return next(new AppError('You do not have permission to access this resource', 403));
+    }
+    next();
+  };
 };
 

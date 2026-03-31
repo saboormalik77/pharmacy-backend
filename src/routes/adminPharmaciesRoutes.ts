@@ -10,12 +10,13 @@ import {
   getPendingInvitesHandler,
   cancelInviteHandler,
 } from '../controllers/adminPharmaciesController';
-import { authenticateAdmin } from '../middleware/adminAuth';
+import { authenticateAdmin, requirePermission } from '../middleware/adminAuth';
 
 const router = Router();
 
 // Apply admin authentication middleware to all routes
 router.use(authenticateAdmin);
+router.use(requirePermission('pharmacies'));
 
 /**
  * @swagger

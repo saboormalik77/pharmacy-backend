@@ -1,5 +1,6 @@
 'use client';
 
+import { PermissionGate } from '@/components/auth/PermissionGate';
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
@@ -494,6 +495,7 @@ export default function RATrackingPage() {
     };
 
     return (
+        <PermissionGate permission="warehouse">
         <div className="space-y-3">
             <ToastContainer toasts={toasts} onClose={id => setToasts(t => t.filter(x => x.id !== id))} />
 
@@ -1611,5 +1613,6 @@ export default function RATrackingPage() {
             )}
 
         </div>
+        </PermissionGate>
     );
 }

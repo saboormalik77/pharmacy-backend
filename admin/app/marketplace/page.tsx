@@ -1,5 +1,6 @@
 'use client';
 
+import { PermissionGate } from '@/components/auth/PermissionGate';
 import { useState, useEffect } from 'react';
 import { Search, Eye, Edit, ShoppingCart, Calendar, DollarSign, Package, X, Loader2, ChevronLeft, ChevronRight, Trash2, Star, Tag, ShoppingBag } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
@@ -417,6 +418,7 @@ export default function MarketplacePage() {
     const categoryOptions = ['all', ...categories.map(cat => cat.value)];
 
     return (
+        <PermissionGate permission="marketplace">
         <div className="space-y-6">
             <div>
                 <h1 className="text-2xl font-bold text-gray-900">Marketplace</h1>
@@ -1448,5 +1450,6 @@ export default function MarketplacePage() {
 
             <ToastContainer toasts={toasts} onClose={removeToast} />
         </div>
+        </PermissionGate>
     );
 }

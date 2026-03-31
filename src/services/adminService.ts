@@ -8,6 +8,15 @@ const db = supabaseAdmin || null;
 // Get the admin client for auth operations
 const authAdmin = supabaseAdmin?.auth?.admin;
 
+// All available admin permissions (mirrors sidebar sections)
+export const ALL_ADMIN_PERMISSIONS = [
+  'dashboard', 'pharmacies', 'distributors', 'marketplace', 'documents',
+  'payments', 'payout_hub', 'analytics', 'settings', 'admins',
+  'processors', 'policies', 'ndc_pricing', 'tbd_items', 'destruction', 'warehouse',
+] as const;
+
+export type AdminPermission = typeof ALL_ADMIN_PERMISSIONS[number];
+
 // JWT configuration
 const JWT_SECRET = process.env.JWT_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || 'your-secret-key-change-in-production';
 // Admin tokens expire after 24 hours (configurable via env var)
@@ -27,10 +36,11 @@ export interface AdminAuthResponse {
     email: string;
     name: string;
     role: string;
+    permissions: string[];
   };
   token: string;
-  accessToken?: string; // Alias for token (for frontend compatibility)
-  access_token?: string; // Alias for token (for frontend compatibility)
+  accessToken?: string;
+  access_token?: string;
   expiresIn: number;
   expiresAt: number;
 }
@@ -54,11 +64,22 @@ export const adminLogin = async (data: AdminLoginData): Promise<AdminAuthRespons
   }
 
   // Step 1: Fetch admin from database
-  const { data: adminData, error: adminError } = await db
+  let { data: adminData, error: adminError } = await db
     .from('admin')
-    .select('id, email, password_hash, name, role, is_active')
+    .select('id, email, password_hash, name, role, is_active, permissions')
     .eq('email', email)
     .single();
+
+  // Fallback if `permissions` column hasn't been added yet
+  if (adminError?.message?.includes('permissions')) {
+    const fallback = await db
+      .from('admin')
+      .select('id, email, password_hash, name, role, is_active')
+      .eq('email', email)
+      .single();
+    adminData = fallback.data ? { ...fallback.data, permissions: [] } : null;
+    adminError = fallback.error;
+  }
 
   if (adminError || !adminData) {
     throw new AppError('Invalid email or password', 401);
@@ -80,12 +101,18 @@ export const adminLogin = async (data: AdminLoginData): Promise<AdminAuthRespons
   const now = Math.floor(Date.now() / 1000);
   const expiresAt = now + JWT_EXPIRES_IN_SECONDS;
 
+  // Resolve permissions: super_admin always gets full access
+  const permissions: string[] = adminData.role === 'super_admin'
+    ? [...ALL_ADMIN_PERMISSIONS]
+    : Array.isArray(adminData.permissions) ? adminData.permissions : [];
+
   const tokenPayload = {
     id: adminData.id,
     email: adminData.email,
     name: adminData.name,
     role: adminData.role,
-    type: 'admin', // Distinguish from pharmacy users
+    permissions,
+    type: 'admin',
   };
 
   const token = jwt.sign(tokenPayload, JWT_SECRET, {
@@ -104,6 +131,7 @@ export const adminLogin = async (data: AdminLoginData): Promise<AdminAuthRespons
     email: adminData.email,
     name: adminData.name,
     role: adminData.role,
+    permissions,
   };
 
   return {
@@ -351,6 +379,7 @@ export const verifyAdminToken = async (token: string): Promise<{
   name: string;
   role: string;
   type: string;
+  permissions: string[];
 }> => {
   try {
     // Step 1: Verify JWT signature and expiration
@@ -373,11 +402,22 @@ export const verifyAdminToken = async (token: string): Promise<{
       throw new AppError('Database connection not configured', 500);
     }
 
-    const { data: adminData, error: adminError } = await db
+    let { data: adminData, error: adminError } = await db
       .from('admin')
-      .select('id, email, name, role, is_active')
+      .select('id, email, name, role, is_active, permissions')
       .eq('id', decoded.id)
       .single();
+
+    // Fallback if `permissions` column hasn't been added yet
+    if (adminError?.message?.includes('permissions')) {
+      const fallback = await db
+        .from('admin')
+        .select('id, email, name, role, is_active')
+        .eq('id', decoded.id)
+        .single();
+      adminData = fallback.data ? { ...fallback.data, permissions: [] } : null;
+      adminError = fallback.error;
+    }
 
     if (adminError) {
       console.error('[AdminAuth] Database error:', adminError.message, adminError.code);
@@ -393,12 +433,17 @@ export const verifyAdminToken = async (token: string): Promise<{
       throw new AppError('Admin account is inactive', 403);
     }
 
+    const permissions: string[] = adminData.role === 'super_admin'
+      ? [...ALL_ADMIN_PERMISSIONS]
+      : Array.isArray(adminData.permissions) ? adminData.permissions : [];
+
     return {
       id: adminData.id,
       email: adminData.email,
       name: adminData.name,
       role: adminData.role,
       type: 'admin',
+      permissions,
     };
   } catch (error: any) {
     if (error instanceof AppError) {

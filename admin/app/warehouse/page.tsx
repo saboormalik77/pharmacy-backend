@@ -1,5 +1,6 @@
 'use client';
 
+import { PermissionGate } from '@/components/auth/PermissionGate';
 import Link from 'next/link';
 import {
     PackageCheck,
@@ -50,6 +51,7 @@ const warehouseSections = [
 
 export default function WarehouseHubPage() {
     return (
+        <PermissionGate permission="warehouse">
         <div className="space-y-4">
             {/* Header */}
             <div>
@@ -101,5 +103,6 @@ export default function WarehouseHubPage() {
                 })}
             </div>
         </div>
+        </PermissionGate>
     );
 }

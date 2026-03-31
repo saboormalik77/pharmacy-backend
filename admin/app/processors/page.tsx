@@ -1,5 +1,6 @@
 'use client';
 
+import { PermissionGate } from '@/components/auth/PermissionGate';
 import { useState, useEffect } from 'react';
 import {
     Search, Eye, EyeOff, UserPlus, X, ChevronLeft, ChevronRight,
@@ -250,6 +251,7 @@ export default function ProcessorsPage() {
 
     // ── Render ─────────────────────────────────────────────────
     return (
+        <PermissionGate permission="processors">
         <div className="space-y-3">
             <ToastContainer toasts={toasts} onClose={removeToast} />
 
@@ -868,5 +870,6 @@ export default function ProcessorsPage() {
                 </div>
             )}
         </div>
+        </PermissionGate>
     );
 }

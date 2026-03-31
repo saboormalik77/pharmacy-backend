@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticateAdmin } from '../middleware/adminAuth';
+import { authenticateAdmin, requirePermission } from '../middleware/adminAuth';
 import {
   listShippedShipmentGroupsHandler,
   listMemosForGroupShippingHandler,
@@ -12,6 +12,9 @@ import {
 } from '../controllers/shipmentGroupController';
 
 const router = Router();
+
+router.use(authenticateAdmin);
+router.use(requirePermission('warehouse'));
 
 /**
  * @swagger
@@ -37,9 +40,9 @@ const router = Router();
  *       200:
  *         description: List of memos ready for grouping
  */
-router.get('/shipped', authenticateAdmin, listShippedShipmentGroupsHandler);
+router.get('/shipped', listShippedShipmentGroupsHandler);
 
-router.get('/available-memos', authenticateAdmin, listMemosForGroupShippingHandler);
+router.get('/available-memos', listMemosForGroupShippingHandler);
 
 /**
  * @swagger
@@ -74,11 +77,11 @@ router.get('/available-memos', authenticateAdmin, listMemosForGroupShippingHandl
  *       400:
  *         description: Invalid input or memos not eligible for grouping
  */
-router.post('/', authenticateAdmin, createShipmentGroupHandler);
+router.post('/', createShipmentGroupHandler);
 
-router.get('/:id/shipping-label', authenticateAdmin, shipmentGroupShippingLabelHandler);
+router.get('/:id/shipping-label', shipmentGroupShippingLabelHandler);
 
-router.post('/:id/schedule-pickup', authenticateAdmin, scheduleShipmentGroupPickupHandler);
+router.post('/:id/schedule-pickup', scheduleShipmentGroupPickupHandler);
 
 /**
  * @swagger
@@ -99,7 +102,7 @@ router.post('/:id/schedule-pickup', authenticateAdmin, scheduleShipmentGroupPick
  *       404:
  *         description: Shipment group not found
  */
-router.get('/:id', authenticateAdmin, getShipmentGroupDetailsHandler);
+router.get('/:id', getShipmentGroupDetailsHandler);
 
 /**
  * @swagger
@@ -135,7 +138,7 @@ router.get('/:id', authenticateAdmin, getShipmentGroupDetailsHandler);
  *       400:
  *         description: Invalid input or group already shipped
  */
-router.post('/:id/ship', authenticateAdmin, shipGroupHandler);
+router.post('/:id/ship', shipGroupHandler);
 
 /**
  * @swagger
@@ -176,6 +179,6 @@ router.post('/:id/ship', authenticateAdmin, shipGroupHandler);
  *       400:
  *         description: Invalid input or configuration error
  */
-router.post('/:id/create-fedex-shipment', authenticateAdmin, createGroupFedexShipmentHandler);
+router.post('/:id/create-fedex-shipment', createGroupFedexShipmentHandler);
 
 export default router;
