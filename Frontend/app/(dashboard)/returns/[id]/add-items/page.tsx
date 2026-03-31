@@ -34,6 +34,7 @@ interface ReturnTransactionItem {
     genericName?: string;
     manufacturer?: string;
     lotNumber?: string;
+    serialNumber?: string;
     expirationDate?: string;
     standardPrice?: number;
     quantity: number;
@@ -537,19 +538,20 @@ export default function AddItemsPage() {
 
         setIsItemActionLoading(true);
         try {
-            const res = await apiClient.post<any>(`/return-transactions/${transactionId}/items`, payload, true);
+            const res = await apiClient.post<any>(`/return-transactions/${transactionId}/items`, payload, true) as any;
 
             if (res.status === 'success' && res.data) {
                 const name = form.proprietaryName || form.ndc || 'Item';
-                const savedItem = res.data.item;
-                const pc = res.data.policyCheck;
-                const wcItem = res.data.wineCellarItem;
-                const wcOnly = res.data.wineCellarOnly === true;
+                const savedItem = res.data;
+                const pc = res.policyCheck;
+                const wcItem = res.wineCellarItem;
+                const wcOnly = res.wineCellarOnly === true;
 
                 if (savedItem) {
                     setItemCount(prev => prev + 1);
                     setRecentlyAddedItems(prev => [savedItem, ...prev]);
                     setActiveTab('list');
+                    await fetchItems();
                 }
 
                 if (wcOnly && wcItem) {
@@ -560,8 +562,8 @@ export default function AddItemsPage() {
                     showToast(`${name} saved! Ready for next scan.`);
                 }
 
-                if (res.data.warning) {
-                    setLastWarning(res.data.warning);
+                if (res.warning) {
+                    setLastWarning(res.warning);
                 } else {
                     setLastWarning('');
                 }
@@ -823,10 +825,13 @@ export default function AddItemsPage() {
                                             <div><span className="text-gray-500">Exp:</span> <span className="font-medium text-gray-800">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</span></div>
                                             <div><span className="text-gray-500">Value:</span> <span className="font-bold text-green-600">${item.estimatedValue?.toFixed(2) || '0.00'}</span></div>
                                             {item.manufacturer && (
-                                                <div className="col-span-2"><span className="text-gray-500">Manufacturer:</span> <span className="font-medium text-gray-800">{item.manufacturer}</span></div>
+                                                <div className="col-span-1"><span className="text-gray-500">Manufacturer:</span> <span className="font-medium text-gray-800">{item.manufacturer}</span></div>
                                             )}
                                             {item.destination && (
-                                                <div className="col-span-2"><span className="text-gray-500">Destination:</span> <span className="font-medium text-gray-800 capitalize">{item.destination}</span></div>
+                                                <div className="col-span-1"><span className="text-gray-500">Destination:</span> <span className="font-medium text-gray-800 capitalize">{item.destination}</span></div>
+                                            )}
+                                            {item.serialNumber && (
+                                                <div className="col-span-1"><span className="text-gray-500">Serial Number:</span> <span className="font-medium text-gray-800 capitalize">{item.serialNumber}</span></div>
                                             )}
                                         </div>
                                     </div>
