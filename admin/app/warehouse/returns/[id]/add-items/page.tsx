@@ -188,9 +188,17 @@ export default function AddItemsPage() {
 
     // ── Barcode scan handler ───────────────────────────────────
 
+    const deriveIsPartial = useCallback((): boolean => {
+        const pkgSize = parseFloat(form.fullPackageSize) || 0;
+        const qtyNum = parseFloat(form.fullPackageQtyReturned) || 0;
+        if (!form.fullPackageQtyReturned.trim() || qtyNum <= 0 || pkgSize <= 0) return false;
+        const units = form.qtyMode === 'units' ? qtyNum : (qtyNum / 100) * pkgSize;
+        return units < pkgSize;
+    }, [form.fullPackageSize, form.fullPackageQtyReturned, form.qtyMode]);
+
     const performPolicyCheck = useCallback(
-        async (ndc: string, expirationDate: string, dosageForm?: string) => {
-            const checkResult = await dispatch(checkReturnability({ ndc, expirationDate, dosageForm }));
+        async (ndc: string, expirationDate: string, dosageForm?: string, isPartial?: boolean) => {
+            const checkResult = await dispatch(checkReturnability({ ndc, expirationDate, dosageForm, isPartial }));
             if (checkReturnability.fulfilled.match(checkResult) && checkResult.payload) {
                 const policy = checkResult.payload;
                 setPolicyAutoCheck(policy);
@@ -216,12 +224,13 @@ export default function AddItemsPage() {
         setIsPolicyChecking(true);
         setPolicyAutoCheck(null);
         setPreCheckResult(null);
+        const partial = deriveIsPartial();
         const reqId = ++policyCheckRequestIdRef.current;
         try {
-            const policy = await performPolicyCheck(ndc, expirationDate, dosageForm);
+            const policy = await performPolicyCheck(ndc, expirationDate, dosageForm, partial);
             if (reqId !== policyCheckRequestIdRef.current) return policy;
             if (policy) {
-                policySyncKeyRef.current = `${ndc}|${expirationDate}|${dosageForm || ''}`;
+                policySyncKeyRef.current = `${ndc}|${expirationDate}|${dosageForm || ''}|${partial}`;
             }
             return policy;
         } finally {
@@ -236,13 +245,14 @@ export default function AddItemsPage() {
         const ndc = form.ndc.trim();
         const exp = form.expirationDate.trim();
         const dosage = (form.dosageForm || '').trim();
+        const partial = deriveIsPartial();
         if (!ndc || !exp) {
             policySyncKeyRef.current = '';
             setPolicyAutoCheck(null);
             setPreCheckResult(null);
             return;
         }
-        const key = `${ndc}|${exp}|${dosage}`;
+        const key = `${ndc}|${exp}|${dosage}|${partial}`;
         if (key === policySyncKeyRef.current) {
             return;
         }
@@ -254,7 +264,7 @@ export default function AddItemsPage() {
 
         (async () => {
             try {
-                const policy = await performPolicyCheck(ndc, exp, dosage || undefined);
+                const policy = await performPolicyCheck(ndc, exp, dosage || undefined, partial);
                 if (reqId !== policyCheckRequestIdRef.current) return;
                 if (policy) {
                     policySyncKeyRef.current = key;
@@ -267,7 +277,7 @@ export default function AddItemsPage() {
                 }
             }
         })();
-    }, [form.ndc, form.expirationDate, form.dosageForm, performPolicyCheck]);
+    }, [form.ndc, form.expirationDate, form.dosageForm, form.fullPackageQtyReturned, form.fullPackageSize, form.qtyMode, deriveIsPartial, performPolicyCheck]);
 
     const handleScan = async (raw: string) => {
         if (!raw.trim()) return;

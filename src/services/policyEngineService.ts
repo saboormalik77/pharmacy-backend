@@ -212,8 +212,10 @@ export async function checkReturnability(
     };
   }
 
-  // Use the first (primary) return policy
-  const rp = returnPolicies[0];
+  // Select the matching return policy based on partial status.
+  // If isPartial, prefer a policy with partials_accepted=true; otherwise prefer partials_accepted=false.
+  const matchingPolicy = returnPolicies.find((p: any) => p.partials_accepted === isPartial);
+  const rp = matchingPolicy || returnPolicies[0];
 
   // Step 5: Calculate return window
   const windowStart = addMonths(expDate, -rp.months_before_expiration);

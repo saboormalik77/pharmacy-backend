@@ -39,6 +39,12 @@ const INITIAL_RETURN_POLICY = {
     returnableWithinPolicyPeriod: true,
 };
 
+const INITIAL_PARTIAL_POLICY = {
+    policyNumber: undefined as number | undefined,
+    policyDescription: '',
+    returnableWithinPolicyPeriod: true,
+};
+
 // ── Page ───────────────────────────────────────────────────────
 
 export default function PoliciesPage() {
@@ -59,6 +65,7 @@ export default function PoliciesPage() {
         labelerId: '', manufacturerName: '', labelerType: 'generic',
     });
     const [newReturnPolicy, setNewReturnPolicy] = useState({ ...INITIAL_RETURN_POLICY });
+    const [partialPolicy, setPartialPolicy] = useState({ ...INITIAL_PARTIAL_POLICY });
     const [newNote, setNewNote] = useState('');
 
     // Reverse distributors for the Destination dropdown
@@ -136,13 +143,30 @@ export default function PoliciesPage() {
                     policyNumber: newReturnPolicy.policyNumber,
                     policyDescription: newReturnPolicy.policyDescription || undefined,
                     discountRate: newReturnPolicy.discountRate,
-                    partialsAccepted: newReturnPolicy.partialsAccepted,
+                    partialsAccepted: false,
                     reimbursementType: newReturnPolicy.reimbursementType,
                     returnableWithinPolicyPeriod: newReturnPolicy.returnableWithinPolicyPeriod,
                 };
                 const rpResult = await dispatch(addReturnPolicy({ policyId: createdId, payload: rpPayload }));
                 if (addReturnPolicy.rejected.match(rpResult)) {
                     showToast((rpResult.payload as string) || 'Policy created but failed to save return info.', 'error');
+                }
+
+                if (newReturnPolicy.partialsAccepted) {
+                    const partialPayload: ReturnPolicyCreatePayload = {
+                        destination: newReturnPolicy.destination,
+                        autoRaEmail: newReturnPolicy.autoRaEmail || undefined,
+                        policyNumber: partialPolicy.policyNumber,
+                        policyDescription: partialPolicy.policyDescription || undefined,
+                        discountRate: newReturnPolicy.discountRate,
+                        partialsAccepted: true,
+                        reimbursementType: newReturnPolicy.reimbursementType,
+                        returnableWithinPolicyPeriod: partialPolicy.returnableWithinPolicyPeriod,
+                    };
+                    const partialResult = await dispatch(addReturnPolicy({ policyId: createdId, payload: partialPayload }));
+                    if (addReturnPolicy.rejected.match(partialResult)) {
+                        showToast((partialResult.payload as string) || 'Main policy saved but partial policy failed.', 'error');
+                    }
                 }
             }
 
@@ -155,6 +179,7 @@ export default function PoliciesPage() {
             setAddModal(false);
             setNewPolicy({ labelerId: '', manufacturerName: '', labelerType: 'generic' });
             setNewReturnPolicy({ ...INITIAL_RETURN_POLICY });
+            setPartialPolicy({ ...INITIAL_PARTIAL_POLICY });
             setNewNote('');
             dispatch(fetchPolicies({ page, limit: 20 }));
         } else {
@@ -586,6 +611,37 @@ export default function PoliciesPage() {
                                         <option value="no">Inverted — Wine Cellar in window</option>
                                     </select>
                                 </div>
+
+                                {/* Partial Policy Section — only when Partials = YES */}
+                                {newReturnPolicy.partialsAccepted && (
+                                    <div className="border-2 border-purple-200 rounded-lg p-3 space-y-3 bg-purple-50/40">
+                                        <h4 className="text-xs font-bold text-purple-800 uppercase tracking-wider">Partial Return Policy</h4>
+                                        <p className="text-[10px] text-purple-600">Configure separate policy details for partial returns</p>
+
+                                        <div className="grid grid-cols-3 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Policy #</label>
+                                                <input type="number" value={partialPolicy.policyNumber ?? ''} onChange={e => setPartialPolicy({ ...partialPolicy, policyNumber: e.target.value ? parseInt(e.target.value) : undefined })} placeholder="e.g. 2" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" />
+                                            </div>
+                                            <div className="col-span-2">
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Policy Description</label>
+                                                <input type="text" value={partialPolicy.policyDescription} onChange={e => setPartialPolicy({ ...partialPolicy, policyDescription: e.target.value })} placeholder="e.g. Partial returns accepted for tablets only" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700 mb-1">Return window mode</label>
+                                            <select
+                                                value={partialPolicy.returnableWithinPolicyPeriod ? 'yes' : 'no'}
+                                                onChange={e => setPartialPolicy({ ...partialPolicy, returnableWithinPolicyPeriod: e.target.value === 'yes' })}
+                                                className="w-full max-w-xs px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
+                                            >
+                                                <option value="yes">Standard — returnable in window</option>
+                                                <option value="no">Inverted — Wine Cellar in window</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <div className="flex justify-end gap-2 px-5 py-3 border-t border-gray-200 bg-gray-50 flex-shrink-0">
