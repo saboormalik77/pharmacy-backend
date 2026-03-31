@@ -73,7 +73,7 @@ function effectiveRaStatus(memo: DebitMemo): 'pending' | 'requested' | 'received
     if (
         memo.ticklerDate &&
         new Date(memo.ticklerDate) < new Date() &&
-        (memo.raRequestedAt != null || memo.raStatus === 'requested' || memo.raStatus === 'overdue')
+        (memo.raRequestedAt != null || memo.raStatus === 'requested')
     ) {
         return 'overdue';
     }

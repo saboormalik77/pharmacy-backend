@@ -197,7 +197,7 @@ export default function FinancialsPage() {
                                                     <td className="px-2 py-1.5 text-xs font-medium text-gray-900">
                                                         {avrGroupBy === 'ndc' ? row.ndc : avrGroupBy === 'destination' ? row.destination : row.labelerName}
                                                     </td>
-                                                    <td className="px-2 py-1.5 text-xs text-right">{formatCurrency(row.totalAsk)}</td>
+                                                    <td className="px-2 py-1.5 text-xs text-right">{formatCurrency(row.totalAsk ?? row.totalAskValue ?? 0)}</td>
                                                     <td className="px-2 py-1.5 text-xs text-right text-green-600">{formatCurrency(row.totalReceived)}</td>
                                                     <td className="px-2 py-1.5 text-xs text-right text-red-600">{formatCurrency(row.difference)}</td>
                                                     <td className="px-2 py-1.5 text-xs text-right">

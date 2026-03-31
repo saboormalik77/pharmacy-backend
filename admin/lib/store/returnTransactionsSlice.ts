@@ -539,7 +539,18 @@ export const updateTransactionItem = createAsyncThunk(
 
 export const resolveTransactionItem = createAsyncThunk(
     'returnTransactions/resolveItem',
-    async ({ transactionId, itemId, payload }: { transactionId: string; itemId: string; payload: { new_status: string; reason?: string; destination?: string; memo?: string } }, { rejectWithValue }) => {
+    async ({ transactionId, itemId, payload }: {
+        transactionId: string;
+        itemId: string;
+        payload: {
+            new_status: string;
+            reason?: string;
+            destination?: string;
+            memo?: string;
+            non_returnable_route?: 'wine_cellar' | 'destruction';
+            expected_returnable_date?: string;
+        };
+    }, { rejectWithValue }) => {
         try {
             const { apiClient } = await import('@/lib/api/apiClient');
             const { cookieUtils } = await import('@/lib/utils/cookies');
@@ -697,9 +708,10 @@ const returnTransactionsSlice = createSlice({
             // updateFinalizeSteps
             .addCase(updateFinalizeSteps.fulfilled, (state, action) => {
                 if (action.payload) {
-                    state.currentReturn = action.payload;
-                    const idx = state.transactions.findIndex(t => t.id === action.payload.id);
-                    if (idx >= 0) state.transactions[idx] = action.payload;
+                    const tx = action.payload;
+                    const idx = state.transactions.findIndex(t => t.id === tx.id);
+                    if (idx >= 0) state.transactions[idx] = tx;
+                    if (state.currentTransaction?.id === tx.id) state.currentTransaction = tx;
                 }
             })
 

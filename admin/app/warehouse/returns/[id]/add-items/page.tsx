@@ -6,7 +6,7 @@ import { useRouter, useParams } from 'next/navigation';
 import {
     ArrowLeft, Loader2, ScanLine, Keyboard, CheckCircle,
     AlertTriangle, RotateCcw, X, Camera, Archive, ShieldCheck,
-    FileText, Ban, Info,
+    FileText, Ban, Info, Trash2,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
@@ -17,9 +17,11 @@ import {
     scanBarcode,
     addTransactionItem,
     addToWineCellarDirect,
+    deleteTransactionItem,
+    fetchTransactionItems,
 } from '@/lib/store/returnTransactionsSlice';
 import { checkReturnability } from '@/lib/store/policiesSlice';
-import { BarcodeScanResponse, ReturnabilityCheckResult } from '@/lib/types';
+import { BarcodeScanResponse, ReturnabilityCheckResult, ReturnTransactionItem } from '@/lib/types';
 import { apiClient } from '@/lib/api/apiClient';
 
 // Dynamically imported so it only loads in the browser (uses WebRTC APIs)
@@ -68,7 +70,7 @@ export default function AddItemsPage() {
     const params = useParams();
     const transactionId = params.id as string;
     const dispatch = useAppDispatch();
-    const { currentTransaction: tx, isScanLoading, isItemActionLoading } = useAppSelector(
+    const { currentTransaction: tx, isScanLoading, isItemActionLoading, items } = useAppSelector(
         (state) => state.returnTransactions
     );
 
@@ -87,6 +89,8 @@ export default function AddItemsPage() {
     const [scanError, setScanError] = useState('');
     const [toasts, setToasts] = useState<Toast[]>([]);
     const [itemCount, setItemCount] = useState(0);
+    const [recentlyAddedItems, setRecentlyAddedItems] = useState<ReturnTransactionItem[]>([]);
+    const [activeTab, setActiveTab] = useState<'list' | 'form'>('form');
     const [lastWarning, setLastWarning] = useState('');
     const [lastClassification, setLastClassification] = useState<{ item: string; status: string; policyCheck?: ReturnabilityCheckResult; wineCellarItem?: any } | null>(null);
     const [scannedPrices, setScannedPrices] = useState<ScannedPrices | null>(null);
@@ -100,6 +104,7 @@ export default function AddItemsPage() {
     const [formErrors, setFormErrors] = useState<Set<string>>(new Set());
     // Expected returnable date for manual wine cellar move
     const [wineCellarDate, setWineCellarDate] = useState('');
+    const [nonReturnableRoute, setNonReturnableRoute] = useState<'wine_cellar' | 'destruction'>('destruction');
     // Manual destination when no policy found
     const [manualDestination, setManualDestination] = useState('');
     const [reverseDistributors, setReverseDistributors] = useState<{ id: string; name: string; email: string }[]>([]);
@@ -125,8 +130,18 @@ export default function AddItemsPage() {
     const removeToast = (id: string) => setToasts(prev => prev.filter(t => t.id !== id));
 
     useEffect(() => {
-        if (transactionId) dispatch(fetchReturnTransactionById(transactionId));
+        if (transactionId) {
+            dispatch(fetchReturnTransactionById(transactionId));
+            dispatch(fetchTransactionItems({ transactionId }));
+        }
     }, [dispatch, transactionId]);
+
+    useEffect(() => {
+        if (items && items.length > 0) {
+            setRecentlyAddedItems(items);
+            setItemCount(items.length);
+        }
+    }, [items]);
 
     useEffect(() => {
         if (mode === 'usb') scanInputRef.current?.focus();
@@ -173,9 +188,17 @@ export default function AddItemsPage() {
 
     // ── Barcode scan handler ───────────────────────────────────
 
+    const deriveIsPartial = useCallback((): boolean => {
+        const pkgSize = parseFloat(form.fullPackageSize) || 0;
+        const qtyNum = parseFloat(form.fullPackageQtyReturned) || 0;
+        if (!form.fullPackageQtyReturned.trim() || qtyNum <= 0 || pkgSize <= 0) return false;
+        const units = form.qtyMode === 'units' ? qtyNum : (qtyNum / 100) * pkgSize;
+        return units < pkgSize;
+    }, [form.fullPackageSize, form.fullPackageQtyReturned, form.qtyMode]);
+
     const performPolicyCheck = useCallback(
-        async (ndc: string, expirationDate: string, dosageForm?: string) => {
-            const checkResult = await dispatch(checkReturnability({ ndc, expirationDate, dosageForm }));
+        async (ndc: string, expirationDate: string, dosageForm?: string, isPartial?: boolean) => {
+            const checkResult = await dispatch(checkReturnability({ ndc, expirationDate, dosageForm, isPartial }));
             if (checkReturnability.fulfilled.match(checkResult) && checkResult.payload) {
                 const policy = checkResult.payload;
                 setPolicyAutoCheck(policy);
@@ -201,12 +224,13 @@ export default function AddItemsPage() {
         setIsPolicyChecking(true);
         setPolicyAutoCheck(null);
         setPreCheckResult(null);
+        const partial = deriveIsPartial();
         const reqId = ++policyCheckRequestIdRef.current;
         try {
-            const policy = await performPolicyCheck(ndc, expirationDate, dosageForm);
+            const policy = await performPolicyCheck(ndc, expirationDate, dosageForm, partial);
             if (reqId !== policyCheckRequestIdRef.current) return policy;
             if (policy) {
-                policySyncKeyRef.current = `${ndc}|${expirationDate}|${dosageForm || ''}`;
+                policySyncKeyRef.current = `${ndc}|${expirationDate}|${dosageForm || ''}|${partial}`;
             }
             return policy;
         } finally {
@@ -221,13 +245,14 @@ export default function AddItemsPage() {
         const ndc = form.ndc.trim();
         const exp = form.expirationDate.trim();
         const dosage = (form.dosageForm || '').trim();
+        const partial = deriveIsPartial();
         if (!ndc || !exp) {
             policySyncKeyRef.current = '';
             setPolicyAutoCheck(null);
             setPreCheckResult(null);
             return;
         }
-        const key = `${ndc}|${exp}|${dosage}`;
+        const key = `${ndc}|${exp}|${dosage}|${partial}`;
         if (key === policySyncKeyRef.current) {
             return;
         }
@@ -239,7 +264,7 @@ export default function AddItemsPage() {
 
         (async () => {
             try {
-                const policy = await performPolicyCheck(ndc, exp, dosage || undefined);
+                const policy = await performPolicyCheck(ndc, exp, dosage || undefined, partial);
                 if (reqId !== policyCheckRequestIdRef.current) return;
                 if (policy) {
                     policySyncKeyRef.current = key;
@@ -252,7 +277,7 @@ export default function AddItemsPage() {
                 }
             }
         })();
-    }, [form.ndc, form.expirationDate, form.dosageForm, performPolicyCheck]);
+    }, [form.ndc, form.expirationDate, form.dosageForm, form.fullPackageQtyReturned, form.fullPackageSize, form.qtyMode, deriveIsPartial, performPolicyCheck]);
 
     const handleScan = async (raw: string) => {
         if (!raw.trim()) return;
@@ -486,7 +511,12 @@ export default function AddItemsPage() {
         payload.scanSource = form.scanSource;
         if (form.rawScanData) payload.rawScanData = form.rawScanData;
         const destinationToUse = policyAutoCheck?.destination || manualDestination;
-        if (destinationToUse) payload.destination = destinationToUse;
+        if (form.returnStatus === 'returnable' && destinationToUse) {
+            payload.destination = destinationToUse;
+        }
+        if (form.returnStatus === 'non_returnable' && nonReturnableRoute === 'destruction') {
+            payload.destination = 'destruction';
+        }
 
         const result = await dispatch(addTransactionItem({ transactionId, payload }));
 
@@ -499,6 +529,8 @@ export default function AddItemsPage() {
 
             if (savedItem) {
                 setItemCount(prev => prev + 1);
+                setRecentlyAddedItems(prev => [savedItem, ...prev]);
+                setActiveTab('list');
             }
 
             if (wcOnly && wcItem) {
@@ -525,6 +557,7 @@ export default function AddItemsPage() {
             setForm({ ...EMPTY_FORM });
             setFormErrors(new Set());
             setManualDestination('');
+            setNonReturnableRoute('destruction');
             setScannedPrices(null);
             setScanError('');
             setScanInput('');
@@ -595,6 +628,7 @@ export default function AddItemsPage() {
         setFormErrors(new Set());
         setWineCellarDate('');
         setManualDestination('');
+        setNonReturnableRoute('destruction');
         setScannedPrices(null);
         setScanError('');
         setScanInput('');
@@ -610,6 +644,7 @@ export default function AddItemsPage() {
         setFormErrors(new Set());
         setWineCellarDate('');
         setManualDestination('');
+        setNonReturnableRoute('destruction');
         setScannedPrices(null);
         setScanError('');
         setLastWarning('');
@@ -620,6 +655,21 @@ export default function AddItemsPage() {
         setIsPolicyChecking(false);
         setPolicyModalOpen(false);
         if (mode === 'usb') scanInputRef.current?.focus();
+    };
+
+    const handleRemoveRecentItem = async (itemId: string) => {
+        if (!checkActionAllowed('remove item')) {
+            return;
+        }
+
+        const result = await dispatch(deleteTransactionItem({ transactionId, itemId }));
+        if (deleteTransactionItem.fulfilled.match(result)) {
+            setRecentlyAddedItems(prev => prev.filter(item => item.id !== itemId));
+            setItemCount(prev => prev - 1);
+            showToast('Item removed successfully', 'success');
+        } else {
+            showToast('Failed to remove item. Please try again.', 'error');
+        }
     };
 
     // ── Render ─────────────────────────────────────────────────
@@ -686,6 +736,100 @@ export default function AddItemsPage() {
                 </button>
             </div>
 
+            {/* Tabs - Only show when items exist */}
+            {recentlyAddedItems.length > 0 && (
+                <div className="flex gap-2 border-b border-gray-200">
+                    <button
+                        onClick={() => setActiveTab('list')}
+                        className={`px-4 py-2 text-xs font-semibold transition-colors border-b-2 ${
+                            activeTab === 'list'
+                                ? 'border-primary-600 text-primary-700 bg-primary-50'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                        }`}
+                    >
+                        <div className="flex items-center gap-1.5">
+                            <FileText className="w-3.5 h-3.5" />
+                            Products ({recentlyAddedItems.length})
+                        </div>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('form')}
+                        className={`px-4 py-2 text-xs font-semibold transition-colors border-b-2 ${
+                            activeTab === 'form'
+                                ? 'border-primary-600 text-primary-700 bg-primary-50'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                        }`}
+                    >
+                        <div className="flex items-center gap-1.5">
+                            <ScanLine className="w-3.5 h-3.5" />
+                            Scan &amp; Add
+                        </div>
+                    </button>
+                </div>
+            )}
+
+            {/* Tab Content: Product List */}
+            {activeTab === 'list' && recentlyAddedItems.length > 0 && (
+                <div className="bg-white rounded-lg shadow px-4 py-3">
+                    <div className="flex items-center justify-between mb-3">
+                        <h2 className="text-xs font-semibold text-gray-700">Products Added in This Session</h2>
+                        <p className="text-[10px] text-gray-500">{recentlyAddedItems.length} item{recentlyAddedItems.length !== 1 ? 's' : ''}</p>
+                    </div>
+                    <div className="space-y-2 max-h-[500px] overflow-y-auto">
+                        {recentlyAddedItems.map((item) => (
+                            <div key={item.id} className="flex items-start gap-2 p-3 border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50/30 transition-all">
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1.5">
+                                        <p className="text-sm font-bold text-gray-900 truncate">
+                                            {item.proprietaryName || item.genericName || 'Unknown Product'}
+                                        </p>
+                                        <Badge variant={
+                                            item.returnStatus === 'returnable' ? 'success' : 
+                                            item.returnStatus === 'non_returnable' ? 'danger' : 
+                                            'warning'
+                                        }>
+                                            <span className="text-[10px]">
+                                                {item.returnStatus === 'tbd' ? 'TBD' : 
+                                                 item.returnStatus === 'returnable' ? 'Returnable' : 
+                                                 'Non-Returnable'}
+                                            </span>
+                                        </Badge>
+                                        {item.isPartial && (
+                                            <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[10px] rounded font-semibold">
+                                                Partial {item.partialPercentage}%
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-1 text-[11px]">
+                                        <div><span className="text-gray-500">NDC:</span> <span className="font-semibold text-gray-900 font-mono">{item.ndc || '—'}</span></div>
+                                        <div><span className="text-gray-500">Lot:</span> <span className="font-medium text-gray-800">{item.lotNumber || '—'}</span></div>
+                                        <div><span className="text-gray-500">Exp:</span> <span className="font-medium text-gray-800">{item.expirationDate ? new Date(item.expirationDate).toLocaleDateString() : '—'}</span></div>
+                                        <div><span className="text-gray-500">Value:</span> <span className="font-bold text-green-600">${item.estimatedValue?.toFixed(2) || '0.00'}</span></div>
+                                        {item.manufacturer && (
+                                            <div className="col-span-2"><span className="text-gray-500">Manufacturer:</span> <span className="font-medium text-gray-800">{item.manufacturer}</span></div>
+                                        )}
+                                        {item.destination && (
+                                            <div className="col-span-2"><span className="text-gray-500">Destination:</span> <span className="font-medium text-gray-800 capitalize">{item.destination}</span></div>
+                                        )}
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => handleRemoveRecentItem(item.id)}
+                                    disabled={isItemActionLoading}
+                                    className="flex-shrink-0 p-2 rounded border border-red-300 bg-red-50 text-red-600 hover:bg-red-100 hover:border-red-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    title="Remove this item"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Tab Content: Scan & Add Form */}
+            {(activeTab === 'form' || recentlyAddedItems.length === 0) && (
+                <>
             {/* Scan / Manual Toggle */}
             <div className="bg-white rounded-lg shadow px-4 py-3">
                 {/* Mode tabs */}
@@ -817,7 +961,7 @@ export default function AddItemsPage() {
                 )}
             </div>
 
-            {/* Classification Result */}
+            {/* Classification Result (after save) */}
             {lastClassification && (
                 <div className={`rounded-lg border px-3 py-2 ${
                     lastClassification.wineCellarItem ? 'bg-purple-50 border-purple-300' :
@@ -1054,12 +1198,12 @@ export default function AddItemsPage() {
                     </div>
                 </div>
 
-                {/* Manual Destination — shown only when no return policy is found */}
-                {(!policyAutoCheck || policyAutoCheck.status === 'tbd') && (
+                {/* Manual Destination — shown only when item is returnable and no policy destination is available */}
+                {(!policyAutoCheck || policyAutoCheck.status === 'tbd') && form.returnStatus === 'returnable' && (
                     <div className="mt-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg">
                         <div className="flex items-center gap-1.5 mb-1.5">
                             <AlertTriangle className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
-                            <p className="text-[10px] font-semibold text-amber-800">No return policy found — select destination manually</p>
+                            <p className="text-[10px] font-semibold text-amber-800">No return policy found — select return destination manually</p>
                         </div>
                         <div>
                             <label className="block text-[10px] font-medium text-amber-700 mb-0.5">
@@ -1080,6 +1224,33 @@ export default function AddItemsPage() {
                                     Selected: <span className="font-semibold">{manualDestination}</span>
                                 </p>
                             )}
+                        </div>
+                    </div>
+                )}
+
+                {/* Non-returnable route selector */}
+                {form.returnStatus === 'non_returnable' && (
+                    <div className="mt-2 p-2.5 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="text-[10px] font-semibold text-red-800 mb-1.5">Non-Returnable Route</p>
+                        <div className="grid grid-cols-2 gap-2">
+                            <label className={`flex items-center gap-2 px-2 py-1.5 border rounded cursor-pointer ${nonReturnableRoute === 'wine_cellar' ? 'border-purple-400 bg-purple-50' : 'border-gray-300 bg-white'}`}>
+                                <input
+                                    type="radio"
+                                    checked={nonReturnableRoute === 'wine_cellar'}
+                                    onChange={() => setNonReturnableRoute('wine_cellar')}
+                                />
+                                <Archive className="w-3.5 h-3.5 text-purple-600" />
+                                <span className="text-xs font-medium text-purple-800">Wine Cellar</span>
+                            </label>
+                            <label className={`flex items-center gap-2 px-2 py-1.5 border rounded cursor-pointer ${nonReturnableRoute === 'destruction' ? 'border-red-400 bg-red-50' : 'border-gray-300 bg-white'}`}>
+                                <input
+                                    type="radio"
+                                    checked={nonReturnableRoute === 'destruction'}
+                                    onChange={() => setNonReturnableRoute('destruction')}
+                                />
+                                <Ban className="w-3.5 h-3.5 text-red-600" />
+                                <span className="text-xs font-medium text-red-800">Destruction</span>
+                            </label>
                         </div>
                     </div>
                 )}
@@ -1115,45 +1286,72 @@ export default function AddItemsPage() {
                             </div>
                         </>
                     ) : (() => {
-                        // No policy found + user manually selected Non-Returnable → offer Wine Cellar
+                        // No policy found + user manually selected Non-Returnable → route choice
                         const noPolicy = !policyAutoCheck || policyAutoCheck.status === 'tbd';
                         const isManualNonReturnable = noPolicy && form.returnStatus === 'non_returnable';
                         return isManualNonReturnable ? (
                             <>
-                                <div className="mb-2 bg-purple-50 border border-purple-200 rounded px-3 py-2 space-y-2">
-                                    <div className="flex items-start gap-1.5">
-                                        <Archive className="w-3.5 h-3.5 text-purple-600 mt-0.5 flex-shrink-0" />
+                                {nonReturnableRoute === 'wine_cellar' && (
+                                    <div className="mb-2 bg-purple-50 border border-purple-200 rounded px-3 py-2 space-y-2">
+                                        <div className="flex items-start gap-1.5">
+                                            <Archive className="w-3.5 h-3.5 text-purple-600 mt-0.5 flex-shrink-0" />
+                                            <div>
+                                                <p className="text-xs font-semibold text-purple-800">Wine Cellar route selected</p>
+                                                <p className="text-[10px] text-purple-700 mt-0.5">
+                                                    Enter expected returnable date, then move item to Wine Cellar.
+                                                </p>
+                                            </div>
+                                        </div>
                                         <div>
-                                            <p className="text-xs font-semibold text-purple-800">No return policy — move to Wine Cellar</p>
-                                            <p className="text-[10px] text-purple-700 mt-0.5">
-                                                Enter when this product will be eligible for return, then click Move to Wine Cellar.
-                                            </p>
+                                            <label className="block text-[10px] font-medium text-purple-700 mb-0.5">
+                                                Expected Returnable Date <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="date"
+                                                value={wineCellarDate}
+                                                onChange={e => setWineCellarDate(e.target.value)}
+                                                className={`w-44 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-purple-400 ${
+                                                    !wineCellarDate ? 'border-red-300 bg-red-50' : 'border-purple-300 bg-white'
+                                                }`}
+                                            />
                                         </div>
                                     </div>
-                                    <div>
-                                        <label className="block text-[10px] font-medium text-purple-700 mb-0.5">
-                                            Expected Returnable Date <span className="text-red-500">*</span>
-                                        </label>
-                                        <input
-                                            type="date"
-                                            value={wineCellarDate}
-                                            onChange={e => setWineCellarDate(e.target.value)}
-                                            className={`w-44 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-purple-400 ${
-                                                !wineCellarDate ? 'border-red-300 bg-red-50' : 'border-purple-300 bg-white'
-                                            }`}
-                                        />
+                                )}
+                                {nonReturnableRoute === 'destruction' && (
+                                    <div className="mb-2 bg-red-50 border border-red-200 rounded px-3 py-2">
+                                        <div className="flex items-start gap-1.5">
+                                            <Ban className="w-3.5 h-3.5 text-red-600 mt-0.5 flex-shrink-0" />
+                                            <div>
+                                                <p className="text-xs font-semibold text-red-800">Destruction route selected</p>
+                                                <p className="text-[10px] text-red-700 mt-0.5">
+                                                    Item will be saved as non-returnable and routed to destruction workflow.
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                                 <div className="flex flex-wrap gap-1.5">
-                                    <button
-                                        onClick={handleMoveToWineCellarManual}
-                                        disabled={isItemActionLoading || !wineCellarDate}
-                                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 transition-colors"
-                                    >
-                                        {isItemActionLoading
-                                            ? <><Loader2 className="w-3 h-3 animate-spin" />Moving...</>
-                                            : <><Archive className="w-3 h-3" />Move to Wine Cellar</>}
-                                    </button>
+                                    {nonReturnableRoute === 'wine_cellar' ? (
+                                        <button
+                                            onClick={handleMoveToWineCellarManual}
+                                            disabled={isItemActionLoading || !wineCellarDate}
+                                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 transition-colors"
+                                        >
+                                            {isItemActionLoading
+                                                ? <><Loader2 className="w-3 h-3 animate-spin" />Moving...</>
+                                                : <><Archive className="w-3 h-3" />Move to Wine Cellar</>}
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={() => handleSave()}
+                                            disabled={isItemActionLoading || isPreChecking || !canEdit}
+                                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
+                                        >
+                                            {isItemActionLoading || isPreChecking
+                                                ? <><Loader2 className="w-3 h-3 animate-spin" />Saving...</>
+                                                : <><Ban className="w-3 h-3" />Save to Destruction</>}
+                                        </button>
+                                    )}
                                     <button onClick={handleClearForm} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
                                         <X className="w-3 h-3" /> Clear
                                     </button>
@@ -1177,6 +1375,8 @@ export default function AddItemsPage() {
                     })()}
                 </div>
             </div>
+            </>
+            )}
 
             {/* ── Policy Modal ─────────────────────────────── */}
             {policyModalOpen && (

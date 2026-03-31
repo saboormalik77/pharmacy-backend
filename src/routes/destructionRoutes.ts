@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { authenticate } from '../middleware/auth';
 import { authenticateAdmin } from '../middleware/adminAuth';
 import {
   listHandler,
@@ -10,6 +11,15 @@ import {
 } from '../controllers/destructionController';
 
 const router = Router();
+const authenticateAny = async (req: any, res: any, next: any) => {
+  const auth = req.headers.authorization;
+  if (!auth || !auth.startsWith('Bearer ')) return next();
+
+  await authenticateAdmin(req, res, async (adminErr: any) => {
+    if (!adminErr) return next();
+    await authenticate(req, res, next);
+  });
+};
 
 /**
  * @swagger
@@ -47,7 +57,7 @@ const router = Router();
  *       200:
  *         description: List of destruction records with pagination
  */
-router.get('/', authenticateAdmin, listHandler);
+router.get('/', authenticateAny, listHandler);
 
 /**
  * @swagger
@@ -65,7 +75,7 @@ router.get('/', authenticateAdmin, listHandler);
  *       200:
  *         description: Pending destruction items
  */
-router.get('/pending', authenticateAdmin, pendingHandler);
+router.get('/pending', authenticateAny, pendingHandler);
 
 /**
  * @swagger
@@ -83,7 +93,7 @@ router.get('/pending', authenticateAdmin, pendingHandler);
  *       200:
  *         description: Statistics object with counts per status
  */
-router.get('/stats', authenticateAdmin, statsHandler);
+router.get('/stats', authenticateAny, statsHandler);
 
 /**
  * @swagger
@@ -104,7 +114,7 @@ router.get('/stats', authenticateAdmin, statsHandler);
  *       404:
  *         description: Record not found
  */
-router.get('/:id', authenticateAdmin, getHandler);
+router.get('/:id', authenticateAny, getHandler);
 
 /**
  * @swagger
@@ -140,7 +150,7 @@ router.get('/:id', authenticateAdmin, getHandler);
  *       400:
  *         description: Validation error
  */
-router.post('/', authenticateAdmin, createHandler);
+router.post('/', authenticateAny, createHandler);
 
 /**
  * @swagger
@@ -176,6 +186,6 @@ router.post('/', authenticateAdmin, createHandler);
  *       404:
  *         description: Record not found
  */
-router.patch('/:id', authenticateAdmin, updateHandler);
+router.patch('/:id', authenticateAny, updateHandler);
 
 export default router;

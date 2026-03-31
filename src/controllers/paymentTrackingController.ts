@@ -77,9 +77,65 @@ export const recordPaymentHandler = catchAsync(
     const result = await paymentTrackingService.recordPayment(
       req.params.id,
       Number(amountReceived),
-      paymentDate,
-      reference,
-      notes,
+      paymentDate || undefined,
+      reference !== undefined ? (reference || null) : undefined,
+      notes !== undefined ? (notes || null) : undefined,
+      creditMemoUrl
+    );
+
+    res.status(200).json({ status: 'success', data: result });
+  }
+);
+
+// ============================================================
+// PATCH /api/admin/debit-memos/:id/update-payment — Update payment
+// Accepts multipart/form-data with optional new creditMemo PDF file
+// ============================================================
+export const updatePaymentHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { amountReceived, paymentDate, reference, notes } = req.body;
+
+    if (!amountReceived) {
+      throw new AppError('amountReceived is required', 400);
+    }
+
+    // Upload new credit memo PDF if provided
+    let creditMemoUrl: string | undefined;
+    const file = (req as any).file as Express.Multer.File | undefined;
+
+    if (file) {
+      if (!supabaseAdmin) {
+        throw new AppError('Supabase admin client not configured', 500);
+      }
+
+      const timestamp = Date.now();
+      const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const filePath = `memo-documents/${req.params.id}/${timestamp}-${sanitizedName}`;
+
+      const { error: uploadError } = await supabaseAdmin.storage
+        .from('documents')
+        .upload(filePath, file.buffer, {
+          contentType: file.mimetype,
+          upsert: false,
+        });
+
+      if (uploadError) {
+        throw new AppError(`Failed to upload credit memo: ${uploadError.message}`, 400);
+      }
+
+      const { data: urlData } = supabaseAdmin.storage
+        .from('documents')
+        .getPublicUrl(filePath);
+
+      creditMemoUrl = urlData?.publicUrl;
+    }
+
+    const result = await paymentTrackingService.updatePayment(
+      req.params.id,
+      Number(amountReceived),
+      paymentDate || undefined,
+      reference !== undefined ? (reference || null) : undefined,
+      notes !== undefined ? (notes || null) : undefined,
       creditMemoUrl
     );
 

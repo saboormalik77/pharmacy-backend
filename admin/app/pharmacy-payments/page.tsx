@@ -55,7 +55,7 @@ function CalculatePayoutModal({
   const [batchId, setBatchId] = useState('');
 
   const pharmacyEligible = (p: BatchPharmacy) =>
-    !p.payoutRecorded && p.debitMemosPaidForPayout;
+    !p.payoutRecorded;
   const eligiblePharmacyCount = batchPharmacies.filter(pharmacyEligible).length;
 
   const handleBatchChange = (value: string) => {
@@ -444,7 +444,7 @@ function PharmacyPaymentsPageContent() {
               <table className="w-full table-auto">
                 <thead className="bg-gray-50 border-b border-gray-100">
                   <tr>
-                    {['Payment ID', 'Pharmacy', 'Batch', 'Payout Amount', 'Status', 'Created', 'Actions'].map(h => (
+                    {['Payment ID', 'Pharmacy', 'Batch', 'Total Credit', 'Payout Amount', 'Status', 'Created', 'Actions'].map(h => (
                       <th key={h} className="px-3 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider">{h}</th>
                     ))}
                   </tr>
@@ -462,6 +462,9 @@ function PharmacyPaymentsPageContent() {
                       <td className="px-3 py-1.5 whitespace-nowrap">
                         <div className="text-xs text-gray-900">{payment.batchName || 'N/A'}</div>
                         <div className="text-[10px] text-gray-400">{payment.batchId ? payment.batchId.slice(0, 8) + '…' : 'None'}</div>
+                      </td>
+                      <td className="px-3 py-1.5 whitespace-nowrap text-xs font-medium text-gray-900">
+                        ${payment.totalCreditReceived?.toFixed(2) || '0.00'}
                       </td>
                       <td className="px-3 py-1.5 whitespace-nowrap text-xs font-semibold text-green-600">
                         ${payment.pharmacyPayout?.toFixed(2) || '0.00'}
@@ -492,7 +495,7 @@ function PharmacyPaymentsPageContent() {
                               onClick={() => handleStatusUpdate(payment.id, 'processing')}
                               className="px-2 py-1 text-[10px] font-medium text-orange-900 bg-orange-50 border border-orange-200 rounded hover:bg-orange-100 transition-colors"
                             >
-                              Processing
+                             Mark as Processing
                             </button>
                           )}
                           {payment.status === 'processing' && (
@@ -592,6 +595,7 @@ function PharmacyPaymentsPageContent() {
                   { label: 'Status', isStatus: true },
                   { label: 'Pharmacy', value: viewModal.pharmacyName || 'N/A', sub: viewModal.pharmacyId.slice(0,8) + '…' },
                   { label: 'Batch', value: viewModal.batchName || 'N/A', sub: viewModal.batchId ? viewModal.batchId.slice(0,8) + '…' : '—' },
+                  { label: 'Total Credit Received', value: `$${viewModal.totalCreditReceived?.toFixed(2) || '0.00'}`, bold: true },
                   { label: 'Payout Amount', value: `$${viewModal.pharmacyPayout?.toFixed(2) || '0.00'}`, bold: true, green: true },
                   { label: 'Created', value: viewModal.createdAt ? new Date(viewModal.createdAt).toLocaleString() : 'N/A' },
                 ].map((row) => (

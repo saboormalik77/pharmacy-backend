@@ -167,6 +167,10 @@ export default function InventoryAnalysisPage() {
         await fetchAnalysisSummary();
         // Trigger notification refresh
         window.dispatchEvent(new CustomEvent('refreshNotifications'));
+        // Some backends generate notifications asynchronously; re-check shortly after upload
+        window.setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('refreshNotifications'));
+        }, 2000);
       } else {
         setError(response.message || 'Failed to analyze inventory');
       }

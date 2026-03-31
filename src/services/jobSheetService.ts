@@ -87,7 +87,7 @@ export function generateJobSheetHTML(data: JobSheetData): string {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Job Report – ${tx.licensePlate}</title>
+<title>${ph.businessName} Job Sheet</title>
 <style>
   @page { margin: 0.4in 0.5in; size: letter; }
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -139,7 +139,6 @@ export function generateJobSheetHTML(data: JobSheetData): string {
       ${licensePlateBarcode ? `<div style="margin-top:4px"><img src="${licensePlateBarcode}" alt="barcode" style="height:40px"></div>` : ''}
     </div>
     <div class="header-right">
-      <div class="header-field"><b>Status:</b> ${tx.status.toUpperCase()}</div>
       ${tx.finalizedAt ? `<div class="header-field"><b>Finalized:</b> ${new Date(tx.finalizedAt).toLocaleDateString('en-US')}</div>` : ''}
     </div>
   </div>
@@ -209,7 +208,7 @@ export function generateShippingLabelHTML(
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Shipping Label – ${trackingNumber}</title>
+<title>${ph.businessName} Label</title>
 <style>
   @page { margin: 0.3in; size: 4in 6in; }
   * { margin:0; padding:0; box-sizing:border-box; }

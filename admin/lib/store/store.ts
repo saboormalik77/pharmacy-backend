@@ -22,6 +22,7 @@ import raTrackingReducer from './raTrackingSlice';
 import paymentTrackingReducer from './paymentTrackingSlice';
 import ndcPricingReducer from './ndcPricingSlice';
 import shipmentGroupReducer from './shipmentGroupSlice';
+import destructionReducer from './destructionSlice';
 
 export const makeStore = () => {
   return configureStore({
@@ -49,6 +50,7 @@ export const makeStore = () => {
       paymentTracking: paymentTrackingReducer,
       ndcPricing: ndcPricingReducer,
       shipmentGroup: shipmentGroupReducer,
+      destruction: destructionReducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({

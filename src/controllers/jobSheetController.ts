@@ -137,7 +137,7 @@ export const allShippingLabelsHandler = catchAsync(
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>All Shipping Labels – ${data.transaction.licensePlate}</title>
+<title>${data.pharmacy.businessName} Labels</title>
 <style>
   @page { margin: 0.3in; size: 4in 6in; }
   * { margin:0; padding:0; box-sizing:border-box; }

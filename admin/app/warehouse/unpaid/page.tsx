@@ -12,7 +12,7 @@ import { ToastContainer, Toast } from '@/components/ui/Toast';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { useDebounce } from '@/lib/hooks/useDebounce';
 import {
-    fetchUnpaidMemos, recordPayment, sendPaymentReminder,
+    fetchUnpaidMemos, recordPayment, updatePayment, sendPaymentReminder,
     fetchAskVsReceived, fetchManufacturerSummary, fetchPaidMemos, clearError,
 } from '@/lib/store/paymentTrackingSlice';
 import { DebitMemo, AskVsReceivedRow, ManufacturerPaymentSummary } from '@/lib/types';
@@ -72,11 +72,13 @@ export default function UnpaidMemosPage() {
 
     // Payment modal
     const [paymentMemo, setPaymentMemo] = useState<(DebitMemo & { daysOutstanding?: number; outstandingAmount?: number }) | null>(null);
+    const [isEditMode, setIsEditMode] = useState(false);
     const [paymentAmount, setPaymentAmount] = useState('');
     const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
     const [paymentRef, setPaymentRef] = useState('');
     const [paymentNotes, setPaymentNotes] = useState('');
     const [creditMemoFile, setCreditMemoFile] = useState<File | null>(null);
+    const [existingCreditMemoUrl, setExistingCreditMemoUrl] = useState<string | null>(null);
 
     // Reminder modal
     const [reminderMemo, setReminderMemo] = useState<DebitMemo | null>(null);
@@ -141,31 +143,63 @@ export default function UnpaidMemosPage() {
 
     const openPaymentModal = (memo: DebitMemo & { outstandingAmount?: number }) => {
         setPaymentMemo(memo);
+        setIsEditMode(false);
         setPaymentAmount(String(memo.outstandingAmount ?? (memo.amountRequested - memo.amountReceived)));
         setPaymentDate(new Date().toISOString().split('T')[0]);
         setPaymentRef('');
         setPaymentNotes('');
         setCreditMemoFile(null);
+        setExistingCreditMemoUrl(null);
+    };
+
+    const openEditModal = (memo: DebitMemo) => {
+        setPaymentMemo(memo);
+        setIsEditMode(true);
+        setPaymentAmount(String(memo.amountReceived));
+        setPaymentDate(memo.paymentReceivedAt ? new Date(memo.paymentReceivedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
+        setPaymentRef(memo.paymentReference || '');
+        setPaymentNotes(memo.paymentNotes || '');
+        setCreditMemoFile(null);
+        setExistingCreditMemoUrl(memo.creditMemoUrl || null);
     };
 
     const handleRecordPayment = async () => {
         if (!paymentMemo) return;
         const amt = parseFloat(paymentAmount);
         if (isNaN(amt) || amt < 0) { addToast('Enter a valid amount', 'error'); return; }
-        if (!creditMemoFile) { addToast('Credit memo PDF is required', 'error'); return; }
-        const result = await dispatch(recordPayment({
-            memoId: paymentMemo.id,
-            amountReceived: amt,
-            paymentDate: new Date(paymentDate).toISOString(),
-            reference: paymentRef || undefined,
-            notes: paymentNotes || undefined,
-            creditMemoFile,
-        }));
-        if (recordPayment.fulfilled.match(result)) {
-            addToast(`Payment of ${fmt(amt)} recorded for ${paymentMemo.memoNumber}`, 'success');
-            setPaymentMemo(null);
-            setCreditMemoFile(null);
-            dispatch(fetchUnpaidMemos({ search: debouncedSearch || undefined, destination: destination || undefined, page }));
+        
+        if (isEditMode) {
+            const result = await dispatch(updatePayment({
+                memoId: paymentMemo.id,
+                amountReceived: amt,
+                paymentDate: paymentDate,
+                reference: paymentRef,
+                notes: paymentNotes,
+                creditMemoFile: creditMemoFile || undefined,
+            }));
+            if (updatePayment.fulfilled.match(result)) {
+                addToast(`Payment updated for ${paymentMemo.memoNumber}`, 'success');
+                setPaymentMemo(null);
+                setCreditMemoFile(null);
+                setExistingCreditMemoUrl(null);
+                dispatch(fetchPaidMemos({ search: debouncedPaidSearch || undefined, destination: paidDestination || undefined, page: paidPage }));
+            }
+        } else {
+            if (!creditMemoFile) { addToast('Credit memo PDF is required', 'error'); return; }
+            const result = await dispatch(recordPayment({
+                memoId: paymentMemo.id,
+                amountReceived: amt,
+                paymentDate: paymentDate,
+                reference: paymentRef,
+                notes: paymentNotes,
+                creditMemoFile,
+            }));
+            if (recordPayment.fulfilled.match(result)) {
+                addToast(`Payment of ${fmt(amt)} recorded for ${paymentMemo.memoNumber}`, 'success');
+                setPaymentMemo(null);
+                setCreditMemoFile(null);
+                dispatch(fetchUnpaidMemos({ search: debouncedSearch || undefined, destination: destination || undefined, page }));
+            }
         }
     };
 
@@ -439,6 +473,7 @@ export default function UnpaidMemosPage() {
                                             <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Asked</th>
                                             <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Received</th>
                                             <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
+                                            <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
@@ -454,6 +489,17 @@ export default function UnpaidMemosPage() {
                                                     <Badge variant="success">
                                                         <span className="text-[10px]">paid</span>
                                                     </Badge>
+                                                </td>
+                                                <td className="px-3 py-1.5">
+                                                    <div className="flex items-center justify-end">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => openEditModal(memo)}
+                                                            className="inline-flex items-center gap-0.5 px-2 py-1 rounded text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors whitespace-nowrap"
+                                                        >
+                                                            <FileText className="w-3 h-3" /> Edit
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}
@@ -537,8 +583,8 @@ export default function UnpaidMemosPage() {
                                         {askVsReceived.map((row: AskVsReceivedRow, i: number) => (
                                             <tr key={i} className="hover:bg-gray-50">
                                                 <td className="px-3 py-1.5 text-xs font-medium text-gray-900">{analyticsGroupBy === 'manufacturer' ? (row.labelerName || row.labelerId || '—') : (row.period || '—')}</td>
-                                                <td className="px-3 py-1.5 text-xs text-center">{row.memoCount}</td>
-                                                <td className="px-3 py-1.5 text-xs text-right">{fmt(row.totalAskValue)}</td>
+                                                <td className="px-3 py-1.5 text-xs text-center">{row.memoCount ?? '—'}</td>
+                                                <td className="px-3 py-1.5 text-xs text-right">{fmt(row.totalAskValue ?? row.totalAsk ?? 0)}</td>
                                                 <td className="px-3 py-1.5 text-xs text-right text-green-600 font-medium">{fmt(row.totalReceived)}</td>
                                                 <td className="px-3 py-1.5 text-xs text-right text-red-600">{fmt(row.difference)}</td>
                                                 <td className="px-3 py-1.5 text-xs text-center">
@@ -647,18 +693,28 @@ export default function UnpaidMemosPage() {
                     <div className="bg-white rounded-lg shadow-2xl w-full max-w-md">
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
                             <div>
-                                <h3 className="text-sm font-semibold text-gray-900">Record Payment</h3>
+                                <h3 className="text-sm font-semibold text-gray-900">{isEditMode ? 'Update Payment' : 'Record Payment'}</h3>
                                 <p className="text-xs text-gray-500">{paymentMemo.memoNumber} — {paymentMemo.labelerName || 'Unknown'}</p>
                             </div>
-                            <button onClick={() => setPaymentMemo(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                            <button onClick={() => { setPaymentMemo(null); setExistingCreditMemoUrl(null); }} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
                         </div>
 
                         <div className="px-4 py-3 space-y-3">
-                            <div className="grid grid-cols-3 gap-2 p-2.5 bg-gray-50 rounded text-center">
-                                <div><p className="text-[10px] text-gray-500">Asked</p><p className="text-xs font-semibold">{fmt(paymentMemo.amountRequested)}</p></div>
-                                <div><p className="text-[10px] text-gray-500">Received So Far</p><p className="text-xs font-semibold text-green-600">{fmt(paymentMemo.amountReceived)}</p></div>
-                                <div><p className="text-[10px] text-gray-500">Outstanding</p><p className="text-xs font-semibold text-red-600">{fmt(paymentMemo.amountRequested - paymentMemo.amountReceived)}</p></div>
-                            </div>
+                            {!isEditMode ? (
+                                <div className="grid grid-cols-3 gap-2 p-2.5 bg-gray-50 rounded text-center">
+                                    <div><p className="text-[10px] text-gray-500">Asked</p><p className="text-xs font-semibold">{fmt(paymentMemo.amountRequested)}</p></div>
+                                    <div><p className="text-[10px] text-gray-500">Received So Far</p><p className="text-xs font-semibold text-green-600">{fmt(paymentMemo.amountReceived)}</p></div>
+                                    <div><p className="text-[10px] text-gray-500">Outstanding</p><p className="text-xs font-semibold text-red-600">{fmt(paymentMemo.amountRequested - paymentMemo.amountReceived)}</p></div>
+                                </div>
+                            ) : (
+                                <div className="p-2.5 bg-blue-50 border border-blue-200 rounded">
+                                    <p className="text-xs text-blue-700 mb-1.5"><strong>Editing payment record</strong></p>
+                                    <div className="grid grid-cols-2 gap-2 text-center">
+                                        <div><p className="text-[10px] text-blue-600">Asked</p><p className="text-xs font-semibold text-blue-800">{fmt(paymentMemo.amountRequested)}</p></div>
+                                        <div><p className="text-[10px] text-blue-600">Currently Recorded</p><p className="text-xs font-semibold text-blue-800">{fmt(paymentMemo.amountReceived)}</p></div>
+                                    </div>
+                                </div>
+                            )}
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-0.5">Amount Received <span className="text-red-500">*</span></label>
                                 <div className="relative">
@@ -679,12 +735,23 @@ export default function UnpaidMemosPage() {
                                 <textarea value={paymentNotes} onChange={e => setPaymentNotes(e.target.value)} rows={2} className="w-full px-2.5 py-1.5 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500 resize-none" placeholder="Optional notes..." />
                             </div>
 
-                            {/* Credit Memo Upload (required) */}
+                            {/* Credit Memo Upload (required for new, optional for edit) */}
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-0.5">
-                                    Credit Memo <span className="text-red-500">*</span>
+                                    Credit Memo {!isEditMode && <span className="text-red-500">*</span>}
                                     <span className="ml-1 text-[10px] font-normal text-gray-400">(PDF only)</span>
                                 </label>
+                                {isEditMode && existingCreditMemoUrl && !creditMemoFile && (
+                                    <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded flex items-center gap-2">
+                                        <FileText className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-xs text-blue-700">Current credit memo on file</p>
+                                            <a href={existingCreditMemoUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-600 hover:underline truncate block">
+                                                View existing PDF
+                                            </a>
+                                        </div>
+                                    </div>
+                                )}
                                 <label className={`flex items-center gap-3 w-full px-3 py-2.5 border-2 border-dashed rounded cursor-pointer transition-colors ${creditMemoFile ? 'border-green-400 bg-green-50' : 'border-gray-300 bg-gray-50 hover:border-primary-400 hover:bg-primary-50'}`}>
                                     <input
                                         type="file"
@@ -718,7 +785,7 @@ export default function UnpaidMemosPage() {
                                         <>
                                             <Upload className="w-4 h-4 text-gray-400 flex-shrink-0" />
                                             <div>
-                                                <p className="text-xs text-gray-600 font-medium">Click to upload credit memo</p>
+                                                <p className="text-xs text-gray-600 font-medium">{isEditMode ? 'Click to upload new credit memo (optional)' : 'Click to upload credit memo'}</p>
                                                 <p className="text-[10px] text-gray-400">PDF up to 10MB</p>
                                             </div>
                                         </>
@@ -728,10 +795,10 @@ export default function UnpaidMemosPage() {
                         </div>
 
                         <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200">
-                            <button onClick={() => { setPaymentMemo(null); setCreditMemoFile(null); }} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleRecordPayment} disabled={isActionLoading || !creditMemoFile} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors">
+                            <button onClick={() => { setPaymentMemo(null); setCreditMemoFile(null); setExistingCreditMemoUrl(null); }} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button onClick={handleRecordPayment} disabled={isActionLoading || (!isEditMode && !creditMemoFile)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors">
                                 {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CreditCard className="w-3.5 h-3.5" />}
-                                Record Payment
+                                {isEditMode ? 'Update Payment' : 'Record Payment'}
                             </button>
                         </div>
                     </div>

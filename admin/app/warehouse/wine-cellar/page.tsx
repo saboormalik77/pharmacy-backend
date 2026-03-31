@@ -148,7 +148,7 @@ export default function WineCellarPage() {
 
     return (
         <div className="space-y-6">
-            <ToastContainer toasts={toasts} removeToast={removeToast} />
+            <ToastContainer toasts={toasts} onClose={removeToast} />
 
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">

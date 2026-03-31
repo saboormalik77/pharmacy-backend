@@ -15,6 +15,7 @@ import {
   Bell,
   X,
   ScanLine,
+  Camera,
   TrendingUp,
   Building2,
   Search,
@@ -22,6 +23,11 @@ import {
   ClipboardList,
   Warehouse,
   Archive,
+  ShieldAlert,
+  AlertTriangle,
+  Scan,
+  DollarSign,
+  Trash2,
 } from 'lucide-react'
 
 interface NavItem {
@@ -37,20 +43,35 @@ const navItems: NavItem[] = [
     icon: LayoutDashboard,
   },
   {
-    title: 'Upload Documents',
-    href: '/upload',
-    icon: Upload,
+    title: 'Returns',
+    href: '/returns',
+    icon: ClipboardList,
+  },
+  {
+    title: 'Create Return',
+    href: '/returns/create',
+    icon: Scan,
+  },
+  {
+    title: 'TBD Items',
+    href: '/returns/tbd-items',
+    icon: AlertTriangle,
+  },
+  {
+    title: 'Destruction',
+    href: '/returns/destruction',
+    icon: Trash2,
+  },
+  {
+    title: 'Wine Cellar',
+    href: '/wine-cellar',
+    icon: Archive,
   },
   {
     title: 'My Products',
     href: '/products',
     icon: ScanLine,
   },
-  // {
-  //   title: 'Analytics & Reports',
-  //   href: '/reports',
-  //   icon: BarChart3,
-  // },
   {
     title: 'Search',
     href: '/optimization',
@@ -92,20 +113,10 @@ const navItems: NavItem[] = [
     icon: BarChart3,
   },
   {
-    title: 'Wine Cellar',
-    href: '/wine-cellar',
-    icon: Archive,
+    title: 'Upload Documents',
+    href: '/upload',
+    icon: Upload,
   },
-  // {
-  //   title: 'Documents',
-  //   href: '/documents',
-  //   icon: FileText,
-  // },
-  // {
-  //   title: 'Notifications',
-  //   href: '/notifications',
-  //   icon: Bell,
-  // },
 ]
 
 interface SidebarProps {
@@ -142,13 +153,13 @@ export function Sidebar({ onClose }: SidebarProps) {
               href={item.href}
               onClick={onClose}
               className={cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                'flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-medium transition-colors',
                 isActive
                   ? 'bg-teal-600 text-white'
                   : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
               )}
             >
-              <Icon className="h-5 w-5 flex-shrink-0" />
+              <Icon className="h-4 w-4 flex-shrink-0" />
               {item.title}
             </Link>
           )
@@ -158,16 +169,16 @@ export function Sidebar({ onClose }: SidebarProps) {
       <div className="border-t p-3 space-y-1">
         <Link
           href="/settings"
-          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+          className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
         >
-          <Settings className="h-5 w-5" />
+          <Settings className="h-4 w-4" />
           Settings
         </Link>
         <Link
           href="/subscription"
-          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+          className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
         >
-          <CreditCard className="h-5 w-5" />
+          <CreditCard className="h-4 w-4" />
           Subscription
         </Link>
         {/* <Link

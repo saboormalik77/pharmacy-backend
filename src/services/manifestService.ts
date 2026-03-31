@@ -358,7 +358,7 @@ export function generateManifestHtml(data: ManifestData): string {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Return manifest — ${escapeHtml(t.licensePlate)}</title>
+<title>${escapeHtml(p.name)} Itemized Return</title>
 <style>
   * { box-sizing: border-box; }
   body { font-family: Arial, Helvetica, sans-serif; font-size: 10pt; color: #111; margin: 0; padding: 24px; background: #fff; }
