@@ -31,11 +31,11 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  {
-    title: 'Dashboard',
-    href: '/dashboard',
-    icon: LayoutDashboard,
-  },
+  // {
+  //   title: 'Dashboard',
+  //   href: '/dashboard',
+  //   icon: LayoutDashboard,
+  // },
   {
     title: 'Upload Documents',
     href: '/upload',
@@ -56,11 +56,11 @@ const navItems: NavItem[] = [
     href: '/optimization',
     icon: Search,
   },
-  {
-    title: 'Packages',
-    href: '/packages',
-    icon: Package,
-  },
+  // {
+  //   title: 'Packages',
+  //   href: '/packages',
+  //   icon: Package,
+  // },
   {
     title: 'Marketplace',
     href: '/marketplace',
@@ -76,11 +76,11 @@ const navItems: NavItem[] = [
     href: '/inventory-analysis',
     icon: Warehouse,
   },
-  {
-    title: 'Top Distributors',
-    href: '/top-distributors',
-    icon: Building2,
-  },
+  // {
+  //   title: 'Top Distributors',
+  //   href: '/top-distributors',
+  //   icon: Building2,
+  // },
   {
     title: 'Credits',
     href: '/credits',
