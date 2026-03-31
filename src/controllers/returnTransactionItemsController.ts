@@ -236,7 +236,33 @@ export const listItemsHandler = catchAsync(
       search,
     );
 
-    res.status(200).json({ status: 'success', data: result });
+    // Destruction-routed items belong to the destruction workflow and should
+    // not appear in return item lists across any portal.
+    const filteredItems = (result.items || []).filter((item: any) => {
+      const normalizedDestination = String(item?.destination || '').trim().toLowerCase();
+      return normalizedDestination !== 'destruction';
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        ...result,
+        items: filteredItems,
+        summary: {
+          totalItems: filteredItems.length,
+          totalReturnableValue: filteredItems
+            .filter((item: any) => item.returnStatus === 'returnable')
+            .reduce((sum: number, item: any) => sum + (Number(item.estimatedValue) || 0), 0),
+          totalNonReturnableValue: filteredItems
+            .filter((item: any) => item.returnStatus === 'non_returnable')
+            .reduce((sum: number, item: any) => sum + (Number(item.estimatedValue) || 0), 0),
+          totalValue: filteredItems.reduce(
+            (sum: number, item: any) => sum + (Number(item.estimatedValue) || 0),
+            0
+          ),
+        },
+      },
+    });
   }
 );
 

@@ -852,7 +852,7 @@ export default function AddItemsPage() {
                         {/* Mode tabs */}
                         <div className="flex gap-1.5 mb-3">
                             {([
-                                { key: 'camera', icon: Camera,   label: 'Camera' },
+                                { key: 'camera', icon: Camera,   label: 'Camera QR' },
                                 { key: 'usb',    icon: ScanLine,  label: 'USB Scanner' },
                                 { key: 'manual', icon: Keyboard,  label: 'Manual NDC' },
                             ] as const).map(({ key, icon: Icon, label }) => (
@@ -875,14 +875,23 @@ export default function AddItemsPage() {
                             <div>
                                 <button
                                     onClick={() => setCameraOpen(true)}
-                                    className="w-full py-3 px-4 bg-primary-50 border border-primary-200 rounded-lg text-primary-700 hover:bg-primary-100 transition-colors flex items-center justify-center gap-2 text-sm font-medium"
+                                    disabled={isScanLoading}
+                                    className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 border border-dashed rounded transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed border-primary-300 bg-primary-50 hover:bg-primary-100 hover:border-primary-400"
                                 >
-                                    <Camera className="w-4 h-4" />
-                                    Open Camera Scanner
+                                    {isScanLoading ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 animate-spin text-primary-500 flex-shrink-0" />
+                                            <span className="text-xs font-medium text-primary-600">Looking up product...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Camera className="w-4 h-4 text-primary-600 flex-shrink-0" />
+                                            <span className="text-xs font-semibold text-primary-700">Open Camera Scanner</span>
+                                            <span className="text-[10px] text-primary-400">— tap to scan QR / barcode</span>
+                                        </>
+                                    )}
                                 </button>
-                                <p className="text-[10px] text-gray-400 mt-2 text-center">
-                                    Use your device camera to scan QR codes or barcodes
-                                </p>
+                                <p className="text-[10px] text-gray-400 mt-1">Works with QR codes, GS1 barcodes, and standard barcodes</p>
                             </div>
                         )}
 
