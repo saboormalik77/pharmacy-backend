@@ -539,7 +539,18 @@ export const updateTransactionItem = createAsyncThunk(
 
 export const resolveTransactionItem = createAsyncThunk(
     'returnTransactions/resolveItem',
-    async ({ transactionId, itemId, payload }: { transactionId: string; itemId: string; payload: { new_status: string; reason?: string; destination?: string; memo?: string } }, { rejectWithValue }) => {
+    async ({ transactionId, itemId, payload }: {
+        transactionId: string;
+        itemId: string;
+        payload: {
+            new_status: string;
+            reason?: string;
+            destination?: string;
+            memo?: string;
+            non_returnable_route?: 'wine_cellar' | 'destruction';
+            expected_returnable_date?: string;
+        };
+    }, { rejectWithValue }) => {
         try {
             const { apiClient } = await import('@/lib/api/apiClient');
             const { cookieUtils } = await import('@/lib/utils/cookies');

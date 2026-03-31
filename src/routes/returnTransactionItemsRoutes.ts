@@ -12,10 +12,11 @@ import { catchAsync } from '../utils/catchAsync';
 import * as itemsService from '../services/returnTransactionItemsService';
 import { authenticateAdmin } from '../middleware/adminAuth';
 import { authenticateProcessor } from '../middleware/processorAuth';
+import { authenticate as authenticatePharmacy } from '../middleware/auth';
 
 const router = Router({ mergeParams: true });
 
-// Shared auth: accept both admin and processor tokens
+// Shared auth: accept admin, processor, and pharmacy tokens
 const authenticateAny = async (req: any, res: any, next: any) => {
   try {
     await new Promise<void>((resolve, reject) => {
@@ -26,8 +27,21 @@ const authenticateAny = async (req: any, res: any, next: any) => {
     });
     return next();
   } catch {
-    // Not a processor — fall through to admin auth
+    // Not a processor — try pharmacy auth
   }
+  
+  try {
+    await new Promise<void>((resolve, reject) => {
+      authenticatePharmacy(req, res, (err: any) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+    return next();
+  } catch {
+    // Not a pharmacy — fall through to admin auth
+  }
+  
   authenticateAdmin(req, res, next);
 };
 
