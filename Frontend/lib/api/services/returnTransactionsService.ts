@@ -19,6 +19,8 @@ export interface ReturnTransactionItem {
   serialNumber?: string;
   expirationDate?: string;
   quantity?: number;
+  fullPackageSize?: number;
+  fullPackageQtyReturned?: number;
   returnStatus: 'returnable' | 'non_returnable' | 'tbd';
   nonReturnableReason?: string;
   destination?: string;

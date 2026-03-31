@@ -544,6 +544,7 @@ export default function AddItemsPage() {
         if (form.standardPrice) payload.standardPrice = parseFloat(form.standardPrice);
         payload.quantity = payloadQuantity;
         if (form.fullPackageSize) payload.fullPackageSize = parseInt(form.fullPackageSize);
+        if (form.fullPackageQtyReturned && parseFloat(form.fullPackageQtyReturned) > 0) payload.fullPackageQtyReturned = parseInt(form.fullPackageQtyReturned);
         payload.isPartial = payloadIsPartial;
         if (payloadIsPartial && payloadPartialPercentage != null) payload.partialPercentage = payloadPartialPercentage;
         payload.returnStatus = form.returnStatus;
@@ -573,10 +574,8 @@ export default function AddItemsPage() {
                 const wcOnly = res.wineCellarOnly === true;
 
                 if (savedItem) {
-                    setItemCount(prev => prev + 1);
-                    setRecentlyAddedItems(prev => [savedItem, ...prev]);
-                    setActiveTab('list');
                     await fetchItems();
+                    setActiveTab('list');
                 }
 
                 if (wcOnly && wcItem) {
@@ -721,8 +720,7 @@ export default function AddItemsPage() {
         try {
             const res = await apiClient.delete(`/return-transactions/${transactionId}/items/${itemId}`, true);
             if (res.status === 'success') {
-                setRecentlyAddedItems(prev => prev.filter(item => item.id !== itemId));
-                setItemCount(prev => prev - 1);
+                await fetchItems();
                 showToast('Item removed successfully', 'success');
             } else {
                 showToast('Failed to remove item. Please try again.', 'error');
