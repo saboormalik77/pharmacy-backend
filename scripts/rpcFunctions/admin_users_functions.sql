@@ -186,6 +186,7 @@ BEGIN
       END,
       'isActive', a.is_active,
       'status', a.status,
+      'permissions', COALESCE(a.permissions, '[]'::jsonb),
       'lastLoginAt', a.last_login_at,
       'createdAt', a.created_at,
       'updatedAt', a.updated_at
@@ -235,6 +236,7 @@ BEGIN
     END,
     'isActive', a.is_active,
     'status', CASE WHEN a.is_active THEN 'active' ELSE 'inactive' END,
+    'permissions', COALESCE(a.permissions, '[]'::jsonb),
     'lastLoginAt', a.last_login_at,
     'createdAt', a.created_at,
     'updatedAt', a.updated_at
@@ -263,11 +265,16 @@ $$;
 -- Password hashing is done in the application layer (bcrypt)
 -- ============================================================
 
+-- Drop existing function to avoid conflicts
+DROP FUNCTION IF EXISTS create_admin_user(TEXT, TEXT, TEXT, TEXT);
+DROP FUNCTION IF EXISTS create_admin_user(TEXT, TEXT, TEXT, TEXT, JSONB);
+
 CREATE OR REPLACE FUNCTION create_admin_user(
   p_email TEXT,
   p_password_hash TEXT,
   p_name TEXT,
-  p_role TEXT DEFAULT 'support'
+  p_role TEXT DEFAULT 'support',
+  p_permissions JSONB DEFAULT '[]'::jsonb
 )
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -294,8 +301,8 @@ BEGIN
   END IF;
   
   -- Insert new admin
-  INSERT INTO admin (email, password_hash, name, role, is_active, created_at, updated_at)
-  VALUES (p_email, p_password_hash, p_name, p_role, true, NOW(), NOW())
+  INSERT INTO admin (email, password_hash, name, role, permissions, is_active, created_at, updated_at)
+  VALUES (p_email, p_password_hash, p_name, p_role, COALESCE(p_permissions, '[]'::jsonb), true, NOW(), NOW())
   RETURNING id INTO v_admin_id;
   
   -- Fetch created admin
@@ -313,6 +320,7 @@ BEGIN
     END,
     'isActive', a.is_active,
     'status', 'active',
+    'permissions', COALESCE(a.permissions, '[]'::jsonb),
     'createdAt', a.created_at
   )
   INTO v_admin
@@ -332,12 +340,17 @@ $$;
 -- Updates admin user information (not password)
 -- ============================================================
 
+-- Drop existing function to avoid conflicts
+DROP FUNCTION IF EXISTS update_admin_user(UUID, TEXT, TEXT, TEXT, BOOLEAN);
+DROP FUNCTION IF EXISTS update_admin_user(UUID, TEXT, TEXT, TEXT, BOOLEAN, JSONB);
+
 CREATE OR REPLACE FUNCTION update_admin_user(
   p_admin_id UUID,
   p_name TEXT DEFAULT NULL,
   p_email TEXT DEFAULT NULL,
   p_role TEXT DEFAULT NULL,
-  p_is_active BOOLEAN DEFAULT NULL
+  p_is_active BOOLEAN DEFAULT NULL,
+  p_permissions JSONB DEFAULT NULL
 )
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -381,6 +394,7 @@ BEGIN
     email = COALESCE(p_email, email),
     role = COALESCE(p_role, role),
     is_active = COALESCE(p_is_active, is_active),
+    permissions = COALESCE(p_permissions, permissions),
     updated_at = NOW()
   WHERE id = p_admin_id;
   
@@ -399,6 +413,7 @@ BEGIN
     END,
     'isActive', a.is_active,
     'status', CASE WHEN a.is_active THEN 'active' ELSE 'inactive' END,
+    'permissions', COALESCE(a.permissions, '[]'::jsonb),
     'lastLoginAt', a.last_login_at,
     'createdAt', a.created_at,
     'updatedAt', a.updated_at

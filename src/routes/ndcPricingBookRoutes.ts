@@ -7,7 +7,7 @@ import {
   resolveHandler,
   importHandler,
 } from '../controllers/ndcPricingBookController';
-import { authenticateAdmin } from '../middleware/adminAuth';
+import { authenticateAdmin, requirePermission } from '../middleware/adminAuth';
 import { authenticateProcessor } from '../middleware/processorAuth';
 
 const router = Router();
@@ -28,6 +28,10 @@ const authenticateAny = async (req: any, res: any, next: any) => {
 };
 
 router.use(authenticateAny);
+router.use((req, res, next) => {
+  if (!req.adminId) return next();
+  return requirePermission('ndc_pricing')(req, res, next);
+});
 
 router.get('/search', searchHandler);
 router.get('/resolve/:ndc', resolveHandler);

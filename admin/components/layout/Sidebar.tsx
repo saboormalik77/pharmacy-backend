@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppSelector } from '@/lib/store/hooks';
+import { usePermissions } from '@/hooks/usePermissions';
 
 // Warehouse sub-routes that activate the Warehouse sidebar link
 const warehouseSubRoutes = [
@@ -43,22 +44,22 @@ const payoutSubRoutes = [
 
 // Admin navigation (for super_admin, manager, reviewer, support)
 const adminSidebarLinks = [
-    { href: '/', icon: LayoutDashboard, label: 'Dashboard' },
-    { href: '/pharmacies', icon: Building2, label: 'Pharmacies' },
-    { href: '/distributors', icon: Warehouse, label: 'Distributors' },
-    { href: '/marketplace', icon: ShoppingCart, label: 'Marketplace' },
-    { href: '/documents', icon: FileText, label: 'Documents' },
-    { href: '/payments', icon: CreditCard, label: 'Payments' },
-    { href: '/payout-hub', icon: CircleDollarSign, label: 'Payout Mgmt' },
-    { href: '/analytics', icon: BarChart3, label: 'Analytics' },
-    { href: '/settings', icon: Settings, label: 'Settings' },
-    { href: '/admins', icon: Users, label: 'Admins' },
-    { href: '/processors', icon: UserCog, label: 'Processors' },
-    { href: '/policies', icon: Shield, label: 'Labeler Info' },
-    { href: '/ndc-pricing', icon: DollarSign, label: 'NDC Pricing' },
-    { href: '/warehouse/tbd-items', icon: AlertTriangle, label: 'TBD Items' },
-    { href: '/warehouse/destruction', icon: Trash2, label: 'Destruction' },
-    { href: '/warehouse', icon: Warehouse, label: 'Warehouse', matchPrefix: '/warehouse' },
+    { href: '/', icon: LayoutDashboard, label: 'Dashboard', permission: 'dashboard' },
+    { href: '/pharmacies', icon: Building2, label: 'Pharmacies', permission: 'pharmacies' },
+    { href: '/distributors', icon: Warehouse, label: 'Distributors', permission: 'distributors' },
+    { href: '/marketplace', icon: ShoppingCart, label: 'Marketplace', permission: 'marketplace' },
+    { href: '/documents', icon: FileText, label: 'Documents', permission: 'documents' },
+    { href: '/payments', icon: CreditCard, label: 'Payments', permission: 'payments' },
+    { href: '/payout-hub', icon: CircleDollarSign, label: 'Payout Mgmt', permission: 'payout_hub' },
+    { href: '/analytics', icon: BarChart3, label: 'Analytics', permission: 'analytics' },
+    { href: '/settings', icon: Settings, label: 'Settings', permission: 'settings' },
+    { href: '/admins', icon: Users, label: 'Admins', permission: 'admins' },
+    { href: '/processors', icon: UserCog, label: 'Processors', permission: 'processors' },
+    { href: '/policies', icon: Shield, label: 'Labeler Info', permission: 'policies' },
+    { href: '/ndc-pricing', icon: DollarSign, label: 'NDC Pricing', permission: 'ndc_pricing' },
+    { href: '/warehouse/tbd-items', icon: AlertTriangle, label: 'TBD Items', permission: 'tbd_items' },
+    { href: '/warehouse/destruction', icon: Trash2, label: 'Destruction', permission: 'destruction' },
+    { href: '/warehouse', icon: Warehouse, label: 'Warehouse', matchPrefix: '/warehouse', permission: 'warehouse' },
 ];
 
 // Processor navigation (for role = 'processor') — Receiving is warehouse-only
@@ -82,9 +83,16 @@ interface SidebarProps {
 export function Sidebar({ isCollapsed, isOpen = false, onClose }: SidebarProps) {
     const pathname = usePathname();
     const { user } = useAppSelector((state) => state.auth);
+    const { hasPermission, isSuperAdmin } = usePermissions();
 
-    // Choose navigation links based on user role
-    const sidebarLinks = user?.role === 'processor' ? processorSidebarLinks : adminSidebarLinks;
+    // Choose navigation links based on user role, filtered by permissions
+    const rawLinks = user?.role === 'processor' ? processorSidebarLinks : adminSidebarLinks;
+    const sidebarLinks = rawLinks.filter((link) => {
+        const perm = (link as any).permission as string | undefined;
+        if (!perm) return true;
+        if (perm === 'admins' && !isSuperAdmin) return false;
+        return hasPermission(perm);
+    });
 
     const handleLinkClick = () => {
         // Close sidebar on mobile when a link is clicked

@@ -1,5 +1,6 @@
 'use client';
 
+import { PermissionGate } from '@/components/auth/PermissionGate';
 import { useState, useEffect } from 'react';
 import { Search, Eye, Download, Trash2, FileText, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
@@ -106,6 +107,7 @@ export default function DocumentsPage() {
     };
 
     return (
+        <PermissionGate permission="documents">
         <div className="space-y-6">
             <div>
                 <h1 className="text-2xl font-bold text-gray-900">Documents</h1>
@@ -466,5 +468,6 @@ export default function DocumentsPage() {
                 </div>
             )}
         </div>
+        </PermissionGate>
     );
 }

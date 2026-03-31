@@ -1,5 +1,6 @@
 'use client';
 
+import { PermissionGate } from '@/components/auth/PermissionGate';
 import { useState, useEffect } from 'react';
 import { Save, Bell, Shield, Globe, Loader2, Eye, EyeOff, Warehouse } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -187,6 +188,7 @@ export default function SettingsPage() {
     };
 
     return (
+        <PermissionGate permission="settings">
         <div className="space-y-3">
             <div>
                 <h1 className="text-lg font-bold text-gray-900">Settings</h1>
@@ -566,5 +568,6 @@ export default function SettingsPage() {
 
             <ToastContainer toasts={toasts} onClose={removeToast} />
         </div>
+        </PermissionGate>
     );
 }

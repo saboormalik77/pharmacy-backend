@@ -135,13 +135,14 @@ export const createAdmin = createAsyncThunk(
       }
       
       console.log('Creating admin with payload:', { ...payload, password: '***' });
-      const response = await apiClient.post<{ status: string; data: Admin }>(
+      const response = await apiClient.post<{ status: string; data: { admin: Admin } | Admin }>(
         '/admin/users',
         payload,
         true
       );
 
-      return response.data;
+      const body: any = response.data;
+      return body?.admin || body;
     } catch (error: any) {
       // Log detailed error information
       console.error('Error creating admin:', {
@@ -173,13 +174,14 @@ export const updateAdmin = createAsyncThunk(
         return rejectWithValue('Authentication required. Please login again.');
       }
       
-      const response = await apiClient.patch<{ status: string; data: Admin }>(
+      const response = await apiClient.patch<{ status: string; data: { admin: Admin } | Admin }>(
         `/admin/users/${id}`,
         payload,
         true
       );
 
-      return response.data;
+      const body: any = response.data;
+      return body?.admin || body;
     } catch (error: any) {
       // Log detailed error information
       console.error('Error updating admin:', {

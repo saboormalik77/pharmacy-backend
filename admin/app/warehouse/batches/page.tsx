@@ -1,5 +1,6 @@
 'use client';
 
+import { PermissionGate } from '@/components/auth/PermissionGate';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -110,6 +111,7 @@ export default function BatchesPage() {
     };
 
     return (
+        <PermissionGate permission="warehouse">
         <div className="space-y-3">
             <ToastContainer toasts={toasts} onClose={id => setToasts(t => t.filter(x => x.id !== id))} />
 
@@ -321,5 +323,6 @@ export default function BatchesPage() {
                 </div>
             )}
         </div>
+        </PermissionGate>
     );
 }

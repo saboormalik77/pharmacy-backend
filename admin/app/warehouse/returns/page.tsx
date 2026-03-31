@@ -1,5 +1,6 @@
 'use client';
 
+import { PermissionGate } from '@/components/auth/PermissionGate';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -187,15 +188,18 @@ export default function ReturnsPage() {
 
     if (user?.role !== 'processor') {
         return (
+            <PermissionGate permission="warehouse">
             <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
                 <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-3" />
                 <p className="text-red-800 font-medium">Access denied. This page is for processors only.</p>
                 <Button variant="outline" className="mt-4" onClick={() => router.push('/')}>Go to Dashboard</Button>
             </div>
+            </PermissionGate>
         );
     }
 
     return (
+        <PermissionGate permission="warehouse">
         <div className="space-y-3">
             <ToastContainer toasts={toasts} onClose={removeToast} />
 
@@ -544,5 +548,6 @@ export default function ReturnsPage() {
                 </div>
             )}
         </div>
+        </PermissionGate>
     );
 }

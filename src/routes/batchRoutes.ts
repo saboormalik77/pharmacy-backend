@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticateAdmin } from '../middleware/adminAuth';
+import { authenticateAdmin, requirePermission } from '../middleware/adminAuth';
 import {
   listBatchesHandler,
   createBatchHandler,
@@ -19,6 +19,8 @@ import {
 } from '../controllers/batchController';
 
 const router = Router();
+router.use(authenticateAdmin);
+router.use(requirePermission('warehouse'));
 
 /**
  * @swagger
@@ -61,7 +63,7 @@ const router = Router();
  *       200:
  *         description: Paginated list of batches
  */
-router.get('/', authenticateAdmin, listBatchesHandler);
+router.get('/', listBatchesHandler);
 
 /**
  * @swagger
@@ -75,7 +77,7 @@ router.get('/', authenticateAdmin, listBatchesHandler);
  *       200:
  *         description: Array of YYYY-MM strings
  */
-router.get('/used-months', authenticateAdmin, listUsedBatchMonthsHandler);
+router.get('/used-months', listUsedBatchMonthsHandler);
 
 /**
  * @swagger
@@ -101,7 +103,7 @@ router.get('/used-months', authenticateAdmin, listUsedBatchMonthsHandler);
  *       400:
  *         description: Duplicate month or validation error
  */
-router.post('/', authenticateAdmin, createBatchHandler);
+router.post('/', createBatchHandler);
 
 /**
  * @swagger
@@ -122,7 +124,7 @@ router.post('/', authenticateAdmin, createBatchHandler);
  *       404:
  *         description: Batch not found
  */
-router.get('/:id', authenticateAdmin, getBatchHandler);
+router.get('/:id', getBatchHandler);
 
 /**
  * @swagger
@@ -154,7 +156,7 @@ router.get('/:id', authenticateAdmin, getBatchHandler);
  *       400:
  *         description: Batch not open or validation error
  */
-router.post('/:id/assign', authenticateAdmin, assignReturnsToBatchHandler);
+router.post('/:id/assign', assignReturnsToBatchHandler);
 
 /**
  * @swagger
@@ -175,8 +177,8 @@ router.post('/:id/assign', authenticateAdmin, assignReturnsToBatchHandler);
  *       400:
  *         description: TBD items, no-destination items, or batch not open
  */
-router.post('/:id/close', authenticateAdmin, closeBatchHandler);
-router.post('/:id/generate-memos', authenticateAdmin, generateBatchMemosHandler);
+router.post('/:id/close', closeBatchHandler);
+router.post('/:id/generate-memos', generateBatchMemosHandler);
 
 /**
  * @swagger
@@ -197,7 +199,7 @@ router.post('/:id/generate-memos', authenticateAdmin, generateBatchMemosHandler)
  *       400:
  *         description: Batch must be closed first
  */
-router.post('/:id/submit-cardinal', authenticateAdmin, submitCardinalHandler);
+router.post('/:id/submit-cardinal', submitCardinalHandler);
 
 /**
  * @swagger
@@ -218,7 +220,7 @@ router.post('/:id/submit-cardinal', authenticateAdmin, submitCardinalHandler);
  *       404:
  *         description: Batch not found
  */
-router.post('/:id/fix-destinations', authenticateAdmin, fixBatchDestinationsHandler);
+router.post('/:id/fix-destinations', fixBatchDestinationsHandler);
 
 // ============================================================
 // Batch Management Routes (FCR-32)
@@ -245,7 +247,7 @@ router.post('/:id/fix-destinations', authenticateAdmin, fixBatchDestinationsHand
  *       404:
  *         description: Batch not found
  */
-router.delete('/:id', authenticateAdmin, deleteBatchHandler);
+router.delete('/:id', deleteBatchHandler);
 
 /**
  * @swagger
@@ -279,7 +281,7 @@ router.delete('/:id', authenticateAdmin, deleteBatchHandler);
  *       404:
  *         description: Batch not found
  */
-router.post('/:id/unassign', authenticateAdmin, unassignReturnsFromBatchHandler);
+router.post('/:id/unassign', unassignReturnsFromBatchHandler);
 
 /**
  * @swagger
@@ -300,7 +302,7 @@ router.post('/:id/unassign', authenticateAdmin, unassignReturnsFromBatchHandler)
  *       404:
  *         description: Batch not found
  */
-router.get('/:id/permissions', authenticateAdmin, getBatchPermissionsHandler);
+router.get('/:id/permissions', getBatchPermissionsHandler);
 
 // ============================================================
 // Batch Workflow Routes (FCR-36)
@@ -323,7 +325,7 @@ router.get('/:id/permissions', authenticateAdmin, getBatchPermissionsHandler);
  *       200:
  *         description: Workflow state with boolean flags for each step
  */
-router.get('/:id/workflow', authenticateAdmin, getBatchWorkflowHandler);
+router.get('/:id/workflow', getBatchWorkflowHandler);
 
 /**
  * @swagger
@@ -355,6 +357,6 @@ router.get('/:id/workflow', authenticateAdmin, getBatchWorkflowHandler);
  *       200:
  *         description: Step marked complete, returns updated workflow state
  */
-router.post('/:id/workflow/complete', authenticateAdmin, completeBatchWorkflowStepHandler);
+router.post('/:id/workflow/complete', completeBatchWorkflowStepHandler);
 
 export default router;

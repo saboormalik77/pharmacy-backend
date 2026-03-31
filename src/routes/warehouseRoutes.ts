@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticateAdmin } from '../middleware/adminAuth';
+import { authenticateAdmin, requirePermission } from '../middleware/adminAuth';
 import {
   receiveHandler,
   scanBoxHandler,
@@ -12,6 +12,9 @@ import {
 } from '../controllers/warehouseController';
 
 const router = Router();
+
+router.use(authenticateAdmin);
+router.use(requirePermission('warehouse'));
 
 /**
  * @swagger
@@ -45,7 +48,7 @@ const router = Router();
  *       404:
  *         description: No return found with that tracking number
  */
-router.post('/receive', authenticateAdmin, receiveHandler);
+router.post('/receive', receiveHandler);
 
 /**
  * @swagger
@@ -76,7 +79,7 @@ router.post('/receive', authenticateAdmin, receiveHandler);
  *       404:
  *         description: No finalized return found with that tracking number
  */
-router.post('/scan-box', authenticateAdmin, scanBoxHandler);
+router.post('/scan-box', scanBoxHandler);
 
 /**
  * @swagger
@@ -101,7 +104,7 @@ router.post('/scan-box', authenticateAdmin, scanBoxHandler);
  *       200:
  *         description: Paginated list of pending returns
  */
-router.get('/pending', authenticateAdmin, pendingHandler);
+router.get('/pending', pendingHandler);
 
 /**
  * @swagger
@@ -126,7 +129,7 @@ router.get('/pending', authenticateAdmin, pendingHandler);
  *       200:
  *         description: Paginated list of received returns
  */
-router.get('/received', authenticateAdmin, receivedHandler);
+router.get('/received', receivedHandler);
 
 /**
  * @swagger
@@ -158,7 +161,7 @@ router.get('/received', authenticateAdmin, receivedHandler);
  *       404:
  *         description: Return not found
  */
-router.post('/:id/verify', authenticateAdmin, verifyReturnHandler);
+router.post('/:id/verify', verifyReturnHandler);
 
 /**
  * @swagger
@@ -196,7 +199,7 @@ router.post('/:id/verify', authenticateAdmin, verifyReturnHandler);
  *       404:
  *         description: Transaction or item not found
  */
-router.patch('/:id/items/:itemId/verify', authenticateAdmin, verifyItemHandler);
+router.patch('/:id/items/:itemId/verify', verifyItemHandler);
 
 /**
  * @swagger
@@ -234,7 +237,7 @@ router.patch('/:id/items/:itemId/verify', authenticateAdmin, verifyItemHandler);
  *       404:
  *         description: Transaction not found
  */
-router.post('/:id/discrepancy', authenticateAdmin, reportDiscrepancyHandler);
+router.post('/:id/discrepancy', reportDiscrepancyHandler);
 
 /**
  * @swagger
@@ -256,6 +259,6 @@ router.post('/:id/discrepancy', authenticateAdmin, reportDiscrepancyHandler);
  *       200:
  *         description: List of discrepancies
  */
-router.get('/:id/discrepancies', authenticateAdmin, listDiscrepanciesHandler);
+router.get('/:id/discrepancies', listDiscrepanciesHandler);
 
 export default router;

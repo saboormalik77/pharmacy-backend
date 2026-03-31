@@ -1,8 +1,11 @@
 import { Router } from 'express';
-import { authenticateAdmin } from '../middleware/adminAuth';
+import { authenticateAdmin, requirePermission } from '../middleware/adminAuth';
 import { outboundShipmentsHandler } from '../controllers/raController';
 
 const router = Router();
+
+router.use(authenticateAdmin);
+router.use(requirePermission('warehouse'));
 
 /**
  * @swagger
@@ -34,6 +37,6 @@ const router = Router();
  *       200:
  *         description: Paginated list of shipped debit memos
  */
-router.get('/outbound', authenticateAdmin, outboundShipmentsHandler);
+router.get('/outbound', outboundShipmentsHandler);
 
 export default router;

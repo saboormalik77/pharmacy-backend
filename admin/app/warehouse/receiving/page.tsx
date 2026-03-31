@@ -1,5 +1,6 @@
 'use client';
 
+import { PermissionGate } from '@/components/auth/PermissionGate';
 import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -172,6 +173,7 @@ export default function WarehouseReceivingPage() {
     ];
 
     return (
+        <PermissionGate permission="warehouse">
         <div className="space-y-3">
             <ToastContainer toasts={toasts} onClose={removeToast} />
 
@@ -670,5 +672,6 @@ export default function WarehouseReceivingPage() {
                 </div>
             )}
         </div>
+        </PermissionGate>
     );
 }

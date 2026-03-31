@@ -7,12 +7,13 @@ import {
   getAdminProfileHandler,
   resetPasswordHandler,
 } from '../controllers/adminSettingsController';
-import { authenticateAdmin } from '../middleware/adminAuth';
+import { authenticateAdmin, requirePermission } from '../middleware/adminAuth';
 
 const router = Router();
 
 // Apply admin authentication to all routes
 router.use(authenticateAdmin);
+router.use(requirePermission('settings'));
 
 // ============================================================
 // Swagger Schemas

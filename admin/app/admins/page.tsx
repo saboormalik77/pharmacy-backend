@@ -1,5 +1,6 @@
 'use client';
 
+import { PermissionGate } from '@/components/auth/PermissionGate';
 import { useState, useEffect } from 'react';
 import { Search, Eye, UserPlus, Shield, X, ChevronLeft, ChevronRight, Trash2, Edit, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
@@ -10,6 +11,23 @@ import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { fetchAdmins, createAdmin, updateAdmin, deleteAdmin, setFilters } from '@/lib/store/adminsSlice';
 import { Admin, AdminCreatePayload, AdminUpdatePayload } from '@/lib/types';
 import { useDebounce } from '@/lib/hooks/useDebounce';
+
+const ASSIGNABLE_PERMISSIONS = [
+    { key: 'pharmacies', label: 'Pharmacies' },
+    { key: 'distributors', label: 'Distributors' },
+    { key: 'marketplace', label: 'Marketplace' },
+    { key: 'documents', label: 'Documents' },
+    { key: 'payments', label: 'Payments' },
+    { key: 'payout_hub', label: 'Payout Mgmt' },
+    { key: 'analytics', label: 'Analytics' },
+    { key: 'settings', label: 'Settings' },
+    { key: 'processors', label: 'Processors' },
+    { key: 'policies', label: 'Labeler Info' },
+    { key: 'ndc_pricing', label: 'NDC Pricing' },
+    { key: 'tbd_items', label: 'TBD Items' },
+    { key: 'destruction', label: 'Destruction' },
+    { key: 'warehouse', label: 'Warehouse' },
+] as const;
 
 const roleLabels: Record<string, string> = {
     'super_admin': 'Super Admin',
@@ -41,6 +59,7 @@ export default function AdminsPage() {
     const [editModal, setEditModal] = useState<Admin | null>(null);
     const [editFormData, setEditFormData] = useState<AdminUpdatePayload>({});
     const [deleteModal, setDeleteModal] = useState<Admin | null>(null);
+    const [editLoading, setEditLoading] = useState(false);
     const [toasts, setToasts] = useState<Toast[]>([]);
 
     const showToast = (message: string, type: Toast['type'] = 'success') => {
@@ -56,6 +75,7 @@ export default function AdminsPage() {
         password: '',
         name: '',
         role: 'manager',
+        permissions: [],
     });
 
     // Debounce search term
@@ -84,6 +104,7 @@ export default function AdminsPage() {
                 email: editModal.email || '',
                 role: editModal.role || 'manager',
                 isActive: editModal.isActive ?? true,
+                permissions: editModal.permissions || [],
             });
         }
     }, [editModal]);
@@ -128,9 +149,10 @@ export default function AdminsPage() {
                 password: '',
                 name: '',
                 role: 'manager',
+                permissions: [],
             });
             // Refresh the list
-            dispatch(fetchAdmins({
+            await dispatch(fetchAdmins({
                 page: currentPage,
                 limit: 10,
                 search: debouncedSearch || undefined,
@@ -144,8 +166,19 @@ export default function AdminsPage() {
         }
     };
 
-    const handleEdit = (admin: Admin) => {
-        setEditModal(admin);
+    const handleEdit = async (admin: Admin) => {
+        setEditLoading(true);
+        try {
+            const { apiClient } = await import('@/lib/api/apiClient');
+            const response: any = await apiClient.get(`/admin/users/${admin.id}`, true);
+            const fullAdmin: Admin = response?.data?.admin || admin;
+            setEditModal(fullAdmin);
+        } catch {
+            // Fallback to list row data if detail fetch fails
+            setEditModal(admin);
+        } finally {
+            setEditLoading(false);
+        }
     };
 
     const handleUpdate = async () => {
@@ -210,6 +243,15 @@ export default function AdminsPage() {
         return true;
     };
 
+    const togglePermission = (
+        current: string[] | undefined,
+        key: string,
+        setter: (perms: string[]) => void,
+    ) => {
+        const list = current || [];
+        setter(list.includes(key) ? list.filter(p => p !== key) : [...list, key]);
+    };
+
     const getStatusVariant = (status: string) => {
         switch (status?.toLowerCase()) {
             case 'active': return 'success';
@@ -219,6 +261,7 @@ export default function AdminsPage() {
     };
 
     return (
+        <PermissionGate permission="admins">
         <div className="space-y-6">
             <ToastContainer toasts={toasts} onClose={removeToast} />
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
@@ -413,6 +456,7 @@ export default function AdminsPage() {
                                                         onClick={() => handleEdit(admin)}
                                                         className="p-1 text-green-600 hover:bg-green-50 rounded transition-colors flex-shrink-0"
                                                         title="Edit"
+                                                        disabled={editLoading}
                                                     >
                                                         <Edit className="w-3.5 h-3.5" />
                                                     </button>
@@ -524,6 +568,20 @@ export default function AdminsPage() {
                                     <label className="text-xs font-medium text-gray-500">Created At</label>
                                     <p className="text-sm text-gray-900 mt-0.5">{viewModal.createdAt ? formatDate(viewModal.createdAt) : 'N/A'}</p>
                                 </div>
+                                <div className="col-span-2">
+                                    <label className="text-xs font-medium text-gray-500">Permissions</label>
+                                    {viewModal.role === 'super_admin' ? (
+                                        <p className="text-xs text-green-600 font-medium mt-0.5">Full Access (all permissions)</p>
+                                    ) : (viewModal.permissions && viewModal.permissions.length > 0) ? (
+                                        <div className="flex flex-wrap gap-1.5 mt-1">
+                                            {viewModal.permissions.map((p) => (
+                                                <span key={p} className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-full">{p}</span>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-xs text-gray-400 mt-0.5">No permissions assigned</p>
+                                    )}
+                                </div>
                             </div>
                         </div>
                         <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 flex-shrink-0">
@@ -593,6 +651,26 @@ export default function AdminsPage() {
                                         <option value="reviewer">Reviewer</option>
                                         <option value="support">Support</option>
                                     </select>
+                                </div>
+                                <div className="col-span-2">
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Permissions</label>
+                                    {newAdmin.role === 'super_admin' ? (
+                                        <p className="text-xs text-green-600 font-medium py-1">Full Access (all permissions)</p>
+                                    ) : (
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 mt-1 p-2 border border-gray-200 rounded-md max-h-48 overflow-y-auto">
+                                            {ASSIGNABLE_PERMISSIONS.map(({ key, label }) => (
+                                                <label key={key} className="flex items-center gap-1.5 text-xs cursor-pointer hover:bg-gray-50 rounded px-1 py-0.5">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={(newAdmin.permissions || []).includes(key)}
+                                                        onChange={() => togglePermission(newAdmin.permissions, key, (perms) => setNewAdmin({ ...newAdmin, permissions: perms }))}
+                                                        className="w-3.5 h-3.5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                                                    />
+                                                    {label}
+                                                </label>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -669,6 +747,26 @@ export default function AdminsPage() {
                                         <option value="reviewer">Reviewer</option>
                                         <option value="support">Support</option>
                                     </select>
+                                </div>
+                                <div className="col-span-2">
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Permissions</label>
+                                    {editFormData.role === 'super_admin' ? (
+                                        <p className="text-xs text-green-600 font-medium py-1">Full Access (all permissions)</p>
+                                    ) : (
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 mt-1 p-2 border border-gray-200 rounded-md max-h-48 overflow-y-auto">
+                                            {ASSIGNABLE_PERMISSIONS.map(({ key, label }) => (
+                                                <label key={key} className="flex items-center gap-1.5 text-xs cursor-pointer hover:bg-gray-50 rounded px-1 py-0.5">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={(editFormData.permissions || []).includes(key)}
+                                                        onChange={() => togglePermission(editFormData.permissions, key, (perms) => setEditFormData({ ...editFormData, permissions: perms }))}
+                                                        className="w-3.5 h-3.5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                                                    />
+                                                    {label}
+                                                </label>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="col-span-2">
                                     <label className="flex items-center gap-2">
@@ -760,48 +858,8 @@ export default function AdminsPage() {
                 </div>
             )}
 
-            {/* Permissions Info */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Role Permissions</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="p-4 border border-red-200 rounded-lg bg-red-50">
-                        <h4 className="font-medium text-red-900 mb-2">Super Admin</h4>
-                        <ul className="text-sm text-red-700 space-y-1">
-                            <li>• Full system access</li>
-                            <li>• Manage all users</li>
-                            <li>• System configuration</li>
-                            <li>• All permissions</li>
-                        </ul>
-                    </div>
-                    <div className="p-4 border border-yellow-200 rounded-lg bg-yellow-50">
-                        <h4 className="font-medium text-yellow-900 mb-2">Manager</h4>
-                        <ul className="text-sm text-yellow-700 space-y-1">
-                            <li>• Manage pharmacies</li>
-                            <li>• Approve documents</li>
-                            <li>• Process payments</li>
-                            <li>• View analytics</li>
-                        </ul>
-                    </div>
-                    <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
-                        <h4 className="font-medium text-blue-900 mb-2">Reviewer</h4>
-                        <ul className="text-sm text-blue-700 space-y-1">
-                            <li>• Review documents</li>
-                            <li>• Approve/reject returns</li>
-                            <li>• View shipments</li>
-                            <li>• Limited access</li>
-                        </ul>
-                    </div>
-                    <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">
-                        <h4 className="font-medium text-gray-900 mb-2">Support</h4>
-                        <ul className="text-sm text-gray-700 space-y-1">
-                            <li>• View-only access</li>
-                            <li>• Customer support</li>
-                            <li>• Answer queries</li>
-                            <li>• Generate reports</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+            {/* Role permissions info card intentionally hidden */}
         </div>
+        </PermissionGate>
     );
 }

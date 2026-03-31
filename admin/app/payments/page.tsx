@@ -1,5 +1,6 @@
 'use client';
 
+import { PermissionGate } from '@/components/auth/PermissionGate';
 import { useState, useEffect } from 'react';
 import { Search, Eye, Download, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
@@ -92,6 +93,7 @@ export default function PaymentsPage() {
     };
 
     return (
+        <PermissionGate permission="payments">
         <div className="space-y-6">
             <div>
                 <h1 className="text-2xl font-bold text-gray-900">Payments</h1>
@@ -418,5 +420,6 @@ export default function PaymentsPage() {
                 </div>
             )}
         </div>
+        </PermissionGate>
     );
 }

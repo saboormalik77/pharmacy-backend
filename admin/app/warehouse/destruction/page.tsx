@@ -1,5 +1,6 @@
 'use client';
 
+import { PermissionGate } from '@/components/auth/PermissionGate';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, CheckCircle2, Clock3, Loader2, Search, Truck, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
@@ -174,6 +175,7 @@ export default function DestructionPage() {
   );
 
   return (
+    <PermissionGate permission="destruction">
     <div className="space-y-3">
       <ToastContainer toasts={toasts} onClose={closeToast} />
 
@@ -380,5 +382,6 @@ export default function DestructionPage() {
         </div>
       )}
     </div>
+    </PermissionGate>
   );
 }

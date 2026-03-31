@@ -1,5 +1,6 @@
 'use client';
 
+import { PermissionGate } from '@/components/auth/PermissionGate';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import {
@@ -286,6 +287,7 @@ export default function NDCPricingPage() {
     };
 
     return (
+        <PermissionGate permission="ndc_pricing">
         <div className="space-y-3">
             <ToastContainer toasts={toasts} onClose={removeToast} />
 
@@ -722,5 +724,6 @@ export default function NDCPricingPage() {
                 </div>
             )}
         </div>
+        </PermissionGate>
     );
 }

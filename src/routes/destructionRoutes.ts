@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticate } from '../middleware/auth';
-import { authenticateAdmin } from '../middleware/adminAuth';
+import { authenticateAdmin, requirePermission } from '../middleware/adminAuth';
 import {
   listHandler,
   pendingHandler,
@@ -10,7 +10,6 @@ import {
   updateHandler,
 } from '../controllers/destructionController';
 
-const router = Router();
 const authenticateAny = async (req: any, res: any, next: any) => {
   const auth = req.headers.authorization;
   if (!auth || !auth.startsWith('Bearer ')) return next();
@@ -20,6 +19,14 @@ const authenticateAny = async (req: any, res: any, next: any) => {
     await authenticate(req, res, next);
   });
 };
+
+const router = Router();
+
+router.use(authenticateAny);
+router.use((req, res, next) => {
+  if (!req.adminId) return next();
+  return requirePermission('destruction')(req, res, next);
+});
 
 /**
  * @swagger
@@ -57,7 +64,7 @@ const authenticateAny = async (req: any, res: any, next: any) => {
  *       200:
  *         description: List of destruction records with pagination
  */
-router.get('/', authenticateAny, listHandler);
+router.get('/', listHandler);
 
 /**
  * @swagger
@@ -75,7 +82,7 @@ router.get('/', authenticateAny, listHandler);
  *       200:
  *         description: Pending destruction items
  */
-router.get('/pending', authenticateAny, pendingHandler);
+router.get('/pending', pendingHandler);
 
 /**
  * @swagger
@@ -93,7 +100,7 @@ router.get('/pending', authenticateAny, pendingHandler);
  *       200:
  *         description: Statistics object with counts per status
  */
-router.get('/stats', authenticateAny, statsHandler);
+router.get('/stats', statsHandler);
 
 /**
  * @swagger
@@ -114,7 +121,7 @@ router.get('/stats', authenticateAny, statsHandler);
  *       404:
  *         description: Record not found
  */
-router.get('/:id', authenticateAny, getHandler);
+router.get('/:id', getHandler);
 
 /**
  * @swagger
@@ -150,7 +157,7 @@ router.get('/:id', authenticateAny, getHandler);
  *       400:
  *         description: Validation error
  */
-router.post('/', authenticateAny, createHandler);
+router.post('/', createHandler);
 
 /**
  * @swagger
@@ -186,6 +193,6 @@ router.post('/', authenticateAny, createHandler);
  *       404:
  *         description: Record not found
  */
-router.patch('/:id', authenticateAny, updateHandler);
+router.patch('/:id', updateHandler);
 
 export default router;

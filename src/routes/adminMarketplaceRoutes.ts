@@ -13,13 +13,14 @@ import {
   getDealOfTheDayInfoHandler,
   getAllFeaturedDealsInfoHandler,
 } from '../controllers/adminMarketplaceController';
-import { authenticateAdmin } from '../middleware/adminAuth';
+import { authenticateAdmin, requirePermission } from '../middleware/adminAuth';
 import { uploadImage } from '../middleware/uploadImage';
 
 const router = Router();
 
 // Apply admin authentication to all routes
 router.use(authenticateAdmin);
+router.use(requirePermission('marketplace'));
 
 // ============================================================
 // Swagger Schemas

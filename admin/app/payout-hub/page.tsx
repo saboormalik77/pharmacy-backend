@@ -1,5 +1,6 @@
 'use client';
 
+import { PermissionGate } from '@/components/auth/PermissionGate';
 import Link from 'next/link';
 import {
     DollarSign,
@@ -43,6 +44,7 @@ const payoutSections = [
 
 export default function PayoutHubPage() {
     return (
+        <PermissionGate permission="payout_hub">
         <div className="space-y-4">
             {/* Header */}
             <div>
@@ -89,5 +91,6 @@ export default function PayoutHubPage() {
                 })}
             </div>
         </div>
+        </PermissionGate>
     );
 }
