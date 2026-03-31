@@ -154,11 +154,30 @@ export const checkReturnabilityHandler = catchAsync(
       throw new AppError('ndc and expirationDate are required', 400);
     }
 
+    // Debug logging to understand the difference between pharmacy and processor calls
+    console.log('🔍 Policy Check Debug:', {
+      ndc,
+      expirationDate,
+      isPartial,
+      dosageForm,
+      userAgent: req.headers['user-agent'],
+      authHeader: req.headers.authorization ? 'Present' : 'Missing',
+      requestBody: req.body,
+    });
+
     const result = await checkReturnability({
       ndc,
       expirationDate,
       isPartial: isPartial === true || isPartial === 'true',
       dosageForm,
+    });
+
+    console.log('🔍 Policy Check Result:', {
+      ndc,
+      isPartial: isPartial === true || isPartial === 'true',
+      status: result.status,
+      reason: result.reason,
+      partialsAccepted: result.partialsAccepted,
     });
 
     res.status(200).json({ status: 'success', data: result });
