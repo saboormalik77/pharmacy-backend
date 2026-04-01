@@ -437,14 +437,22 @@ export default function ReturnDetailPage() {
         setIsEditPolicyChecking(false);
     }, [editItemModal, editItemForm.fullPackageSize, editItemForm.fullPackageQtyReturned, dispatch]);
 
+    /** Debounce policy check when Qty Returned / package size change in edit modal (avoids a request per keystroke). */
+    const editPolicyTriggerKey =
+        editItemModal && !isLocked
+            ? `${editItemForm.fullPackageSize}|${editItemForm.fullPackageQtyReturned}`
+            : '';
+    const debouncedEditPolicyKey = useDebounce(editPolicyTriggerKey, 600);
+
     useEffect(() => {
         if (!editItemModal || isLocked) return;
+        if (!debouncedEditPolicyKey) return;
         const pkgSize = parseInt(editItemForm.fullPackageSize) || 0;
         const qtyReturned = parseInt(editItemForm.fullPackageQtyReturned) || 0;
         if (pkgSize <= 0 || qtyReturned <= 0) return;
 
         runEditPolicyCheck();
-    }, [editItemForm.fullPackageSize, editItemForm.fullPackageQtyReturned, editItemModal, isLocked, runEditPolicyCheck]);
+    }, [debouncedEditPolicyKey, editItemModal, isLocked, runEditPolicyCheck]);
 
     const handleDeleteItem = async () => {
         if (!deleteItemModal) return;

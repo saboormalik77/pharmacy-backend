@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import {
@@ -336,13 +336,43 @@ export default function ReturnDetailPage() {
         setIsEditPolicyChecking(false);
     }, [editItemModal, editItemForm.fullPackageSize, editItemForm.fullPackageQtyReturned]);
 
+    const editPolicyModalIdRef = useRef<string | null>(null);
+    const prevEditPkgRef = useRef<string>('');
+    const prevEditQtyRef = useRef<string>('');
+
     useEffect(() => {
-        if (!editItemModal) return;
+        if (!editItemModal) {
+            editPolicyModalIdRef.current = null;
+            return;
+        }
         const pkgSize = parseInt(editItemForm.fullPackageSize) || 0;
         const qtyReturned = parseInt(editItemForm.fullPackageQtyReturned) || 0;
         if (pkgSize <= 0 || qtyReturned <= 0) return;
 
-        runEditPolicyCheck();
+        const pkgStr = editItemForm.fullPackageSize;
+        const qtyStr = editItemForm.fullPackageQtyReturned;
+
+        const modalOpened = editPolicyModalIdRef.current !== editItemModal.id;
+        if (modalOpened) {
+            editPolicyModalIdRef.current = editItemModal.id;
+            prevEditPkgRef.current = pkgStr;
+            prevEditQtyRef.current = qtyStr;
+            runEditPolicyCheck();
+            return;
+        }
+
+        const pkgChanged = prevEditPkgRef.current !== pkgStr;
+        const qtyChanged = prevEditQtyRef.current !== qtyStr;
+        prevEditPkgRef.current = pkgStr;
+        prevEditQtyRef.current = qtyStr;
+
+        if (pkgChanged && !qtyChanged) {
+            runEditPolicyCheck();
+            return;
+        }
+
+        const t = window.setTimeout(() => runEditPolicyCheck(), 600);
+        return () => window.clearTimeout(t);
     }, [editItemForm.fullPackageSize, editItemForm.fullPackageQtyReturned, editItemModal, runEditPolicyCheck]);
 
     // ── Action handlers ────────────────────────────────────────
