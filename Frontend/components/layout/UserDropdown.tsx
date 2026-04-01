@@ -64,7 +64,7 @@ export function UserDropdown() {
 
   const handleLogout = () => {
     authService.signout()
-    router.push('/login')
+    window.location.href = '/login'
   }
 
   return (

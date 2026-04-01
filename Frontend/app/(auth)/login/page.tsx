@@ -26,7 +26,7 @@ function LoginForm() {
     try {
       await authService.signin({ email, password })
       // Redirect to the original destination or dashboard
-      const redirectTo = searchParams.get('redirect') || '/dashboard'
+      const redirectTo = searchParams.get('redirect') || '/returns'
       router.push(redirectTo)
     } catch (err: any) {
       setError(err.message || 'Invalid email or password. Please try again.')

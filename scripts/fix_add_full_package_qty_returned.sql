@@ -1,17 +1,21 @@
--- FIX: Add full_package_qty_returned column to return_transaction_items
--- This stores the raw "Qty Returned" input from the scan form
--- so it can be displayed in the products table.
+-- FIX: Update quantity_returned column handling in return_transaction_items
+-- The column already exists with NOT NULL constraint, but sometimes the field
+-- is missing from the payload. This script makes it nullable and updates RPCs.
 --
 -- Run this ONCE in Supabase SQL Editor.
 -- ============================================================
 
 
--- 1. Add the column
+-- 1. Drop the NOT NULL constraint on quantity_returned
 ALTER TABLE return_transaction_items
-  ADD COLUMN IF NOT EXISTS full_package_qty_returned INTEGER;
+  ALTER COLUMN quantity_returned DROP NOT NULL;
+
+-- Drop the positive check constraint if it exists
+ALTER TABLE return_transaction_items
+  DROP CONSTRAINT IF EXISTS check_quantity_returned_positive;
 
 
--- 2. Update _rti_to_json to include the new field in API responses
+-- 2. Update _rti_to_json to include quantity_returned (maps to fullPackageQtyReturned in frontend)
 CREATE OR REPLACE FUNCTION _rti_to_json(r return_transaction_items)
 RETURNS jsonb LANGUAGE sql STABLE AS $$
   SELECT jsonb_build_object(
@@ -33,7 +37,7 @@ RETURNS jsonb LANGUAGE sql STABLE AS $$
     'standardPrice',           r.standard_price,
     'quantity',                r.quantity,
     'fullPackageSize',         r.full_package_size,
-    'fullPackageQtyReturned',  r.full_package_qty_returned,
+    'fullPackageQtyReturned',  r.quantity_returned,
     'isPartial',               r.is_partial,
     'partialPercentage',       r.partial_percentage,
     'estimatedValue',          r.estimated_value,
@@ -110,7 +114,7 @@ BEGIN
     proprietary_name, generic_name, manufacturer, package_description,
     dosage_form, strength, route,
     lot_number, serial_number, expiration_date,
-    standard_price, quantity, full_package_size, full_package_qty_returned,
+    standard_price, quantity, full_package_size, quantity_returned,
     is_partial, partial_percentage, estimated_value,
     estimated_store_price, estimated_store_value,
     return_status, non_returnable_reason, return_reason, destination,
@@ -279,9 +283,9 @@ BEGIN
     full_package_size     = CASE WHEN p_updates ? 'fullPackageSize'
                                  THEN (p_updates->>'fullPackageSize')::int
                                  ELSE full_package_size END,
-    full_package_qty_returned = CASE WHEN p_updates ? 'fullPackageQtyReturned'
+    quantity_returned = CASE WHEN p_updates ? 'fullPackageQtyReturned'
                                  THEN (p_updates->>'fullPackageQtyReturned')::int
-                                 ELSE full_package_qty_returned END,
+                                 ELSE quantity_returned END,
     is_partial            = CASE WHEN p_updates ? 'isPartial'
                                  THEN (p_updates->>'isPartial')::boolean
                                  ELSE is_partial END,

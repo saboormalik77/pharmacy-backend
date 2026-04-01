@@ -33,9 +33,9 @@ RETURNS jsonb LANGUAGE sql STABLE AS $$
     'status',                   r.status,
     'fedexTracking',            r.fedex_tracking,
     'fedexPickupConfirmation',  r.fedex_pickup_confirmation,
-    'totalItems',               r.total_items,
-    'totalReturnableValue',     r.total_returnable_value,
-    'totalNonReturnableValue',  r.total_non_returnable_value,
+    'totalItems',               (SELECT COUNT(*)::INTEGER FROM return_transaction_items WHERE transaction_id = r.id AND return_status IN ('returnable', 'tbd')),
+    'totalReturnableValue',     (SELECT COALESCE(SUM(estimated_value), 0) FROM return_transaction_items WHERE transaction_id = r.id AND return_status = 'returnable'),
+    'totalNonReturnableValue',  (SELECT COALESCE(SUM(estimated_value), 0) FROM return_transaction_items WHERE transaction_id = r.id AND return_status = 'non_returnable'),
     'batchId',                  r.batch_id,
     'timeIn',                   r.time_in,
     'timeOut',                  r.time_out,
@@ -45,6 +45,12 @@ RETURNS jsonb LANGUAGE sql STABLE AS $$
     'finalizedAt',              r.finalized_at,
     'boxCount',                 r.box_count,
     'manifestGeneratedAt',      r.manifest_generated_at,
+    'prpNumber',                r.prp_number,
+    'packageTracking',          r.package_tracking,
+    'scannedPackages',          r.scanned_packages,
+    'fedexShipmentId',          r.fedex_shipment_id,
+    'fedexLabels',              r.fedex_labels,
+    'finalizeSteps',            COALESCE(r.finalize_steps, '{"printManifest": false, "fedexEntered": false, "printJobSheets": false}'::jsonb),
     'createdAt',                r.created_at,
     'updatedAt',                r.updated_at
   );
@@ -219,12 +225,12 @@ BEGIN
   WHERE rti.transaction_id = p_transaction_id
     AND rti.return_status = 'non_returnable';
 
-  -- Counts & values
-  SELECT COUNT(*) INTO v_item_count FROM return_transaction_items WHERE transaction_id = p_transaction_id;
+  -- Counts & values (only returnable + tbd for totalItems)
+  SELECT COUNT(*) INTO v_item_count FROM return_transaction_items WHERE transaction_id = p_transaction_id AND return_status IN ('returnable', 'tbd');
   SELECT COUNT(*) INTO v_returnable_count FROM return_transaction_items WHERE transaction_id = p_transaction_id AND return_status = 'returnable';
-  SELECT COUNT(*) INTO v_non_ret_count FROM return_transaction_items WHERE transaction_id = p_transaction_id AND return_status = 'non_returnable';
+  v_non_ret_count := 0;
   SELECT COALESCE(SUM(estimated_value), 0) INTO v_returnable_value FROM return_transaction_items WHERE transaction_id = p_transaction_id AND return_status = 'returnable';
-  SELECT COALESCE(SUM(estimated_value), 0) INTO v_non_ret_value FROM return_transaction_items WHERE transaction_id = p_transaction_id AND return_status = 'non_returnable';
+  v_non_ret_value := 0;
 
   -- Check if CII items exist
   SELECT EXISTS(

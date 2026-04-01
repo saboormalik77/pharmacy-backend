@@ -270,12 +270,6 @@ export async function generateManifestPdf(data: ManifestData): Promise<Buffer> {
     drawItemsTable(doc, 'RETURNABLE ITEMS', data.returnableItems, pageWidth, true);
   }
 
-  // ── Non-Returnable Items Table ──
-  if (data.nonReturnableItems.length > 0) {
-    if (doc.y > 650) doc.addPage();
-    drawItemsTable(doc, 'NON-RETURNABLE ITEMS', data.nonReturnableItems, pageWidth, false);
-  }
-
   // ── Notes ──
   if (data.transaction.notes) {
     if (doc.y > 680) doc.addPage();
@@ -348,7 +342,7 @@ export function generateManifestHtml(data: ManifestData): string {
   const proc = data.processor;
   const dateStr = fmtDate(t.finalizedAt || t.createdAt);
   const returnableBlock = manifestItemsTableHtml('RETURNABLE ITEMS', data.returnableItems, true);
-  const nonRetBlock = manifestItemsTableHtml('NON-RETURNABLE ITEMS', data.nonReturnableItems, false);
+  const nonRetBlock = '';
   const notesBlock = t.notes
     ? `<div class="notes"><strong>Notes:</strong> ${escapeHtml(t.notes)}</div>`
     : '';

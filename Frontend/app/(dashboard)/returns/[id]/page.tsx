@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import {
@@ -336,13 +336,43 @@ export default function ReturnDetailPage() {
         setIsEditPolicyChecking(false);
     }, [editItemModal, editItemForm.fullPackageSize, editItemForm.fullPackageQtyReturned]);
 
+    const editPolicyModalIdRef = useRef<string | null>(null);
+    const prevEditPkgRef = useRef<string>('');
+    const prevEditQtyRef = useRef<string>('');
+
     useEffect(() => {
-        if (!editItemModal) return;
+        if (!editItemModal) {
+            editPolicyModalIdRef.current = null;
+            return;
+        }
         const pkgSize = parseInt(editItemForm.fullPackageSize) || 0;
         const qtyReturned = parseInt(editItemForm.fullPackageQtyReturned) || 0;
         if (pkgSize <= 0 || qtyReturned <= 0) return;
 
-        runEditPolicyCheck();
+        const pkgStr = editItemForm.fullPackageSize;
+        const qtyStr = editItemForm.fullPackageQtyReturned;
+
+        const modalOpened = editPolicyModalIdRef.current !== editItemModal.id;
+        if (modalOpened) {
+            editPolicyModalIdRef.current = editItemModal.id;
+            prevEditPkgRef.current = pkgStr;
+            prevEditQtyRef.current = qtyStr;
+            runEditPolicyCheck();
+            return;
+        }
+
+        const pkgChanged = prevEditPkgRef.current !== pkgStr;
+        const qtyChanged = prevEditQtyRef.current !== qtyStr;
+        prevEditPkgRef.current = pkgStr;
+        prevEditQtyRef.current = qtyStr;
+
+        if (pkgChanged && !qtyChanged) {
+            runEditPolicyCheck();
+            return;
+        }
+
+        const t = window.setTimeout(() => runEditPolicyCheck(), 600);
+        return () => window.clearTimeout(t);
     }, [editItemForm.fullPackageSize, editItemForm.fullPackageQtyReturned, editItemModal, runEditPolicyCheck]);
 
     // ── Action handlers ────────────────────────────────────────
@@ -624,7 +654,7 @@ export default function ReturnDetailPage() {
     };
 
     // Calculate finalize state
-    const returnableItemsCount = items.filter(item => item.returnStatus === 'returnable').length;
+    const returnableAndTbdItemsCount = items.filter(item => item.returnStatus === 'returnable' || item.returnStatus === 'tbd').length;
     const tbdItems = items.filter(item => item.returnStatus === 'tbd');
     const ciiItems = items.filter(item => item.deaForm222Required);
     const hasTbdItems = tbdItems.length > 0;
@@ -737,7 +767,12 @@ export default function ReturnDetailPage() {
 
     const badge = getStatusBadge(tx.status);
     const showDocuments = ['finalized', 'received', 'closed_out'].includes(tx.status);
-    const showShipping = !!(tx.fedexTracking || tx.fedexPickupConfirmation);
+    const showShipping = !!(
+        tx.fedexTracking ||
+        tx.fedexPickupConfirmation ||
+        (tx.packageTracking && Object.keys(tx.packageTracking).length > 0) ||
+        (tx.fedexLabels && Object.keys(tx.fedexLabels).length > 0)
+    );
 
     return (
         <DashboardLayout>
@@ -888,7 +923,7 @@ export default function ReturnDetailPage() {
                         <dl className="space-y-2">
                             <div className="flex justify-between">
                                 <dt className="text-xs text-gray-500">Total Items</dt>
-                                <dd className="text-xs font-medium text-gray-900">{returnableItemsCount}</dd>
+                                <dd className="text-xs font-medium text-gray-900">{returnableAndTbdItemsCount}</dd>
                             </div>
                             <div className="flex justify-between">
                                 <dt className="text-xs text-gray-500">Returnable Value</dt>
@@ -927,6 +962,70 @@ export default function ReturnDetailPage() {
                                         <dd className="text-xs font-medium text-gray-900 font-mono">{tx.fedexPickupConfirmation}</dd>
                                     </div>
                                 )}
+                                
+                                {/* Package Tracking with Print Labels */}
+                                {tx.packageTracking && Object.keys(tx.packageTracking).length > 0 && (
+                                    <div className="pt-2 border-t border-gray-100">
+                                        <dt className="text-xs text-gray-500 mb-2 flex items-center justify-between">
+                                            <span>Package Tracking</span>
+                                            <div className="flex items-center gap-1">
+                                                <button
+                                                    onClick={printShippingLabels}
+                                                    disabled={pdfLoading === 'shipping-labels'}
+                                                    className="flex items-center gap-1 px-2 py-1 bg-green-100 hover:bg-green-200 text-xs text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
+                                                    title="Print all shipping labels with addresses and barcodes"
+                                                >
+                                                    {pdfLoading === 'shipping-labels' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
+                                                    Print All Labels
+                                                </button>
+                                            </div>
+                                        </dt>
+                                        <dd className="space-y-1.5 mt-1">
+                                            {Object.entries(tx.packageTracking)
+                                                .filter(([, v]) => v)
+                                                .map(([key, val], idx) => (
+                                                    <div key={key} className="flex justify-between items-center text-xs">
+                                                        <span className="text-gray-500 capitalize">{key.replace(/([0-9]+)/, ' $1')}</span>
+                                                        <div className="flex items-center gap-1.5">
+                                                            <span className="font-mono text-gray-900">{val}</span>
+                                                            <button
+                                                                onClick={() => printSingleLabel(idx + 1)}
+                                                                disabled={pdfLoading === `shipping-label-${idx + 1}`}
+                                                                className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
+                                                                title={`Print shipping label for ${val}`}
+                                                            >
+                                                                {pdfLoading === `shipping-label-${idx + 1}` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            }
+                                        </dd>
+                                    </div>
+                                )}
+                                
+                                {/* FedEx Labels */}
+                                {tx.fedexLabels && Object.keys(tx.fedexLabels).length > 0 && (
+                                    <div className="pt-2 border-t border-gray-100">
+                                        <dt className="text-gray-500 mb-1 flex items-center gap-1"><Printer className="w-3.5 h-3.5" /> Shipping Labels</dt>
+                                        <dd className="flex flex-wrap gap-2">
+                                            {Object.keys(tx.fedexLabels).map((key) => {
+                                                const num = key.replace('package', '');
+                                                return (
+                                                    <a
+                                                        key={key}
+                                                        href={`${process.env.NEXT_PUBLIC_API_URL}/return-transactions/${tx.id}/labels/${num}/download`}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="flex items-center gap-1 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-xs text-gray-700 rounded border border-gray-200 transition-colors"
+                                                    >
+                                                        <Download className="w-3 h-3" /> Label {num}
+                                                    </a>
+                                                );
+                                            })}
+                                        </dd>
+                                    </div>
+                                )}
                             </dl>
                         </div>
                     )}
@@ -954,7 +1053,7 @@ export default function ReturnDetailPage() {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     <div className="bg-white rounded-lg shadow px-4 py-3 text-center">
                         <p className="text-[10px] uppercase tracking-wide text-gray-500 mb-1">Items</p>
-                        <p className="text-lg font-bold text-gray-900">{returnableItemsCount}</p>
+                        <p className="text-lg font-bold text-gray-900">{returnableAndTbdItemsCount}</p>
                     </div>
                     <div className="bg-white rounded-lg shadow px-4 py-3 text-center">
                         <p className="text-[10px] uppercase tracking-wide text-green-600 mb-1">Returnable</p>
@@ -1420,7 +1519,7 @@ export default function ReturnDetailPage() {
                                 )}
 
                                 {/* ── Step 1: Print Itemized Return ── */}
-                                <div className={`border rounded-lg p-4 transition-all ${finalizeStepsDone.printManifest ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-white'}`}>
+                                <div className={`border rounded-lg p-4 transition-all ${hasTbdItems ? 'opacity-50 pointer-events-none' : ''} ${finalizeStepsDone.printManifest ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-white'}`}>
                                     <div className="flex items-start gap-3">
                                         <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${finalizeStepsDone.printManifest ? 'bg-green-500 text-white' : 'bg-blue-500 text-white'}`}>
                                             {finalizeStepsDone.printManifest ? <CheckCircle className="w-4 h-4" /> : '1'}
@@ -1453,7 +1552,7 @@ export default function ReturnDetailPage() {
                                 </div>
 
                                 {/* ── Step 2: Enter FedEx Tracking ── */}
-                                <div className={`border rounded-lg p-4 transition-all ${!finalizeStepsDone.printManifest ? 'opacity-50 pointer-events-none' : ''} ${finalizeStepsDone.fedexEntered ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-white'}`}>
+                                <div className={`border rounded-lg p-4 transition-all ${hasTbdItems || !finalizeStepsDone.printManifest ? 'opacity-50 pointer-events-none' : ''} ${finalizeStepsDone.fedexEntered ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-white'}`}>
                                     <div className="flex items-start gap-3">
                                         <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${finalizeStepsDone.fedexEntered ? 'bg-green-500 text-white' : finalizeStepsDone.printManifest ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'}`}>
                                             {finalizeStepsDone.fedexEntered ? <CheckCircle className="w-4 h-4" /> : '2'}
@@ -1501,7 +1600,7 @@ export default function ReturnDetailPage() {
                                 </div>
 
                                 {/* ── Step 3: Print Job Sheets ── */}
-                                <div className={`border rounded-lg p-4 transition-all ${!finalizeStepsDone.fedexEntered ? 'opacity-50 pointer-events-none' : ''} ${finalizeStepsDone.printJobSheets ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-white'}`}>
+                                <div className={`border rounded-lg p-4 transition-all ${hasTbdItems || !finalizeStepsDone.fedexEntered ? 'opacity-50 pointer-events-none' : ''} ${finalizeStepsDone.printJobSheets ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-white'}`}>
                                     <div className="flex items-start gap-3">
                                         <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${finalizeStepsDone.printJobSheets ? 'bg-green-500 text-white' : finalizeStepsDone.fedexEntered ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'}`}>
                                             {finalizeStepsDone.printJobSheets ? <CheckCircle className="w-4 h-4" /> : '3'}

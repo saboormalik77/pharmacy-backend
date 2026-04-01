@@ -456,6 +456,7 @@ export const addTransactionItem = createAsyncThunk(
                 wineCellarOnly?: boolean;
                 policyCheck?: ReturnabilityCheckResult;
                 wineCellarItem?: any;
+                warning?: string;
             }>(
                 `/return-transactions/${transactionId}/items`,
                 payload,
@@ -466,6 +467,7 @@ export const addTransactionItem = createAsyncThunk(
                 wineCellarOnly: response.wineCellarOnly === true,
                 policyCheck: response.policyCheck,
                 wineCellarItem: response.wineCellarItem,
+                warning: response.warning,
             };
         } catch (error: any) {
             return rejectWithValue(error?.message || 'Failed to add item');

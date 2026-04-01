@@ -129,8 +129,8 @@ class ApiClient {
   }
 
   /**
-   * Check if token exists and redirect to login if missing or expired
-   * This prevents showing loading state when token is expired
+   * Check if token exists and redirect to login if missing
+   * Note: We don't check token expiry here - let the server validate and use refresh flow
    */
   private checkAuthBeforeRequest(includeAuth: boolean, endpoint: string): void {
     if (typeof window === 'undefined') return;
@@ -138,9 +138,8 @@ class ApiClient {
     // Only check auth if auth is required and not on auth endpoints
     if (includeAuth && !endpoint.includes('/auth/')) {
       const token = this.getAuthToken();
-      if (!token || this.isTokenExpired(token)) {
-        // No token or token expired, redirect immediately without making request
-        // Check if we're already on login page to avoid redirect loops
+      if (!token) {
+        // No token at all, redirect immediately
         const currentPath = window.location.pathname;
         if (currentPath !== '/login' && currentPath !== '/signup') {
           clearAuthCookies();
