@@ -85,6 +85,41 @@ export const authService = {
   },
 
   /**
+   * Sign in via Google (Clerk OAuth) — looks up pharmacy by email
+   */
+  async googleSignin(email: string): Promise<AuthResponse> {
+    console.log('authService.googleSignin called with email:', email);
+    
+    try {
+      const response = await apiClient.post<AuthResponse>('/auth/google-signin', { email }, false);
+      console.log('Backend response:', response);
+      
+      if (response.status === 'success' && response.data) {
+        if (typeof window !== 'undefined') {
+          setToken(response.data.token);
+          if (response.data.refreshToken) {
+            setRefreshToken(response.data.refreshToken);
+          }
+          setUserData({
+            user: response.data.user,
+            pharmacyId: response.data.user.id,
+          });
+        }
+        console.log('Google sign-in successful');
+        return response.data;
+      }
+      
+      throw new Error(response.message || 'Google sign-in failed');
+    } catch (error: any) {
+      console.error('Google sign-in error:', error);
+      
+      // The API client already extracted the error message from the backend response
+      // Just re-throw it with the exact message
+      throw new Error(error.message || 'Google sign-in failed. Please try again or contact support.');
+    }
+  },
+
+  /**
    * Sign out current user
    */
   signout(): void {

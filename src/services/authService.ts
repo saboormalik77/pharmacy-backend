@@ -286,6 +286,53 @@ export const signup = async (data: SignupData): Promise<AuthResponse> => {
   };
 };
 
+export const googleSignin = async (email: string): Promise<AuthResponse> => {
+  if (!email) {
+    throw new AppError('Email is required', 400);
+  }
+
+  const normalizedEmail = email.toLowerCase().trim();
+
+  const { data: pharmacyData, error: pharmacyError } = await db
+    .from('pharmacy')
+    .select('*')
+    .eq('email', normalizedEmail)
+    .single();
+
+  if (pharmacyError || !pharmacyData) {
+    throw new AppError('No pharmacy account found with this email. Please register first or sign in with a different email.', 404);
+  }
+
+  const pharmacyStatus = pharmacyData.status?.toLowerCase() || 'pending';
+
+  if (pharmacyStatus === 'blacklisted') {
+    throw new AppError('Your pharmacy account has been permanently blocked. Access to the platform is denied. Please contact support for more information.', 403);
+  } else if (pharmacyStatus === 'suspended') {
+    throw new AppError('Your pharmacy account has been suspended. Please contact support to reactivate your account.', 403);
+  } else if (pharmacyStatus === 'pending') {
+    throw new AppError('Your pharmacy account is pending approval. Please wait for account activation or contact support.', 403);
+  } else if (pharmacyStatus !== 'active') {
+    throw new AppError('Your pharmacy account status is invalid. Please contact support.', 403);
+  }
+
+  const authUserId = pharmacyData.id;
+
+  await revokeAllRefreshTokens(authUserId);
+
+  const { accessToken, expiresIn, expiresAt } = generateJwtAccessToken(authUserId, normalizedEmail);
+
+  const customRefreshToken = generateRefreshToken();
+  await storeRefreshToken(authUserId, customRefreshToken);
+
+  return {
+    user: pharmacyData,
+    token: accessToken,
+    refreshToken: customRefreshToken,
+    expiresIn,
+    expiresAt,
+  };
+};
+
 export const signin = async (data: SigninData): Promise<AuthResponse> => {
   const { email, password } = data;
 
