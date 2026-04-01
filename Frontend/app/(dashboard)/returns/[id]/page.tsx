@@ -767,7 +767,12 @@ export default function ReturnDetailPage() {
 
     const badge = getStatusBadge(tx.status);
     const showDocuments = ['finalized', 'received', 'closed_out'].includes(tx.status);
-    const showShipping = !!(tx.fedexTracking || tx.fedexPickupConfirmation);
+    const showShipping = !!(
+        tx.fedexTracking ||
+        tx.fedexPickupConfirmation ||
+        (tx.packageTracking && Object.keys(tx.packageTracking).length > 0) ||
+        (tx.fedexLabels && Object.keys(tx.fedexLabels).length > 0)
+    );
 
     return (
         <DashboardLayout>
