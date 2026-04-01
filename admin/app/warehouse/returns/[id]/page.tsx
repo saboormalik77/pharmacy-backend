@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import {
     ArrowLeft, Loader2, AlertCircle, X, Play, CheckCircle, Lock,
@@ -34,6 +34,7 @@ import {
     updateFinalizeSteps,
 } from '@/lib/store/returnTransactionsSlice';
 import { unassignSingleReturn } from '@/lib/store/batchSlice';
+import { checkReturnability } from '@/lib/store/policiesSlice';
 import { ReturnTransaction, ReturnTransactionItem, WineCellarItem } from '@/lib/types';
 import { apiClient } from '@/lib/api/apiClient';
 
@@ -209,6 +210,13 @@ export default function ReturnDetailPage() {
     const [deleteItemModal, setDeleteItemModal] = useState<ReturnTransactionItem | null>(null);
     const [editItemModal, setEditItemModal] = useState<ReturnTransactionItem | null>(null);
     const [editItemForm, setEditItemForm] = useState({ fullPackageSize: '', fullPackageQtyReturned: '', standardPrice: '', returnStatus: 'tbd', destination: '', memo: '' });
+    const [editPolicyCheck, setEditPolicyCheck] = useState<{
+        status: 'returnable' | 'non_returnable' | 'tbd';
+        reason: string | null;
+        destination: string | null;
+        manufacturerName: string | null;
+    } | null>(null);
+    const [isEditPolicyChecking, setIsEditPolicyChecking] = useState(false);
     const debouncedItemSearch = useDebounce(itemSearch, 500);
 
     // Reverse distributors for Destination select in edit item modal
@@ -385,14 +393,66 @@ export default function ReturnDetailPage() {
         if (editItemModal) {
             setEditItemForm({
                 fullPackageSize: editItemModal.fullPackageSize ? String(editItemModal.fullPackageSize) : '',
-                fullPackageQtyReturned: editItemModal.quantity ? String(editItemModal.quantity) : '',
+                fullPackageQtyReturned: editItemModal.fullPackageQtyReturned ? String(editItemModal.fullPackageQtyReturned) : (editItemModal.quantity ? String(editItemModal.quantity) : ''),
                 standardPrice: editItemModal.standardPrice != null ? String(editItemModal.standardPrice) : '',
                 returnStatus: editItemModal.returnStatus,
                 destination: editItemModal.destination || '',
                 memo: editItemModal.memo || '',
             });
+            setEditPolicyCheck(null);
         }
     }, [editItemModal]);
+
+    const runEditPolicyCheck = useCallback(async () => {
+        if (!editItemModal) return;
+        const ndc = editItemModal.ndc;
+        const expDate = editItemModal.expirationDate;
+        if (!ndc || !expDate) return;
+
+        const pkgSize = parseInt(editItemForm.fullPackageSize) || 0;
+        const qtyReturned = parseInt(editItemForm.fullPackageQtyReturned) || 0;
+        const isPartial = pkgSize > 0 && qtyReturned > 0 && qtyReturned < pkgSize;
+
+        setIsEditPolicyChecking(true);
+        setEditPolicyCheck(null);
+        try {
+            const result = await dispatch(checkReturnability({
+                ndc,
+                expirationDate: expDate,
+                dosageForm: editItemModal.dosageForm || undefined,
+                isPartial,
+            }));
+            if (checkReturnability.fulfilled.match(result) && result.payload) {
+                const policy = result.payload;
+                setEditPolicyCheck(policy);
+                if (policy.status === 'returnable' || policy.status === 'non_returnable') {
+                    setEditItemForm(prev => ({
+                        ...prev,
+                        returnStatus: policy.status,
+                        destination: policy.destination || prev.destination,
+                    }));
+                }
+            }
+        } catch { /* non-critical */ }
+        setIsEditPolicyChecking(false);
+    }, [editItemModal, editItemForm.fullPackageSize, editItemForm.fullPackageQtyReturned, dispatch]);
+
+    /** Debounce policy check when Qty Returned / package size change in edit modal (avoids a request per keystroke). */
+    const editPolicyTriggerKey =
+        editItemModal && !isLocked
+            ? `${editItemForm.fullPackageSize}|${editItemForm.fullPackageQtyReturned}`
+            : '';
+    const debouncedEditPolicyKey = useDebounce(editPolicyTriggerKey, 600);
+
+    useEffect(() => {
+        if (!editItemModal || isLocked) return;
+        if (!debouncedEditPolicyKey) return;
+        const pkgSize = parseInt(editItemForm.fullPackageSize) || 0;
+        const qtyReturned = parseInt(editItemForm.fullPackageQtyReturned) || 0;
+        if (pkgSize <= 0 || qtyReturned <= 0) return;
+
+        runEditPolicyCheck();
+    }, [debouncedEditPolicyKey, editItemModal, isLocked, runEditPolicyCheck]);
 
     const handleDeleteItem = async () => {
         if (!deleteItemModal) return;
@@ -414,8 +474,21 @@ export default function ReturnDetailPage() {
         
         // Core data fields — only include if not locked
         if (!isLocked) {
-            if (editItemForm.fullPackageSize) payload.fullPackageSize = parseInt(editItemForm.fullPackageSize);
-            if (editItemForm.fullPackageQtyReturned) payload.quantity = parseInt(editItemForm.fullPackageQtyReturned);
+            const pkgSize = editItemForm.fullPackageSize ? parseInt(editItemForm.fullPackageSize) : 0;
+            const qtyReturned = editItemForm.fullPackageQtyReturned ? parseInt(editItemForm.fullPackageQtyReturned) : 0;
+            if (pkgSize > 0) payload.fullPackageSize = pkgSize;
+            if (qtyReturned > 0) {
+                payload.fullPackageQtyReturned = qtyReturned;
+                if (pkgSize > 0 && qtyReturned < pkgSize) {
+                    payload.quantity = 1;
+                    payload.isPartial = true;
+                    payload.partialPercentage = Math.round((qtyReturned / pkgSize) * 100 * 100) / 100;
+                } else {
+                    payload.quantity = qtyReturned >= pkgSize && pkgSize > 0 ? Math.floor(qtyReturned / pkgSize) : qtyReturned;
+                    payload.isPartial = false;
+                    payload.partialPercentage = null;
+                }
+            }
             if (editItemForm.standardPrice) payload.standardPrice = parseFloat(editItemForm.standardPrice);
         }
         
@@ -1212,7 +1285,11 @@ export default function ReturnDetailPage() {
                                                 {item.fullPackageSize || '—'}
                                             </td>
                                             <td className="px-2 py-1.5 text-[11px] text-center text-gray-900">
-                                                {item.quantity}{item.isPartial && <span className="text-yellow-600 ml-0.5">P</span>}
+                                                {(() => {
+                                                    const qtyReturned = item.fullPackageQtyReturned ?? item.quantity;
+                                                    const displayQty = (item.fullPackageQtyReturned && item.fullPackageSize && item.fullPackageQtyReturned === item.fullPackageSize) ? 1 : qtyReturned;
+                                                    return <>{displayQty}{item.isPartial && <span className="text-yellow-600 ml-0.5">P</span>}</>;
+                                                })()}
                                             </td>
                                             <td className="px-2 py-1.5 text-[11px] text-gray-600 font-mono whitespace-nowrap">
                                                 {item.serialNumber || '—'}
@@ -1300,6 +1377,28 @@ export default function ReturnDetailPage() {
                                         <input type="number" min="0" value={editItemForm.fullPackageQtyReturned} onChange={e => setEditItemForm({ ...editItemForm, fullPackageQtyReturned: e.target.value })} disabled={isLocked} placeholder="e.g. 45" className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} />
                                     </div>
                                 </div>
+                                {isEditPolicyChecking && (
+                                    <div className="flex items-center gap-2 text-[11px] text-gray-600 px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded">
+                                        <Loader2 className="w-3 h-3 animate-spin" /> Checking policy...
+                                    </div>
+                                )}
+                                {editPolicyCheck && (
+                                    <div className={`flex items-start gap-1.5 text-[11px] rounded px-2.5 py-1.5 border ${
+                                        editPolicyCheck.status === 'returnable' ? 'bg-green-50 border-green-200 text-green-800' :
+                                        editPolicyCheck.status === 'non_returnable' ? 'bg-red-50 border-red-200 text-red-800' :
+                                        'bg-yellow-50 border-yellow-200 text-yellow-800'
+                                    }`}>
+                                        {editPolicyCheck.status === 'returnable' ? <CheckCircle className="w-3 h-3 mt-0.5 flex-shrink-0" /> :
+                                         editPolicyCheck.status === 'non_returnable' ? <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" /> :
+                                         <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />}
+                                        <div>
+                                            <span className="font-semibold">{editPolicyCheck.manufacturerName ? `${editPolicyCheck.manufacturerName}: ` : 'Policy: '}</span>
+                                            {editPolicyCheck.status === 'returnable' && 'Returnable — status & destination updated.'}
+                                            {editPolicyCheck.status === 'non_returnable' && `Non-Returnable${editPolicyCheck.reason ? ` — ${editPolicyCheck.reason.replace(/_/g, ' ')}` : ''}`}
+                                            {editPolicyCheck.status === 'tbd' && 'No policy found — set status manually.'}
+                                        </div>
+                                    </div>
+                                )}
                                 <div>
                                     <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Price ($)</label>
                                     <input type="number" step="0.01" min="0" value={editItemForm.standardPrice} onChange={e => setEditItemForm({ ...editItemForm, standardPrice: e.target.value })} disabled={isLocked} className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} />
