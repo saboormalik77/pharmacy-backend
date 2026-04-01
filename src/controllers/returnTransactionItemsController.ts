@@ -170,6 +170,7 @@ export const addItemHandler = catchAsync(
       standardPrice: body.standardPrice != null ? Number(body.standardPrice) : undefined,
       quantity: body.quantity != null ? Number(body.quantity) : undefined,
       fullPackageSize,
+      fullPackageQtyReturned: body.fullPackageQtyReturned != null ? Number(body.fullPackageQtyReturned) : undefined,
       isPartial,
       partialPercentage,
       returnStatus,

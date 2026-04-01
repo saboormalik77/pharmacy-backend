@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import {
@@ -63,6 +63,7 @@ interface ReturnTransactionItem {
     isPartial?: boolean;
     partialPercentage?: number;
     fullPackageSize?: number;
+    fullPackageQtyReturned?: number;
     estimatedValue?: number;
     estimatedStoreValue?: number;
     returnStatus: string;
@@ -205,6 +206,13 @@ export default function ReturnDetailPage() {
         destination: '',
         memo: '',
     });
+    const [editPolicyCheck, setEditPolicyCheck] = useState<{
+        status: 'returnable' | 'non_returnable' | 'tbd';
+        reason?: string;
+        destination?: string;
+        manufacturerName?: string;
+    } | null>(null);
+    const [isEditPolicyChecking, setIsEditPolicyChecking] = useState(false);
 
     // ── Data fetching ─────────────────────────────────────────
 
@@ -284,14 +292,88 @@ export default function ReturnDetailPage() {
         if (editItemModal) {
             setEditItemForm({
                 fullPackageSize: editItemModal.fullPackageSize ? String(editItemModal.fullPackageSize) : '',
-                fullPackageQtyReturned: editItemModal.quantity ? String(editItemModal.quantity) : '',
+                fullPackageQtyReturned: editItemModal.fullPackageQtyReturned ? String(editItemModal.fullPackageQtyReturned) : (editItemModal.quantity ? String(editItemModal.quantity) : ''),
                 standardPrice: editItemModal.standardPrice || 0,
                 returnStatus: editItemModal.returnStatus,
                 destination: editItemModal.destination || '',
                 memo: editItemModal.memo || '',
             });
+            setEditPolicyCheck(null);
         }
     }, [editItemModal]);
+
+    const runEditPolicyCheck = useCallback(async () => {
+        if (!editItemModal) return;
+        const ndc = editItemModal.ndc;
+        const expDate = editItemModal.expirationDate;
+        if (!ndc || !expDate) return;
+
+        const pkgSize = parseInt(editItemForm.fullPackageSize) || 0;
+        const qtyReturned = parseInt(editItemForm.fullPackageQtyReturned) || 0;
+        const isPartial = pkgSize > 0 && qtyReturned > 0 && qtyReturned < pkgSize;
+
+        setIsEditPolicyChecking(true);
+        setEditPolicyCheck(null);
+        try {
+            const res = await apiClient.post<any>('/policies/check', {
+                ndc,
+                expirationDate: expDate,
+                dosageForm: editItemModal.dosageForm || undefined,
+                isPartial,
+            }, true);
+            if (res.status === 'success' && res.data) {
+                const policy = res.data;
+                setEditPolicyCheck(policy);
+                if (policy.status === 'returnable' || policy.status === 'non_returnable') {
+                    setEditItemForm(prev => ({
+                        ...prev,
+                        returnStatus: policy.status,
+                        destination: policy.destination || prev.destination,
+                    }));
+                }
+            }
+        } catch { /* non-critical */ }
+        setIsEditPolicyChecking(false);
+    }, [editItemModal, editItemForm.fullPackageSize, editItemForm.fullPackageQtyReturned]);
+
+    const editPolicyModalIdRef = useRef<string | null>(null);
+    const prevEditPkgRef = useRef<string>('');
+    const prevEditQtyRef = useRef<string>('');
+
+    useEffect(() => {
+        if (!editItemModal) {
+            editPolicyModalIdRef.current = null;
+            return;
+        }
+        const pkgSize = parseInt(editItemForm.fullPackageSize) || 0;
+        const qtyReturned = parseInt(editItemForm.fullPackageQtyReturned) || 0;
+        if (pkgSize <= 0 || qtyReturned <= 0) return;
+
+        const pkgStr = editItemForm.fullPackageSize;
+        const qtyStr = editItemForm.fullPackageQtyReturned;
+
+        const modalOpened = editPolicyModalIdRef.current !== editItemModal.id;
+        if (modalOpened) {
+            editPolicyModalIdRef.current = editItemModal.id;
+            prevEditPkgRef.current = pkgStr;
+            prevEditQtyRef.current = qtyStr;
+            runEditPolicyCheck();
+            return;
+        }
+
+        const pkgChanged = prevEditPkgRef.current !== pkgStr;
+        const qtyChanged = prevEditQtyRef.current !== qtyStr;
+        prevEditPkgRef.current = pkgStr;
+        prevEditQtyRef.current = qtyStr;
+
+        if (pkgChanged && !qtyChanged) {
+            runEditPolicyCheck();
+            return;
+        }
+
+        const t = window.setTimeout(() => runEditPolicyCheck(), 600);
+        return () => window.clearTimeout(t);
+    }, [editItemForm.fullPackageSize, editItemForm.fullPackageQtyReturned, editItemModal, runEditPolicyCheck]);
 
     // ── Action handlers ────────────────────────────────────────
 
@@ -588,8 +670,21 @@ export default function ReturnDetailPage() {
                 returnStatus: editItemForm.returnStatus,
             };
             
-            if (editItemForm.fullPackageSize) payload.fullPackageSize = parseInt(editItemForm.fullPackageSize);
-            if (editItemForm.fullPackageQtyReturned) payload.quantity = parseInt(editItemForm.fullPackageQtyReturned);
+            const pkgSize = editItemForm.fullPackageSize ? parseInt(editItemForm.fullPackageSize) : 0;
+            const qtyReturned = editItemForm.fullPackageQtyReturned ? parseInt(editItemForm.fullPackageQtyReturned) : 0;
+            if (pkgSize > 0) payload.fullPackageSize = pkgSize;
+            if (qtyReturned > 0) {
+                payload.fullPackageQtyReturned = qtyReturned;
+                if (pkgSize > 0 && qtyReturned < pkgSize) {
+                    payload.quantity = 1;
+                    payload.isPartial = true;
+                    payload.partialPercentage = Math.round((qtyReturned / pkgSize) * 100 * 100) / 100;
+                } else {
+                    payload.quantity = qtyReturned >= pkgSize && pkgSize > 0 ? Math.floor(qtyReturned / pkgSize) : qtyReturned;
+                    payload.isPartial = false;
+                    payload.partialPercentage = null;
+                }
+            }
             if (editItemForm.standardPrice) payload.standardPrice = editItemForm.standardPrice;
             if (editItemForm.destination) payload.destination = editItemForm.destination;
             if (editItemForm.memo) payload.memo = editItemForm.memo;
@@ -1008,7 +1103,11 @@ export default function ReturnDetailPage() {
                                                 </td>
                                                 <td className="px-3 py-2">
                                                     <span className="text-xs text-gray-900">
-                                                        {item.quantity}{item.isPartial && <span className="text-orange-500 font-semibold ml-0.5">P</span>}
+                                                        {(() => {
+                                                            const qtyReturned = item.fullPackageQtyReturned ?? item.quantity;
+                                                            const displayQty = (item.fullPackageQtyReturned && item.fullPackageSize && item.fullPackageQtyReturned === item.fullPackageSize) ? 1 : qtyReturned;
+                                                            return <>{displayQty}{item.isPartial && <span className="text-orange-500 font-semibold ml-0.5">P</span>}</>;
+                                                        })()}
                                                     </span>
                                                 </td>
                                                 <td className="px-3 py-2">
@@ -1215,6 +1314,28 @@ export default function ReturnDetailPage() {
                                         />
                                     </div>
                                 </div>
+                                {isEditPolicyChecking && (
+                                    <div className="flex items-center gap-2 text-xs text-gray-600 px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded">
+                                        <Loader2 className="w-3 h-3 animate-spin" /> Checking policy...
+                                    </div>
+                                )}
+                                {editPolicyCheck && (
+                                    <div className={`flex items-start gap-1.5 text-xs rounded px-2.5 py-1.5 border ${
+                                        editPolicyCheck.status === 'returnable' ? 'bg-green-50 border-green-200 text-green-800' :
+                                        editPolicyCheck.status === 'non_returnable' ? 'bg-red-50 border-red-200 text-red-800' :
+                                        'bg-yellow-50 border-yellow-200 text-yellow-800'
+                                    }`}>
+                                        {editPolicyCheck.status === 'returnable' ? <CheckCircle className="w-3 h-3 mt-0.5 flex-shrink-0" /> :
+                                         editPolicyCheck.status === 'non_returnable' ? <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" /> :
+                                         <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />}
+                                        <div>
+                                            <span className="font-semibold">{editPolicyCheck.manufacturerName ? `${editPolicyCheck.manufacturerName}: ` : 'Policy: '}</span>
+                                            {editPolicyCheck.status === 'returnable' && 'Returnable — status & destination updated.'}
+                                            {editPolicyCheck.status === 'non_returnable' && `Non-Returnable${editPolicyCheck.reason ? ` — ${editPolicyCheck.reason.replace(/_/g, ' ')}` : ''}`}
+                                            {editPolicyCheck.status === 'tbd' && 'No policy found — set status manually.'}
+                                        </div>
+                                    </div>
+                                )}
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-0.5">Price</label>
                                     <input
