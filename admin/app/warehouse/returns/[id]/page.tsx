@@ -512,13 +512,11 @@ export default function ReturnDetailPage() {
     // ── Finalize & Document helpers ─────────────────────────────
 
     const nonWcItems = items.filter(i => !i.wineCellarId);
+    const nonWcReturnableItemsCount = nonWcItems.filter(i => i.returnStatus === 'returnable').length;
     const nonWcReturnableValue = nonWcItems
         .filter(i => i.returnStatus === 'returnable')
         .reduce((sum, i) => sum + (i.estimatedValue ?? 0), 0);
-    const nonWcNonReturnableValue = nonWcItems
-        .filter(i => i.returnStatus === 'non_returnable')
-        .reduce((sum, i) => sum + (i.estimatedValue ?? 0), 0);
-    const nonWcTotalValue = nonWcReturnableValue + nonWcNonReturnableValue;
+    const nonWcTotalValue = nonWcReturnableValue;
 
     // ── Print helpers ─────────────────────────────────────────────
 
@@ -832,16 +830,16 @@ export default function ReturnDetailPage() {
                     <dl className="space-y-1.5">
                         <div className="flex justify-between">
                             <dt className="text-[11px] text-gray-500">Total Items</dt>
-                            <dd className="text-[11px] font-semibold text-gray-900">{nonWcItems.length}</dd>
+                            <dd className="text-[11px] font-semibold text-gray-900">{nonWcReturnableItemsCount}</dd>
                         </div>
                         <div className="flex justify-between">
                             <dt className="text-[11px] text-gray-500">Returnable Value</dt>
                             <dd className="text-[11px] font-semibold text-green-700">{formatCurrency(nonWcReturnableValue)}</dd>
                         </div>
-                        <div className="flex justify-between">
+                        {/* <div className="flex justify-between">
                             <dt className="text-[11px] text-gray-500">Non-Returnable Value</dt>
                             <dd className="text-[11px] font-semibold text-red-700">{formatCurrency(nonWcNonReturnableValue)}</dd>
-                        </div>
+                        </div> */}
                         <div className="flex justify-between pt-1.5 border-t border-gray-100">
                             <dt className="text-[11px] text-gray-500 font-medium">Total Value</dt>
                             <dd className="text-[11px] font-bold text-gray-900">{formatCurrency(nonWcTotalValue)}</dd>
@@ -1038,16 +1036,16 @@ export default function ReturnDetailPage() {
                         <dl className="space-y-2.5">
                             <div className="flex justify-between items-center">
                                 <dt className="text-xs text-amber-700 font-medium">Total Items</dt>
-                                <dd className="text-xs font-bold text-gray-800">{nonWcItems.length}</dd>
+                                <dd className="text-xs font-bold text-gray-800">{nonWcReturnableItemsCount}</dd>
                             </div>
                             <div className="flex justify-between items-center">
                                 <dt className="text-xs text-amber-700 font-medium">Returnable Value</dt>
                                 <dd className="text-xs font-bold text-green-700">{formatCurrency(nonWcReturnableValue)}</dd>
                             </div>
-                            <div className="flex justify-between items-center">
+                            {/* <div className="flex justify-between items-center">
                                 <dt className="text-xs text-amber-700 font-medium">Non-Returnable Value</dt>
                                 <dd className="text-xs font-bold text-red-700">{formatCurrency(nonWcNonReturnableValue)}</dd>
-                            </div>
+                            </div> */}
                             <div className="flex justify-between items-center pt-2 border-t border-amber-200">
                                 <dt className="text-xs text-amber-800 font-bold">Total Value</dt>
                                 <dd className="text-sm font-black text-gray-900 bg-white/70 px-2 py-0.5 rounded">{formatCurrency(nonWcTotalValue)}</dd>
@@ -1117,16 +1115,16 @@ export default function ReturnDetailPage() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2">
                         <div className="bg-gray-50 rounded px-2.5 py-1.5 text-center">
                             <p className="text-[10px] text-gray-500">Items</p>
-                            <p className="text-xs font-bold text-gray-900">{nonWcItems.length}</p>
+                            <p className="text-xs font-bold text-gray-900">{nonWcReturnableItemsCount}</p>
                         </div>
                         <div className="bg-green-50 rounded px-2.5 py-1.5 text-center">
                             <p className="text-[10px] text-green-600">Returnable</p>
                             <p className="text-xs font-bold text-green-800">{formatCurrency(nonWcReturnableValue)}</p>
                         </div>
-                        <div className="bg-red-50 rounded px-2.5 py-1.5 text-center">
+                        {/* <div className="bg-red-50 rounded px-2.5 py-1.5 text-center">
                             <p className="text-[10px] text-red-600">Non-Returnable</p>
                             <p className="text-xs font-bold text-red-800">{formatCurrency(nonWcNonReturnableValue)}</p>
-                        </div>
+                        </div> */}
                         <div className="bg-blue-50 rounded px-2.5 py-1.5 text-center">
                             <p className="text-[10px] text-blue-600">Total Value</p>
                             <p className="text-xs font-bold text-blue-800">{formatCurrency(nonWcTotalValue)}</p>

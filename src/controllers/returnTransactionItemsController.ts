@@ -213,11 +213,6 @@ export const addItemHandler = catchAsync(
       response.policyCheck = policyResult;
     }
 
-    if (result.duplicate) {
-      response.warning = 'Duplicate NDC + lot number detected in this transaction';
-      response.duplicateItemId = result.duplicateItemId;
-    }
-
     res.status(201).json(response);
   }
 );

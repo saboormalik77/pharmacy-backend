@@ -198,6 +198,19 @@ export default function AddItemsPage() {
 
     const performPolicyCheck = useCallback(
         async (ndc: string, expirationDate: string, dosageForm?: string, isPartial?: boolean) => {
+            // Debug logging for processor side
+            console.log('🔍 Processor Policy Check:', {
+                ndc,
+                expirationDate,
+                dosageForm,
+                isPartial,
+                formState: {
+                    fullPackageSize: form.fullPackageSize,
+                    fullPackageQtyReturned: form.fullPackageQtyReturned,
+                    qtyMode: form.qtyMode
+                }
+            });
+            
             const checkResult = await dispatch(checkReturnability({ ndc, expirationDate, dosageForm, isPartial }));
             if (checkReturnability.fulfilled.match(checkResult) && checkResult.payload) {
                 const policy = checkResult.payload;

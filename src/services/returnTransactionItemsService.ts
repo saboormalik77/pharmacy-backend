@@ -126,7 +126,7 @@ function handleRpcError(data: any, rpcError: any, label: string) {
 
 export const addItem = async (
   itemData: AddItemData
-): Promise<{ item: ReturnTransactionItem; duplicate: boolean; duplicateItemId: string | null }> => {
+): Promise<{ item: ReturnTransactionItem }> => {
   const sb = ensureAdmin();
 
   const { data, error } = await sb.rpc('add_return_transaction_item_with_validation', {
@@ -138,8 +138,6 @@ export const addItem = async (
 
   return {
     item: data.data as ReturnTransactionItem,
-    duplicate: data.duplicate || false,
-    duplicateItemId: data.duplicateItemId || null,
   };
 };
 

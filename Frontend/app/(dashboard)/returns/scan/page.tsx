@@ -238,9 +238,17 @@ export default function PharmacyScanPage() {
     return Math.round(storeBase * (pct / 100) * 100) / 100;
   })();
 
-  const performPolicyCheck = useCallback(async (ndc: string, expirationDate: string, dosageForm?: string) => {
+  const deriveIsPartial = useCallback((): boolean => {
+    const pkgSize = parseFloat(form.fullPackageSize) || 0;
+    const qtyNum = parseFloat(form.fullPackageQtyReturned) || 0;
+    if (!form.fullPackageQtyReturned.trim() || qtyNum <= 0 || pkgSize <= 0) return false;
+    const units = form.qtyMode === 'units' ? qtyNum : (qtyNum / 100) * pkgSize;
+    return units < pkgSize;
+  }, [form.fullPackageSize, form.fullPackageQtyReturned, form.qtyMode]);
+
+  const performPolicyCheck = useCallback(async (ndc: string, expirationDate: string, dosageForm?: string, isPartial?: boolean) => {
     try {
-      const res = await apiClient.post<any>('/policies/check', { ndc, expirationDate, dosageForm }, true);
+      const res = await apiClient.post<any>('/policies/check', { ndc, expirationDate, dosageForm, isPartial }, true);
       const policy = res?.data;
       if (policy) {
         setPolicyAutoCheck(policy);
@@ -262,6 +270,8 @@ export default function PharmacyScanPage() {
   useEffect(() => {
     const ndc = form.ndc.trim();
     const exp = form.expirationDate.trim();
+    const isPartial = deriveIsPartial();
+    
     if (!ndc || !exp) {
       setPolicyAutoCheck(null);
       setPreCheckResult(null);
@@ -271,10 +281,10 @@ export default function PharmacyScanPage() {
     setPolicyAutoCheck(null);
     setPreCheckResult(null);
     (async () => {
-      await performPolicyCheck(ndc, exp, form.dosageForm || undefined);
+      await performPolicyCheck(ndc, exp, form.dosageForm || undefined, isPartial);
       setIsPolicyChecking(false);
     })();
-  }, [form.ndc, form.expirationDate, form.dosageForm, performPolicyCheck]);
+  }, [form.ndc, form.expirationDate, form.dosageForm, form.fullPackageSize, form.fullPackageQtyReturned, form.qtyMode, performPolicyCheck, deriveIsPartial]);
 
   const ensureTransaction = async (): Promise<string> => {
     if (selectedTxId) return selectedTxId;
@@ -383,7 +393,8 @@ export default function PharmacyScanPage() {
     if (!skipWineCellarCheck && preCheckResult?.expectedReturnableDate) return;
     if (!skipWineCellarCheck && !policyAutoCheck && form.ndc && form.expirationDate) {
       setIsPreChecking(true);
-      const policy = await performPolicyCheck(form.ndc, form.expirationDate, form.dosageForm || undefined);
+      const isPartial = deriveIsPartial();
+      const policy = await performPolicyCheck(form.ndc, form.expirationDate, form.dosageForm || undefined, isPartial);
       setIsPreChecking(false);
       if (policy?.expectedReturnableDate) return;
     }

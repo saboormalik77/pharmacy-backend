@@ -227,13 +227,34 @@ export default function AddItemsPage() {
 
     // ── Policy check ──────────────────────────────────────────
 
+    const deriveIsPartial = useCallback((): boolean => {
+        const pkgSize = parseFloat(form.fullPackageSize) || 0;
+        const qtyNum = parseFloat(form.fullPackageQtyReturned) || 0;
+        if (!form.fullPackageQtyReturned.trim() || qtyNum <= 0 || pkgSize <= 0) return false;
+        const units = form.qtyMode === 'units' ? qtyNum : (qtyNum / 100) * pkgSize;
+        return units < pkgSize;
+    }, [form.fullPackageSize, form.fullPackageQtyReturned, form.qtyMode]);
+
     const performPolicyCheck = useCallback(
-        async (ndc: string, expirationDate: string, dosageForm?: string): Promise<PolicyCheckResult | null> => {
+        async (ndc: string, expirationDate: string, dosageForm?: string, isPartial?: boolean): Promise<PolicyCheckResult | null> => {
             try {
+                // Debug logging for pharmacy side
+                console.log('🔍 Pharmacy Policy Check:', {
+                    ndc,
+                    expirationDate,
+                    dosageForm,
+                    isPartial,
+                    formState: {
+                        fullPackageSize: form.fullPackageSize,
+                        fullPackageQtyReturned: form.fullPackageQtyReturned,
+                        qtyMode: form.qtyMode
+                    }
+                });
+                
                 // Add a small delay to make the checking state more visible
                 await new Promise(resolve => setTimeout(resolve, 500));
                 
-                const res = await apiClient.post<any>('/policies/check', { ndc, expirationDate, dosageForm }, true);
+                const res = await apiClient.post<any>('/policies/check', { ndc, expirationDate, dosageForm, isPartial }, true);
                 if (res.status === 'success' && res.data) {
                     const policy = res.data as PolicyCheckResult;
                     setPolicyAutoCheck(policy);
@@ -262,11 +283,12 @@ export default function AddItemsPage() {
         setPolicyAutoCheck(null);
         setPreCheckResult(null);
         const reqId = ++policyCheckRequestIdRef.current;
+        const isPartial = deriveIsPartial();
         try {
-            const policy = await performPolicyCheck(ndc, expirationDate, dosageForm);
+            const policy = await performPolicyCheck(ndc, expirationDate, dosageForm, isPartial);
             if (reqId !== policyCheckRequestIdRef.current) return policy;
             if (policy) {
-                policySyncKeyRef.current = `${ndc}|${expirationDate}|${dosageForm || ''}`;
+                policySyncKeyRef.current = `${ndc}|${expirationDate}|${dosageForm || ''}|${isPartial}`;
             }
             return policy;
         } finally {
@@ -280,13 +302,16 @@ export default function AddItemsPage() {
         const ndc = form.ndc.trim();
         const exp = form.expirationDate.trim();
         const dosage = (form.dosageForm || '').trim();
+        const isPartial = deriveIsPartial();
+        
         if (!ndc || !exp) {
             policySyncKeyRef.current = '';
             setPolicyAutoCheck(null);
             setPreCheckResult(null);
             return;
         }
-        const key = `${ndc}|${exp}|${dosage}`;
+        
+        const key = `${ndc}|${exp}|${dosage}|${isPartial}`;
         if (key === policySyncKeyRef.current) return;
 
         const reqId = ++policyCheckRequestIdRef.current;
@@ -296,7 +321,7 @@ export default function AddItemsPage() {
 
         (async () => {
             try {
-                const policy = await performPolicyCheck(ndc, exp, dosage || undefined);
+                const policy = await performPolicyCheck(ndc, exp, dosage || undefined, isPartial);
                 if (reqId !== policyCheckRequestIdRef.current) return;
                 if (policy) {
                     policySyncKeyRef.current = key;
@@ -309,7 +334,7 @@ export default function AddItemsPage() {
                 }
             }
         })();
-    }, [form.ndc, form.expirationDate, form.dosageForm, performPolicyCheck]);
+    }, [form.ndc, form.expirationDate, form.dosageForm, form.fullPackageSize, form.fullPackageQtyReturned, form.qtyMode, performPolicyCheck, deriveIsPartial]);
 
     // ── Barcode scan handler ──────────────────────────────────
 

@@ -214,8 +214,30 @@ export async function checkReturnability(
 
   // Select the matching return policy based on partial status.
   // If isPartial, prefer a policy with partials_accepted=true; otherwise prefer partials_accepted=false.
+  console.log('🔍 Policy Selection Debug:', {
+    ndc,
+    isPartial,
+    availablePolicies: returnPolicies.map(p => ({
+      id: p.id,
+      partials_accepted: p.partials_accepted,
+      months_before: p.months_before_expiration,
+      months_after: p.months_after_expiration,
+      destination: p.destination
+    }))
+  });
+  
   const matchingPolicy = returnPolicies.find((p: any) => p.partials_accepted === isPartial);
   const rp = matchingPolicy || returnPolicies[0];
+  
+  console.log('🔍 Selected Policy:', {
+    ndc,
+    isPartial,
+    selectedPolicyId: rp.id,
+    selectedPartialAccepted: rp.partials_accepted,
+    monthsBefore: rp.months_before_expiration,
+    monthsAfter: rp.months_after_expiration,
+    fallbackUsed: !matchingPolicy
+  });
 
   // Step 5: Calculate return window
   const windowStart = addMonths(expDate, -rp.months_before_expiration);
