@@ -36,7 +36,7 @@ const externalRedirectRoutes = [
 ]
 
 // Public routes that don't require authentication
-const publicRoutes = ['/login', '/register', '/', '/setup-account']
+const publicRoutes = ['/login', '/register', '/', '/setup-account', '/sso-callback', '/sso-check']
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl

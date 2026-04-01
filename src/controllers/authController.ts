@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { signup, signin, refreshToken, logout, logoutAll, forgotPassword, resetPassword, verifyResetToken } from '../services/authService';
+import { signup, signin, googleSignin, refreshToken, logout, logoutAll, forgotPassword, resetPassword, verifyResetToken } from '../services/authService';
 import { catchAsync } from '../utils/catchAsync';
 import { AppError } from '../utils/appError';
 import { supabaseAdmin } from '../config/supabase';
@@ -43,6 +43,23 @@ export const signinHandler = catchAsync(
     console.log('📱 Signin request - FCM Token:', fcmToken ? `${fcmToken.substring(0, 20)}...` : 'not provided');
 
     const result = await signin({ email, password, fcmToken });
+
+    res.status(200).json({
+      status: 'success',
+      data: result,
+    });
+  }
+);
+
+export const googleSigninHandler = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { email } = req.body;
+
+    if (!email) {
+      throw new AppError('Email is required', 400);
+    }
+
+    const result = await googleSignin(email);
 
     res.status(200).json({
       status: 'success',

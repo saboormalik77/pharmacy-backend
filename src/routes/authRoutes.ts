@@ -1,5 +1,5 @@
 import express from 'express';
-import { signupHandler, signinHandler, refreshTokenHandler, logoutHandler, logoutAllHandler, forgotPasswordHandler, resetPasswordHandler, verifyResetTokenHandler, verifyInviteHandler, completeSetupHandler } from '../controllers/authController';
+import { signupHandler, signinHandler, googleSigninHandler, refreshTokenHandler, logoutHandler, logoutAllHandler, forgotPasswordHandler, resetPasswordHandler, verifyResetTokenHandler, verifyInviteHandler, completeSetupHandler } from '../controllers/authController';
 import { loginHandler, adminForgotPasswordHandler, adminVerifyResetTokenHandler, adminResetPasswordHandler } from '../controllers/adminController';
 import { authenticate } from '../middleware/auth';
 
@@ -178,6 +178,43 @@ router.post('/login', loginHandler);
  *               message: 'Pharmacy profile not found'
  */
 router.post('/signin', signinHandler);
+
+/**
+ * @swagger
+ * /api/auth/google-signin:
+ *   post:
+ *     summary: Sign in with Google (Clerk OAuth)
+ *     description: |
+ *       Authenticates a pharmacy user via Google email (verified by Clerk on the frontend).
+ *       Looks up the pharmacy by email, validates status, and returns JWT tokens.
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Google email from Clerk OAuth
+ *                 example: pharmacy@gmail.com
+ *     responses:
+ *       200:
+ *         description: Successfully authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthResponse'
+ *       404:
+ *         description: No pharmacy found with this email
+ *       403:
+ *         description: Pharmacy account is suspended, pending, or blacklisted
+ */
+router.post('/google-signin', googleSigninHandler);
 
 /**
  * @swagger
