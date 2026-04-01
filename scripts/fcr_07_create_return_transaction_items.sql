@@ -245,7 +245,9 @@ BEGIN
   -- 4. Update transaction totals
   UPDATE return_transactions SET
     total_items = (
-      SELECT COUNT(*) FROM return_transaction_items WHERE transaction_id = v_txn.id
+      SELECT COUNT(*) FROM return_transaction_items 
+      WHERE transaction_id = v_txn.id 
+      AND return_status IN ('returnable', 'tbd')
     ),
     total_returnable_value = (
       SELECT COALESCE(SUM(estimated_value), 0)
@@ -418,7 +420,9 @@ BEGIN
 
   -- Update transaction totals
   UPDATE return_transactions SET
-    total_items = (SELECT COUNT(*) FROM return_transaction_items WHERE transaction_id = v_item.transaction_id),
+    total_items = (SELECT COUNT(*) FROM return_transaction_items 
+                   WHERE transaction_id = v_item.transaction_id 
+                   AND return_status IN ('returnable', 'tbd')),
     total_returnable_value = (
       SELECT COALESCE(SUM(estimated_value), 0) FROM return_transaction_items
        WHERE transaction_id = v_item.transaction_id AND return_status = 'returnable'
@@ -458,7 +462,9 @@ BEGIN
 
   -- Update transaction totals
   UPDATE return_transactions SET
-    total_items = (SELECT COUNT(*) FROM return_transaction_items WHERE transaction_id = v_item.transaction_id),
+    total_items = (SELECT COUNT(*) FROM return_transaction_items 
+                   WHERE transaction_id = v_item.transaction_id 
+                   AND return_status IN ('returnable', 'tbd')),
     total_returnable_value = (
       SELECT COALESCE(SUM(estimated_value), 0) FROM return_transaction_items
        WHERE transaction_id = v_item.transaction_id AND return_status = 'returnable'

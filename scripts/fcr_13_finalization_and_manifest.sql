@@ -23,30 +23,30 @@ ALTER TABLE return_transactions
 CREATE OR REPLACE FUNCTION _rt_to_json(r return_transactions)
 RETURNS jsonb LANGUAGE sql STABLE AS $$
   SELECT jsonb_build_object(
-    'id',                       r.id,
-    'licensePlate',             r.license_plate,
-    'pharmacyId',               r.pharmacy_id,
-    'pharmacyName',             COALESCE((SELECT pharmacy_name FROM pharmacy WHERE id = r.pharmacy_id), ''),
-    'processorId',              r.processor_id,
-    'processorName',            COALESCE((SELECT name FROM processors WHERE id = r.processor_id), ''),
-    'serviceType',              r.service_type,
-    'status',                   r.status,
-    'fedexTracking',            r.fedex_tracking,
-    'fedexPickupConfirmation',  r.fedex_pickup_confirmation,
-    'totalItems',               r.total_items,
-    'totalReturnableValue',     r.total_returnable_value,
-    'totalNonReturnableValue',  r.total_non_returnable_value,
-    'batchId',                  r.batch_id,
-    'timeIn',                   r.time_in,
-    'timeOut',                  r.time_out,
-    'receivedInWarehouseDate',  r.received_in_warehouse_date,
-    'verifiedIntegrity',        r.verified_integrity,
-    'notes',                    r.notes,
-    'finalizedAt',              r.finalized_at,
-    'boxCount',                 r.box_count,
-    'manifestGeneratedAt',      r.manifest_generated_at,
-    'createdAt',                r.created_at,
-    'updatedAt',                r.updated_at
+    'id',                       (r).id,
+    'licensePlate',             (r).license_plate,
+    'pharmacyId',               (r).pharmacy_id,
+    'pharmacyName',             COALESCE((SELECT pharmacy_name FROM pharmacy WHERE id = (r).pharmacy_id), ''),
+    'processorId',              (r).processor_id,
+    'processorName',            COALESCE((SELECT name FROM processors WHERE id = (r).processor_id), ''),
+    'serviceType',              (r).service_type,
+    'status',                   (r).status,
+    'fedexTracking',            (r).fedex_tracking,
+    'fedexPickupConfirmation',  (r).fedex_pickup_confirmation,
+    'totalItems',               (SELECT COUNT(*) FROM return_transaction_items WHERE transaction_id = (r).id AND return_status IN ('returnable', 'tbd')),
+    'totalReturnableValue',     (r).total_returnable_value,
+    'totalNonReturnableValue',  (r).total_non_returnable_value,
+    'batchId',                  (r).batch_id,
+    'timeIn',                   (r).time_in,
+    'timeOut',                  (r).time_out,
+    'receivedInWarehouseDate',  (r).received_in_warehouse_date,
+    'verifiedIntegrity',        (r).verified_integrity,
+    'notes',                    (r).notes,
+    'finalizedAt',              (r).finalized_at,
+    'boxCount',                 (r).box_count,
+    'manifestGeneratedAt',      (r).manifest_generated_at,
+    'createdAt',                (r).created_at,
+    'updatedAt',                (r).updated_at
   );
 $$;
 
@@ -219,12 +219,12 @@ BEGIN
   WHERE rti.transaction_id = p_transaction_id
     AND rti.return_status = 'non_returnable';
 
-  -- Counts & values
-  SELECT COUNT(*) INTO v_item_count FROM return_transaction_items WHERE transaction_id = p_transaction_id;
+  -- Counts & values (only returnable + tbd for totalItems)
+  SELECT COUNT(*) INTO v_item_count FROM return_transaction_items WHERE transaction_id = p_transaction_id AND return_status IN ('returnable', 'tbd');
   SELECT COUNT(*) INTO v_returnable_count FROM return_transaction_items WHERE transaction_id = p_transaction_id AND return_status = 'returnable';
-  SELECT COUNT(*) INTO v_non_ret_count FROM return_transaction_items WHERE transaction_id = p_transaction_id AND return_status = 'non_returnable';
+  v_non_ret_count := 0;
   SELECT COALESCE(SUM(estimated_value), 0) INTO v_returnable_value FROM return_transaction_items WHERE transaction_id = p_transaction_id AND return_status = 'returnable';
-  SELECT COALESCE(SUM(estimated_value), 0) INTO v_non_ret_value FROM return_transaction_items WHERE transaction_id = p_transaction_id AND return_status = 'non_returnable';
+  v_non_ret_value := 0;
 
   -- Check if CII items exist
   SELECT EXISTS(
