@@ -943,18 +943,12 @@ export default function ReturnDetailPage() {
                     </div>
 
                     {/* Shipping (conditional) */}
-                    {(showShipping || true) && (
+                    {showShipping && (
                         <div className="bg-white rounded-lg shadow p-4">
                             <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                                 <Truck className="w-4 h-4 text-gray-500" />
                                 Shipping
                             </h2>
-                            {/* Debug info */}
-                            <div className="text-xs text-red-600 mb-2">
-                                Debug: fedexTracking={tx.fedexTracking || 'null'}, 
-                                packageTracking={tx.packageTracking ? Object.keys(tx.packageTracking).length : 'null'}, 
-                                fedexLabels={tx.fedexLabels ? Object.keys(tx.fedexLabels).length : 'null'}
-                            </div>
                             <dl className="space-y-2">
                                 {tx.fedexTracking && (
                                     <div className="flex justify-between">
