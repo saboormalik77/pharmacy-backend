@@ -585,7 +585,7 @@ export default function ReturnDetailPage() {
     // ── Finalize & Document helpers ─────────────────────────────
 
     const nonWcItems = items.filter(i => !i.wineCellarId);
-    const nonWcReturnableItemsCount = nonWcItems.filter(i => i.returnStatus === 'returnable').length;
+    const nonWcReturnableAndTbdItemsCount = nonWcItems.filter(i => i.returnStatus === 'returnable' || i.returnStatus === 'tbd').length;
     const nonWcReturnableValue = nonWcItems
         .filter(i => i.returnStatus === 'returnable')
         .reduce((sum, i) => sum + (i.estimatedValue ?? 0), 0);
@@ -903,7 +903,7 @@ export default function ReturnDetailPage() {
                     <dl className="space-y-1.5">
                         <div className="flex justify-between">
                             <dt className="text-[11px] text-gray-500">Total Items</dt>
-                            <dd className="text-[11px] font-semibold text-gray-900">{nonWcReturnableItemsCount}</dd>
+                            <dd className="text-[11px] font-semibold text-gray-900">{nonWcReturnableAndTbdItemsCount}</dd>
                         </div>
                         <div className="flex justify-between">
                             <dt className="text-[11px] text-gray-500">Returnable Value</dt>
@@ -1109,7 +1109,7 @@ export default function ReturnDetailPage() {
                         <dl className="space-y-2.5">
                             <div className="flex justify-between items-center">
                                 <dt className="text-xs text-amber-700 font-medium">Total Items</dt>
-                                <dd className="text-xs font-bold text-gray-800">{nonWcReturnableItemsCount}</dd>
+                                <dd className="text-xs font-bold text-gray-800">{nonWcReturnableAndTbdItemsCount}</dd>
                             </div>
                             <div className="flex justify-between items-center">
                                 <dt className="text-xs text-amber-700 font-medium">Returnable Value</dt>
@@ -1188,7 +1188,7 @@ export default function ReturnDetailPage() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2">
                         <div className="bg-gray-50 rounded px-2.5 py-1.5 text-center">
                             <p className="text-[10px] text-gray-500">Items</p>
-                            <p className="text-xs font-bold text-gray-900">{nonWcReturnableItemsCount}</p>
+                            <p className="text-xs font-bold text-gray-900">{nonWcReturnableAndTbdItemsCount}</p>
                         </div>
                         <div className="bg-green-50 rounded px-2.5 py-1.5 text-center">
                             <p className="text-[10px] text-green-600">Returnable</p>
@@ -1585,7 +1585,7 @@ export default function ReturnDetailPage() {
                             )}
 
                             {/* ── Step 1: Print Itemized Return ── */}
-                            <div className={`border rounded-lg p-4 transition-all ${finalizeStepsDone.printManifest ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-white'}`}>
+                            <div className={`border rounded-lg p-4 transition-all ${hasTbdItems ? 'opacity-50 pointer-events-none' : ''} ${finalizeStepsDone.printManifest ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-white'}`}>
                                 <div className="flex items-start gap-3">
                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${finalizeStepsDone.printManifest ? 'bg-green-500 text-white' : 'bg-blue-500 text-white'}`}>
                                         {finalizeStepsDone.printManifest ? <CheckCircle className="w-4 h-4" /> : '1'}
@@ -1618,7 +1618,7 @@ export default function ReturnDetailPage() {
                             </div>
 
                             {/* ── Step 2: Enter FedEx Tracking ── */}
-                            <div className={`border rounded-lg p-4 transition-all ${!finalizeStepsDone.printManifest ? 'opacity-50 pointer-events-none' : ''} ${finalizeStepsDone.fedexEntered ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-white'}`}>
+                            <div className={`border rounded-lg p-4 transition-all ${hasTbdItems || !finalizeStepsDone.printManifest ? 'opacity-50 pointer-events-none' : ''} ${finalizeStepsDone.fedexEntered ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-white'}`}>
                                 <div className="flex items-start gap-3">
                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${finalizeStepsDone.fedexEntered ? 'bg-green-500 text-white' : finalizeStepsDone.printManifest ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'}`}>
                                         {finalizeStepsDone.fedexEntered ? <CheckCircle className="w-4 h-4" /> : '2'}
@@ -1666,7 +1666,7 @@ export default function ReturnDetailPage() {
                             </div>
 
                             {/* ── Step 3: Print Job Sheets ── */}
-                            <div className={`border rounded-lg p-4 transition-all ${!finalizeStepsDone.fedexEntered ? 'opacity-50 pointer-events-none' : ''} ${finalizeStepsDone.printJobSheets ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-white'}`}>
+                            <div className={`border rounded-lg p-4 transition-all ${hasTbdItems || !finalizeStepsDone.fedexEntered ? 'opacity-50 pointer-events-none' : ''} ${finalizeStepsDone.printJobSheets ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-white'}`}>
                                 <div className="flex items-start gap-3">
                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${finalizeStepsDone.printJobSheets ? 'bg-green-500 text-white' : finalizeStepsDone.fedexEntered ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'}`}>
                                         {finalizeStepsDone.printJobSheets ? <CheckCircle className="w-4 h-4" /> : '3'}
@@ -1714,7 +1714,7 @@ export default function ReturnDetailPage() {
                             </div>
 
                             {/* ── Step 4: Finalize Return ── */}
-                            <div className={`border-2 rounded-lg p-4 transition-all ${!finalizeStepsDone.printJobSheets ? 'opacity-50 pointer-events-none' : ''} ${canFinalize ? 'border-green-200 bg-green-50' : 'border-dashed border-gray-200 bg-gray-50'}`}>
+                            <div className={`border-2 rounded-lg p-4 transition-all ${hasTbdItems || !finalizeStepsDone.printJobSheets ? 'opacity-50 pointer-events-none' : ''} ${canFinalize ? 'border-green-200 bg-green-50' : 'border-dashed border-gray-200 bg-gray-50'}`}>
                                 <div className="flex items-start gap-3">
                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${canFinalize ? 'bg-green-500 text-white' : finalizeStepsDone.printJobSheets ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-500'}`}>
                                         {canFinalize ? <CheckCircle className="w-4 h-4" /> : '4'}
