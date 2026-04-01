@@ -32,6 +32,7 @@ export interface ReturnTransactionItem {
   standardPrice: number | null;
   quantity: number;
   fullPackageSize: number | null;
+  fullPackageQtyReturned: number | null;
   isPartial: boolean;
   partialPercentage: number | null;
   estimatedValue: number | null;
@@ -71,6 +72,7 @@ export interface AddItemData {
   standardPrice?: number;
   quantity?: number;
   fullPackageSize?: number;
+  fullPackageQtyReturned?: number;
   isPartial?: boolean;
   partialPercentage?: number;
   returnStatus?: string;

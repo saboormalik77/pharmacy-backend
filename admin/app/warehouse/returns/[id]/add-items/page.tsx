@@ -137,7 +137,7 @@ export default function AddItemsPage() {
     }, [dispatch, transactionId]);
 
     useEffect(() => {
-        if (items && items.length > 0) {
+        if (items) {
             setRecentlyAddedItems(items);
             setItemCount(items.length);
         }
@@ -514,6 +514,7 @@ export default function AddItemsPage() {
         if (form.standardPrice) payload.standardPrice = parseFloat(form.standardPrice);
         payload.quantity = payloadQuantity;
         if (form.fullPackageSize) payload.fullPackageSize = parseInt(form.fullPackageSize);
+        if (form.fullPackageQtyReturned && parseFloat(form.fullPackageQtyReturned) > 0) payload.fullPackageQtyReturned = parseInt(form.fullPackageQtyReturned);
         payload.isPartial = payloadIsPartial;
         if (payloadIsPartial && payloadPartialPercentage != null) payload.partialPercentage = payloadPartialPercentage;
         payload.returnStatus = form.returnStatus;
@@ -541,8 +542,6 @@ export default function AddItemsPage() {
             const wcOnly = result.payload.wineCellarOnly === true;
 
             if (savedItem) {
-                setItemCount(prev => prev + 1);
-                setRecentlyAddedItems(prev => [savedItem, ...prev]);
                 setActiveTab('list');
             }
 
@@ -677,8 +676,6 @@ export default function AddItemsPage() {
 
         const result = await dispatch(deleteTransactionItem({ transactionId, itemId }));
         if (deleteTransactionItem.fulfilled.match(result)) {
-            setRecentlyAddedItems(prev => prev.filter(item => item.id !== itemId));
-            setItemCount(prev => prev - 1);
             showToast('Item removed successfully', 'success');
         } else {
             showToast('Failed to remove item. Please try again.', 'error');
