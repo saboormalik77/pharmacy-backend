@@ -3,6 +3,7 @@
 import { Menu, ShoppingCart } from 'lucide-react'
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown'
 import { UserDropdown } from './UserDropdown'
+import { PharmacySwitcher } from './PharmacySwitcher'
 import { Button } from '@/components/ui/Button'
 import { useMarketplaceStore } from '@/lib/store/marketplaceStore'
 
@@ -29,6 +30,7 @@ export function TopBar({ onMenuClick }: TopBarProps) {
       </div>
 
       <div className="flex items-center gap-2 sm:gap-4">
+        <PharmacySwitcher />
         <NotificationDropdown />
         <Button
           variant="ghost"

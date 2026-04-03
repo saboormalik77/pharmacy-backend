@@ -15,7 +15,7 @@ function SSOCallbackContent() {
     if (!isLoaded || hasRun.current) return
     hasRun.current = true
 
-    const redirectTo = searchParams.get('redirect') || '/returns'
+    const redirectTo = searchParams.get('redirect') || '/portal'
 
     ;(async () => {
       try {

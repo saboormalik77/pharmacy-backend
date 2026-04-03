@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { apiClient } from '@/lib/api/client';
 import { formatCurrency, formatDate } from '@/lib/utils/format';
 import { useDebounce } from '@/hooks/useDebounce';
+import { PermissionGuard } from '@/components/shared/PermissionGuard';
 
 interface DestructionRecord {
   id: string;
@@ -226,6 +227,7 @@ export default function DestructionPage() {
 
   return (
     <DashboardLayout>
+      <PermissionGuard permission="destruction:view">
       <div className="space-y-3">
         <ToastContainer toasts={toasts} onClose={closeToast} />
 
@@ -433,6 +435,7 @@ export default function DestructionPage() {
           </div>
         )}
       </div>
+      </PermissionGuard>
     </DashboardLayout>
   );
 }

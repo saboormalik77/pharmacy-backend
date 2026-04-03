@@ -1,19 +1,24 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Sidebar } from './Sidebar'
 import { TopBar } from './TopBar'
-import { Chatbot } from '@/components/chatbot/Chatbot'
+import { BranchBanner } from './BranchBanner'
 import { CartDrawer } from '@/components/marketplace/CartDrawer'
-import { X, Menu } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
+import { usePharmacyContextStore } from '@/lib/store/pharmacyContextStore'
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { isLoaded, fetchContext } = usePharmacyContextStore()
+
+  useEffect(() => {
+    if (!isLoaded) {
+      fetchContext()
+    }
+  }, [isLoaded, fetchContext])
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -21,7 +26,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         />
       )}
 
-      {/* Sidebar */}
       <div
         className={`
           fixed lg:static inset-y-0 left-0 z-50
@@ -32,18 +36,14 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <Sidebar onClose={() => setSidebarOpen(false)} />
       </div>
 
-      {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden w-full lg:w-auto">
         <TopBar onMenuClick={() => setSidebarOpen(true)} />
+        <BranchBanner />
         <main className="flex-1 overflow-y-auto p-4 sm:p-4">
           {children}
         </main>
       </div>
 
-      {/* Chatbot */}
-      {/* <Chatbot /> */}
-
-      {/* Cart Drawer - Global across all pages */}
       <CartDrawer />
     </div>
   )

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
+import { PermissionGuard } from '@/components/shared/PermissionGuard'
 import { 
   Package, 
   Clock, 
@@ -152,6 +153,7 @@ export default function OrdersPage() {
 
   return (
     <DashboardLayout>
+      <PermissionGuard permission="orders:view">
       <div className="space-y-2 p-2">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -537,6 +539,7 @@ export default function OrdersPage() {
           </div>
         </>
       )}
+      </PermissionGuard>
     </DashboardLayout>
   )
 }

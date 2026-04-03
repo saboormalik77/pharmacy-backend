@@ -55,7 +55,7 @@ function LoginForm() {
     try {
       try { await signOut() } catch {}
 
-      const redirectTo = searchParams.get('redirect') || '/returns'
+      const redirectTo = searchParams.get('redirect') || '/portal'
       const callbackPath = `/sso-callback?redirect=${encodeURIComponent(redirectTo)}`
       const origin = typeof window !== 'undefined' ? window.location.origin : ''
       const callbackUrl = origin ? `${origin}${callbackPath}` : callbackPath
@@ -81,7 +81,7 @@ function LoginForm() {
 
     try {
       await authService.signin({ email, password })
-      const redirectTo = searchParams.get('redirect') || '/returns'
+      const redirectTo = searchParams.get('redirect') || '/portal'
       router.push(redirectTo)
     } catch (err: any) {
       setError(err.message || 'Invalid email or password. Please try again.')

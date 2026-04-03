@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { PermissionGuard } from '@/components/shared/PermissionGuard';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -298,6 +299,7 @@ export default function InventoryAnalysisPage() {
 
   return (
     <DashboardLayout>
+      <PermissionGuard permission="inventory_analysis:view">
       <div className="space-y-4">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 p-3 sm:p-4 rounded-lg bg-gradient-to-r from-teal-50 via-cyan-50 to-teal-50 border-2 border-teal-200">
@@ -691,6 +693,7 @@ export default function InventoryAnalysisPage() {
           </div>
         </div>
       )}
+      </PermissionGuard>
     </DashboardLayout>
   );
 }

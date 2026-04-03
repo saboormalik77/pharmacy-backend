@@ -4,6 +4,7 @@
 
 import { apiClient } from '../client';
 import { setToken, setRefreshToken, setUserData, clearAuthCookies, getUserData, getToken, getRefreshToken } from '@/lib/utils/cookies';
+import { usePharmacyContextStore } from '@/lib/store/pharmacyContextStore';
 
 export interface SignupData {
   email: string;
@@ -203,6 +204,7 @@ export const authService = {
     if (!refreshToken) {
       // No refresh token, user needs to login again
       if (typeof window !== 'undefined') {
+        usePharmacyContextStore.getState().startSignOut();
         clearAuthCookies();
         window.location.href = '/login';
       }
@@ -229,6 +231,7 @@ export const authService = {
 
       // Refresh token expired or invalid
       if (typeof window !== 'undefined') {
+        usePharmacyContextStore.getState().startSignOut();
         clearAuthCookies();
         window.location.href = '/login';
       }
@@ -236,6 +239,7 @@ export const authService = {
     } catch (error) {
       console.error('Token refresh failed:', error);
       if (typeof window !== 'undefined') {
+        usePharmacyContextStore.getState().startSignOut();
         clearAuthCookies();
         window.location.href = '/login';
       }

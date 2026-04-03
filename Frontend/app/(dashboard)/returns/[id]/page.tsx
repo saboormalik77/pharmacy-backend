@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { PermissionGuard } from '@/components/shared/PermissionGuard';
 import {
     ArrowLeft, Loader2, AlertCircle, X, Play, CheckCircle, Lock,
     Trash2, Edit, ClipboardList, Building2, Package, Truck,
@@ -738,12 +739,14 @@ export default function ReturnDetailPage() {
     if (isLoading) {
         return (
             <DashboardLayout>
+                <PermissionGuard permission="returns:view">
                 <div className="flex items-center justify-center min-h-64">
                     <div className="text-center">
                         <Loader2 className="w-8 h-8 animate-spin text-primary-600 mx-auto mb-3" />
                         <p className="text-sm text-gray-500">Loading return transaction...</p>
                     </div>
                 </div>
+                </PermissionGuard>
             </DashboardLayout>
         );
     }
@@ -751,6 +754,7 @@ export default function ReturnDetailPage() {
     if (error || !tx) {
         return (
             <DashboardLayout>
+                <PermissionGuard permission="returns:view">
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
                     <AlertCircle className="w-8 h-8 text-red-500 mx-auto mb-2" />
                     <p className="text-sm text-red-800">{error || 'Return transaction not found'}</p>
@@ -761,6 +765,7 @@ export default function ReturnDetailPage() {
                         Back to Returns
                     </button>
                 </div>
+                </PermissionGuard>
             </DashboardLayout>
         );
     }
@@ -776,6 +781,7 @@ export default function ReturnDetailPage() {
 
     return (
         <DashboardLayout>
+            <PermissionGuard permission="returns:view">
             <div className="space-y-4">
                 <ToastContainer toasts={toasts} onClose={removeToast} />
 
@@ -1999,6 +2005,7 @@ export default function ReturnDetailPage() {
                     </div>
                 )}
             </div>
+            </PermissionGuard>
         </DashboardLayout>
     );
 }

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { PermissionGuard } from '@/components/shared/PermissionGuard';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -186,6 +187,7 @@ export default function PaymentsPage() {
 
   return (
     <DashboardLayout>
+      <PermissionGuard permission="payments:view">
       <div className="space-y-2">
         {/* Professional Medical Header */}
         <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-teal-50 via-cyan-50 to-teal-50 border-2 border-teal-200">
@@ -530,6 +532,7 @@ export default function PaymentsPage() {
           </Card>
         )}
       </div>
+      </PermissionGuard>
     </DashboardLayout>
   );
 }

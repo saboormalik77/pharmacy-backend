@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { PermissionGuard } from '@/components/shared/PermissionGuard';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -191,6 +192,7 @@ function SubscriptionContent() {
 
   return (
     <DashboardLayout>
+      <PermissionGuard permission="subscription:view">
       <div className="space-y-3 sm:space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between p-3 sm:p-4 rounded-lg bg-gradient-to-r from-teal-50 via-cyan-50 to-teal-50 border-2 border-teal-200">
@@ -508,6 +510,7 @@ function SubscriptionContent() {
           </CardContent>
         </Card> */}
       </div>
+      </PermissionGuard>
     </DashboardLayout>
   );
 }
@@ -516,9 +519,11 @@ export default function SubscriptionPage() {
   return (
     <Suspense fallback={
       <DashboardLayout>
+        <PermissionGuard permission="subscription:view">
         <div className="flex items-center justify-center min-h-[400px]">
           <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
         </div>
+        </PermissionGuard>
       </DashboardLayout>
     }>
       <SubscriptionContent />

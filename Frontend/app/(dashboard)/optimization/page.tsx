@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { PermissionGuard } from '@/components/shared/PermissionGuard';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Loader2, AlertCircle, RefreshCw, X, Search, Check, Filter, Download, TrendingDown, BarChart3, Plus, ChevronDown } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils/format';
@@ -484,6 +485,7 @@ export default function OptimizationPage() {
 
   return (
     <DashboardLayout>
+      <PermissionGuard permission="optimization:view">
       <style jsx>{scrollbarStyles}</style>
       <div className="space-y-2 p-2">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
@@ -1197,6 +1199,7 @@ export default function OptimizationPage() {
           </div>
         )}
       </div>
+      </PermissionGuard>
     </DashboardLayout>
   );
 }

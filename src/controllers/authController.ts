@@ -288,3 +288,107 @@ export const completeSetupHandler = catchAsync(
     });
   }
 );
+
+/**
+ * Verify a branch invite token
+ * POST /api/auth/verify-branch-invite
+ */
+export const verifyBranchInviteHandler = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { token } = req.body;
+
+    if (!token) {
+      throw new AppError('Invite token is required', 400);
+    }
+
+    const { data, error } = await db.rpc('verify_branch_invite', {
+      p_token: token,
+    });
+
+    if (error) {
+      throw new AppError(error.message || 'Failed to verify invite', 500);
+    }
+
+    if (data?.error) {
+      throw new AppError(data.message, data.code || 400);
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: data.data,
+    });
+  }
+);
+
+/**
+ * Complete branch pharmacy account setup (set password + activate)
+ * POST /api/auth/complete-branch-setup
+ */
+export const completeBranchSetupHandler = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { token, password } = req.body;
+
+    if (!token) {
+      throw new AppError('Invite token is required', 400);
+    }
+
+    if (!password || password.length < 8) {
+      throw new AppError('Password must be at least 8 characters', 400);
+    }
+
+    const { data: verifyResult, error: verifyError } = await db.rpc('verify_branch_invite', {
+      p_token: token,
+    });
+
+    if (verifyError) {
+      throw new AppError(verifyError.message || 'Failed to verify invite', 500);
+    }
+
+    if (verifyResult?.error) {
+      throw new AppError(verifyResult.message, verifyResult.code || 400);
+    }
+
+    const { email } = verifyResult.data;
+
+    const { data: authData, error: authError } = await db.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
+
+    if (authError) {
+      if (authError.message?.includes('already registered') || authError.message?.includes('already exists')) {
+        const { data: existingUsers } = await db.auth.admin.listUsers();
+        const existingUser = existingUsers?.users?.find((u: any) => u.email === email);
+        if (existingUser) {
+          await db.auth.admin.updateUserById(existingUser.id, { password });
+          const { data: setupResult, error: setupError } = await db.rpc('complete_branch_setup', {
+            p_token: token,
+            p_auth_user_id: existingUser.id,
+          });
+
+          if (setupError) throw new AppError(setupError.message || 'Failed to complete setup', 500);
+          if (setupResult?.error) throw new AppError(setupResult.message, setupResult.code || 500);
+        } else {
+          throw new AppError('Failed to set up account. Please contact support.', 500);
+        }
+      } else {
+        throw new AppError(authError.message || 'Failed to create account', 500);
+      }
+    } else if (authData?.user) {
+      const { data: setupResult, error: setupError } = await db.rpc('complete_branch_setup', {
+        p_token: token,
+        p_auth_user_id: authData.user.id,
+      });
+
+      if (setupError) throw new AppError(setupError.message || 'Failed to complete setup', 500);
+      if (setupResult?.error) throw new AppError(setupResult.message, setupResult.code || 500);
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Branch account setup completed successfully. You can now log in.',
+      data: { email },
+    });
+  }
+);

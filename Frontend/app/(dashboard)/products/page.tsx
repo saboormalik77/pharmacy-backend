@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { PermissionGuard } from "@/components/shared/PermissionGuard";
 import {
   Card,
   CardContent,
@@ -1012,6 +1013,7 @@ export default function ProductsPage() {
 
   return (
     <DashboardLayout>
+      <PermissionGuard permission="products:view">
       <div className="space-y-3 sm:space-y-4">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:py-2 sm:px-4 rounded-lg bg-gradient-to-r from-teal-50 via-cyan-50 to-teal-50 border-2 border-teal-200">
@@ -2414,6 +2416,7 @@ export default function ProductsPage() {
           </div>
         )}
       </div>
+      </PermissionGuard>
     </DashboardLayout>
   );
 }

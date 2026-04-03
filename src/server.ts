@@ -52,6 +52,8 @@ import shipmentGroupRoutes from './routes/shipmentGroupRoutes';
 import { pharmacyPaymentAdminRouter, pharmacyPaymentRouter } from './routes/pharmacyPaymentRoutes';
 import pharmacyAnalyticsRoutes from './routes/pharmacyAnalyticsRoutes';
 import ndcPricingBookRoutes from './routes/ndcPricingBookRoutes';
+import pharmacyBranchRoutes from './routes/pharmacyBranchRoutes';
+import pharmacyRoleRoutes from './routes/pharmacyRoleRoutes';
 import { globalErrorHandler } from './controllers/errorController';
 import { checkExpiringProductsAndNotify } from './services/notificationCronService';
 import { surfaceReadyWineCellarItems } from './services/wineCellarCronService';
@@ -211,6 +213,8 @@ app.use('/api/admin/pharmacy-payments', pharmacyPaymentAdminRouter);
 app.use('/api/pharmacy-payments', pharmacyPaymentRouter);
 app.use('/api/analytics', pharmacyAnalyticsRoutes);
 app.use('/api/admin/ndc-pricing', ndcPricingBookRoutes);
+app.use('/api/pharmacy-branches', pharmacyBranchRoutes);
+app.use('/api/pharmacy-roles', pharmacyRoleRoutes);
 
 /**
  * @swagger

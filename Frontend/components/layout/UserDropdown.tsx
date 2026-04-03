@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { User, LogOut, Settings, ChevronDown } from 'lucide-react'
 import { authService } from '@/lib/api/services'
 import { getUserData } from '@/lib/utils/cookies'
+import { usePharmacyContextStore } from '@/lib/store/pharmacyContextStore'
 
 export function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false)
@@ -63,7 +64,16 @@ export function UserDropdown() {
   }, [isOpen])
 
   const handleLogout = () => {
+    // Immediately clear permissions to prevent sidebar flashing
+    usePharmacyContextStore.getState().startSignOut()
+    
+    // Clear auth data
     authService.signout()
+    
+    // Reset store completely
+    usePharmacyContextStore.getState().reset()
+    
+    // Navigate to login
     window.location.href = '/login'
   }
 
