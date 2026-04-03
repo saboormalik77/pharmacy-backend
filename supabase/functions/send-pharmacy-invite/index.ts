@@ -1,6 +1,9 @@
 // Supabase Edge Function: send-pharmacy-invite
 // Sends a welcome email to a newly created pharmacy with a setup link.
 // Deploy:  npx supabase functions deploy send-pharmacy-invite --no-verify-jwt
+//
+// PHARMACY_PORTAL_URL — pharmacy portal origin (no trailing slash), e.g. http://localhost:3001
+// Set via: npx supabase secrets set PHARMACY_PORTAL_URL=https://your-portal.example.com
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { corsHeaders } from '../_shared/cors.ts';
@@ -11,7 +14,8 @@ interface InvitePayload {
   pharmacyName: string;
   contactName: string;
   inviteToken: string;
-  portalBaseUrl: string;
+  /** Optional; superseded by PHARMACY_PORTAL_URL on the Edge Function when set */
+  portalBaseUrl?: string;
 }
 
 function getEnv(key: string, fallback = ''): string {
@@ -76,12 +80,6 @@ function buildInviteHtml(data: InvitePayload): string {
                 </tr>
               </table>
 
-              <p style="margin:20px 0 0;color:#6b7280;font-size:14px;line-height:1.6;">
-                If the button above doesn't work, copy and paste this link into your browser:
-              </p>
-              <p style="margin:8px 0 20px;word-break:break-all;">
-                <a href="${setupUrl}" style="color:#2563eb;font-size:13px;">${setupUrl}</a>
-              </p>
 
               <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;">
 
@@ -132,10 +130,11 @@ serve(async (req: Request) => {
       );
     }
 
-    // Default portal base URL
-    if (!payload.portalBaseUrl) {
-      payload.portalBaseUrl = getEnv('PHARMACY_PORTAL_URL', 'http://localhost:3002');
-    }
+    payload.portalBaseUrl = (
+      getEnv('PHARMACY_PORTAL_URL') ||
+      payload.portalBaseUrl ||
+      'http://localhost:3001'
+    ).replace(/\/$/, '');
 
     const transporter = buildTransporter();
     const html = buildInviteHtml(payload);

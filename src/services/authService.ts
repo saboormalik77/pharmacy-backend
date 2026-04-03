@@ -185,7 +185,10 @@ export const cleanupExpiredTokens = async (): Promise<number> => {
  * Generate access token using jsonwebtoken
  * Creates a signed JWT with pharmacy user information
  */
-const generateJwtAccessToken = (pharmacyId: string, email: string): { accessToken: string; expiresIn: number; expiresAt: number } => {
+const generateJwtAccessToken = (
+  pharmacyId: string, 
+  email: string
+): { accessToken: string; expiresIn: number; expiresAt: number } => {
   const now = Math.floor(Date.now() / 1000);
   const expiresAt = now + ACCESS_TOKEN_EXPIRY_SECONDS;
 
@@ -216,6 +219,56 @@ const calculateExpiry = (): { expiresIn: number; expiresAt: number } => {
   return {
     expiresIn: ACCESS_TOKEN_EXPIRY_SECONDS,
     expiresAt: now + ACCESS_TOKEN_EXPIRY_SECONDS,
+  };
+};
+
+/**
+ * Generate a full login-style response for a branch pharmacy.
+ * Called when a parent-pharmacy admin switches into one of their branches.
+ * Returns the exact same shape as signin() so the frontend can treat it
+ * identically to a normal login.
+ */
+export const loginAsBranch = async (
+  parentPharmacyId: string,
+  branchPharmacyId: string
+): Promise<AuthResponse> => {
+  if (!supabaseAdmin) {
+    throw new AppError('Supabase admin client not configured', 500);
+  }
+
+  // 1. Verify the caller actually owns this branch
+  const { data: verifyData, error: verifyError } = await supabaseAdmin.rpc('verify_pharmacy_switch_access', {
+    p_parent_pharmacy_id: parentPharmacyId,
+    p_branch_pharmacy_id: branchPharmacyId,
+  });
+
+  if (verifyError) throw new AppError('Failed to verify branch access: ' + verifyError.message, 500);
+  if (verifyData?.error) throw new AppError(verifyData.message, verifyData.code || 403);
+
+  // 2. Fetch the full branch pharmacy row (same as signin does)
+  const { data: pharmacyData, error: pharmacyError } = await supabaseAdmin
+    .from('pharmacy')
+    .select('*')
+    .eq('id', branchPharmacyId)
+    .single();
+
+  if (pharmacyError || !pharmacyData) throw new AppError('Branch pharmacy profile not found', 404);
+  if (pharmacyData.status !== 'active') throw new AppError('Branch pharmacy is not active', 403);
+
+  // 3. Generate a standard JWT for the branch pharmacy
+  const { accessToken, expiresIn, expiresAt } = generateJwtAccessToken(branchPharmacyId, pharmacyData.email);
+
+  // 4. Generate a refresh token just like a real login
+  const customRefreshToken = generateRefreshToken();
+  await storeRefreshToken(branchPharmacyId, customRefreshToken);
+
+  // 5. Return exact same shape as signin()
+  return {
+    user: pharmacyData,
+    token: accessToken,
+    refreshToken: customRefreshToken,
+    expiresIn,
+    expiresAt,
   };
 };
 

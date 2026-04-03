@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { PermissionGuard } from '@/components/shared/PermissionGuard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -131,6 +132,7 @@ export default function AnalyticsPage() {
 
   return (
     <DashboardLayout>
+      <PermissionGuard permission="analytics:view">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -804,6 +806,7 @@ export default function AnalyticsPage() {
           </>
         )}
       </div>
+      </PermissionGuard>
     </DashboardLayout>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { PermissionGuard } from '@/components/shared/PermissionGuard';
 import { DealHero } from '@/components/marketplace/DealHero';
 import { DealCard } from '@/components/marketplace/DealCard';
 import { DealModal } from '@/components/marketplace/DealModal';
@@ -105,6 +106,7 @@ export default function MarketplacePage() {
 
   return (
     <DashboardLayout>
+      <PermissionGuard permission="marketplace:view">
       <div className="space-y-3">
         {/* Compact Header */}
         <div className="flex items-center justify-between">
@@ -320,6 +322,7 @@ export default function MarketplacePage() {
         show={showToast}
         onClose={() => setShowToast(false)}
       />
+      </PermissionGuard>
     </DashboardLayout>
   );
 }

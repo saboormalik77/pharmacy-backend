@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
 import { apiClient } from '@/lib/api/client';
+import { PermissionGuard } from '@/components/shared/PermissionGuard';
 
 export default function CreateReturnPage() {
     const router = useRouter();
@@ -53,6 +54,7 @@ export default function CreateReturnPage() {
 
     return (
         <DashboardLayout>
+        <PermissionGuard permission="returns:create">
         <div className="space-y-3">
             <ToastContainer toasts={toasts} onClose={removeToast} />
 
@@ -125,6 +127,7 @@ export default function CreateReturnPage() {
                 </div>
             )}
         </div>
+        </PermissionGuard>
         </DashboardLayout>
     );
 }

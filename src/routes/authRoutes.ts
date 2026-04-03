@@ -1,5 +1,5 @@
 import express from 'express';
-import { signupHandler, signinHandler, googleSigninHandler, refreshTokenHandler, logoutHandler, logoutAllHandler, forgotPasswordHandler, resetPasswordHandler, verifyResetTokenHandler, verifyInviteHandler, completeSetupHandler } from '../controllers/authController';
+import { signupHandler, signinHandler, googleSigninHandler, refreshTokenHandler, logoutHandler, logoutAllHandler, forgotPasswordHandler, resetPasswordHandler, verifyResetTokenHandler, verifyInviteHandler, completeSetupHandler, verifyBranchInviteHandler, completeBranchSetupHandler } from '../controllers/authController';
 import { loginHandler, adminForgotPasswordHandler, adminVerifyResetTokenHandler, adminResetPasswordHandler } from '../controllers/adminController';
 import { authenticate } from '../middleware/auth';
 
@@ -543,6 +543,12 @@ router.post('/verify-reset-token', verifyResetTokenHandler);
 // ============================================================
 router.post('/verify-invite', verifyInviteHandler);
 router.post('/complete-setup', completeSetupHandler);
+
+// ============================================================
+// Branch Pharmacy Invite / Setup Routes (public — no auth required)
+// ============================================================
+router.post('/verify-branch-invite', verifyBranchInviteHandler);
+router.post('/complete-branch-setup', completeBranchSetupHandler);
 
 // ============================================================
 // Admin Password Reset Routes

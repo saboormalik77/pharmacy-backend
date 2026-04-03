@@ -33,12 +33,14 @@ function verifyJwt(token: string): { sub: string; exp: number; aud: string; role
   }
 }
 
-// Extend Express Request type to include pharmacyId and pharmacy status
+// Extend Express Request type
 declare global {
   namespace Express {
     interface Request {
       pharmacyId?: string;
       pharmacyStatus?: string;
+      parentPharmacyId?: string;
+      isPharmacyAdmin?: boolean;
     }
   }
 }
@@ -164,7 +166,7 @@ export const authenticate = async (
     // Step 2: Verify that the user exists in the pharmacy table and get status
     const { data: pharmacy, error: pharmacyError } = await supabaseAdmin
       .from('pharmacy')
-      .select('id, status')
+      .select('id, status, parent_pharmacy_id, can_manage_branches')
       .eq('id', userId)
       .single();
 
@@ -181,6 +183,7 @@ export const authenticate = async (
     // Step 4: Set pharmacy_id and status for use in controllers
     req.pharmacyId = userId;
     req.pharmacyStatus = pharmacy.status;
+    req.isPharmacyAdmin = !pharmacy.parent_pharmacy_id && pharmacy.can_manage_branches === true;
 
     next();
   } catch (error: any) {

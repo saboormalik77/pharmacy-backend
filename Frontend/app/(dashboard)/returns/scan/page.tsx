@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { apiClient } from '@/lib/api/client';
 import { formatDate } from '@/lib/utils/format';
+import { PermissionGuard } from '@/components/shared/PermissionGuard';
 
 interface Transaction {
   id: string;
@@ -555,6 +556,7 @@ export default function PharmacyScanPage() {
 
   return (
     <DashboardLayout>
+      <PermissionGuard permission="returns:create">
       <div className="space-y-3">
         <ToastContainer toasts={toasts} onClose={removeToast} />
 
@@ -1100,6 +1102,7 @@ export default function PharmacyScanPage() {
           </>
         )}
       </div>
+      </PermissionGuard>
     </DashboardLayout>
   );
 }

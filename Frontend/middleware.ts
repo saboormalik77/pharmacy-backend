@@ -4,6 +4,7 @@ import type { NextRequest } from 'next/server'
 // Protected routes that require authentication
 const protectedRoutes = [
   '/dashboard',
+  '/portal',
   '/products',
   '/upload',
   '/optimization',
@@ -26,6 +27,8 @@ const protectedRoutes = [
   '/marketplace',
   '/barcode-generator',
   '/warehouse',
+  '/branches',
+  '/roles',
 ]
 
 // Routes that are publicly accessible (for external redirects like Stripe)
@@ -71,9 +74,9 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  // If accessing login/register with a token, redirect to dashboard
+  // If accessing login/register with a token, send to portal (picks first allowed page)
   if ((pathname === '/login' || pathname === '/register') && token) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    return NextResponse.redirect(new URL('/portal', request.url))
   }
 
   // Allow setup-account page (even with token, don't redirect)

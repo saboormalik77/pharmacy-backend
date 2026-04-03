@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
+import { PermissionGuard } from '@/components/shared/PermissionGuard'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -96,6 +97,7 @@ export default function CreditsPage() {
 
   return (
     <DashboardLayout>
+      <PermissionGuard permission="credits:view">
       <div className="space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-lg bg-gradient-to-r from-teal-50 via-cyan-50 to-teal-50 border-2 border-teal-200">
@@ -354,6 +356,7 @@ export default function CreditsPage() {
           </CardContent>
         </Card>
       </div>
+      </PermissionGuard>
     </DashboardLayout>
   )
 }

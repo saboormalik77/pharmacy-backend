@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { PermissionGuard } from '@/components/shared/PermissionGuard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -109,6 +110,7 @@ export default function WineCellarPage() {
 
   return (
     <DashboardLayout>
+      <PermissionGuard permission="wine_cellar:view">
       <div className="space-y-6">
         {/* Header */}
         <div>
@@ -291,6 +293,7 @@ export default function WineCellarPage() {
           </div>
         )}
       </div>
+      </PermissionGuard>
     </DashboardLayout>
   );
 }

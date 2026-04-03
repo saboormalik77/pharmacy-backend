@@ -5,6 +5,7 @@
 
 import { getToken, getPharmacyId, clearAuthCookies } from '@/lib/utils/cookies';
 import { authService } from './services/authService';
+import { usePharmacyContextStore } from '@/lib/store/pharmacyContextStore';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://pharmacy-backend-dusky.vercel.app/api';
 
@@ -142,6 +143,7 @@ class ApiClient {
         // No token at all, redirect immediately
         const currentPath = window.location.pathname;
         if (currentPath !== '/login' && currentPath !== '/signup') {
+          usePharmacyContextStore.getState().startSignOut();
           clearAuthCookies();
           window.location.href = '/login';
         }
@@ -268,6 +270,7 @@ class ApiClient {
         if ((response.status === 401 || response.status === 403) && !isAuthEndpoint && includeAuth) {
           // Clear auth cookies and redirect to login
           if (typeof window !== 'undefined') {
+            usePharmacyContextStore.getState().startSignOut();
             clearAuthCookies();
             window.location.href = '/login';
           }
@@ -339,6 +342,7 @@ class ApiClient {
         if ((response.status === 401 || response.status === 403) && !isAuthEndpoint && includeAuth) {
           // Clear auth cookies and redirect to login
           if (typeof window !== 'undefined') {
+            usePharmacyContextStore.getState().startSignOut();
             clearAuthCookies();
             window.location.href = '/login';
           }
@@ -405,6 +409,7 @@ class ApiClient {
         if ((response.status === 401 || response.status === 403) && !isAuthEndpoint && includeAuth) {
           // Clear auth cookies and redirect to login
           if (typeof window !== 'undefined') {
+            usePharmacyContextStore.getState().startSignOut();
             clearAuthCookies();
             window.location.href = '/login';
           }
@@ -492,6 +497,7 @@ class ApiClient {
         if ((response.status === 401 || response.status === 403) && !isAuthEndpoint && includeAuth) {
           // Clear auth cookies and redirect to login
           if (typeof window !== 'undefined') {
+            usePharmacyContextStore.getState().startSignOut();
             clearAuthCookies();
             window.location.href = '/login';
           }
@@ -579,6 +585,7 @@ class ApiClient {
         if ((response.status === 401 || response.status === 403) && !isAuthEndpoint && includeAuth) {
           // Clear auth cookies and redirect to login
           if (typeof window !== 'undefined') {
+            usePharmacyContextStore.getState().startSignOut();
             clearAuthCookies();
             window.location.href = '/login';
           }
@@ -636,6 +643,7 @@ class ApiClient {
         if ((response.status === 401 || response.status === 403) && !isAuthEndpoint && includeAuth) {
           // Clear auth cookies and redirect to login
           if (typeof window !== 'undefined') {
+            usePharmacyContextStore.getState().startSignOut();
             clearAuthCookies();
             window.location.href = '/login';
           }
@@ -715,6 +723,7 @@ class ApiClient {
         if ((response.status === 401 || response.status === 403) && !isAuthEndpoint && includeAuth) {
           // Clear auth cookies and redirect to login
           if (typeof window !== 'undefined') {
+            usePharmacyContextStore.getState().startSignOut();
             clearAuthCookies();
             window.location.href = '/login';
           }

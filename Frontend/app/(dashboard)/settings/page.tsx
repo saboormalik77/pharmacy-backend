@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { PermissionGuard } from '@/components/shared/PermissionGuard';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -484,6 +485,7 @@ export default function SettingsPage() {
 
   return (
     <DashboardLayout>
+      <PermissionGuard permission="settings:view">
       <div className="space-y-3">
         {/* Colorful Header */}
         <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-slate-50 via-gray-50 to-zinc-50 border-2 border-slate-200">
@@ -1404,6 +1406,7 @@ export default function SettingsPage() {
           </div>
         )}
       </div>
+      </PermissionGuard>
     </DashboardLayout>
   );
 }

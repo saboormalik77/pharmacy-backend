@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/Button';
 import { apiClient } from '@/lib/api/client';
 import { useDebounce } from '@/hooks/useDebounce';
 import { formatDate } from '@/lib/utils/format';
+import { PermissionGuard } from '@/components/shared/PermissionGuard';
 
 interface ReturnTransaction {
   id: string;
@@ -208,6 +209,7 @@ export default function TbdItemsPage() {
 
   return (
     <DashboardLayout>
+      <PermissionGuard permission="tbd_items:view">
       <div className="space-y-3">
         <ToastContainer toasts={toasts} onClose={removeToast} />
 
@@ -446,6 +448,7 @@ export default function TbdItemsPage() {
           </div>
         )}
       </div>
+      </PermissionGuard>
     </DashboardLayout>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { PermissionGuard } from '@/components/shared/PermissionGuard';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -262,6 +263,7 @@ export default function UploadPage() {
 
   return (
     <DashboardLayout>
+      <PermissionGuard permission="documents:upload">
       <div className="space-y-2 p-2">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:py-2 sm:px-3 rounded-lg bg-gradient-to-r from-teal-50 via-cyan-50 to-teal-50 border-2 border-teal-200">
@@ -626,6 +628,7 @@ export default function UploadPage() {
           </div>
         )}
       </div>
+      </PermissionGuard>
     </DashboardLayout>
   );
 }
