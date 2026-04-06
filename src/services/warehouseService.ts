@@ -49,10 +49,48 @@ export interface VerifiedItem {
   quantity: number;
   actualQuantity: number | null;
   verified: boolean;
+  verificationStatus: string | null;
   conditionNotes: string | null;
   returnStatus: string;
   destination: string | null;
   estimatedValue: number | null;
+  discrepancyId?: string | null;
+}
+
+export interface SurplusItem {
+  id: string;
+  transactionId: string;
+  ndc: string | null;
+  productName: string | null;
+  manufacturer: string | null;
+  lotNumber: string | null;
+  expirationDate: string | null;
+  quantity: number;
+  warehouseLocation: string;
+  condition: string;
+  notes: string | null;
+  status: string;
+  assignedReturnId: string | null;
+  reportedBy: string | null;
+  createdAt: string;
+  discrepancyId?: string | null;
+}
+
+export interface VerificationSummary {
+  transaction: ReturnTransaction;
+  items: VerifiedItem[];
+  counts: {
+    totalItems: number;
+    correct: number;
+    damaged: number;
+    missing: number;
+    wrongItem: number;
+    unverified: number;
+    surplus: number;
+  };
+  surplus: SurplusItem[];
+  discrepancies: WarehouseDiscrepancy[];
+  discrepancyCounts: { total: number; open: number };
 }
 
 // ============================================================
@@ -248,4 +286,215 @@ export const listDiscrepancies = async (
 
   handleRpcError(data, error, 'Failed to list discrepancies');
   return { data: data.data as WarehouseDiscrepancy[], total: data.total };
+};
+
+// ============================================================
+// Start verification session (record box count)
+// ============================================================
+
+export interface StartVerificationResult {
+  transaction: ReturnTransaction;
+  expectedBoxes: number;
+  receivedBoxes: number;
+  boxCountMatch: boolean;
+  totalItems: number;
+}
+
+export const startVerification = async (
+  transactionId: string,
+  boxCount: number,
+  verifiedBy?: string
+): Promise<StartVerificationResult> => {
+  const sb = ensureAdmin();
+
+  const { data, error } = await sb.rpc('warehouse_start_verification', {
+    p_transaction_id: transactionId,
+    p_box_count: boxCount,
+    p_verified_by: verifiedBy || null,
+  });
+
+  handleRpcError(data, error, 'Failed to start verification');
+  return data.data as StartVerificationResult;
+};
+
+// ============================================================
+// Verify item v2 (correct/damaged/missing/wrong_item)
+// ============================================================
+
+export const verifyItemV2 = async (
+  transactionId: string,
+  itemId: string,
+  verificationStatus: string,
+  actualQuantity?: number,
+  conditionNotes?: string,
+  reportedBy?: string
+): Promise<VerifiedItem> => {
+  const sb = ensureAdmin();
+
+  const { data, error } = await sb.rpc('warehouse_verify_item_v2', {
+    p_transaction_id: transactionId,
+    p_item_id: itemId,
+    p_verification_status: verificationStatus,
+    p_actual_quantity: actualQuantity ?? null,
+    p_condition_notes: conditionNotes || null,
+    p_reported_by: reportedBy || null,
+  });
+
+  handleRpcError(data, error, 'Failed to verify item');
+  return data.data as VerifiedItem;
+};
+
+// ============================================================
+// Add surplus item
+// ============================================================
+
+export const addSurplus = async (input: {
+  transactionId: string;
+  ndc?: string;
+  productName?: string;
+  manufacturer?: string;
+  lotNumber?: string;
+  expirationDate?: string;
+  quantity?: number;
+  warehouseLocation: string;
+  condition?: string;
+  notes?: string;
+  reportedBy?: string;
+}): Promise<SurplusItem> => {
+  const sb = ensureAdmin();
+
+  const { data, error } = await sb.rpc('warehouse_add_surplus', {
+    p_transaction_id: input.transactionId,
+    p_ndc: input.ndc || null,
+    p_product_name: input.productName || null,
+    p_manufacturer: input.manufacturer || null,
+    p_lot_number: input.lotNumber || null,
+    p_expiration_date: input.expirationDate || null,
+    p_quantity: input.quantity ?? 1,
+    p_warehouse_location: input.warehouseLocation,
+    p_condition: input.condition || 'good',
+    p_notes: input.notes || null,
+    p_reported_by: input.reportedBy || null,
+  });
+
+  handleRpcError(data, error, 'Failed to add surplus item');
+  return data.data as SurplusItem;
+};
+
+// ============================================================
+// Complete verification
+// ============================================================
+
+export interface CompleteVerificationResult {
+  transaction: ReturnTransaction;
+  summary: {
+    totalItems: number;
+    correctItems: number;
+    damagedItems: number;
+    missingItems: number;
+    wrongItems: number;
+    surplusItems: number;
+    openDiscrepancies: number;
+    correctItemsValue: number;
+    allItemsIntact: boolean;
+  };
+}
+
+export const completeVerification = async (
+  transactionId: string,
+  notes?: string,
+  verifiedBy?: string
+): Promise<CompleteVerificationResult> => {
+  const sb = ensureAdmin();
+
+  const { data, error } = await sb.rpc('warehouse_complete_verification', {
+    p_transaction_id: transactionId,
+    p_notes: notes || null,
+    p_verified_by: verifiedBy || null,
+  });
+
+  handleRpcError(data, error, 'Failed to complete verification');
+  return data.data as CompleteVerificationResult;
+};
+
+// ============================================================
+// Resolve discrepancy
+// ============================================================
+
+export const resolveDiscrepancy = async (
+  discrepancyId: string,
+  resolution: string,
+  resolutionNotes?: string,
+  resolvedBy?: string
+): Promise<WarehouseDiscrepancy> => {
+  const sb = ensureAdmin();
+
+  const { data, error } = await sb.rpc('warehouse_resolve_discrepancy', {
+    p_discrepancy_id: discrepancyId,
+    p_resolution: resolution,
+    p_resolution_notes: resolutionNotes || null,
+    p_resolved_by: resolvedBy || null,
+  });
+
+  handleRpcError(data, error, 'Failed to resolve discrepancy');
+  return data.data as WarehouseDiscrepancy;
+};
+
+// ============================================================
+// Get verification summary
+// ============================================================
+
+export const getVerificationSummary = async (
+  transactionId: string
+): Promise<VerificationSummary> => {
+  const sb = ensureAdmin();
+
+  const { data, error } = await sb.rpc('warehouse_get_verification_summary', {
+    p_transaction_id: transactionId,
+  });
+
+  handleRpcError(data, error, 'Failed to get verification summary');
+  return data.data as VerificationSummary;
+};
+
+// ============================================================
+// List surplus items for a transaction
+// ============================================================
+
+export const listSurplus = async (
+  transactionId: string,
+  status?: string
+): Promise<{ data: SurplusItem[]; total: number }> => {
+  const sb = ensureAdmin();
+
+  const { data, error } = await sb.rpc('warehouse_list_surplus', {
+    p_transaction_id: transactionId,
+    p_status: status || null,
+  });
+
+  handleRpcError(data, error, 'Failed to list surplus items');
+  return { data: data.data as SurplusItem[], total: data.total };
+};
+
+// ============================================================
+// List all surplus items (across all returns)
+// ============================================================
+
+export const listAllSurplus = async (
+  status?: string,
+  search?: string,
+  page?: number,
+  limit?: number
+): Promise<{ data: SurplusItem[]; pagination: any }> => {
+  const sb = ensureAdmin();
+
+  const { data, error } = await sb.rpc('warehouse_list_all_surplus', {
+    p_status: status || null,
+    p_search: search || null,
+    p_page: page || 1,
+    p_limit: limit || 20,
+  });
+
+  handleRpcError(data, error, 'Failed to list all surplus items');
+  return { data: data.data as SurplusItem[], pagination: data.pagination };
 };

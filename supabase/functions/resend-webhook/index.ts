@@ -1,6 +1,10 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
+import {
+  edgeSupabaseServiceRoleKey,
+  edgeSupabaseUrl,
+} from '../_shared/supabase_env.ts'
 
 interface ResendWebhookEvent {
   type: 'email.sent' | 'email.delivered' | 'email.delivery_delayed' | 'email.complained' | 'email.bounced';
@@ -39,10 +43,11 @@ serve(async (req) => {
     
     console.log(`Received Resend webhook: ${event.type} for email ${event.data.email_id}`)
 
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    
+    const supabaseUrl = edgeSupabaseUrl()
+    const supabaseServiceKey = edgeSupabaseServiceRoleKey()
+    if (!supabaseUrl || !supabaseServiceKey) {
+      throw new Error('Missing Supabase URL or service role key')
+    }
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
     // Map Resend event types to our status values

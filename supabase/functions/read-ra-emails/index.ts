@@ -8,10 +8,14 @@
 // Required secrets:
 //   IMAP_HOST, IMAP_PORT, IMAP_USER, IMAP_PASS
 //   AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY, AZURE_OPENAI_DEPLOYMENT, AZURE_OPENAI_API_VERSION
-//   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+//   SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (auto-injected), or EDGE_SUPABASE_URL + EDGE_SUPABASE_SERVICE_ROLE_KEY
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { corsHeaders } from '../_shared/cors.ts';
+import {
+  edgeSupabaseServiceRoleKey,
+  edgeSupabaseUrl,
+} from '../_shared/supabase_env.ts';
 import { ImapFlow } from 'npm:imapflow';
 import { simpleParser } from 'npm:mailparser';
 import { createClient } from 'npm:@supabase/supabase-js@2';
@@ -23,10 +27,14 @@ function env(key: string, fallback = ''): string {
 }
 
 function getSupabase() {
-  return createClient(
-    env('SUPABASE_URL'),
-    env('SUPABASE_SERVICE_ROLE_KEY')
-  );
+  const url = edgeSupabaseUrl();
+  const key = edgeSupabaseServiceRoleKey();
+  if (!url || !key) {
+    throw new Error(
+      'Missing Supabase URL or service role key (set EDGE_SUPABASE_* secrets or use linked project defaults)'
+    );
+  }
+  return createClient(url, key);
 }
 
 // ── IMAP Connection ──────────────────────────────────────────
