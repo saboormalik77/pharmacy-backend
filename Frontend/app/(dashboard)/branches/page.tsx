@@ -119,7 +119,7 @@ export default function BranchesPage() {
             <h1 className="text-xl font-bold">Branch Pharmacies</h1>
             <p className="text-sm text-muted-foreground">{total} branch{total !== 1 ? 'es' : ''} total</p>
           </div>
-          <Button onClick={() => setShowCreateModal(true)}>
+          <Button className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => setShowCreateModal(true)}>
             <Plus className="h-4 w-4 mr-2" /> Add Branch
           </Button>
         </div>
@@ -225,23 +225,14 @@ export default function BranchesPage() {
                       <td className="px-4 py-3 text-right">
                         <div className="relative inline-block" onClick={(e) => e.stopPropagation()}>
                           <button
-                            onClick={() => setActionMenuId(actionMenuId === b.id ? null : b.id)}
-                            className="p-1.5 hover:bg-accent rounded-md"
+                            id={`menu-btn-${b.id}`}
+                            onClick={(e) => {
+                              setActionMenuId(actionMenuId === b.id ? null : b.id)
+                            }}
+                            className="p-1.5 hover:bg-accent rounded-md transition-colors"
                           >
                             <MoreVertical className="h-4 w-4" />
                           </button>
-                          {actionMenuId === b.id && (
-                            <div className="absolute right-0 mt-1 w-40 bg-card border rounded-md shadow-lg z-10">
-                              <button
-                                onClick={() => { router.push(`/branches/${b.id}`); setActionMenuId(null) }}
-                                className="w-full text-left px-3 py-2 text-sm hover:bg-accent"
-                              >View Details</button>
-                              <button
-                                onClick={() => handleStatusToggle(b)}
-                                className={`w-full text-left px-3 py-2 text-sm hover:bg-accent ${b.status === 'active' ? 'text-amber-600' : 'text-green-600'}`}
-                              >{b.status === 'active' ? 'Suspend' : 'Activate'}</button>
-                            </div>
-                          )}
                         </div>
                       </td>
                     </tr>
@@ -266,6 +257,49 @@ export default function BranchesPage() {
             </div>
           )}
         </div>
+
+        {/* Dropdown Menu - Rendered outside table */}
+        {actionMenuId && (
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setActionMenuId(null)} />
+            <div 
+              className="fixed w-40 bg-white border border-gray-200 rounded-lg shadow-xl z-50"
+              style={{
+                top: (() => {
+                  const btn = document.getElementById(`menu-btn-${actionMenuId}`)
+                  if (btn) {
+                    const rect = btn.getBoundingClientRect()
+                    return `${rect.bottom + 4}px`
+                  }
+                  return '0px'
+                })(),
+                right: (() => {
+                  const btn = document.getElementById(`menu-btn-${actionMenuId}`)
+                  if (btn) {
+                    const rect = btn.getBoundingClientRect()
+                    return `${window.innerWidth - rect.right}px`
+                  }
+                  return '0px'
+                })()
+              }}
+            >
+              {branches.map((b) => 
+                b.id === actionMenuId ? (
+                  <div key={b.id}>
+                    <button
+                      onClick={() => { router.push(`/branches/${b.id}`); setActionMenuId(null) }}
+                      className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors rounded-t-lg"
+                    >View Details</button>
+                    <button
+                      onClick={() => handleStatusToggle(b)}
+                      className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors rounded-b-lg ${b.status === 'active' ? 'text-amber-600 font-medium' : 'text-emerald-600 font-medium'}`}
+                    >{b.status === 'active' ? 'Suspend' : 'Activate'}</button>
+                  </div>
+                ) : null
+              )}
+            </div>
+          </>
+        )}
 
         <CreateBranchModal
           isOpen={showCreateModal}
