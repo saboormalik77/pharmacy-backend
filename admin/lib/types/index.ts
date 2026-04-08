@@ -1127,6 +1127,81 @@ export interface SurplusItem {
     pharmacyName?: string;
 }
 
+export interface VerificationV2Counts {
+    totalItems: number;
+    correct: number;
+    damaged: number;
+    missing: number;
+    wrongItem: number;
+    unverified: number;
+    surplus: number;
+}
+
+export interface VerificationV2Item {
+    id: string;
+    ndc: string;
+    proprietaryName: string;
+    genericName: string;
+    manufacturer: string;
+    lotNumber: string;
+    expirationDate: string;
+    quantity: number;
+    actualQuantity: number | null;
+    verified: boolean;
+    verificationStatus: 'correct' | 'damaged' | 'missing' | 'wrong_item' | null;
+    conditionNotes: string | null;
+    returnStatus: string;
+    estimatedValue: number;
+}
+
+export interface WarehouseSurplusItem {
+    id: string;
+    transactionId: string;
+    ndc: string | null;
+    productName: string | null;
+    manufacturer: string | null;
+    lotNumber: string | null;
+    expirationDate: string | null;
+    quantity: number;
+    warehouseLocation: string;
+    condition: 'good' | 'damaged' | 'unknown';
+    status: 'stored' | 'assigned_to_return' | 'disposed';
+    notes: string | null;
+    discrepancyId: string | null;
+    licensePlate?: string;
+    pharmacyName?: string;
+    createdAt: string;
+}
+
+export interface VerificationV2Summary {
+    transaction: ReturnTransaction;
+    items: VerificationV2Item[];
+    counts: VerificationV2Counts;
+    surplus: WarehouseSurplusItem[];
+    discrepancies: WarehouseDiscrepancy[];
+    discrepancyCounts: { total: number; open: number };
+}
+
+export interface StartVerificationResult {
+    transaction: ReturnTransaction;
+    expectedBoxes: number;
+    receivedBoxes: number;
+    boxCountMatch: boolean;
+    totalItems: number;
+}
+
+export interface CompleteVerificationSummary {
+    totalItems: number;
+    correctItems: number;
+    damagedItems: number;
+    missingItems: number;
+    wrongItems: number;
+    surplusItems: number;
+    openDiscrepancies: number;
+    correctItemsValue: number;
+    allItemsIntact: boolean;
+}
+
 // ── Monthly Batch & Close-Out (Module 10) ────────────────────
 
 export interface ReturnBatch {

@@ -5,6 +5,10 @@ import {
     WarehouseDiscrepancy,
     VerificationSummary,
     SurplusItem,
+    VerificationV2Summary,
+    StartVerificationResult,
+    CompleteVerificationSummary,
+    WarehouseSurplusItem,
 } from '@/lib/types';
 
 // ── State ─────────────────────────────────────────────────────
@@ -18,9 +22,9 @@ export interface WarehouseState {
     currentItems: ReturnTransactionItem[];
     discrepancies: WarehouseDiscrepancy[];
     verificationSummary: VerificationSummary | null;
-    surplusItems: SurplusItem[];
-    allSurplus: SurplusItem[];
-    surplusPagination: { page: number; limit: number; total: number; totalPages: number } | null;
+    v2Summary: VerificationV2Summary | null;
+    allSurplus: WarehouseSurplusItem[];
+    allSurplusPagination: { total: number; totalPages: number } | null;
     isLoading: boolean;
     isActionLoading: boolean;
     error: string | null;
@@ -35,9 +39,9 @@ const initialState: WarehouseState = {
     currentItems: [],
     discrepancies: [],
     verificationSummary: null,
-    surplusItems: [],
+    v2Summary: null,
     allSurplus: [],
-    surplusPagination: null,
+    allSurplusPagination: null,
     isLoading: false,
     isActionLoading: false,
     error: null,
@@ -238,25 +242,18 @@ export const fetchTransactionForVerification = createAsyncThunk<
     }
 });
 
-// ── New Verification Flow (v2) ────────────────────────────────────
+// ── V2 Verification Thunks ────────────────────────────────────
 
 export const startVerification = createAsyncThunk<
-    { transaction: ReturnTransaction; expectedBoxes: number; receivedBoxes: number; boxCountMatch: boolean; totalItems: number },
+    StartVerificationResult,
     { transactionId: string; boxCount: number },
     { rejectValue: string }
 >('warehouse/startVerification', async ({ transactionId, boxCount }, { rejectWithValue }) => {
     try {
         const { apiClient } = await import('@/lib/api/apiClient');
-        const res = await apiClient.post<{
-            status: string;
-            data: {
-                transaction: ReturnTransaction;
-                expectedBoxes: number;
-                receivedBoxes: number;
-                boxCountMatch: boolean;
-                totalItems: number;
-            };
-        }>(`/admin/warehouse/${transactionId}/start-verification`, { boxCount }, true);
+        const res = await apiClient.post<{ status: string; data: StartVerificationResult }>(
+            `/admin/warehouse/${transactionId}/start-verification`, { boxCount }, true
+        );
         return res.data;
     } catch (err: any) {
         return rejectWithValue(err?.message || 'Failed to start verification');
@@ -264,13 +261,13 @@ export const startVerification = createAsyncThunk<
 });
 
 export const fetchVerificationSummary = createAsyncThunk<
-    VerificationSummary,
+    VerificationV2Summary,
     string,
     { rejectValue: string }
 >('warehouse/fetchVerificationSummary', async (transactionId, { rejectWithValue }) => {
     try {
         const { apiClient } = await import('@/lib/api/apiClient');
-        const res = await apiClient.get<{ status: string; data: VerificationSummary }>(
+        const res = await apiClient.get<{ status: string; data: VerificationV2Summary }>(
             `/admin/warehouse/${transactionId}/verification-summary`, true
         );
         return res.data;
@@ -280,24 +277,16 @@ export const fetchVerificationSummary = createAsyncThunk<
 });
 
 export const verifyItemV2 = createAsyncThunk<
-    { item: ReturnTransactionItem; discrepancyId?: string },
-    {
-        transactionId: string;
-        itemId: string;
-        verificationStatus: 'correct' | 'damaged' | 'missing' | 'wrong_item';
-        actualQuantity?: number;
-        conditionNotes?: string;
-    },
+    any,
+    { transactionId: string; itemId: string; verificationStatus: string; actualQuantity?: number; conditionNotes?: string },
     { rejectValue: string }
 >('warehouse/verifyItemV2', async ({ transactionId, itemId, ...payload }, { rejectWithValue }) => {
     try {
         const { apiClient } = await import('@/lib/api/apiClient');
-        const res = await apiClient.patch<{
-            status: string;
-            data: ReturnTransactionItem;
-            discrepancyId?: string;
-        }>(`/admin/warehouse/${transactionId}/items/${itemId}/verify-v2`, payload, true);
-        return { item: res.data, discrepancyId: res.discrepancyId };
+        const res = await apiClient.patch<{ status: string; data: any }>(
+            `/admin/warehouse/${transactionId}/items/${itemId}/verify-v2`, payload, true
+        );
+        return res.data;
     } catch (err: any) {
         return rejectWithValue(err?.message || 'Failed to verify item');
     }
@@ -351,54 +340,39 @@ export const fetchSurplusForReturn = createAsyncThunk<
 });
 
 export const fetchAllSurplus = createAsyncThunk<
-    { data: SurplusItem[]; pagination: any },
-    { status?: string; search?: string; page?: number; limit?: number } | void,
+    { data: WarehouseSurplusItem[]; total: number; totalPages: number },
+    { search?: string; status?: string; page?: number; limit?: number } | void,
     { rejectValue: string }
 >('warehouse/fetchAllSurplus', async (params, { rejectWithValue }) => {
     try {
         const { apiClient } = await import('@/lib/api/apiClient');
         const query: Record<string, string> = {};
         if (params) {
-            if (params.status) query.status = params.status;
             if (params.search) query.search = params.search;
+            if (params.status) query.status = params.status;
             if (params.page) query.page = String(params.page);
             if (params.limit) query.limit = String(params.limit);
         }
-        const res = await apiClient.get<{ status: string; data: SurplusItem[]; pagination: any }>(
+        const res = await apiClient.get<{ status: string; data: WarehouseSurplusItem[]; total: number; totalPages: number }>(
             '/admin/warehouse/surplus', true, query
         );
-        return { data: res.data, pagination: res.pagination };
+        return { data: res.data, total: res.total, totalPages: res.totalPages };
     } catch (err: any) {
-        return rejectWithValue(err?.message || 'Failed to fetch all surplus items');
+        return rejectWithValue(err?.message || 'Failed to fetch surplus items');
     }
 });
 
 export const completeVerification = createAsyncThunk<
-    {
-        transaction: ReturnTransaction;
-        summary: {
-            totalItems: number;
-            correctItems: number;
-            damagedItems: number;
-            missingItems: number;
-            wrongItems: number;
-            surplusItems: number;
-            openDiscrepancies: number;
-            correctItemsValue: number;
-            allItemsIntact: boolean;
-        };
-    },
+    { data: any; summary: CompleteVerificationSummary },
     { transactionId: string; notes?: string },
     { rejectValue: string }
 >('warehouse/completeVerification', async ({ transactionId, notes }, { rejectWithValue }) => {
     try {
         const { apiClient } = await import('@/lib/api/apiClient');
-        const res = await apiClient.post<{
-            status: string;
-            data: ReturnTransaction;
-            summary: any;
-        }>(`/admin/warehouse/${transactionId}/complete-verification`, { notes }, true);
-        return { transaction: res.data, summary: res.summary };
+        const res = await apiClient.post<{ status: string; data: any; summary: CompleteVerificationSummary }>(
+            `/admin/warehouse/${transactionId}/complete-verification`, notes ? { notes } : {}, true
+        );
+        return { data: res.data, summary: res.summary };
     } catch (err: any) {
         return rejectWithValue(err?.message || 'Failed to complete verification');
     }
@@ -408,11 +382,12 @@ export const resolveDiscrepancy = createAsyncThunk<
     WarehouseDiscrepancy,
     { discrepancyId: string; resolution: 'resolved' | 'dismissed'; resolutionNotes?: string },
     { rejectValue: string }
->('warehouse/resolveDiscrepancy', async ({ discrepancyId, ...payload }, { rejectWithValue }) => {
+>('warehouse/resolveDiscrepancy', async ({ discrepancyId, resolution, resolutionNotes }, { rejectWithValue }) => {
     try {
         const { apiClient } = await import('@/lib/api/apiClient');
         const res = await apiClient.patch<{ status: string; data: WarehouseDiscrepancy }>(
-            `/admin/warehouse/discrepancies/${discrepancyId}/resolve`, payload, true
+            `/admin/warehouse/discrepancies/${discrepancyId}/resolve`,
+            { resolution, resolutionNotes: resolutionNotes || undefined }, true
         );
         return res.data;
     } catch (err: any) {
@@ -507,68 +482,29 @@ const warehouseSlice = createSlice({
             })
             .addCase(fetchTransactionForVerification.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; })
 
-            // ── New Verification Flow (v2) ────────────────────────────────────
-            
-            // startVerification
+            // V2: startVerification
             .addCase(startVerification.pending, (state) => { state.isActionLoading = true; state.error = null; })
-            .addCase(startVerification.fulfilled, (state, action) => {
-                state.isActionLoading = false;
-                state.currentReturn = action.payload.transaction;
-            })
+            .addCase(startVerification.fulfilled, (state) => { state.isActionLoading = false; })
             .addCase(startVerification.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
 
-            // fetchVerificationSummary
+            // V2: fetchVerificationSummary
             .addCase(fetchVerificationSummary.pending, (state) => { state.isLoading = true; state.error = null; })
-            .addCase(fetchVerificationSummary.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.verificationSummary = action.payload;
-                if (action.payload.transaction) state.currentReturn = action.payload.transaction;
-                if (action.payload.items) state.currentItems = action.payload.items;
-                if (action.payload.surplus) state.surplusItems = action.payload.surplus;
-                if (action.payload.discrepancies) state.discrepancies = action.payload.discrepancies;
-            })
+            .addCase(fetchVerificationSummary.fulfilled, (state, action) => { state.isLoading = false; state.v2Summary = action.payload; })
             .addCase(fetchVerificationSummary.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; })
 
-            // verifyItemV2
+            // V2: verifyItemV2
             .addCase(verifyItemV2.pending, (state) => { state.isActionLoading = true; state.error = null; })
-            .addCase(verifyItemV2.fulfilled, (state, action) => {
-                state.isActionLoading = false;
-                const updated = action.payload.item;
-                state.currentItems = state.currentItems.map(i => i.id === updated.id ? { ...i, ...updated } : i);
-            })
+            .addCase(verifyItemV2.fulfilled, (state) => { state.isActionLoading = false; })
             .addCase(verifyItemV2.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
 
             // addSurplus
             .addCase(addSurplus.pending, (state) => { state.isActionLoading = true; state.error = null; })
-            .addCase(addSurplus.fulfilled, (state, action) => {
-                state.isActionLoading = false;
-                state.surplusItems = [action.payload.surplus, ...state.surplusItems];
-            })
+            .addCase(addSurplus.fulfilled, (state) => { state.isActionLoading = false; })
             .addCase(addSurplus.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
-
-            // fetchSurplusForReturn
-            .addCase(fetchSurplusForReturn.pending, (state) => { state.isLoading = true; state.error = null; })
-            .addCase(fetchSurplusForReturn.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.surplusItems = action.payload;
-            })
-            .addCase(fetchSurplusForReturn.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; })
-
-            // fetchAllSurplus
-            .addCase(fetchAllSurplus.pending, (state) => { state.isLoading = true; state.error = null; })
-            .addCase(fetchAllSurplus.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.allSurplus = action.payload.data;
-                state.surplusPagination = action.payload.pagination;
-            })
-            .addCase(fetchAllSurplus.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; })
 
             // completeVerification
             .addCase(completeVerification.pending, (state) => { state.isActionLoading = true; state.error = null; })
-            .addCase(completeVerification.fulfilled, (state, action) => {
-                state.isActionLoading = false;
-                state.currentReturn = action.payload.transaction;
-            })
+            .addCase(completeVerification.fulfilled, (state) => { state.isActionLoading = false; })
             .addCase(completeVerification.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
 
             // resolveDiscrepancy
@@ -578,7 +514,16 @@ const warehouseSlice = createSlice({
                 const updated = action.payload;
                 state.discrepancies = state.discrepancies.map(d => d.id === updated.id ? updated : d);
             })
-            .addCase(resolveDiscrepancy.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; });
+            .addCase(resolveDiscrepancy.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
+
+            // fetchAllSurplus
+            .addCase(fetchAllSurplus.pending, (state) => { state.isLoading = true; state.error = null; })
+            .addCase(fetchAllSurplus.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.allSurplus = action.payload.data;
+                state.allSurplusPagination = { total: action.payload.total, totalPages: action.payload.totalPages };
+            })
+            .addCase(fetchAllSurplus.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; });
     },
 });
 

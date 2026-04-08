@@ -1,0 +1,716 @@
+'use client';
+
+import { PermissionGate } from '@/components/auth/PermissionGate';
+import { useState, useEffect, useCallback } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import {
+    ArrowLeft, Loader2, CheckCircle, XCircle, AlertTriangle,
+    HelpCircle, Plus, ClipboardCheck, BarChart3, ShieldAlert,
+    BoxIcon, Package,
+} from 'lucide-react';
+import { Badge } from '@/components/ui/Badge';
+import { ToastContainer, Toast } from '@/components/ui/Toast';
+import { formatDate, formatCurrency } from '@/lib/utils';
+import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
+import {
+    startVerification,
+    fetchVerificationSummary,
+    verifyItemV2,
+    addSurplus,
+    completeVerification,
+    resolveDiscrepancy,
+} from '@/lib/store/warehouseSlice';
+import type {
+    VerificationV2Item,
+    WarehouseSurplusItem,
+    WarehouseDiscrepancy,
+    VerificationV2Counts,
+    CompleteVerificationSummary,
+} from '@/lib/types';
+
+type ActiveTab = 'items' | 'surplus' | 'discrepancies';
+
+export default function VerificationSessionPage() {
+    const dispatch = useAppDispatch();
+    const router = useRouter();
+    const params = useParams();
+    const returnId = params.id as string;
+    const { v2Summary, isLoading, isActionLoading } = useAppSelector(s => s.warehouse);
+
+    const [toasts, setToasts] = useState<Toast[]>([]);
+    const [activeTab, setActiveTab] = useState<ActiveTab>('items');
+
+    // Box count step
+    const [needsBoxCount, setNeedsBoxCount] = useState(false);
+    const [boxCount, setBoxCount] = useState('');
+    const [boxResult, setBoxResult] = useState<{ expectedBoxes: number; receivedBoxes: number; boxCountMatch: boolean } | null>(null);
+
+    // Verify item modal
+    const [verifyingItem, setVerifyingItem] = useState<VerificationV2Item | null>(null);
+    const [verifyStatus, setVerifyStatus] = useState('');
+    const [verifyActualQty, setVerifyActualQty] = useState('');
+    const [verifyNotes, setVerifyNotes] = useState('');
+
+    // Surplus form
+    const [showSurplusForm, setShowSurplusForm] = useState(false);
+    const [surplusForm, setSurplusForm] = useState({
+        ndc: '', productName: '', manufacturer: '', lotNumber: '',
+        expirationDate: '', quantity: '', warehouseLocation: '', condition: 'good', notes: '',
+    });
+
+    // Complete
+    const [showCompleteConfirm, setShowCompleteConfirm] = useState(false);
+    const [completeNotes, setCompleteNotes] = useState('');
+    const [completedSummary, setCompletedSummary] = useState<CompleteVerificationSummary | null>(null);
+
+    // Discrepancy resolve
+    const [resolvingId, setResolvingId] = useState<string | null>(null);
+    const [resolveNotes, setResolveNotes] = useState('');
+
+    const showToast = (msg: string, type: Toast['type'] = 'success') => {
+        setToasts(prev => [...prev, { id: Date.now().toString(), message: msg, type }]);
+    };
+    const removeToast = (id: string) => setToasts(prev => prev.filter(t => t.id !== id));
+
+    const loadSummary = useCallback(async () => {
+        const result = await dispatch(fetchVerificationSummary(returnId));
+        if (fetchVerificationSummary.rejected.match(result)) {
+            const msg = (result.payload as string) || '';
+            if (msg.toLowerCase().includes('not started') || msg.toLowerCase().includes('not been started')) {
+                setNeedsBoxCount(true);
+            } else {
+                showToast(msg || 'Failed to load verification data', 'error');
+            }
+        } else {
+            setNeedsBoxCount(false);
+        }
+    }, [dispatch, returnId]);
+
+    useEffect(() => { loadSummary(); }, [loadSummary]);
+
+    const handleStartVerification = async () => {
+        const count = Number(boxCount);
+        if (!boxCount || count < 0) { showToast('Enter a valid box count', 'error'); return; }
+        const result = await dispatch(startVerification({ transactionId: returnId, boxCount: count }));
+        if (startVerification.fulfilled.match(result)) {
+            const d = result.payload;
+            setBoxResult({ expectedBoxes: d.expectedBoxes, receivedBoxes: d.receivedBoxes, boxCountMatch: d.boxCountMatch });
+            if (!d.boxCountMatch) {
+                showToast(`Box mismatch: expected ${d.expectedBoxes}, received ${d.receivedBoxes}. Discrepancy recorded.`, 'warning');
+            }
+            setNeedsBoxCount(false);
+            await loadSummary();
+        } else {
+            showToast((result.payload as string) || 'Failed to start verification', 'error');
+        }
+    };
+
+    const openVerifyItem = (item: VerificationV2Item) => {
+        setVerifyingItem(item);
+        setVerifyStatus('');
+        setVerifyActualQty(String(item.quantity));
+        setVerifyNotes('');
+    };
+
+    const handleVerifyItem = async () => {
+        if (!verifyStatus || !verifyingItem) return;
+        const body: any = { verificationStatus: verifyStatus };
+        if (verifyStatus === 'missing') body.actualQuantity = 0;
+        else if (verifyActualQty !== '') body.actualQuantity = Number(verifyActualQty);
+        if (verifyNotes.trim()) body.conditionNotes = verifyNotes.trim();
+
+        const result = await dispatch(verifyItemV2({ transactionId: returnId, itemId: verifyingItem.id, ...body }));
+        if (verifyItemV2.fulfilled.match(result)) {
+            showToast('Item verified');
+            setVerifyingItem(null);
+            await loadSummary();
+        } else {
+            showToast((result.payload as string) || 'Failed to verify item', 'error');
+        }
+    };
+
+    const handleAddSurplus = async () => {
+        if (!surplusForm.warehouseLocation.trim()) { showToast('Warehouse location is required', 'error'); return; }
+        const body: Record<string, any> = { ...surplusForm };
+        if (body.quantity) body.quantity = Number(body.quantity);
+        Object.keys(body).forEach(k => { if (body[k] === '' || body[k] === undefined) delete body[k]; });
+        body.warehouseLocation = surplusForm.warehouseLocation;
+        body.condition = surplusForm.condition;
+
+        const result = await dispatch(addSurplus({ transactionId: returnId, data: body }));
+        if (addSurplus.fulfilled.match(result)) {
+            showToast('Surplus item added');
+            setShowSurplusForm(false);
+            setSurplusForm({ ndc: '', productName: '', manufacturer: '', lotNumber: '', expirationDate: '', quantity: '', warehouseLocation: '', condition: 'good', notes: '' });
+            await loadSummary();
+        } else {
+            showToast((result.payload as string) || 'Failed to add surplus item', 'error');
+        }
+    };
+
+    const handleCompleteVerification = async () => {
+        const result = await dispatch(completeVerification({ transactionId: returnId, notes: completeNotes.trim() || undefined }));
+        if (completeVerification.fulfilled.match(result)) {
+            showToast('Verification completed');
+            setShowCompleteConfirm(false);
+            setCompletedSummary(result.payload.summary);
+        } else {
+            showToast((result.payload as string) || 'Failed to complete verification', 'error');
+        }
+    };
+
+    const handleResolve = async (discrepancyId: string, resolution: 'resolved' | 'dismissed') => {
+        const result = await dispatch(resolveDiscrepancy({ discrepancyId, resolution, resolutionNotes: resolveNotes.trim() || undefined }));
+        if (resolveDiscrepancy.fulfilled.match(result)) {
+            showToast(resolution === 'resolved' ? 'Discrepancy resolved' : 'Discrepancy dismissed');
+            setResolvingId(null);
+            setResolveNotes('');
+            await loadSummary();
+        } else {
+            showToast((result.payload as string) || 'Failed to resolve discrepancy', 'error');
+        }
+    };
+
+    // Loading state
+    if (isLoading && !v2Summary && !needsBoxCount) {
+        return (
+            <PermissionGate permission="warehouse">
+                <div className="flex items-center justify-center py-24">
+                    <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                </div>
+            </PermissionGate>
+        );
+    }
+
+    // Box count step
+    if (needsBoxCount && !v2Summary) {
+        return (
+            <PermissionGate permission="warehouse">
+                <ToastContainer toasts={toasts} onClose={removeToast} />
+                <div className="max-w-lg mx-auto mt-6 space-y-4">
+                    <Link href="/warehouse/verification" className="inline-flex items-center gap-1 text-xs text-primary-600 hover:underline">
+                        <ArrowLeft className="w-3.5 h-3.5" /> Back to list
+                    </Link>
+                    <div className="bg-white rounded-lg shadow p-6 space-y-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-primary-50">
+                                <BoxIcon className="w-5 h-5 text-primary-600" />
+                            </div>
+                            <div>
+                                <h2 className="text-base font-bold text-gray-900">Start Verification</h2>
+                                <p className="text-[11px] text-gray-500">How many boxes did you physically receive?</p>
+                            </div>
+                        </div>
+                        <input
+                            type="number"
+                            min="0"
+                            placeholder="Enter box count..."
+                            value={boxCount}
+                            onChange={e => setBoxCount(e.target.value)}
+                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+                        />
+                        {boxResult && !boxResult.boxCountMatch && (
+                            <div className="p-3 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-start gap-2">
+                                <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                                <span>Expected {boxResult.expectedBoxes} boxes, you received {boxResult.receivedBoxes} — a discrepancy has been automatically recorded.</span>
+                            </div>
+                        )}
+                        <button
+                            disabled={isActionLoading || !boxCount}
+                            onClick={handleStartVerification}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md disabled:opacity-50 transition"
+                        >
+                            {isActionLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                            Start Verification
+                        </button>
+                    </div>
+                </div>
+            </PermissionGate>
+        );
+    }
+
+    // Completed summary screen
+    if (completedSummary) {
+        return (
+            <PermissionGate permission="warehouse">
+                <ToastContainer toasts={toasts} onClose={removeToast} />
+                <div className="max-w-2xl mx-auto mt-6 space-y-4">
+                    <div className="bg-white rounded-lg shadow p-6 space-y-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-green-50">
+                                <CheckCircle className="w-6 h-6 text-green-600" />
+                            </div>
+                            <div>
+                                <h2 className="text-base font-bold text-gray-900">Verification Complete</h2>
+                                <p className="text-[11px] text-gray-500">Summary of verification results</p>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            {([
+                                { label: 'Total Items', value: completedSummary.totalItems, color: 'text-gray-900' },
+                                { label: 'Correct', value: completedSummary.correctItems, color: 'text-green-700' },
+                                { label: 'Damaged', value: completedSummary.damagedItems, color: 'text-red-700' },
+                                { label: 'Missing', value: completedSummary.missingItems, color: 'text-gray-500' },
+                                { label: 'Wrong Items', value: completedSummary.wrongItems, color: 'text-orange-700' },
+                                { label: 'Surplus', value: completedSummary.surplusItems, color: 'text-blue-700' },
+                            ]).map(s => (
+                                <div key={s.label} className="p-3 rounded-md border border-gray-200 bg-gray-50">
+                                    <p className="text-[10px] text-gray-500">{s.label}</p>
+                                    <p className={`text-xl font-bold ${s.color}`}>{s.value ?? 0}</p>
+                                </div>
+                            ))}
+                        </div>
+                        {completedSummary.correctItemsValue != null && (
+                            <div className="p-3 rounded-md bg-green-50 border border-green-200 text-center">
+                                <p className="text-[10px] text-green-700">Correct Items Value</p>
+                                <p className="text-2xl font-bold text-green-900">{formatCurrency(completedSummary.correctItemsValue)}</p>
+                            </div>
+                        )}
+                        {completedSummary.openDiscrepancies > 0 && (
+                            <div className="p-3 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center gap-2">
+                                <AlertTriangle className="w-4 h-4" />
+                                {completedSummary.openDiscrepancies} open discrepancies remain.
+                            </div>
+                        )}
+                        <Link href="/warehouse/verification">
+                            <button className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md mt-2 transition">
+                                <ArrowLeft className="w-4 h-4" /> Back to Received List
+                            </button>
+                        </Link>
+                    </div>
+                </div>
+            </PermissionGate>
+        );
+    }
+
+    if (!v2Summary) {
+        return (
+            <PermissionGate permission="warehouse">
+                <div className="text-center py-16 text-gray-500">
+                    <p className="text-sm">Could not load verification data.</p>
+                    <Link href="/warehouse/verification" className="inline-flex items-center gap-1 mt-3 text-xs text-primary-600 hover:underline">
+                        <ArrowLeft className="w-3.5 h-3.5" /> Back
+                    </Link>
+                </div>
+            </PermissionGate>
+        );
+    }
+
+    const { items, counts, surplus, discrepancies, discrepancyCounts } = v2Summary;
+    const verified = counts.correct + counts.damaged + counts.missing + counts.wrongItem;
+    const progressPct = counts.totalItems > 0 ? Math.round((verified / counts.totalItems) * 100) : 0;
+
+    const statusColor = (s: string | null) => {
+        switch (s) {
+            case 'correct': return 'bg-green-100 text-green-700 border-green-200';
+            case 'damaged': return 'bg-red-100 text-red-700 border-red-200';
+            case 'missing': return 'bg-gray-200 text-gray-600 border-gray-300';
+            case 'wrong_item': return 'bg-orange-100 text-orange-700 border-orange-200';
+            default: return 'bg-white text-gray-400 border-gray-200';
+        }
+    };
+
+    const discrepancyColor = (type: string) => {
+        switch (type) {
+            case 'missing': return 'bg-red-100 text-red-700';
+            case 'damaged': return 'bg-amber-100 text-amber-700';
+            case 'surplus': case 'extra': return 'bg-blue-100 text-blue-700';
+            default: return 'bg-gray-100 text-gray-600';
+        }
+    };
+
+    return (
+        <PermissionGate permission="warehouse">
+            <ToastContainer toasts={toasts} onClose={removeToast} />
+            <div className="space-y-3">
+                {/* Header */}
+                <div className="flex items-center gap-3">
+                    <Link href="/warehouse/verification" className="p-1.5 rounded-md hover:bg-gray-100 transition">
+                        <ArrowLeft className="w-4 h-4 text-gray-500" />
+                    </Link>
+                    <div>
+                        <h1 className="text-base font-bold text-gray-900">Verification Session</h1>
+                        <p className="text-[11px] text-gray-500">
+                            {v2Summary.transaction?.licensePlate || returnId}
+                            {v2Summary.transaction?.pharmacyName && ` — ${v2Summary.transaction.pharmacyName}`}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Progress */}
+                <div className="bg-white rounded-lg shadow p-3">
+                    <div className="flex items-center gap-3">
+                        <BarChart3 className="w-4 h-4 text-primary-600 flex-shrink-0" />
+                        <div className="flex-1">
+                            <div className="flex justify-between text-[11px] mb-1">
+                                <span className="font-medium text-gray-700">{verified} / {counts.totalItems} items verified</span>
+                                <span className="font-bold text-primary-700">{progressPct}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-1.5">
+                                <div className="bg-primary-500 h-1.5 rounded-full transition-all duration-300" style={{ width: `${progressPct}%` }} />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex gap-3 mt-2 text-[10px] font-medium">
+                        <span className="text-green-700">{counts.correct} correct</span>
+                        <span className="text-red-700">{counts.damaged} damaged</span>
+                        <span className="text-gray-500">{counts.missing} missing</span>
+                        <span className="text-orange-700">{counts.wrongItem} wrong</span>
+                        <span className="text-blue-700">{counts.surplus} surplus</span>
+                    </div>
+                </div>
+
+                {/* Tabs */}
+                <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+                    {([
+                        { key: 'items' as ActiveTab, label: 'Items', count: counts.totalItems },
+                        { key: 'surplus' as ActiveTab, label: 'Surplus', count: surplus.length },
+                        { key: 'discrepancies' as ActiveTab, label: 'Discrepancies', count: discrepancyCounts.total },
+                    ]).map(tab => (
+                        <button
+                            key={tab.key}
+                            onClick={() => setActiveTab(tab.key)}
+                            className={`px-3 py-1.5 text-[11px] font-medium rounded-md transition-all ${
+                                activeTab === tab.key
+                                    ? 'bg-white text-primary-700 shadow-sm'
+                                    : 'text-gray-500 hover:text-gray-700'
+                            }`}
+                        >
+                            {tab.label} <span className="font-bold">({tab.count})</span>
+                        </button>
+                    ))}
+                </div>
+
+                {/* ITEMS TAB */}
+                {activeTab === 'items' && (
+                    <div className="bg-white rounded-lg shadow overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="bg-gray-50 border-b border-gray-200">
+                                        <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Product</th>
+                                        <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">NDC</th>
+                                        <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Lot</th>
+                                        <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Exp</th>
+                                        <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Qty</th>
+                                        <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Status</th>
+                                        <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                    {items.map(item => (
+                                        <tr key={item.id} className="hover:bg-gray-50">
+                                            <td className="px-3 py-2">
+                                                <div className="text-xs font-medium text-gray-900">{item.proprietaryName || item.genericName}</div>
+                                                {item.manufacturer && <div className="text-[10px] text-gray-400">{item.manufacturer}</div>}
+                                            </td>
+                                            <td className="px-3 py-2 text-[11px] font-mono text-gray-600">{item.ndc}</td>
+                                            <td className="px-3 py-2 text-[11px] text-gray-600">{item.lotNumber || '—'}</td>
+                                            <td className="px-3 py-2 text-[11px] text-gray-600">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
+                                            <td className="px-3 py-2 text-xs font-medium">{item.quantity}</td>
+                                            <td className="px-3 py-2">
+                                                <Badge className={`text-[10px] border ${statusColor(item.verificationStatus)}`}>
+                                                    {item.verificationStatus ? item.verificationStatus.replace('_', ' ') : 'unverified'}
+                                                </Badge>
+                                            </td>
+                                            <td className="px-3 py-2">
+                                                <button
+                                                    onClick={() => openVerifyItem(item)}
+                                                    className={`px-2 py-1 text-[10px] font-medium rounded-md transition ${
+                                                        item.verificationStatus
+                                                            ? 'border border-gray-200 text-gray-600 hover:bg-gray-50'
+                                                            : 'text-white bg-primary-600 hover:bg-primary-700'
+                                                    }`}
+                                                >
+                                                    {item.verificationStatus ? 'Edit' : 'Verify'}
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
+                {/* VERIFY ITEM MODAL */}
+                {verifyingItem && (
+                    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+                        <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-5 space-y-4">
+                            <h3 className="font-bold text-sm text-gray-900">Verify Item</h3>
+                            <p className="text-[11px] text-gray-500">{verifyingItem.proprietaryName || verifyingItem.genericName}</p>
+
+                            <div className="grid grid-cols-2 gap-2">
+                                {([
+                                    { value: 'correct', label: 'Correct', icon: CheckCircle, base: 'border-green-300 bg-green-50 text-green-700', active: 'border-green-500 bg-green-200 text-green-900 ring-2 ring-green-300' },
+                                    { value: 'damaged', label: 'Damaged', icon: XCircle, base: 'border-red-300 bg-red-50 text-red-700', active: 'border-red-500 bg-red-200 text-red-900 ring-2 ring-red-300' },
+                                    { value: 'missing', label: 'Missing', icon: HelpCircle, base: 'border-gray-300 bg-gray-50 text-gray-700', active: 'border-gray-500 bg-gray-300 text-gray-900 ring-2 ring-gray-400' },
+                                    { value: 'wrong_item', label: 'Wrong Item', icon: AlertTriangle, base: 'border-orange-300 bg-orange-50 text-orange-700', active: 'border-orange-500 bg-orange-200 text-orange-900 ring-2 ring-orange-300' },
+                                ] as const).map(opt => {
+                                    const Icon = opt.icon;
+                                    return (
+                                        <button
+                                            key={opt.value}
+                                            type="button"
+                                            onClick={() => { setVerifyStatus(opt.value); if (opt.value === 'missing') setVerifyActualQty('0'); }}
+                                            className={`flex items-center gap-2 p-2.5 rounded-md border-2 text-xs font-medium transition-all ${verifyStatus === opt.value ? opt.active : opt.base}`}
+                                        >
+                                            <Icon className="w-4 h-4" /> {opt.label}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            {verifyStatus && verifyStatus !== 'missing' && (
+                                <div>
+                                    <label className="text-[10px] font-medium text-gray-700">Actual Quantity (if different)</label>
+                                    <input type="number" min="0" value={verifyActualQty} onChange={e => setVerifyActualQty(e.target.value)}
+                                        className="mt-1 w-full px-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                </div>
+                            )}
+
+                            {(verifyStatus === 'damaged' || verifyStatus === 'wrong_item') && (
+                                <div>
+                                    <label className="text-[10px] font-medium text-gray-700">Condition Notes</label>
+                                    <textarea rows={2} placeholder="Describe the issue..." value={verifyNotes} onChange={e => setVerifyNotes(e.target.value)}
+                                        className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none" />
+                                </div>
+                            )}
+
+                            <div className="flex gap-2 justify-end">
+                                <button onClick={() => setVerifyingItem(null)} className="px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-md hover:bg-gray-50">Cancel</button>
+                                <button
+                                    disabled={!verifyStatus || isActionLoading}
+                                    onClick={handleVerifyItem}
+                                    className="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md disabled:opacity-50 flex items-center gap-1 transition"
+                                >
+                                    {isActionLoading && <Loader2 className="w-3 h-3 animate-spin" />} Save
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* SURPLUS TAB */}
+                {activeTab === 'surplus' && (
+                    <div className="space-y-3">
+                        <div className="flex justify-end">
+                            <button
+                                onClick={() => setShowSurplusForm(!showSurplusForm)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition"
+                            >
+                                <Plus className="w-3 h-3" /> Add Surplus Item
+                            </button>
+                        </div>
+
+                        {showSurplusForm && (
+                            <div className="bg-white rounded-lg shadow p-4 space-y-3">
+                                <h3 className="font-bold text-xs text-gray-900">Add Surplus Item</h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {([
+                                        { key: 'ndc', label: 'NDC', type: 'text', placeholder: 'e.g. 12345678901' },
+                                        { key: 'productName', label: 'Product Name', type: 'text', placeholder: '' },
+                                        { key: 'manufacturer', label: 'Manufacturer', type: 'text', placeholder: '' },
+                                        { key: 'lotNumber', label: 'Lot Number', type: 'text', placeholder: '' },
+                                        { key: 'expirationDate', label: 'Expiration Date', type: 'date', placeholder: '' },
+                                        { key: 'quantity', label: 'Quantity', type: 'number', placeholder: '' },
+                                        { key: 'warehouseLocation', label: 'Warehouse Location *', type: 'text', placeholder: 'e.g. Shelf B3, Row 2' },
+                                    ] as const).map(f => (
+                                        <div key={f.key}>
+                                            <label className="text-[10px] font-medium text-gray-700">{f.label}</label>
+                                            <input
+                                                type={f.type}
+                                                placeholder={f.placeholder || undefined}
+                                                value={surplusForm[f.key as keyof typeof surplusForm]}
+                                                onChange={e => setSurplusForm(prev => ({ ...prev, [f.key]: e.target.value }))}
+                                                className="mt-1 w-full px-3 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                            />
+                                        </div>
+                                    ))}
+                                    <div>
+                                        <label className="text-[10px] font-medium text-gray-700">Condition</label>
+                                        <select
+                                            value={surplusForm.condition}
+                                            onChange={e => setSurplusForm(prev => ({ ...prev, condition: e.target.value }))}
+                                            className="mt-1 w-full px-3 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                        >
+                                            <option value="good">Good</option>
+                                            <option value="damaged">Damaged</option>
+                                            <option value="unknown">Unknown</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-medium text-gray-700">Notes</label>
+                                    <textarea rows={2} value={surplusForm.notes} onChange={e => setSurplusForm(prev => ({ ...prev, notes: e.target.value }))} placeholder="Any additional notes..."
+                                        className="mt-1 w-full px-3 py-2 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none" />
+                                </div>
+                                <div className="flex gap-2 justify-end">
+                                    <button onClick={() => setShowSurplusForm(false)} className="px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-md hover:bg-gray-50">Cancel</button>
+                                    <button
+                                        disabled={isActionLoading}
+                                        onClick={handleAddSurplus}
+                                        className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50 flex items-center gap-1 transition"
+                                    >
+                                        {isActionLoading && <Loader2 className="w-3 h-3 animate-spin" />} Add Surplus
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="bg-white rounded-lg shadow overflow-hidden">
+                            {surplus.length === 0 ? (
+                                <div className="text-center py-12 text-gray-400 text-xs">No surplus items recorded yet</div>
+                            ) : (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead>
+                                            <tr className="bg-gray-50 border-b border-gray-200">
+                                                <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Product</th>
+                                                <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">NDC</th>
+                                                <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Lot</th>
+                                                <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Qty</th>
+                                                <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Location</th>
+                                                <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Condition</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100">
+                                            {surplus.map(s => (
+                                                <tr key={s.id} className="hover:bg-gray-50">
+                                                    <td className="px-3 py-2 text-xs font-medium text-gray-900">{s.productName || '—'}</td>
+                                                    <td className="px-3 py-2 text-[11px] font-mono text-gray-600">{s.ndc || '—'}</td>
+                                                    <td className="px-3 py-2 text-[11px] text-gray-600">{s.lotNumber || '—'}</td>
+                                                    <td className="px-3 py-2 text-xs font-medium">{s.quantity}</td>
+                                                    <td className="px-3 py-2 text-[11px] text-gray-600">{s.warehouseLocation}</td>
+                                                    <td className="px-3 py-2">
+                                                        <Badge className={`text-[10px] ${s.condition === 'good' ? 'bg-green-100 text-green-700' : s.condition === 'damaged' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'}`}>
+                                                            {s.condition}
+                                                        </Badge>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* DISCREPANCIES TAB */}
+                {activeTab === 'discrepancies' && (
+                    <div className="bg-white rounded-lg shadow overflow-hidden">
+                        {discrepancies.length === 0 ? (
+                            <div className="text-center py-12 text-gray-400 text-xs">No discrepancies recorded</div>
+                        ) : (
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="bg-gray-50 border-b border-gray-200">
+                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Type</th>
+                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Product</th>
+                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Expected</th>
+                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Actual</th>
+                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Status</th>
+                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100">
+                                        {discrepancies.map(d => (
+                                            <tr key={d.id} className="hover:bg-gray-50">
+                                                <td className="px-3 py-2"><Badge className={`text-[10px] ${discrepancyColor(d.type)}`}>{d.type}</Badge></td>
+                                                <td className="px-3 py-2 text-xs text-gray-900">{d.productName || d.ndc || '—'}</td>
+                                                <td className="px-3 py-2 text-xs font-medium">{d.expectedQuantity ?? '—'}</td>
+                                                <td className="px-3 py-2 text-xs font-medium">{d.actualQuantity ?? '—'}</td>
+                                                <td className="px-3 py-2">
+                                                    <Badge className={`text-[10px] border ${d.status === 'open' ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
+                                                        {d.status}
+                                                    </Badge>
+                                                </td>
+                                                <td className="px-3 py-2">
+                                                    {d.status === 'open' ? (
+                                                        resolvingId === d.id ? (
+                                                            <div className="space-y-1.5">
+                                                                <textarea
+                                                                    rows={2}
+                                                                    placeholder="Resolution notes..."
+                                                                    value={resolveNotes}
+                                                                    onChange={e => setResolveNotes(e.target.value)}
+                                                                    className="w-full px-2 py-1 text-[10px] border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none"
+                                                                />
+                                                                <div className="flex gap-1">
+                                                                    <button disabled={isActionLoading} onClick={() => handleResolve(d.id, 'resolved')}
+                                                                        className="px-2 py-0.5 text-[9px] font-medium text-white bg-green-600 hover:bg-green-700 rounded disabled:opacity-50">Resolve</button>
+                                                                    <button disabled={isActionLoading} onClick={() => handleResolve(d.id, 'dismissed')}
+                                                                        className="px-2 py-0.5 text-[9px] font-medium text-white bg-gray-500 hover:bg-gray-600 rounded disabled:opacity-50">Dismiss</button>
+                                                                    <button onClick={() => { setResolvingId(null); setResolveNotes(''); }}
+                                                                        className="px-2 py-0.5 text-[9px] font-medium text-gray-500 border border-gray-200 rounded hover:bg-gray-50">Cancel</button>
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <button onClick={() => setResolvingId(d.id)}
+                                                                className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-amber-700 border border-amber-200 rounded-md hover:bg-amber-50 transition">
+                                                                <ShieldAlert className="w-3 h-3" /> Resolve
+                                                            </button>
+                                                        )
+                                                    ) : (
+                                                        <span className="text-[10px] text-gray-400">
+                                                            {d.resolutionNotes ? `${d.resolutionNotes}` : (d as any).resolution || 'resolved'}
+                                                        </span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* COMPLETE VERIFICATION */}
+                <div className="bg-white rounded-lg shadow p-4">
+                    {showCompleteConfirm ? (
+                        <div className="space-y-3">
+                            <h3 className="font-bold text-xs text-gray-900">Confirm Complete Verification</h3>
+                            <div className="grid grid-cols-3 gap-2 text-[11px]">
+                                <div className="p-2 bg-green-50 rounded border border-green-200"><span className="text-green-700">Correct:</span> <strong>{counts.correct}</strong></div>
+                                <div className="p-2 bg-red-50 rounded border border-red-200"><span className="text-red-700">Damaged:</span> <strong>{counts.damaged}</strong></div>
+                                <div className="p-2 bg-gray-50 rounded border border-gray-200"><span className="text-gray-600">Missing:</span> <strong>{counts.missing}</strong></div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-medium text-gray-700">Completion Notes (optional)</label>
+                                <textarea rows={2} value={completeNotes} onChange={e => setCompleteNotes(e.target.value)} placeholder="Summary notes..."
+                                    className="mt-1 w-full px-3 py-2 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none" />
+                            </div>
+                            <div className="flex gap-2 justify-end">
+                                <button onClick={() => setShowCompleteConfirm(false)} className="px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-md hover:bg-gray-50">Cancel</button>
+                                <button
+                                    disabled={isActionLoading}
+                                    onClick={handleCompleteVerification}
+                                    className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-md disabled:opacity-50 flex items-center gap-1 transition"
+                                >
+                                    {isActionLoading && <Loader2 className="w-3 h-3 animate-spin" />} Complete Verification
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex items-center justify-between">
+                            <span className="text-[11px] text-gray-500">
+                                {counts.unverified > 0 ? `${counts.unverified} items still unverified` : 'All items verified — ready to complete'}
+                            </span>
+                            <button
+                                disabled={counts.unverified > 0}
+                                onClick={() => setShowCompleteConfirm(true)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-md disabled:opacity-40 transition"
+                            >
+                                <ClipboardCheck className="w-3.5 h-3.5" /> Complete Verification
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </PermissionGate>
+    );
+}
