@@ -399,7 +399,10 @@ export const createPharmacyHandler = async (
 
     // Send invite email via Edge Function
     const portalBaseUrl = process.env.PHARMACY_PORTAL_URL || 'http://localhost:3002';
+    let emailSent = false;
+    let emailErrorMsg: string | null = null;
     try {
+      console.log(`📧 Invoking send-pharmacy-invite for ${pharmacyEmail}...`);
       const { data: emailResult, error: emailError } = await db.functions.invoke('send-pharmacy-invite', {
         body: {
           to: pharmacyEmail,
@@ -411,17 +414,28 @@ export const createPharmacyHandler = async (
       });
 
       if (emailError) {
-        console.error('Failed to send invite email:', emailError);
+        emailErrorMsg = emailError.message || JSON.stringify(emailError);
+        console.error('❌ Edge Function error:', emailErrorMsg);
+        console.error('❌ Full error:', JSON.stringify(emailError, null, 2));
+      } else if (emailResult?.success === false) {
+        emailErrorMsg = emailResult.error || 'Edge function returned success=false';
+        console.error('❌ Edge Function returned error:', emailErrorMsg);
       } else {
+        emailSent = true;
         console.log(`✅ Invite email sent to ${pharmacyEmail}, messageId: ${emailResult?.messageId}`);
       }
     } catch (emailErr: any) {
-      console.error('Failed to send invite email:', emailErr.message);
+      emailErrorMsg = emailErr.message;
+      console.error('❌ Exception invoking Edge Function:', emailErr.message);
+      console.error('❌ Stack:', emailErr.stack);
     }
 
     res.status(201).json({
       status: 'success',
-      message: 'Pharmacy created successfully. Invite email has been sent.',
+      message: emailSent
+        ? 'Pharmacy created successfully. Invite email has been sent.'
+        : `Pharmacy created successfully. Email failed: ${emailErrorMsg}`,
+      emailSent,
       data: {
         inviteId,
         email: pharmacyEmail,

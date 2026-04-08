@@ -101,7 +101,7 @@ if [[ -f "$ENV_FILE" ]]; then
     cd "$ROOT"
     for fn in send-pharmacy-invite send-branch-invite send-email send-ra-email-enhanced \
               send-ra-email read-ra-emails resend-webhook; do
-      npx supabase functions deploy "$fn"
+      npx supabase functions deploy "$fn" --no-verify-jwt
     done
     echo ""
     echo "✅ Functions deployed."
