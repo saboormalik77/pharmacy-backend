@@ -28,6 +28,7 @@ import { usePermissions } from '@/hooks/usePermissions';
 // Warehouse sub-routes that activate the Warehouse sidebar link
 const warehouseSubRoutes = [
     '/warehouse/receiving',
+    '/warehouse/surplus',
     '/warehouse/batches',
     '/warehouse/debit-memos',
     '/warehouse/ra-tracking',

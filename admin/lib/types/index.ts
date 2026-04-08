@@ -1087,9 +1087,44 @@ export interface WarehouseDiscrepancy {
 }
 
 export interface VerificationSummary {
-    totalItems: number;
-    verifiedItems: number;
-    openDiscrepancies: number;
+    transaction: ReturnTransaction;
+    items: ReturnTransactionItem[];
+    surplus: SurplusItem[];
+    discrepancies: WarehouseDiscrepancy[];
+    counts: {
+        totalItems: number;
+        correct: number;
+        damaged: number;
+        missing: number;
+        wrongItem: number;
+        unverified: number;
+        surplus: number;
+    };
+    discrepancyCounts: {
+        total: number;
+        open: number;
+    };
+}
+
+export interface SurplusItem {
+    id: string;
+    returnTransactionId: string;
+    ndc?: string;
+    productName?: string;
+    manufacturer?: string;
+    lotNumber?: string;
+    expirationDate?: string;
+    quantity: number;
+    warehouseLocation: string;
+    condition: 'good' | 'damaged' | 'unknown';
+    status: 'stored' | 'assigned_to_return' | 'disposed' | 'other';
+    notes?: string;
+    discrepancyId?: string;
+    createdAt: string;
+    updatedAt: string;
+    // Populated from return transaction
+    licensePlate?: string;
+    pharmacyName?: string;
 }
 
 // ── Monthly Batch & Close-Out (Module 10) ────────────────────

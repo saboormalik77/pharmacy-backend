@@ -8,6 +8,7 @@ import {
     Receipt,
     MailCheck,
     ArrowRight,
+    Package,
 } from 'lucide-react';
 
 const warehouseSections = [
@@ -19,6 +20,15 @@ const warehouseSections = [
         color: 'text-blue-600',
         bg: 'bg-blue-50',
         border: 'border-blue-100',
+    },
+    {
+        href: '/warehouse/surplus',
+        icon: Package,
+        label: 'Surplus Inventory',
+        description: 'View and manage surplus items found during verification. Track warehouse storage locations.',
+        color: 'text-yellow-600',
+        bg: 'bg-yellow-50',
+        border: 'border-yellow-100',
     },
     {
         href: '/warehouse/batches',
