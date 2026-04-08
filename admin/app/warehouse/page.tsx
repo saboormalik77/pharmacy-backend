@@ -4,6 +4,8 @@ import { PermissionGate } from '@/components/auth/PermissionGate';
 import Link from 'next/link';
 import {
     PackageCheck,
+    ClipboardCheck,
+    Archive,
     Layers,
     Receipt,
     MailCheck,
@@ -19,6 +21,24 @@ const warehouseSections = [
         color: 'text-blue-600',
         bg: 'bg-blue-50',
         border: 'border-blue-100',
+    },
+    {
+        href: '/warehouse/verification',
+        icon: ClipboardCheck,
+        label: 'Verification',
+        description: 'Verify received returns item-by-item. Check conditions, report damaged or missing items, track surplus.',
+        color: 'text-teal-600',
+        bg: 'bg-teal-50',
+        border: 'border-teal-100',
+    },
+    {
+        href: '/warehouse/surplus',
+        icon: Archive,
+        label: 'Surplus Inventory',
+        description: 'View and manage surplus items found during verification. Track storage locations and status.',
+        color: 'text-cyan-600',
+        bg: 'bg-cyan-50',
+        border: 'border-cyan-100',
     },
     {
         href: '/warehouse/batches',
