@@ -13,8 +13,24 @@ import { useDebounce } from '@/lib/hooks/useDebounce';
 import { formatDate } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { fetchReceivedReturns } from '@/lib/store/warehouseSlice';
+import type { ReturnTransaction } from '@/lib/types';
 
 type VerificationFilter = '' | 'not_started' | 'in_progress' | 'completed';
+
+type UiVerificationPhase = 'not_started' | 'in_progress' | 'completed';
+
+/** Matches DB logic in fcr_49 / fcr_48 when API omits verificationStatus (older _rt_to_json). */
+function deriveWarehouseVerificationUiStatus(r: ReturnTransaction): UiVerificationPhase {
+    const vs = r.verificationStatus;
+    if (vs === 'completed' || vs === 'in_progress' || vs === 'not_started') return vs;
+    if (r.verificationCompletedAt) return 'completed';
+    const st = r.status;
+    if (st === 'verified' || st === 'closed' || st === 'closed_out') return 'completed';
+    if (st === 'received' && r.verifiedIntegrity === true) return 'completed';
+    if (st === 'received' && r.verifiedAt) return 'in_progress';
+    if (st === 'received') return 'not_started';
+    return 'completed';
+}
 
 export default function WarehouseVerificationListPage() {
     const dispatch = useAppDispatch();
@@ -72,7 +88,8 @@ export default function WarehouseVerificationListPage() {
                         Warehouse Verification
                     </h1>
                     <p className="text-xs text-gray-500 mt-0.5">
-                        Verify received returns — check items, report discrepancies, track surplus
+                        Pick a return to open the session: first enter the physical box count, then verify each line item.
+                        Receiving → Verify also opens this flow.
                     </p>
                 </div>
 
@@ -147,31 +164,34 @@ export default function WarehouseVerificationListPage() {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
-                                        {receivedReturns.map(r => (
+                                        {receivedReturns.map(r => {
+                                            const phase = deriveWarehouseVerificationUiStatus(r);
+                                            return (
                                             <tr key={r.id} className="hover:bg-gray-50">
                                                 <td className="px-3 py-2 text-xs font-semibold text-primary-700">{r.licensePlate}</td>
                                                 <td className="px-3 py-2 text-xs text-gray-700">{r.pharmacyName || '—'}</td>
                                                 <td className="px-3 py-2">
                                                     <span className="inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-50 text-purple-700">
-                                                        {(r as any).totalItems ?? '—'}
+                                                        {r.totalItems ?? '—'}
                                                     </span>
                                                 </td>
                                                 <td className="px-3 py-2 text-[11px] text-gray-500">
                                                     {formatDate(r.receivedInWarehouseDate || r.createdAt)}
                                                 </td>
                                                 <td className="px-3 py-2">
-                                                    {getStatusBadge((r as any).verificationStatus)}
+                                                    {getStatusBadge(phase)}
                                                 </td>
                                                 <td className="px-3 py-2">
                                                     <Link href={`/warehouse/verification/${r.id}`}>
                                                         <button className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md transition">
-                                                            {getActionLabel((r as any).verificationStatus)}
+                                                            {getActionLabel(phase)}
                                                             <ArrowRight className="w-3 h-3" />
                                                         </button>
                                                     </Link>
                                                 </td>
                                             </tr>
-                                        ))}
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                             </div>

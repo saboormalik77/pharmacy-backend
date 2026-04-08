@@ -456,7 +456,7 @@ export default function WarehouseReceivingPage() {
                                 {/* Actions */}
                                 <div className="flex gap-2 pt-2 border-t border-gray-200">
                                     {scanProgress.allScanned && (
-                                        <Button variant="primary" size="sm" onClick={() => router.push(`/warehouse/receiving/${scannedReturn.id}`)}>
+                                        <Button variant="primary" size="sm" onClick={() => router.push(`/warehouse/verification/${scannedReturn.id}`)}>
                                             <ArrowRight className="w-3.5 h-3.5 mr-1" />Start Verification
                                         </Button>
                                     )}
@@ -651,7 +651,7 @@ export default function WarehouseReceivingPage() {
                                                 ) : (
                                                     <button
                                                         type="button"
-                                                        onClick={() => router.push(`/warehouse/receiving/${r.id}`)}
+                                                        onClick={() => router.push(`/warehouse/verification/${r.id}`)}
                                                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors whitespace-nowrap"
                                                     >
                                                         Verify <ArrowRight className="w-3 h-3" />

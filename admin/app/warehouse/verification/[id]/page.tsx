@@ -28,6 +28,10 @@ import type {
     VerificationV2Counts,
     CompleteVerificationSummary,
 } from '@/lib/types';
+import {
+    shouldShowWarehouseBoxCountStep,
+    isWarehouseVerificationAlreadyCompleted,
+} from '@/lib/utils/warehouseVerificationUi';
 
 type ActiveTab = 'items' | 'surplus' | 'discrepancies';
 
@@ -37,6 +41,7 @@ export default function VerificationSessionPage() {
     const params = useParams();
     const returnId = params.id as string;
     const { v2Summary, isLoading, isActionLoading } = useAppSelector(s => s.warehouse);
+    const verificationAlreadyCompleted = isWarehouseVerificationAlreadyCompleted(v2Summary?.transaction);
 
     const [toasts, setToasts] = useState<Toast[]>([]);
     const [activeTab, setActiveTab] = useState<ActiveTab>('items');
@@ -77,17 +82,20 @@ export default function VerificationSessionPage() {
         const result = await dispatch(fetchVerificationSummary(returnId));
         if (fetchVerificationSummary.rejected.match(result)) {
             const msg = (result.payload as string) || '';
-            if (msg.toLowerCase().includes('not started') || msg.toLowerCase().includes('not been started')) {
-                setNeedsBoxCount(true);
-            } else {
-                showToast(msg || 'Failed to load verification data', 'error');
-            }
-        } else {
+            showToast(msg || 'Failed to load verification data', 'error');
             setNeedsBoxCount(false);
+        } else {
+            const data = result.payload;
+            const txn = data?.transaction;
+            setNeedsBoxCount(shouldShowWarehouseBoxCountStep(txn));
         }
     }, [dispatch, returnId]);
 
     useEffect(() => { loadSummary(); }, [loadSummary]);
+
+    useEffect(() => {
+        if (verificationAlreadyCompleted) setShowCompleteConfirm(false);
+    }, [verificationAlreadyCompleted]);
 
     const handleStartVerification = async () => {
         const count = Number(boxCount);
@@ -172,8 +180,8 @@ export default function VerificationSessionPage() {
         }
     };
 
-    // Loading state
-    if (isLoading && !v2Summary && !needsBoxCount) {
+    // Loading state (first load only — summary RPC always succeeds for valid returns)
+    if (isLoading && !v2Summary) {
         return (
             <PermissionGate permission="warehouse">
                 <div className="flex items-center justify-center py-24">
@@ -183,8 +191,8 @@ export default function VerificationSessionPage() {
         );
     }
 
-    // Box count step
-    if (needsBoxCount && !v2Summary) {
+    // Box count step (before warehouse_start_verification; list page /warehouse/verification has no box UI by design)
+    if (needsBoxCount && v2Summary) {
         return (
             <PermissionGate permission="warehouse">
                 <ToastContainer toasts={toasts} onClose={removeToast} />
@@ -200,6 +208,12 @@ export default function VerificationSessionPage() {
                             <div>
                                 <h2 className="text-base font-bold text-gray-900">Start Verification</h2>
                                 <p className="text-[11px] text-gray-500">How many boxes did you physically receive?</p>
+                                {v2Summary.transaction?.boxCount != null && Number(v2Summary.transaction.boxCount) > 0 && (
+                                    <p className="text-[11px] text-gray-600 mt-1">
+                                        Expected on return manifest:{' '}
+                                        <span className="font-semibold">{v2Summary.transaction.boxCount}</span> boxes
+                                    </p>
+                                )}
                             </div>
                         </div>
                         <input
@@ -265,6 +279,12 @@ export default function VerificationSessionPage() {
                             <div className="p-3 rounded-md bg-green-50 border border-green-200 text-center">
                                 <p className="text-[10px] text-green-700">Correct Items Value</p>
                                 <p className="text-2xl font-bold text-green-900">{formatCurrency(completedSummary.correctItemsValue)}</p>
+                            </div>
+                        )}
+                        {(completedSummary.excludedFromBatch ?? 0) > 0 && (
+                            <div className="p-3 rounded-md bg-blue-50 border border-blue-200 text-blue-800 text-xs flex items-start gap-2">
+                                <Package className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                                <span>{completedSummary.excludedFromBatch} non-correct item(s) have been excluded from batching and will not appear in debit memos.</span>
                             </div>
                         )}
                         {completedSummary.openDiscrepancies > 0 && (
@@ -669,47 +689,56 @@ export default function VerificationSessionPage() {
                     </div>
                 )}
 
-                {/* COMPLETE VERIFICATION */}
-                <div className="bg-white rounded-lg shadow p-4">
-                    {showCompleteConfirm ? (
-                        <div className="space-y-3">
-                            <h3 className="font-bold text-xs text-gray-900">Confirm Complete Verification</h3>
-                            <div className="grid grid-cols-3 gap-2 text-[11px]">
-                                <div className="p-2 bg-green-50 rounded border border-green-200"><span className="text-green-700">Correct:</span> <strong>{counts.correct}</strong></div>
-                                <div className="p-2 bg-red-50 rounded border border-red-200"><span className="text-red-700">Damaged:</span> <strong>{counts.damaged}</strong></div>
-                                <div className="p-2 bg-gray-50 rounded border border-gray-200"><span className="text-gray-600">Missing:</span> <strong>{counts.missing}</strong></div>
+                {/* COMPLETE VERIFICATION — hidden when return already finalized */}
+                {verificationAlreadyCompleted ? (
+                    <div className="bg-white rounded-lg shadow p-4 border border-green-200">
+                        <p className="text-[11px] text-green-800 flex items-center gap-2">
+                            <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                            Verification for this return is already completed.
+                        </p>
+                    </div>
+                ) : (
+                    <div className="bg-white rounded-lg shadow p-4">
+                        {showCompleteConfirm ? (
+                            <div className="space-y-3">
+                                <h3 className="font-bold text-xs text-gray-900">Confirm Complete Verification</h3>
+                                <div className="grid grid-cols-3 gap-2 text-[11px]">
+                                    <div className="p-2 bg-green-50 rounded border border-green-200"><span className="text-green-700">Correct:</span> <strong>{counts.correct}</strong></div>
+                                    <div className="p-2 bg-red-50 rounded border border-red-200"><span className="text-red-700">Damaged:</span> <strong>{counts.damaged}</strong></div>
+                                    <div className="p-2 bg-gray-50 rounded border border-gray-200"><span className="text-gray-600">Missing:</span> <strong>{counts.missing}</strong></div>
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-medium text-gray-700">Completion Notes (optional)</label>
+                                    <textarea rows={2} value={completeNotes} onChange={e => setCompleteNotes(e.target.value)} placeholder="Summary notes..."
+                                        className="mt-1 w-full px-3 py-2 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none" />
+                                </div>
+                                <div className="flex gap-2 justify-end">
+                                    <button onClick={() => setShowCompleteConfirm(false)} className="px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-md hover:bg-gray-50">Cancel</button>
+                                    <button
+                                        disabled={isActionLoading}
+                                        onClick={handleCompleteVerification}
+                                        className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-md disabled:opacity-50 flex items-center gap-1 transition"
+                                    >
+                                        {isActionLoading && <Loader2 className="w-3 h-3 animate-spin" />} Complete Verification
+                                    </button>
+                                </div>
                             </div>
-                            <div>
-                                <label className="text-[10px] font-medium text-gray-700">Completion Notes (optional)</label>
-                                <textarea rows={2} value={completeNotes} onChange={e => setCompleteNotes(e.target.value)} placeholder="Summary notes..."
-                                    className="mt-1 w-full px-3 py-2 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none" />
-                            </div>
-                            <div className="flex gap-2 justify-end">
-                                <button onClick={() => setShowCompleteConfirm(false)} className="px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-md hover:bg-gray-50">Cancel</button>
+                        ) : (
+                            <div className="flex items-center justify-between">
+                                <span className="text-[11px] text-gray-500">
+                                    {counts.unverified > 0 ? `${counts.unverified} items still unverified` : 'All items verified — ready to complete'}
+                                </span>
                                 <button
-                                    disabled={isActionLoading}
-                                    onClick={handleCompleteVerification}
-                                    className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-md disabled:opacity-50 flex items-center gap-1 transition"
+                                    disabled={counts.unverified > 0}
+                                    onClick={() => setShowCompleteConfirm(true)}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-md disabled:opacity-40 transition"
                                 >
-                                    {isActionLoading && <Loader2 className="w-3 h-3 animate-spin" />} Complete Verification
+                                    <ClipboardCheck className="w-3.5 h-3.5" /> Complete Verification
                                 </button>
                             </div>
-                        </div>
-                    ) : (
-                        <div className="flex items-center justify-between">
-                            <span className="text-[11px] text-gray-500">
-                                {counts.unverified > 0 ? `${counts.unverified} items still unverified` : 'All items verified — ready to complete'}
-                            </span>
-                            <button
-                                disabled={counts.unverified > 0}
-                                onClick={() => setShowCompleteConfirm(true)}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-md disabled:opacity-40 transition"
-                            >
-                                <ClipboardCheck className="w-3.5 h-3.5" /> Complete Verification
-                            </button>
-                        </div>
-                    )}
-                </div>
+                        )}
+                    </div>
+                )}
             </div>
         </PermissionGate>
     );

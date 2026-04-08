@@ -190,27 +190,25 @@ CREATE POLICY "Service role full access on processed_inbox_emails"
 
 
 -- ────────────────────────────────────────────────────────────
--- 8. Optional: pg_cron schedule (uncomment to enable)
---    Calls the Edge Function every 15 minutes
---    Requires pg_cron and pg_net extensions enabled in Supabase
+-- 8. Optional: pg_cron schedule (call read-ra-emails on a timer)
+--    Requires pg_cron + pg_net enabled (Dashboard → Extensions).
+--    Ready-to-run template with placeholders:
+--      scripts/setup_read_ra_emails_pg_cron.sql
 -- ────────────────────────────────────────────────────────────
 
--- To enable, run these in the SQL editor separately:
---
--- CREATE EXTENSION IF NOT EXISTS pg_cron;
--- CREATE EXTENSION IF NOT EXISTS pg_net;
+-- Example (replace URL and Bearer token before running):
 --
 -- SELECT cron.schedule(
---   'read-ra-emails-cron',     -- job name
---   '*/15 * * * *',            -- every 15 minutes
+--   'read-ra-emails-cron-1min',
+--   '* * * * *',
 --   $$
 --   SELECT net.http_post(
---     url := '<SUPABASE_URL>/functions/v1/read-ra-emails',
+--     url := 'https://<PROJECT_REF>.supabase.co/functions/v1/read-ra-emails',
 --     headers := jsonb_build_object(
 --       'Content-Type', 'application/json',
---       'Authorization', 'Bearer <SUPABASE_SERVICE_ROLE_KEY>'
+--       'Authorization', 'Bearer <SERVICE_ROLE_KEY>'
 --     ),
---     body := '{"maxEmails": 20, "markAsRead": true}'::jsonb
+--     body := '{"maxEmails": 50, "markAsRead": true}'::jsonb
 --   );
 --   $$
 -- );
@@ -223,3 +221,25 @@ CREATE POLICY "Service role full access on processed_inbox_emails"
 COMMENT ON TABLE processed_inbox_emails IS 'Tracks emails read from inbox by the RA auto-reader Edge Function';
 COMMENT ON FUNCTION get_inbox_processing_stats IS 'Returns statistics on inbox email processing';
 COMMENT ON VIEW inbox_processing_with_memo_info IS 'Processed inbox emails joined with debit memo info for reporting';
+
+
+-- ────────────────────────────────────────────────────────────
+-- 10. Safe diagnostics (SQL Editor) — run this block ONLY
+--     Do NOT query cron.job unless you enabled pg_cron:
+--       Database → Extensions → pg_cron → Enable
+--     Without pg_cron, "relation cron.job does not exist" is expected.
+-- ────────────────────────────────────────────────────────────
+
+-- Recent processed emails (works on any project that ran section 1–7 above):
+-- SELECT
+--   from_address,
+--   subject,
+--   memo_number,
+--   status,
+--   processed_at
+-- FROM processed_inbox_emails
+-- ORDER BY processed_at DESC
+-- LIMIT 10;
+
+-- Optional: only after CREATE EXTENSION pg_cron; has been run successfully:
+-- SELECT * FROM cron.job WHERE jobname LIKE 'read-ra-emails%';

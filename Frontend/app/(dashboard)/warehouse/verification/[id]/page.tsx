@@ -25,6 +25,10 @@ import { formatDate, formatCurrency } from "@/lib/utils/format";
 import { apiClient } from "@/lib/api/client";
 import { toast } from "react-toastify";
 import Link from "next/link";
+import {
+  shouldShowWarehouseBoxCountStep,
+  isWarehouseVerificationAlreadyCompleted,
+} from "@/lib/utils/warehouseVerificationUi";
 
 interface VerificationItem {
   id: string;
@@ -143,6 +147,10 @@ export default function VerificationSessionPage() {
   const [resolveNotes, setResolveNotes] = useState("");
   const [submittingResolve, setSubmittingResolve] = useState(false);
 
+  const verificationAlreadyCompleted = isWarehouseVerificationAlreadyCompleted(
+    summary?.transaction
+  );
+
   const fetchSummary = useCallback(async () => {
     try {
       const res = await apiClient.getApiWithoutPharmacyId<any>(
@@ -150,16 +158,10 @@ export default function VerificationSessionPage() {
       );
       const data = res.data?.data || res.data;
       setSummary(data);
-      setNeedsBoxCount(false);
+      setNeedsBoxCount(shouldShowWarehouseBoxCountStep(data?.transaction));
     } catch (err: any) {
-      if (
-        err.status === 400 ||
-        err.message?.toLowerCase().includes("not started")
-      ) {
-        setNeedsBoxCount(true);
-      } else {
-        toast.error(err.message || "Failed to load verification data");
-      }
+      toast.error(err.message || "Failed to load verification data");
+      setNeedsBoxCount(false);
     } finally {
       setLoading(false);
     }
@@ -168,6 +170,10 @@ export default function VerificationSessionPage() {
   useEffect(() => {
     fetchSummary();
   }, [fetchSummary]);
+
+  useEffect(() => {
+    if (verificationAlreadyCompleted) setShowCompleteConfirm(false);
+  }, [verificationAlreadyCompleted]);
 
   const handleStartVerification = async () => {
     if (!boxCount || Number(boxCount) < 0) {
@@ -332,8 +338,8 @@ export default function VerificationSessionPage() {
     );
   }
 
-  // Step 2: Box count screen
-  if (needsBoxCount && !summary) {
+  // Step 2: Box count screen (only on this detail route; list page has no box step)
+  if (needsBoxCount && summary) {
     return (
       <DashboardLayout>
         <div className="space-y-4 max-w-lg mx-auto mt-8">
@@ -356,6 +362,16 @@ export default function VerificationSessionPage() {
                   <p className="text-xs text-gray-500">
                     How many boxes did you physically receive?
                   </p>
+                  {summary.transaction?.boxCount != null &&
+                    Number(summary.transaction.boxCount) > 0 && (
+                      <p className="text-xs text-gray-600 mt-1">
+                        Expected on return manifest:{" "}
+                        <span className="font-semibold">
+                          {summary.transaction.boxCount}
+                        </span>{" "}
+                        boxes
+                      </p>
+                    )}
                 </div>
               </div>
               <Input
@@ -459,6 +475,12 @@ export default function VerificationSessionPage() {
                   <p className="text-2xl font-bold text-green-900">
                     {formatCurrency(completeSummary.correctItemsValue)}
                   </p>
+                </div>
+              )}
+              {(completeSummary.excludedFromBatch ?? 0) > 0 && (
+                <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 text-sm flex items-start gap-2">
+                  <Package className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                  <span>{completeSummary.excludedFromBatch} non-correct item(s) have been excluded from batching and will not appear in debit memos.</span>
                 </div>
               )}
               {completeSummary.openDiscrepancies > 0 && (
@@ -1258,80 +1280,91 @@ export default function VerificationSessionPage() {
           </Card>
         )}
 
-        {/* COMPLETE VERIFICATION BUTTON */}
-        <Card className="border-2 border-teal-200">
-          <CardContent className="p-4">
-            {showCompleteConfirm ? (
-              <div className="space-y-3">
-                <h3 className="font-bold text-sm text-gray-900">
-                  Confirm Complete Verification
-                </h3>
-                <div className="grid grid-cols-3 gap-2 text-xs">
-                  <div className="p-2 bg-green-50 rounded border border-green-200">
-                    <span className="text-green-700">Correct:</span>{" "}
-                    <strong>{counts.correct}</strong>
+        {/* COMPLETE VERIFICATION — hidden when return already finalized */}
+        {verificationAlreadyCompleted ? (
+          <Card className="border-2 border-green-200">
+            <CardContent className="p-4">
+              <p className="text-sm text-green-800 flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 flex-shrink-0" />
+                Verification for this return is already completed.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="border-2 border-teal-200">
+            <CardContent className="p-4">
+              {showCompleteConfirm ? (
+                <div className="space-y-3">
+                  <h3 className="font-bold text-sm text-gray-900">
+                    Confirm Complete Verification
+                  </h3>
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div className="p-2 bg-green-50 rounded border border-green-200">
+                      <span className="text-green-700">Correct:</span>{" "}
+                      <strong>{counts.correct}</strong>
+                    </div>
+                    <div className="p-2 bg-red-50 rounded border border-red-200">
+                      <span className="text-red-700">Damaged:</span>{" "}
+                      <strong>{counts.damaged}</strong>
+                    </div>
+                    <div className="p-2 bg-gray-50 rounded border border-gray-200">
+                      <span className="text-gray-600">Missing:</span>{" "}
+                      <strong>{counts.missing}</strong>
+                    </div>
                   </div>
-                  <div className="p-2 bg-red-50 rounded border border-red-200">
-                    <span className="text-red-700">Damaged:</span>{" "}
-                    <strong>{counts.damaged}</strong>
+                  <div>
+                    <label className="text-xs font-medium text-gray-700">
+                      Completion Notes (optional)
+                    </label>
+                    <textarea
+                      className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-200"
+                      rows={2}
+                      value={completeNotes}
+                      onChange={(e) => setCompleteNotes(e.target.value)}
+                      placeholder="Summary notes..."
+                    />
                   </div>
-                  <div className="p-2 bg-gray-50 rounded border border-gray-200">
-                    <span className="text-gray-600">Missing:</span>{" "}
-                    <strong>{counts.missing}</strong>
+                  <div className="flex gap-2 justify-end">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowCompleteConfirm(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700"
+                      disabled={submittingComplete}
+                      onClick={handleCompleteVerification}
+                    >
+                      {submittingComplete && (
+                        <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                      )}
+                      Complete Verification
+                    </Button>
                   </div>
                 </div>
-                <div>
-                  <label className="text-xs font-medium text-gray-700">
-                    Completion Notes (optional)
-                  </label>
-                  <textarea
-                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-200"
-                    rows={2}
-                    value={completeNotes}
-                    onChange={(e) => setCompleteNotes(e.target.value)}
-                    placeholder="Summary notes..."
-                  />
-                </div>
-                <div className="flex gap-2 justify-end">
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div className="text-xs text-gray-500">
+                    {counts.unverified > 0
+                      ? `${counts.unverified} items still unverified`
+                      : "All items verified — ready to complete"}
+                  </div>
                   <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowCompleteConfirm(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    size="sm"
                     className="bg-green-600 hover:bg-green-700"
-                    disabled={submittingComplete}
-                    onClick={handleCompleteVerification}
+                    disabled={counts.unverified > 0}
+                    onClick={() => setShowCompleteConfirm(true)}
                   >
-                    {submittingComplete && (
-                      <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                    )}
+                    <ClipboardCheck className="h-4 w-4 mr-2" />
                     Complete Verification
                   </Button>
                 </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <div className="text-xs text-gray-500">
-                  {counts.unverified > 0
-                    ? `${counts.unverified} items still unverified`
-                    : "All items verified — ready to complete"}
-                </div>
-                <Button
-                  className="bg-green-600 hover:bg-green-700"
-                  disabled={counts.unverified > 0}
-                  onClick={() => setShowCompleteConfirm(true)}
-                >
-                  <ClipboardCheck className="h-4 w-4 mr-2" />
-                  Complete Verification
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
     </DashboardLayout>
   );

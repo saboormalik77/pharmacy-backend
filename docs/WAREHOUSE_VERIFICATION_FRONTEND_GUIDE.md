@@ -26,11 +26,26 @@ All endpoints are under `POST/GET/PATCH /api/admin/warehouse/...` and require ad
 
 ### Step 1: Pick a Return to Verify
 
-**Page**: Warehouse Received list
+**Page**: Warehouse Verification list (`/warehouse/verification`) or Receiving → Received tab (Verify should navigate to `/warehouse/verification/:id`).
+
+**Note**: The **box-count step** lives only on the **session detail** route (`/warehouse/verification/:id`), not on the list page. After the summary loads, if v2 has not started (`verified_at` and `pieces_received` are still null on a `received` return), the UI shows “How many boxes did you physically receive?” first.
 
 **API**: `GET /api/admin/warehouse/received`
 
 **Query params**: `search`, `page`, `limit`, `verificationStatus`
+
+**List row display**: Each return JSON from `_rt_to_json` should include `verificationStatus`, `verifiedAt`, and `verificationCompletedAt` for correct badges (otherwise the UI shows “Not Started” for completed rows). Run `scripts/fcr_49_rt_json_warehouse_verification_status.sql` after FCR-47 (and after your current `_rt_to_json` definition, e.g. `fix_totals_and_manifest.sql`).
+
+**`verificationStatus` values** (applied by RPC `warehouse_list_received`; run `scripts/fcr_48_warehouse_list_received_v2_status_filters.sql` after FCR-47 so these work):
+
+| Value | Meaning |
+|--------|--------|
+| *(omit or empty)* | All rows in the received/verified/closed queue |
+| `not_started` | `received`, never started v2 (`verified_at` null, not completed) |
+| `in_progress` | `received`, v2 started (`verified_at` set) but not completed and not legacy “integrity verified” |
+| `completed` | V2 finished (`verification_completed_at` set), or status is `verified`/`closed`/`closed_out`, or legacy received row with `verified_integrity = true` |
+| `verified` | Legacy filter: `verified_integrity = true` |
+| `unverified` | Legacy filter: `verified_integrity = false` |
 
 The user sees a list of returns with status `received`. They click one to start verification.
 
@@ -212,17 +227,24 @@ This returns all items with their current `verificationStatus` (null = unverifie
     "surplusItems": 3,
     "openDiscrepancies": 5,
     "correctItemsValue": 450.00,
-    "allItemsIntact": false
+    "allItemsIntact": false,
+    "excludedFromBatch": 3
   }
 }
 ```
 
 **Validation**: All items must be verified. If any are unverified, the API returns an error with the count.
 
+**Side effects (FCR-50)**: When verification completes, items verified as **damaged**, **missing**, or **wrong_item** are automatically set to `return_status = 'non_returnable'`. This means:
+- Only **correct** items proceed to batch assignment, debit memo generation, and all downstream steps
+- The return's `totalReturnableValue` is recalculated to reflect only correct items
+- The `excludedFromBatch` field in the summary shows how many items were excluded
+
 **Frontend behavior**:
 - Disable the "Complete Verification" button until all items are verified (check `counts.unverified === 0` from summary)
 - Show a confirmation dialog with the summary before completing
-- After completion, show the summary screen and navigate back to the received list
+- After completion, show the summary screen with the excluded items notice and navigate back to the received list
+- If the return is already verified, hide the Complete Verification button entirely
 
 ---
 
@@ -294,10 +316,12 @@ WarehouseVerification/
 
 2. **Surplus items are NOT part of the return**. They are stored in the warehouse for future returns. The return continues without them.
 
-3. **Damaged/missing items are excluded** from the completed return. Only `correct` items count toward the return value.
+3. **Damaged/missing items are excluded from batches** (FCR-50). When verification completes, non-correct items have their `return_status` set to `non_returnable`. This means they are automatically excluded from batch close-out, debit memo generation, and all downstream steps. Only `correct` items count toward the return value and appear in debit memos.
 
 4. **All items must be verified** before completing. The backend enforces this.
 
 5. **Use `verification-summary` to reload state** at any point during the flow. It returns everything: items, surplus, discrepancies, and counts.
 
 6. **The `verified` boolean field** (legacy) is still maintained for backward compatibility. It's `true` when `verificationStatus === 'correct'`, `false` otherwise.
+
+7. **Verified returns can be assigned to batches** (FCR-50). `assign_returns_to_batch` accepts returns with status `received`, `verified`, or `closed_out`.

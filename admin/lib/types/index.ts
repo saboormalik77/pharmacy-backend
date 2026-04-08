@@ -607,7 +607,7 @@ export interface ReturnTransaction {
     processorId: string | null;
     processorName: string | null;
     serviceType: string;
-    status: 'in_progress' | 'paused' | 'completed' | 'finalized' | 'received' | 'closed_out';
+    status: 'in_progress' | 'paused' | 'completed' | 'finalized' | 'received' | 'verified' | 'closed' | 'closed_out';
     fedexTracking: string | null;
     fedexPickupConfirmation: string | null;
     totalItems: number;
@@ -630,7 +630,12 @@ export interface ReturnTransaction {
     finalizeSteps: { printManifest: boolean; fedexEntered: boolean; printJobSheets: boolean } | null;
     verifiedAt: string | null;
     verifiedBy: string | null;
+    /** Set when v2 start-verification runs (box count) or legacy verify */
     piecesReceived: number | null;
+    /** FCR-47: set when warehouse v2 verification is finished */
+    verificationCompletedAt?: string | null;
+    /** FCR-49: derived in _rt_to_json for warehouse verification UI tabs */
+    verificationStatus?: 'not_started' | 'in_progress' | 'completed' | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -1200,6 +1205,8 @@ export interface CompleteVerificationSummary {
     openDiscrepancies: number;
     correctItemsValue: number;
     allItemsIntact: boolean;
+    /** FCR-50: how many items were set to non_returnable because they aren't correct */
+    excludedFromBatch?: number;
 }
 
 // ── Monthly Batch & Close-Out (Module 10) ────────────────────

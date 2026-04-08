@@ -40,14 +40,20 @@ function getSupabase() {
 // ── IMAP Connection ──────────────────────────────────────────
 
 async function connectImap(): Promise<ImapFlow> {
+  const host = env('IMAP_HOST', 'imap.gmail.com');
+  const port = parseInt(env('IMAP_PORT', '993'), 10);
+  const user = env('IMAP_USER');
+  const pass = env('IMAP_PASS');
+  // Confirms in Edge logs which mailbox is used (never log password).
+  console.log(
+    `[read-ra-emails] IMAP login: user=${user || '(IMAP_USER missing)'} host=${host} port=${port} passwordSet=${Boolean(pass)}`
+  );
+
   const client = new ImapFlow({
-    host: env('IMAP_HOST', 'imap.gmail.com'),
-    port: parseInt(env('IMAP_PORT', '993'), 10),
+    host,
+    port,
     secure: true,
-    auth: {
-      user: env('IMAP_USER'),
-      pass: env('IMAP_PASS'),
-    },
+    auth: { user, pass },
     logger: false,
   });
 
@@ -302,6 +308,11 @@ async function processEmails(maxEmails = 20, markAsRead = true): Promise<{
       if (!uids.length) {
         return { processed: 0, updated: 0, results: [] };
       }
+
+      // Newest first (higher UID ≈ more recent on Gmail). Otherwise old unread
+      // onboarding mail (UID 1–10) starves real RA replies forever — we never
+      // mark no_memo_found as read, so the same messages are re-fetched every run.
+      uids.sort((a, b) => Number(b) - Number(a));
 
       const emailsToProcess = uids.slice(0, maxEmails);
       const sb = getSupabase();
