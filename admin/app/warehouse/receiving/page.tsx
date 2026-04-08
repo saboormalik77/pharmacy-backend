@@ -520,7 +520,19 @@ export default function WarehouseReceivingPage() {
                                             <tr key={r.id} className="hover:bg-gray-50">
                                                 <td className="px-3 py-1.5 text-xs font-mono font-semibold text-gray-900">{r.licensePlate}</td>
                                                 <td className="px-3 py-1.5 text-xs text-gray-700">{r.pharmacyName}</td>
-                                                <td className="px-3 py-1.5 text-[11px] font-mono text-gray-600">{r.fedexTracking || '—'}</td>
+                                                <td className="px-3 py-1.5">
+                                                    {r.packageTracking && Object.keys(r.packageTracking).length > 0 ? (
+                                                        <div className="flex flex-col gap-0.5">
+                                                            {Object.values(r.packageTracking).map((tn: any, i) => (
+                                                                <span key={i} className="text-[11px] font-mono text-gray-600 leading-tight">
+                                                                    {tn}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-[11px] font-mono text-gray-600">{r.fedexTracking || '—'}</span>
+                                                    )}
+                                                </td>
                                                 <td className="px-3 py-1.5 text-xs text-center text-gray-900">{r.totalItems}</td>
                                                 <td className="px-3 py-1.5 text-xs text-center text-gray-900">{r.boxCount ?? '—'}</td>
                                                 <td className="px-3 py-1.5 text-center">
