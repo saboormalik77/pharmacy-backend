@@ -250,7 +250,7 @@ export async function generateManifestPdf(data: ManifestData): Promise<Buffer> {
 
   // ── Summary Box ──
   const sumY = doc.y;
-  doc.rect(40, sumY, pageWidth, 40).fillAndStroke('#f0f4f8', '#cccccc');
+  doc.rect(40, sumY, pageWidth, 20).fillAndStroke('#f0f4f8', '#cccccc');
   doc.fillColor('#000000').fontSize(9).font('Helvetica-Bold');
 
   const colW = pageWidth / 4;
@@ -259,11 +259,11 @@ export async function generateManifestPdf(data: ManifestData): Promise<Buffer> {
   doc.text(`Non-Returnable: ${data.summary.nonReturnableCount}`, 50 + colW * 2, sumY + 8, { width: colW });
   doc.text(`CII Items: ${data.summary.hasCiiItems ? 'Yes' : 'No'}`, 50 + colW * 3, sumY + 8, { width: colW });
 
-  doc.text(`Returnable Value: ${fmt$(data.summary.totalReturnableValue)}`, 50, sumY + 22, { width: colW * 2 });
-  doc.text(`Non-Ret. Value: ${fmt$(data.summary.totalNonReturnableValue)}`, 50 + colW * 2, sumY + 22, { width: colW });
-  doc.text(`Total: ${fmt$(data.summary.totalValue)}`, 50 + colW * 3, sumY + 22, { width: colW });
+  // doc.text(`Returnable Value: ${fmt$(data.summary.totalReturnableValue)}`, 50, sumY + 22, { width: colW * 2 });
+  // doc.text(`Non-Ret. Value: ${fmt$(data.summary.totalNonReturnableValue)}`, 50 + colW * 2, sumY + 22, { width: colW });
+  // doc.text(`Total: ${fmt$(data.summary.totalValue)}`, 50 + colW * 3, sumY + 22, { width: colW });
 
-  doc.y = sumY + 50;
+  doc.y = sumY + 30;
 
   // ── Returnable Items Table ──
   if (data.returnableItems.length > 0) {
@@ -303,8 +303,8 @@ function manifestItemsTableHtml(
 ): string {
   if (items.length === 0) return '';
   const th = showDestination
-    ? '<th>NDC</th><th>Product</th><th>Lot</th><th>Exp</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Value</th><th>Dest</th>'
-    : '<th>NDC</th><th>Product</th><th>Lot</th><th>Exp</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Value</th><th>Reason</th>';
+    ? '<th>NDC</th><th>Product</th><th>Lot</th><th>Exp</th><th class="num">Qty</th><!-- <th class="num">Price</th><th class="num">Value</th> --><th>Dest</th>'
+    : '<th>NDC</th><th>Product</th><th>Lot</th><th>Exp</th><th class="num">Qty</th><!-- <th class="num">Price</th><th class="num">Value</th> --><th>Reason</th>';
   const rows = items
     .map((item, idx) => {
       const namePlain = productName(item) + (item.isPartial ? ` (${item.partialPercentage || 0}%)` : '');
@@ -318,8 +318,8 @@ function manifestItemsTableHtml(
         <td>${escapeHtml(item.lotNumber || '—')}</td>
         <td>${escapeHtml(fmtDate(item.expirationDate))}</td>
         <td class="num">${item.quantity}</td>
-        <td class="num">${escapeHtml(fmt$(item.standardPrice))}</td>
-        <td class="num">${escapeHtml(fmt$(item.estimatedValue))}</td>
+        <!-- <td class="num">${escapeHtml(fmt$(item.standardPrice))}</td> -->
+        <!-- <td class="num">${escapeHtml(fmt$(item.estimatedValue))}</td> -->
         <td>${escapeHtml(destOrReason)}</td>
       </tr>`;
     })
@@ -331,7 +331,7 @@ function manifestItemsTableHtml(
       <thead><tr>${th}</tr></thead>
       <tbody>${rows}</tbody>
     </table>
-    <p class="subtotal"><strong>${escapeHtml(title)} total:</strong> ${items.length} items — ${escapeHtml(fmt$(total))}</p>
+    <!-- <p class="subtotal"><strong>${escapeHtml(title)} total:</strong> ${items.length} items — ${escapeHtml(fmt$(total))}</p> -->
   `;
 }
 
@@ -407,8 +407,8 @@ export function generateManifestHtml(data: ManifestData): string {
     <div>Returnable: <strong>${s.returnableCount}</strong></div>
     <div>Non-Returnable: <strong>${s.nonReturnableCount}</strong></div>
     <div>CII Items: <strong>${s.hasCiiItems ? 'Yes' : 'No'}</strong></div>
-    <div class="wide">Returnable Value: <strong>${escapeHtml(fmt$(s.totalReturnableValue))}</strong></div>
-    <div class="wide">Non-Ret. Value: <strong>${escapeHtml(fmt$(s.totalNonReturnableValue))}</strong> &nbsp; Total: <strong>${escapeHtml(fmt$(s.totalValue))}</strong></div>
+    <!-- <div class="wide">Returnable Value: <strong>${escapeHtml(fmt$(s.totalReturnableValue))}</strong></div>
+    <div class="wide">Non-Ret. Value: <strong>${escapeHtml(fmt$(s.totalNonReturnableValue))}</strong> &nbsp; Total: <strong>${escapeHtml(fmt$(s.totalValue))}</strong></div> -->
   </div>
   ${returnableBlock}
   ${nonRetBlock}
@@ -436,8 +436,8 @@ function drawItemsTable(
 
   // Column widths
   const cols = showDestination
-    ? { ndc: 75, name: 145, lot: 55, exp: 55, qty: 30, price: 55, value: 55, dest: 62 }
-    : { ndc: 80, name: 165, lot: 60, exp: 60, qty: 35, price: 60, value: 60, reason: 62 };
+    ? { ndc: 75, name: 145, lot: 55, exp: 55, qty: 30, price: 0, value: 0, dest: 62 }
+    : { ndc: 80, name: 165, lot: 60, exp: 60, qty: 35, price: 0, value: 0, reason: 62 };
 
   const headerY = doc.y;
 
@@ -452,8 +452,8 @@ function drawItemsTable(
   doc.text('LOT', x, headerY, { width: cols.lot }); x += cols.lot;
   doc.text('EXP', x, headerY, { width: cols.exp }); x += cols.exp;
   doc.text('QTY', x, headerY, { width: cols.qty }); x += cols.qty;
-  doc.text('PRICE', x, headerY, { width: cols.price }); x += cols.price;
-  doc.text('VALUE', x, headerY, { width: cols.value }); x += cols.value;
+  // doc.text('PRICE', x, headerY, { width: cols.price }); x += cols.price;
+  // doc.text('VALUE', x, headerY, { width: cols.value }); x += cols.value;
   if (showDestination) {
     doc.text('DEST', x, headerY, { width: (cols as any).dest });
   } else {
@@ -485,8 +485,8 @@ function drawItemsTable(
     doc.text(item.lotNumber || '—', cx, rowY, { width: cols.lot }); cx += cols.lot;
     doc.text(fmtDate(item.expirationDate), cx, rowY, { width: cols.exp }); cx += cols.exp;
     doc.text(String(item.quantity), cx, rowY, { width: cols.qty }); cx += cols.qty;
-    doc.text(fmt$(item.standardPrice), cx, rowY, { width: cols.price }); cx += cols.price;
-    doc.text(fmt$(item.estimatedValue), cx, rowY, { width: cols.value }); cx += cols.value;
+    // doc.text(fmt$(item.standardPrice), cx, rowY, { width: cols.price }); cx += cols.price;
+    // doc.text(fmt$(item.estimatedValue), cx, rowY, { width: cols.value }); cx += cols.value;
     if (showDestination) {
       doc.text((item.destination || '—').toUpperCase(), cx, rowY, { width: (cols as any).dest });
     } else {
@@ -502,9 +502,9 @@ function drawItemsTable(
   doc.moveDown(0.3);
 
   // Subtotal
-  const totalValue = items.reduce((sum, i) => sum + (i.estimatedValue || 0), 0);
-  doc.font('Helvetica-Bold').fontSize(8)
-    .text(`${title} TOTAL: ${items.length} items — ${fmt$(totalValue)}`, { align: 'right' });
+  // const totalValue = items.reduce((sum, i) => sum + (i.estimatedValue || 0), 0);
+  // doc.font('Helvetica-Bold').fontSize(8)
+  //   .text(`${title} TOTAL: ${items.length} items — ${fmt$(totalValue)}`, { align: 'right' });
   doc.moveDown(0.5);
 }
 
