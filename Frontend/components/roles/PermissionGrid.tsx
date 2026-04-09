@@ -53,7 +53,7 @@ export function PermissionGrid({ allPermissions, selectedKeys, onChange, disable
         const someSelected = moduleKeys.some((k) => selectedKeys.includes(k)) && !allSelected
 
         return (
-          <div key={module} className="border rounded-lg p-4">
+          <div key={module} className="rounded-lg border-[0.5px] border-gray-200 p-3">
             <div className="flex items-center gap-2 mb-3">
               <input
                 type="checkbox"

@@ -122,6 +122,7 @@ serve(async (req: Request) => {
 
   try {
     const payload: InvitePayload = await req.json();
+    console.log('[send-pharmacy-invite] Received payload for:', payload.to);
 
     if (!payload.to || !payload.inviteToken) {
       return new Response(
@@ -136,23 +137,37 @@ serve(async (req: Request) => {
       'http://localhost:3001'
     ).replace(/\/$/, '');
 
+    const smtpHost = getEnv('SMTP_HOST', 'smtp.gmail.com');
+    const smtpPort = getEnv('SMTP_PORT', '587');
+    const smtpUser = getEnv('SMTP_USER');
+    const smtpFrom = getEnv('SMTP_FROM_EMAIL');
+    console.log(`[send-pharmacy-invite] SMTP config: host=${smtpHost}, port=${smtpPort}, user=${smtpUser ? smtpUser.substring(0, 5) + '***' : 'EMPTY'}, from=${smtpFrom ? smtpFrom.substring(0, 5) + '***' : 'EMPTY'}, portalUrl=${payload.portalBaseUrl}`);
+
+    if (!smtpUser || !getEnv('SMTP_PASS')) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'SMTP credentials not configured (SMTP_USER or SMTP_PASS is empty)' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const transporter = buildTransporter();
     const html = buildInviteHtml(payload);
 
     const info = await transporter.sendMail({
-      from: `"${getEnv('SMTP_FROM_NAME', 'PharmAdmin')}" <${getEnv('SMTP_FROM_EMAIL')}>`,
+      from: `"${getEnv('SMTP_FROM_NAME', 'PharmAdmin')}" <${smtpFrom || smtpUser}>`,
       to: payload.to,
       subject: `Welcome to PharmAdmin — Complete Your Account Setup`,
       html,
       text: `Hello ${payload.contactName || 'there'},\n\nAn account has been created for ${payload.pharmacyName}. Please complete your setup at: ${payload.portalBaseUrl}/setup-account?token=${payload.inviteToken}\n\nThis link expires in 7 days.`,
     });
 
+    console.log(`[send-pharmacy-invite] Email sent successfully, messageId: ${info.messageId}`);
     return new Response(
       JSON.stringify({ success: true, messageId: info.messageId }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (err: any) {
-    console.error('send-pharmacy-invite error:', err);
+    console.error('[send-pharmacy-invite] Error:', err.message, err.stack);
     return new Response(
       JSON.stringify({ success: false, error: err.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

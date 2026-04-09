@@ -21,6 +21,7 @@ import {
   Building2,
   Search,
   ShoppingCart,
+  ClipboardCheck,
   ClipboardList,
   Warehouse,
   Archive,
@@ -118,6 +119,18 @@ export function Sidebar({ onClose }: SidebarProps) {
       href: '/upload',
       icon: Upload,
       visible: hasPermission('documents:upload'),
+    },
+    {
+      title: 'Verification',
+      href: '/warehouse/verification',
+      icon: ClipboardCheck,
+      visible: hasPermission('warehouse:view'),
+    },
+    {
+      title: 'Surplus Inventory',
+      href: '/warehouse/surplus',
+      icon: Archive,
+      visible: hasPermission('warehouse:view'),
     },
   ].filter((item) => item.visible)
 

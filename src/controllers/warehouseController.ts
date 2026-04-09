@@ -192,3 +192,203 @@ export const listDiscrepanciesHandler = catchAsync(
     });
   }
 );
+
+// ============================================================
+// POST /api/admin/warehouse/:id/start-verification
+// ============================================================
+export const startVerificationHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { id: transactionId } = req.params;
+    const { boxCount } = req.body;
+
+    if (boxCount == null || boxCount < 0) {
+      throw new AppError('boxCount is required and must be a non-negative integer', 400);
+    }
+
+    const verifiedBy = (req as any).adminId || (req as any).userId;
+
+    const result = await warehouseService.startVerification(
+      transactionId,
+      Number(boxCount),
+      verifiedBy
+    );
+
+    res.status(200).json({
+      status: 'success',
+      data: result,
+    });
+  }
+);
+
+// ============================================================
+// PATCH /api/admin/warehouse/:id/items/:itemId/verify-v2
+// ============================================================
+export const verifyItemV2Handler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { id: transactionId, itemId } = req.params;
+    const { verificationStatus, actualQuantity, conditionNotes } = req.body;
+
+    if (!verificationStatus) {
+      throw new AppError('verificationStatus is required (correct, damaged, missing, wrong_item)', 400);
+    }
+
+    const reportedBy = (req as any).adminId || (req as any).userId;
+
+    const item = await warehouseService.verifyItemV2(
+      transactionId,
+      itemId,
+      verificationStatus,
+      actualQuantity != null ? Number(actualQuantity) : undefined,
+      conditionNotes,
+      reportedBy
+    );
+
+    res.status(200).json({
+      status: 'success',
+      data: item,
+    });
+  }
+);
+
+// ============================================================
+// POST /api/admin/warehouse/:id/surplus
+// ============================================================
+export const addSurplusHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { id: transactionId } = req.params;
+    const body = req.body;
+
+    if (!body.warehouseLocation || !body.warehouseLocation.trim()) {
+      throw new AppError('warehouseLocation is required for surplus items', 400);
+    }
+
+    const reportedBy = (req as any).adminId || (req as any).userId;
+
+    const surplus = await warehouseService.addSurplus({
+      transactionId,
+      ndc: body.ndc,
+      productName: body.productName,
+      manufacturer: body.manufacturer,
+      lotNumber: body.lotNumber,
+      expirationDate: body.expirationDate,
+      quantity: body.quantity != null ? Number(body.quantity) : undefined,
+      warehouseLocation: body.warehouseLocation.trim(),
+      condition: body.condition,
+      notes: body.notes,
+      reportedBy,
+    });
+
+    res.status(201).json({
+      status: 'success',
+      data: surplus,
+    });
+  }
+);
+
+// ============================================================
+// POST /api/admin/warehouse/:id/complete-verification
+// ============================================================
+export const completeVerificationHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { id: transactionId } = req.params;
+    const { notes } = req.body;
+
+    const verifiedBy = (req as any).adminId || (req as any).userId;
+
+    const result = await warehouseService.completeVerification(
+      transactionId,
+      notes,
+      verifiedBy
+    );
+
+    res.status(200).json({
+      status: 'success',
+      data: result.transaction,
+      summary: result.summary,
+    });
+  }
+);
+
+// ============================================================
+// PATCH /api/admin/warehouse/discrepancies/:discrepancyId/resolve
+// ============================================================
+export const resolveDiscrepancyHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { discrepancyId } = req.params;
+    const { resolution, resolutionNotes } = req.body;
+
+    if (!resolution || !['resolved', 'dismissed'].includes(resolution)) {
+      throw new AppError('resolution is required (resolved or dismissed)', 400);
+    }
+
+    const resolvedBy = (req as any).adminId || (req as any).userId;
+
+    const discrepancy = await warehouseService.resolveDiscrepancy(
+      discrepancyId,
+      resolution,
+      resolutionNotes,
+      resolvedBy
+    );
+
+    res.status(200).json({
+      status: 'success',
+      data: discrepancy,
+    });
+  }
+);
+
+// ============================================================
+// GET /api/admin/warehouse/:id/verification-summary
+// ============================================================
+export const verificationSummaryHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { id: transactionId } = req.params;
+
+    const summary = await warehouseService.getVerificationSummary(transactionId);
+
+    res.status(200).json({
+      status: 'success',
+      data: summary,
+    });
+  }
+);
+
+// ============================================================
+// GET /api/admin/warehouse/:id/surplus
+// ============================================================
+export const listSurplusHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { id: transactionId } = req.params;
+    const { status } = req.query as Record<string, string>;
+
+    const result = await warehouseService.listSurplus(transactionId, status);
+
+    res.status(200).json({
+      status: 'success',
+      data: result.data,
+      total: result.total,
+    });
+  }
+);
+
+// ============================================================
+// GET /api/admin/warehouse/surplus
+// ============================================================
+export const listAllSurplusHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { status, search, page, limit } = req.query as Record<string, string>;
+
+    const result = await warehouseService.listAllSurplus(
+      status,
+      search,
+      page ? Number(page) : undefined,
+      limit ? Number(limit) : undefined
+    );
+
+    res.status(200).json({
+      status: 'success',
+      data: result.data,
+      pagination: result.pagination,
+    });
+  }
+);

@@ -8,7 +8,7 @@ import Link from 'next/link';
 import {
     PackageCheck, Loader2, Search, ScanLine, CheckCircle, XCircle, Package,
     Box, AlertTriangle,
-    ArrowRight, RotateCcw, Truck, Clock, ChevronLeft, Camera,
+    ArrowRight, RotateCcw, Truck, Clock, ChevronLeft, Camera, Copy, Check,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -66,6 +66,22 @@ export default function WarehouseReceivingPage() {
     const inputRef = useRef<HTMLInputElement>(null);
     const [receiveScanMode, setReceiveScanMode] = useState<'camera' | 'input'>('camera');
     const [cameraOpen, setCameraOpen] = useState(false);
+    const [copiedTrackingKey, setCopiedTrackingKey] = useState<string | null>(null);
+    const copyFeedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const copyTrackingNumber = (text: string, key: string) => {
+        void navigator.clipboard.writeText(text);
+        if (copyFeedbackTimeoutRef.current) clearTimeout(copyFeedbackTimeoutRef.current);
+        setCopiedTrackingKey(key);
+        copyFeedbackTimeoutRef.current = setTimeout(() => {
+            setCopiedTrackingKey(null);
+            copyFeedbackTimeoutRef.current = null;
+        }, 2000);
+    };
+
+    useEffect(() => () => {
+        if (copyFeedbackTimeoutRef.current) clearTimeout(copyFeedbackTimeoutRef.current);
+    }, []);
 
     const showToast = (msg: string, type: Toast['type'] = 'success') => {
         setToasts(prev => [...prev, { id: Date.now().toString(), message: msg, type }]);
@@ -456,7 +472,7 @@ export default function WarehouseReceivingPage() {
                                 {/* Actions */}
                                 <div className="flex gap-2 pt-2 border-t border-gray-200">
                                     {scanProgress.allScanned && (
-                                        <Button variant="primary" size="sm" onClick={() => router.push(`/warehouse/receiving/${scannedReturn.id}`)}>
+                                        <Button variant="primary" size="sm" onClick={() => router.push(`/warehouse/verification/${scannedReturn.id}`)}>
                                             <ArrowRight className="w-3.5 h-3.5 mr-1" />Start Verification
                                         </Button>
                                     )}
@@ -516,11 +532,65 @@ export default function WarehouseReceivingPage() {
                                         const scannedPkgs = r.scannedPackages && typeof r.scannedPackages === 'object'
                                             ? Object.keys(r.scannedPackages).length
                                             : 0;
+                                        const fedexCopyKey = `${r.id}:fedex`;
+                                        const fedexJustCopied = copiedTrackingKey === fedexCopyKey;
                                         return (
                                             <tr key={r.id} className="hover:bg-gray-50">
                                                 <td className="px-3 py-1.5 text-xs font-mono font-semibold text-gray-900">{r.licensePlate}</td>
                                                 <td className="px-3 py-1.5 text-xs text-gray-700">{r.pharmacyName}</td>
-                                                <td className="px-3 py-1.5 text-[11px] font-mono text-gray-600">{r.fedexTracking || '—'}</td>
+                                                <td className="px-3 py-1.5">
+                                                    {r.packageTracking && Object.keys(r.packageTracking).length > 0 ? (
+                                                        <div className="flex flex-col gap-0.5">
+                                                            {Object.values(r.packageTracking).map((tn: any, i) => {
+                                                                const ck = `${r.id}:pkg:${i}`;
+                                                                const justCopied = copiedTrackingKey === ck;
+                                                                return (
+                                                                <div key={i} className="flex items-center gap-1 group/tn">
+                                                                    <span className="text-[11px] font-mono text-gray-600 leading-tight">{tn}</span>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => copyTrackingNumber(String(tn), ck)}
+                                                                        className={`p-0.5 rounded transition-all ${
+                                                                            justCopied
+                                                                                ? 'opacity-100 text-green-600 bg-green-50'
+                                                                                : 'opacity-0 group-hover/tn:opacity-100 text-gray-400 hover:text-gray-700 hover:bg-gray-100'
+                                                                        }`}
+                                                                        title={justCopied ? 'Copied' : 'Copy tracking number'}
+                                                                    >
+                                                                        {justCopied ? (
+                                                                            <Check className="w-3 h-3" strokeWidth={2.5} />
+                                                                        ) : (
+                                                                            <Copy className="w-3 h-3" />
+                                                                        )}
+                                                                    </button>
+                                                                </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex items-center gap-1 group/tn">
+                                                            <span className="text-[11px] font-mono text-gray-600">{r.fedexTracking || '—'}</span>
+                                                            {r.fedexTracking && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => copyTrackingNumber(r.fedexTracking!, fedexCopyKey)}
+                                                                    className={`p-0.5 rounded transition-all ${
+                                                                        fedexJustCopied
+                                                                            ? 'opacity-100 text-green-600 bg-green-50'
+                                                                            : 'opacity-0 group-hover/tn:opacity-100 text-gray-400 hover:text-gray-700 hover:bg-gray-100'
+                                                                    }`}
+                                                                    title={fedexJustCopied ? 'Copied' : 'Copy tracking number'}
+                                                                >
+                                                                    {fedexJustCopied ? (
+                                                                        <Check className="w-3 h-3" strokeWidth={2.5} />
+                                                                    ) : (
+                                                                        <Copy className="w-3 h-3" />
+                                                                    )}
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </td>
                                                 <td className="px-3 py-1.5 text-xs text-center text-gray-900">{r.totalItems}</td>
                                                 <td className="px-3 py-1.5 text-xs text-center text-gray-900">{r.boxCount ?? '—'}</td>
                                                 <td className="px-3 py-1.5 text-center">
@@ -651,7 +721,7 @@ export default function WarehouseReceivingPage() {
                                                 ) : (
                                                     <button
                                                         type="button"
-                                                        onClick={() => router.push(`/warehouse/receiving/${r.id}`)}
+                                                        onClick={() => router.push(`/warehouse/verification/${r.id}`)}
                                                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors whitespace-nowrap"
                                                     >
                                                         Verify <ArrowRight className="w-3 h-3" />
