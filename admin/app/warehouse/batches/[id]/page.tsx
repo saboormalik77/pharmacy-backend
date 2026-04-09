@@ -172,7 +172,7 @@ export default function BatchDetailPage() {
         setShowAssign(true);
         setSelectedReturnIds([]);
         setAssignSearch('');
-        dispatch(fetchReceivedReturns({ limit: 100 }));
+        dispatch(fetchReceivedReturns({ limit: 100, verificationStatus: 'verified' }));
     };
 
     const handleAssign = async () => {
@@ -245,7 +245,11 @@ export default function BatchDetailPage() {
     };
 
     const filteredReceived = receivedReturns.filter(r => {
+        // Only show verified returns
+        if (r.status !== 'verified') return false;
+        // Don't show returns already assigned to a batch
         if (r.batchId) return false;
+        // Apply search filter
         if (!assignSearch) return true;
         const s = assignSearch.toLowerCase();
         return (
@@ -971,7 +975,7 @@ export default function BatchDetailPage() {
 
                         <div className="overflow-y-auto flex-1 p-3">
                             {filteredReceived.length === 0 ? (
-                                <p className="text-center py-6 text-xs text-gray-500">No received returns available for assignment.</p>
+                                <p className="text-center py-6 text-xs text-gray-500">No verified returns available for assignment.</p>
                             ) : (
                                 <div className="space-y-1.5">
                                     {filteredReceived.map(rt => {

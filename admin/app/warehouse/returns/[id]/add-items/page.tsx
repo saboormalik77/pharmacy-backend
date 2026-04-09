@@ -814,7 +814,7 @@ export default function AddItemsPage() {
                                         <div><span className="text-gray-500">NDC:</span> <span className="font-semibold text-gray-900 font-mono">{item.ndc || '—'}</span></div>
                                         <div><span className="text-gray-500">Lot:</span> <span className="font-medium text-gray-800">{item.lotNumber || '—'}</span></div>
                                         <div><span className="text-gray-500">Exp:</span> <span className="font-medium text-gray-800">{item.expirationDate ? new Date(item.expirationDate).toLocaleDateString() : '—'}</span></div>
-                                        <div><span className="text-gray-500">Value:</span> <span className="font-bold text-green-600">${item.estimatedValue?.toFixed(2) || '0.00'}</span></div>
+                                        {/* <div><span className="text-gray-500">Value:</span> <span className="font-bold text-green-600">${item.estimatedValue?.toFixed(2) || '0.00'}</span></div> */}
                                         {item.manufacturer && (
                                             <div className="col-span-2"><span className="text-gray-500">Manufacturer:</span> <span className="font-medium text-gray-800">{item.manufacturer}</span></div>
                                         )}
@@ -1084,7 +1084,7 @@ export default function AddItemsPage() {
                 </div>
 
                 <hr className="my-3 border-gray-100" />
-                <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Quantity &amp; Pricing</h2>
+                <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Quantity Pricing</h2>
 
                 {(() => {
                     const pkgSize = parseFloat(form.fullPackageSize) || 0;
@@ -1100,10 +1100,10 @@ export default function AddItemsPage() {
                     return (
                         <>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                            <div>
+                            {/* <div>
                                 <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Price ($)</label>
                                 <input type="number" step="0.01" min="0" value={form.standardPrice} onChange={e => updateField('standardPrice', e.target.value)} placeholder="0.00" className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
-                            </div>
+                            </div> */}
                             <div>
                                 <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Pkg Size</label>
                                 <input type="number" min="1" value={form.fullPackageSize} onChange={e => updateField('fullPackageSize', e.target.value)} placeholder="e.g. 60" className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
@@ -1125,7 +1125,7 @@ export default function AddItemsPage() {
                                 )}
                             </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-2 mt-2">
+                        {/* <div className="grid grid-cols-2 gap-2 mt-2">
                             <div>
                                 <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Est. Value</label>
                                 <input type="text" readOnly value={`$${estimatedValue.toFixed(2)}`} className="w-full px-2 py-1 text-xs border border-gray-200 rounded bg-gray-50 text-gray-700 font-medium" />
@@ -1134,7 +1134,7 @@ export default function AddItemsPage() {
                                 <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Est. Store Value <span className="text-gray-400 font-normal">(−30%)</span></label>
                                 <input type="text" readOnly value={`$${estimatedStoreValue.toFixed(2)}`} className="w-full px-2 py-1 text-xs border border-gray-200 rounded bg-gray-50 text-gray-700 font-medium" />
                             </div>
-                        </div>
+                        </div> */}
                         </>
                     );
                 })()}

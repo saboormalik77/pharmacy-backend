@@ -921,7 +921,7 @@ export default function ReturnDetailPage() {
                     </div>
 
                     {/* Items & Values */}
-                    <div className="bg-white rounded-lg shadow p-4">
+                    {/* <div className="bg-white rounded-lg shadow p-4">
                         <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                             <Package className="w-4 h-4 text-gray-500" />
                             Items &amp; Values
@@ -935,10 +935,10 @@ export default function ReturnDetailPage() {
                                 <dt className="text-xs text-gray-500">Returnable Value</dt>
                                 <dd className="text-xs font-medium text-green-700">{formatCurrency(itemsSummary?.totalReturnableValue ?? tx.totalReturnableValue)}</dd>
                             </div>
-                            {/* <div className="flex justify-between">
+                            <div className="flex justify-between">
                                 <dt className="text-xs text-gray-500">Non-Returnable Value</dt>
                                 <dd className="text-xs font-medium text-red-700">{formatCurrency(itemsSummary?.totalNonReturnableValue ?? tx.totalNonReturnableValue)}</dd>
-                            </div> */}
+                            </div>
                             <div className="flex justify-between border-t border-gray-200 pt-2">
                                 <dt className="text-xs font-semibold text-gray-700">Total Value</dt>
                                 <dd className="text-xs font-bold text-gray-900">
@@ -946,7 +946,7 @@ export default function ReturnDetailPage() {
                                 </dd>
                             </div>
                         </dl>
-                    </div>
+                    </div> */}
 
                     {/* Shipping (conditional) */}
                     {showShipping && (
@@ -1056,7 +1056,7 @@ export default function ReturnDetailPage() {
                 )}
 
                 {/* ── Summary Bar ─────────────────────────────────── */}
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {/* <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     <div className="bg-white rounded-lg shadow px-4 py-3 text-center">
                         <p className="text-[10px] uppercase tracking-wide text-gray-500 mb-1">Items</p>
                         <p className="text-lg font-bold text-gray-900">{returnableAndTbdItemsCount}</p>
@@ -1065,15 +1065,15 @@ export default function ReturnDetailPage() {
                         <p className="text-[10px] uppercase tracking-wide text-green-600 mb-1">Returnable</p>
                         <p className="text-lg font-bold text-green-700">{formatCurrency(itemsSummary?.totalReturnableValue ?? tx.totalReturnableValue)}</p>
                     </div>
-                    {/* <div className="bg-white rounded-lg shadow px-4 py-3 text-center">
+                    <div className="bg-white rounded-lg shadow px-4 py-3 text-center">
                         <p className="text-[10px] uppercase tracking-wide text-red-600 mb-1">Non-Returnable</p>
                         <p className="text-lg font-bold text-red-700">{formatCurrency(itemsSummary?.totalNonReturnableValue ?? tx.totalNonReturnableValue)}</p>
-                    </div> */}
+                    </div>
                     <div className="bg-white rounded-lg shadow px-4 py-3 text-center">
                         <p className="text-[10px] uppercase tracking-wide text-blue-600 mb-1">Total Value</p>
                         <p className="text-lg font-bold text-blue-700">{formatCurrency(itemsSummary?.totalReturnableValue ?? tx.totalReturnableValue)}</p>
                     </div>
-                </div>
+                </div> */}
 
                 {/* ── Items Section ───────────────────────────────── */}
                 <div className="bg-white rounded-lg shadow">
@@ -1148,9 +1148,9 @@ export default function ReturnDetailPage() {
                                         <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Pkg Size</th>
                                         <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Qty Returned</th>
                                         <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Serial#</th>
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Price</th>
+                                        {/* <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Price</th>
                                         <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Est. Value</th>
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Est. Store Value</th>
+                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Est. Store Value</th> */}
                                         <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Expires</th>
                                         <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
                                         <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Destination</th>
@@ -1188,7 +1188,7 @@ export default function ReturnDetailPage() {
                                                 <td className="px-3 py-2">
                                                     <span className="text-xs font-mono text-gray-700">{item.serialNumber || '—'}</span>
                                                 </td>
-                                                <td className="px-3 py-2">
+                                                {/* <td className="px-3 py-2">
                                                     <span className="text-xs text-gray-900">{item.standardPrice ? formatCurrency(item.standardPrice) : '—'}</span>
                                                 </td>
                                                 <td className="px-3 py-2">
@@ -1196,7 +1196,7 @@ export default function ReturnDetailPage() {
                                                 </td>
                                                 <td className="px-3 py-2">
                                                     <span className="text-xs text-gray-900">{item.estimatedStoreValue ? formatCurrency(item.estimatedStoreValue) : '—'}</span>
-                                                </td>
+                                                </td> */}
                                                 <td className="px-3 py-2">
                                                     <span className="text-xs text-gray-700">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</span>
                                                 </td>
@@ -1411,7 +1411,7 @@ export default function ReturnDetailPage() {
                                         </div>
                                     </div>
                                 )}
-                                <div>
+                                {/* <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-0.5">Price</label>
                                     <input
                                         type="number"
@@ -1421,7 +1421,7 @@ export default function ReturnDetailPage() {
                                         className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
                                         min="0"
                                     />
-                                </div>
+                                </div> */}
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-0.5">Return Status</label>
                                     <select

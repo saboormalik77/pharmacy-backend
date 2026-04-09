@@ -1099,7 +1099,7 @@ export default function ReturnDetailPage() {
                     </div>
 
                     {/* Items & Values */}
-                    <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl shadow-sm border border-amber-100 px-5 py-4 hover:shadow-md transition-shadow">
+                    {/* <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl shadow-sm border border-amber-100 px-5 py-4 hover:shadow-md transition-shadow">
                         <h2 className="text-xs font-bold text-amber-800 uppercase tracking-wider mb-3 flex items-center gap-2">
                             <div className="p-1.5 bg-amber-100 rounded-lg">
                                 <Package className="w-4 h-4 text-amber-600" />
@@ -1115,16 +1115,16 @@ export default function ReturnDetailPage() {
                                 <dt className="text-xs text-amber-700 font-medium">Returnable Value</dt>
                                 <dd className="text-xs font-bold text-green-700">{formatCurrency(nonWcReturnableValue)}</dd>
                             </div>
-                            {/* <div className="flex justify-between items-center">
+                            <div className="flex justify-between items-center">
                                 <dt className="text-xs text-amber-700 font-medium">Non-Returnable Value</dt>
                                 <dd className="text-xs font-bold text-red-700">{formatCurrency(nonWcNonReturnableValue)}</dd>
-                            </div> */}
+                            </div>
                             <div className="flex justify-between items-center pt-2 border-t border-amber-200">
                                 <dt className="text-xs text-amber-800 font-bold">Total Value</dt>
                                 <dd className="text-sm font-black text-gray-900 bg-white/70 px-2 py-0.5 rounded">{formatCurrency(nonWcTotalValue)}</dd>
                             </div>
                         </dl>
-                    </div>
+                    </div> */}
                 </div>
             )}
 
@@ -1184,7 +1184,7 @@ export default function ReturnDetailPage() {
                 </div>
 
                 {/* Summary Bar */}
-                {nonWcItems.length > 0 && (
+                {/* {nonWcItems.length > 0 && (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2">
                         <div className="bg-gray-50 rounded px-2.5 py-1.5 text-center">
                             <p className="text-[10px] text-gray-500">Items</p>
@@ -1194,16 +1194,16 @@ export default function ReturnDetailPage() {
                             <p className="text-[10px] text-green-600">Returnable</p>
                             <p className="text-xs font-bold text-green-800">{formatCurrency(nonWcReturnableValue)}</p>
                         </div>
-                        {/* <div className="bg-red-50 rounded px-2.5 py-1.5 text-center">
+                        <div className="bg-red-50 rounded px-2.5 py-1.5 text-center">
                             <p className="text-[10px] text-red-600">Non-Returnable</p>
                             <p className="text-xs font-bold text-red-800">{formatCurrency(nonWcNonReturnableValue)}</p>
-                        </div> */}
+                        </div>
                         <div className="bg-blue-50 rounded px-2.5 py-1.5 text-center">
                             <p className="text-[10px] text-blue-600">Total Value</p>
                             <p className="text-xs font-bold text-blue-800">{formatCurrency(nonWcTotalValue)}</p>
                         </div>
                     </div>
-                )}
+                )} */}
 
                 {/* Items Filters */}
                 <div className="flex flex-col sm:flex-row gap-1.5 mb-2">
@@ -1260,9 +1260,9 @@ export default function ReturnDetailPage() {
                                     <th className="text-center px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Pkg Size</th>
                                     <th className="text-center px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Qty Returned</th>
                                     <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Serial#</th>
-                                    <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Price</th>
-                                    <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Est. Value</th>
-                                    <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Est. Store Value</th>
+                                    {/* <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Price</th>
+                                    <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Est. Value</th> */}
+                                    {/* <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Est. Store Value</th> */}
                                     <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Expires</th>
                                     <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
                                     <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Destination</th>
@@ -1294,15 +1294,15 @@ export default function ReturnDetailPage() {
                                             <td className="px-2 py-1.5 text-[11px] text-gray-600 font-mono whitespace-nowrap">
                                                 {item.serialNumber || '—'}
                                             </td>
-                                            <td className="px-2 py-1.5 text-[11px] text-right text-gray-900">
+                                            {/* <td className="px-2 py-1.5 text-[11px] text-right text-gray-900">
                                                 {item.standardPrice != null ? formatCurrency(item.standardPrice) : '—'}
                                             </td>
                                             <td className="px-2 py-1.5 text-[11px] text-right font-medium text-gray-900">
                                                 {item.estimatedValue != null ? formatCurrency(item.estimatedValue) : '—'}
-                                            </td>
-                                            <td className="px-2 py-1.5 text-[11px] text-right font-medium text-gray-900">
+                                            </td> */}
+                                            {/* <td className="px-2 py-1.5 text-[11px] text-right font-medium text-gray-900">
                                                 {item.estimatedStoreValue != null ? formatCurrency(item.estimatedStoreValue) : '—'}
-                                            </td>
+                                            </td> */}
                                             <td className="px-2 py-1.5 text-[11px] text-gray-600 whitespace-nowrap">
                                                 {item.expirationDate ? formatDate(item.expirationDate) : '—'}
                                             </td>
@@ -1399,10 +1399,10 @@ export default function ReturnDetailPage() {
                                         </div>
                                     </div>
                                 )}
-                                <div>
+                                {/* <div>
                                     <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Price ($)</label>
                                     <input type="number" step="0.01" min="0" value={editItemForm.standardPrice} onChange={e => setEditItemForm({ ...editItemForm, standardPrice: e.target.value })} disabled={isLocked} className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} />
-                                </div>
+                                </div> */}
                                 <div>
                                     <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Return Status</label>
                                     <select value={editItemForm.returnStatus} onChange={e => setEditItemForm({ ...editItemForm, returnStatus: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500">
