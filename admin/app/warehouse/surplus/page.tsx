@@ -2,6 +2,7 @@
 
 import { PermissionGate } from '@/components/auth/PermissionGate';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
     Warehouse, Loader2, Search, Package, ChevronLeft, ChevronRight,
 } from 'lucide-react';
@@ -66,6 +67,9 @@ export default function WarehouseSurplusPage() {
             <div className="space-y-3">
                 {/* Header */}
                 <div>
+                    <Link href="/warehouse" className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-primary-600 mb-1.5 transition-colors">
+                        <ChevronLeft className="w-3 h-3" /> Back to Warehouse
+                    </Link>
                     <h1 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                         <Warehouse className="w-5 h-5 text-blue-600" />
                         Surplus Inventory

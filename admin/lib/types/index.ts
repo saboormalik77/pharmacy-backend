@@ -1149,6 +1149,7 @@ export interface VerificationV2Item {
     genericName: string;
     manufacturer: string;
     lotNumber: string;
+    serialNumber: string | null;
     expirationDate: string;
     quantity: number;
     actualQuantity: number | null;

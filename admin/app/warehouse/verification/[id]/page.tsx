@@ -1,13 +1,14 @@
 'use client';
 
 import { PermissionGate } from '@/components/auth/PermissionGate';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-    ArrowLeft, Loader2, CheckCircle, XCircle, AlertTriangle,
+    ArrowLeft, ChevronLeft, Loader2, CheckCircle, XCircle, AlertTriangle,
     HelpCircle, Plus, ClipboardCheck, BarChart3, ShieldAlert,
-    BoxIcon, Package,
+    BoxIcon, Package, ScanLine, Camera, Keyboard,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
@@ -27,11 +28,14 @@ import type {
     WarehouseDiscrepancy,
     VerificationV2Counts,
     CompleteVerificationSummary,
+    BarcodeScanResponse,
 } from '@/lib/types';
 import {
     shouldShowWarehouseBoxCountStep,
     isWarehouseVerificationAlreadyCompleted,
 } from '@/lib/utils/warehouseVerificationUi';
+
+const QrScannerModal = dynamic(() => import('@/components/scanner/QrScannerModal'), { ssr: false });
 
 type ActiveTab = 'items' | 'surplus' | 'discrepancies';
 
@@ -63,6 +67,15 @@ export default function VerificationSessionPage() {
         ndc: '', productName: '', manufacturer: '', lotNumber: '',
         expirationDate: '', quantity: '', warehouseLocation: '', condition: 'good', notes: '',
     });
+
+    // Surplus scanner
+    const [surplusEntryMode, setSurplusEntryMode] = useState<'manual' | 'scanner'>('manual');
+    const [surplusScanMode, setSurplusScanMode] = useState<'camera' | 'input'>('camera');
+    const [surplusScanInput, setSurplusScanInput] = useState('');
+    const [surplusCameraOpen, setSurplusCameraOpen] = useState(false);
+    const [surplusScanError, setSurplusScanError] = useState('');
+    const [isSurplusScanning, setIsSurplusScanning] = useState(false);
+    const surplusScanInputRef = useRef<HTMLInputElement>(null);
 
     // Complete
     const [showCompleteConfirm, setShowCompleteConfirm] = useState(false);
@@ -140,13 +153,18 @@ export default function VerificationSessionPage() {
 
     const handleAddSurplus = async () => {
         if (!surplusForm.warehouseLocation.trim()) { showToast('Warehouse location is required', 'error'); return; }
-        const body: Record<string, any> = { ...surplusForm };
-        if (body.quantity) body.quantity = Number(body.quantity);
-        Object.keys(body).forEach(k => { if (body[k] === '' || body[k] === undefined) delete body[k]; });
-        body.warehouseLocation = surplusForm.warehouseLocation;
-        body.condition = surplusForm.condition;
-
-        const result = await dispatch(addSurplus({ transactionId: returnId, data: body }));
+        const result = await dispatch(addSurplus({
+            transactionId: returnId,
+            warehouseLocation: surplusForm.warehouseLocation,
+            condition: surplusForm.condition as 'good' | 'damaged' | 'unknown',
+            ...(surplusForm.ndc && { ndc: surplusForm.ndc }),
+            ...(surplusForm.productName && { productName: surplusForm.productName }),
+            ...(surplusForm.manufacturer && { manufacturer: surplusForm.manufacturer }),
+            ...(surplusForm.lotNumber && { lotNumber: surplusForm.lotNumber }),
+            ...(surplusForm.expirationDate && { expirationDate: surplusForm.expirationDate }),
+            ...(surplusForm.quantity && { quantity: Number(surplusForm.quantity) }),
+            ...(surplusForm.notes && { notes: surplusForm.notes }),
+        }));
         if (addSurplus.fulfilled.match(result)) {
             showToast('Surplus item added');
             setShowSurplusForm(false);
@@ -154,6 +172,43 @@ export default function VerificationSessionPage() {
             await loadSummary();
         } else {
             showToast((result.payload as string) || 'Failed to add surplus item', 'error');
+        }
+    };
+
+    const handleSurplusScan = async (raw: string) => {
+        setSurplusCameraOpen(false);
+        setSurplusScanInput('');
+        setSurplusScanError('');
+        setIsSurplusScanning(true);
+        try {
+            const { apiClient } = await import('@/lib/api/apiClient');
+            const res = await apiClient.post<{ status: string; data: BarcodeScanResponse }>(
+                '/barcode/scan',
+                { scanData: raw },
+                true
+            );
+            const { scan, product } = res.data;
+            setSurplusForm(prev => ({
+                ...prev,
+                ndc: product?.ndc || scan.ndcCandidates[0] || prev.ndc,
+                productName: product?.proprietaryName || product?.genericName || prev.productName,
+                manufacturer: product?.manufacturer || prev.manufacturer,
+                lotNumber: scan.lotNumber || prev.lotNumber,
+                expirationDate: scan.expirationDate || prev.expirationDate,
+            }));
+            setSurplusEntryMode('manual');
+        } catch (err: any) {
+            setSurplusScanError(err?.message || 'Failed to scan barcode');
+        } finally {
+            setIsSurplusScanning(false);
+        }
+    };
+
+    const handleSurplusScanKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const val = surplusScanInput.trim();
+            if (val) void handleSurplusScan(val);
         }
     };
 
@@ -180,12 +235,13 @@ export default function VerificationSessionPage() {
         }
     };
 
-    // Loading state (first load only — summary RPC always succeeds for valid returns)
-    if (isLoading && !v2Summary) {
+    // Show spinner while loading OR when cached summary belongs to a different return (stale data from previous navigation)
+    if (isLoading || (v2Summary && v2Summary.transaction?.id !== returnId)) {
         return (
             <PermissionGate permission="warehouse">
-                <div className="flex items-center justify-center py-24">
-                    <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                <div className="flex flex-col items-center justify-center py-24 gap-3">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary-500" />
+                    <span className="text-xs text-gray-400">Loading verification session…</span>
                 </div>
             </PermissionGate>
         );
@@ -345,16 +401,21 @@ export default function VerificationSessionPage() {
             <ToastContainer toasts={toasts} onClose={removeToast} />
             <div className="space-y-3">
                 {/* Header */}
-                <div className="flex items-center gap-3">
-                    <Link href="/warehouse/verification" className="p-1.5 rounded-md hover:bg-gray-100 transition">
-                        <ArrowLeft className="w-4 h-4 text-gray-500" />
+                <div>
+                    <Link href="/warehouse" className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-primary-600 mb-1.5 transition-colors">
+                        <ChevronLeft className="w-3 h-3" /> Back to Warehouse
                     </Link>
-                    <div>
-                        <h1 className="text-base font-bold text-gray-900">Verification Session</h1>
-                        <p className="text-[11px] text-gray-500">
-                            {v2Summary.transaction?.licensePlate || returnId}
-                            {v2Summary.transaction?.pharmacyName && ` — ${v2Summary.transaction.pharmacyName}`}
-                        </p>
+                    <div className="flex items-center gap-3">
+                        <Link href="/warehouse/verification" className="p-1.5 rounded-md hover:bg-gray-100 transition">
+                            <ArrowLeft className="w-4 h-4 text-gray-500" />
+                        </Link>
+                        <div>
+                            <h1 className="text-base font-bold text-gray-900">Verification Session</h1>
+                            <p className="text-[11px] text-gray-500">
+                                {v2Summary.transaction?.licensePlate || returnId}
+                                {v2Summary.transaction?.pharmacyName && ` — ${v2Summary.transaction.pharmacyName}`}
+                            </p>
+                        </div>
                     </div>
                 </div>
 
@@ -384,9 +445,9 @@ export default function VerificationSessionPage() {
                 {/* Tabs */}
                 <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
                     {([
-                        { key: 'items' as ActiveTab, label: 'Items', count: counts.totalItems },
+                        { key: 'items' as ActiveTab, label: 'Items', count: counts.unverified },
                         { key: 'surplus' as ActiveTab, label: 'Surplus', count: surplus.length },
-                        { key: 'discrepancies' as ActiveTab, label: 'Discrepancies', count: discrepancyCounts.total },
+                        { key: 'discrepancies' as ActiveTab, label: 'Discrepancies', count: discrepancyCounts.open },
                     ]).map(tab => (
                         <button
                             key={tab.key}
@@ -405,12 +466,16 @@ export default function VerificationSessionPage() {
                 {/* ITEMS TAB */}
                 {activeTab === 'items' && (
                     <div className="bg-white rounded-lg shadow overflow-hidden">
+                        {items.filter(item => !item.verificationStatus).length === 0 ? (
+                            <div className="text-center py-12 text-gray-400 text-xs">All items have been verified</div>
+                        ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>
                                     <tr className="bg-gray-50 border-b border-gray-200">
                                         <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Product</th>
                                         <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">NDC</th>
+                                        <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Serial #</th>
                                         <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Lot</th>
                                         <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Exp</th>
                                         <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Qty</th>
@@ -419,13 +484,14 @@ export default function VerificationSessionPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
-                                    {items.map(item => (
+                                    {items.filter(item => !item.verificationStatus).map(item => (
                                         <tr key={item.id} className="hover:bg-gray-50">
                                             <td className="px-3 py-2">
                                                 <div className="text-xs font-medium text-gray-900">{item.proprietaryName || item.genericName}</div>
                                                 {item.manufacturer && <div className="text-[10px] text-gray-400">{item.manufacturer}</div>}
                                             </td>
                                             <td className="px-3 py-2 text-[11px] font-mono text-gray-600">{item.ndc}</td>
+                                            <td className="px-3 py-2 text-[11px] font-mono text-gray-600">{item.serialNumber || '—'}</td>
                                             <td className="px-3 py-2 text-[11px] text-gray-600">{item.lotNumber || '—'}</td>
                                             <td className="px-3 py-2 text-[11px] text-gray-600">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
                                             <td className="px-3 py-2 text-xs font-medium">{item.quantity}</td>
@@ -435,22 +501,24 @@ export default function VerificationSessionPage() {
                                                 </Badge>
                                             </td>
                                             <td className="px-3 py-2">
-                                                <button
-                                                    onClick={() => openVerifyItem(item)}
-                                                    className={`px-2 py-1 text-[10px] font-medium rounded-md transition ${
-                                                        item.verificationStatus
-                                                            ? 'border border-gray-200 text-gray-600 hover:bg-gray-50'
-                                                            : 'text-white bg-primary-600 hover:bg-primary-700'
-                                                    }`}
-                                                >
-                                                    {item.verificationStatus ? 'Edit' : 'Verify'}
-                                                </button>
+                                                {!item.verificationStatus ? (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => openVerifyItem(item)}
+                                                        className="px-2 py-1 text-[10px] font-medium rounded-md transition text-white bg-primary-600 hover:bg-primary-700"
+                                                    >
+                                                        Verify
+                                                    </button>
+                                                ) : (
+                                                    <span className="text-[10px] text-gray-300">—</span>
+                                                )}
                                             </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
+                        )}
                     </div>
                 )}
 
@@ -482,13 +550,13 @@ export default function VerificationSessionPage() {
                                 })}
                             </div>
 
-                            {verifyStatus && verifyStatus !== 'missing' && (
+                            {/* {verifyStatus && verifyStatus !== 'missing' && (
                                 <div>
                                     <label className="text-[10px] font-medium text-gray-700">Actual Quantity (if different)</label>
                                     <input type="number" min="0" value={verifyActualQty} onChange={e => setVerifyActualQty(e.target.value)}
                                         className="mt-1 w-full px-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500" />
                                 </div>
-                            )}
+                            )} */}
 
                             {(verifyStatus === 'damaged' || verifyStatus === 'wrong_item') && (
                                 <div>
@@ -518,7 +586,7 @@ export default function VerificationSessionPage() {
                         <div className="flex justify-end">
                             <button
                                 onClick={() => setShowSurplusForm(!showSurplusForm)}
-                                className="inline-flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition"
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md transition"
                             >
                                 <Plus className="w-3 h-3" /> Add Surplus Item
                             </button>
@@ -526,7 +594,117 @@ export default function VerificationSessionPage() {
 
                         {showSurplusForm && (
                             <div className="bg-white rounded-lg shadow p-4 space-y-3">
-                                <h3 className="font-bold text-xs text-gray-900">Add Surplus Item</h3>
+                                <div className="flex items-center justify-between">
+                                    <h3 className="font-bold text-xs text-gray-900">Add Surplus Item</h3>
+                                    {/* Entry mode toggle */}
+                                    <div className="flex gap-1">
+                                        {([
+                                            { key: 'manual' as const, icon: Keyboard, label: 'Manual' },
+                                            { key: 'scanner' as const, icon: ScanLine, label: 'Scanner' },
+                                        ]).map(({ key, icon: Icon, label }) => (
+                                            <button
+                                                key={key}
+                                                type="button"
+                                                onClick={() => { setSurplusEntryMode(key); setSurplusScanError(''); }}
+                                                className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium transition-colors ${
+                                                    surplusEntryMode === key
+                                                        ? 'bg-blue-100 text-blue-700 ring-1 ring-blue-300'
+                                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                }`}
+                                            >
+                                                <Icon className="w-3 h-3" /> {label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Scanner panel */}
+                                {surplusEntryMode === 'scanner' && (
+                                    <div className="space-y-2 p-3 rounded-md bg-gray-50 border border-gray-200">
+                                        <div className="flex items-center justify-between flex-wrap gap-2">
+                                            <span className="text-[11px] font-medium text-gray-700">Scan product barcode to pre-fill fields</span>
+                                            <div className="flex gap-1">
+                                                {([
+                                                    { key: 'camera' as const, icon: Camera, label: 'Camera' },
+                                                    { key: 'input' as const, icon: ScanLine, label: 'USB / Keyboard' },
+                                                ]).map(({ key, icon: Icon, label }) => (
+                                                    <button
+                                                        key={key}
+                                                        type="button"
+                                                        onClick={() => setSurplusScanMode(key)}
+                                                        className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium transition-colors ${
+                                                            surplusScanMode === key
+                                                                ? 'bg-primary-100 text-primary-700 ring-1 ring-primary-300'
+                                                                : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                                                        }`}
+                                                    >
+                                                        <Icon className="w-3 h-3" /> {label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {surplusScanMode === 'camera' && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setSurplusCameraOpen(true)}
+                                                disabled={isSurplusScanning}
+                                                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-dashed border-primary-300 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors disabled:opacity-50"
+                                            >
+                                                {isSurplusScanning ? (
+                                                    <>
+                                                        <Loader2 className="w-4 h-4 animate-spin text-primary-600" />
+                                                        <span className="text-xs font-medium text-primary-700">Looking up product…</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Camera className="w-4 h-4 text-primary-600" />
+                                                        <span className="text-xs font-semibold text-primary-800">Open camera scanner</span>
+                                                    </>
+                                                )}
+                                            </button>
+                                        )}
+
+                                        {surplusScanMode === 'input' && (
+                                            <div className="flex gap-2">
+                                                <div className="relative flex-1">
+                                                    <ScanLine className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                                                    <input
+                                                        ref={surplusScanInputRef}
+                                                        type="text"
+                                                        value={surplusScanInput}
+                                                        onChange={e => setSurplusScanInput(e.target.value)}
+                                                        onKeyDown={handleSurplusScanKeyDown}
+                                                        placeholder="Scan barcode or type and press Enter…"
+                                                        className="w-full pl-8 pr-3 py-1.5 text-xs border-2 border-primary-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 bg-primary-50 font-mono"
+                                                        disabled={isSurplusScanning}
+                                                        autoFocus
+                                                    />
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    disabled={isSurplusScanning || !surplusScanInput.trim()}
+                                                    onClick={() => void handleSurplusScan(surplusScanInput.trim())}
+                                                    className="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md disabled:opacity-50 flex items-center gap-1 transition"
+                                                >
+                                                    {isSurplusScanning ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Scan'}
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {surplusScanError && (
+                                            <p className="text-[11px] text-red-600 flex items-center gap-1">
+                                                <XCircle className="w-3 h-3 flex-shrink-0" /> {surplusScanError}
+                                            </p>
+                                        )}
+                                        <p className="text-[10px] text-gray-400">After scan, fields will be pre-filled. Complete the remaining fields and click Add Surplus.</p>
+                                    </div>
+                                )}
+
+                                {surplusCameraOpen && (
+                                    <QrScannerModal onScan={raw => void handleSurplusScan(raw)} onClose={() => setSurplusCameraOpen(false)} />
+                                )}
+
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     {([
                                         { key: 'ndc', label: 'NDC', type: 'text', placeholder: 'e.g. 12345678901' },
@@ -571,7 +749,7 @@ export default function VerificationSessionPage() {
                                     <button
                                         disabled={isActionLoading}
                                         onClick={handleAddSurplus}
-                                        className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50 flex items-center gap-1 transition"
+                                        className="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md disabled:opacity-50 flex items-center gap-1 transition"
                                     >
                                         {isActionLoading && <Loader2 className="w-3 h-3 animate-spin" />} Add Surplus
                                     </button>
@@ -621,8 +799,8 @@ export default function VerificationSessionPage() {
                 {/* DISCREPANCIES TAB */}
                 {activeTab === 'discrepancies' && (
                     <div className="bg-white rounded-lg shadow overflow-hidden">
-                        {discrepancies.length === 0 ? (
-                            <div className="text-center py-12 text-gray-400 text-xs">No discrepancies recorded</div>
+                        {discrepancies.filter(d => d.status === 'open').length === 0 ? (
+                            <div className="text-center py-12 text-gray-400 text-xs">No open discrepancies</div>
                         ) : (
                             <div className="overflow-x-auto">
                                 <table className="w-full">
@@ -632,52 +810,40 @@ export default function VerificationSessionPage() {
                                             <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Product</th>
                                             <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Expected</th>
                                             <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Actual</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Status</th>
                                             <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
-                                        {discrepancies.map(d => (
+                                        {discrepancies.filter(d => d.status === 'open').map(d => (
                                             <tr key={d.id} className="hover:bg-gray-50">
                                                 <td className="px-3 py-2"><Badge className={`text-[10px] ${discrepancyColor(d.type)}`}>{d.type}</Badge></td>
                                                 <td className="px-3 py-2 text-xs text-gray-900">{d.productName || d.ndc || '—'}</td>
                                                 <td className="px-3 py-2 text-xs font-medium">{d.expectedQuantity ?? '—'}</td>
                                                 <td className="px-3 py-2 text-xs font-medium">{d.actualQuantity ?? '—'}</td>
                                                 <td className="px-3 py-2">
-                                                    <Badge className={`text-[10px] border ${d.status === 'open' ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-green-100 text-green-700 border-green-200'}`}>
-                                                        {d.status}
-                                                    </Badge>
-                                                </td>
-                                                <td className="px-3 py-2">
-                                                    {d.status === 'open' ? (
-                                                        resolvingId === d.id ? (
-                                                            <div className="space-y-1.5">
-                                                                <textarea
-                                                                    rows={2}
-                                                                    placeholder="Resolution notes..."
-                                                                    value={resolveNotes}
-                                                                    onChange={e => setResolveNotes(e.target.value)}
-                                                                    className="w-full px-2 py-1 text-[10px] border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none"
-                                                                />
-                                                                <div className="flex gap-1">
-                                                                    <button disabled={isActionLoading} onClick={() => handleResolve(d.id, 'resolved')}
-                                                                        className="px-2 py-0.5 text-[9px] font-medium text-white bg-green-600 hover:bg-green-700 rounded disabled:opacity-50">Resolve</button>
-                                                                    <button disabled={isActionLoading} onClick={() => handleResolve(d.id, 'dismissed')}
-                                                                        className="px-2 py-0.5 text-[9px] font-medium text-white bg-gray-500 hover:bg-gray-600 rounded disabled:opacity-50">Dismiss</button>
-                                                                    <button onClick={() => { setResolvingId(null); setResolveNotes(''); }}
-                                                                        className="px-2 py-0.5 text-[9px] font-medium text-gray-500 border border-gray-200 rounded hover:bg-gray-50">Cancel</button>
-                                                                </div>
+                                                    {resolvingId === d.id ? (
+                                                        <div className="space-y-1.5">
+                                                            <textarea
+                                                                rows={2}
+                                                                placeholder="Resolution notes..."
+                                                                value={resolveNotes}
+                                                                onChange={e => setResolveNotes(e.target.value)}
+                                                                className="w-full px-2 py-1 text-[10px] border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none"
+                                                            />
+                                                            <div className="flex gap-1">
+                                                                <button disabled={isActionLoading} onClick={() => handleResolve(d.id, 'resolved')}
+                                                                    className="px-2 py-0.5 text-[9px] font-medium text-white bg-green-600 hover:bg-green-700 rounded disabled:opacity-50">Resolve</button>
+                                                                <button disabled={isActionLoading} onClick={() => handleResolve(d.id, 'dismissed')}
+                                                                    className="px-2 py-0.5 text-[9px] font-medium text-white bg-gray-500 hover:bg-gray-600 rounded disabled:opacity-50">Dismiss</button>
+                                                                <button onClick={() => { setResolvingId(null); setResolveNotes(''); }}
+                                                                    className="px-2 py-0.5 text-[9px] font-medium text-gray-500 border border-gray-200 rounded hover:bg-gray-50">Cancel</button>
                                                             </div>
-                                                        ) : (
-                                                            <button onClick={() => setResolvingId(d.id)}
-                                                                className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-amber-700 border border-amber-200 rounded-md hover:bg-amber-50 transition">
-                                                                <ShieldAlert className="w-3 h-3" /> Resolve
-                                                            </button>
-                                                        )
+                                                        </div>
                                                     ) : (
-                                                        <span className="text-[10px] text-gray-400">
-                                                            {d.resolutionNotes ? `${d.resolutionNotes}` : (d as any).resolution || 'resolved'}
-                                                        </span>
+                                                        <button onClick={() => setResolvingId(d.id)}
+                                                            className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-amber-700 border border-amber-200 rounded-md hover:bg-amber-50 transition">
+                                                            <ShieldAlert className="w-3 h-3" /> Resolve
+                                                        </button>
                                                     )}
                                                 </td>
                                             </tr>
