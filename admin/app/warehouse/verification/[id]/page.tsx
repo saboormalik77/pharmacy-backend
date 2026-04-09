@@ -445,7 +445,7 @@ export default function VerificationSessionPage() {
                 {/* Tabs */}
                 <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
                     {([
-                        { key: 'items' as ActiveTab, label: 'Items', count: counts.unverified },
+                        { key: 'items' as ActiveTab, label: 'Items', count: counts.totalItems },
                         { key: 'surplus' as ActiveTab, label: 'Surplus', count: surplus.length },
                         { key: 'discrepancies' as ActiveTab, label: 'Discrepancies', count: discrepancyCounts.open },
                     ]).map(tab => (
@@ -466,8 +466,8 @@ export default function VerificationSessionPage() {
                 {/* ITEMS TAB */}
                 {activeTab === 'items' && (
                     <div className="bg-white rounded-lg shadow overflow-hidden">
-                        {items.filter(item => !item.verificationStatus).length === 0 ? (
-                            <div className="text-center py-12 text-gray-400 text-xs">All items have been verified</div>
+                        {items.length === 0 ? (
+                            <div className="text-center py-12 text-gray-400 text-xs">No items found</div>
                         ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full">
@@ -484,7 +484,7 @@ export default function VerificationSessionPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
-                                    {items.filter(item => !item.verificationStatus).map(item => (
+                                    {items.map(item => (
                                         <tr key={item.id} className="hover:bg-gray-50">
                                             <td className="px-3 py-2">
                                                 <div className="text-xs font-medium text-gray-900">{item.proprietaryName || item.genericName}</div>
