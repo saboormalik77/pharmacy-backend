@@ -83,6 +83,9 @@ export default function WarehouseVerificationListPage() {
             <div className="space-y-3">
                 {/* Header */}
                 <div>
+                    <Link href="/warehouse" className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-primary-600 mb-1.5 transition-colors">
+                        <ChevronLeft className="w-3 h-3" /> Back to Warehouse
+                    </Link>
                     <h1 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                         <ClipboardCheck className="w-5 h-5 text-primary-600" />
                         Warehouse Verification

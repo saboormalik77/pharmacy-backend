@@ -45,6 +45,7 @@ export interface VerifiedItem {
   genericName: string | null;
   manufacturer: string | null;
   lotNumber: string | null;
+  serialNumber: string | null;
   expirationDate: string | null;
   quantity: number;
   actualQuantity: number | null;
@@ -437,7 +438,48 @@ export const resolveDiscrepancy = async (
   });
 
   handleRpcError(data, error, 'Failed to resolve discrepancy');
-  return data.data as WarehouseDiscrepancy;
+  const resolved = data.data as WarehouseDiscrepancy;
+
+  // If the discrepancy is linked to an item, reset that item back to
+  // unverified so the warehouse admin can re-verify it and the counts update.
+  if (resolved.itemId) {
+    await sb
+      .from('return_transaction_items')
+      .update({
+        verified: false,
+        verification_status: null,
+        condition_notes: null,
+        return_status: 'returnable',
+      })
+      .eq('id', resolved.itemId);
+
+    // Recalculate totals on the parent return transaction
+    if (resolved.transactionId) {
+      const { data: items } = await sb
+        .from('return_transaction_items')
+        .select('return_status, estimated_value')
+        .eq('transaction_id', resolved.transactionId);
+
+      if (items) {
+        const returnableVal = items
+          .filter((i: any) => i.return_status === 'returnable')
+          .reduce((sum: number, i: any) => sum + (i.estimated_value || 0), 0);
+        const nonReturnableVal = items
+          .filter((i: any) => i.return_status === 'non_returnable')
+          .reduce((sum: number, i: any) => sum + (i.estimated_value || 0), 0);
+
+        await sb
+          .from('return_transactions')
+          .update({
+            total_returnable_value: returnableVal,
+            total_non_returnable_value: nonReturnableVal,
+          })
+          .eq('id', resolved.transactionId);
+      }
+    }
+  }
+
+  return resolved;
 };
 
 // ============================================================
@@ -454,7 +496,29 @@ export const getVerificationSummary = async (
   });
 
   handleRpcError(data, error, 'Failed to get verification summary');
-  return data.data as VerificationSummary;
+
+  const summary = data.data as VerificationSummary;
+
+  // Fetch serial numbers from return_transaction_items and merge into items
+  if (summary.items && summary.items.length > 0) {
+    const itemIds = summary.items.map((item: VerifiedItem) => item.id);
+    const { data: rawItems } = await sb
+      .from('return_transaction_items')
+      .select('id, serial_number')
+      .in('id', itemIds);
+
+    if (rawItems && rawItems.length > 0) {
+      const serialMap: Record<string, string | null> = {};
+      for (const row of rawItems) {
+        serialMap[row.id] = row.serial_number ?? null;
+      }
+      for (const item of summary.items) {
+        (item as VerifiedItem).serialNumber = serialMap[item.id] ?? null;
+      }
+    }
+  }
+
+  return summary;
 };
 
 // ============================================================
