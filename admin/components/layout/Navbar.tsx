@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Menu, Search, Bell, User, LogOut, Settings } from 'lucide-react';
+import { Menu, Search, Bell, User, LogOut, Settings, Loader2 } from 'lucide-react';
 import { cn, formatRelativeTime } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { logoutUser } from '@/lib/store/authSlice';
@@ -15,10 +15,11 @@ interface NavbarProps {
 export function Navbar({ onToggleSidebar }: NavbarProps) {
     const router = useRouter();
     const dispatch = useAppDispatch();
-    const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+    const { user, isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
     const { notifications, isLoadingNotifications } = useAppSelector((state) => state.recentActivity);
     const [showNotifications, setShowNotifications] = useState(false);
     const [showProfile, setShowProfile] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
     const notificationsRef = useRef<HTMLDivElement>(null);
     const profileRef = useRef<HTMLDivElement>(null);
 
@@ -149,6 +150,8 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
     };
 
     const handleLogout = async () => {
+        setIsLoggingOut(true);
+        setShowProfile(false);
         await dispatch(logoutUser());
         window.location.href = '/login';
     };
@@ -263,6 +266,16 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
                     </div>
                 </div>
             </div>
+
+            {/* Logout Loading Overlay */}
+            {isLoggingOut && (
+                <div className="fixed inset-0 bg-white z-[9999] flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-3">
+                        <Loader2 className="w-8 h-8 animate-spin text-gray-600" />
+                        <p className="text-sm text-gray-600 font-medium">Logging out...</p>
+                    </div>
+                </div>
+            )}
         </nav>
     );
 }

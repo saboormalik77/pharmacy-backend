@@ -162,8 +162,8 @@ export default function ReturnsPage() {
 
     const canDoAction = (tx: ReturnTransaction, action: string): boolean => {
         switch (action) {
-            case 'edit': return tx.status !== 'finalized' && tx.status !== 'closed_out';
-            case 'delete': return tx.status !== 'finalized' && tx.status !== 'closed_out' && tx.status !== 'received';
+            case 'edit': return !['finalized', 'received', 'verified', 'closed_out'].includes(tx.status);
+            case 'delete': return !['finalized', 'received', 'verified', 'closed_out'].includes(tx.status);
             default: return false;
         }
     };

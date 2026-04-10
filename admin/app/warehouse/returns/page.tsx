@@ -169,8 +169,8 @@ export default function ReturnsPage() {
             case 'resume': return tx.status === 'paused';
             case 'complete': return tx.status === 'in_progress' || tx.status === 'paused';
             case 'finalize': return tx.status === 'completed';
-            case 'edit': return tx.status !== 'finalized' && tx.status !== 'closed_out';
-            case 'delete': return tx.status !== 'finalized' && tx.status !== 'closed_out' && tx.status !== 'received';
+            case 'edit': return !['finalized', 'received', 'verified', 'closed_out'].includes(tx.status);
+            case 'delete': return !['finalized', 'received', 'verified', 'closed_out'].includes(tx.status);
             default: return false;
         }
     };

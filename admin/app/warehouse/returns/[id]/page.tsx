@@ -1325,12 +1325,12 @@ export default function ReturnDetailPage() {
                                             </td>
                                             <td className="px-2 py-1.5">
                                                 <div className="flex items-center justify-end gap-0.5">
-                                                    {canDoAction(tx, 'edit') && item.nonReturnableReason === 'date' && !item.wineCellarId && (
+                                                    {canAddDeleteItems && item.nonReturnableReason === 'date' && !item.wineCellarId && (
                                                         <button onClick={() => handleMoveToWineCellar(item)} className="p-1 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded" title="Move to Wine Cellar">
                                                             <Archive className="w-3 h-3" />
                                                         </button>
                                                     )}
-                                                    {canDoAction(tx, 'edit') && (
+                                                    {canAddDeleteItems && (
                                                         <button onClick={() => setEditItemModal(item)} className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title={isLocked ? 'Edit classification' : 'Edit item'}>
                                                             <Edit className="w-3 h-3" />
                                                         </button>
