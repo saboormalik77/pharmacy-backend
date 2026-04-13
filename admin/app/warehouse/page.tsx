@@ -5,7 +5,6 @@ import Link from 'next/link';
 import {
     PackageCheck,
     ClipboardCheck,
-    Archive,
     Layers,
     Receipt,
     MailCheck,
@@ -32,15 +31,15 @@ const warehouseSections = [
         bg: 'bg-teal-50',
         border: 'border-teal-100',
     },
-    {
-        href: '/warehouse/surplus',
-        icon: Archive,
-        label: 'Surplus Inventory',
-        description: 'View and manage surplus items found during verification. Track storage locations and status.',
-        color: 'text-cyan-600',
-        bg: 'bg-cyan-50',
-        border: 'border-cyan-100',
-    },
+    // {
+    //     href: '/warehouse/surplus',
+    //     icon: Archive,
+    //     label: 'Surplus Inventory',
+    //     description: 'View and manage surplus items found during verification. Track storage locations and status.',
+    //     color: 'text-cyan-600',
+    //     bg: 'bg-cyan-50',
+    //     border: 'border-cyan-100',
+    // },
     {
         href: '/warehouse/batches',
         icon: Layers,

@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-// Protected routes that require authentication
+// Protected routes that require authentication.
+// (Several paths are commented out in Sidebar.tsx — they stay listed here so direct URLs still require login.)
 const protectedRoutes = [
   '/dashboard',
   '/portal',
   '/products',
-  '/upload',
+  // '/upload',
   '/optimization',
   '/packages',
   '/top-distributors',
@@ -15,7 +16,7 @@ const protectedRoutes = [
   '/documents',
   '/notifications',
   '/settings',
-  '/subscription',
+  // '/subscription',
   '/support',
   '/credits',
   '/payments',

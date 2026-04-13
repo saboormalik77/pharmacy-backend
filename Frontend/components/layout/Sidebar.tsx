@@ -72,36 +72,36 @@ export function Sidebar({ onClose }: SidebarProps) {
       icon: Archive,
       visible: hasPermission('wine_cellar:view'),
     },
-    {
-      title: 'My Products',
-      href: '/products',
-      icon: ScanLine,
-      visible: hasPermission('products:view'),
-    },
+    // {
+    //   title: 'My Products',
+    //   href: '/products',
+    //   icon: ScanLine,
+    //   visible: hasPermission('products:view'),
+    // },
     {
       title: 'Search',
       href: '/optimization',
       icon: Search,
       visible: hasPermission('optimization:view'),
     },
-    {
-      title: 'Marketplace',
-      href: '/marketplace',
-      icon: ShoppingCart,
-      visible: hasPermission('marketplace:view'),
-    },
-    {
-      title: 'Orders',
-      href: '/orders',
-      icon: ClipboardList,
-      visible: hasPermission('orders:view'),
-    },
-    {
-      title: 'Inventory Analysis',
-      href: '/inventory-analysis',
-      icon: Warehouse,
-      visible: hasPermission('inventory_analysis:view'),
-    },
+    // {
+    //   title: 'Marketplace',
+    //   href: '/marketplace',
+    //   icon: ShoppingCart,
+    //   visible: hasPermission('marketplace:view'),
+    // },
+    // {
+    //   title: 'Orders',
+    //   href: '/orders',
+    //   icon: ClipboardList,
+    //   visible: hasPermission('orders:view'),
+    // },
+    // {
+    //   title: 'Inventory Analysis',
+    //   href: '/inventory-analysis',
+    //   icon: Warehouse,
+    //   visible: hasPermission('inventory_analysis:view'),
+    // },
     {
       title: 'Credits',
       href: '/credits',
@@ -114,24 +114,24 @@ export function Sidebar({ onClose }: SidebarProps) {
       icon: BarChart3,
       visible: hasPermission('analytics:view'),
     },
-    {
-      title: 'Upload Documents',
-      href: '/upload',
-      icon: Upload,
-      visible: hasPermission('documents:upload'),
-    },
-    {
-      title: 'Verification',
-      href: '/warehouse/verification',
-      icon: ClipboardCheck,
-      visible: hasPermission('warehouse:view'),
-    },
-    {
-      title: 'Surplus Inventory',
-      href: '/warehouse/surplus',
-      icon: Archive,
-      visible: hasPermission('warehouse:view'),
-    },
+    // {
+    //   title: 'Upload Documents',
+    //   href: '/upload',
+    //   icon: Upload,
+    //   visible: hasPermission('documents:upload'),
+    // },
+    // {
+    //   title: 'Verification',
+    //   href: '/warehouse/verification',
+    //   icon: ClipboardCheck,
+    //   visible: hasPermission('warehouse:view'),
+    // },
+    // {
+    //   title: 'Surplus Inventory',
+    //   href: '/warehouse/surplus',
+    //   icon: Archive,
+    //   visible: hasPermission('warehouse:view'),
+    // },
   ].filter((item) => item.visible)
 
   const bottomItems = [
@@ -153,12 +153,12 @@ export function Sidebar({ onClose }: SidebarProps) {
       icon: Settings,
       visible: hasPermission('settings:view'),
     },
-    {
-      title: 'Subscription',
-      href: '/subscription',
-      icon: CreditCard,
-      visible: hasPermission('subscription:view'),
-    },
+    // {
+    //   title: 'Subscription',
+    //   href: '/subscription',
+    //   icon: CreditCard,
+    //   visible: hasPermission('subscription:view'),
+    // },
   ].filter((item) => item.visible)
 
   return (
