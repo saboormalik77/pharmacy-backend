@@ -172,14 +172,20 @@ export default function WarehouseVerificationPage() {
 
         if (verifyReturn.fulfilled.match(result)) {
             showToast('Verification complete!');
-            // Load open batches and open the batch assignment modal
-            setBatchesLoading(true);
+            // Immediately open the batch assignment modal
             setBatchModal(true);
+            setBatchesLoading(true);
             setSelectedBatchId('');
             setCreateNewBatch(false);
             setNewBatchMonth('');
             setNewBatchName('');
-            const batchResult = await dispatch(fetchBatches({ status: 'open', limit: 100 }));
+            
+            // Load open batches and used months
+            const [batchResult, monthsResult] = await Promise.all([
+                dispatch(fetchBatches({ status: 'open', limit: 100 })),
+                dispatch(fetchUsedBatchMonths())
+            ]);
+            
             if (fetchBatches.fulfilled.match(batchResult)) {
                 setOpenBatches(batchResult.payload.data);
             }

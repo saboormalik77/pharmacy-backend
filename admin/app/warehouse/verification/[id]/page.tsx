@@ -1,16 +1,17 @@
 'use client';
 
 import { PermissionGate } from '@/components/auth/PermissionGate';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
     ArrowLeft, ChevronLeft, Loader2, CheckCircle, XCircle, AlertTriangle,
     HelpCircle, Plus, ClipboardCheck, BarChart3, ShieldAlert,
-    BoxIcon, Package, ScanLine, Camera, Keyboard,
+    BoxIcon, Package, ScanLine, Camera, Keyboard, Layers, PlusCircle, X,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
@@ -22,6 +23,12 @@ import {
     completeVerification,
     resolveDiscrepancy,
 } from '@/lib/store/warehouseSlice';
+import {
+    fetchBatches,
+    createBatch,
+    assignReturnsToBatch,
+    fetchUsedBatchMonths,
+} from '@/lib/store/batchSlice';
 import type {
     VerificationV2Item,
     WarehouseSurplusItem,
@@ -29,11 +36,13 @@ import type {
     VerificationV2Counts,
     CompleteVerificationSummary,
     BarcodeScanResponse,
+    ReturnBatch,
 } from '@/lib/types';
 import {
     shouldShowWarehouseBoxCountStep,
     isWarehouseVerificationAlreadyCompleted,
 } from '@/lib/utils/warehouseVerificationUi';
+import { buildAvailableBatchMonthOptions } from '@/lib/utils/batchMonths';
 
 const QrScannerModal = dynamic(() => import('@/components/scanner/QrScannerModal'), { ssr: false });
 
@@ -46,6 +55,14 @@ export default function VerificationSessionPage() {
     const returnId = params.id as string;
     const { v2Summary, isLoading, isActionLoading } = useAppSelector(s => s.warehouse);
     const verificationAlreadyCompleted = isWarehouseVerificationAlreadyCompleted(v2Summary?.transaction);
+
+    // Local state for used batch months
+    const [usedBatchMonths, setUsedBatchMonths] = useState<string[]>([]);
+
+    // Available batch months for creating new batches
+    const availableNewBatchMonths = useMemo(() => {
+        return buildAvailableBatchMonthOptions(usedBatchMonths);
+    }, [usedBatchMonths]);
 
     const [toasts, setToasts] = useState<Toast[]>([]);
     const [activeTab, setActiveTab] = useState<ActiveTab>('items');
@@ -85,6 +102,17 @@ export default function VerificationSessionPage() {
     // Discrepancy resolve
     const [resolvingId, setResolvingId] = useState<string | null>(null);
     const [resolveNotes, setResolveNotes] = useState('');
+
+    // Batch assignment modal
+    const [batchModal, setBatchModal] = useState(false);
+    const [openBatches, setOpenBatches] = useState<ReturnBatch[]>([]);
+    const [selectedBatchId, setSelectedBatchId] = useState('');
+    const [createNewBatch, setCreateNewBatch] = useState(false);
+    const [newBatchMonth, setNewBatchMonth] = useState('');
+    const [newBatchName, setNewBatchName] = useState('');
+    const [batchesLoading, setBatchesLoading] = useState(false);
+    const [batchAssigning, setBatchAssigning] = useState(false);
+    const [usedMonthsLoading, setUsedMonthsLoading] = useState(false);
 
     const showToast = (msg: string, type: Toast['type'] = 'success') => {
         setToasts(prev => [...prev, { id: Date.now().toString(), message: msg, type }]);
@@ -235,6 +263,96 @@ export default function VerificationSessionPage() {
         }
     };
 
+    const handleOpenBatchModal = async () => {
+        // Set modal state first to ensure it shows
+        setBatchModal(true);
+        setBatchesLoading(true);
+        setSelectedBatchId('');
+        setCreateNewBatch(false);
+        setNewBatchName('');
+        
+        try {
+            // Load open batches and used months
+            const [batchResult, monthsResult] = await Promise.all([
+                dispatch(fetchBatches({ status: 'open', limit: 100 })),
+                dispatch(fetchUsedBatchMonths())
+            ]);
+            
+            if (fetchBatches.fulfilled.match(batchResult)) {
+                setOpenBatches(batchResult.payload.data);
+            }
+            
+            let months: string[] = [];
+            if (fetchUsedBatchMonths.fulfilled.match(monthsResult)) {
+                months = monthsResult.payload;
+                setUsedBatchMonths(months);
+            }
+            
+            // Set default month to first available
+            const availableMonths = buildAvailableBatchMonthOptions(months);
+            if (availableMonths.length > 0) {
+                setNewBatchMonth(availableMonths[0].value);
+            } else {
+                setNewBatchMonth('');
+            }
+        } catch (error) {
+            console.error('Error loading batch data:', error);
+            showToast('Failed to load batch data', 'error');
+        } finally {
+            setBatchesLoading(false);
+        }
+    };
+
+    const handleAssignToBatch = async () => {
+        setBatchAssigning(true);
+        try {
+            let targetBatchId = selectedBatchId;
+
+            if (createNewBatch) {
+                if (!newBatchMonth) {
+                    showToast('Please select a batch month', 'error');
+                    setBatchAssigning(false);
+                    return;
+                }
+
+                const createResult = await dispatch(createBatch({
+                    batchMonth: `${newBatchMonth}-01`, // Convert YYYY-MM to YYYY-MM-DD format
+                    batchName: newBatchName || undefined,
+                }));
+
+                if (createBatch.fulfilled.match(createResult)) {
+                    targetBatchId = createResult.payload.id;
+                    showToast('New batch created successfully');
+                } else {
+                    showToast(createResult.payload as string || 'Failed to create batch', 'error');
+                    setBatchAssigning(false);
+                    return;
+                }
+            }
+
+            if (!targetBatchId) {
+                showToast('Please select a batch', 'error');
+                setBatchAssigning(false);
+                return;
+            }
+
+            const assignResult = await dispatch(assignReturnsToBatch({
+                batchId: targetBatchId,
+                transactionIds: [returnId],
+            }));
+
+            if (assignReturnsToBatch.fulfilled.match(assignResult)) {
+                showToast('Return assigned to batch successfully!');
+                setBatchModal(false);
+                router.push('/warehouse/verification');
+            } else {
+                showToast(assignResult.payload as string || 'Failed to assign to batch', 'error');
+            }
+        } finally {
+            setBatchAssigning(false);
+        }
+    };
+
     // Show spinner while loading OR when cached summary belongs to a different return (stale data from previous navigation)
     if (isLoading || (v2Summary && v2Summary.transaction?.id !== returnId)) {
         return (
@@ -349,13 +467,132 @@ export default function VerificationSessionPage() {
                                 {completedSummary.openDiscrepancies} open discrepancies remain.
                             </div>
                         )}
-                        <Link href="/warehouse/verification">
-                            <button className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md mt-2 transition">
-                                <ArrowLeft className="w-4 h-4" /> Back to Received List
-                            </button>
-                        </Link>
+                        <button 
+                            onClick={handleOpenBatchModal}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md mt-2 transition"
+                        >
+                            <Layers className="w-4 h-4" /> Create Batch
+                        </button>
                     </div>
                 </div>
+
+                {/* ── Batch Assignment Modal ──────────────────── */}
+                {batchModal && (
+                    <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setBatchModal(false)}>
+                        <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                            <div className="flex items-center justify-between p-5 border-b bg-gray-50">
+                                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                    <Layers className="w-5 h-5 text-primary-600" />
+                                    Add to Batch
+                                </h2>
+                                <button onClick={() => setBatchModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                            </div>
+                            <div className="p-5 space-y-4">
+                                <p className="text-sm text-gray-600">
+                                    Verification complete for <span className="font-semibold">{completedSummary.licensePlate || returnId}</span>.
+                                    Assign this return to a monthly batch for close-out processing.
+                                </p>
+
+                                {batchesLoading ? (
+                                    <div className="flex justify-center py-6">
+                                        <Loader2 className="w-5 h-5 animate-spin text-primary-600" />
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => setCreateNewBatch(false)}
+                                                className={`flex-1 py-2 text-sm rounded-lg border font-medium transition-colors ${!createNewBatch ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                                            >
+                                                Existing Batch
+                                            </button>
+                                            <button
+                                                onClick={() => setCreateNewBatch(true)}
+                                                className={`flex-1 py-2 text-sm rounded-lg border font-medium transition-colors ${createNewBatch ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                                            >
+                                                <PlusCircle className="w-4 h-4 inline mr-1" />Create New
+                                            </button>
+                                        </div>
+
+                                        {!createNewBatch ? (
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Select Open Batch</label>
+                                                {openBatches.length === 0 ? (
+                                                    <div className="text-sm text-gray-500 bg-gray-50 rounded-lg p-3 text-center">
+                                                        No open batches found. Switch to "Create New" to start one.
+                                                    </div>
+                                                ) : (
+                                                    <select
+                                                        value={selectedBatchId}
+                                                        onChange={e => setSelectedBatchId(e.target.value)}
+                                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                    >
+                                                        <option value="">— Choose a batch —</option>
+                                                        {openBatches.map(b => (
+                                                            <option key={b.id} value={b.id}>
+                                                                {b.batchName || b.batchMonth} ({b.totalReturns} returns)
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-3">
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700 mb-1">Batch Month <span className="text-red-500">*</span></label>
+                                                    {usedMonthsLoading ? (
+                                                        <div className="flex items-center gap-2 py-2 text-sm text-gray-500">
+                                                            <Loader2 className="w-4 h-4 animate-spin text-primary-600" /> Loading months…
+                                                        </div>
+                                                    ) : availableNewBatchMonths.length === 0 ? (
+                                                        <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+                                                            No open month slots in the allowed range. Create a batch from Warehouse → Monthly Batches or free a month by deleting an unused open batch.
+                                                        </p>
+                                                    ) : (
+                                                        <select
+                                                            value={newBatchMonth}
+                                                            onChange={e => setNewBatchMonth(e.target.value)}
+                                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                                                        >
+                                                            {availableNewBatchMonths.map(o => (
+                                                                <option key={o.value} value={o.value}>{o.label}</option>
+                                                            ))}
+                                                        </select>
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700 mb-1">Batch Name <span className="text-gray-400 font-normal">(optional)</span></label>
+                                                    <input
+                                                        type="text"
+                                                        value={newBatchName}
+                                                        onChange={e => setNewBatchName(e.target.value)}
+                                                        placeholder="e.g. March 2026 Batch"
+                                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                            <div className="flex justify-end gap-2 p-5 border-t bg-gray-50">
+                                <button onClick={() => setBatchModal(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Skip</button>
+                                <button
+                                    onClick={handleAssignToBatch}
+                                    disabled={
+                                        batchAssigning || batchesLoading
+                                        || (!createNewBatch && !selectedBatchId)
+                                        || (createNewBatch && (usedMonthsLoading || !newBatchMonth || availableNewBatchMonths.length === 0))
+                                    }
+                                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors"
+                                >
+                                    {batchAssigning ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Layers className="w-4 h-4 mr-1" />}
+                                    {createNewBatch ? 'Create & Assign' : 'Assign to Batch'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </PermissionGate>
         );
     }
@@ -903,6 +1140,130 @@ export default function VerificationSessionPage() {
                                 </button>
                             </div>
                         )}
+                    </div>
+                )}
+
+                {/* ── Batch Assignment Modal ──────────────────── */}
+                {batchModal && (
+                    <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setBatchModal(false)}>
+                        <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                            <div className="flex items-center justify-between p-5 border-b bg-gray-50">
+                                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                    <Layers className="w-5 h-5 text-primary-600" />
+                                    Add to Batch
+                                </h2>
+                                <button onClick={() => setBatchModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                            </div>
+                            <div className="p-5 space-y-4">
+                                <p className="text-sm text-gray-600">
+                                    Verification complete for <span className="font-semibold">{v2Summary?.transaction?.licensePlate || returnId}</span>.
+                                    Assign this return to a monthly batch for close-out processing.
+                                </p>
+
+                                {batchesLoading ? (
+                                    <div className="flex justify-center py-6">
+                                        <Loader2 className="w-5 h-5 animate-spin text-primary-600" />
+                                    </div>
+                                ) : (
+                                    <>
+                                        {/* Toggle: existing vs new */}
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => setCreateNewBatch(false)}
+                                                className={`flex-1 py-2 text-sm rounded-lg border font-medium transition-colors ${!createNewBatch ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                                            >
+                                                Existing Batch
+                                            </button>
+                                            <button
+                                                onClick={() => setCreateNewBatch(true)}
+                                                className={`flex-1 py-2 text-sm rounded-lg border font-medium transition-colors ${createNewBatch ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                                            >
+                                                <PlusCircle className="w-4 h-4 inline mr-1" />Create New
+                                            </button>
+                                        </div>
+
+                                        {!createNewBatch ? (
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Select Open Batch</label>
+                                                {openBatches.length === 0 ? (
+                                                    <div className="text-sm text-gray-500 bg-gray-50 rounded-lg p-3 text-center">
+                                                        No open batches found. Switch to "Create New" to start one.
+                                                    </div>
+                                                ) : (
+                                                    <select
+                                                        value={selectedBatchId}
+                                                        onChange={e => setSelectedBatchId(e.target.value)}
+                                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                    >
+                                                        <option value="">— Choose a batch —</option>
+                                                        {openBatches.map(b => (
+                                                            <option key={b.id} value={b.id}>
+                                                                {b.batchName || b.batchMonth} ({b.totalReturns} returns)
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-3">
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700 mb-1">Batch Month <span className="text-red-500">*</span></label>
+                                                    {usedMonthsLoading ? (
+                                                        <div className="flex items-center gap-2 py-2 text-sm text-gray-500">
+                                                            <Loader2 className="w-4 h-4 animate-spin text-primary-600" /> Loading months…
+                                                        </div>
+                                                    ) : availableNewBatchMonths.length === 0 ? (
+                                                        <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+                                                            No open month slots in the allowed range. Create a batch from Warehouse → Monthly Batches or free a month by deleting an unused open batch.
+                                                        </p>
+                                                    ) : (
+                                                        <select
+                                                            value={newBatchMonth}
+                                                            onChange={e => setNewBatchMonth(e.target.value)}
+                                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                                                        >
+                                                            {availableNewBatchMonths.map(o => (
+                                                                <option key={o.value} value={o.value}>{o.label}</option>
+                                                            ))}
+                                                        </select>
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-700 mb-1">Batch Name <span className="text-gray-400 font-normal">(optional)</span></label>
+                                                    <input
+                                                        type="text"
+                                                        value={newBatchName}
+                                                        onChange={e => setNewBatchName(e.target.value)}
+                                                        placeholder="e.g. March 2026 Batch"
+                                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                            <div className="flex justify-end gap-2 p-5 border-t bg-gray-50">
+                                <button 
+                                    onClick={() => setBatchModal(false)}
+                                    className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                                >
+                                    Skip
+                                </button>
+                                <button
+                                    onClick={handleAssignToBatch}
+                                    disabled={
+                                        batchAssigning || batchesLoading
+                                        || (!createNewBatch && !selectedBatchId)
+                                        || (createNewBatch && (usedMonthsLoading || !newBatchMonth || availableNewBatchMonths.length === 0))
+                                    }
+                                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors"
+                                >
+                                    {batchAssigning ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Layers className="w-4 h-4 mr-1" />}
+                                    {createNewBatch ? 'Create & Assign' : 'Assign to Batch'}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
