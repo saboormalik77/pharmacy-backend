@@ -5,24 +5,18 @@ import { usePathname } from 'next/navigation';
 import {
     LayoutDashboard,
     Building2,
-    Warehouse,
     BarChart3,
     Settings,
     Users,
     UserCog,
     ClipboardList,
     Scan,
-    Shield,
-    AlertTriangle,
-    CircleDollarSign,
-    DollarSign,
-    Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppSelector } from '@/lib/store/hooks';
 import { usePermissions } from '@/hooks/usePermissions';
 
-// Warehouse sub-routes that activate the Warehouse sidebar link
+// Warehouse sub-routes that activate the Warehouse sidebar link (when that tab is uncommented)
 const warehouseSubRoutes = [
     '/warehouse/receiving',
     '/warehouse/verification',
@@ -34,7 +28,7 @@ const warehouseSubRoutes = [
     '/warehouse/destruction',
 ];
 
-// Payout sub-routes that activate the Payout Management sidebar link
+// Payout sub-routes that activate the Payout Management sidebar link (when that tab is uncommented)
 const payoutSubRoutes = [
     '/pharmacy-payments',
     '/warehouse/unpaid',
@@ -45,20 +39,20 @@ const payoutSubRoutes = [
 const adminSidebarLinks = [
     { href: '/', icon: LayoutDashboard, label: 'Dashboard', permission: 'dashboard' },
     { href: '/pharmacies', icon: Building2, label: 'Pharmacies', permission: 'pharmacies' },
-    { href: '/distributors', icon: Warehouse, label: 'Distributors', permission: 'distributors' },
+    // { href: '/distributors', icon: Warehouse, label: 'Distributors', permission: 'distributors' },
     // { href: '/marketplace', icon: ShoppingCart, label: 'Marketplace', permission: 'marketplace' },
     // { href: '/documents', icon: FileText, label: 'Documents', permission: 'documents' },
     // { href: '/payments', icon: CreditCard, label: 'Payments', permission: 'payments' },
-    { href: '/payout-hub', icon: CircleDollarSign, label: 'Payout Mgmt', permission: 'payout_hub' },
+    // { href: '/payout-hub', icon: CircleDollarSign, label: 'Payout Mgmt', permission: 'payout_hub' },
     { href: '/analytics', icon: BarChart3, label: 'Analytics', permission: 'analytics' },
     { href: '/settings', icon: Settings, label: 'Settings', permission: 'settings' },
     { href: '/admins', icon: Users, label: 'Admins', permission: 'admins' },
     { href: '/processors', icon: UserCog, label: 'Processors', permission: 'processors' },
-    { href: '/policies', icon: Shield, label: 'Labeler Info', permission: 'policies' },
-    { href: '/ndc-pricing', icon: DollarSign, label: 'NDC Pricing', permission: 'ndc_pricing' },
-    { href: '/warehouse/tbd-items', icon: AlertTriangle, label: 'TBD Items', permission: 'tbd_items' },
-    { href: '/warehouse/destruction', icon: Trash2, label: 'Destruction', permission: 'destruction' },
-    { href: '/warehouse', icon: Warehouse, label: 'Warehouse', matchPrefix: '/warehouse', permission: 'warehouse' },
+    // { href: '/policies', icon: Shield, label: 'Labeler Info', permission: 'policies' },
+    // { href: '/ndc-pricing', icon: DollarSign, label: 'NDC Pricing', permission: 'ndc_pricing' },
+    // { href: '/warehouse/tbd-items', icon: AlertTriangle, label: 'TBD Items', permission: 'tbd_items' },
+    // { href: '/warehouse/destruction', icon: Trash2, label: 'Destruction', permission: 'destruction' },
+    // { href: '/warehouse', icon: Warehouse, label: 'Warehouse', matchPrefix: '/warehouse', permission: 'warehouse' },
 ];
 
 // Processor navigation (for role = 'processor') — Receiving is warehouse-only
@@ -66,9 +60,9 @@ const processorSidebarLinks = [
     { href: '/', icon: LayoutDashboard, label: 'Dashboard' },
     { href: '/warehouse/returns', icon: ClipboardList, label: 'Returns' },
     { href: '/warehouse/returns/create', icon: Scan, label: 'Create Return' },
-    { href: '/ndc-pricing', icon: DollarSign, label: 'NDC Pricing' },
-    { href: '/warehouse/tbd-items', icon: AlertTriangle, label: 'TBD Items' },
-    { href: '/warehouse/destruction', icon: Trash2, label: 'Destruction' },
+    // { href: '/ndc-pricing', icon: DollarSign, label: 'NDC Pricing' },
+    // { href: '/warehouse/tbd-items', icon: AlertTriangle, label: 'TBD Items' },
+    // { href: '/warehouse/destruction', icon: Trash2, label: 'Destruction' },
     // { href: '/warehouse/wine-cellar', icon: Archive, label: 'Wine Cellar' },
     // { href: '/settings', icon: Settings, label: 'Settings' },
 ];
