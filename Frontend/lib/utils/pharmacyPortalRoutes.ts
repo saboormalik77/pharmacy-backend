@@ -19,7 +19,7 @@ export function getFirstAllowedDashboardPath(args: {
     { href: '/returns/destruction', visible: has('destruction:view') },
     { href: '/wine-cellar', visible: has('wine_cellar:view') },
     // { href: '/products', visible: has('products:view') },
-    { href: '/optimization', visible: has('optimization:view') },
+    // { href: '/optimization', visible: has('optimization:view') },
     // { href: '/marketplace', visible: has('marketplace:view') },
     // { href: '/orders', visible: has('orders:view') },
     // { href: '/inventory-analysis', visible: has('inventory_analysis:view') },

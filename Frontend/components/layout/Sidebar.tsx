@@ -19,7 +19,6 @@ import {
   Camera,
   TrendingUp,
   Building2,
-  Search,
   ShoppingCart,
   ClipboardCheck,
   ClipboardList,
@@ -78,12 +77,12 @@ export function Sidebar({ onClose }: SidebarProps) {
     //   icon: ScanLine,
     //   visible: hasPermission('products:view'),
     // },
-    {
-      title: 'Search',
-      href: '/optimization',
-      icon: Search,
-      visible: hasPermission('optimization:view'),
-    },
+    // {
+    //   title: 'Search',
+    //   href: '/optimization',
+    //   icon: Search,
+    //   visible: hasPermission('optimization:view'),
+    // },
     // {
     //   title: 'Marketplace',
     //   href: '/marketplace',
