@@ -54,6 +54,7 @@ import pharmacyAnalyticsRoutes from './routes/pharmacyAnalyticsRoutes';
 import ndcPricingBookRoutes from './routes/ndcPricingBookRoutes';
 import pharmacyBranchRoutes from './routes/pharmacyBranchRoutes';
 import pharmacyRoleRoutes from './routes/pharmacyRoleRoutes';
+import mainAdminRoutes from './routes/mainAdminRoutes';
 import { globalErrorHandler } from './controllers/errorController';
 import { checkExpiringProductsAndNotify } from './services/notificationCronService';
 import { surfaceReadyWineCellarItems } from './services/wineCellarCronService';
@@ -79,9 +80,11 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:3002',
+  'http://localhost:3003',
   'http://127.0.0.1:3000',
   'http://127.0.0.1:3001',
   'http://127.0.0.1:3002',
+  'http://127.0.0.1:3003',
   'https://pharmacy-ui-75vl.vercel.app', // Without trailing slash
   'https://pharmacy-ui-75vl.vercel.app/', // With trailing slash (for safety)
   'https://pharm-admin.vercel.app',
@@ -199,6 +202,7 @@ app.use('/api/analytics', pharmacyAnalyticsRoutes);
 app.use('/api/admin/ndc-pricing', ndcPricingBookRoutes);
 app.use('/api/pharmacy-branches', pharmacyBranchRoutes);
 app.use('/api/pharmacy-roles', pharmacyRoleRoutes);
+app.use('/api/main-admin', mainAdminRoutes);
 
 /**
  * @swagger
