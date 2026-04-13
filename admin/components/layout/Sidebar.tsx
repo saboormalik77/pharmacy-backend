@@ -45,7 +45,7 @@ const payoutSubRoutes = [
 const adminSidebarLinks = [
     { href: '/', icon: LayoutDashboard, label: 'Dashboard', permission: 'dashboard' },
     { href: '/pharmacies', icon: Building2, label: 'Pharmacies', permission: 'pharmacies' },
-    // { href: '/distributors', icon: Warehouse, label: 'Distributors', permission: 'distributors' },
+    { href: '/distributors', icon: Warehouse, label: 'Distributors', permission: 'distributors' },
     // { href: '/marketplace', icon: ShoppingCart, label: 'Marketplace', permission: 'marketplace' },
     // { href: '/documents', icon: FileText, label: 'Documents', permission: 'documents' },
     // { href: '/payments', icon: CreditCard, label: 'Payments', permission: 'payments' },
