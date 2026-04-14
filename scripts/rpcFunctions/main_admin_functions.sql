@@ -105,7 +105,7 @@ DECLARE
 BEGIN
   v_offset := (p_page - 1) * p_limit;
 
-  -- Stats (using admin table, treating is_active as status)
+  -- Stats (using admin table, treating is_active as status, only super_admin role)
   SELECT jsonb_build_object(
     'total', COUNT(*)::INTEGER,
     'active', COUNT(*) FILTER (WHERE a.is_active = true)::INTEGER,
@@ -113,14 +113,16 @@ BEGIN
     'suspended', 0::INTEGER
   )
   INTO v_stats
-  FROM admin a;
+  FROM admin a
+  WHERE a.role = 'super_admin';
 
   -- Count
   SELECT COUNT(*)::INTEGER
   INTO v_total
   FROM admin a
   WHERE
-    (p_search IS NULL OR p_search = '' OR
+    a.role = 'super_admin'
+    AND (p_search IS NULL OR p_search = '' OR
       a.name ILIKE '%' || p_search || '%' OR
       a.email ILIKE '%' || p_search || '%')
     AND (p_status IS NULL OR p_status = '' OR p_status = 'all' OR 
@@ -147,7 +149,8 @@ BEGIN
     ) AS row_data
     FROM admin a
     WHERE
-      (p_search IS NULL OR p_search = '' OR
+      a.role = 'super_admin'
+      AND (p_search IS NULL OR p_search = '' OR
         a.name ILIKE '%' || p_search || '%' OR
         a.email ILIKE '%' || p_search || '%')
       AND (p_status IS NULL OR p_status = '' OR p_status = 'all' OR 
@@ -213,7 +216,7 @@ BEGIN
   )
   INTO v_group
   FROM admin a
-  WHERE a.id = p_group_id;
+  WHERE a.id = p_group_id AND a.role = 'super_admin';
 
   IF v_group IS NULL THEN
     RETURN jsonb_build_object('error', true, 'message', 'Buying group not found');
@@ -362,7 +365,7 @@ BEGIN
     email = COALESCE(p_contact_email, email),
     is_active = COALESCE(v_is_active, is_active),
     updated_at = NOW()
-  WHERE id = p_group_id;
+  WHERE id = p_group_id AND role = 'super_admin';
 
   SELECT jsonb_build_object(
     'id', a.id,
@@ -398,12 +401,12 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM admin WHERE id = p_group_id) THEN
+  IF NOT EXISTS (SELECT 1 FROM admin WHERE id = p_group_id AND role = 'super_admin') THEN
     RETURN jsonb_build_object('error', true, 'message', 'Buying group not found');
   END IF;
 
   -- Delete the admin record (buying group)
-  DELETE FROM admin WHERE id = p_group_id;
+  DELETE FROM admin WHERE id = p_group_id AND role = 'super_admin';
 
   RETURN jsonb_build_object(
     'error', false,
