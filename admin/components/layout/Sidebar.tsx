@@ -46,7 +46,7 @@ const adminSidebarLinks = [
     // { href: '/payout-hub', icon: CircleDollarSign, label: 'Payout Mgmt', permission: 'payout_hub' },
     { href: '/analytics', icon: BarChart3, label: 'Analytics', permission: 'analytics' },
     { href: '/settings', icon: Settings, label: 'Settings', permission: 'settings' },
-    { href: '/admins', icon: Users, label: 'Admins', permission: 'admins' },
+    // { href: '/admins', icon: Users, label: 'Admins', permission: 'admins' },
     { href: '/processors', icon: UserCog, label: 'Processors', permission: 'processors' },
     // { href: '/policies', icon: Shield, label: 'Labeler Info', permission: 'policies' },
     // { href: '/ndc-pricing', icon: DollarSign, label: 'NDC Pricing', permission: 'ndc_pricing' },
