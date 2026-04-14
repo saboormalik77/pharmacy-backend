@@ -377,6 +377,7 @@ export default function ProcessorsPage() {
                                         <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Phone</th>
                                         <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                                         <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Stores</th>
+                                        <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Returns</th>
                                         <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Created</th>
                                         <th className="px-3 py-2 text-center text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                                     </tr>
@@ -411,6 +412,11 @@ export default function ProcessorsPage() {
                                                     <Store className="w-3 h-3" />
                                                     {processor.assignedStoresCount ?? 0}
                                                 </button>
+                                            </td>
+                                            <td className="px-3 py-1.5 whitespace-nowrap">
+                                                <span className="text-xs text-gray-700 font-medium">
+                                                    {processor.totalReturns ?? 0}
+                                                </span>
                                             </td>
                                             <td className="px-3 py-1.5 text-xs text-gray-500 whitespace-nowrap">
                                                 {processor.createdAt ? formatDate(processor.createdAt) : '—'}
@@ -511,6 +517,13 @@ export default function ProcessorsPage() {
                                     <p className="text-gray-900 flex items-center gap-1 mt-0.5">
                                         <Store className="w-3.5 h-3.5 text-gray-400" />
                                         {viewModal.assignedStoresCount ?? 0}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-gray-500 font-medium">Total Returns</p>
+                                    <p className="text-gray-900 flex items-center gap-1 mt-0.5">
+                                        <UserCog className="w-3.5 h-3.5 text-gray-400" />
+                                        {viewModal.totalReturns ?? 0}
                                     </p>
                                 </div>
                                 <div>

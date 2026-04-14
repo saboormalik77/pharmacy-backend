@@ -204,7 +204,7 @@ export default function Dashboard() {
       {/* Page Header */}
       <div>
         <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-sm sm:text-base text-gray-600 mt-1">Welcome to PharmAdmin Management Portal</p>
+        <p className="text-sm sm:text-base text-gray-600 mt-1">Welcome to Buying group Management Portal</p>
       </div>
 
       {/* Stats Grid */}

@@ -545,6 +545,7 @@ export interface Processor {
     status: 'active' | 'inactive';
     notes: string | null;
     assignedStoresCount: number;
+    totalReturns: number;
     createdAt: string;
     updatedAt: string;
 }

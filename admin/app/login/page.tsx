@@ -63,8 +63,8 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-500 rounded-xl mb-4 shadow-lg">
             <Shield className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">PharmAdmin</h1>
-          <p className="text-gray-600">Admin Panel Login</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Buying group</h1>
+          <p className="text-gray-600"> Buying group Management Portal Login</p>
         </div>
 
         {/* Login Card */}
@@ -90,7 +90,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="admin@pharmadmin.com"
+                  placeholder="admin@buyinggroup.com"
                   required
                   autoComplete="email"
                 />
@@ -171,7 +171,7 @@ export default function LoginPage() {
 
         {/* Footer */}
         <p className="text-center text-sm text-gray-500 mt-6" suppressHydrationWarning>
-          © {new Date().getFullYear()} PharmAdmin. All rights reserved.
+          © {new Date().getFullYear()} Buying group. All rights reserved.
         </p>
       </div>
     </div>

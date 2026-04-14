@@ -14,6 +14,7 @@ export interface Processor {
   status: string;
   notes: string | null;
   assignedStoresCount: number;
+  totalReturns: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -69,7 +70,7 @@ function ensureAdmin() {
   return supabaseAdmin;
 }
 
-function mapProcessor(row: any, storeCount: number = 0): Processor {
+function mapProcessor(row: any, storeCount: number = 0, totalReturns: number = 0): Processor {
   return {
     id: row.id,
     name: row.name,
@@ -78,6 +79,7 @@ function mapProcessor(row: any, storeCount: number = 0): Processor {
     status: row.status,
     notes: row.notes,
     assignedStoresCount: storeCount,
+    totalReturns,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -128,8 +130,10 @@ export const getProcessors = async (
 
   const processorIds = (data || []).map((p: any) => p.id);
   let storeCounts: Record<string, number> = {};
+  let returnCounts: Record<string, number> = {};
 
   if (processorIds.length > 0) {
+    // Count assigned stores
     const { data: assignments } = await sb
       .from('processor_store_assignments')
       .select('processor_id');
@@ -141,10 +145,26 @@ export const getProcessors = async (
         }
       }
     }
+
+    // Count returns (return_transactions) created by each processor
+    const { data: returns } = await sb
+      .from('return_transactions')
+      .select('processor_id')
+      .in('processor_id', processorIds);
+
+    if (returns) {
+      for (const r of returns) {
+        if (r.processor_id) {
+          returnCounts[r.processor_id] = (returnCounts[r.processor_id] || 0) + 1;
+        }
+      }
+    }
   }
 
   return {
-    processors: (data || []).map((row: any) => mapProcessor(row, storeCounts[row.id] || 0)),
+    processors: (data || []).map((row: any) => 
+      mapProcessor(row, storeCounts[row.id] || 0, returnCounts[row.id] || 0)
+    ),
     pagination: { page, limit, total, totalPages },
   };
 };
@@ -165,12 +185,19 @@ export const getProcessorById = async (processorId: string): Promise<Processor> 
     );
   }
 
+  // Count assigned stores
   const { count } = await sb
     .from('processor_store_assignments')
     .select('id', { count: 'exact', head: true })
     .eq('processor_id', processorId);
 
-  return mapProcessor(data, count ?? 0);
+  // Count returns (return_transactions) created by this processor
+  const { count: returnCount } = await sb
+    .from('return_transactions')
+    .select('id', { count: 'exact', head: true })
+    .eq('processor_id', processorId);
+
+  return mapProcessor(data, count ?? 0, returnCount ?? 0);
 };
 
 export const createProcessor = async (input: CreateProcessorData): Promise<Processor> => {
@@ -302,7 +329,13 @@ export const updateProcessor = async (
     .select('id', { count: 'exact', head: true })
     .eq('processor_id', processorId);
 
-  return mapProcessor(data, count ?? 0);
+  // Count returns (return_transactions) created by this processor
+  const { count: returnCount } = await sb
+    .from('return_transactions')
+    .select('id', { count: 'exact', head: true })
+    .eq('processor_id', processorId);
+
+  return mapProcessor(data, count ?? 0, returnCount ?? 0);
 };
 
 export const deactivateProcessor = async (processorId: string): Promise<void> => {

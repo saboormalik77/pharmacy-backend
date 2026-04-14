@@ -43,7 +43,7 @@ export default function ForgotPasswordPage() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-500 rounded-xl mb-4 shadow-lg">
               <Shield className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">PharmAdmin</h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Buying group</h1>
           </div>
 
           {/* Success Card */}
@@ -71,7 +71,7 @@ export default function ForgotPasswordPage() {
 
           {/* Footer */}
           <p className="text-center text-sm text-gray-500 mt-6">
-            © {new Date().getFullYear()} PharmAdmin. All rights reserved.
+            © {new Date().getFullYear()} Buying group. All rights reserved.
           </p>
         </div>
       </div>
@@ -86,7 +86,7 @@ export default function ForgotPasswordPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-500 rounded-xl mb-4 shadow-lg">
             <Shield className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">PharmAdmin</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Buying group</h1>
           <p className="text-gray-600">Reset your password</p>
         </div>
 
@@ -120,7 +120,7 @@ export default function ForgotPasswordPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="admin@pharmadmin.com"
+                  placeholder="admin@buyinggroup.com"
                   required
                   autoComplete="email"
                   autoFocus
@@ -164,7 +164,7 @@ export default function ForgotPasswordPage() {
 
         {/* Footer */}
         <p className="text-center text-sm text-gray-500 mt-6">
-          © {new Date().getFullYear()} PharmAdmin. All rights reserved.
+          © {new Date().getFullYear()} Buying group. All rights reserved.
         </p>
       </div>
     </div>
