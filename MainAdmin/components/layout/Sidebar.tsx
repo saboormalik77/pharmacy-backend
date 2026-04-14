@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, Warehouse, CircleDollarSign, FileText, DollarSign, AlertTriangle, Trash2 } from 'lucide-react';
+import { LayoutDashboard, Users, Warehouse, CircleDollarSign, FileText, DollarSign, AlertTriangle, Trash2, UserCog } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { usePermissions } from '@/hooks/usePermissions';
 
 const warehouseSubRoutes = [
     '/warehouse/receiving',
@@ -23,15 +24,16 @@ const payoutSubRoutes = [
 ];
 
 const sidebarLinks = [
-    { href: '/', icon: LayoutDashboard, label: 'Dashboard' },
-    { href: '/buying-groups', icon: Users, label: 'Buying Groups' },
-    { href: '/distributors', icon: Warehouse, label: 'Distributors' },
-    { href: '/warehouse', icon: Warehouse, label: 'Warehouse' },
-    { href: '/payout-hub', icon: CircleDollarSign, label: 'Payout Mgmt' },
-    { href: '/policies', icon: FileText, label: 'Labeler Info' },
-    { href: '/ndc-pricing', icon: DollarSign, label: 'NDC Pricing' },
-    { href: '/warehouse/tbd-items', icon: AlertTriangle, label: 'TBD Items' },
-    { href: '/warehouse/destruction', icon: Trash2, label: 'Destruction' },
+    { href: '/', icon: LayoutDashboard, label: 'Dashboard', permission: 'dashboard' },
+    { href: '/buying-groups', icon: Users, label: 'Buying Groups', permission: 'buying_groups' },
+    { href: '/distributors', icon: Warehouse, label: 'Distributors', permission: 'distributors' },
+    { href: '/warehouse', icon: Warehouse, label: 'Warehouse', permission: 'warehouse' },
+    { href: '/payout-hub', icon: CircleDollarSign, label: 'Payout Mgmt', permission: 'payout_hub' },
+    { href: '/policies', icon: FileText, label: 'Labeler Info', permission: 'policies' },
+    { href: '/ndc-pricing', icon: DollarSign, label: 'NDC Pricing', permission: 'ndc_pricing' },
+    { href: '/warehouse/tbd-items', icon: AlertTriangle, label: 'TBD Items', permission: 'tbd_items' },
+    { href: '/warehouse/destruction', icon: Trash2, label: 'Destruction', permission: 'destruction' },
+    { href: '/sub-admins', icon: UserCog, label: 'Sub Admins', permission: 'sub_admins' },
 ];
 
 interface SidebarProps {
@@ -42,6 +44,12 @@ interface SidebarProps {
 
 export function Sidebar({ isCollapsed, isOpen = false, onClose }: SidebarProps) {
     const pathname = usePathname();
+    const { hasPermission, isMainAdmin } = usePermissions();
+
+    const filteredLinks = sidebarLinks.filter((link) => {
+        if (link.permission === 'sub_admins' && !isMainAdmin) return false;
+        return hasPermission(link.permission);
+    });
 
     const handleLinkClick = () => {
         if (onClose && typeof window !== 'undefined' && window.innerWidth < 640) {
@@ -64,7 +72,7 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose }: SidebarProps) 
                 style={{ scrollbarWidth: 'thin', scrollbarColor: '#334155 transparent' }}
             >
                 <nav className="space-y-0.5">
-                    {sidebarLinks.map((link) => {
+                    {filteredLinks.map((link) => {
                         const Icon = link.icon;
                         const isActive =
                             link.href === '/warehouse'

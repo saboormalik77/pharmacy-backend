@@ -26,6 +26,7 @@ export const mainAdminLoginHandler = catchAsync(
       access_token: result.access_token,
       user: result.user,
     });
+
   }
 );
 

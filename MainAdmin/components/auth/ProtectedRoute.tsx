@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { logoutUser } from '@/lib/store/authSlice';
 
-const PUBLIC_PAGES = ['/login'];
+const PUBLIC_PAGES = ['/login', '/setup-account'];
 
 function decodeJwtExp(token: string): number | null {
   try {

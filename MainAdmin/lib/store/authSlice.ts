@@ -24,6 +24,8 @@ export const loginUser = createAsyncThunk(
         id: data.id || data.userId || '',
         email: data.email || credentials.email,
         name: data.name || 'Main Admin',
+        role: data.role,
+        permissions: data.permissions,
       };
       const userData: User = { ...rawUser };
 

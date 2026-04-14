@@ -22,6 +22,7 @@ export interface LoginResponse {
   name?: string;
   username?: string;
   role?: string;
+  permissions?: string[];
 }
 
 export interface AuthState {

@@ -7,7 +7,7 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import StoreProvider from '@/components/providers/StoreProvider';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
-const AUTH_PATHS = ['/login'];
+const AUTH_PATHS = ['/login', '/setup-account'];
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);

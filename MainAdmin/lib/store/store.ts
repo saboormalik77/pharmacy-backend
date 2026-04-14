@@ -14,6 +14,7 @@ import settingsReducer from './settingsSlice';
 import pharmacyPaymentsReducer from './pharmacyPaymentsSlice';
 import ndcPricingReducer from './ndcPricingSlice';
 import distributorsReducer from './distributorsSlice';
+import subAdminsReducer from './subAdminsSlice';
 
 export const makeStore = () => {
   return configureStore({
@@ -33,6 +34,7 @@ export const makeStore = () => {
       pharmacyPayments: pharmacyPaymentsReducer,
       ndcPricing: ndcPricingReducer,
       distributors: distributorsReducer,
+      subAdmins: subAdminsReducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({

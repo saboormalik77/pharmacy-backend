@@ -8,6 +8,8 @@ declare global {
       mainAdminId?: string;
       mainAdminEmail?: string;
       mainAdminName?: string;
+      mainAdminRole?: string;
+      mainAdminPermissions?: string[];
     }
   }
 }
@@ -35,6 +37,8 @@ export const authenticateMainAdmin = async (
     req.mainAdminId = adminData.id;
     req.mainAdminEmail = adminData.email;
     req.mainAdminName = adminData.name;
+    req.mainAdminRole = adminData.role;
+    req.mainAdminPermissions = adminData.permissions;
 
     next();
   } catch (error) {

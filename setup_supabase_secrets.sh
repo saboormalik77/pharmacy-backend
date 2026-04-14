@@ -99,7 +99,7 @@ if [[ -f "$ENV_FILE" ]]; then
   if [[ "${1:-}" == "--deploy" ]]; then
     echo "🚀 Deploying Edge Functions..."
     cd "$ROOT"
-    for fn in send-pharmacy-invite send-branch-invite send-email send-ra-email-enhanced \
+    for fn in send-pharmacy-invite send-branch-invite send-sub-admin-invite send-email send-ra-email-enhanced \
               send-ra-email read-ra-emails resend-webhook; do
       npx supabase functions deploy "$fn" --no-verify-jwt
     done
