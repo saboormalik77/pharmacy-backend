@@ -1,27 +1,34 @@
 'use client';
 
 import { PermissionGate } from '@/components/auth/PermissionGate';
-import { useState, useEffect } from 'react';
-import { Save, Bell, Shield, Globe, Loader2, Eye, EyeOff, Warehouse } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Save, Shield, Globe, Loader2, Eye, EyeOff, Warehouse, Building2, ImagePlus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
-import { fetchSettings, updateNotificationSettings, updateWarehouseAddress, resetPassword } from '@/lib/store/settingsSlice';
+import { fetchSettings, updateWarehouseAddress, updateBusinessSettings, uploadLogo, resetPassword } from '@/lib/store/settingsSlice';
 
 export default function SettingsPage() {
     const dispatch = useAppDispatch();
     const { settings, isLoading, isUpdating, isResettingPassword, error } = useAppSelector((state) => state.settings);
     const { isAuthenticated } = useAppSelector((state) => state.auth);
-    
-    // Local state for notification settings
-    const [notificationSettings, setNotificationSettings] = useState({
-        emailNotifications: false,
-        documentApprovalNotif: false,
-        paymentNotif: false,
-        shipmentNotif: false,
+
+    const [businessForm, setBusinessForm] = useState({ businessName: '' });
+    const [logoPreview, setLogoPreview] = useState<string | null>(null);
+    const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const [warehouseForm, setWarehouseForm] = useState({
+        warehouseName: '',
+        warehouseStreet: '',
+        warehouseCity: '',
+        warehouseState: '',
+        warehouseZip: '',
+        warehouseCountry: 'US',
+        warehousePhone: '',
+        warehouseContactName: '',
     });
 
-    // Local state for password reset
     const [passwordForm, setPasswordForm] = useState({
         currentPassword: '',
         newPassword: '',
@@ -40,17 +47,6 @@ export default function SettingsPage() {
         confirmPassword: false,
     });
 
-    const [warehouseForm, setWarehouseForm] = useState({
-        warehouseName: '',
-        warehouseStreet: '',
-        warehouseCity: '',
-        warehouseState: '',
-        warehouseZip: '',
-        warehouseCountry: 'US',
-        warehousePhone: '',
-        warehouseContactName: '',
-    });
-
     const [toasts, setToasts] = useState<Toast[]>([]);
 
     const showToast = (message: string, type: Toast['type'] = 'success') => {
@@ -62,7 +58,6 @@ export default function SettingsPage() {
         setToasts((prev) => prev.filter((toast) => toast.id !== id));
     };
 
-    // Fetch settings on mount
     useEffect(() => {
         if (isAuthenticated) {
             dispatch(fetchSettings());
@@ -71,12 +66,8 @@ export default function SettingsPage() {
 
     useEffect(() => {
         if (settings) {
-            setNotificationSettings({
-                emailNotifications: settings.emailNotifications,
-                documentApprovalNotif: settings.documentApprovalNotif,
-                paymentNotif: settings.paymentNotif,
-                shipmentNotif: settings.shipmentNotif,
-            });
+            setBusinessForm({ businessName: settings.businessName || '' });
+            setLogoPreview(settings.logoUrl || null);
             setWarehouseForm({
                 warehouseName: settings.warehouseName || '',
                 warehouseStreet: settings.warehouseStreet || '',
@@ -90,22 +81,40 @@ export default function SettingsPage() {
         }
     }, [settings]);
 
-    // Show error toast if there's an error
     useEffect(() => {
-        if (error) {
-            showToast(error, 'error');
-        }
+        if (error) showToast(error, 'error');
     }, [error]);
 
-    const handleSaveNotifications = async () => {
+    const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setLogoPreview(URL.createObjectURL(file));
+        setIsUploadingLogo(true);
         try {
-            const result = await dispatch(updateNotificationSettings(notificationSettings));
-            if (updateNotificationSettings.fulfilled.match(result)) {
-                showToast('Notification settings updated successfully!', 'success');
+            const result = await dispatch(uploadLogo(file));
+            if (uploadLogo.fulfilled.match(result)) {
+                showToast('Logo uploaded successfully!', 'success');
             } else {
-                showToast(result.payload as string || 'Failed to update notification settings', 'error');
+                showToast(result.payload as string || 'Failed to upload logo', 'error');
+                setLogoPreview(settings?.logoUrl || null);
             }
-        } catch (err) {
+        } catch {
+            showToast('An unexpected error occurred', 'error');
+            setLogoPreview(settings?.logoUrl || null);
+        } finally {
+            setIsUploadingLogo(false);
+        }
+    };
+
+    const handleSaveBusinessSettings = async () => {
+        try {
+            const result = await dispatch(updateBusinessSettings({ businessName: businessForm.businessName }));
+            if (updateBusinessSettings.fulfilled.match(result)) {
+                showToast('Business settings updated successfully!', 'success');
+            } else {
+                showToast(result.payload as string || 'Failed to update business settings', 'error');
+            }
+        } catch {
             showToast('An unexpected error occurred', 'error');
         }
     };
@@ -118,71 +127,35 @@ export default function SettingsPage() {
             } else {
                 showToast(result.payload as string || 'Failed to update warehouse address', 'error');
             }
-        } catch (err) {
+        } catch {
             showToast('An unexpected error occurred', 'error');
         }
     };
 
     const validatePasswordForm = (): boolean => {
-        const errors = {
-            currentPassword: '',
-            newPassword: '',
-            confirmPassword: '',
-        };
+        const errors = { currentPassword: '', newPassword: '', confirmPassword: '' };
         let isValid = true;
-
-        if (!passwordForm.currentPassword) {
-            errors.currentPassword = 'Current password is required';
-            isValid = false;
-        }
-
-        if (!passwordForm.newPassword) {
-            errors.newPassword = 'New password is required';
-            isValid = false;
-        } else if (passwordForm.newPassword.length < 8) {
-            errors.newPassword = 'Password must be at least 8 characters';
-            isValid = false;
-        }
-
-        if (!passwordForm.confirmPassword) {
-            errors.confirmPassword = 'Please confirm your password';
-            isValid = false;
-        } else if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-            errors.confirmPassword = 'Passwords do not match';
-            isValid = false;
-        }
-
+        if (!passwordForm.currentPassword) { errors.currentPassword = 'Current password is required'; isValid = false; }
+        if (!passwordForm.newPassword) { errors.newPassword = 'New password is required'; isValid = false; }
+        else if (passwordForm.newPassword.length < 8) { errors.newPassword = 'Password must be at least 8 characters'; isValid = false; }
+        if (!passwordForm.confirmPassword) { errors.confirmPassword = 'Please confirm your password'; isValid = false; }
+        else if (passwordForm.newPassword !== passwordForm.confirmPassword) { errors.confirmPassword = 'Passwords do not match'; isValid = false; }
         setPasswordErrors(errors);
         return isValid;
     };
 
     const handleResetPassword = async () => {
-        // Clear previous errors
-        setPasswordErrors({
-            currentPassword: '',
-            newPassword: '',
-            confirmPassword: '',
-        });
-
-        // Validate form
-        if (!validatePasswordForm()) {
-            return;
-        }
-
+        setPasswordErrors({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        if (!validatePasswordForm()) return;
         try {
             const result = await dispatch(resetPassword(passwordForm));
             if (resetPassword.fulfilled.match(result)) {
                 showToast('Password reset successfully!', 'success');
-                // Clear form
-                setPasswordForm({
-                    currentPassword: '',
-                    newPassword: '',
-                    confirmPassword: '',
-                });
+                setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
             } else {
                 showToast(result.payload as string || 'Failed to reset password', 'error');
             }
-        } catch (err) {
+        } catch {
             showToast('An unexpected error occurred', 'error');
         }
     };
@@ -201,7 +174,6 @@ export default function SettingsPage() {
                     <Globe className="w-4 h-4 text-primary-500" />
                     <h2 className="text-sm font-semibold text-gray-900">General Settings</h2>
                 </div>
-
                 {isLoading && !settings ? (
                     <div className="flex items-center justify-center py-8">
                         <Loader2 className="w-6 h-6 animate-spin text-primary-500 mr-2" />
@@ -216,6 +188,86 @@ export default function SettingsPage() {
                         <div>
                             <label className="block text-xs font-medium text-gray-700 mb-0.5">Site Email</label>
                             <input type="email" value={settings?.siteEmail || ''} readOnly className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded bg-gray-50 text-gray-600 cursor-not-allowed" />
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Business Settings */}
+            <div className="bg-white rounded-lg shadow px-4 py-3">
+                <div className="flex items-center gap-2 mb-3">
+                    <Building2 className="w-4 h-4 text-primary-500" />
+                    <h2 className="text-sm font-semibold text-gray-900">Business Settings</h2>
+                </div>
+
+                {isLoading && !settings ? (
+                    <div className="flex items-center justify-center py-8">
+                        <Loader2 className="w-6 h-6 animate-spin text-primary-500 mr-2" />
+                        <p className="text-xs text-gray-500">Loading settings...</p>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        {/* Logo Upload */}
+                        <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-2">Company Logo</label>
+                            <div className="flex items-start gap-5">
+                                {/* Preview box */}
+                                <div className="relative w-32 h-32 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center overflow-hidden bg-gray-50 flex-shrink-0">
+                                    {isUploadingLogo ? (
+                                        <div className="flex flex-col items-center gap-1">
+                                            <Loader2 className="w-7 h-7 animate-spin text-primary-500" />
+                                            <span className="text-[10px] text-gray-400">Uploading...</span>
+                                        </div>
+                                    ) : logoPreview ? (
+                                        <img src={logoPreview} alt="Logo" className="w-full h-full object-contain p-2" />
+                                    ) : (
+                                        <div className="flex flex-col items-center gap-1 text-gray-300">
+                                            <ImagePlus className="w-8 h-8" />
+                                            <span className="text-[10px]">No logo</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Upload controls */}
+                                <div className="flex flex-col gap-2 justify-center h-32">
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleLogoChange}
+                                        className="hidden"
+                                        id="logo-upload"
+                                    />
+                                    <label htmlFor="logo-upload" className={`inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md border border-gray-300 text-gray-700 cursor-pointer hover:bg-gray-50 transition-colors ${isUploadingLogo ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}`}>
+                                        <ImagePlus className="w-4 h-4" />
+                                        {logoPreview ? 'Change Logo' : 'Upload Logo'}
+                                    </label>
+                                    <p className="text-[11px] text-gray-400">PNG, JPG, SVG up to 5MB</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Business Name */}
+                        <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-0.5">Business Name</label>
+                            <input
+                                type="text"
+                                value={businessForm.businessName}
+                                onChange={(e) => setBusinessForm({ businessName: e.target.value })}
+                                placeholder="Enter your business name"
+                                className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                disabled={isUpdating}
+                            />
+                        </div>
+
+                        <div className="flex justify-end pt-1">
+                            <Button variant="primary" size="sm" onClick={handleSaveBusinessSettings} disabled={isUpdating || isUploadingLogo}>
+                                {isUpdating ? (
+                                    <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Saving...</>
+                                ) : (
+                                    <><Save className="w-3.5 h-3.5 mr-1.5" />Save Business Settings</>
+                                )}
+                            </Button>
                         </div>
                     </div>
                 )}
@@ -331,7 +383,6 @@ export default function SettingsPage() {
                                 type="tel"
                                 value={warehouseForm.warehousePhone}
                                 onChange={(e) => {
-                                    // Clean phone number: remove non-digits, limit to 10 digits for US
                                     const cleaned = e.target.value.replace(/\D/g, '').slice(0, 10);
                                     setWarehouseForm({ ...warehouseForm, warehousePhone: cleaned });
                                 }}
@@ -344,158 +395,20 @@ export default function SettingsPage() {
                         <div className="flex justify-end pt-4">
                             <Button
                                 variant="primary"
-                                size="lg"
+                                size="sm"
                                 onClick={handleSaveWarehouseAddress}
                                 disabled={isUpdating || (isLoading && !settings)}
                             >
                                 {isUpdating ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                        Saving...
-                                    </>
+                                    <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Saving...</>
                                 ) : (
-                                    <>
-                                        <Save className="w-4 h-4 mr-2" />
-                                        Save Warehouse Address
-                                    </>
+                                    <><Save className="w-3.5 h-3.5 mr-1.5" />Save Warehouse Address</>
                                 )}
                             </Button>
                         </div>
                     </div>
                 )}
             </div>
-
-            {/* Notification Settings */}
-            {/* <div className="bg-white rounded-lg shadow-md p-6">
-                <div className="flex items-center gap-3 mb-6">
-                    <Bell className="w-5 h-5 text-primary-500" />
-                    <h2 className="text-lg font-semibold text-gray-900">Notification Settings</h2>
-                </div>
-
-                {isLoading && !settings ? (
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                                <div className="h-5 bg-gray-200 rounded animate-pulse mb-2 w-32"></div>
-                                <div className="h-4 bg-gray-100 rounded animate-pulse w-48"></div>
-                            </div>
-                            <div className="w-11 h-6 bg-gray-200 rounded-full animate-pulse"></div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                                <div className="h-5 bg-gray-200 rounded animate-pulse mb-2 w-32"></div>
-                                <div className="h-4 bg-gray-100 rounded animate-pulse w-48"></div>
-                            </div>
-                            <div className="w-11 h-6 bg-gray-200 rounded-full animate-pulse"></div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                                <div className="h-5 bg-gray-200 rounded animate-pulse mb-2 w-32"></div>
-                                <div className="h-4 bg-gray-100 rounded animate-pulse w-48"></div>
-                            </div>
-                            <div className="w-11 h-6 bg-gray-200 rounded-full animate-pulse"></div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                                <div className="h-5 bg-gray-200 rounded animate-pulse mb-2 w-32"></div>
-                                <div className="h-4 bg-gray-100 rounded animate-pulse w-48"></div>
-                            </div>
-                            <div className="w-11 h-6 bg-gray-200 rounded-full animate-pulse"></div>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="font-medium text-gray-900">Email Notifications</p>
-                                <p className="text-sm text-gray-600">Receive email notifications for important events</p>
-                            </div>
-                            <label className="relative inline-flex items-center cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    checked={notificationSettings.emailNotifications}
-                                    onChange={(e) => setNotificationSettings({ ...notificationSettings, emailNotifications: e.target.checked })}
-                                    className="sr-only peer"
-                                    disabled={isUpdating}
-                                />
-                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
-                            </label>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="font-medium text-gray-900">Document Approvals</p>
-                                <p className="text-sm text-gray-600">Notify when documents need review</p>
-                            </div>
-                            <label className="relative inline-flex items-center cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    checked={notificationSettings.documentApprovalNotif}
-                                    onChange={(e) => setNotificationSettings({ ...notificationSettings, documentApprovalNotif: e.target.checked })}
-                                    className="sr-only peer"
-                                    disabled={isUpdating}
-                                />
-                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
-                            </label>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="font-medium text-gray-900">Payment Updates</p>
-                                <p className="text-sm text-gray-600">Notify about payment status changes</p>
-                            </div>
-                            <label className="relative inline-flex items-center cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    checked={notificationSettings.paymentNotif}
-                                    onChange={(e) => setNotificationSettings({ ...notificationSettings, paymentNotif: e.target.checked })}
-                                    className="sr-only peer"
-                                    disabled={isUpdating}
-                                />
-                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
-                            </label>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="font-medium text-gray-900">Shipment Tracking</p>
-                                <p className="text-sm text-gray-600">Notify about shipment status updates</p>
-                            </div>
-                            <label className="relative inline-flex items-center cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    checked={notificationSettings.shipmentNotif}
-                                    onChange={(e) => setNotificationSettings({ ...notificationSettings, shipmentNotif: e.target.checked })}
-                                    className="sr-only peer"
-                                    disabled={isUpdating}
-                                />
-                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
-                            </label>
-                        </div>
-                    </div>
-                )}
-
-                <div className="flex justify-end pt-4">
-                    <Button 
-                        variant="primary" 
-                        size="lg" 
-                        onClick={handleSaveNotifications}
-                        disabled={isUpdating || (isLoading && !settings)}
-                    >
-                        {isUpdating ? (
-                            <>
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                Saving...
-                            </>
-                        ) : (
-                            <>
-                                <Save className="w-4 h-4 mr-2" />
-                                Save Notification Settings
-                            </>
-                        )}
-                    </Button>
-                </div>
-            </div> */}
 
             {/* Security Settings - Reset Password */}
             <div className="bg-white rounded-lg shadow px-4 py-3">
@@ -506,21 +419,9 @@ export default function SettingsPage() {
 
                 <div className="space-y-2.5 max-w-md">
                     {[
-                        {
-                            key: 'currentPassword' as const,
-                            label: 'Current Password',
-                            hint: '',
-                        },
-                        {
-                            key: 'newPassword' as const,
-                            label: 'New Password',
-                            hint: 'Minimum 8 characters',
-                        },
-                        {
-                            key: 'confirmPassword' as const,
-                            label: 'Confirm New Password',
-                            hint: '',
-                        },
+                        { key: 'currentPassword' as const, label: 'Current Password', hint: '' },
+                        { key: 'newPassword' as const, label: 'New Password', hint: 'Minimum 8 characters' },
+                        { key: 'confirmPassword' as const, label: 'Confirm New Password', hint: '' },
                     ].map(({ key, label, hint }) => (
                         <div key={key}>
                             <label className="block text-xs font-medium text-gray-700 mb-0.5">{label}</label>
@@ -555,13 +456,13 @@ export default function SettingsPage() {
                     ))}
 
                     <div className="flex justify-end pt-1">
-                        <button onClick={handleResetPassword} disabled={isResettingPassword} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                        <Button variant="primary" size="sm" onClick={handleResetPassword} disabled={isResettingPassword}>
                             {isResettingPassword ? (
-                                <><Loader2 className="w-3.5 h-3.5 animate-spin" />Resetting...</>
+                                <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Resetting...</>
                             ) : (
-                                <><Save className="w-3.5 h-3.5" />Reset Password</>
+                                <><Save className="w-3.5 h-3.5 mr-1.5" />Reset Password</>
                             )}
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </div>

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, Warehouse, CircleDollarSign, FileText, DollarSign, AlertTriangle, Trash2, UserCog } from 'lucide-react';
+import { LayoutDashboard, Users, Warehouse, CircleDollarSign, FileText, DollarSign, AlertTriangle, Trash2, UserCog, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePermissions } from '@/hooks/usePermissions';
 
@@ -33,6 +33,7 @@ const sidebarLinks = [
     { href: '/ndc-pricing', icon: DollarSign, label: 'NDC Pricing', permission: 'ndc_pricing' },
     { href: '/warehouse/tbd-items', icon: AlertTriangle, label: 'TBD Items', permission: 'tbd_items' },
     { href: '/warehouse/destruction', icon: Trash2, label: 'Destruction', permission: 'destruction' },
+    { href: '/settings', icon: Settings, label: 'Settings', permission: 'settings' },
     { href: '/sub-admins', icon: UserCog, label: 'Sub Admins', permission: 'sub_admins' },
 ];
 

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { catchAsync } from '../utils/catchAsync';
 import { AppError } from '../utils/appError';
 import * as adminSettingsService from '../services/adminSettingsService';
+import multer from 'multer';
 
 // ============================================================
 // Extended Request interface for admin authentication
@@ -59,6 +60,10 @@ export const updateAdminSettingsHandler = catchAsync(
       warehouse_country,
       warehouse_phone,
       warehouse_contact_name,
+      businessName,
+      business_name,
+      logoUrl,
+      logo_url,
     } = req.body;
 
     const settings = await adminSettingsService.updateAdminSettings({
@@ -78,12 +83,59 @@ export const updateAdminSettingsHandler = catchAsync(
       warehouseCountry: warehouseCountry ?? warehouse_country,
       warehousePhone: warehousePhone ?? warehouse_phone,
       warehouseContactName: warehouseContactName ?? warehouse_contact_name,
+      businessName: businessName ?? business_name,
+      logoUrl: logoUrl ?? logo_url,
     });
 
     res.status(200).json({
       status: 'success',
       message: 'Settings updated successfully',
       data: {
+        settings,
+      },
+    });
+  }
+);
+
+// ============================================================
+// Multer config for logo upload (in-memory)
+// ============================================================
+const logoUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new AppError('Only image files are allowed', 400) as any, false);
+    }
+  },
+}).single('logo');
+
+export const uploadLogoMiddleware = logoUpload;
+
+// ============================================================
+// POST /api/admin/settings/upload-logo - Upload logo
+// ============================================================
+export const uploadLogoHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    if (!req.file) {
+      throw new AppError('No logo file provided', 400);
+    }
+
+    const logoUrl = await adminSettingsService.uploadLogo(
+      req.file.buffer,
+      req.file.originalname,
+      req.file.mimetype
+    );
+
+    const settings = await adminSettingsService.updateAdminSettings({ logoUrl });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Logo uploaded successfully',
+      data: {
+        logoUrl,
         settings,
       },
     });
@@ -168,7 +220,7 @@ export const resetPasswordHandler = catchAsync(
       currentPassword,
       newPassword,
       confirmPassword,
-    });
+    }, (req as AdminRequest).adminRole);
 
     res.status(200).json({
       status: 'success',

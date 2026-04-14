@@ -17,6 +17,8 @@ export interface Settings {
   warehouseCountry: string | null;
   warehousePhone: string | null;
   warehouseContactName: string | null;
+  businessName: string | null;
+  logoUrl: string | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -44,6 +46,11 @@ export interface UpdateWarehouseAddressPayload {
   warehouseCountry?: string;
   warehousePhone?: string;
   warehouseContactName?: string;
+}
+
+export interface UpdateBusinessSettingsPayload {
+  businessName?: string;
+  logoUrl?: string | null;
 }
 
 export interface ResetPasswordPayload {
@@ -166,6 +173,62 @@ export const updateWarehouseAddress = createAsyncThunk(
   }
 );
 
+// Async thunk for updating business settings
+export const updateBusinessSettings = createAsyncThunk(
+  'settings/updateBusinessSettings',
+  async (payload: UpdateBusinessSettingsPayload, { rejectWithValue }) => {
+    try {
+      const { apiClient } = await import('@/lib/api/apiClient');
+      const { cookieUtils } = await import('@/lib/utils/cookies');
+
+      const token = cookieUtils.getAuthToken();
+      if (!token) {
+        return rejectWithValue('Authentication required. Please login again.');
+      }
+
+      const data: SettingsResponse = await apiClient.patch<SettingsResponse>(
+        '/admin/settings',
+        payload,
+        true
+      );
+
+      return data.data.settings;
+    } catch (error: any) {
+      const errorMessage = error?.message || error?.data?.message || 'An error occurred while updating business settings';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// Async thunk for uploading logo
+export const uploadLogo = createAsyncThunk(
+  'settings/uploadLogo',
+  async (file: File, { rejectWithValue }) => {
+    try {
+      const { apiClient } = await import('@/lib/api/apiClient');
+      const { cookieUtils } = await import('@/lib/utils/cookies');
+
+      const token = cookieUtils.getAuthToken();
+      if (!token) {
+        return rejectWithValue('Authentication required. Please login again.');
+      }
+
+      const formData = new FormData();
+      formData.append('logo', file);
+
+      const data = await apiClient.postFormData<{
+        status: string;
+        data: { logoUrl: string; settings: Settings };
+      }>('/admin/settings/upload-logo', formData, true);
+
+      return data.data.settings;
+    } catch (error: any) {
+      const errorMessage = error?.message || error?.data?.message || 'An error occurred while uploading logo';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 // Async thunk for resetting password
 export const resetPassword = createAsyncThunk(
   'settings/resetPassword',
@@ -255,6 +318,38 @@ const settingsSlice = createSlice({
         state.error = null;
       })
       .addCase(updateWarehouseAddress.rejected, (state, action) => {
+        state.isUpdating = false;
+        state.error = action.payload as string;
+      });
+
+    // Update business settings
+    builder
+      .addCase(updateBusinessSettings.pending, (state) => {
+        state.isUpdating = true;
+        state.error = null;
+      })
+      .addCase(updateBusinessSettings.fulfilled, (state, action: PayloadAction<Settings>) => {
+        state.isUpdating = false;
+        state.settings = action.payload;
+        state.error = null;
+      })
+      .addCase(updateBusinessSettings.rejected, (state, action) => {
+        state.isUpdating = false;
+        state.error = action.payload as string;
+      });
+
+    // Upload logo
+    builder
+      .addCase(uploadLogo.pending, (state) => {
+        state.isUpdating = true;
+        state.error = null;
+      })
+      .addCase(uploadLogo.fulfilled, (state, action: PayloadAction<Settings>) => {
+        state.isUpdating = false;
+        state.settings = action.payload;
+        state.error = null;
+      })
+      .addCase(uploadLogo.rejected, (state, action) => {
         state.isUpdating = false;
         state.error = action.payload as string;
       });

@@ -30,6 +30,7 @@ const PERMISSION_LABELS: Record<string, string> = {
   ndc_pricing: 'NDC Pricing',
   tbd_items: 'TBD Items',
   destruction: 'Destruction',
+  settings: 'Settings',
 };
 
 type ModalMode = 'create' | 'edit' | 'view' | null;

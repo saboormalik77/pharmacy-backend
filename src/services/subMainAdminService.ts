@@ -21,6 +21,7 @@ export const ALL_MAIN_ADMIN_PERMISSIONS = [
   'ndc_pricing',
   'tbd_items',
   'destruction',
+  'settings',
 ];
 
 function generateInviteToken(): string {

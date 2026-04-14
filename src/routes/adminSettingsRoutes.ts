@@ -6,6 +6,8 @@ import {
   getLanguagesHandler,
   getAdminProfileHandler,
   resetPasswordHandler,
+  uploadLogoMiddleware,
+  uploadLogoHandler,
 } from '../controllers/adminSettingsController';
 import { authenticateAdmin, requirePermission } from '../middleware/adminAuth';
 
@@ -435,6 +437,7 @@ router.get('/profile', getAdminProfileHandler);
  *         description: Internal server error
  */
 router.post('/reset-password', resetPasswordHandler);
+router.post('/upload-logo', uploadLogoMiddleware, uploadLogoHandler);
 
 export default router;
 
