@@ -229,7 +229,7 @@ export default function PoliciesPage() {
                     onClick={() => { setAddModal(true); fetchReverseDistributors(); }}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary-600 text-white text-xs font-medium hover:bg-primary-700 transition-colors whitespace-nowrap"
                 >
-                    <Plus className="w-3.5 h-3.5" /> Add Policy
+                    <Plus className="w-3.5 h-3.5" /> Add Labeler
                 </button>
             </div>
 
