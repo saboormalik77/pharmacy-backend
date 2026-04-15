@@ -55,6 +55,7 @@ import ndcPricingBookRoutes from './routes/ndcPricingBookRoutes';
 import pharmacyBranchRoutes from './routes/pharmacyBranchRoutes';
 import pharmacyRoleRoutes from './routes/pharmacyRoleRoutes';
 import mainAdminRoutes from './routes/mainAdminRoutes';
+import pharmacyAdminBrandingRoutes from './routes/pharmacyAdminBrandingRoutes';
 import { globalErrorHandler } from './controllers/errorController';
 import { checkExpiringProductsAndNotify } from './services/notificationCronService';
 import { surfaceReadyWineCellarItems } from './services/wineCellarCronService';
@@ -203,6 +204,7 @@ app.use('/api/admin/ndc-pricing', ndcPricingBookRoutes);
 app.use('/api/pharmacy-branches', pharmacyBranchRoutes);
 app.use('/api/pharmacy-roles', pharmacyRoleRoutes);
 app.use('/api/main-admin', mainAdminRoutes);
+app.use('/api/pharmacy', pharmacyAdminBrandingRoutes);
 
 /**
  * @swagger

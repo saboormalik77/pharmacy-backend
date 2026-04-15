@@ -5,7 +5,7 @@ import './globals.css'
 import 'react-toastify/dist/ReactToastify.css'
 
 export const metadata: Metadata = {
-  title: 'PharmAnalytics - Data Analytics Platform',
+  title: 'PharmAnalytics',
   description: 'Maximize your pharmacy returns with data-driven insights',
 }
 

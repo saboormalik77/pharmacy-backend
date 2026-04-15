@@ -284,6 +284,12 @@ const settingsSlice = createSlice({
         state.isLoading = false;
         state.settings = action.payload;
         state.error = null;
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('adminBranding', JSON.stringify({
+            logoUrl: action.payload.logoUrl ?? null,
+            businessName: action.payload.businessName ?? null,
+          }));
+        }
       })
       .addCase(fetchSettings.rejected, (state, action) => {
         state.isLoading = false;
@@ -332,6 +338,12 @@ const settingsSlice = createSlice({
         state.isUpdating = false;
         state.settings = action.payload;
         state.error = null;
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('adminBranding', JSON.stringify({
+            logoUrl: action.payload.logoUrl ?? null,
+            businessName: action.payload.businessName ?? null,
+          }));
+        }
       })
       .addCase(updateBusinessSettings.rejected, (state, action) => {
         state.isUpdating = false;
@@ -348,6 +360,12 @@ const settingsSlice = createSlice({
         state.isUpdating = false;
         state.settings = action.payload;
         state.error = null;
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('adminBranding', JSON.stringify({
+            logoUrl: action.payload.logoUrl ?? null,
+            businessName: action.payload.businessName ?? null,
+          }));
+        }
       })
       .addCase(uploadLogo.rejected, (state, action) => {
         state.isUpdating = false;

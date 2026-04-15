@@ -1,9 +1,11 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils/cn'
 import { usePharmacyPermissions } from '@/hooks/usePharmacyPermissions'
+import { apiClient } from '@/lib/api/client'
 import {
   LayoutDashboard,
   Upload,
@@ -36,9 +38,35 @@ interface SidebarProps {
   onClose?: () => void
 }
 
+interface AdminBranding {
+  logoUrl: string | null
+  businessName: string | null
+}
+
 export function Sidebar({ onClose }: SidebarProps) {
   const pathname = usePathname()
   const { hasPermission, hasAnyPermission, isParent, isLoaded, isSigningOut } = usePharmacyPermissions()
+  const [branding, setBranding] = useState<AdminBranding | null>(null)
+
+  useEffect(() => {
+    const fetchBranding = async () => {
+      try {
+        const res = await apiClient.get<AdminBranding>('/pharmacy/admin-branding')
+        if (res.status === 'success' && res.data) {
+          setBranding(res.data)
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('pharmacyAdminBranding', JSON.stringify(res.data))
+            if (res.data.businessName) {
+              document.title = `${res.data.businessName} - Data Analytics Platform`
+            }
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+    fetchBranding()
+  }, [])
 
   const navItems = [
     {
@@ -163,13 +191,18 @@ export function Sidebar({ onClose }: SidebarProps) {
   return (
     <div className="flex h-full w-64 flex-col border-r bg-card">
       <div className="p-4 sm:p-6 flex items-center justify-between">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-teal-600">PharmAnalytics</h2>
-          <p className="text-xs sm:text-sm text-muted-foreground">Data Analytics Platform</p>
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          {branding?.logoUrl && (
+            <img src={branding.logoUrl} alt="Logo" className="w-8 h-8 rounded-lg object-contain flex-shrink-0" />
+          )}
+          <div className="min-w-0 flex-1">
+            <h2 className="text-base sm:text-lg font-bold text-teal-600 truncate">{branding?.businessName || 'PharmAnalytics'}</h2>
+            {/* <p className="text-xs text-muted-foreground">Data Analytics Platform</p> */}
+          </div>
         </div>
         <button
           onClick={onClose}
-          className="lg:hidden p-2 hover:bg-accent rounded-md"
+          className="lg:hidden p-2 hover:bg-accent rounded-md flex-shrink-0"
           aria-label="Close menu"
         >
           <X className="h-5 w-5" />

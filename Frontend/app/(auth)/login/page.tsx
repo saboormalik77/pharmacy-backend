@@ -22,6 +22,11 @@ function GoogleIcon() {
   )
 }
 
+interface AdminBranding {
+  logoUrl: string | null
+  businessName: string | null
+}
+
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -34,6 +39,22 @@ function LoginForm() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
+  const [branding, setBranding] = useState<AdminBranding | null>(null)
+
+  useEffect(() => {
+    // Only load cached branding on login page (can't fetch without pharmacy_id)
+    try {
+      const cached = localStorage.getItem('pharmacyAdminBranding')
+      if (cached) {
+        const parsedBranding = JSON.parse(cached)
+        setBranding(parsedBranding)
+        // Update document title
+        if (parsedBranding.businessName) {
+          document.title = `${parsedBranding.businessName} - Data Analytics Platform`
+        }
+      }
+    } catch { /* ignore */ }
+  }, [])
 
   useEffect(() => {
     const oauthError = searchParams.get('oauthError')
@@ -93,8 +114,11 @@ function LoginForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="space-y-1">
-        <div className="flex items-center justify-center mb-4">
-          <div className="text-3xl font-bold text-primary">PharmAnalytics</div>
+        <div className="flex flex-col items-center justify-center mb-4 gap-3">
+          {branding?.logoUrl && (
+            <img src={branding.logoUrl} alt="Logo" className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-contain" />
+          )}
+          <div className="text-2xl font-bold text-primary">{branding?.businessName || 'PharmAnalytics'}</div>
         </div>
         <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
         <CardDescription className="text-center">

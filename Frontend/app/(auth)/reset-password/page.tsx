@@ -8,6 +8,11 @@ import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/Card'
 import { authService } from '@/lib/api/services'
 
+interface AdminBranding {
+  logoUrl: string | null
+  businessName: string | null
+}
+
 function ResetPasswordForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -21,6 +26,17 @@ function ResetPasswordForm() {
   const [tokenValid, setTokenValid] = useState(false)
   const [userEmail, setUserEmail] = useState<string | undefined>()
   const [accessToken, setAccessToken] = useState<string | null>(null)
+  const [branding, setBranding] = useState<AdminBranding | null>(null)
+
+  useEffect(() => {
+    // Only load cached branding (can't fetch without authentication)
+    try {
+      const cached = localStorage.getItem('pharmacyAdminBranding')
+      if (cached) {
+        setBranding(JSON.parse(cached))
+      }
+    } catch { /* ignore */ }
+  }, [])
 
   // Get access token from URL hash (Supabase puts it in the fragment)
   // Format: #access_token=xxx&type=recovery&expires_in=3600
@@ -159,8 +175,15 @@ function ResetPasswordForm() {
     return (
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <div className="flex items-center justify-center mb-4">
-            <div className="text-3xl font-bold text-primary">PharmAnalytics</div>
+          <div className="flex flex-col items-center justify-center mb-4 gap-3">
+            {branding?.logoUrl && (
+              <img
+                src={branding.logoUrl}
+                alt="Logo"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-contain"
+              />
+            )}
+            <div className="text-3xl font-bold text-primary">{branding?.businessName || 'PharmAnalytics'}</div>
           </div>
           <CardTitle className="text-2xl text-center">Password Reset Successful</CardTitle>
         </CardHeader>
@@ -202,8 +225,15 @@ function ResetPasswordForm() {
     return (
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <div className="flex items-center justify-center mb-4">
-            <div className="text-3xl font-bold text-primary">PharmAnalytics</div>
+          <div className="flex flex-col items-center justify-center mb-4 gap-3">
+            {branding?.logoUrl && (
+              <img
+                src={branding.logoUrl}
+                alt="Logo"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-contain"
+              />
+            )}
+            <div className="text-3xl font-bold text-primary">{branding?.businessName || 'PharmAnalytics'}</div>
           </div>
           <CardTitle className="text-2xl text-center">Invalid Reset Link</CardTitle>
         </CardHeader>
@@ -247,8 +277,15 @@ function ResetPasswordForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="space-y-1">
-        <div className="flex items-center justify-center mb-4">
-          <div className="text-3xl font-bold text-primary">PharmAnalytics</div>
+        <div className="flex flex-col items-center justify-center mb-4 gap-3">
+          {branding?.logoUrl && (
+            <img
+              src={branding.logoUrl}
+              alt="Logo"
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-contain"
+            />
+          )}
+          <div className="text-3xl font-bold text-primary">{branding?.businessName || 'PharmAnalytics'}</div>
         </div>
         <CardTitle className="text-2xl text-center">Reset Password</CardTitle>
         <CardDescription className="text-center">

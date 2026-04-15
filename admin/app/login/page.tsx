@@ -8,6 +8,11 @@ import { Button } from '@/components/ui/Button';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { loginUser, clearError } from '@/lib/store/authSlice';
 
+interface AdminBranding {
+  logoUrl: string | null;
+  businessName: string | null;
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -16,6 +21,16 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [branding, setBranding] = useState<AdminBranding>({ logoUrl: null, businessName: null });
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('adminBranding');
+      if (stored) setBranding(JSON.parse(stored));
+    } catch {
+      // ignore
+    }
+  }, []);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -60,11 +75,21 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Logo and Branding */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-500 rounded-xl mb-4 shadow-lg">
-            <Shield className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Buying group</h1>
-          <p className="text-gray-600"> Buying group Management Portal Login</p>
+          {branding.logoUrl ? (
+            <img
+              src={branding.logoUrl}
+              alt="Logo"
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-contain mx-auto mb-4 block"
+            />
+          ) : (
+            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-primary-500 rounded-lg mb-4 mx-auto">
+              <Shield className="w-8 h-8 text-white" />
+            </div>
+          )}
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            {branding.businessName || 'Buying group'}
+          </h1>
+          <p className="text-gray-600">{branding.businessName || 'Buying group'} Management Portal Login</p>
         </div>
 
         {/* Login Card */}
