@@ -39,6 +39,15 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
         }
     }, [dispatch, isAuthenticated]);
 
+    // Update document title when branding changes
+    useEffect(() => {
+        if (settings?.businessName) {
+            document.title = `${settings.businessName}`;
+        } else {
+            document.title = 'PharmAdmin - Admin Portal';
+        }
+    }, [settings?.businessName]);
+
     // Close notifications and profile dropdowns when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -157,6 +166,20 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
     const handleLogout = async () => {
         setIsLoggingOut(true);
         setShowProfile(false);
+        // Keep branding on the login screen after full reload (ClientLayout used to reset document.title)
+        if (typeof window !== 'undefined' && settings) {
+            try {
+                localStorage.setItem(
+                    'adminBranding',
+                    JSON.stringify({
+                        logoUrl: settings.logoUrl ?? null,
+                        businessName: settings.businessName ?? null,
+                    })
+                );
+            } catch {
+                // ignore
+            }
+        }
         await dispatch(logoutUser());
         window.location.href = '/login';
     };

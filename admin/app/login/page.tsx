@@ -26,7 +26,14 @@ export default function LoginPage() {
   useEffect(() => {
     try {
       const stored = localStorage.getItem('adminBranding');
-      if (stored) setBranding(JSON.parse(stored));
+      if (stored) {
+        const parsedBranding = JSON.parse(stored);
+        setBranding(parsedBranding);
+        // Update document title
+        if (parsedBranding.businessName) {
+          document.title = `${parsedBranding.businessName} - Admin Login`;
+        }
+      }
     } catch {
       // ignore
     }

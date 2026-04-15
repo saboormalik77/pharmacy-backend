@@ -27,10 +27,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     const handleCloseSidebar = () => setSidebarOpen(false);
 
     useEffect(() => {
-        document.title = 'Pharma Admin';
-    }, []);
-
-    useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth >= 640) setSidebarOpen(false);
         };
