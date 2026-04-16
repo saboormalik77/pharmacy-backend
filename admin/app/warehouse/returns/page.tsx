@@ -322,7 +322,7 @@ export default function ReturnsPage() {
                                     <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Store</th>
                                     <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
                                     <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Items</th>
-                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Value</th>
+                                    {/* <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Value</th> */}
                                     <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Date</th>
                                     <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
                                 </tr>
@@ -342,7 +342,7 @@ export default function ReturnsPage() {
                                                 <Badge variant={badge.variant}><span className="text-[10px]">{badge.label}</span></Badge>
                                             </td>
                                             <td className="px-3 py-1.5 text-xs text-gray-600">{tx.totalItems}</td>
-                                            <td className="px-3 py-1.5 text-xs text-gray-900 font-medium">{formatCurrency(tx.totalReturnableValue)}</td>
+                                            {/* <td className="px-3 py-1.5 text-xs text-gray-900 font-medium">{formatCurrency(tx.totalReturnableValue)}</td> */}
                                             <td className="px-3 py-1.5 text-xs text-gray-500">{formatDate(tx.createdAt)}</td>
                                             <td className="px-3 py-1.5" onClick={e => e.stopPropagation()}>
                                                 <div className="flex items-center justify-end gap-0.5">
