@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/Card'
 import { authService } from '@/lib/api/services'
+import { DomainNotRecognizedScreen } from '@/components/auth/DomainNotRecognizedScreen'
+import { TenantInfoLoadingScreen } from '@/components/auth/TenantInfoLoadingScreen'
+import { usePharmacyPortalTenant } from '@/lib/hooks/usePharmacyPortalTenant'
 
 interface AdminBranding {
   logoUrl: string | null
@@ -19,6 +22,9 @@ export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false)
   const [branding, setBranding] = useState<AdminBranding | null>(null)
 
+  const { tenantChecked, tenantError, validTenant, isLocalHost } =
+    usePharmacyPortalTenant()
+
   useEffect(() => {
     // Only load cached branding (can't fetch without authentication)
     try {
@@ -28,6 +34,15 @@ export default function ForgotPasswordPage() {
       }
     } catch { /* ignore */ }
   }, [])
+
+  useEffect(() => {
+    if (validTenant?.buyingGroupName) {
+      setBranding((prev) => ({
+        logoUrl: prev?.logoUrl ?? null,
+        businessName: validTenant.buyingGroupName,
+      }))
+    }
+  }, [validTenant])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -42,6 +57,13 @@ export default function ForgotPasswordPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (!isLocalHost && !tenantChecked) {
+    return <TenantInfoLoadingScreen />
+  }
+  if (!isLocalHost && tenantChecked && tenantError) {
+    return <DomainNotRecognizedScreen detail={tenantError} />
   }
 
   if (success) {
