@@ -164,7 +164,6 @@ export default function BuyingGroupsPage() {
         adminHostname: domainForm.adminHostname.trim() || null,
         pharmacyHostname: domainForm.pharmacyHostname.trim() || null,
       })).unwrap();
-      setDomainForm({ domain: '', adminHostname: '', pharmacyHostname: '' });
     } catch (err: any) {
       setDomainError(err || 'Failed to save domain');
     } finally {
