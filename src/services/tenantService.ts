@@ -9,11 +9,30 @@ export interface TenantInfo {
   buyingGroupName: string;
 }
 
-// In-memory cache (TTL: 5 minutes) — keeps hostname lookups cheap on hot paths.
+// In-memory cache (TTL: 30 seconds in dev, 5 minutes in production).
 // Cache key includes the role hint so that the same hostname can resolve to
 // different portal types (admin vs pharmacy) depending on the caller.
 const cache = new Map<string, { data: TenantInfo; expiresAt: number }>();
-const CACHE_TTL_MS = 5 * 60 * 1000;
+const CACHE_TTL_MS = process.env.NODE_ENV === 'production' ? 5 * 60 * 1000 : 30 * 1000;
+
+/**
+ * Clear the entire tenant cache. Call this when domains are updated in MainAdmin.
+ */
+export const clearTenantCache = (): void => {
+  cache.clear();
+};
+
+/**
+ * Clear cache entries for a specific buying group (by ID).
+ * This is more targeted than clearing the entire cache.
+ */
+export const clearTenantCacheForBuyingGroup = (buyingGroupId: string): void => {
+  for (const [key, entry] of cache.entries()) {
+    if (entry.data.buyingGroupId === buyingGroupId) {
+      cache.delete(key);
+    }
+  }
+};
 
 /**
  * Returns true only when the server is NOT running in production AND the

@@ -407,6 +407,11 @@ export const upsertBuyingGroupDomain = async (
 
   const result = data as any;
   if (result?.error) throw new AppError(result.message, 400);
+
+  // Clear tenant cache so new domain config takes effect immediately
+  const { clearTenantCache } = await import('./tenantService');
+  clearTenantCache();
+
   return result;
 };
 
@@ -421,5 +426,10 @@ export const deleteBuyingGroupDomain = async (domainId: string) => {
 
   const result = data as any;
   if (result?.error) throw new AppError(result.message, 404);
+
+  // Clear tenant cache so domain removal takes effect immediately
+  const { clearTenantCache } = await import('./tenantService');
+  clearTenantCache();
+
   return result;
 };
