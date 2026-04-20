@@ -6,6 +6,9 @@ import {
   createBuyingGroup,
   updateBuyingGroup,
   deleteBuyingGroup,
+  listBuyingGroupDomains,
+  upsertBuyingGroupDomain,
+  deleteBuyingGroupDomain,
 } from '../services/mainAdminService';
 import { catchAsync } from '../utils/catchAsync';
 import { AppError } from '../utils/appError';
@@ -120,6 +123,47 @@ export const deleteBuyingGroupHandler = catchAsync(
 
     const result = await deleteBuyingGroup(id);
 
+    res.status(200).json(result);
+  }
+);
+
+// ============================================================
+// Buying Group Domain Management (MainAdmin)
+// ============================================================
+
+export const getBuyingGroupDomainsHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { id } = req.params;
+    if (!id) throw new AppError('Buying group ID is required', 400);
+
+    const data = await listBuyingGroupDomains(id);
+    res.status(200).json({ status: 'success', data });
+  }
+);
+
+export const upsertBuyingGroupDomainHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { id } = req.params;
+    const { domain, adminHostname, pharmacyHostname } = req.body;
+
+    if (!id) throw new AppError('Buying group ID is required', 400);
+    if (!domain) throw new AppError('Domain is required', 400);
+
+    const result = await upsertBuyingGroupDomain(id, {
+      domain,
+      adminHostname,
+      pharmacyHostname,
+    });
+    res.status(200).json(result);
+  }
+);
+
+export const deleteBuyingGroupDomainHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { domainId } = req.params;
+    if (!domainId) throw new AppError('Domain ID is required', 400);
+
+    const result = await deleteBuyingGroupDomain(domainId);
     res.status(200).json(result);
   }
 );

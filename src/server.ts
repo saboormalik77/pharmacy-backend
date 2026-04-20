@@ -77,53 +77,10 @@ const app = express();
 app.disable('etag');
 const PORT = process.env.PORT || 3000;
 
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:3001',
-  'http://localhost:3002',
-  'http://localhost:3003',
-  'http://127.0.0.1:3000',
-  'http://127.0.0.1:3001',
-  'http://127.0.0.1:3002',
-  'http://127.0.0.1:3003',
-  'https://pharmacy-ui-75vl.vercel.app', // Without trailing slash
-  'https://pharmacy-ui-75vl.vercel.app/', // With trailing slash (for safety)
-  'https://pharm-admin.vercel.app',
-  'https://pharm-admin.vercel.app/',
-  process.env.FRONTEND_URL,
-].filter(Boolean) as string[];
-
-// Normalize origin by removing trailing slash for comparison
-const normalizeOrigin = (origin: string): string => {
-  return origin.replace(/\/$/, '');
-};
-
+// Open CORS: reflect any request Origin (required when credentials: true; * is invalid with cookies).
 app.use(cors({
-  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-    // Allow requests with no origin (like mobile apps, Postman, or curl)
-    if (!origin) {
-      return callback(null, true);
-    }
-    
-    // Normalize the origin (remove trailing slash)
-    const normalizedOrigin = normalizeOrigin(origin);
-    
-    // Always allow localhost origins (for local development)
-    if (normalizedOrigin.includes('localhost') || normalizedOrigin.includes('127.0.0.1')) {
-      return callback(null, true);
-    }
-    
-    // Check if normalized origin is in allowed list (also normalize allowed origins for comparison)
-    const normalizedAllowedOrigins = allowedOrigins.map(normalizeOrigin);
-    if (normalizedAllowedOrigins.includes(normalizedOrigin)) {
-      return callback(null, true);
-    }
-    
-    // If origin is not in allowed list, block it
-    console.warn(`CORS blocked origin: ${origin} (normalized: ${normalizedOrigin})`);
-    return callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true, // Allow cookies/auth headers
+  origin: true,
+  credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: [
     'Content-Type',
@@ -131,9 +88,10 @@ app.use(cors({
     'X-Requested-With',
     'Accept',
     'Origin',
+    'X-Tenant-Domain',
   ],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  maxAge: 86400, // 24 hours
+  maxAge: 86400,
 }));
 
 // Swagger Documentation

@@ -1,16 +1,26 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Lock, Mail, Shield, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { loginUser, clearError } from '@/lib/store/authSlice';
+import { DomainNotRecognizedScreen } from '@/components/auth/DomainNotRecognizedScreen';
+import { TenantInfoLoadingScreen } from '@/components/auth/TenantInfoLoadingScreen';
 
 interface AdminBranding {
   logoUrl: string | null;
   businessName: string | null;
+}
+
+interface TenantInfo {
+  buyingGroupId: string;
+  domain: string;
+  portalType: 'admin' | 'pharmacy' | 'unknown';
+  isActive: boolean;
+  buyingGroupName: string;
 }
 
 export default function LoginPage() {
@@ -22,6 +32,8 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [branding, setBranding] = useState<AdminBranding>({ logoUrl: null, businessName: null });
+  const [tenantError, setTenantError] = useState<string | null>(null);
+  const [tenantChecked, setTenantChecked] = useState(false);
 
   useEffect(() => {
     try {
@@ -39,6 +51,69 @@ export default function LoginPage() {
     }
   }, []);
 
+  // Skip tenant API wait on localhost before paint (avoids a loader flash).
+  useLayoutEffect(() => {
+    const h = window.location.hostname;
+    if (
+      h === 'localhost' ||
+      h === '127.0.0.1' ||
+      h.endsWith('.localhost')
+    ) {
+      setTenantChecked(true);
+    }
+  }, []);
+
+  // Fetch tenant info (multi-tenant): validates the domain and pulls branding.
+  // - localhost -> skip the check entirely (dev mode allows any login)
+  // - real host -> tenant-info MUST succeed and resolve to an admin portal
+  useEffect(() => {
+    const fetchTenantInfo = async () => {
+      const host = typeof window !== 'undefined' ? window.location.hostname : '';
+      const isLocal =
+        host === 'localhost' ||
+        host === '127.0.0.1' ||
+        host.endsWith('.localhost');
+
+      if (isLocal) {
+        setTenantChecked(true);
+        return;
+      }
+
+      try {
+        const { apiClient } = await import('@/lib/api/apiClient');
+        const resp = await apiClient.get<{
+          status: string;
+          data: { isLocalDev: boolean; tenant: TenantInfo | null };
+        }>('/auth/tenant-info', false);
+
+        const tenant = resp?.data?.tenant;
+        if (!tenant) {
+          setTenantError('This domain is not registered for any buying group.');
+          return;
+        }
+        if (tenant.portalType !== 'admin') {
+          setTenantError('This domain is not configured for admin access.');
+          return;
+        }
+        setBranding({
+          logoUrl: branding.logoUrl,
+          businessName: tenant.buyingGroupName,
+        });
+        if (tenant.buyingGroupName) {
+          document.title = `${tenant.buyingGroupName} - Admin Login`;
+        }
+      } catch (err: any) {
+        setTenantError(
+          err?.message || 'Unable to verify this domain. Access denied.'
+        );
+      } finally {
+        setTenantChecked(true);
+      }
+    };
+    fetchTenantInfo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Redirect if already authenticated
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -54,6 +129,30 @@ export default function LoginPage() {
       dispatch(clearError());
     }
   }, [authError, dispatch]);
+
+  useEffect(() => {
+    const h = typeof window !== 'undefined' ? window.location.hostname : '';
+    const local =
+      h === 'localhost' || h === '127.0.0.1' || h.endsWith('.localhost');
+    if (!local && tenantChecked && tenantError) {
+      document.title = 'Domain not recognized';
+    }
+  }, [tenantChecked, tenantError]);
+
+  const hostname =
+    typeof window !== 'undefined' ? window.location.hostname : '';
+  const isLocalHost =
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname.endsWith('.localhost');
+
+  if (!isLocalHost && !tenantChecked) {
+    return <TenantInfoLoadingScreen />;
+  }
+
+  if (!isLocalHost && tenantChecked && tenantError) {
+    return <DomainNotRecognizedScreen detail={tenantError} />;
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -184,7 +283,7 @@ export default function LoginPage() {
               variant="primary"
               size="lg"
               className="w-full"
-              disabled={isLoading}
+              disabled={isLoading || !!tenantError || !tenantChecked}
             >
               {isLoading ? (
                 <span className="flex items-center justify-center gap-2">

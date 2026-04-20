@@ -1,9 +1,33 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { signupHandler, signinHandler, googleSigninHandler, refreshTokenHandler, logoutHandler, logoutAllHandler, forgotPasswordHandler, resetPasswordHandler, verifyResetTokenHandler, verifyInviteHandler, completeSetupHandler, verifyBranchInviteHandler, completeBranchSetupHandler } from '../controllers/authController';
 import { loginHandler, adminForgotPasswordHandler, adminVerifyResetTokenHandler, adminResetPasswordHandler } from '../controllers/adminController';
 import { authenticate } from '../middleware/auth';
+import { resolveTenantMiddleware } from '../middleware/tenantAuth';
+import { catchAsync } from '../utils/catchAsync';
 
 const router = express.Router();
+
+/**
+ * Tenant info endpoint — public.
+ * Returns the resolved buying group / portal info for the request's domain.
+ * Frontends call this to show branding and block access on unknown hosts.
+ */
+router.get(
+  '/tenant-info',
+  resolveTenantMiddleware,
+  catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
+    if (!req.tenant) {
+      return res.status(200).json({
+        status: 'success',
+        data: { isLocalDev: true, tenant: null },
+      });
+    }
+    return res.status(200).json({
+      status: 'success',
+      data: { isLocalDev: false, tenant: req.tenant },
+    });
+  })
+);
 
 /**
  * @swagger
@@ -127,7 +151,7 @@ router.post('/signup', signupHandler);
  *                   type: string
  *                   example: Please provide email and password
  */
-router.post('/login', loginHandler);
+router.post('/login', resolveTenantMiddleware, loginHandler);
 
 /**
  * @swagger
@@ -177,7 +201,7 @@ router.post('/login', loginHandler);
  *               status: 'fail'
  *               message: 'Pharmacy profile not found'
  */
-router.post('/signin', signinHandler);
+router.post('/signin', resolveTenantMiddleware, signinHandler);
 
 /**
  * @swagger

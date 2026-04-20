@@ -37,6 +37,7 @@ export interface AdminAuthResponse {
     name: string;
     role: string;
     permissions: string[];
+    buying_group_id?: string | null;
   };
   token: string;
   accessToken?: string;
@@ -52,11 +53,19 @@ export interface AdminAuthResponse {
  * 1. Validates email and password
  * 2. Checks if admin exists and is active
  * 3. Verifies password using bcrypt
- * 4. Generates JWT token
- * 5. Updates last_login_at
- * 6. Returns token and user data
+ * 4. (Multi-tenant) Validates tenant access via RPC — if the request came in
+ *    on a buying group's domain, the admin must belong to that buying group.
+ * 5. Generates JWT token (with buying_group_id claim)
+ * 6. Updates last_login_at
+ * 7. Returns token and user data
+ *
+ * @param tenantBuyingGroupId  Resolved buying_group_id from the request's domain
+ *                             (null on localhost — no enforcement).
  */
-export const adminLogin = async (data: AdminLoginData): Promise<AdminAuthResponse> => {
+export const adminLogin = async (
+  data: AdminLoginData,
+  tenantBuyingGroupId?: string | null
+): Promise<AdminAuthResponse> => {
   const { email, password } = data;
 
   if (!db) {
@@ -97,6 +106,28 @@ export const adminLogin = async (data: AdminLoginData): Promise<AdminAuthRespons
     throw new AppError('Invalid email or password', 401);
   }
 
+  // Step 3.5: Tenant-based access control (via RPC).
+  // The RPC enforces the domain -> buying-group mapping and returns
+  // the effective buying_group_id for this admin (used in the JWT).
+  let resolvedBuyingGroupId: string | null = null;
+  const { data: tenantData, error: tenantError } = await db.rpc(
+    'validate_admin_tenant_access',
+    {
+      p_admin_id: adminData.id,
+      p_tenant_buying_group_id: tenantBuyingGroupId ?? null,
+    }
+  );
+
+  if (tenantError) {
+    throw new AppError('Failed to validate tenant access', 500);
+  }
+
+  const tenantResult = tenantData as any;
+  if (tenantResult?.error) {
+    throw new AppError(tenantResult.message || 'Access denied', tenantResult.code || 403);
+  }
+  resolvedBuyingGroupId = tenantResult?.buying_group_id ?? null;
+
   // Step 4: Generate JWT token
   const now = Math.floor(Date.now() / 1000);
   const expiresAt = now + JWT_EXPIRES_IN_SECONDS;
@@ -113,6 +144,7 @@ export const adminLogin = async (data: AdminLoginData): Promise<AdminAuthRespons
     role: adminData.role,
     permissions,
     type: 'admin',
+    buying_group_id: resolvedBuyingGroupId,
   };
 
   const token = jwt.sign(tokenPayload, JWT_SECRET, {
@@ -132,6 +164,7 @@ export const adminLogin = async (data: AdminLoginData): Promise<AdminAuthRespons
     name: adminData.name,
     role: adminData.role,
     permissions,
+    buying_group_id: resolvedBuyingGroupId,
   };
 
   return {

@@ -187,7 +187,8 @@ export const cleanupExpiredTokens = async (): Promise<number> => {
  */
 const generateJwtAccessToken = (
   pharmacyId: string, 
-  email: string
+  email: string,
+  buyingGroupId: string | null = null
 ): { accessToken: string; expiresIn: number; expiresAt: number } => {
   const now = Math.floor(Date.now() / 1000);
   const expiresAt = now + ACCESS_TOKEN_EXPIRY_SECONDS;
@@ -198,6 +199,7 @@ const generateJwtAccessToken = (
     role: 'authenticated',
     aud: 'authenticated',
     type: 'pharmacy',
+    buying_group_id: buyingGroupId,
   };
 
   const accessToken = jwt.sign(tokenPayload, JWT_SECRET, {
@@ -386,7 +388,10 @@ export const googleSignin = async (email: string): Promise<AuthResponse> => {
   };
 };
 
-export const signin = async (data: SigninData): Promise<AuthResponse> => {
+export const signin = async (
+  data: SigninData,
+  tenantBuyingGroupId?: string | null
+): Promise<AuthResponse> => {
   const { email, password } = data;
 
   // Step 1: Sign in with Supabase Auth
@@ -425,12 +430,38 @@ export const signin = async (data: SigninData): Promise<AuthResponse> => {
     throw new AppError('Your pharmacy account status is invalid. Please contact support.', 403);
   }
 
+  // Step 2.6: Tenant-based access control (via RPC).
+  // The RPC enforces the domain -> buying-group mapping and returns
+  // the pharmacy's owning buying_group_id for JWT embedding.
+  let resolvedBuyingGroupId: string | null = null;
+  const { data: tenantData, error: tenantError } = await db.rpc(
+    'validate_pharmacy_tenant_access',
+    {
+      p_pharmacy_id: authUserId,
+      p_tenant_buying_group_id: tenantBuyingGroupId ?? null,
+    }
+  );
+
+  if (tenantError) {
+    throw new AppError('Failed to validate tenant access', 500);
+  }
+
+  const tenantResult = tenantData as any;
+  if (tenantResult?.error) {
+    throw new AppError(tenantResult.message || 'Access denied', tenantResult.code || 403);
+  }
+  resolvedBuyingGroupId = tenantResult?.buying_group_id ?? null;
+
   // Step 3: Revoke all existing refresh tokens (logout from all devices)
   // This ensures that when a user logs in, all previous sessions are invalidated
   await revokeAllRefreshTokens(authUserId);
 
   // Step 4: Generate JWT access token using jsonwebtoken
-  const { accessToken, expiresIn, expiresAt } = generateJwtAccessToken(authUserId, email);
+  const { accessToken, expiresIn, expiresAt } = generateJwtAccessToken(
+    authUserId,
+    email,
+    resolvedBuyingGroupId
+  );
 
   // Step 5: Generate and store our custom long-lived refresh token
   const customRefreshToken = generateRefreshToken();

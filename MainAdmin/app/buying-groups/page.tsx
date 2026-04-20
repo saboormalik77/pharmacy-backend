@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Plus, Search, Users, Eye, Pencil, Trash2, X, ChevronLeft, ChevronRight,
-  CheckCircle, XCircle, AlertTriangle, Loader2,
+  CheckCircle, XCircle, AlertTriangle, Loader2, Globe,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn, formatDate } from '@/lib/utils';
@@ -15,6 +15,9 @@ import {
   updateBuyingGroup,
   deleteBuyingGroup,
   clearSelectedGroup,
+  fetchBuyingGroupDomains,
+  upsertBuyingGroupDomain,
+  deleteBuyingGroupDomain,
   BuyingGroup,
 } from '@/lib/store/buyingGroupsSlice';
 
@@ -24,7 +27,9 @@ export default function BuyingGroupsPage() {
   const dispatch = useAppDispatch();
   const {
     buyingGroups, stats, pagination, isLoading, isLoadingDetail,
-    selectedGroup, selectedGroupAdmins, error,
+    selectedGroup, selectedGroupAdmins,
+    selectedGroupDomains, isLoadingDomains,
+    error,
   } = useAppSelector((state) => state.buyingGroups);
 
   const [search, setSearch] = useState('');
@@ -47,6 +52,14 @@ export default function BuyingGroupsPage() {
     adminPassword: '',
     adminName: '',
   });
+
+  const [domainForm, setDomainForm] = useState({
+    domain: '',
+    adminHostname: '',
+    pharmacyHostname: '',
+  });
+  const [domainError, setDomainError] = useState('');
+  const [domainSavingId, setDomainSavingId] = useState<string | 'new' | null>(null);
 
   const loadGroups = useCallback(() => {
     dispatch(fetchBuyingGroups({
@@ -100,7 +113,48 @@ export default function BuyingGroupsPage() {
 
   const openViewModal = (group: BuyingGroup) => {
     dispatch(fetchBuyingGroupById(group.id));
+    dispatch(fetchBuyingGroupDomains(group.id));
+    setDomainForm({ domain: '', adminHostname: '', pharmacyHostname: '' });
+    setDomainError('');
     setModalMode('view');
+  };
+
+  const handleAddDomain = async () => {
+    setDomainError('');
+    if (!selectedGroup) return;
+    if (!domainForm.domain.trim()) {
+      setDomainError('Domain is required');
+      return;
+    }
+    setDomainSavingId('new');
+    try {
+      await dispatch(upsertBuyingGroupDomain({
+        groupId: selectedGroup.id,
+        domain: domainForm.domain.trim(),
+        adminHostname: domainForm.adminHostname.trim() || null,
+        pharmacyHostname: domainForm.pharmacyHostname.trim() || null,
+      })).unwrap();
+      setDomainForm({ domain: '', adminHostname: '', pharmacyHostname: '' });
+    } catch (err: any) {
+      setDomainError(err || 'Failed to save domain');
+    } finally {
+      setDomainSavingId(null);
+    }
+  };
+
+  const handleDeleteDomain = async (domainId: string) => {
+    if (!selectedGroup) return;
+    setDomainSavingId(domainId);
+    try {
+      await dispatch(deleteBuyingGroupDomain({
+        groupId: selectedGroup.id,
+        domainId,
+      })).unwrap();
+    } catch (err: any) {
+      setDomainError(err || 'Failed to delete domain');
+    } finally {
+      setDomainSavingId(null);
+    }
   };
 
   const closeModal = () => {
@@ -552,6 +606,97 @@ export default function BuyingGroupsPage() {
                   <div>
                     <p className="text-xs text-gray-500">Updated</p>
                     <p className="text-sm text-gray-900">{formatDate(selectedGroup.updatedAt)}</p>
+                  </div>
+                </div>
+
+                {/* Domains */}
+                <div className="border-t border-gray-200 pt-4">
+                  <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <Globe className="w-4 h-4" />
+                    Domains ({selectedGroupDomains.length})
+                  </h4>
+
+                  {domainError && (
+                    <div className="mb-3 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-xs">
+                      {domainError}
+                    </div>
+                  )}
+
+                  {isLoadingDomains ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                    </div>
+                  ) : (
+                    <div className="space-y-2 mb-3">
+                      {selectedGroupDomains.length === 0 ? (
+                        <p className="text-sm text-gray-500">No domains configured yet.</p>
+                      ) : (
+                        selectedGroupDomains.map((d) => (
+                          <div key={d.id} className="p-3 bg-gray-50 rounded-lg text-xs space-y-1">
+                            <div className="flex items-center justify-between">
+                              <p className="text-sm font-medium text-gray-900">{d.domain}</p>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteDomain(d.id)}
+                                disabled={domainSavingId === d.id}
+                                className="p-1 rounded hover:bg-red-100 text-red-600 disabled:opacity-50"
+                                title="Delete domain"
+                              >
+                                {domainSavingId === d.id ? (
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                ) : (
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                )}
+                              </button>
+                            </div>
+                            <p className="text-gray-600">
+                              <span className="font-medium">Admin:</span> {d.adminHostname || '-'}
+                            </p>
+                            <p className="text-gray-600">
+                              <span className="font-medium">Pharmacy:</span> {d.pharmacyHostname || '-'}
+                            </p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+
+                  <div className="border border-dashed border-gray-300 rounded-lg p-3 space-y-2 bg-white">
+                    <p className="text-xs font-medium text-gray-700">Add / update a domain</p>
+                    <input
+                      type="text"
+                      placeholder="Base domain (e.g. abc.com)"
+                      value={domainForm.domain}
+                      onChange={(e) => setDomainForm((f) => ({ ...f, domain: e.target.value }))}
+                      className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Admin hostname (e.g. admin.abc.com)"
+                      value={domainForm.adminHostname}
+                      onChange={(e) => setDomainForm((f) => ({ ...f, adminHostname: e.target.value }))}
+                      className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Pharmacy hostname (e.g. pharmacy.abc.com)"
+                      value={domainForm.pharmacyHostname}
+                      onChange={(e) => setDomainForm((f) => ({ ...f, pharmacyHostname: e.target.value }))}
+                      className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <Button
+                      variant="primary"
+                      onClick={handleAddDomain}
+                      disabled={domainSavingId === 'new'}
+                      className="w-full flex items-center justify-center gap-2"
+                    >
+                      {domainSavingId === 'new' ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Plus className="w-4 h-4" />
+                      )}
+                      Save Domain
+                    </Button>
                   </div>
                 </div>
 

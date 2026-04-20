@@ -370,3 +370,56 @@ export const deleteBuyingGroup = async (groupId: string) => {
 
   return result;
 };
+
+// ============================================================
+// Buying Group Domain Management (all delegated to RPCs)
+// ============================================================
+
+export const listBuyingGroupDomains = async (groupId: string) => {
+  if (!db) throw new AppError('Database connection not configured', 500);
+
+  const { data, error } = await db.rpc('get_buying_group_domains', {
+    p_buying_group_id: groupId,
+  });
+
+  if (error) throw new AppError(`Failed to fetch domains: ${error.message}`, 500);
+  return data ?? [];
+};
+
+export const upsertBuyingGroupDomain = async (
+  groupId: string,
+  params: { domain: string; adminHostname?: string | null; pharmacyHostname?: string | null }
+) => {
+  if (!db) throw new AppError('Database connection not configured', 500);
+
+  if (!params.domain || !params.domain.trim()) {
+    throw new AppError('Domain is required', 400);
+  }
+
+  const { data, error } = await db.rpc('upsert_buying_group_domain', {
+    p_buying_group_id: groupId,
+    p_domain: params.domain,
+    p_admin_hostname: params.adminHostname ?? null,
+    p_pharmacy_hostname: params.pharmacyHostname ?? null,
+  });
+
+  if (error) throw new AppError(`Failed to save domain: ${error.message}`, 500);
+
+  const result = data as any;
+  if (result?.error) throw new AppError(result.message, 400);
+  return result;
+};
+
+export const deleteBuyingGroupDomain = async (domainId: string) => {
+  if (!db) throw new AppError('Database connection not configured', 500);
+
+  const { data, error } = await db.rpc('delete_buying_group_domain', {
+    p_domain_id: domainId,
+  });
+
+  if (error) throw new AppError(`Failed to delete domain: ${error.message}`, 500);
+
+  const result = data as any;
+  if (result?.error) throw new AppError(result.message, 404);
+  return result;
+};
