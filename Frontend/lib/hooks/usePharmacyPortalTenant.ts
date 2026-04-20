@@ -50,7 +50,7 @@ export function usePharmacyPortalTenant() {
         const resp = await apiClient.get<{
           isLocalDev: boolean
           tenant: PharmacyTenantInfo | null
-        }>('/auth/tenant-info', undefined, false)
+        }>('/auth/tenant-info', { role: 'pharmacy' }, false)
 
         const tenant = resp?.data?.tenant
         if (!tenant) {

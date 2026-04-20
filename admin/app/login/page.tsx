@@ -84,7 +84,7 @@ export default function LoginPage() {
         const resp = await apiClient.get<{
           status: string;
           data: { isLocalDev: boolean; tenant: TenantInfo | null };
-        }>('/auth/tenant-info', false);
+        }>('/auth/tenant-info', false, { role: 'admin' });
 
         const tenant = resp?.data?.tenant;
         if (!tenant) {

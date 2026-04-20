@@ -123,7 +123,8 @@ BEGIN
     'portal_type',
       CASE
         WHEN v_hostname = bgd.admin_hostname THEN 'admin'
-        WHEN v_hostname = bgd.pharmacy_hostname THEN 'pharmacy'
+        -- Pharmacy portal may run on either the explicit pharmacy hostname or the base domain
+        WHEN v_hostname = bgd.pharmacy_hostname OR v_hostname = bgd.domain THEN 'pharmacy'
         ELSE 'unknown'
       END,
     'is_active', bgd.is_active,
@@ -137,6 +138,7 @@ BEGIN
     AND (
       bgd.admin_hostname = v_hostname
       OR bgd.pharmacy_hostname = v_hostname
+      OR bgd.domain = v_hostname
     )
   LIMIT 1;
 
