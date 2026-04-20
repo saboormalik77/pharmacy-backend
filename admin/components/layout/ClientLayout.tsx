@@ -6,6 +6,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
 import StoreProvider from '@/components/providers/StoreProvider';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import TenantGate from '@/components/auth/TenantGate';
 
 // Auth pages that don't show sidebar/navbar
 const AUTH_PATHS = ['/login', '/forgot-password', '/reset-password'];
@@ -36,36 +37,38 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
     return (
         <StoreProvider>
-            <ProtectedRoute>
-                {!isAuthPage && (
-                    <>
-                        <Navbar onToggleSidebar={handleToggleSidebar} />
-                        <Sidebar
-                            isCollapsed={sidebarCollapsed}
-                            isOpen={sidebarOpen}
-                            onClose={handleCloseSidebar}
-                        />
-                        {sidebarOpen && (
-                            <div
-                                className="fixed top-16 left-0 right-0 bottom-0 z-30 sm:hidden"
-                                onClick={handleCloseSidebar}
+            <TenantGate>
+                <ProtectedRoute>
+                    {!isAuthPage && (
+                        <>
+                            <Navbar onToggleSidebar={handleToggleSidebar} />
+                            <Sidebar
+                                isCollapsed={sidebarCollapsed}
+                                isOpen={sidebarOpen}
+                                onClose={handleCloseSidebar}
                             />
-                        )}
-                    </>
-                )}
-                <main
-                    className={
-                        !isAuthPage
-                            ? `pt-16 transition-all duration-300 min-h-screen ${sidebarCollapsed ? 'sm:ml-16' : 'sm:ml-64'}`
-                            : ''
-                    }
-                >
-                    {!isAuthPage
-                        ? <div className="p-3 sm:p-4 md:p-6">{children}</div>
-                        : children
-                    }
-                </main>
-            </ProtectedRoute>
+                            {sidebarOpen && (
+                                <div
+                                    className="fixed top-16 left-0 right-0 bottom-0 z-30 sm:hidden"
+                                    onClick={handleCloseSidebar}
+                                />
+                            )}
+                        </>
+                    )}
+                    <main
+                        className={
+                            !isAuthPage
+                                ? `pt-16 transition-all duration-300 min-h-screen ${sidebarCollapsed ? 'sm:ml-16' : 'sm:ml-64'}`
+                                : ''
+                        }
+                    >
+                        {!isAuthPage
+                            ? <div className="p-3 sm:p-4 md:p-6">{children}</div>
+                            : children
+                        }
+                    </main>
+                </ProtectedRoute>
+            </TenantGate>
         </StoreProvider>
     );
 }
