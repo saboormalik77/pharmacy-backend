@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useState, Suspense } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { authService } from '@/lib/api/services'
 import { DomainNotRecognizedScreen } from '@/components/auth/DomainNotRecognizedScreen'
 import { TenantInfoLoadingScreen } from '@/components/auth/TenantInfoLoadingScreen'
+import { usePharmacyPortalTenant } from '@/lib/hooks/usePharmacyPortalTenant'
 
 function GoogleIcon() {
   return (
@@ -29,14 +30,6 @@ interface AdminBranding {
   businessName: string | null
 }
 
-interface TenantInfo {
-  buyingGroupId: string
-  domain: string
-  portalType: 'admin' | 'pharmacy' | 'unknown'
-  isActive: boolean
-  buyingGroupName: string
-}
-
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -50,17 +43,16 @@ function LoginForm() {
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [branding, setBranding] = useState<AdminBranding | null>(null)
-  const [tenantError, setTenantError] = useState<string | null>(null)
-  const [tenantChecked, setTenantChecked] = useState(false)
+
+  const { tenantChecked, tenantError, validTenant, isLocalHost } =
+    usePharmacyPortalTenant()
 
   useEffect(() => {
-    // Only load cached branding on login page (can't fetch without pharmacy_id)
     try {
       const cached = localStorage.getItem('pharmacyAdminBranding')
       if (cached) {
         const parsedBranding = JSON.parse(cached)
         setBranding(parsedBranding)
-        // Update document title
         if (parsedBranding.businessName) {
           document.title = `${parsedBranding.businessName} - Data Analytics Platform`
         }
@@ -68,73 +60,21 @@ function LoginForm() {
     } catch { /* ignore */ }
   }, [])
 
-  useLayoutEffect(() => {
-    const h = window.location.hostname
-    if (
-      h === 'localhost' ||
-      h === '127.0.0.1' ||
-      h.endsWith('.localhost')
-    ) {
-      setTenantChecked(true)
-    }
-  }, [])
-
-  // Fetch tenant info (multi-tenant): validates the domain and pulls branding.
-  // - localhost -> skip the check entirely (dev mode allows any login)
-  // - real host -> tenant-info MUST succeed and resolve to a pharmacy portal
   useEffect(() => {
-    const fetchTenantInfo = async () => {
-      const host = typeof window !== 'undefined' ? window.location.hostname : ''
-      const isLocal =
-        host === 'localhost' ||
-        host === '127.0.0.1' ||
-        host.endsWith('.localhost')
-
-      if (isLocal) {
-        setTenantChecked(true)
-        return
-      }
-
-      try {
-        const { apiClient } = await import('@/lib/api/client')
-        const resp = await apiClient.get<{ isLocalDev: boolean; tenant: TenantInfo | null }>(
-          '/auth/tenant-info',
-          undefined,
-          false
-        )
-        const tenant = resp?.data?.tenant
-        if (!tenant) {
-          setTenantError('This domain is not registered for any buying group.')
-          return
-        }
-        if (tenant.portalType !== 'pharmacy') {
-          setTenantError('This domain is not configured for pharmacy access.')
-          return
-        }
-        setBranding((prev) => ({
-          logoUrl: prev?.logoUrl ?? null,
-          businessName: tenant.buyingGroupName,
-        }))
-        if (tenant.buyingGroupName) {
-          document.title = `${tenant.buyingGroupName} - Data Analytics Platform`
-        }
-      } catch (err: any) {
-        setTenantError(err?.message || 'Unable to verify this domain. Access denied.')
-      } finally {
-        setTenantChecked(true)
-      }
-    }
-    fetchTenantInfo()
-  }, [])
-
-  useEffect(() => {
-    const h = typeof window !== 'undefined' ? window.location.hostname : ''
-    const local =
-      h === 'localhost' || h === '127.0.0.1' || h.endsWith('.localhost')
-    if (!local && tenantChecked && tenantError) {
+    if (!isLocalHost && tenantChecked && tenantError) {
       document.title = 'Domain not recognized'
     }
-  }, [tenantChecked, tenantError])
+  }, [isLocalHost, tenantChecked, tenantError])
+
+  useEffect(() => {
+    if (validTenant?.buyingGroupName) {
+      setBranding((prev) => ({
+        logoUrl: prev?.logoUrl ?? null,
+        businessName: validTenant.buyingGroupName,
+      }))
+      document.title = `${validTenant.buyingGroupName} - Data Analytics Platform`
+    }
+  }, [validTenant])
 
   useEffect(() => {
     const oauthError = searchParams.get('oauthError')
@@ -191,20 +131,15 @@ function LoginForm() {
     }
   }
 
-  const loginHost =
-    typeof window !== 'undefined' ? window.location.hostname : ''
-  const isLoginLocal =
-    loginHost === 'localhost' ||
-    loginHost === '127.0.0.1' ||
-    loginHost.endsWith('.localhost')
-
-  if (!isLoginLocal && !tenantChecked) {
+  if (!isLocalHost && !tenantChecked) {
     return <TenantInfoLoadingScreen />
   }
 
-  if (!isLoginLocal && tenantChecked && tenantError) {
+  if (!isLocalHost && tenantChecked && tenantError) {
     return <DomainNotRecognizedScreen detail={tenantError} />
   }
+
+  const authBlocked = !!tenantError || !tenantChecked
 
   return (
     <Card className="w-full max-w-md">
@@ -225,7 +160,7 @@ function LoginForm() {
           <button
             type="button"
             onClick={handleGoogleSignIn}
-            disabled={googleLoading}
+            disabled={googleLoading || authBlocked}
             className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
           >
             <GoogleIcon />
@@ -296,7 +231,7 @@ function LoginForm() {
           )}
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
-          <Button type="submit" className="w-full" disabled={loading || !!tenantError || !tenantChecked}>
+          <Button type="submit" className="w-full" disabled={loading || authBlocked}>
             {loading ? 'Signing in...' : 'Sign in'}
           </Button>
         </CardFooter>

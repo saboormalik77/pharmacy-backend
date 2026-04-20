@@ -9,6 +9,9 @@ import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/Card'
 import { authService } from '@/lib/api/services'
 import { US_STATES } from '@/lib/constants/usStates'
+import { DomainNotRecognizedScreen } from '@/components/auth/DomainNotRecognizedScreen'
+import { TenantInfoLoadingScreen } from '@/components/auth/TenantInfoLoadingScreen'
+import { usePharmacyPortalTenant } from '@/lib/hooks/usePharmacyPortalTenant'
 
 interface AdminBranding {
   logoUrl: string | null
@@ -146,16 +149,6 @@ export default function RegisterPage() {
   const [error, setError] = useState('')
   const [branding, setBranding] = useState<AdminBranding | null>(null)
 
-  useEffect(() => {
-    // Only load cached branding (can't fetch without authentication)
-    try {
-      const cached = localStorage.getItem('pharmacyAdminBranding')
-      if (cached) {
-        setBranding(JSON.parse(cached))
-      }
-    } catch { /* ignore */ }
-  }, [])
-
   // Form data
   const [pharmacyName, setPharmacyName] = useState('')
   const [npiNumber, setNpiNumber] = useState('')
@@ -181,6 +174,27 @@ export default function RegisterPage() {
     state: '',
     zip: '',
   })
+
+  useEffect(() => {
+    try {
+      const cached = localStorage.getItem('pharmacyAdminBranding')
+      if (cached) {
+        setBranding(JSON.parse(cached))
+      }
+    } catch { /* ignore */ }
+  }, [])
+
+  const { tenantChecked, tenantError, validTenant, isLocalHost } =
+    usePharmacyPortalTenant()
+
+  useEffect(() => {
+    if (validTenant?.buyingGroupName) {
+      setBranding((prev) => ({
+        logoUrl: prev?.logoUrl ?? null,
+        businessName: validTenant.buyingGroupName,
+      }))
+    }
+  }, [validTenant])
   
   const passwordStrength = getPasswordStrength(password)
 
@@ -329,6 +343,13 @@ export default function RegisterPage() {
       setError(err.message || 'Failed to create account. Please try again.')
       setLoading(false)
     }
+  }
+
+  if (!isLocalHost && !tenantChecked) {
+    return <TenantInfoLoadingScreen />
+  }
+  if (!isLocalHost && tenantChecked && tenantError) {
+    return <DomainNotRecognizedScreen detail={tenantError} />
   }
 
   return (

@@ -7,6 +7,9 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/Card'
 import { authService } from '@/lib/api/services'
+import { DomainNotRecognizedScreen } from '@/components/auth/DomainNotRecognizedScreen'
+import { TenantInfoLoadingScreen } from '@/components/auth/TenantInfoLoadingScreen'
+import { usePharmacyPortalTenant } from '@/lib/hooks/usePharmacyPortalTenant'
 
 interface AdminBranding {
   logoUrl: string | null
@@ -28,6 +31,9 @@ function ResetPasswordForm() {
   const [accessToken, setAccessToken] = useState<string | null>(null)
   const [branding, setBranding] = useState<AdminBranding | null>(null)
 
+  const { tenantChecked, tenantError, validTenant, isLocalHost } =
+    usePharmacyPortalTenant()
+
   useEffect(() => {
     // Only load cached branding (can't fetch without authentication)
     try {
@@ -37,6 +43,15 @@ function ResetPasswordForm() {
       }
     } catch { /* ignore */ }
   }, [])
+
+  useEffect(() => {
+    if (validTenant?.buyingGroupName) {
+      setBranding((prev) => ({
+        logoUrl: prev?.logoUrl ?? null,
+        businessName: validTenant.buyingGroupName,
+      }))
+    }
+  }, [validTenant])
 
   // Get access token from URL hash (Supabase puts it in the fragment)
   // Format: #access_token=xxx&type=recovery&expires_in=3600
@@ -154,6 +169,13 @@ function ResetPasswordForm() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (!isLocalHost && !tenantChecked) {
+    return <TenantInfoLoadingScreen />
+  }
+  if (!isLocalHost && tenantChecked && tenantError) {
+    return <DomainNotRecognizedScreen detail={tenantError} />
   }
 
   // Loading state while verifying token
@@ -355,16 +377,7 @@ function ResetPasswordForm() {
 export default function ResetPasswordPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <Suspense fallback={
-        <Card className="w-full max-w-md">
-          <CardContent className="p-8">
-            <div className="flex flex-col items-center justify-center space-y-4">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
-              <p className="text-muted-foreground">Loading...</p>
-            </div>
-          </CardContent>
-        </Card>
-      }>
+      <Suspense fallback={<TenantInfoLoadingScreen />}>
         <ResetPasswordForm />
       </Suspense>
     </div>
