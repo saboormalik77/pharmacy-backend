@@ -33,7 +33,7 @@ async function loadAdminTenant(): Promise<TenantState> {
       const resp = await apiClient.get<{
         status: string;
         data: { isLocalDev: boolean; tenant: AdminTenantInfo | null };
-      }>('/auth/tenant-info', false);
+      }>('/auth/tenant-info', false, { role: 'admin' });
 
       const tenant = resp?.data?.tenant ?? null;
       if (!tenant) {
