@@ -155,7 +155,7 @@ export default function SetupAccountPage() {
             <Shield className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Set Up Your Account</h1>
-          <p className="text-gray-600">Main Admin Portal</p>
+          <p className="text-gray-600">Admin Portal</p>
         </div>
 
         <div className="bg-white rounded-lg shadow-md p-8">
@@ -249,7 +249,7 @@ export default function SetupAccountPage() {
         </div>
 
         <p className="text-center text-sm text-gray-500 mt-6" suppressHydrationWarning>
-          &copy; {new Date().getFullYear()} Main Admin Portal. All rights reserved.
+          &copy; {new Date().getFullYear()} Admin Portal. All rights reserved.
         </p>
       </div>
     </div>

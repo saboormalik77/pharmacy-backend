@@ -26,7 +26,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     const handleCloseSidebar = () => setSidebarOpen(false);
 
     useEffect(() => {
-        document.title = 'Main Admin';
+        document.title = 'Admin';
     }, []);
 
     useEffect(() => {

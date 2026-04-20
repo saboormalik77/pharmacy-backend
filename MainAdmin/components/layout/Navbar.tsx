@@ -56,7 +56,7 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
                         <div className="w-7 h-7 sm:w-8 sm:h-8 bg-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
                             <span className="text-white font-bold text-xs sm:text-sm">MA</span>
                         </div>
-                        <span className="text-base sm:text-xl font-bold text-gray-900 hidden xs:inline">Main Admin</span>
+                        <span className="text-base sm:text-xl font-bold text-gray-900 hidden xs:inline">Admin</span>
                     </div>
                 </div>
 
@@ -66,12 +66,12 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
                             <div className="w-8 h-8 sm:w-9 sm:h-9 bg-indigo-600 rounded-full flex items-center justify-center flex-shrink-0">
                                 <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                             </div>
-                            <span className="text-xs sm:text-sm font-medium text-gray-700 hidden sm:inline">{user?.name || 'Main Admin'}</span>
+                            <span className="text-xs sm:text-sm font-medium text-gray-700 hidden sm:inline">{user?.name || 'Admin'}</span>
                         </button>
                         {showProfile && (
                             <div className="absolute right-0 mt-2 w-48 sm:w-56 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-50">
                                 <div className="px-4 py-3 border-b border-gray-200">
-                                    <p className="font-medium text-gray-900">{user?.name || 'Main Admin'}</p>
+                                    <p className="font-medium text-gray-900">{user?.name || 'Admin'}</p>
                                     <p className="text-sm text-gray-500">{user?.email || ''}</p>
                                 </div>
                                 <div className="py-1">
