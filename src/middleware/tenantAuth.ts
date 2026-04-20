@@ -39,7 +39,14 @@ export const resolveTenantMiddleware = async (
       return next();
     }
 
-    const tenant = await resolveTenant(hostname);
+    // Accept an optional `role` query param sent by the calling portal.
+    // When the same hostname is shared by both admin and pharmacy portals,
+    // this hint is the only reliable way to resolve the correct portalType.
+    const rawRole = req.query?.role;
+    const roleHint =
+      rawRole === 'admin' || rawRole === 'pharmacy' ? rawRole : undefined;
+
+    const tenant = await resolveTenant(hostname, roleHint);
     req.tenant = tenant;
     next();
   } catch (error) {

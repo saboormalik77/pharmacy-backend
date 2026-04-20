@@ -49,6 +49,22 @@ export const addItemHandler = catchAsync(
       throw new AppError('partialPercentage is required when isPartial is true', 400);
     }
 
+    // Duplicate check: block if NDC + serial number already exist in this return transaction
+    if (body.ndc && body.serialNumber) {
+      const existing = await itemsService.listItems(transactionId);
+      const isDuplicate = (existing.items || []).some(
+        (item: any) =>
+          item.ndc === body.ndc &&
+          item.serialNumber === body.serialNumber
+      );
+      if (isDuplicate) {
+        throw new AppError(
+          `Duplicate item: NDC "${body.ndc}" with serial number "${body.serialNumber}" has already been added to this return.`,
+          409
+        );
+      }
+    }
+
     let returnStatus = body.returnStatus;
     let nonReturnableReason = body.nonReturnableReason;
     let destination = body.destination;

@@ -392,6 +392,22 @@ export default function AddItemsPage() {
                     scanSource: af.scanSource || 'gs1_qr',
                     rawScanData: raw.trim(),
                 };
+                // Duplicate check: block if NDC + Serial Number already exist in this return
+                if (newForm.ndc && newForm.serialNumber) {
+                    const isDuplicate = recentlyAddedItems.some(
+                        item =>
+                            item.ndc === newForm.ndc &&
+                            item.serialNumber === newForm.serialNumber
+                    );
+                    if (isDuplicate) {
+                        setScanError(
+                            `Duplicate item! NDC "${newForm.ndc}" with serial number "${newForm.serialNumber}" has already been added to this return.`
+                        );
+                        setScanInput('');
+                        return;
+                    }
+                }
+
                 setForm(newForm);
 
                 if (!res.data.product) {
