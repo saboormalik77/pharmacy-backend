@@ -165,6 +165,16 @@ class ApiClient {
   }
 
   /**
+   * Get current hostname so the backend can resolve the tenant.
+   */
+  private getTenantDomain(): string | null {
+    if (typeof window !== 'undefined' && window.location?.hostname) {
+      return window.location.hostname;
+    }
+    return null;
+  }
+
+  /**
    * Build headers for API requests
    */
   private getHeaders(includeAuth: boolean = true, customHeaders?: Record<string, string>): HeadersInit {
@@ -178,6 +188,11 @@ class ApiClient {
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
+    }
+
+    const tenantDomain = this.getTenantDomain();
+    if (tenantDomain) {
+      headers['X-Tenant-Domain'] = tenantDomain;
     }
 
     return headers;
@@ -695,6 +710,10 @@ class ApiClient {
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
+    }
+    const tenantDomain = this.getTenantDomain();
+    if (tenantDomain) {
+      headers['X-Tenant-Domain'] = tenantDomain;
     }
     // Don't set Content-Type for FormData, browser will set it with boundary
 

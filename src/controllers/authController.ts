@@ -42,7 +42,14 @@ export const signinHandler = catchAsync(
 
     console.log('📱 Signin request - FCM Token:', fcmToken ? `${fcmToken.substring(0, 20)}...` : 'not provided');
 
-    const result = await signin({ email, password, fcmToken });
+    // Tenant enforcement:
+    // - req.tenant === null   -> localhost / dev (no enforcement)
+    // - req.tenant !== null   -> production domain; portal type must be 'pharmacy'
+    if (req.tenant && req.tenant.portalType !== 'pharmacy') {
+      throw new AppError('This domain is not configured for pharmacy access', 403);
+    }
+    const tenantBuyingGroupId = req.tenant?.buyingGroupId ?? null;
+    const result = await signin({ email, password, fcmToken }, tenantBuyingGroupId);
 
     res.status(200).json({
       status: 'success',

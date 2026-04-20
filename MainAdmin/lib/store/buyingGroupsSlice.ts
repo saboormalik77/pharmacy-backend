@@ -23,10 +23,22 @@ export interface BuyingGroupAdmin {
   createdAt: string;
 }
 
+export interface BuyingGroupDomain {
+  id: string;
+  domain: string;
+  adminHostname: string | null;
+  pharmacyHostname: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface BuyingGroupsState {
   buyingGroups: BuyingGroup[];
   selectedGroup: BuyingGroup | null;
   selectedGroupAdmins: BuyingGroupAdmin[];
+  selectedGroupDomains: BuyingGroupDomain[];
+  isLoadingDomains: boolean;
   stats: {
     total: number;
     active: number;
@@ -48,6 +60,8 @@ const initialState: BuyingGroupsState = {
   buyingGroups: [],
   selectedGroup: null,
   selectedGroupAdmins: [],
+  selectedGroupDomains: [],
+  isLoadingDomains: false,
   stats: { total: 0, active: 0, inactive: 0, suspended: 0 },
   pagination: { page: 1, limit: 10, total: 0, totalPages: 0 },
   isLoading: false,
@@ -152,6 +166,73 @@ export const deleteBuyingGroup = createAsyncThunk(
   }
 );
 
+// ============================================================
+// Buying Group Domain Management
+// ============================================================
+
+export const fetchBuyingGroupDomains = createAsyncThunk(
+  'buyingGroups/fetchDomains',
+  async (groupId: string, { rejectWithValue }) => {
+    try {
+      const { apiClient } = await import('@/lib/api/apiClient');
+      const resp = await apiClient.get<{ status: string; data: BuyingGroupDomain[] }>(
+        `/main-admin/buying-groups/${groupId}/domains`
+      );
+      return resp?.data || [];
+    } catch (error: any) {
+      return rejectWithValue(error?.message || 'Failed to fetch domains');
+    }
+  }
+);
+
+export const upsertBuyingGroupDomain = createAsyncThunk(
+  'buyingGroups/upsertDomain',
+  async (
+    params: {
+      groupId: string;
+      domain: string;
+      adminHostname?: string | null;
+      pharmacyHostname?: string | null;
+    },
+    { rejectWithValue, dispatch }
+  ) => {
+    try {
+      const { apiClient } = await import('@/lib/api/apiClient');
+      const data = await apiClient.post<any>(
+        `/main-admin/buying-groups/${params.groupId}/domains`,
+        {
+          domain: params.domain,
+          adminHostname: params.adminHostname ?? null,
+          pharmacyHostname: params.pharmacyHostname ?? null,
+        }
+      );
+      await dispatch(fetchBuyingGroupDomains(params.groupId));
+      return data;
+    } catch (error: any) {
+      return rejectWithValue(error?.message || 'Failed to save domain');
+    }
+  }
+);
+
+export const deleteBuyingGroupDomain = createAsyncThunk(
+  'buyingGroups/deleteDomain',
+  async (
+    params: { groupId: string; domainId: string },
+    { rejectWithValue, dispatch }
+  ) => {
+    try {
+      const { apiClient } = await import('@/lib/api/apiClient');
+      const data = await apiClient.delete<any>(
+        `/main-admin/buying-groups/domains/${params.domainId}`
+      );
+      await dispatch(fetchBuyingGroupDomains(params.groupId));
+      return data;
+    } catch (error: any) {
+      return rejectWithValue(error?.message || 'Failed to delete domain');
+    }
+  }
+);
+
 const buyingGroupsSlice = createSlice({
   name: 'buyingGroups',
   initialState,
@@ -162,6 +243,7 @@ const buyingGroupsSlice = createSlice({
     clearSelectedGroup: (state) => {
       state.selectedGroup = null;
       state.selectedGroupAdmins = [];
+      state.selectedGroupDomains = [];
     },
   },
   extraReducers: (builder) => {
@@ -218,6 +300,30 @@ const buyingGroupsSlice = createSlice({
         state.error = null;
       })
       .addCase(deleteBuyingGroup.rejected, (state, action) => {
+        state.error = action.payload as string;
+      });
+
+    builder
+      .addCase(fetchBuyingGroupDomains.pending, (state) => {
+        state.isLoadingDomains = true;
+        state.error = null;
+      })
+      .addCase(fetchBuyingGroupDomains.fulfilled, (state, action) => {
+        state.isLoadingDomains = false;
+        state.selectedGroupDomains = (action.payload as BuyingGroupDomain[]) || [];
+      })
+      .addCase(fetchBuyingGroupDomains.rejected, (state, action) => {
+        state.isLoadingDomains = false;
+        state.error = action.payload as string;
+      });
+
+    builder
+      .addCase(upsertBuyingGroupDomain.rejected, (state, action) => {
+        state.error = action.payload as string;
+      });
+
+    builder
+      .addCase(deleteBuyingGroupDomain.rejected, (state, action) => {
         state.error = action.payload as string;
       });
   },

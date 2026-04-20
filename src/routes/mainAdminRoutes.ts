@@ -6,6 +6,9 @@ import {
   createBuyingGroupHandler,
   updateBuyingGroupHandler,
   deleteBuyingGroupHandler,
+  getBuyingGroupDomainsHandler,
+  upsertBuyingGroupDomainHandler,
+  deleteBuyingGroupDomainHandler,
 } from '../controllers/mainAdminController';
 import {
   getPermissionsListHandler,
@@ -35,6 +38,11 @@ router.get('/buying-groups/:id', authenticateMainAdmin, getBuyingGroupByIdHandle
 router.post('/buying-groups', authenticateMainAdmin, createBuyingGroupHandler);
 router.put('/buying-groups/:id', authenticateMainAdmin, updateBuyingGroupHandler);
 router.delete('/buying-groups/:id', authenticateMainAdmin, deleteBuyingGroupHandler);
+
+// Buying Group domain management (protected)
+router.get('/buying-groups/:id/domains', authenticateMainAdmin, getBuyingGroupDomainsHandler);
+router.post('/buying-groups/:id/domains', authenticateMainAdmin, upsertBuyingGroupDomainHandler);
+router.delete('/buying-groups/domains/:domainId', authenticateMainAdmin, deleteBuyingGroupDomainHandler);
 
 // Sub-admin management (protected)
 router.get('/sub-admins/permissions', authenticateMainAdmin, getPermissionsListHandler);

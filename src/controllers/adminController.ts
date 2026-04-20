@@ -89,7 +89,14 @@ export const loginHandler = catchAsync(
       throw new AppError('Please provide email and password', 400);
     }
 
-    const result = await adminLogin({ email, password });
+    // Tenant enforcement:
+    // - req.tenant === null   -> localhost / dev (no enforcement)
+    // - req.tenant !== null   -> production domain; portal type must be 'admin'
+    if (req.tenant && req.tenant.portalType !== 'admin') {
+      throw new AppError('This domain is not configured for admin access', 403);
+    }
+    const tenantBuyingGroupId = req.tenant?.buyingGroupId ?? null;
+    const result = await adminLogin({ email, password }, tenantBuyingGroupId);
 
     // Return response in the format expected by frontend
     // Frontend will look for token, accessToken, or access_token
