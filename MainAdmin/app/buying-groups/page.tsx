@@ -65,6 +65,18 @@ export default function BuyingGroupsPage() {
   const [localDomainForm, setLocalDomainForm] = useState({ domain: '', adminHostname: '', pharmacyHostname: '' });
   const [localDomainError, setLocalDomainError] = useState('');
 
+  // When domains finish loading in edit mode, auto-fill the form with the first domain
+  useEffect(() => {
+    if (modalMode === 'edit' && selectedGroupDomains.length > 0 && !domainForm.domain) {
+      const d = selectedGroupDomains[0];
+      setDomainForm({
+        domain: d.domain || '',
+        adminHostname: d.adminHostname || '',
+        pharmacyHostname: d.pharmacyHostname || '',
+      });
+    }
+  }, [selectedGroupDomains, modalMode]);
+
   const loadGroups = useCallback(() => {
     dispatch(fetchBuyingGroups({
       page,
@@ -561,7 +573,7 @@ export default function BuyingGroupsPage() {
                 <div className="border-t border-gray-200 pt-4">
                   <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                     <Globe className="w-4 h-4" />
-                    Domains ({selectedGroupDomains.length})
+                    Domains
                   </h4>
 
                   {domainError && (
@@ -580,22 +592,34 @@ export default function BuyingGroupsPage() {
                         <p className="text-sm text-gray-500">No domains configured yet.</p>
                       ) : (
                         selectedGroupDomains.map((d) => (
-                          <div key={d.id} className="p-3 bg-gray-50 rounded-lg text-xs space-y-1">
+                          <div
+                            key={d.id}
+                            className="p-3 bg-gray-50 rounded-lg text-xs space-y-1 cursor-pointer hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-colors"
+                            onClick={() => setDomainForm({
+                              domain: d.domain || '',
+                              adminHostname: d.adminHostname || '',
+                              pharmacyHostname: d.pharmacyHostname || '',
+                            })}
+                            title="Click to edit this domain"
+                          >
                             <div className="flex items-center justify-between">
                               <p className="text-sm font-medium text-gray-900">{d.domain}</p>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteDomain(d.id, editingGroup.id)}
-                                disabled={domainSavingId === d.id}
-                                className="p-1 rounded hover:bg-red-100 text-red-600 disabled:opacity-50"
-                                title="Delete domain"
-                              >
-                                {domainSavingId === d.id ? (
-                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                ) : (
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                )}
-                              </button>
+                              <div className="flex items-center gap-1">
+                                {/* <span className="text-xs text-indigo-500 font-medium">Edit</span> */}
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); handleDeleteDomain(d.id, editingGroup.id); }}
+                                  disabled={domainSavingId === d.id}
+                                  className="p-1 rounded hover:bg-red-100 text-red-600 disabled:opacity-50"
+                                  title="Delete domain"
+                                >
+                                  {domainSavingId === d.id ? (
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                  ) : (
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  )}
+                                </button>
+                              </div>
                             </div>
                             <p className="text-gray-600">
                               <span className="font-medium">Admin:</span> {d.adminHostname || '-'}
@@ -610,7 +634,9 @@ export default function BuyingGroupsPage() {
                   )}
 
                   <div className="border border-dashed border-gray-300 rounded-lg p-3 space-y-2 bg-white">
-                    <p className="text-xs font-medium text-gray-700">Add / update a domain</p>
+                    <p className="text-xs font-medium text-gray-700">
+                      {domainForm.domain ? 'Edit domain' : 'Add / update a domain'}
+                    </p>
                     <input
                       type="text"
                       placeholder="Base domain (e.g. abc.com)"
