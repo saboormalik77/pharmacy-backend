@@ -65,16 +65,40 @@ export default function BuyingGroupsPage() {
   const [localDomainForm, setLocalDomainForm] = useState({ domain: '', adminHostname: '', pharmacyHostname: '' });
   const [localDomainError, setLocalDomainError] = useState('');
 
-  // When domains finish loading in edit mode, auto-fill the form with the first domain
+  // Keep domain inputs in sync with the list from the server: initial fill, clear when all deleted,
+  // and refresh when the row shown in the form was removed (e.g. after delete).
   useEffect(() => {
-    if (modalMode === 'edit' && selectedGroupDomains.length > 0 && !domainForm.domain) {
+    if (modalMode !== 'edit') return;
+
+    if (selectedGroupDomains.length === 0) {
+      setDomainForm({ domain: '', adminHostname: '', pharmacyHostname: '' });
+      return;
+    }
+
+    setDomainForm((prev) => {
+      const trimmed = prev.domain.trim();
+      if (trimmed === '') {
+        const d = selectedGroupDomains[0];
+        return {
+          domain: d.domain || '',
+          adminHostname: d.adminHostname || '',
+          pharmacyHostname: d.pharmacyHostname || '',
+        };
+      }
+      const formDomain = trimmed.toLowerCase();
+      const match = selectedGroupDomains.find(
+        (d) => (d.domain || '').trim().toLowerCase() === formDomain
+      );
+      if (match) {
+        return prev;
+      }
       const d = selectedGroupDomains[0];
-      setDomainForm({
+      return {
         domain: d.domain || '',
         adminHostname: d.adminHostname || '',
         pharmacyHostname: d.pharmacyHostname || '',
-      });
-    }
+      };
+    });
   }, [selectedGroupDomains, modalMode]);
 
   const loadGroups = useCallback(() => {
