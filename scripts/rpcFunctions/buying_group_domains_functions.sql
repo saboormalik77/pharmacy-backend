@@ -169,7 +169,48 @@ $$;
 
 
 -- ============================================================
--- 5. RPC: upsert_buying_group_domain (for MainAdmin)
+-- 5. Helper function: clean_hostname
+-- Strips protocol (http://, https://), trailing slashes, ports, and paths
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION clean_hostname(p_input TEXT)
+RETURNS TEXT
+LANGUAGE plpgsql
+IMMUTABLE
+AS $$
+DECLARE
+  v_result TEXT;
+BEGIN
+  IF p_input IS NULL THEN
+    RETURN NULL;
+  END IF;
+  
+  v_result := LOWER(TRIM(p_input));
+  
+  -- Remove protocol prefix
+  v_result := REGEXP_REPLACE(v_result, '^https?://', '');
+  
+  -- Remove trailing slashes
+  v_result := REGEXP_REPLACE(v_result, '/+$', '');
+  
+  -- Remove any path after the hostname
+  v_result := SPLIT_PART(v_result, '/', 1);
+  
+  -- Remove port if present
+  v_result := SPLIT_PART(v_result, ':', 1);
+  
+  -- Return NULL if empty
+  IF v_result = '' THEN
+    RETURN NULL;
+  END IF;
+  
+  RETURN v_result;
+END;
+$$;
+
+
+-- ============================================================
+-- 6. RPC: upsert_buying_group_domain (for MainAdmin)
 -- ============================================================
 
 CREATE OR REPLACE FUNCTION upsert_buying_group_domain(
@@ -192,9 +233,10 @@ BEGIN
     RETURN jsonb_build_object('error', true, 'message', 'Buying group not found');
   END IF;
 
-  v_domain := LOWER(TRIM(p_domain));
-  v_admin_host := NULLIF(LOWER(TRIM(p_admin_hostname)), '');
-  v_pharmacy_host := NULLIF(LOWER(TRIM(p_pharmacy_hostname)), '');
+  -- Clean all hostnames: strip protocol, paths, ports
+  v_domain := clean_hostname(p_domain);
+  v_admin_host := clean_hostname(p_admin_hostname);
+  v_pharmacy_host := clean_hostname(p_pharmacy_hostname);
 
   IF v_domain IS NULL OR v_domain = '' THEN
     RETURN jsonb_build_object('error', true, 'message', 'Domain is required');
@@ -215,7 +257,7 @@ $$;
 
 
 -- ============================================================
--- 6. RPC: get_buying_group_domains (for MainAdmin)
+-- 7. RPC: get_buying_group_domains (for MainAdmin)
 -- ============================================================
 
 CREATE OR REPLACE FUNCTION get_buying_group_domains(p_buying_group_id UUID)
@@ -243,7 +285,7 @@ $$;
 
 
 -- ============================================================
--- 7. RPC: delete_buying_group_domain (for MainAdmin)
+-- 8. RPC: delete_buying_group_domain (for MainAdmin)
 -- ============================================================
 
 CREATE OR REPLACE FUNCTION delete_buying_group_domain(p_domain_id UUID)
@@ -267,7 +309,7 @@ $$;
 
 
 -- ============================================================
--- 8. RPC: validate_admin_tenant_access
+-- 9. RPC: validate_admin_tenant_access
 -- Performs the tenant-based access control for admin/processor logins.
 -- Returns:
 --   { error: false, buying_group_id: uuid }  when allowed
@@ -330,7 +372,7 @@ $$;
 
 
 -- ============================================================
--- 9. RPC: validate_pharmacy_tenant_access
+-- 10. RPC: validate_pharmacy_tenant_access
 -- Performs tenant-based access control for pharmacy logins.
 -- Returns:
 --   { error: false, buying_group_id: uuid }
@@ -376,7 +418,7 @@ $$;
 
 
 -- ============================================================
--- 10. GRANTS
+-- 11. GRANTS
 -- ============================================================
 
 GRANT EXECUTE ON FUNCTION resolve_domain_to_buying_group(TEXT) TO authenticated, anon, service_role;

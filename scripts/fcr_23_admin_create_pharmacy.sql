@@ -385,7 +385,11 @@ BEGIN
     'zip', COALESCE(v_invite.zip, '')
   );
 
-  -- Create the pharmacy record now with the auth user ID
+  -- Create the pharmacy record now with the auth user ID.
+  -- `created_by` carries the owning buying group (admin.id of the super_admin
+  -- that created this invite). It is stored as TEXT on pharmacy_invites but
+  -- as UUID on pharmacy, so only propagate when the string is a valid UUID
+  -- (otherwise fall back to NULL, e.g. invites created by MainAdmin).
   INSERT INTO pharmacy (
     id, email, name, pharmacy_name, phone,
     physical_address, status,
@@ -394,6 +398,7 @@ BEGIN
     service_type, days_between_visits,
     last_visit_date, next_visit_date,
     assigned_processor_id, assigned_sales_person_id,
+    created_by,
     created_at, updated_at
   ) VALUES (
     p_auth_user_id,
@@ -415,6 +420,11 @@ BEGIN
     v_invite.next_visit_date,
     v_invite.processor_id,
     v_invite.sales_person_id,
+    CASE
+      WHEN v_invite.created_by ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+        THEN v_invite.created_by::UUID
+      ELSE NULL
+    END,
     NOW(),
     NOW()
   ) RETURNING id INTO v_pharmacy_id;

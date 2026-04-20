@@ -93,12 +93,20 @@ export const getProcessors = async (
   page: number = 1,
   limit: number = 20,
   search?: string,
-  status?: string
+  status?: string,
+  buyingGroupId?: string | null
 ): Promise<ProcessorListResponse> => {
   const sb = ensureAdmin();
 
   let countQuery = sb.from('processors').select('id', { count: 'exact', head: true });
   let dataQuery = sb.from('processors').select('*');
+
+  // Tenant scope — only show processors belonging to the caller's buying group.
+  // When buyingGroupId is null (MainAdmin / localhost) no filter is applied.
+  if (buyingGroupId) {
+    countQuery = countQuery.eq('buying_group_id', buyingGroupId);
+    dataQuery = dataQuery.eq('buying_group_id', buyingGroupId);
+  }
 
   if (status && status !== 'all') {
     countQuery = countQuery.eq('status', status);
@@ -169,14 +177,22 @@ export const getProcessors = async (
   };
 };
 
-export const getProcessorById = async (processorId: string): Promise<Processor> => {
+export const getProcessorById = async (
+  processorId: string,
+  buyingGroupId?: string | null
+): Promise<Processor> => {
   const sb = ensureAdmin();
 
-  const { data, error } = await sb
+  let query = sb
     .from('processors')
     .select('*')
-    .eq('id', processorId)
-    .single();
+    .eq('id', processorId);
+
+  if (buyingGroupId) {
+    query = query.eq('buying_group_id', buyingGroupId);
+  }
+
+  const { data, error } = await query.single();
 
   if (error) {
     throw new AppError(
@@ -200,7 +216,10 @@ export const getProcessorById = async (processorId: string): Promise<Processor> 
   return mapProcessor(data, count ?? 0, returnCount ?? 0);
 };
 
-export const createProcessor = async (input: CreateProcessorData): Promise<Processor> => {
+export const createProcessor = async (
+  input: CreateProcessorData,
+  buyingGroupId?: string | null
+): Promise<Processor> => {
   const sb = ensureAdmin();
 
   if (!input.name || !input.name.trim()) {
@@ -237,15 +256,22 @@ export const createProcessor = async (input: CreateProcessorData): Promise<Proce
 
   const passwordHash = await bcrypt.hash(input.password, 10);
 
+  // Stamp the new admin-login row with the owning buying group so that
+  // downstream tenant validation ties this login to the correct tenant.
+  const adminInsert: Record<string, any> = {
+    email,
+    password_hash: passwordHash,
+    name: input.name.trim(),
+    role: 'processor',
+    is_active: true,
+  };
+  if (buyingGroupId) {
+    adminInsert.buying_group_id = buyingGroupId;
+  }
+
   const { data: adminUser, error: adminError } = await sb
     .from('admin')
-    .insert({
-      email,
-      password_hash: passwordHash,
-      name: input.name.trim(),
-      role: 'processor',
-      is_active: true,
-    })
+    .insert(adminInsert)
     .select('id')
     .single();
 
@@ -261,6 +287,7 @@ export const createProcessor = async (input: CreateProcessorData): Promise<Proce
   };
   if (input.phone) insertData.phone = input.phone.trim();
   if (input.notes) insertData.notes = input.notes.trim();
+  if (buyingGroupId) insertData.buying_group_id = buyingGroupId;
 
   const { data, error } = await sb
     .from('processors')
@@ -278,9 +305,15 @@ export const createProcessor = async (input: CreateProcessorData): Promise<Proce
 
 export const updateProcessor = async (
   processorId: string,
-  updates: UpdateProcessorData
+  updates: UpdateProcessorData,
+  buyingGroupId?: string | null
 ): Promise<Processor> => {
   const sb = ensureAdmin();
+
+  // Ensure the target processor is within the caller's tenant.
+  if (buyingGroupId) {
+    await getProcessorById(processorId, buyingGroupId);
+  }
 
   const dbUpdates: Record<string, any> = {};
   if (updates.name !== undefined) dbUpdates.name = updates.name.trim();
@@ -310,10 +343,16 @@ export const updateProcessor = async (
     }
   }
 
-  const { data, error } = await sb
+  let updateQuery = sb
     .from('processors')
     .update(dbUpdates)
-    .eq('id', processorId)
+    .eq('id', processorId);
+
+  if (buyingGroupId) {
+    updateQuery = updateQuery.eq('buying_group_id', buyingGroupId);
+  }
+
+  const { data, error } = await updateQuery
     .select('*')
     .single();
 
@@ -338,19 +377,33 @@ export const updateProcessor = async (
   return mapProcessor(data, count ?? 0, returnCount ?? 0);
 };
 
-export const deactivateProcessor = async (processorId: string): Promise<void> => {
+export const deactivateProcessor = async (
+  processorId: string,
+  buyingGroupId?: string | null
+): Promise<void> => {
   const sb = ensureAdmin();
 
-  const { data: proc } = await sb
+  let procQuery = sb
     .from('processors')
     .select('admin_user_id')
-    .eq('id', processorId)
-    .single();
+    .eq('id', processorId);
+  if (buyingGroupId) {
+    procQuery = procQuery.eq('buying_group_id', buyingGroupId);
+  }
 
-  const { error } = await sb
+  const { data: proc, error: procErr } = await procQuery.single();
+  if (procErr || !proc) {
+    throw new AppError('Processor not found', 404);
+  }
+
+  let updateQuery = sb
     .from('processors')
     .update({ status: 'inactive' })
     .eq('id', processorId);
+  if (buyingGroupId) {
+    updateQuery = updateQuery.eq('buying_group_id', buyingGroupId);
+  }
+  const { error } = await updateQuery;
 
   if (error) {
     throw new AppError(`Failed to deactivate processor: ${error.message}`, 400);
@@ -364,19 +417,33 @@ export const deactivateProcessor = async (processorId: string): Promise<void> =>
   }
 };
 
-export const activateProcessor = async (processorId: string): Promise<void> => {
+export const activateProcessor = async (
+  processorId: string,
+  buyingGroupId?: string | null
+): Promise<void> => {
   const sb = ensureAdmin();
 
-  const { data: proc } = await sb
+  let procQuery = sb
     .from('processors')
     .select('admin_user_id')
-    .eq('id', processorId)
-    .single();
+    .eq('id', processorId);
+  if (buyingGroupId) {
+    procQuery = procQuery.eq('buying_group_id', buyingGroupId);
+  }
 
-  const { error } = await sb
+  const { data: proc, error: procErr } = await procQuery.single();
+  if (procErr || !proc) {
+    throw new AppError('Processor not found', 404);
+  }
+
+  let updateQuery = sb
     .from('processors')
     .update({ status: 'active' })
     .eq('id', processorId);
+  if (buyingGroupId) {
+    updateQuery = updateQuery.eq('buying_group_id', buyingGroupId);
+  }
+  const { error } = await updateQuery;
 
   if (error) {
     throw new AppError(`Failed to activate processor: ${error.message}`, 400);
@@ -390,10 +457,14 @@ export const activateProcessor = async (processorId: string): Promise<void> => {
   }
 };
 
-export const getProcessorStores = async (processorId: string): Promise<AssignedStore[]> => {
+export const getProcessorStores = async (
+  processorId: string,
+  buyingGroupId?: string | null
+): Promise<AssignedStore[]> => {
   const sb = ensureAdmin();
 
-  await getProcessorById(processorId);
+  // Verifies the processor belongs to the caller's tenant.
+  await getProcessorById(processorId, buyingGroupId);
 
   const { data, error } = await sb
     .from('processor_store_assignments')
@@ -479,11 +550,13 @@ export const getProcessorStores = async (processorId: string): Promise<AssignedS
 
 export const assignStoresToProcessor = async (
   processorId: string,
-  pharmacyIds: string[]
+  pharmacyIds: string[],
+  buyingGroupId?: string | null
 ): Promise<{ assigned: number; skipped: number }> => {
   const sb = ensureAdmin();
 
-  const processor = await getProcessorById(processorId);
+  // Processor must belong to the caller's tenant.
+  const processor = await getProcessorById(processorId, buyingGroupId);
   if (processor.status !== 'active') {
     throw new AppError('Cannot assign stores to an inactive processor', 400);
   }
@@ -492,10 +565,15 @@ export const assignStoresToProcessor = async (
     throw new AppError('At least one pharmacy ID is required', 400);
   }
 
-  const { data: existingPharmacies } = await sb
+  // Validate that the target pharmacies also belong to the caller's tenant.
+  let pharmacyQuery = sb
     .from('pharmacy')
     .select('id')
     .in('id', pharmacyIds);
+  if (buyingGroupId) {
+    pharmacyQuery = pharmacyQuery.eq('created_by', buyingGroupId);
+  }
+  const { data: existingPharmacies } = await pharmacyQuery;
 
   const validIds = new Set((existingPharmacies || []).map((p: any) => p.id));
   const invalidIds = pharmacyIds.filter((id) => !validIds.has(id));
@@ -586,9 +664,13 @@ export const getMyStores = async (processorId: string): Promise<AssignedStore[]>
 
 export const unassignStoreFromProcessor = async (
   processorId: string,
-  pharmacyId: string
+  pharmacyId: string,
+  buyingGroupId?: string | null
 ): Promise<void> => {
   const sb = ensureAdmin();
+
+  // Processor must belong to the caller's tenant.
+  await getProcessorById(processorId, buyingGroupId);
 
   const { error } = await sb
     .from('processor_store_assignments')
@@ -600,9 +682,15 @@ export const unassignStoreFromProcessor = async (
     throw new AppError(`Failed to unassign store: ${error.message}`, 400);
   }
 
-  await sb
+  let clearQuery = sb
     .from('pharmacy')
     .update({ assigned_processor_id: null })
     .eq('id', pharmacyId)
     .eq('assigned_processor_id', processorId);
+
+  if (buyingGroupId) {
+    clearQuery = clearQuery.eq('created_by', buyingGroupId);
+  }
+
+  await clearQuery;
 };

@@ -44,7 +44,8 @@ export const getPharmaciesHandler = async (
       normalizedSearch,
       status as string,
       pageNum,
-      limitNum
+      limitNum,
+      req.adminBuyingGroupId ?? null
     );
 
     res.status(200).json({
@@ -72,7 +73,7 @@ export const getPharmacyByIdHandler = async (
       throw new AppError('Pharmacy ID is required', 400);
     }
 
-    const result = await getPharmacyById(id);
+    const result = await getPharmacyById(id, req.adminBuyingGroupId ?? null);
 
     res.status(200).json({
       status: 'success',
@@ -165,7 +166,7 @@ export const updatePharmacyHandler = async (
       }
     }
 
-    const result = await updatePharmacy(id, updates);
+    const result = await updatePharmacy(id, updates, req.adminBuyingGroupId ?? null);
 
     res.status(200).json({
       status: 'success',
@@ -206,7 +207,7 @@ export const updatePharmacyStatusHandler = async (
       );
     }
 
-    const result = await updatePharmacyStatus(id, status);
+    const result = await updatePharmacyStatus(id, status, req.adminBuyingGroupId ?? null);
 
     res.status(200).json({
       status: 'success',
@@ -234,7 +235,7 @@ export const getPharmacyStoreSettingsHandler = async (
       throw new AppError('Pharmacy ID is required', 400);
     }
 
-    const settings = await getPharmacyStoreSettings(id);
+    const settings = await getPharmacyStoreSettings(id, req.adminBuyingGroupId ?? null);
 
     res.status(200).json({
       status: 'success',
@@ -321,7 +322,7 @@ export const updatePharmacyStoreSettingsHandler = async (
       filtered.daysBetweenVisits = days;
     }
 
-    const settings = await updatePharmacyStoreSettings(id, filtered);
+    const settings = await updatePharmacyStoreSettings(id, filtered, req.adminBuyingGroupId ?? null);
 
     res.status(200).json({
       status: 'success',
@@ -362,6 +363,11 @@ export const createPharmacyHandler = async (
       throw new AppError('Invalid email format', 400);
     }
 
+    // Use the buying group ID from the authenticated admin so that the
+    // new pharmacy is owned by the correct tenant. For MainAdmin
+    // (no tenant), fall back to the legacy behaviour.
+    const createdBy = req.adminBuyingGroupId || req.adminId || (req as any).user?.email || null;
+
     // Call the RPC function to create pharmacy + invite
     const { data: rpcResult, error: rpcError } = await db.rpc('admin_create_pharmacy', {
       p_pharmacy_name: pharmacyName,
@@ -384,7 +390,7 @@ export const createPharmacyHandler = async (
       p_next_visit_date: nextVisitDate || null,
       p_processor_id: processorId || null,
       p_sales_person_id: salesPersonId || null,
-      p_created_by: (req as any).adminId || (req as any).user?.email || null,
+      p_created_by: createdBy,
     });
 
     if (rpcError) {
@@ -458,12 +464,18 @@ export const getPendingInvitesHandler = async (
   next: NextFunction
 ) => {
   try {
-    const { data, error } = await db
+    let invitesQuery = db
       .from('pharmacy_invites')
       .select('id, email, pharmacy_name, contact_name, created_at, expires_at, created_by')
       .eq('status', 'pending')
-      .gt('expires_at', new Date().toISOString())
-      .order('created_at', { ascending: false });
+      .gt('expires_at', new Date().toISOString());
+
+    // Scope to the admin's buying group (MainAdmin sees all).
+    if (req.adminBuyingGroupId) {
+      invitesQuery = invitesQuery.eq('created_by', req.adminBuyingGroupId);
+    }
+
+    const { data, error } = await invitesQuery.order('created_at', { ascending: false });
 
     if (error) {
       throw new AppError(error.message || 'Failed to fetch pending invites', 500);
@@ -494,15 +506,21 @@ export const cancelInviteHandler = async (
       throw new AppError('Invite ID is required', 400);
     }
 
-    // Update the invite status to cancelled
-    const { data, error } = await db
+    // Update the invite status to cancelled (scoped to the admin's BG)
+    let updateQuery = db
       .from('pharmacy_invites')
-      .update({ 
+      .update({
         status: 'expired',
         completed_at: new Date().toISOString()
       })
       .eq('id', id)
-      .eq('status', 'pending')
+      .eq('status', 'pending');
+
+    if (req.adminBuyingGroupId) {
+      updateQuery = updateQuery.eq('created_by', req.adminBuyingGroupId);
+    }
+
+    const { data, error } = await updateQuery
       .select('email, pharmacy_name')
       .single();
 

@@ -19,7 +19,8 @@ export const getProcessorsHandler = catchAsync(
       parseInt(page as string, 10) || 1,
       Math.min(parseInt(limit as string, 10) || 20, 100),
       search as string | undefined,
-      status as string | undefined
+      status as string | undefined,
+      req.adminBuyingGroupId ?? null
     );
 
     res.status(200).json({
@@ -40,7 +41,10 @@ export const getProcessorByIdHandler = catchAsync(
       throw new AppError('Processor ID is required', 400);
     }
 
-    const processor = await processorsService.getProcessorById(id);
+    const processor = await processorsService.getProcessorById(
+      id,
+      req.adminBuyingGroupId ?? null
+    );
 
     res.status(200).json({
       status: 'success',
@@ -68,13 +72,16 @@ export const createProcessorHandler = catchAsync(
       throw new AppError('Password is required and must be at least 8 characters', 400);
     }
 
-    const processor = await processorsService.createProcessor({
-      name,
-      email,
-      password,
-      phone,
-      notes,
-    });
+    const processor = await processorsService.createProcessor(
+      {
+        name,
+        email,
+        password,
+        phone,
+        notes,
+      },
+      req.adminBuyingGroupId ?? null
+    );
 
     res.status(201).json({
       status: 'success',
@@ -96,13 +103,17 @@ export const updateProcessorHandler = catchAsync(
       throw new AppError('Processor ID is required', 400);
     }
 
-    const processor = await processorsService.updateProcessor(id, {
-      name,
-      email,
-      phone,
-      status,
-      notes,
-    });
+    const processor = await processorsService.updateProcessor(
+      id,
+      {
+        name,
+        email,
+        phone,
+        status,
+        notes,
+      },
+      req.adminBuyingGroupId ?? null
+    );
 
     res.status(200).json({
       status: 'success',
@@ -123,7 +134,7 @@ export const deleteProcessorHandler = catchAsync(
       throw new AppError('Processor ID is required', 400);
     }
 
-    await processorsService.deactivateProcessor(id);
+    await processorsService.deactivateProcessor(id, req.adminBuyingGroupId ?? null);
 
     res.status(200).json({
       status: 'success',
@@ -143,7 +154,7 @@ export const activateProcessorHandler = catchAsync(
       throw new AppError('Processor ID is required', 400);
     }
 
-    await processorsService.activateProcessor(id);
+    await processorsService.activateProcessor(id, req.adminBuyingGroupId ?? null);
 
     res.status(200).json({
       status: 'success',
@@ -163,7 +174,10 @@ export const getProcessorStoresHandler = catchAsync(
       throw new AppError('Processor ID is required', 400);
     }
 
-    const stores = await processorsService.getProcessorStores(id);
+    const stores = await processorsService.getProcessorStores(
+      id,
+      req.adminBuyingGroupId ?? null
+    );
 
     res.status(200).json({
       status: 'success',
@@ -188,7 +202,11 @@ export const assignStoresHandler = catchAsync(
       throw new AppError('pharmacyIds must be a non-empty array of UUIDs', 400);
     }
 
-    const result = await processorsService.assignStoresToProcessor(id, pharmacyIds);
+    const result = await processorsService.assignStoresToProcessor(
+      id,
+      pharmacyIds,
+      req.adminBuyingGroupId ?? null
+    );
 
     res.status(200).json({
       status: 'success',
@@ -231,7 +249,11 @@ export const unassignStoreHandler = catchAsync(
       throw new AppError('Processor ID and Pharmacy ID are required', 400);
     }
 
-    await processorsService.unassignStoreFromProcessor(id, pharmacyId);
+    await processorsService.unassignStoreFromProcessor(
+      id,
+      pharmacyId,
+      req.adminBuyingGroupId ?? null
+    );
 
     res.status(200).json({
       status: 'success',

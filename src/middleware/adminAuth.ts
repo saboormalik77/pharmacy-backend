@@ -12,6 +12,11 @@ declare global {
       adminName?: string;
       adminRole?: string;
       adminPermissions?: string[];
+      // Buying group ID this admin belongs to.
+      // - super_admin (buying-group owner): equals adminId
+      // - sub-admin / processor: their owning buying-group's id
+      // - MainAdmin / localhost fallback: null (global scope, no filter)
+      adminBuyingGroupId?: string | null;
     }
   }
 }
@@ -45,6 +50,7 @@ export const authenticateAdmin = async (
       req.adminName = adminData.name;
       req.adminRole = adminData.role;
       req.adminPermissions = adminData.permissions;
+      req.adminBuyingGroupId = adminData.buyingGroupId;
       return next();
     } catch {
       // If admin token fails, try main admin token
@@ -57,6 +63,8 @@ export const authenticateAdmin = async (
       req.adminName = mainAdminData.name;
       req.adminRole = 'super_admin';
       req.adminPermissions = [...ALL_ADMIN_PERMISSIONS];
+      // MainAdmin is a platform-wide operator; no buying group scope.
+      req.adminBuyingGroupId = null;
       return next();
     } catch {
       throw new AppError('Authentication failed', 401);

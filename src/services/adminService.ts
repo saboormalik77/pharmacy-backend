@@ -413,6 +413,7 @@ export const verifyAdminToken = async (token: string): Promise<{
   role: string;
   type: string;
   permissions: string[];
+  buyingGroupId: string | null;
 }> => {
   try {
     // Step 1: Verify JWT signature and expiration
@@ -437,7 +438,7 @@ export const verifyAdminToken = async (token: string): Promise<{
 
     let { data: adminData, error: adminError } = await db
       .from('admin')
-      .select('id, email, name, role, is_active, permissions')
+      .select('id, email, name, role, is_active, permissions, buying_group_id')
       .eq('id', decoded.id)
       .single();
 
@@ -445,10 +446,21 @@ export const verifyAdminToken = async (token: string): Promise<{
     if (adminError?.message?.includes('permissions')) {
       const fallback = await db
         .from('admin')
-        .select('id, email, name, role, is_active')
+        .select('id, email, name, role, is_active, buying_group_id')
         .eq('id', decoded.id)
         .single();
       adminData = fallback.data ? { ...fallback.data, permissions: [] } : null;
+      adminError = fallback.error;
+    }
+
+    // Fallback if `buying_group_id` column hasn't been added yet
+    if (adminError?.message?.includes('buying_group_id')) {
+      const fallback = await db
+        .from('admin')
+        .select('id, email, name, role, is_active, permissions')
+        .eq('id', decoded.id)
+        .single();
+      adminData = fallback.data ? { ...fallback.data, buying_group_id: null } : null;
       adminError = fallback.error;
     }
 
@@ -470,6 +482,13 @@ export const verifyAdminToken = async (token: string): Promise<{
       ? [...ALL_ADMIN_PERMISSIONS]
       : Array.isArray(adminData.permissions) ? adminData.permissions : [];
 
+    // For a super_admin (a buying-group owner), the admin row IS the buying group.
+    // Sub-admins/processors carry a `buying_group_id` pointing at their owning super_admin.
+    const buyingGroupId: string | null =
+      adminData.role === 'super_admin'
+        ? adminData.id
+        : (adminData as any).buying_group_id ?? decoded.buying_group_id ?? null;
+
     return {
       id: adminData.id,
       email: adminData.email,
@@ -477,6 +496,7 @@ export const verifyAdminToken = async (token: string): Promise<{
       role: adminData.role,
       type: 'admin',
       permissions,
+      buyingGroupId,
     };
   } catch (error: any) {
     if (error instanceof AppError) {
