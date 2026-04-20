@@ -63,7 +63,7 @@ export const resolveTenant = async (
 
   const { data, error } = await supabaseAdmin.rpc(
     'resolve_domain_to_buying_group',
-    { p_hostname: normalizedHost }
+    { p_hostname: normalizedHost, p_role_hint: roleHint ?? null }
   );
 
   if (error) {
@@ -72,17 +72,26 @@ export const resolveTenant = async (
 
   let rpcResult = data as any;
 
-  // If the RPC doesn't find the domain (the DB function may not be updated yet),
-  // fall back to a direct query that also checks the base `domain` column so that
-  // a pharmacy hostname saved in the "Base domain" field is still matched.
+  // If the RPC doesn't find the domain, fall back to a direct query.
+  // When a roleHint is provided, only match the corresponding column:
+  //   - admin  -> admin_hostname
+  //   - pharmacy -> pharmacy_hostname
+  // Without a hint, match any of admin_hostname, pharmacy_hostname, or domain.
   if (!rpcResult || rpcResult.error) {
+    let orFilter: string;
+    if (roleHint === 'admin') {
+      orFilter = `admin_hostname.eq.${normalizedHost}`;
+    } else if (roleHint === 'pharmacy') {
+      orFilter = `pharmacy_hostname.eq.${normalizedHost}`;
+    } else {
+      orFilter = `admin_hostname.eq.${normalizedHost},pharmacy_hostname.eq.${normalizedHost},domain.eq.${normalizedHost}`;
+    }
+
     const { data: rows, error: dbErr } = await supabaseAdmin
       .from('buying_group_domains')
       .select('buying_group_id, domain, admin_hostname, pharmacy_hostname, is_active')
       .eq('is_active', true)
-      .or(
-        `admin_hostname.eq.${normalizedHost},pharmacy_hostname.eq.${normalizedHost},domain.eq.${normalizedHost}`
-      )
+      .or(orFilter)
       .limit(1);
 
     if (dbErr || !rows || rows.length === 0) {
@@ -102,9 +111,7 @@ export const resolveTenant = async (
       throw new AppError('Domain not recognized. Access denied.', 403);
     }
 
-    // Determine portal type using the role hint when the caller explicitly tells
-    // us which portal it is (handles the case where admin and pharmacy share the
-    // same hostname). Fall back to column-based matching when no hint is given.
+    // Determine portal type: use the roleHint if provided, otherwise infer from matched column.
     let portalType: 'admin' | 'pharmacy' | 'unknown' = 'unknown';
     if (roleHint === 'admin') {
       portalType = 'admin';
@@ -112,10 +119,7 @@ export const resolveTenant = async (
       portalType = 'pharmacy';
     } else if (row.admin_hostname && normalizedHost === row.admin_hostname.toLowerCase()) {
       portalType = 'admin';
-    } else if (
-      (row.pharmacy_hostname && normalizedHost === row.pharmacy_hostname.toLowerCase()) ||
-      (row.domain && normalizedHost === row.domain.toLowerCase())
-    ) {
+    } else if (row.pharmacy_hostname && normalizedHost === row.pharmacy_hostname.toLowerCase()) {
       portalType = 'pharmacy';
     }
 

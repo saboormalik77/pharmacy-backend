@@ -100,9 +100,17 @@ WHERE p.admin_user_id = a.id
 -- 4. RPC: resolve_domain_to_buying_group
 -- Called on every login and on /auth/tenant-info.
 -- Returns the tenant for the given hostname, or an error envelope.
+--
+-- p_role_hint: optional 'admin' or 'pharmacy' to restrict matching:
+--   - 'admin'    -> only match admin_hostname
+--   - 'pharmacy' -> only match pharmacy_hostname
+--   - NULL       -> match any of admin_hostname, pharmacy_hostname, or domain
 -- ============================================================
 
-CREATE OR REPLACE FUNCTION resolve_domain_to_buying_group(p_hostname TEXT)
+CREATE OR REPLACE FUNCTION resolve_domain_to_buying_group(
+  p_hostname TEXT,
+  p_role_hint TEXT DEFAULT NULL
+)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -110,8 +118,10 @@ AS $$
 DECLARE
   v_result JSONB;
   v_hostname TEXT;
+  v_role TEXT;
 BEGIN
   v_hostname := LOWER(TRIM(p_hostname));
+  v_role := LOWER(TRIM(p_role_hint));
 
   IF v_hostname IS NULL OR v_hostname = '' THEN
     RETURN jsonb_build_object('error', true, 'message', 'Hostname is required');
@@ -122,9 +132,10 @@ BEGIN
     'domain', bgd.domain,
     'portal_type',
       CASE
+        WHEN v_role = 'admin' THEN 'admin'
+        WHEN v_role = 'pharmacy' THEN 'pharmacy'
         WHEN v_hostname = bgd.admin_hostname THEN 'admin'
-        -- Pharmacy portal may run on either the explicit pharmacy hostname or the base domain
-        WHEN v_hostname = bgd.pharmacy_hostname OR v_hostname = bgd.domain THEN 'pharmacy'
+        WHEN v_hostname = bgd.pharmacy_hostname THEN 'pharmacy'
         ELSE 'unknown'
       END,
     'is_active', bgd.is_active,
@@ -136,9 +147,15 @@ BEGIN
   WHERE bgd.is_active = true
     AND a.is_active = true
     AND (
-      bgd.admin_hostname = v_hostname
-      OR bgd.pharmacy_hostname = v_hostname
-      OR bgd.domain = v_hostname
+      -- When role hint is provided, only match the corresponding column
+      (v_role = 'admin' AND bgd.admin_hostname = v_hostname)
+      OR (v_role = 'pharmacy' AND bgd.pharmacy_hostname = v_hostname)
+      -- When no role hint, match any column
+      OR (v_role IS NULL AND (
+        bgd.admin_hostname = v_hostname
+        OR bgd.pharmacy_hostname = v_hostname
+        OR bgd.domain = v_hostname
+      ))
     )
   LIMIT 1;
 
