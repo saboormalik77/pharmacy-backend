@@ -68,7 +68,8 @@ export const getAdminRecentActivity = async (
   limit: number = 20,
   offset: number = 0,
   pharmacyId?: string,
-  filter?: string
+  filter?: string,
+  buyingGroupId?: string | null
 ): Promise<RecentActivityResponse> => {
   if (!supabaseAdmin) {
     throw new AppError('Supabase admin client not configured', 500);
@@ -76,7 +77,7 @@ export const getAdminRecentActivity = async (
 
   const db = supabaseAdmin;
 
-  console.log(`📋 Fetching admin recent activity via RPC (filter: ${filter || 'none'}, type: ${activityType || 'all'}, limit: ${limit}, offset: ${offset}, pharmacyId: ${pharmacyId || 'all'})`);
+  console.log(`📋 Fetching admin recent activity via RPC (filter: ${filter || 'none'}, type: ${activityType || 'all'}, limit: ${limit}, offset: ${offset}, pharmacyId: ${pharmacyId || 'all'}, buyingGroupId: ${buyingGroupId || 'all'})`);
 
   // Call PostgreSQL function - all logic done in database
   const { data, error } = await db.rpc('get_admin_recent_activity', {
@@ -84,6 +85,7 @@ export const getAdminRecentActivity = async (
     p_limit: limit,
     p_offset: offset,
     p_pharmacy_id: pharmacyId || null,
+    p_buying_group_id: buyingGroupId || null,
   });
 
   if (error) {
@@ -121,9 +123,11 @@ export const getAdminRecentActivity = async (
 };
 
 /**
- * Mark all admin activities as read
+ * Mark all admin activities as read (scoped to buying group)
  */
-export const markAllActivitiesAsRead = async (): Promise<{
+export const markAllActivitiesAsRead = async (
+  buyingGroupId?: string | null
+): Promise<{
   success: boolean;
   message: string;
   updatedCount: number;
@@ -135,9 +139,11 @@ export const markAllActivitiesAsRead = async (): Promise<{
 
   const db = supabaseAdmin;
 
-  console.log('📋 Marking all admin activities as read...');
+  console.log(`📋 Marking all admin activities as read (buyingGroupId: ${buyingGroupId || 'all'})...`);
 
-  const { data, error } = await db.rpc('mark_all_admin_activities_read');
+  const { data, error } = await db.rpc('mark_all_admin_activities_read', {
+    p_buying_group_id: buyingGroupId || null,
+  });
 
   if (error) {
     throw new AppError(`Failed to mark activities as read: ${error.message}`, 400);
@@ -154,9 +160,12 @@ export const markAllActivitiesAsRead = async (): Promise<{
 };
 
 /**
- * Mark a single admin activity as read
+ * Mark a single admin activity as read (with access check)
  */
-export const markActivityAsRead = async (activityId: string): Promise<{
+export const markActivityAsRead = async (
+  activityId: string,
+  buyingGroupId?: string | null
+): Promise<{
   success: boolean;
   message: string;
   activityId?: string;
@@ -168,10 +177,11 @@ export const markActivityAsRead = async (activityId: string): Promise<{
 
   const db = supabaseAdmin;
 
-  console.log(`📋 Marking activity ${activityId} as read...`);
+  console.log(`📋 Marking activity ${activityId} as read (buyingGroupId: ${buyingGroupId || 'all'})...`);
 
   const { data, error } = await db.rpc('mark_admin_activity_read', {
     p_activity_id: activityId,
+    p_buying_group_id: buyingGroupId || null,
   });
 
   if (error) {

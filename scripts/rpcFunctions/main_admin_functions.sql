@@ -256,9 +256,9 @@ DECLARE
   v_email TEXT;
   v_name TEXT;
 BEGIN
-  -- Use provided admin email or contact email
+  -- Use the buying group name (not admin name)
   v_email := COALESCE(p_admin_email, p_contact_email);
-  v_name := COALESCE(p_admin_name, p_name);
+  v_name := p_name;
 
   IF v_email IS NULL THEN
     RETURN jsonb_build_object(

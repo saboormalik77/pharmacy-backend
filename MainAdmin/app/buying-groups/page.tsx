@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Plus, Search, Users, Eye, Pencil, Trash2, X, ChevronLeft, ChevronRight,
+  Plus, Search, Users, Eye, EyeOff, Pencil, Trash2, X, ChevronLeft, ChevronRight,
   CheckCircle, XCircle, AlertTriangle, Loader2, Globe,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -52,6 +52,8 @@ export default function BuyingGroupsPage() {
     adminPassword: '',
     adminName: '',
   });
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const [domainForm, setDomainForm] = useState({
     domain: '',
@@ -127,6 +129,7 @@ export default function BuyingGroupsPage() {
       status: 'active', adminEmail: '', adminPassword: '', adminName: '',
     });
     setFormError('');
+    setShowPassword(false);
     setLocalDomains([]);
     setLocalDomainForm({ domain: '', adminHostname: '', pharmacyHostname: '' });
     setLocalDomainError('');
@@ -407,6 +410,7 @@ export default function BuyingGroupsPage() {
               placeholder="Search by name or email..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              autoComplete="off"
               className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
@@ -545,6 +549,7 @@ export default function BuyingGroupsPage() {
                 <input
                   type="text" value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  autoComplete="off"
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   placeholder="Enter buying group name"
                 />
@@ -556,6 +561,7 @@ export default function BuyingGroupsPage() {
                   <input
                     type="email" value={formData.contactEmail}
                     onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
+                    autoComplete="off"
                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     placeholder="contact@example.com"
                   />
@@ -565,6 +571,7 @@ export default function BuyingGroupsPage() {
                   <input
                     type="text" value={formData.contactPhone}
                     onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
+                    autoComplete="off"
                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     placeholder="+1 234 567 8900"
                   />
@@ -576,6 +583,7 @@ export default function BuyingGroupsPage() {
                 <input
                   type="text" value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  autoComplete="off"
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   placeholder="Street address, city, state"
                 />
@@ -602,6 +610,7 @@ export default function BuyingGroupsPage() {
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   rows={2}
+                  autoComplete="off"
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
                   placeholder="Optional notes"
                 />
@@ -723,6 +732,7 @@ export default function BuyingGroupsPage() {
                     <input
                       type="text" value={formData.adminName}
                       onChange={(e) => setFormData({ ...formData, adminName: e.target.value })}
+                      autoComplete="off"
                       className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       placeholder="Admin user display name"
                     />
@@ -734,18 +744,34 @@ export default function BuyingGroupsPage() {
                       <input
                         type="email" value={formData.adminEmail}
                         onChange={(e) => setFormData({ ...formData, adminEmail: e.target.value })}
+                        autoComplete="off"
                         className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         placeholder="admin@buyinggroup.com"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Admin Password</label>
-                      <input
-                        type="password" value={formData.adminPassword}
-                        onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        placeholder="Min 8 characters"
-                      />
+                      <div className="relative">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          value={formData.adminPassword}
+                          onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
+                          autoComplete="new-password"
+                          className="w-full px-3 py-2 pr-10 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          placeholder="Min 8 characters"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                   </div>
 
