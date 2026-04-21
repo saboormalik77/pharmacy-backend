@@ -10,6 +10,9 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/Card'
 import { authService } from '@/lib/api/services'
+import { DomainNotRecognizedScreen } from '@/components/auth/DomainNotRecognizedScreen'
+import { TenantInfoLoadingScreen } from '@/components/auth/TenantInfoLoadingScreen'
+import { usePharmacyPortalTenant } from '@/lib/hooks/usePharmacyPortalTenant'
 
 function GoogleIcon() {
   return (
@@ -20,6 +23,11 @@ function GoogleIcon() {
       <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58Z" fill="#EA4335"/>
     </svg>
   )
+}
+
+interface AdminBranding {
+  logoUrl: string | null
+  businessName: string | null
 }
 
 function LoginForm() {
@@ -34,6 +42,39 @@ function LoginForm() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
+  const [branding, setBranding] = useState<AdminBranding | null>(null)
+
+  const { tenantChecked, tenantError, validTenant, isLocalHost } =
+    usePharmacyPortalTenant()
+
+  useEffect(() => {
+    try {
+      const cached = localStorage.getItem('pharmacyAdminBranding')
+      if (cached) {
+        const parsedBranding = JSON.parse(cached)
+        setBranding(parsedBranding)
+        if (parsedBranding.businessName) {
+          document.title = `${parsedBranding.businessName} - Data Analytics Platform`
+        }
+      }
+    } catch { /* ignore */ }
+  }, [])
+
+  useEffect(() => {
+    if (!isLocalHost && tenantChecked && tenantError) {
+      document.title = 'Domain not recognized'
+    }
+  }, [isLocalHost, tenantChecked, tenantError])
+
+  useEffect(() => {
+    if (validTenant?.buyingGroupName) {
+      setBranding((prev) => ({
+        logoUrl: prev?.logoUrl ?? null,
+        businessName: validTenant.buyingGroupName,
+      }))
+      document.title = `${validTenant.buyingGroupName} - Data Analytics Platform`
+    }
+  }, [validTenant])
 
   useEffect(() => {
     const oauthError = searchParams.get('oauthError')
@@ -90,11 +131,24 @@ function LoginForm() {
     }
   }
 
+  if (!isLocalHost && !tenantChecked) {
+    return <TenantInfoLoadingScreen />
+  }
+
+  if (!isLocalHost && tenantChecked && tenantError) {
+    return <DomainNotRecognizedScreen detail={tenantError} />
+  }
+
+  const authBlocked = !!tenantError || !tenantChecked
+
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="space-y-1">
-        <div className="flex items-center justify-center mb-4">
-          <div className="text-3xl font-bold text-primary">PharmAnalytics</div>
+        <div className="flex flex-col items-center justify-center mb-4 gap-3">
+          {branding?.logoUrl && (
+            <img src={branding.logoUrl} alt="Logo" className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-contain" />
+          )}
+          <div className="text-2xl font-bold text-primary">{branding?.businessName || 'PharmAnalytics'}</div>
         </div>
         <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
         <CardDescription className="text-center">
@@ -106,7 +160,7 @@ function LoginForm() {
           <button
             type="button"
             onClick={handleGoogleSignIn}
-            disabled={googleLoading}
+            disabled={googleLoading || authBlocked}
             className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
           >
             <GoogleIcon />
@@ -177,7 +231,7 @@ function LoginForm() {
           )}
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full" disabled={loading || authBlocked}>
             {loading ? 'Signing in...' : 'Sign in'}
           </Button>
         </CardFooter>
@@ -189,15 +243,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <Suspense fallback={
-        <Card className="w-full max-w-md">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-          </CardContent>
-        </Card>
-      }>
+      <Suspense fallback={<TenantInfoLoadingScreen />}>
         <LoginForm />
       </Suspense>
     </div>

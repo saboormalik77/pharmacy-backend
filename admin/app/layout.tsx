@@ -14,8 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: 'Pharma Admin',
-    description: 'Pharma Admin Panel',
+    description: 'Buying group management portal',
 };
 
 export default function RootLayout({

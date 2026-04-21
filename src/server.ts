@@ -54,6 +54,8 @@ import pharmacyAnalyticsRoutes from './routes/pharmacyAnalyticsRoutes';
 import ndcPricingBookRoutes from './routes/ndcPricingBookRoutes';
 import pharmacyBranchRoutes from './routes/pharmacyBranchRoutes';
 import pharmacyRoleRoutes from './routes/pharmacyRoleRoutes';
+import mainAdminRoutes from './routes/mainAdminRoutes';
+import pharmacyAdminBrandingRoutes from './routes/pharmacyAdminBrandingRoutes';
 import { globalErrorHandler } from './controllers/errorController';
 import { checkExpiringProductsAndNotify } from './services/notificationCronService';
 import { surfaceReadyWineCellarItems } from './services/wineCellarCronService';
@@ -80,51 +82,10 @@ app.set('trust proxy', 1);
 // Azure: WEBSITES_PORT + PORT; production default 8080 (matches Dockerfile EXPOSE; non-root cannot bind <1024)
 const PORT = process.env.PORT || process.env.WEBSITES_PORT || (process.env.NODE_ENV === 'production' ? 8080 : 3000);
 
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:3001',
-  'http://localhost:3002',
-  'http://127.0.0.1:3000',
-  'http://127.0.0.1:3001',
-  'http://127.0.0.1:3002',
-  'https://pharmacy-ui-75vl.vercel.app', // Without trailing slash
-  'https://pharmacy-ui-75vl.vercel.app/', // With trailing slash (for safety)
-  'https://pharm-admin.vercel.app',
-  'https://pharm-admin.vercel.app/',
-  process.env.FRONTEND_URL,
-].filter(Boolean) as string[];
-
-// Normalize origin by removing trailing slash for comparison
-const normalizeOrigin = (origin: string): string => {
-  return origin.replace(/\/$/, '');
-};
-
+// Open CORS: reflect any request Origin (required when credentials: true; * is invalid with cookies).
 app.use(cors({
-  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-    // Allow requests with no origin (like mobile apps, Postman, or curl)
-    if (!origin) {
-      return callback(null, true);
-    }
-    
-    // Normalize the origin (remove trailing slash)
-    const normalizedOrigin = normalizeOrigin(origin);
-    
-    // Always allow localhost origins (for local development)
-    if (normalizedOrigin.includes('localhost') || normalizedOrigin.includes('127.0.0.1')) {
-      return callback(null, true);
-    }
-    
-    // Check if normalized origin is in allowed list (also normalize allowed origins for comparison)
-    const normalizedAllowedOrigins = allowedOrigins.map(normalizeOrigin);
-    if (normalizedAllowedOrigins.includes(normalizedOrigin)) {
-      return callback(null, true);
-    }
-    
-    // If origin is not in allowed list, block it
-    console.warn(`CORS blocked origin: ${origin} (normalized: ${normalizedOrigin})`);
-    return callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true, // Allow cookies/auth headers
+  origin: true,
+  credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: [
     'Content-Type',
@@ -132,9 +93,10 @@ app.use(cors({
     'X-Requested-With',
     'Accept',
     'Origin',
+    'X-Tenant-Domain',
   ],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  maxAge: 86400, // 24 hours
+  maxAge: 86400,
 }));
 
 // Root: Azure startup/warmup probe hits GET / — must return 2xx on the container port
@@ -215,6 +177,8 @@ app.use('/api/analytics', pharmacyAnalyticsRoutes);
 app.use('/api/admin/ndc-pricing', ndcPricingBookRoutes);
 app.use('/api/pharmacy-branches', pharmacyBranchRoutes);
 app.use('/api/pharmacy-roles', pharmacyRoleRoutes);
+app.use('/api/main-admin', mainAdminRoutes);
+app.use('/api/pharmacy', pharmacyAdminBrandingRoutes);
 
 /**
  * @swagger

@@ -3,10 +3,19 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/Card'
 import { authService } from '@/lib/api/services'
+import { DomainNotRecognizedScreen } from '@/components/auth/DomainNotRecognizedScreen'
+import { TenantInfoLoadingScreen } from '@/components/auth/TenantInfoLoadingScreen'
+import { usePharmacyPortalTenant } from '@/lib/hooks/usePharmacyPortalTenant'
+
+interface AdminBranding {
+  logoUrl: string | null
+  businessName: string | null
+}
 
 function ResetPasswordForm() {
   const router = useRouter()
@@ -14,6 +23,8 @@ function ResetPasswordForm() {
   
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -21,6 +32,29 @@ function ResetPasswordForm() {
   const [tokenValid, setTokenValid] = useState(false)
   const [userEmail, setUserEmail] = useState<string | undefined>()
   const [accessToken, setAccessToken] = useState<string | null>(null)
+  const [branding, setBranding] = useState<AdminBranding | null>(null)
+
+  const { tenantChecked, tenantError, validTenant, isLocalHost } =
+    usePharmacyPortalTenant()
+
+  useEffect(() => {
+    // Only load cached branding (can't fetch without authentication)
+    try {
+      const cached = localStorage.getItem('pharmacyAdminBranding')
+      if (cached) {
+        setBranding(JSON.parse(cached))
+      }
+    } catch { /* ignore */ }
+  }, [])
+
+  useEffect(() => {
+    if (validTenant?.buyingGroupName) {
+      setBranding((prev) => ({
+        logoUrl: prev?.logoUrl ?? null,
+        businessName: validTenant.buyingGroupName,
+      }))
+    }
+  }, [validTenant])
 
   // Get access token from URL hash (Supabase puts it in the fragment)
   // Format: #access_token=xxx&type=recovery&expires_in=3600
@@ -140,6 +174,13 @@ function ResetPasswordForm() {
     }
   }
 
+  if (!isLocalHost && !tenantChecked) {
+    return <TenantInfoLoadingScreen />
+  }
+  if (!isLocalHost && tenantChecked && tenantError) {
+    return <DomainNotRecognizedScreen detail={tenantError} />
+  }
+
   // Loading state while verifying token
   if (verifying) {
     return (
@@ -159,8 +200,15 @@ function ResetPasswordForm() {
     return (
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <div className="flex items-center justify-center mb-4">
-            <div className="text-3xl font-bold text-primary">PharmAnalytics</div>
+          <div className="flex flex-col items-center justify-center mb-4 gap-3">
+            {branding?.logoUrl && (
+              <img
+                src={branding.logoUrl}
+                alt="Logo"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-contain"
+              />
+            )}
+            <div className="text-3xl font-bold text-primary">{branding?.businessName || 'PharmAnalytics'}</div>
           </div>
           <CardTitle className="text-2xl text-center">Password Reset Successful</CardTitle>
         </CardHeader>
@@ -202,8 +250,15 @@ function ResetPasswordForm() {
     return (
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <div className="flex items-center justify-center mb-4">
-            <div className="text-3xl font-bold text-primary">PharmAnalytics</div>
+          <div className="flex flex-col items-center justify-center mb-4 gap-3">
+            {branding?.logoUrl && (
+              <img
+                src={branding.logoUrl}
+                alt="Logo"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-contain"
+              />
+            )}
+            <div className="text-3xl font-bold text-primary">{branding?.businessName || 'PharmAnalytics'}</div>
           </div>
           <CardTitle className="text-2xl text-center">Invalid Reset Link</CardTitle>
         </CardHeader>
@@ -247,8 +302,15 @@ function ResetPasswordForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="space-y-1">
-        <div className="flex items-center justify-center mb-4">
-          <div className="text-3xl font-bold text-primary">PharmAnalytics</div>
+        <div className="flex flex-col items-center justify-center mb-4 gap-3">
+          {branding?.logoUrl && (
+            <img
+              src={branding.logoUrl}
+              alt="Logo"
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-contain"
+            />
+          )}
+          <div className="text-3xl font-bold text-primary">{branding?.businessName || 'PharmAnalytics'}</div>
         </div>
         <CardTitle className="text-2xl text-center">Reset Password</CardTitle>
         <CardDescription className="text-center">
@@ -265,16 +327,30 @@ function ResetPasswordForm() {
             <label htmlFor="newPassword" className="text-sm font-medium">
               New Password
             </label>
-            <Input
-              id="newPassword"
-              type="password"
-              placeholder="••••••••"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-              minLength={8}
-              autoFocus
-            />
+            <div className="relative">
+              <Input
+                id="newPassword"
+                type={showNewPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+                minLength={8}
+                autoFocus
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+              >
+                {showNewPassword ? (
+                  <EyeOff className="h-5 w-5" />
+                ) : (
+                  <Eye className="h-5 w-5" />
+                )}
+              </button>
+            </div>
             <p className="text-xs text-muted-foreground">
               Must be at least 8 characters long
             </p>
@@ -283,15 +359,29 @@ function ResetPasswordForm() {
             <label htmlFor="confirmPassword" className="text-sm font-medium">
               Confirm Password
             </label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              minLength={8}
-            />
+            <div className="relative">
+              <Input
+                id="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                minLength={8}
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="h-5 w-5" />
+                ) : (
+                  <Eye className="h-5 w-5" />
+                )}
+              </button>
+            </div>
           </div>
           {error && (
             <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
@@ -318,16 +408,7 @@ function ResetPasswordForm() {
 export default function ResetPasswordPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <Suspense fallback={
-        <Card className="w-full max-w-md">
-          <CardContent className="p-8">
-            <div className="flex flex-col items-center justify-center space-y-4">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
-              <p className="text-muted-foreground">Loading...</p>
-            </div>
-          </CardContent>
-        </Card>
-      }>
+      <Suspense fallback={<TenantInfoLoadingScreen />}>
         <ResetPasswordForm />
       </Suspense>
     </div>

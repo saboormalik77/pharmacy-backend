@@ -98,7 +98,8 @@ export interface OrderListResponse {
 export const createCheckoutSession = async (
   pharmacyId: string,
   email: string,
-  pharmacyName?: string
+  pharmacyName?: string,
+  buyingGroupId?: string | null
 ): Promise<CreateCheckoutResponse> => {
   if (!stripe) {
     throw new AppError('Stripe is not configured', 500);
@@ -170,6 +171,20 @@ export const createCheckoutSession = async (
     throw new AppError('Cart is empty', 400);
   }
 
+  // Resolve the pharmacy portal URL from the buying group domain
+  let baseUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+  const effectiveBuyingGroupId = buyingGroupId || await (async () => {
+    const { data: row } = await supabaseAdmin.from('pharmacy').select('buying_group_id').eq('id', pharmacyId).single();
+    return row?.buying_group_id || null;
+  })();
+  if (effectiveBuyingGroupId) {
+    const { getBuyingGroupHostnames } = await import('./tenantService');
+    const hostnames = await getBuyingGroupHostnames(effectiveBuyingGroupId);
+    if (hostnames?.pharmacyHostname) {
+      baseUrl = `https://${hostnames.pharmacyHostname}`;
+    }
+  }
+
   // Create Stripe Checkout session
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
@@ -191,8 +206,8 @@ export const createCheckoutSession = async (
       quantity: item.quantity,
     })),
     automatic_tax: { enabled: false }, // We handle tax ourselves
-    success_url: `${process.env.FRONTEND_URL || 'http://localhost:3001'}/marketplace`,
-    cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:3001'}/marketplace/checkout?canceled=true`,
+    success_url: `${baseUrl}/marketplace`,
+    cancel_url: `${baseUrl}/marketplace/checkout?canceled=true`,
     metadata: {
       pharmacy_id: pharmacyId,
       type: 'marketplace_order',

@@ -1,9 +1,33 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { signupHandler, signinHandler, googleSigninHandler, refreshTokenHandler, logoutHandler, logoutAllHandler, forgotPasswordHandler, resetPasswordHandler, verifyResetTokenHandler, verifyInviteHandler, completeSetupHandler, verifyBranchInviteHandler, completeBranchSetupHandler } from '../controllers/authController';
 import { loginHandler, adminForgotPasswordHandler, adminVerifyResetTokenHandler, adminResetPasswordHandler } from '../controllers/adminController';
 import { authenticate } from '../middleware/auth';
+import { resolveTenantMiddleware } from '../middleware/tenantAuth';
+import { catchAsync } from '../utils/catchAsync';
 
 const router = express.Router();
+
+/**
+ * Tenant info endpoint — public.
+ * Returns the resolved buying group / portal info for the request's domain.
+ * Frontends call this to show branding and block access on unknown hosts.
+ */
+router.get(
+  '/tenant-info',
+  resolveTenantMiddleware,
+  catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
+    if (!req.tenant) {
+      return res.status(200).json({
+        status: 'success',
+        data: { isLocalDev: true, tenant: null },
+      });
+    }
+    return res.status(200).json({
+      status: 'success',
+      data: { isLocalDev: false, tenant: req.tenant },
+    });
+  })
+);
 
 /**
  * @swagger
@@ -127,7 +151,7 @@ router.post('/signup', signupHandler);
  *                   type: string
  *                   example: Please provide email and password
  */
-router.post('/login', loginHandler);
+router.post('/login', resolveTenantMiddleware, loginHandler);
 
 /**
  * @swagger
@@ -177,7 +201,7 @@ router.post('/login', loginHandler);
  *               status: 'fail'
  *               message: 'Pharmacy profile not found'
  */
-router.post('/signin', signinHandler);
+router.post('/signin', resolveTenantMiddleware, signinHandler);
 
 /**
  * @swagger
@@ -398,7 +422,7 @@ router.post('/logout-all', authenticate, logoutAllHandler);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/forgot-password', forgotPasswordHandler);
+router.post('/forgot-password', resolveTenantMiddleware, forgotPasswordHandler);
 
 /**
  * @swagger
@@ -596,7 +620,7 @@ router.post('/complete-branch-setup', completeBranchSetupHandler);
  *       400:
  *         description: Bad request - email not provided
  */
-router.post('/admin/forgot-password', adminForgotPasswordHandler);
+router.post('/admin/forgot-password', resolveTenantMiddleware, adminForgotPasswordHandler);
 
 /**
  * @swagger
@@ -690,5 +714,62 @@ router.post('/admin/verify-reset-token', adminVerifyResetTokenHandler);
  *         description: Bad request - invalid token or password
  */
 router.post('/admin/reset-password', adminResetPasswordHandler);
+
+// ============================================================
+// Supabase Auth Callback — redirects to the correct frontend
+// ============================================================
+router.get('/callback', async (req: Request, res: Response) => {
+  const portal = (req.query.portal as string) || 'pharmacy';
+  const buyingGroupId = req.query.bg as string;
+  const code = req.query.code as string;
+  const errorParam = req.query.error as string;
+  const errorDescription = req.query.error_description as string;
+
+  let frontendBase = '';
+
+  if (buyingGroupId) {
+    try {
+      const { getBuyingGroupHostnames } = await import('../services/tenantService');
+      const hostnames = await getBuyingGroupHostnames(buyingGroupId);
+      if (portal === 'admin' && hostnames?.adminHostname) {
+        frontendBase = `https://${hostnames.adminHostname}`;
+      } else if (hostnames?.pharmacyHostname) {
+        frontendBase = `https://${hostnames.pharmacyHostname}`;
+      }
+    } catch {
+      // fall through to env fallback
+    }
+  }
+
+  if (!frontendBase) {
+    frontendBase = portal === 'admin'
+      ? (process.env.ADMIN_PASSWORD_RESET_REDIRECT_URL?.replace(/\/reset-password$/, '') || 'http://localhost:3002')
+      : (process.env.FRONTEND_URL || 'http://localhost:3001');
+  }
+
+  // If Supabase sent a PKCE code, forward it to the frontend
+  if (code) {
+    return res.redirect(`${frontendBase}/reset-password?code=${encodeURIComponent(code)}`);
+  }
+
+  // If Supabase sent an error, forward it
+  if (errorParam) {
+    const errMsg = errorDescription || errorParam;
+    return res.redirect(`${frontendBase}/reset-password?error=${encodeURIComponent(errMsg)}`);
+  }
+
+  // Implicit flow: Supabase puts tokens in the hash fragment which never reaches the server.
+  // Serve a tiny HTML page that reads the hash and redirects client-side.
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Redirecting...</title></head><body>
+<script>
+  var hash = window.location.hash;
+  var dest = ${JSON.stringify(frontendBase)} + "/reset-password" + (hash || "");
+  window.location.replace(dest);
+</script>
+<noscript><p>Redirecting to <a href="${frontendBase}/reset-password">${frontendBase}/reset-password</a>...</p></noscript>
+</body></html>`;
+  res.setHeader('Content-Type', 'text/html');
+  res.send(html);
+});
 
 export default router;

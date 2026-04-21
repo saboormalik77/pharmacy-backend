@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Menu, Search, Bell, User, LogOut, Settings } from 'lucide-react';
+import { Menu, Bell, User, LogOut, Settings, Loader2 } from 'lucide-react';
 import { cn, formatRelativeTime } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { logoutUser } from '@/lib/store/authSlice';
 import { fetchRecentActivity, markActivityAsRead, Activity } from '@/lib/store/recentActivitySlice';
+import { fetchSettings } from '@/lib/store/settingsSlice';
 
 interface NavbarProps {
     onToggleSidebar: () => void;
@@ -15,16 +16,21 @@ interface NavbarProps {
 export function Navbar({ onToggleSidebar }: NavbarProps) {
     const router = useRouter();
     const dispatch = useAppDispatch();
-    const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+    const { user, isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
     const { notifications, isLoadingNotifications } = useAppSelector((state) => state.recentActivity);
+    const { settings } = useAppSelector((state) => state.settings);
     const [showNotifications, setShowNotifications] = useState(false);
     const [showProfile, setShowProfile] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
     const notificationsRef = useRef<HTMLDivElement>(null);
     const profileRef = useRef<HTMLDivElement>(null);
 
-    // Fetch recent activity when component mounts or when authenticated
+    // Fetch settings and recent activity when authenticated
     useEffect(() => {
         if (isAuthenticated) {
+            if (!settings) {
+                dispatch(fetchSettings());
+            }
             dispatch(fetchRecentActivity({
                 limit: 20,
                 offset: 0,
@@ -32,6 +38,15 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
             }));
         }
     }, [dispatch, isAuthenticated]);
+
+    // Update document title when branding changes
+    useEffect(() => {
+        if (settings?.businessName) {
+            document.title = `${settings.businessName}`;
+        } else {
+            document.title = 'PharmAdmin - Admin Portal';
+        }
+    }, [settings?.businessName]);
 
     // Close notifications and profile dropdowns when clicking outside
     useEffect(() => {
@@ -149,6 +164,22 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
     };
 
     const handleLogout = async () => {
+        setIsLoggingOut(true);
+        setShowProfile(false);
+        // Keep branding on the login screen after full reload (ClientLayout used to reset document.title)
+        if (typeof window !== 'undefined' && settings) {
+            try {
+                localStorage.setItem(
+                    'adminBranding',
+                    JSON.stringify({
+                        logoUrl: settings.logoUrl ?? null,
+                        businessName: settings.businessName ?? null,
+                    })
+                );
+            } catch {
+                // ignore
+            }
+        }
         await dispatch(logoutUser());
         window.location.href = '/login';
     };
@@ -161,10 +192,20 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
                         <Menu className="w-5 h-5 text-gray-700" />
                     </button>
                     <div className="flex items-center gap-1 sm:gap-2">
-                        <div className="w-7 h-7 sm:w-8 sm:h-8 bg-primary-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <span className="text-white font-bold text-xs sm:text-sm">PA</span>
-                        </div>
-                        <span className="text-base sm:text-xl font-bold text-gray-900 hidden xs:inline">PharmAdmin</span>
+                        {settings?.logoUrl ? (
+                            <img
+                                src={settings.logoUrl}
+                                alt="Site Logo"
+                                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg object-contain flex-shrink-0"
+                            />
+                        ) : (
+                            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-primary-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <span className="text-white font-bold text-xs sm:text-sm">PA</span>
+                            </div>
+                        )}
+                        <span className="text-base sm:text-xl font-bold text-gray-900 hidden xs:inline">
+                            {settings?.businessName || 'PharmAdmin'}
+                        </span>
                     </div>
                 </div>
 
@@ -263,6 +304,16 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
                     </div>
                 </div>
             </div>
+
+            {/* Logout Loading Overlay */}
+            {isLoggingOut && (
+                <div className="fixed inset-0 bg-white z-[9999] flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-3">
+                        <Loader2 className="w-8 h-8 animate-spin text-gray-600" />
+                        <p className="text-sm text-gray-600 font-medium">Logging out...</p>
+                    </div>
+                </div>
+            )}
         </nav>
     );
 }

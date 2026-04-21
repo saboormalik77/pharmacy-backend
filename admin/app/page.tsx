@@ -1,6 +1,6 @@
 'use client';
 
-import { Building2, Truck, FileText, DollarSign, Warehouse, ClipboardList, Scan, Archive, MapPin, Calendar, Loader2 } from 'lucide-react';
+import { Building2, Truck, FileText, DollarSign, ClipboardList, Scan, Archive, MapPin, Calendar, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { StatCard } from '@/components/ui/StatCard';
@@ -204,7 +204,7 @@ export default function Dashboard() {
       {/* Page Header */}
       <div>
         <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-sm sm:text-base text-gray-600 mt-1">Welcome to PharmAdmin Management Portal</p>
+        <p className="text-sm sm:text-base text-gray-600 mt-1">Welcome to Buying group Management Portal</p>
       </div>
 
       {/* Stats Grid */}
@@ -217,14 +217,14 @@ export default function Dashboard() {
           tooltip={`Total number of registered pharmacies in the system. ${data?.stats.totalPharmacies.changeLabel || ''}`}
           changeLabel={data?.stats.totalPharmacies.changeLabel}
         />
-        <StatCard
+        {/* <StatCard
           title="Active Distributors"
           value={data?.stats.activeDistributors.value || 0}
           change={data?.stats.activeDistributors.change || 0}
           icon={<Warehouse className="w-6 h-6" />}
           tooltip={`Number of currently active distributors. ${data?.stats.activeDistributors.changeLabel || ''}`}
           changeLabel={data?.stats.activeDistributors.changeLabel}
-        />
+        /> */}
         {/* <StatCard
           title="Pending Documents"
           value={0}

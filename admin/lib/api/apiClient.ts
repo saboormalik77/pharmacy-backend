@@ -33,6 +33,17 @@ export class ApiClient {
   }
 
   /**
+   * Get the current hostname so the backend can resolve the tenant.
+   * Only runs in the browser.
+   */
+  private getTenantDomain(): string | null {
+    if (typeof window !== 'undefined' && window.location?.hostname) {
+      return window.location.hostname;
+    }
+    return null;
+  }
+
+  /**
    * Get headers for API requests
    */
   private getHeaders(includeAuth: boolean = true, isFormData: boolean = false): HeadersInit {
@@ -48,6 +59,11 @@ export class ApiClient {
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
+    }
+
+    const tenantDomain = this.getTenantDomain();
+    if (tenantDomain) {
+      headers['X-Tenant-Domain'] = tenantDomain;
     }
 
     return headers;

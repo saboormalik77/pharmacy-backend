@@ -95,13 +95,18 @@ END $$;
 -- Returns: pharmacies array and total count
 -- ============================================================
 
+-- Drop all possible variations of get_admin_pharmacies_list
 DROP FUNCTION IF EXISTS get_admin_pharmacies_list(TEXT, TEXT, INTEGER, INTEGER);
+DROP FUNCTION IF EXISTS get_admin_pharmacies_list(TEXT, TEXT, INTEGER, INTEGER, UUID);
+DROP FUNCTION IF EXISTS get_admin_pharmacies_list(UUID, INTEGER, INTEGER, TEXT, TEXT);
+DROP FUNCTION IF EXISTS get_admin_pharmacies_list CASCADE;
 
 CREATE OR REPLACE FUNCTION get_admin_pharmacies_list(
     p_search TEXT DEFAULT NULL,
     p_status TEXT DEFAULT 'all',
     p_page INTEGER DEFAULT 1,
-    p_limit INTEGER DEFAULT 20
+    p_limit INTEGER DEFAULT 20,
+    p_buying_group_id UUID DEFAULT NULL
 )
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -135,6 +140,10 @@ BEGIN
     WHERE 
         -- Status filter
         (p_status = 'all' OR p.status = p_status)
+        -- Tenant (buying group) scope filter.
+        -- When p_buying_group_id is NULL (MainAdmin / localhost), show all.
+        -- Otherwise only return pharmacies owned by that buying group.
+        AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id)
         -- Search filter (business name, owner name, email, or id)
         AND (
             v_normalized_search IS NULL 
@@ -175,6 +184,8 @@ BEGIN
         WHERE 
             -- Status filter
             (p_status = 'all' OR p.status = p_status)
+            -- Tenant (buying group) scope filter.
+            AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id)
             -- Search filter
             AND (
                 v_normalized_search IS NULL 
@@ -243,10 +254,14 @@ $$;
 -- Get single pharmacy details by ID
 -- ============================================================
 
+-- Drop all possible variations of get_admin_pharmacy_by_id
 DROP FUNCTION IF EXISTS get_admin_pharmacy_by_id(UUID);
+DROP FUNCTION IF EXISTS get_admin_pharmacy_by_id(UUID, UUID);
+DROP FUNCTION IF EXISTS get_admin_pharmacy_by_id CASCADE;
 
 CREATE OR REPLACE FUNCTION get_admin_pharmacy_by_id(
-    p_pharmacy_id UUID
+    p_pharmacy_id UUID,
+    p_buying_group_id UUID DEFAULT NULL
 )
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -257,8 +272,13 @@ DECLARE
     v_pharmacy JSONB;
     v_exists BOOLEAN;
 BEGIN
-    -- Check if pharmacy exists
-    SELECT EXISTS(SELECT 1 FROM pharmacy WHERE id = p_pharmacy_id)
+    -- Check if pharmacy exists AND belongs to the caller's buying group
+    -- (NULL buying group = MainAdmin / localhost → no tenant filter)
+    SELECT EXISTS(
+        SELECT 1 FROM pharmacy
+        WHERE id = p_pharmacy_id
+          AND (p_buying_group_id IS NULL OR created_by = p_buying_group_id)
+    )
     INTO v_exists;
     
     IF NOT v_exists THEN
@@ -324,11 +344,15 @@ $$;
 -- Update pharmacy details (for admin edit functionality)
 -- ============================================================
 
+-- Drop all possible variations of update_admin_pharmacy
 DROP FUNCTION IF EXISTS update_admin_pharmacy(UUID, JSONB);
+DROP FUNCTION IF EXISTS update_admin_pharmacy(UUID, JSONB, UUID);
+DROP FUNCTION IF EXISTS update_admin_pharmacy CASCADE;
 
 CREATE OR REPLACE FUNCTION update_admin_pharmacy(
     p_pharmacy_id UUID,
-    p_updates JSONB
+    p_updates JSONB,
+    p_buying_group_id UUID DEFAULT NULL
 )
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -340,8 +364,12 @@ DECLARE
     v_physical_address JSONB;
     v_billing_address JSONB;
 BEGIN
-    -- Check if pharmacy exists
-    SELECT EXISTS(SELECT 1 FROM pharmacy WHERE id = p_pharmacy_id)
+    -- Check if pharmacy exists AND belongs to the caller's buying group.
+    SELECT EXISTS(
+        SELECT 1 FROM pharmacy
+        WHERE id = p_pharmacy_id
+          AND (p_buying_group_id IS NULL OR created_by = p_buying_group_id)
+    )
     INTO v_exists;
     
     IF NOT v_exists THEN
@@ -457,8 +485,8 @@ BEGIN
         updated_at = NOW()
     WHERE id = p_pharmacy_id;
     
-    -- Return updated pharmacy
-    RETURN get_admin_pharmacy_by_id(p_pharmacy_id);
+    -- Return updated pharmacy (scoped to the same buying group).
+    RETURN get_admin_pharmacy_by_id(p_pharmacy_id, p_buying_group_id);
 END;
 $$;
 
@@ -468,11 +496,15 @@ $$;
 -- Update pharmacy status (blacklist/restore/suspend)
 -- ============================================================
 
+-- Drop all possible variations of update_admin_pharmacy_status
 DROP FUNCTION IF EXISTS update_admin_pharmacy_status(UUID, TEXT);
+DROP FUNCTION IF EXISTS update_admin_pharmacy_status(UUID, TEXT, UUID);
+DROP FUNCTION IF EXISTS update_admin_pharmacy_status CASCADE;
 
 CREATE OR REPLACE FUNCTION update_admin_pharmacy_status(
     p_pharmacy_id UUID,
-    p_new_status TEXT
+    p_new_status TEXT,
+    p_buying_group_id UUID DEFAULT NULL
 )
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -492,8 +524,12 @@ BEGIN
         );
     END IF;
     
-    -- Check if pharmacy exists
-    SELECT EXISTS(SELECT 1 FROM pharmacy WHERE id = p_pharmacy_id)
+    -- Check if pharmacy exists AND belongs to the caller's buying group.
+    SELECT EXISTS(
+        SELECT 1 FROM pharmacy
+        WHERE id = p_pharmacy_id
+          AND (p_buying_group_id IS NULL OR created_by = p_buying_group_id)
+    )
     INTO v_exists;
     
     IF NOT v_exists THEN
@@ -514,8 +550,8 @@ BEGIN
         updated_at = NOW()
     WHERE id = p_pharmacy_id;
     
-    -- Return success with updated pharmacy
-    v_result := get_admin_pharmacy_by_id(p_pharmacy_id);
+    -- Return success with updated pharmacy (scoped to the same buying group).
+    v_result := get_admin_pharmacy_by_id(p_pharmacy_id, p_buying_group_id);
     v_result := v_result || jsonb_build_object(
         'statusChange', jsonb_build_object(
             'from', v_old_status,
@@ -531,17 +567,17 @@ $$;
 -- Grant Permissions
 -- ============================================================
 
-GRANT EXECUTE ON FUNCTION get_admin_pharmacies_list(TEXT, TEXT, INTEGER, INTEGER) TO authenticated;
-GRANT EXECUTE ON FUNCTION get_admin_pharmacies_list(TEXT, TEXT, INTEGER, INTEGER) TO service_role;
+GRANT EXECUTE ON FUNCTION get_admin_pharmacies_list(TEXT, TEXT, INTEGER, INTEGER, UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_admin_pharmacies_list(TEXT, TEXT, INTEGER, INTEGER, UUID) TO service_role;
 
-GRANT EXECUTE ON FUNCTION get_admin_pharmacy_by_id(UUID) TO authenticated;
-GRANT EXECUTE ON FUNCTION get_admin_pharmacy_by_id(UUID) TO service_role;
+GRANT EXECUTE ON FUNCTION get_admin_pharmacy_by_id(UUID, UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_admin_pharmacy_by_id(UUID, UUID) TO service_role;
 
-GRANT EXECUTE ON FUNCTION update_admin_pharmacy(UUID, JSONB) TO authenticated;
-GRANT EXECUTE ON FUNCTION update_admin_pharmacy(UUID, JSONB) TO service_role;
+GRANT EXECUTE ON FUNCTION update_admin_pharmacy(UUID, JSONB, UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION update_admin_pharmacy(UUID, JSONB, UUID) TO service_role;
 
-GRANT EXECUTE ON FUNCTION update_admin_pharmacy_status(UUID, TEXT) TO authenticated;
-GRANT EXECUTE ON FUNCTION update_admin_pharmacy_status(UUID, TEXT) TO service_role;
+GRANT EXECUTE ON FUNCTION update_admin_pharmacy_status(UUID, TEXT, UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION update_admin_pharmacy_status(UUID, TEXT, UUID) TO service_role;
 
 -- ============================================================
 -- Example Usage:

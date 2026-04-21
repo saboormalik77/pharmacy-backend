@@ -1,17 +1,48 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/Card'
 import { authService } from '@/lib/api/services'
+import { DomainNotRecognizedScreen } from '@/components/auth/DomainNotRecognizedScreen'
+import { TenantInfoLoadingScreen } from '@/components/auth/TenantInfoLoadingScreen'
+import { usePharmacyPortalTenant } from '@/lib/hooks/usePharmacyPortalTenant'
+
+interface AdminBranding {
+  logoUrl: string | null
+  businessName: string | null
+}
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [branding, setBranding] = useState<AdminBranding | null>(null)
+
+  const { tenantChecked, tenantError, validTenant, isLocalHost } =
+    usePharmacyPortalTenant()
+
+  useEffect(() => {
+    // Only load cached branding (can't fetch without authentication)
+    try {
+      const cached = localStorage.getItem('pharmacyAdminBranding')
+      if (cached) {
+        setBranding(JSON.parse(cached))
+      }
+    } catch { /* ignore */ }
+  }, [])
+
+  useEffect(() => {
+    if (validTenant?.buyingGroupName) {
+      setBranding((prev) => ({
+        logoUrl: prev?.logoUrl ?? null,
+        businessName: validTenant.buyingGroupName,
+      }))
+    }
+  }, [validTenant])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,13 +59,27 @@ export default function ForgotPasswordPage() {
     }
   }
 
+  if (!isLocalHost && !tenantChecked) {
+    return <TenantInfoLoadingScreen />
+  }
+  if (!isLocalHost && tenantChecked && tenantError) {
+    return <DomainNotRecognizedScreen detail={tenantError} />
+  }
+
   if (success) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1">
-            <div className="flex items-center justify-center mb-4">
-              <div className="text-3xl font-bold text-primary">PharmAnalytics</div>
+            <div className="flex flex-col items-center justify-center mb-4 gap-3">
+              {branding?.logoUrl && (
+                <img
+                  src={branding.logoUrl}
+                  alt="Logo"
+                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-contain"
+                />
+              )}
+              <div className="text-3xl font-bold text-primary">{branding?.businessName || 'PharmAnalytics'}</div>
             </div>
             <CardTitle className="text-2xl text-center">Check Your Email</CardTitle>
           </CardHeader>
@@ -79,8 +124,15 @@ export default function ForgotPasswordPage() {
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <div className="flex items-center justify-center mb-4">
-            <div className="text-3xl font-bold text-primary">PharmAnalytics</div>
+          <div className="flex flex-col items-center justify-center mb-4 gap-3">
+            {branding?.logoUrl && (
+              <img
+                src={branding.logoUrl}
+                alt="Logo"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-contain"
+              />
+            )}
+            <div className="text-3xl font-bold text-primary">{branding?.businessName || 'PharmAnalytics'}</div>
           </div>
           <CardTitle className="text-2xl text-center">Reset Password</CardTitle>
           <CardDescription className="text-center">

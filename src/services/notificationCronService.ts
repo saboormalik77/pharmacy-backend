@@ -168,7 +168,7 @@ export const checkExpiringProductsAndNotify = async (): Promise<{
         // Get pharmacy info for email and push notifications
         const { data: pharmacy } = await supabaseAdmin
           .from('pharmacy')
-          .select('id, name, email, fcm_token')
+          .select('id, name, email, fcm_token, buying_group_id')
           .eq('id', pharmacyId)
           .single();
 
@@ -267,8 +267,8 @@ export const checkExpiringProductsAndNotify = async (): Promise<{
               await sendEmail({
                 to: pharmacy.email,
                 subject: `📦 ${notificationsToInsert.length} Products Expiring Soon - Potential Return Value: $${totalValue.toFixed(2)}`,
-                html: generateEmailHtml(pharmacy.name, notificationsToInsert),
-                text: generateEmailText(pharmacy.name, notificationsToInsert),
+                html: await generateEmailHtml(pharmacy.name, notificationsToInsert, pharmacy.buying_group_id),
+                text: await generateEmailText(pharmacy.name, notificationsToInsert, pharmacy.buying_group_id),
               });
 
               emailsSent++;
@@ -351,8 +351,22 @@ export const checkExpiringProductsAndNotify = async (): Promise<{
 // Email Helpers
 // ============================================================
 
-const generateEmailHtml = (pharmacyName: string, notifications: any[]): string => {
+const generateEmailHtml = async (
+  pharmacyName: string,
+  notifications: any[],
+  buyingGroupId?: string | null
+): Promise<string> => {
   const totalValue = notifications.reduce((sum, n) => sum + n.total_potential_value, 0);
+  
+  // Build the pharmacy portal base URL using the buying group's pharmacy_hostname
+  let baseUrl = process.env.FRONTEND_URL || 'https://app.pharmacollect.com';
+  if (buyingGroupId) {
+    const { getBuyingGroupHostnames } = await import('./tenantService');
+    const hostnames = await getBuyingGroupHostnames(buyingGroupId);
+    if (hostnames?.pharmacyHostname) {
+      baseUrl = `https://${hostnames.pharmacyHostname}`;
+    }
+  }
   
   let itemsHtml = notifications.map(n => `
     <tr>
@@ -413,7 +427,7 @@ const generateEmailHtml = (pharmacyName: string, notifications: any[]): string =
     </table>
     
     <div style="margin-top: 25px; text-align: center;">
-      <a href="${process.env.FRONTEND_URL || 'https://app.pharmacollect.com'}/inventory" 
+      <a href="${baseUrl}/inventory" 
          style="display: inline-block; background: linear-gradient(135deg, #1a237e 0%, #4a148c 100%); 
                 color: white; padding: 14px 30px; text-decoration: none; border-radius: 8px; 
                 font-weight: bold; font-size: 16px;">
@@ -423,7 +437,7 @@ const generateEmailHtml = (pharmacyName: string, notifications: any[]): string =
     
     <p style="margin: 25px 0 0 0; font-size: 12px; color: #999; text-align: center;">
       This is an automated reminder from PharmaCollect. 
-      <a href="${process.env.FRONTEND_URL || 'https://app.pharmacollect.com'}/settings/notifications" style="color: #666;">
+      <a href="${baseUrl}/settings/notifications" style="color: #666;">
         Manage notification preferences
       </a>
     </p>
@@ -433,9 +447,22 @@ const generateEmailHtml = (pharmacyName: string, notifications: any[]): string =
   `;
 };
 
-const generateEmailText = (pharmacyName: string, notifications: any[]): string => {
+const generateEmailText = async (
+  pharmacyName: string,
+  notifications: any[],
+  buyingGroupId?: string | null
+): Promise<string> => {
   const totalValue = notifications.reduce((sum, n) => sum + n.total_potential_value, 0);
   
+  let baseUrl = process.env.FRONTEND_URL || 'https://app.pharmacollect.com';
+  if (buyingGroupId) {
+    const { getBuyingGroupHostnames } = await import('./tenantService');
+    const hostnames = await getBuyingGroupHostnames(buyingGroupId);
+    if (hostnames?.pharmacyHostname) {
+      baseUrl = `https://${hostnames.pharmacyHostname}`;
+    }
+  }
+
   let itemsText = notifications.map(n => 
     `- ${n.product_name || n.ndc_code} (NDC: ${n.ndc_code})\n` +
     `  Units: ${n.full_units} full, ${n.partial_units} partial\n` +
@@ -456,7 +483,7 @@ Total Potential Return Value: $${totalValue.toFixed(2)}
 PRODUCTS EXPIRING SOON:
 ${itemsText}
 
-Visit ${process.env.FRONTEND_URL || 'https://app.pharmacollect.com'}/inventory to view and return.
+Visit ${baseUrl}/inventory to view and return.
 
 This is an automated reminder from PharmaCollect.
   `;

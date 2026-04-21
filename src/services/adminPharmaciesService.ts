@@ -142,19 +142,21 @@ export const getPharmaciesList = async (
   search?: string,
   status: string = 'all',
   page: number = 1,
-  limit: number = 20
+  limit: number = 20,
+  buyingGroupId?: string | null
 ): Promise<PharmaciesListResponse> => {
   if (!supabaseAdmin) {
     throw new AppError('Supabase admin client not configured', 500);
   }
 
-  console.log(`📋 Fetching pharmacies list (search: ${search || 'none'}, status: ${status}, page: ${page})`);
+  console.log(`📋 Fetching pharmacies list (search: ${search || 'none'}, status: ${status}, page: ${page}, bg: ${buyingGroupId || 'all'})`);
 
   const { data, error } = await supabaseAdmin.rpc('get_admin_pharmacies_list', {
     p_search: search || null,
     p_status: status,
     p_page: page,
     p_limit: limit,
+    p_buying_group_id: buyingGroupId ?? null,
   });
 
   if (error) {
@@ -180,16 +182,18 @@ export const getPharmaciesList = async (
  * Uses PostgreSQL RPC function - no custom JS logic
  */
 export const getPharmacyById = async (
-  pharmacyId: string
+  pharmacyId: string,
+  buyingGroupId?: string | null
 ): Promise<PharmacyDetailsResponse> => {
   if (!supabaseAdmin) {
     throw new AppError('Supabase admin client not configured', 500);
   }
 
-  console.log(`🔍 Fetching pharmacy details for ID: ${pharmacyId}`);
+  console.log(`🔍 Fetching pharmacy details for ID: ${pharmacyId} (bg: ${buyingGroupId || 'all'})`);
 
   const { data, error } = await supabaseAdmin.rpc('get_admin_pharmacy_by_id', {
     p_pharmacy_id: pharmacyId,
+    p_buying_group_id: buyingGroupId ?? null,
   });
 
   if (error) {
@@ -219,17 +223,19 @@ export const getPharmacyById = async (
  */
 export const updatePharmacy = async (
   pharmacyId: string,
-  updates: UpdatePharmacyData
+  updates: UpdatePharmacyData,
+  buyingGroupId?: string | null
 ): Promise<PharmacyDetailsResponse> => {
   if (!supabaseAdmin) {
     throw new AppError('Supabase admin client not configured', 500);
   }
 
-  console.log(`✏️ Updating pharmacy: ${pharmacyId}`);
+  console.log(`✏️ Updating pharmacy: ${pharmacyId} (bg: ${buyingGroupId || 'all'})`);
 
   const { data, error } = await supabaseAdmin.rpc('update_admin_pharmacy', {
     p_pharmacy_id: pharmacyId,
     p_updates: updates,
+    p_buying_group_id: buyingGroupId ?? null,
   });
 
   if (error) {
@@ -259,17 +265,19 @@ export const updatePharmacy = async (
  */
 export const updatePharmacyStatus = async (
   pharmacyId: string,
-  newStatus: string
+  newStatus: string,
+  buyingGroupId?: string | null
 ): Promise<PharmacyDetailsResponse & { statusChange: { from: string; to: string } }> => {
   if (!supabaseAdmin) {
     throw new AppError('Supabase admin client not configured', 500);
   }
 
-  console.log(`🔄 Updating pharmacy status: ${pharmacyId} -> ${newStatus}`);
+  console.log(`🔄 Updating pharmacy status: ${pharmacyId} -> ${newStatus} (bg: ${buyingGroupId || 'all'})`);
 
   const { data, error } = await supabaseAdmin.rpc('update_admin_pharmacy_status', {
     p_pharmacy_id: pharmacyId,
     p_new_status: newStatus,
+    p_buying_group_id: buyingGroupId ?? null,
   });
 
   if (error) {
@@ -326,17 +334,23 @@ function buildDeaWarning(deaExp: string | null): string | null {
 }
 
 export const getPharmacyStoreSettings = async (
-  pharmacyId: string
+  pharmacyId: string,
+  buyingGroupId?: string | null
 ): Promise<PharmacyStoreSettings> => {
   if (!supabaseAdmin) {
     throw new AppError('Supabase admin client not configured', 500);
   }
 
-  const { data, error } = await supabaseAdmin
+  let query = supabaseAdmin
     .from('pharmacy')
-    .select(FCR_PHARMACY_COLUMNS)
-    .eq('id', pharmacyId)
-    .single();
+    .select(FCR_PHARMACY_COLUMNS + ', created_by')
+    .eq('id', pharmacyId);
+
+  if (buyingGroupId) {
+    query = query.eq('created_by', buyingGroupId);
+  }
+
+  const { data, error } = await query.single();
 
   if (error) {
     throw new AppError(`Failed to fetch pharmacy store settings: ${error.message}`, error.code === 'PGRST116' ? 404 : 400);
@@ -346,41 +360,60 @@ export const getPharmacyStoreSettings = async (
     throw new AppError('Pharmacy not found', 404);
   }
 
+  // Type assertion for the data object since we know the structure
+  const pharmacyData = data as any;
+
   let processorName: string | null = null;
-  if (data.assigned_processor_id) {
+  if (pharmacyData.assigned_processor_id) {
     const { data: proc } = await supabaseAdmin
       .from('processors')
       .select('name')
-      .eq('id', data.assigned_processor_id)
+      .eq('id', pharmacyData.assigned_processor_id)
       .single();
     processorName = proc?.name || null;
   }
 
   return {
-    storeNumber: data.store_number,
-    primaryWholesaler: data.primary_wholesaler,
-    wholesalerAccountNumber: data.wholesaler_account_number,
-    secondaryWholesaler: data.secondary_wholesaler,
-    gpoAffiliation: data.gpo_affiliation,
-    serviceType: data.service_type || 'full_service',
-    assignedProcessorId: data.assigned_processor_id,
+    storeNumber: pharmacyData.store_number,
+    primaryWholesaler: pharmacyData.primary_wholesaler,
+    wholesalerAccountNumber: pharmacyData.wholesaler_account_number,
+    secondaryWholesaler: pharmacyData.secondary_wholesaler,
+    gpoAffiliation: pharmacyData.gpo_affiliation,
+    serviceType: pharmacyData.service_type || 'full_service',
+    assignedProcessorId: pharmacyData.assigned_processor_id,
     assignedProcessorName: processorName,
-    assignedSalesPersonId: data.assigned_sales_person_id,
-    lastVisitDate: data.last_visit_date,
-    nextVisitDate: data.next_visit_date,
-    daysBetweenVisits: data.days_between_visits ?? 120,
-    deaExpirationDate: data.dea_expiration_date,
-    deaExpirationWarning: buildDeaWarning(data.dea_expiration_date),
-    faxNumber: data.fax_number,
+    assignedSalesPersonId: pharmacyData.assigned_sales_person_id,
+    lastVisitDate: pharmacyData.last_visit_date,
+    nextVisitDate: pharmacyData.next_visit_date,
+    daysBetweenVisits: pharmacyData.days_between_visits ?? 120,
+    deaExpirationDate: pharmacyData.dea_expiration_date,
+    deaExpirationWarning: buildDeaWarning(pharmacyData.dea_expiration_date),
+    faxNumber: pharmacyData.fax_number,
   };
 };
 
 export const updatePharmacyStoreSettings = async (
   pharmacyId: string,
-  updates: UpdatePharmacyStoreSettingsData
+  updates: UpdatePharmacyStoreSettingsData,
+  buyingGroupId?: string | null
 ): Promise<PharmacyStoreSettings> => {
   if (!supabaseAdmin) {
     throw new AppError('Supabase admin client not configured', 500);
+  }
+
+  // Enforce tenant ownership before touching the row.
+  if (buyingGroupId) {
+    const { data: owner, error: ownerErr } = await supabaseAdmin
+      .from('pharmacy')
+      .select('id, created_by')
+      .eq('id', pharmacyId)
+      .maybeSingle();
+    if (ownerErr || !owner) {
+      throw new AppError('Pharmacy not found', 404);
+    }
+    if (owner.created_by !== buyingGroupId) {
+      throw new AppError('Pharmacy not found', 404);
+    }
   }
 
   const dbUpdates: Record<string, any> = {};
@@ -422,11 +455,14 @@ export const updatePharmacyStoreSettings = async (
   }
 
   if (dbUpdates.assigned_processor_id) {
-    const { data: proc, error: procErr } = await supabaseAdmin
+    let procQuery = supabaseAdmin
       .from('processors')
-      .select('id, status')
-      .eq('id', dbUpdates.assigned_processor_id)
-      .single();
+      .select('id, status, buying_group_id')
+      .eq('id', dbUpdates.assigned_processor_id);
+    if (buyingGroupId) {
+      procQuery = procQuery.eq('buying_group_id', buyingGroupId);
+    }
+    const { data: proc, error: procErr } = await procQuery.single();
     if (procErr || !proc) {
       throw new AppError('Assigned processor not found', 404);
     }
@@ -444,6 +480,6 @@ export const updatePharmacyStoreSettings = async (
     throw new AppError(`Failed to update pharmacy store settings: ${error.message}`, 400);
   }
 
-  return getPharmacyStoreSettings(pharmacyId);
+  return getPharmacyStoreSettings(pharmacyId, buyingGroupId);
 };
 

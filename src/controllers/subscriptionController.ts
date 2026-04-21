@@ -183,7 +183,8 @@ export const createCheckout = catchAsync(async (req: Request, res: Response, nex
     billingInterval,
     pharmacy.email,
     pharmacy.pharmacy_name || pharmacy.name,
-    platform
+    platform,
+    req.tenant?.buyingGroupId || null
   );
 
   res.status(200).json({

@@ -8,8 +8,8 @@ const tabs = [
     { href: '/analytics', label: 'Overview', icon: BarChart3 },
     { href: '/analytics/returns', label: 'Returns', icon: TrendingUp },
     { href: '/analytics/financials', label: 'Financials', icon: DollarSign },
-    { href: '/analytics/inventory', label: 'Inventory', icon: Package },
-    { href: '/analytics/price-audit', label: 'Price Audit', icon: Search },
+    // { href: '/analytics/inventory', label: 'Inventory', icon: Package },
+    // { href: '/analytics/price-audit', label: 'Price Audit', icon: Search },
     { href: '/analytics/performance', label: 'Performance', icon: Building2 },
 ];
 

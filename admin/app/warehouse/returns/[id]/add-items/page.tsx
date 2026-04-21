@@ -351,6 +351,22 @@ export default function AddItemsPage() {
                 scanSource: af.scanSource || 'gs1_qr',
                 rawScanData: raw.trim(),
             };
+            // Duplicate check: block if NDC + Serial Number already exist in this return
+            if (newForm.ndc && newForm.serialNumber) {
+                const isDuplicate = recentlyAddedItems.some(
+                    item =>
+                        item.ndc === newForm.ndc &&
+                        item.serialNumber === newForm.serialNumber
+                );
+                if (isDuplicate) {
+                    setScanError(
+                        `Duplicate item! NDC "${newForm.ndc}" with serial number "${newForm.serialNumber}" has already been added to this return.`
+                    );
+                    setScanInput('');
+                    return;
+                }
+            }
+
             setForm(newForm);
 
             if (!data.product) {
@@ -814,7 +830,7 @@ export default function AddItemsPage() {
                                         <div><span className="text-gray-500">NDC:</span> <span className="font-semibold text-gray-900 font-mono">{item.ndc || '—'}</span></div>
                                         <div><span className="text-gray-500">Lot:</span> <span className="font-medium text-gray-800">{item.lotNumber || '—'}</span></div>
                                         <div><span className="text-gray-500">Exp:</span> <span className="font-medium text-gray-800">{item.expirationDate ? new Date(item.expirationDate).toLocaleDateString() : '—'}</span></div>
-                                        {/* <div><span className="text-gray-500">Value:</span> <span className="font-bold text-green-600">${item.estimatedValue?.toFixed(2) || '0.00'}</span></div> */}
+                                        <div><span className="text-gray-500">Serial Number:</span> <span className="font-bold text-gray-600">${item.serialNumber || '0.00'}</span></div>
                                         {item.manufacturer && (
                                             <div className="col-span-2"><span className="text-gray-500">Manufacturer:</span> <span className="font-medium text-gray-800">{item.manufacturer}</span></div>
                                         )}

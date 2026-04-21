@@ -14,7 +14,7 @@ interface InvitePayload {
   pharmacyName: string;
   contactName: string;
   inviteToken: string;
-  /** Optional; superseded by PHARMACY_PORTAL_URL on the Edge Function when set */
+  /** Optional; takes priority over PHARMACY_PORTAL_URL env var when provided */
   portalBaseUrl?: string;
 }
 
@@ -132,8 +132,8 @@ serve(async (req: Request) => {
     }
 
     payload.portalBaseUrl = (
-      getEnv('PHARMACY_PORTAL_URL') ||
       payload.portalBaseUrl ||
+      getEnv('PHARMACY_PORTAL_URL') ||
       'http://localhost:3001'
     ).replace(/\/$/, '');
 

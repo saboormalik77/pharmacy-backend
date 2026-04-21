@@ -162,8 +162,8 @@ export default function ReturnsPage() {
 
     const canDoAction = (tx: ReturnTransaction, action: string): boolean => {
         switch (action) {
-            case 'edit': return tx.status !== 'finalized' && tx.status !== 'closed_out';
-            case 'delete': return tx.status !== 'finalized' && tx.status !== 'closed_out' && tx.status !== 'received';
+            case 'edit': return !['finalized', 'received', 'verified', 'closed_out'].includes(tx.status);
+            case 'delete': return !['finalized', 'received', 'verified', 'closed_out'].includes(tx.status);
             default: return false;
         }
     };
@@ -304,7 +304,7 @@ export default function ReturnsPage() {
                                     <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Store</th>
                                     <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
                                     <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Items</th>
-                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Value</th>
+                                    {/* <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Value</th> */}
                                     <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Date</th>
                                     <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
                                 </tr>
@@ -324,7 +324,7 @@ export default function ReturnsPage() {
                                                 <Badge variant={badge.variant}><span className="text-[10px]">{badge.label}</span></Badge>
                                             </td>
                                             <td className="px-3 py-1.5 text-xs text-gray-600">{tx.totalItems}</td>
-                                            <td className="px-3 py-1.5 text-xs text-gray-900 font-medium">{formatCurrency(tx.totalReturnableValue)}</td>
+                                            {/* <td className="px-3 py-1.5 text-xs text-gray-900 font-medium">{formatCurrency(tx.totalReturnableValue)}</td> */}
                                             <td className="px-3 py-1.5 text-xs text-gray-500">{formatDate(tx.createdAt)}</td>
                                             <td className="px-3 py-1.5" onClick={e => e.stopPropagation()}>
                                                 <div className="flex items-center justify-end gap-0.5">
@@ -389,14 +389,15 @@ export default function ReturnsPage() {
                                     { label: 'Processor', value: viewModal.processorName || '—' },
                                     { label: 'Service Type', value: (viewModal.serviceType || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) },
                                     { label: 'Total Items', value: String(viewModal.totalItems) },
-                                    { label: 'Returnable Value', value: formatCurrency(viewModal.totalReturnableValue), className: 'text-green-700' },
-                                    { label: 'Non-Returnable', value: formatCurrency(viewModal.totalNonReturnableValue), className: 'text-red-700' },
+                                    // { label: 'Returnable Value', value: formatCurrency(viewModal.totalReturnableValue), className: 'text-green-700' },
+                                    // { label: 'Non-Returnable', value: formatCurrency(viewModal.totalNonReturnableValue), className: 'text-red-700' },
                                     { label: 'Created', value: formatDate(viewModal.createdAt) },
                                     { label: 'Updated', value: formatDate(viewModal.updatedAt) },
-                                ].map(({ label, value, className }) => (
+                                ].map(({ label, value }) => (
                                     <div key={label}>
                                         <p className="text-[10px] text-gray-400">{label}</p>
-                                        <p className={`text-xs font-medium text-gray-900 ${className || ''}`}>{value}</p>
+                                        {/* <p className={`text-xs font-medium text-gray-900 ${className || ''}`}>{value}</p> */}
+                                        <p className="text-xs font-medium text-gray-900">{value}</p>
                                     </div>
                                 ))}
                             </div>

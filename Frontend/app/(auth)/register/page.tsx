@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
@@ -9,6 +9,14 @@ import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/Card'
 import { authService } from '@/lib/api/services'
 import { US_STATES } from '@/lib/constants/usStates'
+import { DomainNotRecognizedScreen } from '@/components/auth/DomainNotRecognizedScreen'
+import { TenantInfoLoadingScreen } from '@/components/auth/TenantInfoLoadingScreen'
+import { usePharmacyPortalTenant } from '@/lib/hooks/usePharmacyPortalTenant'
+
+interface AdminBranding {
+  logoUrl: string | null
+  businessName: string | null
+}
 
 // Validation functions
 const validateNPI = (npi: string): { isValid: boolean; error?: string } => {
@@ -139,6 +147,7 @@ export default function RegisterPage() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [branding, setBranding] = useState<AdminBranding | null>(null)
 
   // Form data
   const [pharmacyName, setPharmacyName] = useState('')
@@ -165,6 +174,27 @@ export default function RegisterPage() {
     state: '',
     zip: '',
   })
+
+  useEffect(() => {
+    try {
+      const cached = localStorage.getItem('pharmacyAdminBranding')
+      if (cached) {
+        setBranding(JSON.parse(cached))
+      }
+    } catch { /* ignore */ }
+  }, [])
+
+  const { tenantChecked, tenantError, validTenant, isLocalHost } =
+    usePharmacyPortalTenant()
+
+  useEffect(() => {
+    if (validTenant?.buyingGroupName) {
+      setBranding((prev) => ({
+        logoUrl: prev?.logoUrl ?? null,
+        businessName: validTenant.buyingGroupName,
+      }))
+    }
+  }, [validTenant])
   
   const passwordStrength = getPasswordStrength(password)
 
@@ -315,12 +345,26 @@ export default function RegisterPage() {
     }
   }
 
+  if (!isLocalHost && !tenantChecked) {
+    return <TenantInfoLoadingScreen />
+  }
+  if (!isLocalHost && tenantChecked && tenantError) {
+    return <DomainNotRecognizedScreen detail={tenantError} />
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <Card className="w-full max-w-2xl">
         <CardHeader>
-          <div className="flex items-center justify-center mb-4">
-            <div className="text-3xl font-bold text-primary">PharmAnalytics</div>
+          <div className="flex flex-col items-center justify-center mb-4 gap-3">
+            {branding?.logoUrl && (
+              <img
+                src={branding.logoUrl}
+                alt="Logo"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-contain"
+              />
+            )}
+            <div className="text-3xl font-bold text-primary">{branding?.businessName || 'PharmAnalytics'}</div>
           </div>
           <CardTitle className="text-2xl text-center">Create your account</CardTitle>
           <CardDescription className="text-center">

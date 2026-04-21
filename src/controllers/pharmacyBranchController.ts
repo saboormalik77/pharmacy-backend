@@ -59,7 +59,21 @@ export const createBranchHandler = async (req: Request, res: Response, next: Nex
 
     const { inviteToken, email: branchEmail, pharmacyName: name, parentPharmacyName } = rpcResult.data;
 
-    const portalBaseUrl = process.env.PHARMACY_PORTAL_URL || 'http://localhost:3002';
+    // Resolve the pharmacy portal URL from the parent pharmacy's buying group domain
+    let portalBaseUrl = process.env.PHARMACY_PORTAL_URL || 'http://localhost:3002';
+    const buyingGroupId = req.tenant?.buyingGroupId || await (async () => {
+      if (!parentPharmacyId) return null;
+      const { data: row } = await db.from('pharmacy').select('buying_group_id').eq('id', parentPharmacyId).single();
+      return row?.buying_group_id || null;
+    })();
+    if (buyingGroupId) {
+      const { getBuyingGroupHostnames } = await import('../services/tenantService');
+      const hostnames = await getBuyingGroupHostnames(buyingGroupId);
+      if (hostnames?.pharmacyHostname) {
+        portalBaseUrl = `https://${hostnames.pharmacyHostname}`;
+      }
+    }
+
     try {
       const { error: emailError } = await db.functions.invoke('send-branch-invite', {
         body: {
@@ -178,7 +192,21 @@ export const resendBranchInviteHandler = async (req: Request, res: Response, nex
     if (data?.error) throw new AppError(data.message, data.code || 400);
 
     const { inviteToken, email, pharmacyName } = data.data;
-    const portalBaseUrl = process.env.PHARMACY_PORTAL_URL || 'http://localhost:3002';
+
+    // Resolve the pharmacy portal URL from the pharmacy's buying group domain
+    let portalBaseUrl = process.env.PHARMACY_PORTAL_URL || 'http://localhost:3002';
+    const buyingGroupId = req.tenant?.buyingGroupId || await (async () => {
+      if (!req.pharmacyId) return null;
+      const { data: row } = await db.from('pharmacy').select('buying_group_id').eq('id', req.pharmacyId).single();
+      return row?.buying_group_id || null;
+    })();
+    if (buyingGroupId) {
+      const { getBuyingGroupHostnames } = await import('../services/tenantService');
+      const hostnames = await getBuyingGroupHostnames(buyingGroupId);
+      if (hostnames?.pharmacyHostname) {
+        portalBaseUrl = `https://${hostnames.pharmacyHostname}`;
+      }
+    }
 
     try {
       await db.functions.invoke('send-branch-invite', {

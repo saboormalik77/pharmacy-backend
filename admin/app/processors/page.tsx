@@ -63,11 +63,12 @@ export default function ProcessorsPage() {
     const [showPassword, setShowPassword] = useState(false);
 
     // Pharmacies for assignment
-    const [availablePharmacies, setAvailablePharmacies] = useState<{ id: string; name: string }[]>([]);
+    const [availablePharmacies, setAvailablePharmacies] = useState<{ id: string; name: string; isAssigned?: boolean }[]>([]);
     const [selectedPharmacyIds, setSelectedPharmacyIds] = useState<string[]>([]);
     const [loadingPharmacies, setLoadingPharmacies] = useState(false);
     const [assignSearch, setAssignSearch] = useState('');
     const [isAssigning, setIsAssigning] = useState(false);
+    const [activeTab, setActiveTab] = useState<'assign' | 'unassign'>('assign');
 
     const debouncedSearch = useDebounce(searchTerm, 500);
 
@@ -190,6 +191,7 @@ export default function ProcessorsPage() {
         setAssignModal(processor);
         setSelectedPharmacyIds([]);
         setAssignSearch('');
+        setActiveTab('assign');
         setLoadingPharmacies(true);
         try {
             const { apiClient } = await import('@/lib/api/apiClient');
@@ -203,10 +205,13 @@ export default function ProcessorsPage() {
             const assigned = assignedRes?.data?.stores || assignedRes?.stores || [];
             const assignedIds = new Set(assigned.map((s: any) => s.pharmacyId));
             
-            const unassigned = list.filter((p: any) => !assignedIds.has(p.id));
-            
+            // Show all pharmacies with assignment status
             setAvailablePharmacies(
-                unassigned.map((p: any) => ({ id: p.id, name: p.businessName || p.pharmacy_name || p.name || 'Unknown' }))
+                list.map((p: any) => ({ 
+                    id: p.id, 
+                    name: p.businessName || p.pharmacy_name || p.name || 'Unknown',
+                    isAssigned: assignedIds.has(p.id)
+                }))
             );
         } catch {
             showToast('Failed to load pharmacies', 'error');
@@ -220,14 +225,43 @@ export default function ProcessorsPage() {
         
         setIsAssigning(true);
         try {
-            const result = await dispatch(assignStoresToProcessor({ processorId: assignModal.id, pharmacyIds: selectedPharmacyIds }));
-            if (assignStoresToProcessor.fulfilled.match(result)) {
-                showToast(`${selectedPharmacyIds.length} store(s) assigned successfully!`);
+            let successCount = 0;
+            let errorCount = 0;
+            
+            if (activeTab === 'assign') {
+                // Handle assignments
+                const result = await dispatch(assignStoresToProcessor({ processorId: assignModal.id, pharmacyIds: selectedPharmacyIds }));
+                if (assignStoresToProcessor.fulfilled.match(result)) {
+                    successCount = selectedPharmacyIds.length;
+                    showToast(`${successCount} store(s) assigned successfully!`);
+                } else {
+                    errorCount = selectedPharmacyIds.length;
+                    showToast(result.payload as string || 'Failed to assign stores', 'error');
+                }
+            } else {
+                // Handle unassignments
+                for (const pharmacyId of selectedPharmacyIds) {
+                    const result = await dispatch(unassignStoreFromProcessor({ processorId: assignModal.id, pharmacyId }));
+                    if (unassignStoreFromProcessor.fulfilled.match(result)) {
+                        successCount++;
+                    } else {
+                        errorCount++;
+                    }
+                }
+                
+                if (successCount > 0 && errorCount === 0) {
+                    showToast(`${successCount} store(s) unassigned successfully!`);
+                } else if (successCount > 0 && errorCount > 0) {
+                    showToast(`${successCount} store(s) unassigned successfully, ${errorCount} failed`, 'warning');
+                } else {
+                    showToast('Failed to unassign stores', 'error');
+                }
+            }
+            
+            if (successCount > 0) {
                 setAssignModal(null);
                 setSelectedPharmacyIds([]);
                 dispatch(fetchProcessors({ page: currentPage, limit: 15 }));
-            } else {
-                showToast(result.payload as string || 'Failed to assign stores', 'error');
             }
         } finally {
             setIsAssigning(false);
@@ -240,9 +274,11 @@ export default function ProcessorsPage() {
         );
     };
 
-    const filteredPharmacies = availablePharmacies.filter(p =>
-        p.name.toLowerCase().includes(assignSearch.toLowerCase())
-    );
+    const filteredPharmacies = availablePharmacies.filter(p => {
+        const matchesSearch = p.name.toLowerCase().includes(assignSearch.toLowerCase());
+        const matchesTab = activeTab === 'assign' ? !p.isAssigned : p.isAssigned;
+        return matchesSearch && matchesTab;
+    });
 
     // ── Stats ──────────────────────────────────────────────────
     const totalActive = processors.filter(p => p.status === 'active').length;
@@ -341,6 +377,7 @@ export default function ProcessorsPage() {
                                         <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Phone</th>
                                         <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                                         <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Stores</th>
+                                        <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Returns</th>
                                         <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Created</th>
                                         <th className="px-3 py-2 text-center text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                                     </tr>
@@ -375,6 +412,11 @@ export default function ProcessorsPage() {
                                                     <Store className="w-3 h-3" />
                                                     {processor.assignedStoresCount ?? 0}
                                                 </button>
+                                            </td>
+                                            <td className="px-3 py-1.5 whitespace-nowrap">
+                                                <span className="text-xs text-gray-700 font-medium">
+                                                    {processor.totalReturns ?? 0}
+                                                </span>
                                             </td>
                                             <td className="px-3 py-1.5 text-xs text-gray-500 whitespace-nowrap">
                                                 {processor.createdAt ? formatDate(processor.createdAt) : '—'}
@@ -475,6 +517,13 @@ export default function ProcessorsPage() {
                                     <p className="text-gray-900 flex items-center gap-1 mt-0.5">
                                         <Store className="w-3.5 h-3.5 text-gray-400" />
                                         {viewModal.assignedStoresCount ?? 0}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-gray-500 font-medium">Total Returns</p>
+                                    <p className="text-gray-900 flex items-center gap-1 mt-0.5">
+                                        <UserCog className="w-3.5 h-3.5 text-gray-400" />
+                                        {viewModal.totalReturns ?? 0}
                                     </p>
                                 </div>
                                 <div>
@@ -725,17 +774,55 @@ export default function ProcessorsPage() {
                     <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
                             <div>
-                                <h2 className="text-lg font-semibold text-gray-900">Assign Stores</h2>
-                                <p className="text-xs text-gray-500 mt-0.5">Select pharmacies to assign to {assignModal.name}</p>
+                                <h2 className="text-lg font-semibold text-gray-900">Manage Store Assignments</h2>
+                                <p className="text-xs text-gray-500 mt-0.5">Manage pharmacy assignments for {assignModal.name}</p>
                             </div>
                             <button onClick={() => setAssignModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                        </div>
+                        
+                        {/* Tabs */}
+                        <div className="flex border-b border-gray-200">
+                            <button
+                                onClick={() => {
+                                    setActiveTab('assign');
+                                    setSelectedPharmacyIds([]);
+                                    setAssignSearch('');
+                                }}
+                                className={`flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                                    activeTab === 'assign'
+                                        ? 'border-indigo-500 text-indigo-600 bg-indigo-50'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                }`}
+                            >
+                                Assign Stores
+                                <span className="ml-2 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                                    {availablePharmacies.filter(p => !p.isAssigned).length}
+                                </span>
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setActiveTab('unassign');
+                                    setSelectedPharmacyIds([]);
+                                    setAssignSearch('');
+                                }}
+                                className={`flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                                    activeTab === 'unassign'
+                                        ? 'border-indigo-500 text-indigo-600 bg-indigo-50'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                }`}
+                            >
+                                Unassign Stores
+                                <span className="ml-2 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                                    {availablePharmacies.filter(p => p.isAssigned).length}
+                                </span>
+                            </button>
                         </div>
                         <div className="p-4 border-b border-gray-100">
                             <div className="relative">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                 <input
                                     type="text"
-                                    placeholder="Search pharmacies..."
+                                    placeholder={activeTab === 'assign' ? 'Search unassigned pharmacies...' : 'Search assigned pharmacies...'}
                                     value={assignSearch}
                                     onChange={e => setAssignSearch(e.target.value)}
                                     className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -756,12 +843,18 @@ export default function ProcessorsPage() {
                                 </div>
                             ) : filteredPharmacies.length === 0 ? (
                                 <div className="text-center py-8">
-                                    <p className="text-gray-500 text-sm">No pharmacies found</p>
+                                    <p className="text-gray-500 text-sm">
+                                        {activeTab === 'assign' 
+                                            ? 'No unassigned pharmacies found' 
+                                            : 'No assigned pharmacies found'
+                                        }
+                                    </p>
                                 </div>
                             ) : (
                                 <div className="space-y-1.5">
                                     {filteredPharmacies.map(pharmacy => {
                                         const isSelected = selectedPharmacyIds.includes(pharmacy.id);
+                                        const isAssigned = pharmacy.isAssigned;
                                         return (
                                             <button
                                                 key={pharmacy.id}
@@ -799,8 +892,8 @@ export default function ProcessorsPage() {
                                 type="button"
                             >
                                 {isAssigning
-                                    ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Assigning...</>
-                                    : `Assign ${selectedPharmacyIds.length > 0 ? `(${selectedPharmacyIds.length})` : ''} Store${selectedPharmacyIds.length !== 1 ? 's' : ''}`
+                                    ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />{activeTab === 'assign' ? 'Assigning...' : 'Unassigning...'}</>
+                                    : `${activeTab === 'assign' ? 'Assign' : 'Unassign'} ${selectedPharmacyIds.length > 0 ? `(${selectedPharmacyIds.length})` : ''} Store${selectedPharmacyIds.length !== 1 ? 's' : ''}`
                                 }
                             </Button>
                         </div>

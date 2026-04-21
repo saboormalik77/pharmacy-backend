@@ -3,9 +3,10 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { ToastContainer } from 'react-toastify'
 import './globals.css'
 import 'react-toastify/dist/ReactToastify.css'
+import TenantGate from '@/components/auth/TenantGate'
 
 export const metadata: Metadata = {
-  title: 'PharmAnalytics - Data Analytics Platform',
+  title: 'PharmAnalytics',
   description: 'Maximize your pharmacy returns with data-driven insights',
 }
 
@@ -28,7 +29,7 @@ export default function RootLayout({
       >
         <html lang="en">
           <body>
-            {children}
+            <TenantGate>{children}</TenantGate>
             <ToastContainer
               position="top-right"
               autoClose={5000}
@@ -50,7 +51,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
+        <TenantGate>{children}</TenantGate>
         <ToastContainer
           position="top-right"
           autoClose={5000}

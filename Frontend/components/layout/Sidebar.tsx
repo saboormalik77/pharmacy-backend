@@ -1,9 +1,11 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils/cn'
 import { usePharmacyPermissions } from '@/hooks/usePharmacyPermissions'
+import { apiClient } from '@/lib/api/client'
 import {
   LayoutDashboard,
   Upload,
@@ -19,7 +21,6 @@ import {
   Camera,
   TrendingUp,
   Building2,
-  Search,
   ShoppingCart,
   ClipboardCheck,
   ClipboardList,
@@ -37,9 +38,35 @@ interface SidebarProps {
   onClose?: () => void
 }
 
+interface AdminBranding {
+  logoUrl: string | null
+  businessName: string | null
+}
+
 export function Sidebar({ onClose }: SidebarProps) {
   const pathname = usePathname()
   const { hasPermission, hasAnyPermission, isParent, isLoaded, isSigningOut } = usePharmacyPermissions()
+  const [branding, setBranding] = useState<AdminBranding | null>(null)
+
+  useEffect(() => {
+    const fetchBranding = async () => {
+      try {
+        const res = await apiClient.get<AdminBranding>('/pharmacy/admin-branding')
+        if (res.status === 'success' && res.data) {
+          setBranding(res.data)
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('pharmacyAdminBranding', JSON.stringify(res.data))
+            if (res.data.businessName) {
+              document.title = `${res.data.businessName} - Data Analytics Platform`
+            }
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+    fetchBranding()
+  }, [])
 
   const navItems = [
     {
@@ -72,36 +99,36 @@ export function Sidebar({ onClose }: SidebarProps) {
       icon: Archive,
       visible: hasPermission('wine_cellar:view'),
     },
-    {
-      title: 'My Products',
-      href: '/products',
-      icon: ScanLine,
-      visible: hasPermission('products:view'),
-    },
-    {
-      title: 'Search',
-      href: '/optimization',
-      icon: Search,
-      visible: hasPermission('optimization:view'),
-    },
-    {
-      title: 'Marketplace',
-      href: '/marketplace',
-      icon: ShoppingCart,
-      visible: hasPermission('marketplace:view'),
-    },
-    {
-      title: 'Orders',
-      href: '/orders',
-      icon: ClipboardList,
-      visible: hasPermission('orders:view'),
-    },
-    {
-      title: 'Inventory Analysis',
-      href: '/inventory-analysis',
-      icon: Warehouse,
-      visible: hasPermission('inventory_analysis:view'),
-    },
+    // {
+    //   title: 'My Products',
+    //   href: '/products',
+    //   icon: ScanLine,
+    //   visible: hasPermission('products:view'),
+    // },
+    // {
+    //   title: 'Search',
+    //   href: '/optimization',
+    //   icon: Search,
+    //   visible: hasPermission('optimization:view'),
+    // },
+    // {
+    //   title: 'Marketplace',
+    //   href: '/marketplace',
+    //   icon: ShoppingCart,
+    //   visible: hasPermission('marketplace:view'),
+    // },
+    // {
+    //   title: 'Orders',
+    //   href: '/orders',
+    //   icon: ClipboardList,
+    //   visible: hasPermission('orders:view'),
+    // },
+    // {
+    //   title: 'Inventory Analysis',
+    //   href: '/inventory-analysis',
+    //   icon: Warehouse,
+    //   visible: hasPermission('inventory_analysis:view'),
+    // },
     {
       title: 'Credits',
       href: '/credits',
@@ -114,24 +141,24 @@ export function Sidebar({ onClose }: SidebarProps) {
       icon: BarChart3,
       visible: hasPermission('analytics:view'),
     },
-    {
-      title: 'Upload Documents',
-      href: '/upload',
-      icon: Upload,
-      visible: hasPermission('documents:upload'),
-    },
-    {
-      title: 'Verification',
-      href: '/warehouse/verification',
-      icon: ClipboardCheck,
-      visible: hasPermission('warehouse:view'),
-    },
-    {
-      title: 'Surplus Inventory',
-      href: '/warehouse/surplus',
-      icon: Archive,
-      visible: hasPermission('warehouse:view'),
-    },
+    // {
+    //   title: 'Upload Documents',
+    //   href: '/upload',
+    //   icon: Upload,
+    //   visible: hasPermission('documents:upload'),
+    // },
+    // {
+    //   title: 'Verification',
+    //   href: '/warehouse/verification',
+    //   icon: ClipboardCheck,
+    //   visible: hasPermission('warehouse:view'),
+    // },
+    // {
+    //   title: 'Surplus Inventory',
+    //   href: '/warehouse/surplus',
+    //   icon: Archive,
+    //   visible: hasPermission('warehouse:view'),
+    // },
   ].filter((item) => item.visible)
 
   const bottomItems = [
@@ -153,24 +180,29 @@ export function Sidebar({ onClose }: SidebarProps) {
       icon: Settings,
       visible: hasPermission('settings:view'),
     },
-    {
-      title: 'Subscription',
-      href: '/subscription',
-      icon: CreditCard,
-      visible: hasPermission('subscription:view'),
-    },
+    // {
+    //   title: 'Subscription',
+    //   href: '/subscription',
+    //   icon: CreditCard,
+    //   visible: hasPermission('subscription:view'),
+    // },
   ].filter((item) => item.visible)
 
   return (
     <div className="flex h-full w-64 flex-col border-r bg-card">
       <div className="p-4 sm:p-6 flex items-center justify-between">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-teal-600">PharmAnalytics</h2>
-          <p className="text-xs sm:text-sm text-muted-foreground">Data Analytics Platform</p>
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          {branding?.logoUrl && (
+            <img src={branding.logoUrl} alt="Logo" className="w-8 h-8 rounded-lg object-contain flex-shrink-0" />
+          )}
+          <div className="min-w-0 flex-1">
+            <h2 className="text-base sm:text-lg font-bold text-teal-600 truncate">{branding?.businessName || 'PharmAnalytics'}</h2>
+            {/* <p className="text-xs text-muted-foreground">Data Analytics Platform</p> */}
+          </div>
         </div>
         <button
           onClick={onClose}
-          className="lg:hidden p-2 hover:bg-accent rounded-md"
+          className="lg:hidden p-2 hover:bg-accent rounded-md flex-shrink-0"
           aria-label="Close menu"
         >
           <X className="h-5 w-5" />

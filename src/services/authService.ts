@@ -187,7 +187,8 @@ export const cleanupExpiredTokens = async (): Promise<number> => {
  */
 const generateJwtAccessToken = (
   pharmacyId: string, 
-  email: string
+  email: string,
+  buyingGroupId: string | null = null
 ): { accessToken: string; expiresIn: number; expiresAt: number } => {
   const now = Math.floor(Date.now() / 1000);
   const expiresAt = now + ACCESS_TOKEN_EXPIRY_SECONDS;
@@ -198,6 +199,7 @@ const generateJwtAccessToken = (
     role: 'authenticated',
     aud: 'authenticated',
     type: 'pharmacy',
+    buying_group_id: buyingGroupId,
   };
 
   const accessToken = jwt.sign(tokenPayload, JWT_SECRET, {
@@ -386,7 +388,10 @@ export const googleSignin = async (email: string): Promise<AuthResponse> => {
   };
 };
 
-export const signin = async (data: SigninData): Promise<AuthResponse> => {
+export const signin = async (
+  data: SigninData,
+  tenantBuyingGroupId?: string | null
+): Promise<AuthResponse> => {
   const { email, password } = data;
 
   // Step 1: Sign in with Supabase Auth
@@ -425,12 +430,38 @@ export const signin = async (data: SigninData): Promise<AuthResponse> => {
     throw new AppError('Your pharmacy account status is invalid. Please contact support.', 403);
   }
 
+  // Step 2.6: Tenant-based access control (via RPC).
+  // The RPC enforces the domain -> buying-group mapping and returns
+  // the pharmacy's owning buying_group_id for JWT embedding.
+  let resolvedBuyingGroupId: string | null = null;
+  const { data: tenantData, error: tenantError } = await db.rpc(
+    'validate_pharmacy_tenant_access',
+    {
+      p_pharmacy_id: authUserId,
+      p_tenant_buying_group_id: tenantBuyingGroupId ?? null,
+    }
+  );
+
+  if (tenantError) {
+    throw new AppError('Failed to validate tenant access', 500);
+  }
+
+  const tenantResult = tenantData as any;
+  if (tenantResult?.error) {
+    throw new AppError(tenantResult.message || 'Access denied', tenantResult.code || 403);
+  }
+  resolvedBuyingGroupId = tenantResult?.buying_group_id ?? null;
+
   // Step 3: Revoke all existing refresh tokens (logout from all devices)
   // This ensures that when a user logs in, all previous sessions are invalidated
   await revokeAllRefreshTokens(authUserId);
 
   // Step 4: Generate JWT access token using jsonwebtoken
-  const { accessToken, expiresIn, expiresAt } = generateJwtAccessToken(authUserId, email);
+  const { accessToken, expiresIn, expiresAt } = generateJwtAccessToken(
+    authUserId,
+    email,
+    resolvedBuyingGroupId
+  );
 
   // Step 5: Generate and store our custom long-lived refresh token
   const customRefreshToken = generateRefreshToken();
@@ -568,11 +599,15 @@ export const logoutAll = async (pharmacyId: string): Promise<void> => {
 };
 
 /**
- * Request password reset - sends password reset email via Supabase
- * @param email - User's email address
- * @param redirectTo - URL to redirect to after password reset (frontend reset page)
+ * Request password reset - sends password reset email via Supabase.
+ * Supabase redirects to /api/auth/callback on this backend, which then
+ * resolves the buying group's frontend hostname from the DB and redirects there.
  */
-export const forgotPassword = async (email: string, redirectTo?: string): Promise<{ message: string }> => {
+export const forgotPassword = async (
+  email: string,
+  _redirectTo?: string,
+  buyingGroupId?: string | null
+): Promise<{ message: string }> => {
   if (!email) {
     throw new AppError('Email is required', 400);
   }
@@ -600,14 +635,36 @@ export const forgotPassword = async (email: string, redirectTo?: string): Promis
     throw new AppError('This account has been suspended. Please contact support to reactivate.', 403);
   }
 
+  // Look up the pharmacy's buying_group_id so the callback route can resolve the frontend hostname
+  const effectiveBuyingGroupId = buyingGroupId || await (async () => {
+    const { data: bgRow } = await db
+      .from('pharmacy')
+      .select('buying_group_id')
+      .eq('id', pharmacyData.id)
+      .single();
+    return bgRow?.buying_group_id || null;
+  })();
+
+  // Build the redirectTo pointing to our own backend callback route.
+  // Supabase will redirect here after token verification, and the callback
+  // route will look up the buying group hostname and redirect to the correct frontend.
+  const backendBase = process.env.BACKEND_URL || 'http://localhost:3000';
+  const callbackUrl = new URL('/api/auth/callback', backendBase);
+  callbackUrl.searchParams.set('portal', 'pharmacy');
+  if (effectiveBuyingGroupId) {
+    callbackUrl.searchParams.set('bg', effectiveBuyingGroupId);
+  }
+  const resetUrl = callbackUrl.toString();
+
+  console.log(`[forgotPassword] email=${email}, resetUrl=${resetUrl}, effectiveBuyingGroupId=${effectiveBuyingGroupId}`);
+
   // Send password reset email via Supabase
   const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.toLowerCase().trim(), {
-    redirectTo: redirectTo || process.env.PASSWORD_RESET_REDIRECT_URL || 'http://localhost:3001/reset-password',
+    redirectTo: resetUrl,
   });
 
   if (resetError) {
     console.error('Supabase password reset error:', resetError);
-    // Don't reveal the actual error for security
     throw new AppError('Failed to send password reset email. Please try again later.', 500);
   }
 
