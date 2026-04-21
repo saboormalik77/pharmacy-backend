@@ -421,7 +421,8 @@ $$;
 -- 11. GRANTS
 -- ============================================================
 
-GRANT EXECUTE ON FUNCTION resolve_domain_to_buying_group(TEXT) TO authenticated, anon, service_role;
+-- Two-arg signature: defaults do not create a separate (text-only) overload in pg_proc.
+GRANT EXECUTE ON FUNCTION resolve_domain_to_buying_group(TEXT, TEXT) TO authenticated, anon, service_role;
 GRANT EXECUTE ON FUNCTION upsert_buying_group_domain(UUID, TEXT, TEXT, TEXT) TO authenticated, anon, service_role;
 GRANT EXECUTE ON FUNCTION get_buying_group_domains(UUID) TO authenticated, anon, service_role;
 GRANT EXECUTE ON FUNCTION delete_buying_group_domain(UUID) TO authenticated, anon, service_role;
