@@ -169,13 +169,20 @@ export default function BuyingGroupsPage() {
 
   const handleAddDomain = async (groupId: string, opts?: { replaceExisting?: boolean }) => {
     setDomainError('');
-    if (!domainForm.domain.trim()) {
-      setDomainError('Domain is required');
+    if (!domainForm.adminHostname.trim()) {
+      setDomainError('Admin hostname is required');
+      return;
+    }
+    if (!domainForm.pharmacyHostname.trim()) {
+      setDomainError('Pharmacy hostname is required');
+      return;
+    }
+    if (domainForm.adminHostname.trim().toLowerCase() === domainForm.pharmacyHostname.trim().toLowerCase()) {
+      setDomainError('Admin and pharmacy hostnames must be different');
       return;
     }
     setDomainSavingId('new');
     try {
-      // Edit modal requirement: do not allow multiple domains; overwrite previous domains
       if (opts?.replaceExisting) {
         for (const d of selectedGroupDomains) {
           await dispatch(deleteBuyingGroupDomain({ groupId, domainId: d.id })).unwrap();
@@ -184,7 +191,7 @@ export default function BuyingGroupsPage() {
 
       await dispatch(upsertBuyingGroupDomain({
         groupId,
-        domain: domainForm.domain.trim(),
+        domain: domainForm.adminHostname.trim(),
         adminHostname: domainForm.adminHostname.trim() || null,
         pharmacyHostname: domainForm.pharmacyHostname.trim() || null,
       })).unwrap();
@@ -211,14 +218,22 @@ export default function BuyingGroupsPage() {
 
   const handleLocalDomainAdd = () => {
     setLocalDomainError('');
-    if (!localDomainForm.domain.trim()) {
-      setLocalDomainError('Domain is required');
+    if (!localDomainForm.adminHostname.trim()) {
+      setLocalDomainError('Admin hostname is required');
+      return;
+    }
+    if (!localDomainForm.pharmacyHostname.trim()) {
+      setLocalDomainError('Pharmacy hostname is required');
+      return;
+    }
+    if (localDomainForm.adminHostname.trim().toLowerCase() === localDomainForm.pharmacyHostname.trim().toLowerCase()) {
+      setLocalDomainError('Admin and pharmacy hostnames must be different');
       return;
     }
     setLocalDomains((prev) => [
       ...prev,
       {
-        domain: localDomainForm.domain.trim(),
+        domain: localDomainForm.adminHostname.trim(),
         adminHostname: localDomainForm.adminHostname.trim(),
         pharmacyHostname: localDomainForm.pharmacyHostname.trim(),
       },
@@ -662,16 +677,12 @@ export default function BuyingGroupsPage() {
                     </p>
                     <input
                       type="text"
-                      placeholder="Base domain (e.g. abc.com)"
-                      value={domainForm.domain}
-                      onChange={(e) => setDomainForm((f) => ({ ...f, domain: e.target.value }))}
-                      className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
-                    <input
-                      type="text"
                       placeholder="Admin hostname (e.g. admin.abc.com)"
                       value={domainForm.adminHostname}
-                      onChange={(e) => setDomainForm((f) => ({ ...f, adminHostname: e.target.value }))}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setDomainForm((f) => ({ ...f, adminHostname: value, domain: value }));
+                      }}
                       className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                     <input
@@ -783,16 +794,12 @@ export default function BuyingGroupsPage() {
                       <p className="text-xs font-medium text-gray-700">Add a domain</p>
                       <input
                         type="text"
-                        placeholder="Base domain (e.g. abc.com)"
-                        value={localDomainForm.domain}
-                        onChange={(e) => setLocalDomainForm((f) => ({ ...f, domain: e.target.value }))}
-                        className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      />
-                      <input
-                        type="text"
                         placeholder="Admin hostname (e.g. admin.abc.com)"
                         value={localDomainForm.adminHostname}
-                        onChange={(e) => setLocalDomainForm((f) => ({ ...f, adminHostname: e.target.value }))}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setLocalDomainForm((f) => ({ ...f, adminHostname: value, domain: value }));
+                        }}
                         className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       />
                       <input

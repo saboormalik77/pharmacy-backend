@@ -59,9 +59,13 @@ export const createBranchHandler = async (req: Request, res: Response, next: Nex
 
     const { inviteToken, email: branchEmail, pharmacyName: name, parentPharmacyName } = rpcResult.data;
 
-    // Build the pharmacy portal base URL using the buying group's pharmacy_hostname
+    // Resolve the pharmacy portal URL from the parent pharmacy's buying group domain
     let portalBaseUrl = process.env.PHARMACY_PORTAL_URL || 'http://localhost:3002';
-    const buyingGroupId = req.tenant?.buyingGroupId;
+    const buyingGroupId = req.tenant?.buyingGroupId || await (async () => {
+      if (!parentPharmacyId) return null;
+      const { data: row } = await db.from('pharmacy').select('buying_group_id').eq('id', parentPharmacyId).single();
+      return row?.buying_group_id || null;
+    })();
     if (buyingGroupId) {
       const { getBuyingGroupHostnames } = await import('../services/tenantService');
       const hostnames = await getBuyingGroupHostnames(buyingGroupId);
@@ -189,9 +193,13 @@ export const resendBranchInviteHandler = async (req: Request, res: Response, nex
 
     const { inviteToken, email, pharmacyName } = data.data;
 
-    // Build the pharmacy portal base URL using the buying group's pharmacy_hostname
+    // Resolve the pharmacy portal URL from the pharmacy's buying group domain
     let portalBaseUrl = process.env.PHARMACY_PORTAL_URL || 'http://localhost:3002';
-    const buyingGroupId = req.tenant?.buyingGroupId;
+    const buyingGroupId = req.tenant?.buyingGroupId || await (async () => {
+      if (!req.pharmacyId) return null;
+      const { data: row } = await db.from('pharmacy').select('buying_group_id').eq('id', req.pharmacyId).single();
+      return row?.buying_group_id || null;
+    })();
     if (buyingGroupId) {
       const { getBuyingGroupHostnames } = await import('../services/tenantService');
       const hostnames = await getBuyingGroupHostnames(buyingGroupId);

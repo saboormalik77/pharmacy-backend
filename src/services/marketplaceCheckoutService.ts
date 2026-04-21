@@ -171,11 +171,15 @@ export const createCheckoutSession = async (
     throw new AppError('Cart is empty', 400);
   }
 
-  // Build the pharmacy portal base URL using the buying group's pharmacy_hostname
+  // Resolve the pharmacy portal URL from the buying group domain
   let baseUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
-  if (buyingGroupId) {
+  const effectiveBuyingGroupId = buyingGroupId || await (async () => {
+    const { data: row } = await supabaseAdmin.from('pharmacy').select('buying_group_id').eq('id', pharmacyId).single();
+    return row?.buying_group_id || null;
+  })();
+  if (effectiveBuyingGroupId) {
     const { getBuyingGroupHostnames } = await import('./tenantService');
-    const hostnames = await getBuyingGroupHostnames(buyingGroupId);
+    const hostnames = await getBuyingGroupHostnames(effectiveBuyingGroupId);
     if (hostnames?.pharmacyHostname) {
       baseUrl = `https://${hostnames.pharmacyHostname}`;
     }
