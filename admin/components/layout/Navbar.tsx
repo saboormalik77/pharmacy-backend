@@ -39,7 +39,7 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
         }
     }, [dispatch, isAuthenticated]);
 
-    // Update document title when branding changes
+    // Update document title and favicon when branding changes
     useEffect(() => {
         if (settings?.businessName) {
             document.title = `${settings.businessName}`;
@@ -47,6 +47,18 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
             document.title = 'PharmAdmin - Admin Portal';
         }
     }, [settings?.businessName]);
+
+    useEffect(() => {
+        if (settings?.logoUrl) {
+            let link = document.querySelector<HTMLLinkElement>("link[rel~='icon']");
+            if (!link) {
+                link = document.createElement('link');
+                link.rel = 'icon';
+                document.head.appendChild(link);
+            }
+            link.href = settings.logoUrl;
+        }
+    }, [settings?.logoUrl]);
 
     // Close notifications and profile dropdowns when clicking outside
     useEffect(() => {

@@ -21,6 +21,7 @@ interface TenantInfo {
   portalType: 'admin' | 'pharmacy' | 'unknown';
   isActive: boolean;
   buyingGroupName: string;
+  logoUrl?: string | null;
 }
 
 export default function LoginPage() {
@@ -41,7 +42,6 @@ export default function LoginPage() {
       if (stored) {
         const parsedBranding = JSON.parse(stored);
         setBranding(parsedBranding);
-        // Update document title
         if (parsedBranding.businessName) {
           document.title = `${parsedBranding.businessName} - Admin Login`;
         }
@@ -50,6 +50,18 @@ export default function LoginPage() {
       // ignore
     }
   }, []);
+
+  useEffect(() => {
+    if (branding.logoUrl) {
+      let link = document.querySelector<HTMLLinkElement>("link[rel~='icon']");
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.head.appendChild(link);
+      }
+      link.href = branding.logoUrl;
+    }
+  }, [branding.logoUrl]);
 
   // Skip tenant API wait on localhost before paint (avoids a loader flash).
   useLayoutEffect(() => {
@@ -95,10 +107,12 @@ export default function LoginPage() {
           setTenantError('This domain is not configured for admin access.');
           return;
         }
-        setBranding({
-          logoUrl: branding.logoUrl,
+        const updatedBranding = {
+          logoUrl: tenant.logoUrl || branding.logoUrl,
           businessName: tenant.buyingGroupName,
-        });
+        };
+        setBranding(updatedBranding);
+        localStorage.setItem('adminBranding', JSON.stringify(updatedBranding));
         if (tenant.buyingGroupName) {
           document.title = `${tenant.buyingGroupName} - Admin Login`;
         }
