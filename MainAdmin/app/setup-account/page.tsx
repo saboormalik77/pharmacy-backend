@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Shield, Lock, Eye, EyeOff, CheckCircle, AlertTriangle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
-export default function SetupAccountPage() {
+function SetupAccountPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
@@ -253,5 +253,22 @@ export default function SetupAccountPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function SetupAccountPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+          <div className="text-center">
+            <Loader2 className="w-8 h-8 animate-spin text-indigo-600 mx-auto" />
+            <p className="mt-4 text-gray-600">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <SetupAccountPageContent />
+    </Suspense>
   );
 }

@@ -489,7 +489,7 @@ export default function VerificationSessionPage() {
                             </div>
                             <div className="p-5 space-y-4">
                                 <p className="text-sm text-gray-600">
-                                    Verification complete for <span className="font-semibold">{completedSummary.licensePlate || returnId}</span>.
+                                    Verification complete for <span className="font-semibold">{v2Summary?.transaction?.licensePlate || returnId}</span>.
                                     Assign this return to a monthly batch for close-out processing.
                                 </p>
 
