@@ -22,6 +22,25 @@ router.get(
         data: { isLocalDev: true, tenant: null },
       });
     }
+
+    // Attach branding from admin_settings so login pages display the correct logo and business name
+    try {
+      const { supabaseAdmin } = await import('../config/supabase');
+      if (supabaseAdmin) {
+        const { data: settings } = await supabaseAdmin
+          .from('admin_settings')
+          .select('logo_url, business_name')
+          .eq('id', 1)
+          .single();
+        if (settings?.logo_url) {
+          req.tenant.logoUrl = settings.logo_url;
+        }
+        if (settings?.business_name) {
+          req.tenant.buyingGroupName = settings.business_name;
+        }
+      }
+    } catch { /* non-critical */ }
+
     return res.status(200).json({
       status: 'success',
       data: { isLocalDev: false, tenant: req.tenant },

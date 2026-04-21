@@ -49,12 +49,26 @@ function ResetPasswordForm() {
 
   useEffect(() => {
     if (validTenant?.buyingGroupName) {
-      setBranding((prev) => ({
-        logoUrl: prev?.logoUrl ?? null,
+      const updatedBranding = {
+        logoUrl: validTenant.logoUrl || branding?.logoUrl || null,
         businessName: validTenant.buyingGroupName,
-      }))
+      }
+      setBranding(updatedBranding)
+      try { localStorage.setItem('pharmacyAdminBranding', JSON.stringify(updatedBranding)) } catch { /* ignore */ }
     }
   }, [validTenant])
+
+  useEffect(() => {
+    if (branding?.logoUrl) {
+      let link = document.querySelector<HTMLLinkElement>("link[rel~='icon']")
+      if (!link) {
+        link = document.createElement('link')
+        link.rel = 'icon'
+        document.head.appendChild(link)
+      }
+      link.href = branding.logoUrl
+    }
+  }, [branding?.logoUrl])
 
   // Get access token from URL hash (Supabase puts it in the fragment)
   // Format: #access_token=xxx&type=recovery&expires_in=3600

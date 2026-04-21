@@ -7,6 +7,7 @@ export interface TenantInfo {
   portalType: 'admin' | 'pharmacy' | 'unknown';
   isActive: boolean;
   buyingGroupName: string;
+  logoUrl?: string | null;
 }
 
 // In-memory cache (TTL: 30 seconds in dev, 5 minutes in production).

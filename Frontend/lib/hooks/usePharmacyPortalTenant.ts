@@ -8,6 +8,7 @@ export interface PharmacyTenantInfo {
   portalType: 'admin' | 'pharmacy' | 'unknown'
   isActive: boolean
   buyingGroupName: string
+  logoUrl?: string | null
 }
 
 interface TenantState {

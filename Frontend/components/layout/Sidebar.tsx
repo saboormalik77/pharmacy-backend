@@ -59,6 +59,15 @@ export function Sidebar({ onClose }: SidebarProps) {
             if (res.data.businessName) {
               document.title = `${res.data.businessName} - Data Analytics Platform`
             }
+            if (res.data.logoUrl) {
+              let link = document.querySelector<HTMLLinkElement>("link[rel~='icon']")
+              if (!link) {
+                link = document.createElement('link')
+                link.rel = 'icon'
+                document.head.appendChild(link)
+              }
+              link.href = res.data.logoUrl
+            }
           }
         }
       } catch {
