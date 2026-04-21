@@ -7,10 +7,12 @@ import { catchAsync } from '../utils/catchAsync';
  * Returns activity records for:
  * - Document uploads by pharmacies
  * - Product additions by pharmacies
+ * - Pharmacy registrations
  * 
  * Supports filtering by activity type and pharmacy
  * Supports pagination via limit and offset
  * Supports filter parameter: 'notifications' (only registrations) or 'recentactivity' (all)
+ * Scoped to authenticated admin's buying group
  */
 export const getAdminRecentActivityHandler = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -57,7 +59,10 @@ export const getAdminRecentActivityHandler = catchAsync(
     // Get optional pharmacy ID filter
     const pharmacyId = req.query.pharmacyId as string | undefined;
 
-    const activityData = await getAdminRecentActivity(activityType, limit, offset, pharmacyId, filter);
+    // Scope to authenticated admin's buying group
+    const buyingGroupId = req.adminBuyingGroupId ?? null;
+
+    const activityData = await getAdminRecentActivity(activityType, limit, offset, pharmacyId, filter, buyingGroupId);
 
     res.status(200).json({
       status: 'success',
@@ -67,11 +72,14 @@ export const getAdminRecentActivityHandler = catchAsync(
 );
 
 /**
- * Mark all admin activities as read
+ * Mark all admin activities as read (scoped to buying group)
  */
 export const markAllActivitiesAsReadHandler = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const result = await markAllActivitiesAsRead();
+    // Scope to authenticated admin's buying group
+    const buyingGroupId = req.adminBuyingGroupId ?? null;
+
+    const result = await markAllActivitiesAsRead(buyingGroupId);
 
     res.status(200).json({
       status: 'success',
@@ -81,13 +89,16 @@ export const markAllActivitiesAsReadHandler = catchAsync(
 );
 
 /**
- * Mark a single admin activity as read
+ * Mark a single admin activity as read (with access check)
  */
 export const markActivityAsReadHandler = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
 
-    const result = await markActivityAsRead(id);
+    // Scope access check to authenticated admin's buying group
+    const buyingGroupId = req.adminBuyingGroupId ?? null;
+
+    const result = await markActivityAsRead(id, buyingGroupId);
 
     res.status(200).json({
       status: 'success',

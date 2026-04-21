@@ -54,7 +54,8 @@ export interface AdminDashboardResponse {
 export const getAdminDashboardStats = async (
   pharmacyId?: string,
   periodType: 'monthly' | 'yearly' = 'monthly',
-  periods: number = 12
+  periods: number = 12,
+  buyingGroupId?: string
 ): Promise<AdminDashboardResponse> => {
   if (!supabaseAdmin) {
     throw new AppError('Supabase admin client not configured', 500);
@@ -62,13 +63,14 @@ export const getAdminDashboardStats = async (
 
   const db = supabaseAdmin;
 
-  console.log(`📊 Fetching admin dashboard stats via RPC (pharmacyId: ${pharmacyId || 'all'}, periodType: ${periodType}, periods: ${periods})`);
+  console.log(`📊 Fetching admin dashboard stats via RPC (pharmacyId: ${pharmacyId || 'all'}, periodType: ${periodType}, periods: ${periods}, buyingGroupId: ${buyingGroupId || 'all'})`);
 
   // Call PostgreSQL function - all aggregation done in database
   const { data, error } = await db.rpc('get_admin_dashboard_stats', {
     p_pharmacy_id: pharmacyId || null,
     p_period_type: periodType,
     p_periods: periods,
+    p_buying_group_id: buyingGroupId || null,
   });
 
   if (error) {

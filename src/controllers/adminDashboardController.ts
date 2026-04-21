@@ -32,7 +32,10 @@ export const getAdminDashboardHandler = catchAsync(
       if (periods > 60) periods = 60; // Max 60 months (5 years)
     }
 
-    const dashboardData = await getAdminDashboardStats(pharmacyId, periodType, periods);
+    // Scope all data to the authenticated admin's buying group (null = MainAdmin, sees everything)
+    const buyingGroupId = req.adminBuyingGroupId ?? undefined;
+
+    const dashboardData = await getAdminDashboardStats(pharmacyId, periodType, periods, buyingGroupId);
 
     res.status(200).json({
       status: 'success',

@@ -2,87 +2,86 @@
 -- RPC Function: get_admin_dashboard_stats
 -- Used by: GET /api/admin/dashboard
 -- ============================================================
--- Returns admin dashboard statistics:
+-- Returns admin dashboard statistics scoped to a buying group:
 -- - Total Pharmacies (with % change vs last month)
--- - Active Distributors (with % change vs last month)
+-- - Active Distributors used by this buying group's pharmacies
 -- - Returns Value (with % change vs last month)
--- - Returns Value Trend (monthly data for graph)
+-- - Returns Value Trend (monthly/yearly graph data)
 -- - All pharmacy names with IDs
--- When pharmacy_id is provided, returns graph data for that pharmacy only
+--
+-- p_buying_group_id NULL  → MainAdmin: shows global (all tenants) data
+-- p_buying_group_id set   → Buying-group admin: scoped to their pharmacies only
 -- ============================================================
 
 DROP FUNCTION IF EXISTS get_admin_dashboard_stats(UUID, TEXT, INTEGER);
+DROP FUNCTION IF EXISTS get_admin_dashboard_stats(UUID, TEXT, INTEGER, UUID);
 
 CREATE OR REPLACE FUNCTION get_admin_dashboard_stats(
-    p_pharmacy_id UUID DEFAULT NULL,
-    p_period_type TEXT DEFAULT 'monthly',
-    p_periods INTEGER DEFAULT 12
+    p_pharmacy_id       UUID    DEFAULT NULL,
+    p_period_type       TEXT    DEFAULT 'monthly',
+    p_periods           INTEGER DEFAULT 12,
+    p_buying_group_id   UUID    DEFAULT NULL
 )
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
-    v_result JSONB;
-    v_total_pharmacies INTEGER;
-    v_pharmacies_this_month INTEGER;
-    v_pharmacies_last_month INTEGER;
-    v_pharmacies_change NUMERIC;
-    v_active_distributors INTEGER;
-    v_distributors_this_month INTEGER;
-    v_distributors_last_month INTEGER;
-    v_distributors_change NUMERIC;
-    v_returns_value NUMERIC;
-    v_returns_value_this_month NUMERIC;
-    v_returns_value_last_month NUMERIC;
-    v_returns_change NUMERIC;
-    v_pharmacies_list JSONB;
-    v_returns_trend JSONB;
-    v_start_date TIMESTAMP WITH TIME ZONE;
-    v_end_date TIMESTAMP WITH TIME ZONE;
-    v_current_month_start TIMESTAMP WITH TIME ZONE;
-    v_next_month_start TIMESTAMP WITH TIME ZONE;
-    v_last_month_start TIMESTAMP WITH TIME ZONE;
+    v_result                        JSONB;
+    v_total_pharmacies              INTEGER;
+    v_pharmacies_this_month         INTEGER;
+    v_pharmacies_last_month         INTEGER;
+    v_pharmacies_change             NUMERIC;
+    v_active_distributors           INTEGER;
+    v_distributors_this_month       INTEGER;
+    v_distributors_last_month       INTEGER;
+    v_distributors_change           NUMERIC;
+    v_returns_value                 NUMERIC;
+    v_returns_value_this_month      NUMERIC;
+    v_returns_value_last_month      NUMERIC;
+    v_returns_change                NUMERIC;
+    v_pharmacies_list               JSONB;
+    v_returns_trend                 JSONB;
+    v_start_date                    TIMESTAMP WITH TIME ZONE;
+    v_end_date                      TIMESTAMP WITH TIME ZONE;
+    v_current_month_start           TIMESTAMP WITH TIME ZONE;
+    v_next_month_start              TIMESTAMP WITH TIME ZONE;
+    v_last_month_start              TIMESTAMP WITH TIME ZONE;
 BEGIN
-    -- Calculate date ranges using TIMESTAMP WITH TIME ZONE for proper comparison
-    -- Use < next_period instead of <= end_of_period to handle timestamps correctly
     v_current_month_start := DATE_TRUNC('month', NOW());
-    v_next_month_start := DATE_TRUNC('month', NOW()) + INTERVAL '1 month';
-    v_last_month_start := DATE_TRUNC('month', NOW()) - INTERVAL '1 month';
-    v_end_date := NOW();
-    
-    -- Calculate start date based on periods (for graph)
+    v_next_month_start    := DATE_TRUNC('month', NOW()) + INTERVAL '1 month';
+    v_last_month_start    := DATE_TRUNC('month', NOW()) - INTERVAL '1 month';
+    v_end_date            := NOW();
+
     IF p_period_type = 'yearly' THEN
-        v_start_date := DATE_TRUNC('year', NOW()) - (p_periods || ' years')::INTERVAL;
+        v_start_date := DATE_TRUNC('year',  NOW()) - (p_periods || ' years')::INTERVAL;
     ELSE
         v_start_date := DATE_TRUNC('month', NOW()) - (p_periods || ' months')::INTERVAL;
     END IF;
 
     -- ============================================================
-    -- STAT 1: Total Pharmacies with % change
-    -- Change compares: this month vs last month
+    -- STAT 1: Total Pharmacies (scoped to buying group)
     -- ============================================================
-    
-    -- Total pharmacies (all time)
-    SELECT COUNT(*)::INTEGER 
+
+    SELECT COUNT(*)::INTEGER
     INTO v_total_pharmacies
-    FROM pharmacy;
-    
-    -- Pharmacies created THIS month (from 1st of month to now)
+    FROM pharmacy
+    WHERE (p_buying_group_id IS NULL OR created_by = p_buying_group_id);
+
     SELECT COUNT(*)::INTEGER
     INTO v_pharmacies_this_month
     FROM pharmacy
     WHERE created_at >= v_current_month_start
-    AND created_at < v_next_month_start;
-    
-    -- Pharmacies created LAST month (from 1st to end of last month)
+      AND created_at <  v_next_month_start
+      AND (p_buying_group_id IS NULL OR created_by = p_buying_group_id);
+
     SELECT COUNT(*)::INTEGER
     INTO v_pharmacies_last_month
     FROM pharmacy
     WHERE created_at >= v_last_month_start
-    AND created_at < v_current_month_start;
-    
-    -- Calculate % change (this month vs last month)
+      AND created_at <  v_current_month_start
+      AND (p_buying_group_id IS NULL OR created_by = p_buying_group_id);
+
     IF v_pharmacies_last_month > 0 THEN
         v_pharmacies_change := ROUND(((v_pharmacies_this_month - v_pharmacies_last_month)::NUMERIC / v_pharmacies_last_month * 100)::NUMERIC, 1);
     ELSE
@@ -90,33 +89,61 @@ BEGIN
     END IF;
 
     -- ============================================================
-    -- STAT 2: Active Distributors with % change
-    -- Change compares: this month vs last month
+    -- STAT 2: Active Distributors used by this buying group's pharmacies
+    -- When p_buying_group_id is NULL (MainAdmin) → all active distributors
+    -- When scoped → distinct active distributors referenced in their documents
     -- ============================================================
-    
-    -- Active distributors (current total)
-    SELECT COUNT(*)::INTEGER
-    INTO v_active_distributors
-    FROM reverse_distributors
-    WHERE is_active = true;
-    
-    -- Active distributors created THIS month
-    SELECT COUNT(*)::INTEGER
-    INTO v_distributors_this_month
-    FROM reverse_distributors
-    WHERE is_active = true
-    AND created_at >= v_current_month_start
-    AND created_at < v_next_month_start;
-    
-    -- Active distributors created LAST month
-    SELECT COUNT(*)::INTEGER
-    INTO v_distributors_last_month
-    FROM reverse_distributors
-    WHERE is_active = true
-    AND created_at >= v_last_month_start
-    AND created_at < v_current_month_start;
-    
-    -- Calculate % change (this month vs last month)
+
+    IF p_buying_group_id IS NULL THEN
+        SELECT COUNT(*)::INTEGER
+        INTO v_active_distributors
+        FROM reverse_distributors
+        WHERE is_active = true;
+
+        SELECT COUNT(*)::INTEGER
+        INTO v_distributors_this_month
+        FROM reverse_distributors
+        WHERE is_active = true
+          AND created_at >= v_current_month_start
+          AND created_at <  v_next_month_start;
+
+        SELECT COUNT(*)::INTEGER
+        INTO v_distributors_last_month
+        FROM reverse_distributors
+        WHERE is_active = true
+          AND created_at >= v_last_month_start
+          AND created_at <  v_current_month_start;
+    ELSE
+        -- Count distinct active distributors actually used by this tenant's pharmacies
+        SELECT COUNT(DISTINCT ud.reverse_distributor_id)::INTEGER
+        INTO v_active_distributors
+        FROM uploaded_documents ud
+        JOIN pharmacy p ON p.id = ud.pharmacy_id
+        JOIN reverse_distributors rd ON rd.id = ud.reverse_distributor_id
+        WHERE rd.is_active = true
+          AND p.created_by = p_buying_group_id;
+
+        SELECT COUNT(DISTINCT ud.reverse_distributor_id)::INTEGER
+        INTO v_distributors_this_month
+        FROM uploaded_documents ud
+        JOIN pharmacy p ON p.id = ud.pharmacy_id
+        JOIN reverse_distributors rd ON rd.id = ud.reverse_distributor_id
+        WHERE rd.is_active = true
+          AND p.created_by = p_buying_group_id
+          AND ud.uploaded_at >= v_current_month_start
+          AND ud.uploaded_at <  v_next_month_start;
+
+        SELECT COUNT(DISTINCT ud.reverse_distributor_id)::INTEGER
+        INTO v_distributors_last_month
+        FROM uploaded_documents ud
+        JOIN pharmacy p ON p.id = ud.pharmacy_id
+        JOIN reverse_distributors rd ON rd.id = ud.reverse_distributor_id
+        WHERE rd.is_active = true
+          AND p.created_by = p_buying_group_id
+          AND ud.uploaded_at >= v_last_month_start
+          AND ud.uploaded_at <  v_current_month_start;
+    END IF;
+
     IF v_distributors_last_month > 0 THEN
         v_distributors_change := ROUND(((v_distributors_this_month - v_distributors_last_month)::NUMERIC / v_distributors_last_month * 100)::NUMERIC, 1);
     ELSE
@@ -124,32 +151,34 @@ BEGIN
     END IF;
 
     -- ============================================================
-    -- STAT 3: Returns Value with % change
+    -- STAT 3: Returns Value (scoped to buying group via pharmacy.created_by)
     -- ============================================================
-    
-    -- Total returns value (ALL TIME - sum of all records)
-    SELECT COALESCE(SUM(total_credit_amount), 0)::NUMERIC
+
+    SELECT COALESCE(SUM(ud.total_credit_amount), 0)::NUMERIC
     INTO v_returns_value
-    FROM uploaded_documents
-    WHERE total_credit_amount IS NOT NULL;
-    
-    -- Returns value THIS month (for change calculation)
-    SELECT COALESCE(SUM(total_credit_amount), 0)::NUMERIC
+    FROM uploaded_documents ud
+    JOIN pharmacy p ON p.id = ud.pharmacy_id
+    WHERE ud.total_credit_amount IS NOT NULL
+      AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
+
+    SELECT COALESCE(SUM(ud.total_credit_amount), 0)::NUMERIC
     INTO v_returns_value_this_month
-    FROM uploaded_documents
-    WHERE report_date >= v_current_month_start
-    AND report_date < v_next_month_start
-    AND total_credit_amount IS NOT NULL;
-    
-    -- Returns value LAST month (for change calculation)
-    SELECT COALESCE(SUM(total_credit_amount), 0)::NUMERIC
+    FROM uploaded_documents ud
+    JOIN pharmacy p ON p.id = ud.pharmacy_id
+    WHERE ud.report_date >= v_current_month_start
+      AND ud.report_date <  v_next_month_start
+      AND ud.total_credit_amount IS NOT NULL
+      AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
+
+    SELECT COALESCE(SUM(ud.total_credit_amount), 0)::NUMERIC
     INTO v_returns_value_last_month
-    FROM uploaded_documents
-    WHERE report_date >= v_last_month_start
-    AND report_date < v_current_month_start
-    AND total_credit_amount IS NOT NULL;
-    
-    -- Calculate % change (comparing this month vs last month)
+    FROM uploaded_documents ud
+    JOIN pharmacy p ON p.id = ud.pharmacy_id
+    WHERE ud.report_date >= v_last_month_start
+      AND ud.report_date <  v_current_month_start
+      AND ud.total_credit_amount IS NOT NULL
+      AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
+
     IF v_returns_value_last_month > 0 THEN
         v_returns_change := ROUND(((v_returns_value_this_month - v_returns_value_last_month)::NUMERIC / v_returns_value_last_month * 100)::NUMERIC, 1);
     ELSE
@@ -157,47 +186,47 @@ BEGIN
     END IF;
 
     -- ============================================================
-    -- STAT 4: All Pharmacies List (id and name)
+    -- STAT 4: Pharmacies List (scoped to buying group)
     -- ============================================================
-    
+
     SELECT COALESCE(jsonb_agg(
-        jsonb_build_object(
-            'id', p.id,
-            'name', p.pharmacy_name
-        ) ORDER BY p.pharmacy_name
+        jsonb_build_object('id', ph.id, 'name', ph.pharmacy_name)
+        ORDER BY ph.pharmacy_name
     ), '[]'::JSONB)
     INTO v_pharmacies_list
-    FROM pharmacy p;
+    FROM pharmacy ph
+    WHERE (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
     -- ============================================================
-    -- STAT 5: Returns Value Trend (Graph Data)
-    -- If pharmacy_id is provided, filter by that pharmacy
+    -- STAT 5: Returns Value Trend (scoped to buying group + optional pharmacy)
     -- ============================================================
-    
+
     IF p_period_type = 'yearly' THEN
         WITH years AS (
             SELECT generate_series(
                 EXTRACT(YEAR FROM v_start_date)::INTEGER,
                 EXTRACT(YEAR FROM v_end_date)::INTEGER
-            ) as year
+            ) AS year
         ),
         earnings AS (
-            SELECT 
-                EXTRACT(YEAR FROM report_date)::INTEGER as year,
-                ROUND(SUM(total_credit_amount)::NUMERIC, 2) as value,
-                COUNT(*)::INTEGER as documents_count
-            FROM uploaded_documents
-            WHERE report_date >= v_start_date
-            AND report_date <= v_end_date
-            AND total_credit_amount IS NOT NULL
-            AND (p_pharmacy_id IS NULL OR pharmacy_id = p_pharmacy_id)
-            GROUP BY EXTRACT(YEAR FROM report_date)
+            SELECT
+                EXTRACT(YEAR FROM ud.report_date)::INTEGER        AS year,
+                ROUND(SUM(ud.total_credit_amount)::NUMERIC, 2)    AS value,
+                COUNT(*)::INTEGER                                  AS documents_count
+            FROM uploaded_documents ud
+            JOIN pharmacy p ON p.id = ud.pharmacy_id
+            WHERE ud.report_date >= v_start_date
+              AND ud.report_date <= v_end_date
+              AND ud.total_credit_amount IS NOT NULL
+              AND (p_pharmacy_id     IS NULL OR ud.pharmacy_id  = p_pharmacy_id)
+              AND (p_buying_group_id IS NULL OR p.created_by    = p_buying_group_id)
+            GROUP BY EXTRACT(YEAR FROM ud.report_date)
         )
         SELECT COALESCE(jsonb_agg(
             jsonb_build_object(
-                'period', y.year::TEXT,
-                'label', y.year::TEXT,
-                'value', COALESCE(e.value, 0),
+                'period',         y.year::TEXT,
+                'label',          y.year::TEXT,
+                'value',          COALESCE(e.value, 0),
                 'documentsCount', COALESCE(e.documents_count, 0)
             ) ORDER BY y.year
         ), '[]'::JSONB)
@@ -206,10 +235,10 @@ BEGIN
         LEFT JOIN earnings e ON y.year = e.year;
     ELSE
         WITH months AS (
-            SELECT 
-                TO_CHAR(d::DATE, 'YYYY-MM') as period,
-                TRIM(TO_CHAR(d::DATE, 'Mon')) as label,
-                d::DATE as month_date
+            SELECT
+                TO_CHAR(d::DATE, 'YYYY-MM')       AS period,
+                TRIM(TO_CHAR(d::DATE, 'Mon'))      AS label,
+                d::DATE                            AS month_date
             FROM generate_series(
                 DATE_TRUNC('month', v_start_date),
                 DATE_TRUNC('month', v_end_date),
@@ -217,22 +246,24 @@ BEGIN
             ) d
         ),
         earnings AS (
-            SELECT 
-                TO_CHAR(report_date, 'YYYY-MM') as period,
-                ROUND(SUM(total_credit_amount)::NUMERIC, 2) as value,
-                COUNT(*)::INTEGER as documents_count
-            FROM uploaded_documents
-            WHERE report_date >= v_start_date
-            AND report_date <= v_end_date
-            AND total_credit_amount IS NOT NULL
-            AND (p_pharmacy_id IS NULL OR pharmacy_id = p_pharmacy_id)
-            GROUP BY TO_CHAR(report_date, 'YYYY-MM')
+            SELECT
+                TO_CHAR(ud.report_date, 'YYYY-MM')         AS period,
+                ROUND(SUM(ud.total_credit_amount)::NUMERIC, 2) AS value,
+                COUNT(*)::INTEGER                              AS documents_count
+            FROM uploaded_documents ud
+            JOIN pharmacy p ON p.id = ud.pharmacy_id
+            WHERE ud.report_date >= v_start_date
+              AND ud.report_date <= v_end_date
+              AND ud.total_credit_amount IS NOT NULL
+              AND (p_pharmacy_id     IS NULL OR ud.pharmacy_id  = p_pharmacy_id)
+              AND (p_buying_group_id IS NULL OR p.created_by    = p_buying_group_id)
+            GROUP BY TO_CHAR(ud.report_date, 'YYYY-MM')
         )
         SELECT COALESCE(jsonb_agg(
             jsonb_build_object(
-                'period', m.period,
-                'label', m.label,
-                'value', COALESCE(e.value, 0),
+                'period',         m.period,
+                'label',          m.label,
+                'value',          COALESCE(e.value, 0),
                 'documentsCount', COALESCE(e.documents_count, 0)
             ) ORDER BY m.period
         ), '[]'::JSONB)
@@ -244,32 +275,32 @@ BEGIN
     -- ============================================================
     -- Build final result
     -- ============================================================
-    
+
     v_result := jsonb_build_object(
         'stats', jsonb_build_object(
             'totalPharmacies', jsonb_build_object(
-                'value', v_total_pharmacies,
-                'change', v_pharmacies_change,
+                'value',       v_total_pharmacies,
+                'change',      v_pharmacies_change,
                 'changeLabel', 'vs last month'
             ),
             'activeDistributors', jsonb_build_object(
-                'value', v_active_distributors,
-                'change', v_distributors_change,
+                'value',       v_active_distributors,
+                'change',      v_distributors_change,
                 'changeLabel', 'vs last month'
             ),
             'returnsValue', jsonb_build_object(
-                'value', ROUND(v_returns_value, 2),
-                'change', v_returns_change,
+                'value',       ROUND(v_returns_value, 2),
+                'change',      v_returns_change,
                 'changeLabel', 'vs last month'
             )
         ),
-        'pharmacies', v_pharmacies_list,
+        'pharmacies',       v_pharmacies_list,
         'returnsValueTrend', v_returns_trend,
         'period', jsonb_build_object(
-            'type', p_period_type,
-            'periods', p_periods,
-            'startDate', v_start_date::TEXT,
-            'endDate', v_end_date::TEXT,
+            'type',       p_period_type,
+            'periods',    p_periods,
+            'startDate',  v_start_date::TEXT,
+            'endDate',    v_end_date::TEXT,
             'pharmacyId', p_pharmacy_id
         ),
         'generatedAt', NOW()
@@ -280,18 +311,5 @@ END;
 $$;
 
 -- Grant execute permissions
-GRANT EXECUTE ON FUNCTION get_admin_dashboard_stats(UUID, TEXT, INTEGER) TO authenticated;
-GRANT EXECUTE ON FUNCTION get_admin_dashboard_stats(UUID, TEXT, INTEGER) TO service_role;
-
--- ============================================================
--- Example usage:
--- ============================================================
--- Get overall admin stats (no pharmacy filter):
--- SELECT get_admin_dashboard_stats();
---
--- Get stats with specific pharmacy's graph data:
--- SELECT get_admin_dashboard_stats('3e19f01d-511d-421f-9cc6-ed83d33e034d'::UUID);
---
--- Get yearly data:
--- SELECT get_admin_dashboard_stats(NULL, 'yearly', 5);
-
+GRANT EXECUTE ON FUNCTION get_admin_dashboard_stats(UUID, TEXT, INTEGER, UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_admin_dashboard_stats(UUID, TEXT, INTEGER, UUID) TO service_role;
