@@ -61,6 +61,10 @@ export interface CreateAdminData {
   name: string;
   role?: string;
   permissions?: string[];
+  // The buying group this admin belongs to.
+  // Required for sub-admin roles (manager/reviewer/support). For super_admin
+  // the RPC self-references the new admin's own id, so this is ignored.
+  buyingGroupId?: string | null;
 }
 
 export interface UpdateAdminData {
@@ -69,6 +73,7 @@ export interface UpdateAdminData {
   role?: string;
   isActive?: boolean;
   permissions?: string[];
+  buyingGroupId?: string | null;
 }
 
 // ============================================================
@@ -86,7 +91,8 @@ export const getAdminUsers = async (
   role?: string,
   status?: string,
   sortBy: string = 'created_at',
-  sortOrder: string = 'desc'
+  sortOrder: string = 'desc',
+  buyingGroupId?: string | null
 ): Promise<AdminListResponse> => {
   if (!supabaseAdmin) {
     throw new AppError('Supabase admin client not configured', 500);
@@ -100,6 +106,7 @@ export const getAdminUsers = async (
     p_status: status || null,
     p_sort_by: sortBy,
     p_sort_order: sortOrder,
+    p_buying_group_id: buyingGroupId ?? null,
   });
 
   // Backward-compatible fallback while DB migration is pending
@@ -283,11 +290,26 @@ export const createAdmin = async (adminData: CreateAdminData): Promise<AdminUser
   // Hash password
   const passwordHash = await bcrypt.hash(adminData.password, 10);
 
+  const role = adminData.role || 'support';
+
+  // For sub-admin roles we MUST have a buying_group_id, otherwise the new
+  // admin would effectively become a MainAdmin (see /api/admin/dashboard
+  // buying-group scoping). super_admin ignores this value — the RPC
+  // self-references the newly created admin id.
+  if (role !== 'super_admin' && !adminData.buyingGroupId) {
+    throw new AppError(
+      'Cannot create a sub-admin without a buying group. The request must be made by an authenticated super_admin / buying-group admin.',
+      400
+    );
+  }
+
   const { data, error } = await supabaseAdmin.rpc('create_admin_user', {
     p_email: adminData.email.toLowerCase().trim(),
     p_password_hash: passwordHash,
     p_name: adminData.name.trim(),
-    p_role: adminData.role || 'support',
+    p_role: role,
+    p_permissions: adminData.permissions ?? [],
+    p_buying_group_id: adminData.buyingGroupId ?? null,
   });
 
   if (error) {
@@ -329,6 +351,8 @@ export const updateAdmin = async (
     p_email: updateData.email?.toLowerCase().trim() || null,
     p_role: updateData.role || null,
     p_is_active: updateData.isActive !== undefined ? updateData.isActive : null,
+    p_permissions: updateData.permissions ?? null,
+    p_buying_group_id: updateData.buyingGroupId ?? null,
   });
 
   if (error) {

@@ -11,6 +11,7 @@ interface AdminRequest extends Request {
   adminEmail?: string;
   adminName?: string;
   adminRole?: string;
+  adminBuyingGroupId?: string | null;
 }
 
 // ============================================================
@@ -28,6 +29,9 @@ export const getAdminUsersHandler = catchAsync(
       sortOrder = 'desc',
     } = req.query;
 
+    // Scope the list to the caller's buying group. MainAdmin (null) sees all.
+    const buyingGroupId = req.adminBuyingGroupId ?? null;
+
     const result = await adminUsersService.getAdminUsers(
       parseInt(page as string, 10),
       parseInt(limit as string, 10),
@@ -35,7 +39,8 @@ export const getAdminUsersHandler = catchAsync(
       role as string,
       status as string,
       sortBy as string,
-      sortOrder as string
+      sortOrder as string,
+      buyingGroupId
     );
 
     res.status(200).json({
@@ -87,19 +92,43 @@ export const getAdminByIdHandler = catchAsync(
 // POST /api/admin/users - Create new admin user
 // ============================================================
 export const createAdminHandler = catchAsync(
-  async (req: Request, res: Response, _next: NextFunction) => {
-    const { email, password, name, role, permissions } = req.body;
+  async (req: AdminRequest, res: Response, _next: NextFunction) => {
+    const { email, password, name, role, permissions, buyingGroupId } = req.body;
 
     if (!email || !password || !name) {
       throw new AppError('Email, password, and name are required', 400);
+    }
+
+    // The new admin inherits the buying group of whoever is creating them.
+    // - MainAdmin (req.adminBuyingGroupId === null): may create admins for any
+    //   buying group, so we accept a buyingGroupId from the body.
+    // - A buying-group admin (super_admin/manager/etc.): the new admin is
+    //   ALWAYS created in their own group — body value is ignored for safety.
+    const callerBuyingGroupId = req.adminBuyingGroupId ?? null;
+    const effectiveRole = role || 'support';
+
+    let resolvedBuyingGroupId: string | null = null;
+    if (effectiveRole !== 'super_admin') {
+      if (callerBuyingGroupId) {
+        resolvedBuyingGroupId = callerBuyingGroupId;
+      } else if (buyingGroupId) {
+        // MainAdmin path — accept the body value.
+        resolvedBuyingGroupId = buyingGroupId;
+      } else {
+        throw new AppError(
+          'buyingGroupId is required when creating a sub-admin as MainAdmin',
+          400
+        );
+      }
     }
 
     const admin = await adminUsersService.createAdmin({
       email,
       password,
       name,
-      role,
+      role: effectiveRole,
       permissions,
+      buyingGroupId: resolvedBuyingGroupId,
     });
 
     res.status(201).json({
@@ -116,13 +145,19 @@ export const createAdminHandler = catchAsync(
 // PATCH /api/admin/users/:id - Update admin user
 // ============================================================
 export const updateAdminHandler = catchAsync(
-  async (req: Request, res: Response, _next: NextFunction) => {
+  async (req: AdminRequest, res: Response, _next: NextFunction) => {
     const { id } = req.params;
-    const { name, email, role, isActive, permissions } = req.body;
+    const { name, email, role, isActive, permissions, buyingGroupId } = req.body;
 
     if (!id) {
       throw new AppError('Admin ID is required', 400);
     }
+
+    // Only MainAdmin (adminBuyingGroupId === null) may explicitly change
+    // buying_group_id on an existing admin. Buying-group admins must not
+    // be able to reassign users across groups.
+    const callerBuyingGroupId = req.adminBuyingGroupId ?? null;
+    const allowBuyingGroupChange = callerBuyingGroupId === null;
 
     const admin = await adminUsersService.updateAdmin(id, {
       name,
@@ -130,6 +165,7 @@ export const updateAdminHandler = catchAsync(
       role,
       isActive,
       permissions,
+      buyingGroupId: allowBuyingGroupChange ? buyingGroupId : undefined,
     });
 
     res.status(200).json({
