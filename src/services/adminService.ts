@@ -181,7 +181,11 @@ export const adminLogin = async (
  * Request password reset for admin
  * Uses Supabase's built-in email service (same as pharmacy)
  */
-export const adminForgotPassword = async (email: string, redirectTo?: string): Promise<{
+export const adminForgotPassword = async (
+  email: string,
+  _redirectTo?: string,
+  buyingGroupId?: string | null
+): Promise<{
   message: string;
 }> => {
   if (!db || !supabase) {
@@ -237,9 +241,28 @@ export const adminForgotPassword = async (email: string, redirectTo?: string): P
     }
   }
 
+  // Look up the admin's buying_group_id so the callback route can resolve the frontend hostname
+  const effectiveBuyingGroupId = buyingGroupId || await (async () => {
+    const { data: bgRow } = await db
+      .from('admin')
+      .select('buying_group_id')
+      .eq('id', adminData.id)
+      .single();
+    return bgRow?.buying_group_id || null;
+  })();
+
+  // Build the redirectTo pointing to our own backend callback route.
+  const backendBase = process.env.BACKEND_URL || 'http://localhost:3000';
+  const callbackUrl = new URL('/api/auth/callback', backendBase);
+  callbackUrl.searchParams.set('portal', 'admin');
+  if (effectiveBuyingGroupId) {
+    callbackUrl.searchParams.set('bg', effectiveBuyingGroupId);
+  }
+  const resetUrl = callbackUrl.toString();
+
   // Step 3: Send password reset email via Supabase (same as pharmacy)
   const { error: resetError } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
-    redirectTo: redirectTo || process.env.ADMIN_PASSWORD_RESET_REDIRECT_URL || 'http://localhost:3002/reset-password',
+    redirectTo: resetUrl,
   });
 
   if (resetError) {

@@ -171,7 +171,8 @@ export const createCheckoutSession = async (
   billingInterval: 'monthly' | 'yearly',
   email: string,
   pharmacyName?: string,
-  platform?: 'web' | 'mobile'
+  platform?: 'web' | 'mobile',
+  buyingGroupId?: string | null
 ): Promise<{ sessionId: string; url: string }> => {
   // Get the plan
   const plan = await getSubscriptionPlanById(planId);
@@ -192,6 +193,16 @@ export const createCheckoutSession = async (
   // Create or get Stripe customer
   const customerId = await createStripeCustomer(pharmacyId, email, pharmacyName);
 
+  // Build the pharmacy portal base URL using the buying group's pharmacy_hostname
+  let baseUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+  if (buyingGroupId) {
+    const { getBuyingGroupHostnames } = await import('./tenantService');
+    const hostnames = await getBuyingGroupHostnames(buyingGroupId);
+    if (hostnames?.pharmacyHostname) {
+      baseUrl = `https://${hostnames.pharmacyHostname}`;
+    }
+  }
+
   // Determine success URL based on platform
   let successUrl: string;
   if (platform === 'mobile') {
@@ -200,7 +211,7 @@ export const createCheckoutSession = async (
     successUrl = `${mobileAppUrl}?success=true&session_id={CHECKOUT_SESSION_ID}`;
   } else {
     // Default web URL
-    successUrl = `${process.env.FRONTEND_URL || 'http://localhost:3001'}/subscription?success=true&session_id={CHECKOUT_SESSION_ID}`;
+    successUrl = `${baseUrl}/subscription?success=true&session_id={CHECKOUT_SESSION_ID}`;
   }
 
   // Create checkout session
@@ -215,7 +226,7 @@ export const createCheckoutSession = async (
       },
     ],
     success_url: successUrl,
-    cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:3001'}/subscription?canceled=true`,
+    cancel_url: `${baseUrl}/subscription?canceled=true`,
     metadata: {
       pharmacy_id: pharmacyId,
       plan_id: planId,

@@ -192,3 +192,40 @@ export const extractHostname = (req: {
 
   return '';
 };
+
+/**
+ * Fetch the pharmacy and admin hostnames for a buying group from the database.
+ * Returns null if not found. Used to dynamically build redirect URLs for password
+ * reset, Stripe checkouts, email links, and invite flows.
+ */
+export const getBuyingGroupHostnames = async (
+  buyingGroupId: string
+): Promise<{
+  pharmacyHostname: string | null;
+  adminHostname: string | null;
+  domain: string | null;
+} | null> => {
+  if (!buyingGroupId || !supabaseAdmin) return null;
+
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('buying_group_domains')
+      .select('pharmacy_hostname, admin_hostname, domain')
+      .eq('buying_group_id', buyingGroupId)
+      .eq('is_active', true)
+      .limit(1)
+      .single();
+
+    if (error || !data) {
+      return null;
+    }
+
+    return {
+      pharmacyHostname: data.pharmacy_hostname || null,
+      adminHostname: data.admin_hostname || null,
+      domain: data.domain || null,
+    };
+  } catch {
+    return null;
+  }
+};

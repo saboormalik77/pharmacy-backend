@@ -134,7 +134,8 @@ export const forgotPasswordHandler = catchAsync(
       throw new AppError('Email is required', 400);
     }
 
-    const result = await forgotPassword(email, redirectTo);
+    const buyingGroupId = req.tenant?.buyingGroupId || null;
+    const result = await forgotPassword(email, redirectTo, buyingGroupId);
 
     res.status(200).json({
       status: 'success',

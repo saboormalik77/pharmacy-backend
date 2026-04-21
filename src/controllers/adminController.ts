@@ -122,8 +122,8 @@ export const adminForgotPasswordHandler = catchAsync(
       throw new AppError('Email is required', 400);
     }
 
-    // Uses Supabase's built-in email service (same as pharmacy)
-    const result = await adminForgotPassword(email, redirectTo);
+    const buyingGroupId = req.tenant?.buyingGroupId || null;
+    const result = await adminForgotPassword(email, redirectTo, buyingGroupId);
 
     res.status(200).json({
       status: 'success',
