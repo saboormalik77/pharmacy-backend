@@ -59,7 +59,17 @@ export const createBranchHandler = async (req: Request, res: Response, next: Nex
 
     const { inviteToken, email: branchEmail, pharmacyName: name, parentPharmacyName } = rpcResult.data;
 
-    const portalBaseUrl = process.env.PHARMACY_PORTAL_URL || 'http://localhost:3002';
+    // Build the pharmacy portal base URL using the buying group's pharmacy_hostname
+    let portalBaseUrl = process.env.PHARMACY_PORTAL_URL || 'http://localhost:3002';
+    const buyingGroupId = req.tenant?.buyingGroupId;
+    if (buyingGroupId) {
+      const { getBuyingGroupHostnames } = await import('../services/tenantService');
+      const hostnames = await getBuyingGroupHostnames(buyingGroupId);
+      if (hostnames?.pharmacyHostname) {
+        portalBaseUrl = `https://${hostnames.pharmacyHostname}`;
+      }
+    }
+
     try {
       const { error: emailError } = await db.functions.invoke('send-branch-invite', {
         body: {
@@ -178,7 +188,17 @@ export const resendBranchInviteHandler = async (req: Request, res: Response, nex
     if (data?.error) throw new AppError(data.message, data.code || 400);
 
     const { inviteToken, email, pharmacyName } = data.data;
-    const portalBaseUrl = process.env.PHARMACY_PORTAL_URL || 'http://localhost:3002';
+
+    // Build the pharmacy portal base URL using the buying group's pharmacy_hostname
+    let portalBaseUrl = process.env.PHARMACY_PORTAL_URL || 'http://localhost:3002';
+    const buyingGroupId = req.tenant?.buyingGroupId;
+    if (buyingGroupId) {
+      const { getBuyingGroupHostnames } = await import('../services/tenantService');
+      const hostnames = await getBuyingGroupHostnames(buyingGroupId);
+      if (hostnames?.pharmacyHostname) {
+        portalBaseUrl = `https://${hostnames.pharmacyHostname}`;
+      }
+    }
 
     try {
       await db.functions.invoke('send-branch-invite', {

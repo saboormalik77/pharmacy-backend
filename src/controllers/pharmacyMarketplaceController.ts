@@ -446,10 +446,12 @@ export const createCheckoutSessionHandler = async (
       throw new AppError('Email is required for checkout', 400);
     }
 
+    const buyingGroupId = req.tenant?.buyingGroupId || null;
     const result = await marketplaceCheckoutService.createCheckoutSession(
       pharmacyId,
       email,
-      pharmacyName
+      pharmacyName,
+      buyingGroupId
     );
 
     res.status(200).json({

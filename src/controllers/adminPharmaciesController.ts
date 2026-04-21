@@ -403,8 +403,18 @@ export const createPharmacyHandler = async (
 
     const { inviteId, inviteToken, email: pharmacyEmail, pharmacyName: name } = rpcResult.data;
 
+    // Build the pharmacy portal base URL using the buying group's pharmacy_hostname
+    let portalBaseUrl = process.env.PHARMACY_PORTAL_URL || 'http://localhost:3002';
+    const buyingGroupId = req.tenant?.buyingGroupId;
+    if (buyingGroupId) {
+      const { getBuyingGroupHostnames } = await import('../services/tenantService');
+      const hostnames = await getBuyingGroupHostnames(buyingGroupId);
+      if (hostnames?.pharmacyHostname) {
+        portalBaseUrl = `https://${hostnames.pharmacyHostname}`;
+      }
+    }
+
     // Send invite email via Edge Function
-    const portalBaseUrl = process.env.PHARMACY_PORTAL_URL || 'http://localhost:3002';
     let emailSent = false;
     let emailErrorMsg: string | null = null;
     try {

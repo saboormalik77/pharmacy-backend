@@ -599,11 +599,15 @@ export const logoutAll = async (pharmacyId: string): Promise<void> => {
 };
 
 /**
- * Request password reset - sends password reset email via Supabase
- * @param email - User's email address
- * @param redirectTo - URL to redirect to after password reset (frontend reset page)
+ * Request password reset - sends password reset email via Supabase.
+ * Supabase redirects to /api/auth/callback on this backend, which then
+ * resolves the buying group's frontend hostname from the DB and redirects there.
  */
-export const forgotPassword = async (email: string, redirectTo?: string): Promise<{ message: string }> => {
+export const forgotPassword = async (
+  email: string,
+  _redirectTo?: string,
+  buyingGroupId?: string | null
+): Promise<{ message: string }> => {
   if (!email) {
     throw new AppError('Email is required', 400);
   }
@@ -631,14 +635,36 @@ export const forgotPassword = async (email: string, redirectTo?: string): Promis
     throw new AppError('This account has been suspended. Please contact support to reactivate.', 403);
   }
 
+  // Look up the pharmacy's buying_group_id so the callback route can resolve the frontend hostname
+  const effectiveBuyingGroupId = buyingGroupId || await (async () => {
+    const { data: bgRow } = await db
+      .from('pharmacy')
+      .select('buying_group_id')
+      .eq('id', pharmacyData.id)
+      .single();
+    return bgRow?.buying_group_id || null;
+  })();
+
+  // Build the redirectTo pointing to our own backend callback route.
+  // Supabase will redirect here after token verification, and the callback
+  // route will look up the buying group hostname and redirect to the correct frontend.
+  const backendBase = process.env.BACKEND_URL || 'http://localhost:3000';
+  const callbackUrl = new URL('/api/auth/callback', backendBase);
+  callbackUrl.searchParams.set('portal', 'pharmacy');
+  if (effectiveBuyingGroupId) {
+    callbackUrl.searchParams.set('bg', effectiveBuyingGroupId);
+  }
+  const resetUrl = callbackUrl.toString();
+
+  console.log(`[forgotPassword] email=${email}, resetUrl=${resetUrl}, effectiveBuyingGroupId=${effectiveBuyingGroupId}`);
+
   // Send password reset email via Supabase
   const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.toLowerCase().trim(), {
-    redirectTo: redirectTo || process.env.PASSWORD_RESET_REDIRECT_URL || 'http://localhost:3001/reset-password',
+    redirectTo: resetUrl,
   });
 
   if (resetError) {
     console.error('Supabase password reset error:', resetError);
-    // Don't reveal the actual error for security
     throw new AppError('Failed to send password reset email. Please try again later.', 500);
   }
 

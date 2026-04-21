@@ -131,8 +131,8 @@ serve(async (req: Request) => {
     }
 
     payload.portalBaseUrl = (
-      getEnv('PHARMACY_PORTAL_URL') ||
       payload.portalBaseUrl ||
+      getEnv('PHARMACY_PORTAL_URL') ||
       'http://localhost:3001'
     ).replace(/\/$/, '');
 
