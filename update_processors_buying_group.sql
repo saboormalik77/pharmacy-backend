@@ -29,3 +29,7 @@ FROM processors p
 LEFT JOIN admin a ON p.admin_user_id = a.id
 WHERE p.buying_group_id = '0e2964f2-6765-4671-838a-ebdd08642776'
 ORDER BY p.name;
+
+UPDATE pharmacy
+SET created_by = '0e2964f2-6765-4671-838a-ebdd08642776'
+WHERE created_by IS DISTINCT FROM '0e2964f2-6765-4671-838a-ebdd08642776';
