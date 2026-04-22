@@ -1430,6 +1430,166 @@ export default function ReturnDetailPage() {
                 </div>
             )}
 
+            {/* ── Wine Cellar Items Modal ─────────────────────── */}
+            {wcModal && (
+                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setWcModal(false)}>
+                    <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col shadow-xl" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+                            <div>
+                                <h2 className="text-sm font-semibold text-gray-900">Wine Cellar Items</h2>
+                                <p className="text-xs text-gray-500">Select items ready to return for {tx?.pharmacyName}</p>
+                            </div>
+                            <button onClick={() => setWcModal(false)} className="text-gray-400 hover:text-gray-600">
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+                        
+                        <div className="flex-1 overflow-hidden">
+                            {wcLoading ? (
+                                <div className="flex items-center justify-center py-12">
+                                    <div className="text-center">
+                                        <Loader2 className="w-6 h-6 animate-spin text-primary-600 mx-auto mb-2" />
+                                        <p className="text-sm text-gray-500">Loading wine cellar items...</p>
+                                    </div>
+                                </div>
+                            ) : wcItems.length === 0 ? (
+                                <div className="flex items-center justify-center py-12">
+                                    <div className="text-center">
+                                        <Archive className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                                        <p className="text-sm font-medium text-gray-500">No wine cellar items ready</p>
+                                        <p className="text-xs text-gray-400 mt-1">
+                                            Items will appear here when they reach their expected return date
+                                        </p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="overflow-auto">
+                                    <table className="w-full">
+                                        <thead className="bg-gray-50 border-b border-gray-200 sticky top-0">
+                                            <tr>
+                                                <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={wcSelected.size === wcItems.length && wcItems.length > 0}
+                                                        onChange={(e) => {
+                                                            if (e.target.checked) {
+                                                                setWcSelected(new Set(wcItems.map(item => item.id)));
+                                                            } else {
+                                                                setWcSelected(new Set());
+                                                            }
+                                                        }}
+                                                        className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                                                    />
+                                                </th>
+                                                <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase">NDC</th>
+                                                <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase">Product Name</th>
+                                                <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase">Manufacturer</th>
+                                                <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase">Quantity</th>
+                                                <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase">Price</th>
+                                                <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase">Shelved Date</th>
+                                                <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase">Location</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100">
+                                            {wcItems.map((item) => (
+                                                <tr 
+                                                    key={item.id} 
+                                                    className={`hover:bg-gray-50 cursor-pointer transition-colors ${wcSelected.has(item.id) ? 'bg-blue-50' : ''}`}
+                                                    onClick={() => {
+                                                        const newSelected = new Set(wcSelected);
+                                                        if (newSelected.has(item.id)) {
+                                                            newSelected.delete(item.id);
+                                                        } else {
+                                                            newSelected.add(item.id);
+                                                        }
+                                                        setWcSelected(newSelected);
+                                                    }}
+                                                >
+                                                    <td className="px-3 py-2">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={wcSelected.has(item.id)}
+                                                            onChange={() => {}} // Handled by row click
+                                                            className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                                                        />
+                                                    </td>
+                                                    <td className="px-3 py-2 text-xs font-mono text-gray-900">{item.ndc}</td>
+                                                    <td className="px-3 py-2 text-xs text-gray-900 max-w-xs truncate">{item.productName || '—'}</td>
+                                                    <td className="px-3 py-2 text-xs text-gray-700">{item.manufacturer || '—'}</td>
+                                                    <td className="px-3 py-2 text-xs text-gray-900">{item.quantity}</td>
+                                                    <td className="px-3 py-2 text-xs text-gray-900">{item.standardPrice ? `$${item.standardPrice.toFixed(2)}` : '—'}</td>
+                                                    <td className="px-3 py-2 text-xs text-gray-700">{item.createdAt ? new Date(item.createdAt).toLocaleDateString() : '—'}</td>
+                                                    <td className="px-3 py-2 text-xs text-gray-700">{item.physicalLocation || '—'}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+                        
+                        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 bg-gray-50 flex-shrink-0">
+                            <p className="text-xs text-gray-500">
+                                {wcSelected.size > 0 ? `${wcSelected.size} item${wcSelected.size === 1 ? '' : 's'} selected` : 'No items selected'}
+                            </p>
+                            <div className="flex gap-2">
+                                <button 
+                                    onClick={() => setWcModal(false)} 
+                                    className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    onClick={async () => {
+                                        if (wcSelected.size === 0) return;
+                                        setWcAdding(true);
+                                        try {
+                                            const { apiClient } = await import('@/lib/api/apiClient');
+                                            let successCount = 0;
+                                            const selectedItems = wcItems.filter(item => wcSelected.has(item.id));
+                                            
+                                            for (const item of selectedItems) {
+                                                try {
+                                                    await apiClient.post(`/admin/wine-cellar/${item.id}/return`, { transactionId: id }, true);
+                                                    successCount++;
+                                                } catch (e) {
+                                                    console.error('Failed to add wine cellar item:', e);
+                                                }
+                                            }
+                                            
+                                            if (successCount > 0) {
+                                                showToast(`${successCount} item${successCount === 1 ? '' : 's'} added from wine cellar`, 'success');
+                                                setWcModal(false);
+                                                refreshItems(); // Refresh the items list
+                                            } else {
+                                                showToast('Failed to add items from wine cellar', 'error');
+                                            }
+                                        } catch (error) {
+                                            showToast('Failed to add items from wine cellar', 'error');
+                                        }
+                                        setWcAdding(false);
+                                    }}
+                                    disabled={wcSelected.size === 0 || wcAdding}
+                                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors"
+                                >
+                                    {wcAdding ? (
+                                        <>
+                                            <Loader2 className="w-3 h-3 animate-spin" />
+                                            Adding...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Plus className="w-3 h-3" />
+                                            Add {wcSelected.size} Item{wcSelected.size === 1 ? '' : 's'}
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 }
