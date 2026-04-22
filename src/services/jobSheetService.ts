@@ -153,8 +153,7 @@ export function generateJobSheetHTML(data: JobSheetData): string {
     ${ph.deaExpiration ? `<tr><td class="lbl">DEA Expiration:</td><td>${ph.deaExpiration}</td></tr>` : ''}
     ${ph.storeNumber ? `<tr><td class="lbl">Store Number:</td><td>${ph.storeNumber}</td></tr>` : ''}
     <tr><td class="lbl">Store Phone #:</td><td>${ph.phone}</td></tr>
-    ${ph.contactName ? `<tr><td class="lbl">Store Contact:</td><td>${ph.contactName}</td></tr>` : ''}
-    ${ph.pharmacyProcessor ? `<tr><td class="lbl">Processor:</td><td>${ph.pharmacyProcessor}</td></tr>` : ''}
+    ${ph.pharmacyProcessor ? `<tr><td class="lbl">Sales Rep:</td><td>${ph.pharmacyProcessor}</td></tr>` : ''}
   </table>
 
   <hr class="thick">
