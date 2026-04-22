@@ -26,6 +26,25 @@ import {
 import { Processor, ProcessorCreatePayload, ProcessorUpdatePayload, AssignedStore } from '@/lib/types';
 import { useDebounce } from '@/lib/hooks/useDebounce';
 
+// ── Available Permissions ──────────────────────────────────────
+
+const ASSIGNABLE_PERMISSIONS = [
+    { key: 'pharmacies', label: 'Pharmacies' },
+    { key: 'distributors', label: 'Distributors' },
+    { key: 'marketplace', label: 'Marketplace' },
+    { key: 'documents', label: 'Documents' },
+    { key: 'payments', label: 'Payments' },
+    { key: 'payout_hub', label: 'Payout Mgmt' },
+    { key: 'analytics', label: 'Analytics' },
+    { key: 'settings', label: 'Settings' },
+    { key: 'processors', label: 'Processors' },
+    { key: 'policies', label: 'Labeler Info' },
+    { key: 'ndc_pricing', label: 'NDC Pricing' },
+    { key: 'tbd_items', label: 'TBD Items' },
+    { key: 'destruction', label: 'Destruction' },
+    { key: 'warehouse', label: 'Warehouse' },
+] as const;
+
 // ── Helpers ────────────────────────────────────────────────────
 
 function getInitials(name: string): string {
@@ -56,10 +75,10 @@ export default function ProcessorsPage() {
     const [assignModal, setAssignModal] = useState<Processor | null>(null);
 
     // Forms
-    const [newProcessor, setNewProcessor] = useState<ProcessorCreatePayload>({
-        name: '', email: '', password: '', phone: '', notes: '',
+    const [newProcessor, setNewProcessor] = useState<ProcessorCreatePayload & { permissions?: string[] }>({
+        name: '', email: '', password: '', phone: '', notes: '', permissions: [],
     });
-    const [editForm, setEditForm] = useState<ProcessorUpdatePayload>({});
+    const [editForm, setEditForm] = useState<ProcessorUpdatePayload & { permissions?: string[] }>({});
     const [showPassword, setShowPassword] = useState(false);
 
     // Pharmacies for assignment
@@ -84,6 +103,16 @@ export default function ProcessorsPage() {
     };
     const removeToast = (id: string) => setToasts(prev => prev.filter(t => t.id !== id));
 
+    // ── Permission helpers ─────────────────────────────────────
+    const togglePermission = (
+        current: string[] | undefined,
+        key: string,
+        setter: (perms: string[]) => void,
+    ) => {
+        const list = current || [];
+        setter(list.includes(key) ? list.filter(p => p !== key) : [...list, key]);
+    };
+
     // ── Fetch on filter change ─────────────────────────────────
     useEffect(() => {
         if (!isAuthenticated) return;
@@ -104,6 +133,7 @@ export default function ProcessorsPage() {
                 phone: editModal.phone || '',
                 status: editModal.status,
                 notes: editModal.notes || '',
+                permissions: (editModal as any).permissions || [],
             });
         }
     }, [editModal]);
@@ -123,27 +153,124 @@ export default function ProcessorsPage() {
         if (!newProcessor.password || newProcessor.password.length < 8) {
             showToast('Password must be at least 8 characters', 'error'); return;
         }
-        const result = await dispatch(createProcessor(newProcessor));
-        if (createProcessor.fulfilled.match(result)) {
-            showToast('Processor created successfully!');
-            setAddModal(false);
-            setNewProcessor({ name: '', email: '', password: '', phone: '', notes: '' });
-            setShowPassword(false);
-            refresh();
-        } else {
-            showToast(result.payload as string || 'Failed to create processor', 'error');
+        
+        try {
+            const result = await dispatch(createProcessor(newProcessor));
+            if (createProcessor.fulfilled.match(result)) {
+                // Also set permissions if they were specified
+                if (newProcessor.permissions && newProcessor.permissions.length > 0) {
+                    const processorData = (result.payload as any);
+                    if (processorData.adminUserId) {
+                        const { apiClient } = await import('@/lib/api/apiClient');
+                        await apiClient.patch(`/admin/users/${processorData.adminUserId}`, {
+                            permissions: newProcessor.permissions
+                        }, true);
+                    }
+                }
+                showToast('Processor created successfully!');
+                setAddModal(false);
+                setNewProcessor({ name: '', email: '', password: '', phone: '', notes: '', permissions: [] });
+                setShowPassword(false);
+                refresh();
+            } else {
+                showToast(result.payload as string || 'Failed to create processor', 'error');
+            }
+        } catch (error) {
+            showToast('Failed to create processor', 'error');
+        }
+    };
+
+    const handleView = async (processor: Processor) => {
+        try {
+            const { apiClient } = await import('@/lib/api/apiClient');
+            
+            // First try to get processor details which might include adminUserId
+            let adminUserId = (processor as any).adminUserId;
+            
+            if (!adminUserId) {
+                // Try to find the admin user by email
+                const adminResponse: any = await apiClient.get('/admin/users', true, { 
+                    search: processor.email,
+                    limit: 1 
+                });
+                const admins = adminResponse?.data?.admins || adminResponse?.admins || [];
+                if (admins.length > 0) {
+                    adminUserId = admins[0].id;
+                }
+            }
+            
+            if (adminUserId) {
+                const response: any = await apiClient.get(`/admin/users/${adminUserId}`, true);
+                const adminUser = response?.data?.admin || response?.admin;
+                setViewModal({ ...processor, permissions: adminUser?.permissions || [] } as any);
+            } else {
+                setViewModal({ ...processor, permissions: [] } as any);
+            }
+        } catch (error) {
+            console.log('Failed to fetch processor permissions:', error);
+            setViewModal({ ...processor, permissions: [] } as any);
+        }
+    };
+
+    const handleEdit = async (processor: Processor) => {
+        try {
+            const { apiClient } = await import('@/lib/api/apiClient');
+            
+            // First try to get processor details which might include adminUserId
+            let adminUserId = (processor as any).adminUserId;
+            
+            if (!adminUserId) {
+                // Try to find the admin user by email
+                const adminResponse: any = await apiClient.get('/admin/users', true, { 
+                    search: processor.email,
+                    limit: 1 
+                });
+                const admins = adminResponse?.data?.admins || adminResponse?.admins || [];
+                if (admins.length > 0) {
+                    adminUserId = admins[0].id;
+                }
+            }
+            
+            if (adminUserId) {
+                const response: any = await apiClient.get(`/admin/users/${adminUserId}`, true);
+                const adminUser = response?.data?.admin || response?.admin;
+                setEditModal({ 
+                    ...processor, 
+                    permissions: adminUser?.permissions || [],
+                    adminUserId: adminUserId 
+                } as any);
+            } else {
+                setEditModal({ ...processor, permissions: [] } as any);
+            }
+        } catch (error) {
+            console.log('Failed to fetch processor permissions:', error);
+            setEditModal({ ...processor, permissions: [] } as any);
         }
     };
 
     const handleUpdate = async () => {
         if (!editModal) return;
         if (!editForm.name?.trim()) { showToast('Name is required', 'error'); return; }
-        const result = await dispatch(updateProcessor({ id: editModal.id, payload: editForm }));
-        if (updateProcessor.fulfilled.match(result)) {
-            showToast('Processor updated successfully!');
-            setEditModal(null);
-        } else {
-            showToast(result.payload as string || 'Failed to update processor', 'error');
+        
+        try {
+            // Update processor basic info
+            const result = await dispatch(updateProcessor({ id: editModal.id, payload: editForm }));
+            if (updateProcessor.fulfilled.match(result)) {
+                // Also update permissions if they changed
+                if (editForm.permissions !== undefined && (editModal as any).adminUserId) {
+                    const { apiClient } = await import('@/lib/api/apiClient');
+                    await apiClient.patch(`/admin/users/${(editModal as any).adminUserId}`, {
+                        permissions: editForm.permissions
+                    }, true);
+                }
+                showToast('Processor updated successfully!');
+                setEditModal(null);
+                refresh();
+            } else {
+                showToast(result.payload as string || 'Failed to update processor', 'error');
+            }
+        } catch (error) {
+            showToast('Failed to update processor permissions', 'error');
         }
     };
 
@@ -423,10 +550,10 @@ export default function ProcessorsPage() {
                                             </td>
                                             <td className="px-3 py-1.5 whitespace-nowrap">
                                                 <div className="flex items-center gap-1 justify-center">
-                                                    <button onClick={() => setViewModal(processor)} className="p-1 text-blue-600 hover:bg-blue-50 rounded" title="View">
+                                                    <button onClick={() => handleView(processor)} className="p-1 text-blue-600 hover:bg-blue-50 rounded" title="View">
                                                         <Eye className="w-3.5 h-3.5" />
                                                     </button>
-                                                    <button onClick={() => setEditModal(processor)} className="p-1 text-green-600 hover:bg-green-50 rounded" title="Edit">
+                                                    <button onClick={() => handleEdit(processor)} className="p-1 text-green-600 hover:bg-green-50 rounded" title="Edit">
                                                         <Edit className="w-3.5 h-3.5" />
                                                     </button>
                                                     <button onClick={() => openAssignModal(processor)} className="p-1 text-indigo-600 hover:bg-indigo-50 rounded" title="Assign Stores">
@@ -530,6 +657,23 @@ export default function ProcessorsPage() {
                                     <p className="text-xs text-gray-500 font-medium">Created</p>
                                     <p className="text-gray-900 mt-0.5">{viewModal.createdAt ? formatDate(viewModal.createdAt) : 'N/A'}</p>
                                 </div>
+                                <div className="col-span-2">
+                                    <p className="text-xs text-gray-500 font-medium">Permissions</p>
+                                    {((viewModal as any).permissions && (viewModal as any).permissions.length > 0) ? (
+                                        <div className="flex flex-wrap gap-1 mt-1">
+                                            {(viewModal as any).permissions.map((p: string) => {
+                                                const perm = ASSIGNABLE_PERMISSIONS.find(ap => ap.key === p);
+                                                return (
+                                                    <span key={p} className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-full">
+                                                        {perm?.label || p}
+                                                    </span>
+                                                );
+                                            })}
+                                        </div>
+                                    ) : (
+                                        <p className="text-xs text-gray-400 mt-0.5">No permissions assigned</p>
+                                    )}
+                                </div>
                                 {viewModal.notes && (
                                     <div className="col-span-2">
                                         <p className="text-xs text-gray-500 font-medium">Notes</p>
@@ -550,23 +694,43 @@ export default function ProcessorsPage() {
 
             {/* ── Add Processor Modal ────────────────────────── */}
             {addModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => { setAddModal(false); setShowPassword(false); }}>
-                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
+                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => { 
+                    setAddModal(false); 
+                    setShowPassword(false); 
+                    setNewProcessor({ name: '', email: '', password: '', phone: '', notes: '', permissions: [] });
+                }}>
+                    <div className="bg-white rounded-lg max-w-2xl w-full shadow-xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50 flex-shrink-0">
                             <h2 className="text-lg font-semibold text-gray-900">Add New Processor</h2>
-                            <button onClick={() => { setAddModal(false); setShowPassword(false); }} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                            <button onClick={() => { 
+                                setAddModal(false); 
+                                setShowPassword(false); 
+                                setNewProcessor({ name: '', email: '', password: '', phone: '', notes: '', permissions: [] });
+                            }} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
                         </div>
-                        <div className="p-6 space-y-3">
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Name <span className="text-red-500">*</span></label>
-                                <input
-                                    type="text"
-                                    value={newProcessor.name}
-                                    onChange={e => setNewProcessor({ ...newProcessor, name: e.target.value })}
-                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                    placeholder="Full name"
-                                    autoComplete="off"
-                                />
+                        <div className="p-6 space-y-4 overflow-y-auto flex-1">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Name <span className="text-red-500">*</span></label>
+                                    <input
+                                        type="text"
+                                        value={newProcessor.name}
+                                        onChange={e => setNewProcessor({ ...newProcessor, name: e.target.value })}
+                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        placeholder="Full name"
+                                        autoComplete="off"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Phone</label>
+                                    <input
+                                        type="tel"
+                                        value={newProcessor.phone}
+                                        onChange={e => setNewProcessor({ ...newProcessor, phone: e.target.value })}
+                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        placeholder="(555) 000-0000"
+                                    />
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">Email <span className="text-red-500">*</span></label>
@@ -602,16 +766,6 @@ export default function ProcessorsPage() {
                                 <p className="text-xs text-gray-500 mt-1">Processor will use this to log in. Min. 8 characters.</p>
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Phone</label>
-                                <input
-                                    type="tel"
-                                    value={newProcessor.phone}
-                                    onChange={e => setNewProcessor({ ...newProcessor, phone: e.target.value })}
-                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                    placeholder="(555) 000-0000"
-                                />
-                            </div>
-                            <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
                                 <textarea
                                     value={newProcessor.notes}
@@ -621,9 +775,32 @@ export default function ProcessorsPage() {
                                     placeholder="Optional notes"
                                 />
                             </div>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-2">Permissions</label>
+                                <div className="grid grid-cols-3 gap-2 p-4 border border-gray-200 rounded-md max-h-48 overflow-y-auto bg-gray-50">
+                                    {ASSIGNABLE_PERMISSIONS.map(({ key, label }) => (
+                                        <label key={key} className="flex items-center gap-2 text-xs cursor-pointer hover:bg-white rounded px-2 py-1.5 transition-colors">
+                                            <input
+                                                type="checkbox"
+                                                checked={(newProcessor.permissions || []).includes(key)}
+                                                onChange={() => togglePermission(newProcessor.permissions, key, (perms) => setNewProcessor({ ...newProcessor, permissions: perms }))}
+                                                className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                                            />
+                                            <span className="font-medium text-gray-700">{label}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                                <p className="text-xs text-gray-500 mt-2">
+                                    Select permissions this processor needs to access different modules
+                                </p>
+                            </div>
                         </div>
-                        <div className="flex justify-end gap-2 p-5 border-t border-gray-200 bg-gray-50">
-                            <Button variant="outline" onClick={() => { setAddModal(false); setShowPassword(false); }}>Cancel</Button>
+                        <div className="flex justify-end gap-2 p-5 border-t border-gray-200 bg-gray-50 flex-shrink-0">
+                            <Button variant="outline" onClick={() => { 
+                                setAddModal(false); 
+                                setShowPassword(false); 
+                                setNewProcessor({ name: '', email: '', password: '', phone: '', notes: '', permissions: [] });
+                            }}>Cancel</Button>
                             <Button variant="primary" onClick={handleAdd} disabled={isLoading || !newProcessor.name.trim() || !newProcessor.email.trim() || !newProcessor.password}>
                                 {isLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Adding...</> : 'Add Processor'}
                             </Button>
@@ -635,61 +812,84 @@ export default function ProcessorsPage() {
             {/* ── Edit Processor Modal ───────────────────────── */}
             {editModal && (
                 <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setEditModal(null)}>
-                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
+                    <div className="bg-white rounded-lg max-w-2xl w-full shadow-xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50 flex-shrink-0">
                             <h2 className="text-lg font-semibold text-gray-900">Edit Processor</h2>
                             <button onClick={() => setEditModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
                         </div>
-                        <div className="p-6 space-y-3">
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Name <span className="text-red-500">*</span></label>
-                                <input
-                                    type="text"
-                                    value={editForm.name || ''}
-                                    onChange={e => setEditForm({ ...editForm, name: e.target.value })}
-                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                />
+                        <div className="p-6 space-y-4 overflow-y-auto flex-1">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Name <span className="text-red-500">*</span></label>
+                                    <input
+                                        type="text"
+                                        value={editForm.name || ''}
+                                        onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Phone</label>
+                                    <input
+                                        type="tel"
+                                        value={editForm.phone || ''}
+                                        onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
+                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                    />
+                                </div>
                             </div>
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
-                                <input
-                                    type="email"
-                                    value={editForm.email || ''}
-                                    onChange={e => setEditForm({ ...editForm, email: e.target.value })}
-                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Phone</label>
-                                <input
-                                    type="tel"
-                                    value={editForm.phone || ''}
-                                    onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
-                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
-                                <select
-                                    value={editForm.status || 'active'}
-                                    onChange={e => setEditForm({ ...editForm, status: e.target.value as 'active' | 'inactive' })}
-                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                >
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
-                                </select>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
+                                    <input
+                                        type="email"
+                                        value={editForm.email || ''}
+                                        onChange={e => setEditForm({ ...editForm, email: e.target.value })}
+                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
+                                    <select
+                                        value={editForm.status || 'active'}
+                                        onChange={e => setEditForm({ ...editForm, status: e.target.value as 'active' | 'inactive' })}
+                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                    >
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
                                 <textarea
                                     value={editForm.notes || ''}
                                     onChange={e => setEditForm({ ...editForm, notes: e.target.value })}
-                                    rows={3}
+                                    rows={2}
                                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
                                 />
                             </div>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-2">Permissions</label>
+                                <div className="grid grid-cols-3 gap-2 p-4 border border-gray-200 rounded-md max-h-48 overflow-y-auto bg-gray-50">
+                                    {ASSIGNABLE_PERMISSIONS.map(({ key, label }) => (
+                                        <label key={key} className="flex items-center gap-2 text-xs cursor-pointer hover:bg-white rounded px-2 py-1.5 transition-colors">
+                                            <input
+                                                type="checkbox"
+                                                checked={(editForm.permissions || []).includes(key)}
+                                                onChange={() => togglePermission(editForm.permissions, key, (perms) => setEditForm({ ...editForm, permissions: perms }))}
+                                                className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                                            />
+                                            <span className="font-medium text-gray-700">{label}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                                <p className="text-xs text-gray-500 mt-2">
+                                    Select permissions this processor needs to access different modules
+                                </p>
+                            </div>
                         </div>
-                        <div className="flex justify-end gap-2 p-5 border-t border-gray-200 bg-gray-50">
+                        <div className="flex justify-end gap-2 p-5 border-t border-gray-200 bg-gray-50 flex-shrink-0">
                             <Button variant="outline" onClick={() => setEditModal(null)}>Cancel</Button>
                             <Button variant="primary" onClick={handleUpdate} disabled={isLoading || !editForm.name?.trim()}>
                                 {isLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Saving...</> : 'Save Changes'}

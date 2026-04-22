@@ -1,7 +1,14 @@
 # Ignore frontend apps (deploy separately if needed)
+Frontend
 Frontend/
+admin
 admin/
+MainAdmin
 MainAdmin/
+
+# Node modules (Railway installs fresh)
+node_modules
+node_modules/
 
 # Dev/test files
 *.test.ts
@@ -10,6 +17,7 @@ __tests__/
 coverage/
 
 # Local configs
+.env
 .env.local
 .env.development
 nodemon.json
@@ -17,11 +25,31 @@ nodemon.json
 # IDE
 .vscode/
 .idea/
+.cursor/
 
 # Logs
 *.log
 logs/
 
+# Git
+.git
+.git/
+
 # Local supabase (if any)
 supabase/.branches/
 supabase/.temp/
+
+# Large/unnecessary files
+*.zip
+*.tar.gz
+*.tgz
+
+# Additional large directories
+files
+files/
+screenshots
+screenshots/
+pahrmacy data
+pahrmacy data/
+dist
+dist/

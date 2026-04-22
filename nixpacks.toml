@@ -16,10 +16,10 @@ nixPkgs = [
 ]
 
 [phases.install]
-cmds = ["npm install --legacy-peer-deps"]
+cmds = ["npm install --legacy-peer-deps --include=dev"]
 
 [phases.build]
-cmds = ["npm run build"]
+cmds = ["npx tsc"]
 
 [start]
 cmd = "node dist/server.js"
