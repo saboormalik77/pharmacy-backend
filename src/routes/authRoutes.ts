@@ -735,6 +735,69 @@ router.post('/admin/verify-reset-token', adminVerifyResetTokenHandler);
 router.post('/admin/reset-password', adminResetPasswordHandler);
 
 // ============================================================
+// Resolve the correct frontend redirect URL for a given email.
+// Called client-side from the root HTML page when Supabase
+// redirects to the backend base URL with a hash fragment.
+// ============================================================
+router.get('/resolve-redirect', async (req: Request, res: Response) => {
+  const email = (req.query.email as string || '').toLowerCase().trim();
+  if (!email) {
+    return res.status(400).json({ status: 'error', message: 'email is required' });
+  }
+
+  try {
+    const { supabaseAdmin } = await import('../config/supabase');
+    if (!supabaseAdmin) {
+      return res.status(500).json({ status: 'error', message: 'DB not configured' });
+    }
+
+    // Check pharmacy table first
+    const { data: pharmacyRow } = await supabaseAdmin
+      .from('pharmacy')
+      .select('buying_group_id')
+      .eq('email', email)
+      .limit(1)
+      .maybeSingle();
+
+    if (pharmacyRow?.buying_group_id) {
+      const { getBuyingGroupHostnames } = await import('../services/tenantService');
+      const hostnames = await getBuyingGroupHostnames(pharmacyRow.buying_group_id);
+      if (hostnames?.pharmacyHostname) {
+        return res.json({ portal: 'pharmacy', url: `https://${hostnames.pharmacyHostname}` });
+      }
+    }
+
+    // Check admin table
+    const { data: adminRow } = await supabaseAdmin
+      .from('admin')
+      .select('buying_group_id')
+      .eq('email', email)
+      .limit(1)
+      .maybeSingle();
+
+    if (adminRow?.buying_group_id) {
+      const { getBuyingGroupHostnames } = await import('../services/tenantService');
+      const hostnames = await getBuyingGroupHostnames(adminRow.buying_group_id);
+      if (hostnames?.adminHostname) {
+        return res.json({ portal: 'admin', url: `https://${hostnames.adminHostname}` });
+      }
+    }
+
+    // Fallback to env
+    return res.json({
+      portal: 'unknown',
+      url: process.env.FRONTEND_URL || 'http://localhost:3001',
+    });
+  } catch (err: any) {
+    console.error('[resolve-redirect] error:', err.message);
+    return res.json({
+      portal: 'unknown',
+      url: process.env.FRONTEND_URL || 'http://localhost:3001',
+    });
+  }
+});
+
+// ============================================================
 // Supabase Auth Callback — redirects to the correct frontend
 // ============================================================
 router.get('/callback', async (req: Request, res: Response) => {

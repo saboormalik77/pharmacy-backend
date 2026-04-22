@@ -294,6 +294,13 @@ BEGIN
   )
   RETURNING id INTO v_admin_id;
 
+  -- Also set the business_name in admin_settings to the group name
+  INSERT INTO admin_settings (id, business_name) 
+  VALUES (1, p_name) 
+  ON CONFLICT (id) DO UPDATE 
+  SET business_name = EXCLUDED.business_name,
+      updated_at = NOW();
+
   SELECT jsonb_build_object(
     'id', a.id,
     'name', a.name,
@@ -366,6 +373,14 @@ BEGIN
     is_active = COALESCE(v_is_active, is_active),
     updated_at = NOW()
   WHERE id = p_group_id AND role = 'super_admin';
+
+  -- Also update business_name in admin_settings if name is being updated
+  IF p_name IS NOT NULL THEN
+    UPDATE admin_settings
+    SET business_name = p_name,
+        updated_at = NOW()
+    WHERE id = 1;
+  END IF;
 
   SELECT jsonb_build_object(
     'id', a.id,
