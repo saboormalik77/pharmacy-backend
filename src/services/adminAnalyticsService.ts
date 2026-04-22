@@ -54,11 +54,17 @@ export interface Charts {
   topProducts: TopProductItem[];
 }
 
+export interface AnalyticsScope {
+  buyingGroupId: string | null;
+  isGlobal: boolean;
+}
+
 export interface AnalyticsResponse {
   keyMetrics: KeyMetrics;
   charts: Charts;
   distributorBreakdown: DistributorBreakdownItem[];
   stateBreakdown: StateBreakdownItem[];
+  scope: AnalyticsScope;
   generatedAt: string;
 }
 
@@ -68,15 +74,29 @@ export interface AnalyticsResponse {
 
 /**
  * Get all analytics data for admin dashboard
- * Uses PostgreSQL RPC function - no custom JS logic
- * Returns key metrics, trends, top products, and distributor breakdown
+ * Uses PostgreSQL RPC function - no custom JS logic.
+ *
+ * Scoping:
+ * - When buyingGroupId is null/undefined (MainAdmin), returns global analytics
+ *   across all pharmacies.
+ * - When buyingGroupId is provided, the RPC filters every metric, chart,
+ *   distributor/state breakdown by pharmacies where pharmacy.created_by
+ *   matches the given buying group.
  */
-export const getAnalytics = async (): Promise<AnalyticsResponse> => {
+export const getAnalytics = async (
+  buyingGroupId?: string | null
+): Promise<AnalyticsResponse> => {
   if (!supabaseAdmin) {
     throw new AppError('Supabase admin client not configured', 500);
   }
 
-  const { data, error } = await supabaseAdmin.rpc('get_admin_analytics');
+  console.log(
+    `📊 Fetching admin analytics (buyingGroupId: ${buyingGroupId || 'global'})`
+  );
+
+  const { data, error } = await supabaseAdmin.rpc('get_admin_analytics', {
+    p_buying_group_id: buyingGroupId ?? null,
+  });
 
   if (error) {
     throw new AppError(`Failed to fetch analytics: ${error.message}`, 400);
@@ -91,6 +111,10 @@ export const getAnalytics = async (): Promise<AnalyticsResponse> => {
     charts: data.charts,
     distributorBreakdown: data.distributorBreakdown || [],
     stateBreakdown: data.stateBreakdown || [],
+    scope: data.scope ?? {
+      buyingGroupId: buyingGroupId ?? null,
+      isGlobal: !buyingGroupId,
+    },
     generatedAt: data.generatedAt,
   };
 };

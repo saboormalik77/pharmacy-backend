@@ -385,11 +385,17 @@ export interface AnalyticsCharts {
     topProducts: TopProduct[];
 }
 
+export interface AnalyticsScope {
+    buyingGroupId: string | null;
+    isGlobal: boolean;
+}
+
 export interface AnalyticsData {
     keyMetrics: KeyMetrics;
     charts: AnalyticsCharts;
     distributorBreakdown: DistributorBreakdown[];
     stateBreakdown: StateBreakdown[];
+    scope?: AnalyticsScope;
     generatedAt: string;
 }
 

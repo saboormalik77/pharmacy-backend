@@ -10,16 +10,31 @@
 -- All month-based calculations use return_reports.created_at to determine
 -- which month each record belongs to (when the return report item was created)
 -- ============================================================
+-- MULTI-TENANT (BUYING GROUP) SCOPING:
+-- p_buying_group_id NULL  → MainAdmin: shows global (all tenants) analytics
+-- p_buying_group_id set   → Buying-group admin: restricted to pharmacies
+--                           where pharmacy.created_by = p_buying_group_id
+-- Tenant filter propagates through:
+--   * return_reports via pharmacy_id -> pharmacy.created_by
+--   * uploaded_documents via pharmacy_id -> pharmacy.created_by
+--   * reverse_distributors: only those referenced by this tenant's uploads
+--   * pharmacy direct count (created_by)
+--   * state_breakdown via pharmacy.created_by
+-- ============================================================
 -- Data includes:
 -- 1. Key Metrics (with % change vs last month)
 -- 2. Returns Value Trend (past 12 months)
 -- 3. Top 5 Products by Returns Value
 -- 4. Distributor Breakdown (returns by distributor)
+-- 5. State Breakdown (returns by pharmacy state)
 -- ============================================================
 
 DROP FUNCTION IF EXISTS get_admin_analytics();
+DROP FUNCTION IF EXISTS get_admin_analytics(UUID);
 
-CREATE OR REPLACE FUNCTION get_admin_analytics()
+CREATE OR REPLACE FUNCTION get_admin_analytics(
+  p_buying_group_id UUID DEFAULT NULL
+)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -31,7 +46,7 @@ DECLARE
   v_total_returns_value NUMERIC;
   v_total_returns INTEGER;
   v_avg_return_value NUMERIC;
-  v_active_pharmacies INTEGER;  -- All pharmacies in system
+  v_active_pharmacies INTEGER;  -- All pharmacies in scope
   
   -- Key Metrics - Current month
   v_current_month_value NUMERIC;
@@ -68,7 +83,7 @@ BEGIN
   v_twelve_months_ago := (DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '11 months')::DATE;
 
   -- ============================================================
-  -- 1. KEY METRICS - ALL TIME TOTALS
+  -- 1. KEY METRICS - ALL TIME TOTALS (scoped to buying group)
   -- Each record in return_reports is ONE item, data field contains item directly
   -- ============================================================
   
@@ -77,20 +92,25 @@ BEGIN
     COALESCE((rr.data->>'creditAmount')::NUMERIC, 0)
   ), 0)
   INTO v_total_returns_value
-  FROM return_reports rr;
+  FROM return_reports rr
+  INNER JOIN pharmacy p ON p.id = rr.pharmacy_id
+  WHERE (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
 
   -- Total Returns Count (each record = 1 item)
   SELECT COUNT(*)::INTEGER
   INTO v_total_returns
-  FROM return_reports rr;
+  FROM return_reports rr
+  INNER JOIN pharmacy p ON p.id = rr.pharmacy_id
+  WHERE (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
 
   -- Average Return Value
   v_avg_return_value := CASE WHEN v_total_returns > 0 THEN ROUND(v_total_returns_value / v_total_returns, 2) ELSE 0 END;
 
-  -- Active Pharmacies (all pharmacies in the system)
+  -- Active Pharmacies (all pharmacies in scope)
   SELECT COUNT(*)::INTEGER
   INTO v_active_pharmacies
-  FROM pharmacy;
+  FROM pharmacy p
+  WHERE (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
 
   -- ============================================================
   -- 2. CURRENT MONTH METRICS
@@ -102,19 +122,24 @@ BEGIN
   ), 0)
   INTO v_current_month_value
   FROM return_reports rr
-  WHERE rr.created_at >= v_current_month_start;
+  INNER JOIN pharmacy p ON p.id = rr.pharmacy_id
+  WHERE rr.created_at >= v_current_month_start
+    AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
 
   -- Current month returns count
   SELECT COUNT(*)::INTEGER
   INTO v_current_month_returns
   FROM return_reports rr
-  WHERE rr.created_at >= v_current_month_start;
+  INNER JOIN pharmacy p ON p.id = rr.pharmacy_id
+  WHERE rr.created_at >= v_current_month_start
+    AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
 
-  -- Current month pharmacies (pharmacies created in current month from pharmacy table)
+  -- Current month pharmacies (pharmacies created in current month)
   SELECT COUNT(*)::INTEGER
   INTO v_current_month_pharmacies
   FROM pharmacy p
-  WHERE p.created_at >= v_current_month_start;
+  WHERE p.created_at >= v_current_month_start
+    AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
 
   -- ============================================================
   -- 3. LAST MONTH METRICS (for % change calculation)
@@ -126,56 +151,59 @@ BEGIN
   ), 0)
   INTO v_last_month_returns_value
   FROM return_reports rr
+  INNER JOIN pharmacy p ON p.id = rr.pharmacy_id
   WHERE rr.created_at >= v_last_month_start 
-    AND rr.created_at < v_current_month_start;
+    AND rr.created_at < v_current_month_start
+    AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
 
   -- Last month returns count
   SELECT COUNT(*)::INTEGER
   INTO v_last_month_returns
   FROM return_reports rr
+  INNER JOIN pharmacy p ON p.id = rr.pharmacy_id
   WHERE rr.created_at >= v_last_month_start 
-    AND rr.created_at < v_current_month_start;
+    AND rr.created_at < v_current_month_start
+    AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
 
-  -- Last month pharmacies (pharmacies created in last month from pharmacy table)
+  -- Last month pharmacies (pharmacies created in last month)
   SELECT COUNT(*)::INTEGER
   INTO v_last_month_pharmacies
   FROM pharmacy p
   WHERE p.created_at >= v_last_month_start 
-    AND p.created_at < v_current_month_start;
+    AND p.created_at < v_current_month_start
+    AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
 
   -- ============================================================
   -- 4. CALCULATE PERCENTAGE CHANGES (current month vs last month)
-  -- Only calculate % change if last month had data to compare against
-  -- If no last month data, return 0 (no meaningful comparison)
   -- ============================================================
   
   v_returns_value_change := CASE 
     WHEN v_last_month_returns_value > 0 
     THEN ROUND(((v_current_month_value - v_last_month_returns_value) / v_last_month_returns_value) * 100, 1)
-    ELSE 0  -- No last month data to compare against
+    ELSE 0
   END;
 
   v_total_returns_change := CASE 
     WHEN v_last_month_returns > 0 
     THEN ROUND(((v_current_month_returns - v_last_month_returns)::NUMERIC / v_last_month_returns) * 100, 1)
-    ELSE 0  -- No last month data to compare against
+    ELSE 0
   END;
 
   v_avg_value_change := CASE 
     WHEN v_last_month_returns > 0 AND v_last_month_returns_value > 0
     THEN ROUND((((v_current_month_value / NULLIF(v_current_month_returns, 0)) - (v_last_month_returns_value / v_last_month_returns)) / (v_last_month_returns_value / v_last_month_returns)) * 100, 1)
-    ELSE 0  -- No last month data to compare against
+    ELSE 0
   END;
 
   v_pharmacies_change := CASE 
     WHEN v_last_month_pharmacies > 0 
     THEN ROUND(((v_current_month_pharmacies - v_last_month_pharmacies)::NUMERIC / v_last_month_pharmacies) * 100, 1)
-    ELSE 0  -- No last month data to compare against
+    ELSE 0
   END;
 
   -- ============================================================
-  -- 5. RETURNS VALUE TREND (Past 12 months)
-  -- Uses report_date from uploaded_documents table
+  -- 5. RETURNS VALUE TREND (Past 12 months, scoped to buying group)
+  -- Uses report_date from uploaded_documents table (fallback to rr.created_at)
   -- ============================================================
   
   WITH months AS (
@@ -192,7 +220,9 @@ BEGIN
       COUNT(*)::INTEGER AS items_count
     FROM return_reports rr
     INNER JOIN uploaded_documents ud ON ud.id = rr.document_id
+    INNER JOIN pharmacy p ON p.id = rr.pharmacy_id
     WHERE COALESCE(ud.report_date, rr.created_at::DATE) >= v_twelve_months_ago
+      AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id)
     GROUP BY DATE_TRUNC('month', COALESCE(ud.report_date, rr.created_at::DATE))::DATE
   )
   SELECT COALESCE(jsonb_agg(
@@ -208,7 +238,7 @@ BEGIN
   LEFT JOIN monthly_data md ON m.month_start = md.month_start;
 
   -- ============================================================
-  -- 6. TOP 5 PRODUCTS BY RETURNS VALUE (using itemName from data)
+  -- 6. TOP 5 PRODUCTS BY RETURNS VALUE (scoped to buying group)
   -- ============================================================
   
   WITH product_returns AS (
@@ -218,8 +248,10 @@ BEGIN
       SUM(COALESCE((rr.data->>'quantity')::INTEGER, 1)) AS total_quantity,
       COUNT(*) AS return_count
     FROM return_reports rr
-    WHERE (rr.data->>'itemName' IS NOT NULL AND rr.data->>'itemName' != '')
-       OR (rr.data->>'productDescription' IS NOT NULL AND rr.data->>'productDescription' != '')
+    INNER JOIN pharmacy p ON p.id = rr.pharmacy_id
+    WHERE ((rr.data->>'itemName' IS NOT NULL AND rr.data->>'itemName' != '')
+        OR (rr.data->>'productDescription' IS NOT NULL AND rr.data->>'productDescription' != ''))
+      AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id)
     GROUP BY COALESCE(rr.data->>'itemName', rr.data->>'productDescription', 'Unknown Product')
     ORDER BY total_value DESC
     LIMIT 5
@@ -236,7 +268,8 @@ BEGIN
   FROM product_returns pr;
 
   -- ============================================================
-  -- 7. DISTRIBUTOR BREAKDOWN
+  -- 7. DISTRIBUTOR BREAKDOWN (scoped to buying group)
+  -- Only distributors referenced by this tenant's uploaded_documents
   -- ============================================================
   
   WITH distributor_stats AS (
@@ -249,7 +282,9 @@ BEGIN
     FROM reverse_distributors rd
     INNER JOIN uploaded_documents ud ON ud.reverse_distributor_id = rd.id
     INNER JOIN return_reports rr ON rr.document_id = ud.id
+    INNER JOIN pharmacy p ON p.id = rr.pharmacy_id
     WHERE rd.is_active = true
+      AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id)
     GROUP BY rd.id, rd.name
     HAVING COUNT(rr.id) > 0
     ORDER BY total_value DESC
@@ -268,9 +303,8 @@ BEGIN
   FROM distributor_stats ds;
 
   -- ============================================================
-  -- 8. STATE BREAKDOWN
+  -- 8. STATE BREAKDOWN (scoped to buying group)
   -- Groups pharmacies by state from physical_address JSONB field
-  -- Structure: physical_address = { street, city, state, zip } or NULL
   -- ============================================================
   
   WITH state_stats AS (
@@ -286,6 +320,7 @@ BEGIN
       COALESCE(SUM(COALESCE((rr.data->>'creditAmount')::NUMERIC, 0)), 0) AS total_value
     FROM pharmacy p
     LEFT JOIN return_reports rr ON rr.pharmacy_id = p.id
+    WHERE (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id)
     GROUP BY 
       CASE 
         WHEN p.physical_address IS NULL THEN 'Unknown'
@@ -340,6 +375,10 @@ BEGIN
     ),
     'distributorBreakdown', v_distributor_breakdown,
     'stateBreakdown', v_state_breakdown,
+    'scope', jsonb_build_object(
+      'buyingGroupId', p_buying_group_id,
+      'isGlobal', p_buying_group_id IS NULL
+    ),
     'generatedAt', NOW()
   );
 
@@ -348,12 +387,19 @@ END;
 $$;
 
 -- Grant permissions
-GRANT EXECUTE ON FUNCTION get_admin_analytics() TO authenticated;
-GRANT EXECUTE ON FUNCTION get_admin_analytics() TO service_role;
+GRANT EXECUTE ON FUNCTION get_admin_analytics(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_admin_analytics(UUID) TO service_role;
 
-COMMENT ON FUNCTION get_admin_analytics IS 'Get all analytics data for admin dashboard: key metrics, trends, top products, and distributor breakdown. Each return_reports record = 1 item.';
+COMMENT ON FUNCTION get_admin_analytics(UUID) IS
+  'Get all analytics data for admin dashboard: key metrics, trends, top products, distributor and state breakdowns. '
+  'p_buying_group_id NULL => global (MainAdmin); non-null => scoped to pharmacies where pharmacy.created_by matches.';
 
 -- ============================================================
 -- Example Usage:
 -- ============================================================
+-- Global (MainAdmin):
 -- SELECT get_admin_analytics();
+-- SELECT get_admin_analytics(NULL);
+--
+-- Scoped to a buying group:
+-- SELECT get_admin_analytics('29f984d2-c0ac-4bed-9358-e3a41e4634a6'::UUID);

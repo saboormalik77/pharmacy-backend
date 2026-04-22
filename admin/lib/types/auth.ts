@@ -4,6 +4,7 @@ export interface User {
   name: string;
   role?: string;
   permissions?: string[];
+  buying_group_id?: string | null;
 }
 
 export interface LoginCredentials {

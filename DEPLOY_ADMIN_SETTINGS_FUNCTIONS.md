@@ -1,16 +1,21 @@
--- ============================================================
--- Admin Settings Management RPC Functions
--- Handles CRUD operations for admin system settings
--- ============================================================
+# Deploy Admin Settings Multi-Tenant Functions
 
--- ============================================================
--- 1. GET ADMIN SETTINGS
--- Returns all admin settings (singleton row)
--- ============================================================
+## Quick Fix - Manual Deployment Required
 
--- Drop old function and create new one with buying group support
+The `admin_settings` table already has the `buying_group_id` column, but the updated RPC functions need to be deployed manually.
+
+### Steps:
+
+1. **Go to your Supabase Dashboard** → SQL Editor
+
+2. **Run the following SQL** (copy and paste):
+
+```sql
+-- Drop old functions
 DROP FUNCTION IF EXISTS get_admin_settings();
+DROP FUNCTION IF EXISTS update_admin_settings(TEXT, TEXT, TEXT, TEXT, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN);
 
+-- Create new get_admin_settings function with buying group support
 CREATE OR REPLACE FUNCTION get_admin_settings(
   p_buying_group_id UUID DEFAULT NULL
 )
@@ -21,7 +26,6 @@ AS $$
 DECLARE
   v_settings JSONB;
 BEGIN
-  -- Try to get settings for the specific buying group
   SELECT jsonb_build_object(
     'siteName', COALESCE(s.site_name, 'PharmAdmin'),
     'siteEmail', COALESCE(s.site_email, 'admin@pharmadmin.com'),
@@ -47,13 +51,10 @@ BEGIN
   INTO v_settings
   FROM admin_settings s
   WHERE (
-    -- MainAdmin: get global settings (buying_group_id IS NULL)
     (p_buying_group_id IS NULL AND s.buying_group_id IS NULL)
-    -- Buying group admin: get their group's settings
     OR (p_buying_group_id IS NOT NULL AND s.buying_group_id = p_buying_group_id)
   );
   
-  -- If no settings exist for this buying group, create defaults
   IF v_settings IS NULL THEN
     INSERT INTO admin_settings (buying_group_id, created_at, updated_at)
     VALUES (p_buying_group_id, NOW(), NOW())
@@ -93,14 +94,7 @@ BEGIN
 END;
 $$;
 
--- ============================================================
--- 2. UPDATE ADMIN SETTINGS
--- Updates admin settings (all fields optional)
--- ============================================================
-
--- Drop old function and create new one with buying group support
-DROP FUNCTION IF EXISTS update_admin_settings(TEXT, TEXT, TEXT, TEXT, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN);
-
+-- Create update_admin_settings function with buying group support
 CREATE OR REPLACE FUNCTION update_admin_settings(
   p_site_name TEXT DEFAULT NULL,
   p_site_email TEXT DEFAULT NULL,
@@ -192,9 +186,8 @@ BEGIN
     logo_url = COALESCE(p_logo_url, admin_settings.logo_url),
     updated_at = NOW();
   
-  -- Handle global settings (MainAdmin) separately due to different conflict condition
+  -- Handle global settings (MainAdmin) separately
   IF p_buying_group_id IS NULL THEN
-    -- For global settings, use a different approach since we can't use buying_group_id in ON CONFLICT
     UPDATE admin_settings
     SET
       site_name = COALESCE(p_site_name, site_name),
@@ -218,7 +211,6 @@ BEGIN
       updated_at = NOW()
     WHERE buying_group_id IS NULL;
     
-    -- If no global settings row exists, create one
     IF NOT FOUND THEN
       INSERT INTO admin_settings (
         buying_group_id, site_name, site_email, timezone, language,
@@ -282,158 +274,34 @@ BEGIN
 END;
 $$;
 
--- ============================================================
--- 3. RESET ADMIN PASSWORD (Self-service)
--- Admin can reset their own password with current password verification
--- ============================================================
-
-CREATE OR REPLACE FUNCTION reset_admin_own_password(
-  p_admin_id UUID,
-  p_current_password_hash TEXT,
-  p_new_password_hash TEXT
-)
-RETURNS JSONB
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-DECLARE
-  v_stored_hash TEXT;
-BEGIN
-  -- Get current password hash
-  SELECT password_hash INTO v_stored_hash
-  FROM admin
-  WHERE id = p_admin_id;
-  
-  IF v_stored_hash IS NULL THEN
-    RETURN jsonb_build_object(
-      'error', true,
-      'message', 'Admin user not found'
-    );
-  END IF;
-  
-  -- Note: bcrypt comparison must be done in application layer
-  -- This function expects the application to have already verified the current password
-  -- and passes a flag or the verified hash
-  
-  -- Update password
-  UPDATE admin
-  SET
-    password_hash = p_new_password_hash,
-    updated_at = NOW()
-  WHERE id = p_admin_id;
-  
-  RETURN jsonb_build_object(
-    'error', false,
-    'message', 'Password reset successfully'
-  );
-END;
-$$;
-
--- ============================================================
--- 4. GET AVAILABLE TIMEZONES
--- Returns list of supported timezones
--- ============================================================
-
-CREATE OR REPLACE FUNCTION get_available_timezones()
-RETURNS JSONB
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-BEGIN
-  RETURN jsonb_build_object(
-    'timezones', jsonb_build_array(
-      jsonb_build_object('value', 'America/New_York', 'label', 'Eastern Time (ET)'),
-      jsonb_build_object('value', 'America/Chicago', 'label', 'Central Time (CT)'),
-      jsonb_build_object('value', 'America/Denver', 'label', 'Mountain Time (MT)'),
-      jsonb_build_object('value', 'America/Los_Angeles', 'label', 'Pacific Time (PT)'),
-      jsonb_build_object('value', 'America/Phoenix', 'label', 'Arizona Time'),
-      jsonb_build_object('value', 'America/Anchorage', 'label', 'Alaska Time (AKT)'),
-      jsonb_build_object('value', 'Pacific/Honolulu', 'label', 'Hawaii Time (HT)'),
-      jsonb_build_object('value', 'UTC', 'label', 'UTC')
-    )
-  );
-END;
-$$;
-
--- ============================================================
--- 5. GET AVAILABLE LANGUAGES
--- Returns list of supported languages
--- ============================================================
-
-CREATE OR REPLACE FUNCTION get_available_languages()
-RETURNS JSONB
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-BEGIN
-  RETURN jsonb_build_object(
-    'languages', jsonb_build_array(
-      jsonb_build_object('value', 'en', 'label', 'English'),
-      jsonb_build_object('value', 'es', 'label', 'Spanish'),
-      jsonb_build_object('value', 'fr', 'label', 'French')
-    )
-  );
-END;
-$$;
-
--- ============================================================
--- 6. GET ADMIN PROFILE BY ID
--- Returns admin user profile info (for settings page)
--- ============================================================
-
-CREATE OR REPLACE FUNCTION get_admin_profile(
-  p_admin_id UUID
-)
-RETURNS JSONB
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-DECLARE
-  v_admin JSONB;
-BEGIN
-  SELECT jsonb_build_object(
-    'id', a.id,
-    'email', a.email,
-    'name', a.name,
-    'role', a.role,
-    'roleDisplay', CASE a.role
-      WHEN 'super_admin' THEN 'Super Admin'
-      WHEN 'manager' THEN 'Manager'
-      WHEN 'reviewer' THEN 'Reviewer'
-      WHEN 'support' THEN 'Support'
-      ELSE a.role
-    END,
-    'isActive', a.is_active,
-    'lastLoginAt', a.last_login_at,
-    'createdAt', a.created_at,
-    'updatedAt', a.updated_at
-  )
-  INTO v_admin
-  FROM admin a
-  WHERE a.id = p_admin_id;
-  
-  IF v_admin IS NULL THEN
-    RETURN jsonb_build_object(
-      'error', true,
-      'message', 'Admin user not found'
-    );
-  END IF;
-  
-  RETURN jsonb_build_object(
-    'error', false,
-    'admin', v_admin
-  );
-END;
-$$;
-
--- ============================================================
--- GRANT PERMISSIONS
--- ============================================================
-
+-- Grant permissions
 GRANT EXECUTE ON FUNCTION get_admin_settings(UUID) TO authenticated, anon, service_role;
 GRANT EXECUTE ON FUNCTION update_admin_settings(TEXT, TEXT, TEXT, TEXT, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, UUID) TO authenticated, anon, service_role;
-GRANT EXECUTE ON FUNCTION reset_admin_own_password TO authenticated, anon, service_role;
-GRANT EXECUTE ON FUNCTION get_available_timezones TO authenticated, anon, service_role;
-GRANT EXECUTE ON FUNCTION get_available_languages TO authenticated, anon, service_role;
-GRANT EXECUTE ON FUNCTION get_admin_profile TO authenticated, anon, service_role;
+```
 
+3. **Fix potential table constraint conflicts** (if needed):
+
+```sql
+-- Ensure unique constraint exists for buying group scoping
+CREATE UNIQUE INDEX IF NOT EXISTS idx_admin_settings_unique_buying_group 
+  ON admin_settings(buying_group_id) 
+  WHERE buying_group_id IS NOT NULL;
+```
+
+4. **Test the deployment** by running in SQL Editor:
+
+```sql
+-- Test function works
+SELECT get_admin_settings(NULL);
+```
+
+## What This Fixes
+
+- ✅ Each buying group gets their own business settings (name, logo, warehouse info)
+- ✅ Logo uploads are now scoped per buying group 
+- ✅ When buying group A changes their logo, it won't affect buying group B
+- ✅ MainAdmin can still have global settings (buying_group_id = NULL)
+
+## After Deployment
+
+The backend code changes are already complete. Once you deploy these functions, the multi-tenancy will work immediately!
