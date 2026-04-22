@@ -12,14 +12,16 @@ interface AdminRequest extends Request {
   adminEmail?: string;
   adminName?: string;
   adminRole?: string;
+  adminBuyingGroupId?: string | null;
 }
 
 // ============================================================
 // GET /api/admin/settings - Get admin settings
 // ============================================================
 export const getAdminSettingsHandler = catchAsync(
-  async (_req: Request, res: Response, _next: NextFunction) => {
-    const settings = await adminSettingsService.getAdminSettings();
+  async (req: AdminRequest, res: Response, _next: NextFunction) => {
+    const buyingGroupId = req.adminBuyingGroupId ?? null;
+    const settings = await adminSettingsService.getAdminSettings(buyingGroupId);
 
     res.status(200).json({
       status: 'success',
@@ -34,7 +36,7 @@ export const getAdminSettingsHandler = catchAsync(
 // PATCH /api/admin/settings - Update admin settings
 // ============================================================
 export const updateAdminSettingsHandler = catchAsync(
-  async (req: Request, res: Response, _next: NextFunction) => {
+  async (req: AdminRequest, res: Response, _next: NextFunction) => {
     const {
       siteName,
       siteEmail,
@@ -66,6 +68,8 @@ export const updateAdminSettingsHandler = catchAsync(
       logo_url,
     } = req.body;
 
+    const buyingGroupId = req.adminBuyingGroupId ?? null;
+    
     const settings = await adminSettingsService.updateAdminSettings({
       siteName,
       siteEmail,
@@ -85,7 +89,7 @@ export const updateAdminSettingsHandler = catchAsync(
       warehouseContactName: warehouseContactName ?? warehouse_contact_name,
       businessName: businessName ?? business_name,
       logoUrl: logoUrl ?? logo_url,
-    });
+    }, buyingGroupId);
 
     res.status(200).json({
       status: 'success',
@@ -118,18 +122,21 @@ export const uploadLogoMiddleware = logoUpload;
 // POST /api/admin/settings/upload-logo - Upload logo
 // ============================================================
 export const uploadLogoHandler = catchAsync(
-  async (req: Request, res: Response, _next: NextFunction) => {
+  async (req: AdminRequest, res: Response, _next: NextFunction) => {
     if (!req.file) {
       throw new AppError('No logo file provided', 400);
     }
 
+    const buyingGroupId = req.adminBuyingGroupId ?? null;
+
     const logoUrl = await adminSettingsService.uploadLogo(
       req.file.buffer,
       req.file.originalname,
-      req.file.mimetype
+      req.file.mimetype,
+      buyingGroupId
     );
 
-    const settings = await adminSettingsService.updateAdminSettings({ logoUrl });
+    const settings = await adminSettingsService.updateAdminSettings({ logoUrl }, buyingGroupId);
 
     res.status(200).json({
       status: 'success',

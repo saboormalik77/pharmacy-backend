@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '../config/supabase';
 import { AppError } from '../utils/appError';
+import { getWarehouseAddressFromTable } from '../utils/warehouseAddress';
 
 function ensureAdmin() {
   if (!supabaseAdmin) throw new AppError('Supabase admin client not configured', 500);
@@ -154,11 +155,8 @@ export const createShipmentGroupFedexShipment = async (
     }
   }
 
-  const { data: settings, error: settingsErr } = await sb.rpc('get_admin_settings');
-  if (settingsErr) throw new AppError(`Failed to load settings: ${settingsErr.message}`, 500);
-
-  const s = settings?.settings || settings;
-  if (!s?.warehouseStreet || !s?.warehouseCity || !s?.warehouseState || !s?.warehouseZip) {
+  const s = await getWarehouseAddressFromTable();
+  if (!s.warehouseStreet || !s.warehouseCity || !s.warehouseState || !s.warehouseZip) {
     throw new AppError('Warehouse address is not configured. Set it in Admin Settings.', 400);
   }
 
@@ -274,11 +272,8 @@ export const scheduleShipmentGroupPickup = async (
     throw new AppError('Shipment group not found or has no outbound tracking. Create FedEx shipment first.', 400);
   }
 
-  const { data: settings, error: settingsErr } = await sb.rpc('get_admin_settings');
-  if (settingsErr) throw new AppError(`Failed to load settings: ${settingsErr.message}`, 500);
-
-  const s = settings?.settings || settings;
-  if (!s?.warehouseStreet || !s?.warehouseCity || !s?.warehouseState || !s?.warehouseZip) {
+  const s = await getWarehouseAddressFromTable();
+  if (!s.warehouseStreet || !s.warehouseCity || !s.warehouseState || !s.warehouseZip) {
     throw new AppError('Warehouse address is not configured. Set it in Admin Settings.', 400);
   }
 

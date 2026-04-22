@@ -1,16 +1,116 @@
 -- ============================================================
--- Admin Settings Management RPC Functions
--- Handles CRUD operations for admin system settings
+-- FIX: Convert admin_settings from singleton to multi-tenant
+-- ============================================================
+-- ISSUE: admin_settings table uses id=1 (singleton), so all buying groups
+-- share the same settings row. When one group changes their business name
+-- or logo, it affects all groups.
+--
+-- SOLUTION: Add buying_group_id column and migrate to per-group settings.
 -- ============================================================
 
+BEGIN;
+
 -- ============================================================
--- 1. GET ADMIN SETTINGS
--- Returns all admin settings (singleton row)
+-- 1. Add buying_group_id column and modify constraints
 -- ============================================================
 
--- Drop old function and create new one with buying group support
+-- Remove the singleton constraint that forces id = 1
+ALTER TABLE admin_settings DROP CONSTRAINT IF EXISTS admin_settings_id_check;
+
+-- Add buying_group_id column
+ALTER TABLE admin_settings 
+ADD COLUMN IF NOT EXISTS buying_group_id UUID REFERENCES admin(id) ON DELETE CASCADE;
+
+-- Create index for efficient lookups
+CREATE INDEX IF NOT EXISTS idx_admin_settings_buying_group_id 
+  ON admin_settings(buying_group_id);
+
+-- ============================================================
+-- 2. Data Migration Strategy
+-- ============================================================
+-- We need to decide what to do with the existing singleton row (id=1).
+-- Options:
+-- A) Assign it to the first super_admin found
+-- B) Delete it and let each buying group create their own
+-- C) Clone it for each existing super_admin
+--
+-- We'll go with option A (assign to first super_admin) as it's safest.
+-- ============================================================
+
+DO $$
+DECLARE
+  v_first_super_admin_id UUID;
+  v_settings_count INTEGER;
+BEGIN
+  -- Check if there's an existing singleton settings row
+  SELECT COUNT(*) INTO v_settings_count FROM admin_settings WHERE id = 1;
+  
+  IF v_settings_count > 0 THEN
+    -- Get the first super_admin (buying group owner)
+    SELECT id INTO v_first_super_admin_id 
+    FROM admin 
+    WHERE role = 'super_admin' 
+    ORDER BY created_at ASC 
+    LIMIT 1;
+    
+    IF v_first_super_admin_id IS NOT NULL THEN
+      -- Assign the existing settings to this super_admin
+      UPDATE admin_settings 
+      SET buying_group_id = v_first_super_admin_id 
+      WHERE id = 1 AND buying_group_id IS NULL;
+      
+      RAISE NOTICE 'Existing settings (id=1) assigned to super_admin: %', v_first_super_admin_id;
+    ELSE
+      -- No super_admins found, delete the singleton row
+      DELETE FROM admin_settings WHERE id = 1;
+      RAISE NOTICE 'No super_admins found, deleted singleton settings row';
+    END IF;
+  END IF;
+END $$;
+
+-- ============================================================
+-- 3. Update Primary Key and Constraints
+-- ============================================================
+
+-- Drop old primary key and create a composite one
+ALTER TABLE admin_settings DROP CONSTRAINT IF EXISTS admin_settings_pkey;
+
+-- Change id to be auto-increment instead of always 1
+ALTER TABLE admin_settings ALTER COLUMN id DROP DEFAULT;
+DROP SEQUENCE IF EXISTS admin_settings_id_seq CASCADE;
+CREATE SEQUENCE admin_settings_id_seq;
+ALTER TABLE admin_settings ALTER COLUMN id SET DEFAULT nextval('admin_settings_id_seq');
+
+-- Set the sequence to start after existing IDs
+SELECT setval('admin_settings_id_seq', COALESCE(MAX(id), 0) + 1, false) FROM admin_settings;
+
+-- Create new primary key (id remains primary, but buying_group_id provides uniqueness per group)
+ALTER TABLE admin_settings ADD CONSTRAINT admin_settings_pkey PRIMARY KEY (id);
+
+-- Ensure each buying group has at most one settings row
+CREATE UNIQUE INDEX IF NOT EXISTS idx_admin_settings_unique_buying_group 
+  ON admin_settings(buying_group_id) 
+  WHERE buying_group_id IS NOT NULL;
+
+-- Allow NULL buying_group_id for MainAdmin global settings (max 1 row)
+CREATE UNIQUE INDEX IF NOT EXISTS idx_admin_settings_unique_global 
+  ON admin_settings(id) 
+  WHERE buying_group_id IS NULL;
+
+COMMIT;
+
+-- ============================================================
+-- 4. Update the RPC Functions
+-- ============================================================
+
+-- Drop the old functions
 DROP FUNCTION IF EXISTS get_admin_settings();
+DROP FUNCTION IF EXISTS update_admin_settings(TEXT, TEXT, TEXT, TEXT, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN);
+DROP FUNCTION IF EXISTS update_admin_settings(TEXT, TEXT, TEXT, TEXT, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT);
 
+-- ============================================================
+-- New get_admin_settings with buying group support
+-- ============================================================
 CREATE OR REPLACE FUNCTION get_admin_settings(
   p_buying_group_id UUID DEFAULT NULL
 )
@@ -94,13 +194,8 @@ END;
 $$;
 
 -- ============================================================
--- 2. UPDATE ADMIN SETTINGS
--- Updates admin settings (all fields optional)
+-- New update_admin_settings with buying group support
 -- ============================================================
-
--- Drop old function and create new one with buying group support
-DROP FUNCTION IF EXISTS update_admin_settings(TEXT, TEXT, TEXT, TEXT, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN);
-
 CREATE OR REPLACE FUNCTION update_admin_settings(
   p_site_name TEXT DEFAULT NULL,
   p_site_email TEXT DEFAULT NULL,
@@ -148,7 +243,7 @@ BEGIN
     );
   END IF;
   
-  -- Insert or update settings for this buying group using UPSERT
+  -- Insert or update settings for this buying group
   INSERT INTO admin_settings (
     buying_group_id, site_name, site_email, timezone, language,
     email_notifications, document_approval_notif, payment_notif, shipment_notif,
@@ -194,54 +289,48 @@ BEGIN
   
   -- Handle global settings (MainAdmin) separately due to different conflict condition
   IF p_buying_group_id IS NULL THEN
-    -- For global settings, use a different approach since we can't use buying_group_id in ON CONFLICT
-    UPDATE admin_settings
-    SET
-      site_name = COALESCE(p_site_name, site_name),
-      site_email = COALESCE(p_site_email, site_email),
-      timezone = COALESCE(p_timezone, timezone),
-      language = COALESCE(p_language, language),
-      email_notifications = COALESCE(p_email_notifications, email_notifications),
-      document_approval_notif = COALESCE(p_document_approval_notif, document_approval_notif),
-      payment_notif = COALESCE(p_payment_notif, payment_notif),
-      shipment_notif = COALESCE(p_shipment_notif, shipment_notif),
-      warehouse_name = COALESCE(p_warehouse_name, warehouse_name),
-      warehouse_street = COALESCE(p_warehouse_street, warehouse_street),
-      warehouse_city = COALESCE(p_warehouse_city, warehouse_city),
-      warehouse_state = COALESCE(p_warehouse_state, warehouse_state),
-      warehouse_zip = COALESCE(p_warehouse_zip, warehouse_zip),
-      warehouse_country = COALESCE(p_warehouse_country, warehouse_country),
-      warehouse_phone = COALESCE(p_warehouse_phone, warehouse_phone),
-      warehouse_contact_name = COALESCE(p_warehouse_contact_name, warehouse_contact_name),
-      business_name = COALESCE(p_business_name, business_name),
-      logo_url = COALESCE(p_logo_url, logo_url),
-      updated_at = NOW()
-    WHERE buying_group_id IS NULL;
-    
-    -- If no global settings row exists, create one
-    IF NOT FOUND THEN
-      INSERT INTO admin_settings (
-        buying_group_id, site_name, site_email, timezone, language,
-        email_notifications, document_approval_notif, payment_notif, shipment_notif,
-        warehouse_name, warehouse_street, warehouse_city, warehouse_state, warehouse_zip,
-        warehouse_country, warehouse_phone, warehouse_contact_name, business_name, logo_url,
-        created_at, updated_at
-      )
-      VALUES (
-        NULL,
-        COALESCE(p_site_name, 'PharmAdmin'),
-        COALESCE(p_site_email, 'admin@pharmadmin.com'),
-        COALESCE(p_timezone, 'America/New_York'),
-        COALESCE(p_language, 'en'),
-        COALESCE(p_email_notifications, true),
-        COALESCE(p_document_approval_notif, true),
-        COALESCE(p_payment_notif, true),
-        COALESCE(p_shipment_notif, true),
-        p_warehouse_name, p_warehouse_street, p_warehouse_city, p_warehouse_state, p_warehouse_zip,
-        p_warehouse_country, p_warehouse_phone, p_warehouse_contact_name, p_business_name, p_logo_url,
-        NOW(), NOW()
-      );
-    END IF;
+    INSERT INTO admin_settings (
+      buying_group_id, site_name, site_email, timezone, language,
+      email_notifications, document_approval_notif, payment_notif, shipment_notif,
+      warehouse_name, warehouse_street, warehouse_city, warehouse_state, warehouse_zip,
+      warehouse_country, warehouse_phone, warehouse_contact_name, business_name, logo_url,
+      created_at, updated_at
+    )
+    VALUES (
+      NULL,
+      COALESCE(p_site_name, 'PharmAdmin'),
+      COALESCE(p_site_email, 'admin@pharmadmin.com'),
+      COALESCE(p_timezone, 'America/New_York'),
+      COALESCE(p_language, 'en'),
+      COALESCE(p_email_notifications, true),
+      COALESCE(p_document_approval_notif, true),
+      COALESCE(p_payment_notif, true),
+      COALESCE(p_shipment_notif, true),
+      p_warehouse_name, p_warehouse_street, p_warehouse_city, p_warehouse_state, p_warehouse_zip,
+      p_warehouse_country, p_warehouse_phone, p_warehouse_contact_name, p_business_name, p_logo_url,
+      NOW(), NOW()
+    )
+    ON CONFLICT (id) WHERE buying_group_id IS NULL
+    DO UPDATE SET
+      site_name = COALESCE(p_site_name, admin_settings.site_name),
+      site_email = COALESCE(p_site_email, admin_settings.site_email),
+      timezone = COALESCE(p_timezone, admin_settings.timezone),
+      language = COALESCE(p_language, admin_settings.language),
+      email_notifications = COALESCE(p_email_notifications, admin_settings.email_notifications),
+      document_approval_notif = COALESCE(p_document_approval_notif, admin_settings.document_approval_notif),
+      payment_notif = COALESCE(p_payment_notif, admin_settings.payment_notif),
+      shipment_notif = COALESCE(p_shipment_notif, admin_settings.shipment_notif),
+      warehouse_name = COALESCE(p_warehouse_name, admin_settings.warehouse_name),
+      warehouse_street = COALESCE(p_warehouse_street, admin_settings.warehouse_street),
+      warehouse_city = COALESCE(p_warehouse_city, admin_settings.warehouse_city),
+      warehouse_state = COALESCE(p_warehouse_state, admin_settings.warehouse_state),
+      warehouse_zip = COALESCE(p_warehouse_zip, admin_settings.warehouse_zip),
+      warehouse_country = COALESCE(p_warehouse_country, admin_settings.warehouse_country),
+      warehouse_phone = COALESCE(p_warehouse_phone, admin_settings.warehouse_phone),
+      warehouse_contact_name = COALESCE(p_warehouse_contact_name, admin_settings.warehouse_contact_name),
+      business_name = COALESCE(p_business_name, admin_settings.business_name),
+      logo_url = COALESCE(p_logo_url, admin_settings.logo_url),
+      updated_at = NOW();
   END IF;
   
   -- Fetch updated/created settings
@@ -283,157 +372,24 @@ END;
 $$;
 
 -- ============================================================
--- 3. RESET ADMIN PASSWORD (Self-service)
--- Admin can reset their own password with current password verification
+-- Grant permissions
 -- ============================================================
-
-CREATE OR REPLACE FUNCTION reset_admin_own_password(
-  p_admin_id UUID,
-  p_current_password_hash TEXT,
-  p_new_password_hash TEXT
-)
-RETURNS JSONB
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-DECLARE
-  v_stored_hash TEXT;
-BEGIN
-  -- Get current password hash
-  SELECT password_hash INTO v_stored_hash
-  FROM admin
-  WHERE id = p_admin_id;
-  
-  IF v_stored_hash IS NULL THEN
-    RETURN jsonb_build_object(
-      'error', true,
-      'message', 'Admin user not found'
-    );
-  END IF;
-  
-  -- Note: bcrypt comparison must be done in application layer
-  -- This function expects the application to have already verified the current password
-  -- and passes a flag or the verified hash
-  
-  -- Update password
-  UPDATE admin
-  SET
-    password_hash = p_new_password_hash,
-    updated_at = NOW()
-  WHERE id = p_admin_id;
-  
-  RETURN jsonb_build_object(
-    'error', false,
-    'message', 'Password reset successfully'
-  );
-END;
-$$;
-
--- ============================================================
--- 4. GET AVAILABLE TIMEZONES
--- Returns list of supported timezones
--- ============================================================
-
-CREATE OR REPLACE FUNCTION get_available_timezones()
-RETURNS JSONB
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-BEGIN
-  RETURN jsonb_build_object(
-    'timezones', jsonb_build_array(
-      jsonb_build_object('value', 'America/New_York', 'label', 'Eastern Time (ET)'),
-      jsonb_build_object('value', 'America/Chicago', 'label', 'Central Time (CT)'),
-      jsonb_build_object('value', 'America/Denver', 'label', 'Mountain Time (MT)'),
-      jsonb_build_object('value', 'America/Los_Angeles', 'label', 'Pacific Time (PT)'),
-      jsonb_build_object('value', 'America/Phoenix', 'label', 'Arizona Time'),
-      jsonb_build_object('value', 'America/Anchorage', 'label', 'Alaska Time (AKT)'),
-      jsonb_build_object('value', 'Pacific/Honolulu', 'label', 'Hawaii Time (HT)'),
-      jsonb_build_object('value', 'UTC', 'label', 'UTC')
-    )
-  );
-END;
-$$;
-
--- ============================================================
--- 5. GET AVAILABLE LANGUAGES
--- Returns list of supported languages
--- ============================================================
-
-CREATE OR REPLACE FUNCTION get_available_languages()
-RETURNS JSONB
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-BEGIN
-  RETURN jsonb_build_object(
-    'languages', jsonb_build_array(
-      jsonb_build_object('value', 'en', 'label', 'English'),
-      jsonb_build_object('value', 'es', 'label', 'Spanish'),
-      jsonb_build_object('value', 'fr', 'label', 'French')
-    )
-  );
-END;
-$$;
-
--- ============================================================
--- 6. GET ADMIN PROFILE BY ID
--- Returns admin user profile info (for settings page)
--- ============================================================
-
-CREATE OR REPLACE FUNCTION get_admin_profile(
-  p_admin_id UUID
-)
-RETURNS JSONB
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-DECLARE
-  v_admin JSONB;
-BEGIN
-  SELECT jsonb_build_object(
-    'id', a.id,
-    'email', a.email,
-    'name', a.name,
-    'role', a.role,
-    'roleDisplay', CASE a.role
-      WHEN 'super_admin' THEN 'Super Admin'
-      WHEN 'manager' THEN 'Manager'
-      WHEN 'reviewer' THEN 'Reviewer'
-      WHEN 'support' THEN 'Support'
-      ELSE a.role
-    END,
-    'isActive', a.is_active,
-    'lastLoginAt', a.last_login_at,
-    'createdAt', a.created_at,
-    'updatedAt', a.updated_at
-  )
-  INTO v_admin
-  FROM admin a
-  WHERE a.id = p_admin_id;
-  
-  IF v_admin IS NULL THEN
-    RETURN jsonb_build_object(
-      'error', true,
-      'message', 'Admin user not found'
-    );
-  END IF;
-  
-  RETURN jsonb_build_object(
-    'error', false,
-    'admin', v_admin
-  );
-END;
-$$;
-
--- ============================================================
--- GRANT PERMISSIONS
--- ============================================================
-
 GRANT EXECUTE ON FUNCTION get_admin_settings(UUID) TO authenticated, anon, service_role;
 GRANT EXECUTE ON FUNCTION update_admin_settings(TEXT, TEXT, TEXT, TEXT, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, UUID) TO authenticated, anon, service_role;
-GRANT EXECUTE ON FUNCTION reset_admin_own_password TO authenticated, anon, service_role;
-GRANT EXECUTE ON FUNCTION get_available_timezones TO authenticated, anon, service_role;
-GRANT EXECUTE ON FUNCTION get_available_languages TO authenticated, anon, service_role;
-GRANT EXECUTE ON FUNCTION get_admin_profile TO authenticated, anon, service_role;
 
+-- ============================================================
+-- Verification and Summary
+-- ============================================================
+DO $$
+DECLARE
+  v_settings_count INTEGER;
+  v_buying_groups INTEGER;
+BEGIN
+  SELECT COUNT(*) INTO v_settings_count FROM admin_settings;
+  SELECT COUNT(*) INTO v_buying_groups FROM admin WHERE role = 'super_admin';
+  
+  RAISE NOTICE '=== Admin Settings Multi-Tenant Migration Complete ===';
+  RAISE NOTICE 'Total settings rows: %', v_settings_count;
+  RAISE NOTICE 'Total buying groups (super_admins): %', v_buying_groups;
+  RAISE NOTICE 'Each buying group can now have their own business name, logo, and warehouse settings.';
+END $$;

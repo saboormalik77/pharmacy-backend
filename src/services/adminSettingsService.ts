@@ -83,15 +83,22 @@ export interface ResetPasswordData {
 // ============================================================
 
 /**
- * Get admin settings
+ * Get admin settings (scoped to buying group)
  * Uses PostgreSQL RPC function - no custom JS logic
  */
-export const getAdminSettings = async (): Promise<AdminSettings> => {
+export const getAdminSettings = async (
+  buyingGroupId?: string | null
+): Promise<AdminSettings> => {
   if (!supabaseAdmin) {
     throw new AppError('Supabase admin client not configured', 500);
   }
 
-  const { data, error } = await supabaseAdmin.rpc('get_admin_settings');
+  console.log(`🔧 Fetching admin settings (buyingGroupId: ${buyingGroupId || 'global'})`);
+
+  // Get basic settings from admin_settings
+  const { data, error } = await supabaseAdmin.rpc('get_admin_settings', {
+    p_buying_group_id: buyingGroupId ?? null,
+  });
 
   if (error) {
     throw new AppError(`Failed to fetch admin settings: ${error.message}`, 400);
@@ -101,39 +108,130 @@ export const getAdminSettings = async (): Promise<AdminSettings> => {
     throw new AppError(data.message, 400);
   }
 
-  return data.settings;
+  let settings = data.settings;
+
+  // For MainAdmin (buyingGroupId is null), fetch warehouse info from warehouses table
+  if (buyingGroupId === null) {
+    console.log('🏭 MainAdmin detected - fetching warehouse from warehouses table');
+    
+    const { data: warehouseData, error: warehouseError } = await supabaseAdmin.rpc('get_default_warehouse');
+    
+    if (!warehouseError && warehouseData && !warehouseData.error && warehouseData.warehouse) {
+      const warehouse = warehouseData.warehouse;
+      
+      // Override warehouse fields with data from warehouses table
+      settings = {
+        ...settings,
+        warehouseName: warehouse.name || null,
+        warehouseStreet: warehouse.street || null,
+        warehouseCity: warehouse.city || null,
+        warehouseState: warehouse.state || null,
+        warehouseZip: warehouse.zip || null,
+        warehouseCountry: warehouse.country || 'US',
+        warehousePhone: warehouse.phone || null,
+        warehouseContactName: warehouse.contactName || null,
+      };
+      
+      console.log('✅ Warehouse data loaded from warehouses table');
+    } else {
+      console.log('⚠️ No default warehouse found, using admin_settings warehouse data');
+    }
+  }
+
+  return settings;
 };
 
 /**
- * Update admin settings
+ * Update admin settings (scoped to buying group)
  * Uses PostgreSQL RPC function - no custom JS logic
  */
 export const updateAdminSettings = async (
-  updateData: UpdateSettingsData
+  updateData: UpdateSettingsData,
+  buyingGroupId?: string | null
 ): Promise<AdminSettings> => {
   if (!supabaseAdmin) {
     throw new AppError('Supabase admin client not configured', 500);
   }
 
+  console.log(`🔧 Updating admin settings (buyingGroupId: ${buyingGroupId || 'global'})`);
+
+  // Check if this is a warehouse update for MainAdmin
+  const isWarehouseUpdate = updateData.warehouseName || updateData.warehouseStreet || 
+    updateData.warehouseCity || updateData.warehouseState || updateData.warehouseZip || 
+    updateData.warehouseCountry || updateData.warehousePhone || updateData.warehouseContactName;
+
+  if (buyingGroupId === null && isWarehouseUpdate) {
+    console.log('🏭 MainAdmin warehouse update - saving to warehouses table');
+    
+    // Get current default warehouse
+    const { data: warehouseData, error: warehouseError } = await supabaseAdmin.rpc('get_default_warehouse');
+    
+    if (!warehouseError && warehouseData && !warehouseData.error && warehouseData.warehouse) {
+      // Update existing warehouse
+      const { data: updateResult, error: updateError } = await supabaseAdmin.rpc('update_warehouse', {
+        p_warehouse_id: warehouseData.warehouse.id,
+        p_name: updateData.warehouseName || null,
+        p_contact_name: updateData.warehouseContactName || null,
+        p_phone: updateData.warehousePhone || null,
+        p_street: updateData.warehouseStreet || null,
+        p_city: updateData.warehouseCity || null,
+        p_state: updateData.warehouseState || null,
+        p_zip: updateData.warehouseZip || null,
+        p_country: updateData.warehouseCountry || null,
+        p_is_active: null, // Keep current status
+        p_is_default: null, // Keep current status
+        p_updated_by: null,
+      });
+      
+      if (updateError) {
+        throw new AppError(`Failed to update warehouse: ${updateError.message}`, 400);
+      }
+      
+      if (updateResult && updateResult.error) {
+        throw new AppError(updateResult.message, 400);
+      }
+      
+      console.log('✅ Warehouse updated in warehouses table');
+    } else {
+      console.log('⚠️ No default warehouse found, warehouse data will be ignored');
+    }
+  }
+
+  // Update other settings (non-warehouse) in admin_settings
+  const settingsUpdateData = { ...updateData };
+  
+  // For MainAdmin, don't update warehouse fields in admin_settings since they're now in warehouses table
+  if (buyingGroupId === null) {
+    settingsUpdateData.warehouseName = undefined;
+    settingsUpdateData.warehouseStreet = undefined;
+    settingsUpdateData.warehouseCity = undefined;
+    settingsUpdateData.warehouseState = undefined;
+    settingsUpdateData.warehouseZip = undefined;
+    settingsUpdateData.warehouseCountry = undefined;
+    settingsUpdateData.warehousePhone = undefined;
+    settingsUpdateData.warehouseContactName = undefined;
+  }
+
   const { data, error } = await supabaseAdmin.rpc('update_admin_settings', {
-    p_site_name: updateData.siteName || null,
-    p_site_email: updateData.siteEmail || null,
-    p_timezone: updateData.timezone || null,
-    p_language: updateData.language || null,
-    p_email_notifications: updateData.emailNotifications ?? null,
-    p_document_approval_notif: updateData.documentApprovalNotif ?? null,
-    p_payment_notif: updateData.paymentNotif ?? null,
-    p_shipment_notif: updateData.shipmentNotif ?? null,
-    p_warehouse_name: updateData.warehouseName || null,
-    p_warehouse_street: updateData.warehouseStreet || null,
-    p_warehouse_city: updateData.warehouseCity || null,
-    p_warehouse_state: updateData.warehouseState || null,
-    p_warehouse_zip: updateData.warehouseZip || null,
-    p_warehouse_country: updateData.warehouseCountry || null,
-    p_warehouse_phone: updateData.warehousePhone || null,
-    p_warehouse_contact_name: updateData.warehouseContactName || null,
-    p_business_name: updateData.businessName || null,
-    p_logo_url: updateData.logoUrl || null,
+    p_site_name: settingsUpdateData.siteName || null,
+    p_site_email: settingsUpdateData.siteEmail || null,
+    p_timezone: settingsUpdateData.timezone || null,
+    p_language: settingsUpdateData.language || null,
+    p_email_notifications: settingsUpdateData.emailNotifications ?? null,
+    p_document_approval_notif: settingsUpdateData.documentApprovalNotif ?? null,
+    p_payment_notif: settingsUpdateData.paymentNotif ?? null,
+    p_shipment_notif: settingsUpdateData.shipmentNotif ?? null,
+    p_warehouse_name: settingsUpdateData.warehouseName || null,
+    p_warehouse_street: settingsUpdateData.warehouseStreet || null,
+    p_warehouse_city: settingsUpdateData.warehouseCity || null,
+    p_warehouse_state: settingsUpdateData.warehouseState || null,
+    p_warehouse_zip: settingsUpdateData.warehouseZip || null,
+    p_warehouse_country: settingsUpdateData.warehouseCountry || null,
+    p_warehouse_phone: settingsUpdateData.warehousePhone || null,
+    p_warehouse_contact_name: settingsUpdateData.warehouseContactName || null,
+    p_business_name: settingsUpdateData.businessName || null,
+    p_logo_url: settingsUpdateData.logoUrl || null,
+    p_buying_group_id: buyingGroupId ?? null,
   });
 
   if (error) {
@@ -144,7 +242,8 @@ export const updateAdminSettings = async (
     throw new AppError(data.message, 400);
   }
 
-  return data.settings;
+  // Return the updated settings (which will fetch warehouse data from warehouses table for MainAdmin)
+  return await getAdminSettings(buyingGroupId);
 };
 
 /**
@@ -209,19 +308,24 @@ export const getAdminProfile = async (adminId: string): Promise<AdminProfile> =>
 
 /**
  * Upload logo to Supabase Storage and return the public URL
+ * (Scoped to buying group to avoid filename conflicts)
  */
 export const uploadLogo = async (
   fileBuffer: Buffer,
   originalName: string,
-  mimeType: string
+  mimeType: string,
+  buyingGroupId?: string | null
 ): Promise<string> => {
   if (!supabaseAdmin) {
     throw new AppError('Supabase admin client not configured', 500);
   }
 
   const ext = originalName.split('.').pop() || 'png';
-  const fileName = `logo_${Date.now()}.${ext}`;
+  const groupPrefix = buyingGroupId ? `${buyingGroupId}_` : 'global_';
+  const fileName = `logo_${groupPrefix}${Date.now()}.${ext}`;
   const filePath = `logos/${fileName}`;
+
+  console.log(`🔧 Uploading logo (buyingGroupId: ${buyingGroupId || 'global'}): ${filePath}`);
 
   const { error: uploadError } = await supabaseAdmin.storage
     .from('settings')

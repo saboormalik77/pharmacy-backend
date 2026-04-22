@@ -11,7 +11,11 @@ import { fetchSettings, updateWarehouseAddress, updateBusinessSettings, uploadLo
 export default function SettingsPage() {
     const dispatch = useAppDispatch();
     const { settings, isLoading, isUpdating, isResettingPassword, error } = useAppSelector((state) => state.settings);
-    const { isAuthenticated } = useAppSelector((state) => state.auth);
+    const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+    
+    // Check if user is MainAdmin (buying_group_id is null) or buying group admin
+    const isMainAdmin = user?.buying_group_id === null;
+    const isBuyingGroupAdmin = user?.buying_group_id !== null;
 
     const [businessForm, setBusinessForm] = useState({ businessName: '' });
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -165,33 +169,58 @@ export default function SettingsPage() {
         <div className="space-y-3">
             <div>
                 <h1 className="text-lg font-bold text-gray-900">Settings</h1>
-                <p className="text-xs text-gray-500">Manage system configuration and preferences</p>
+                <p className="text-xs text-gray-500">
+                    {isMainAdmin 
+                        ? "Manage system configuration and preferences" 
+                        : "Manage your business profile and security settings"
+                    }
+                </p>
             </div>
 
-            {/* General Settings */}
-            <div className="bg-white rounded-lg shadow px-4 py-3">
-                <div className="flex items-center gap-2 mb-3">
-                    <Globe className="w-4 h-4 text-primary-500" />
-                    <h2 className="text-sm font-semibold text-gray-900">General Settings</h2>
+            {/* Info message for buying group admins */}
+            {isBuyingGroupAdmin && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center mt-0.5">
+                            <Building2 className="w-3 h-3 text-blue-600" />
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-medium text-blue-900 mb-1">Buying Group Admin Settings</h3>
+                            <p className="text-xs text-blue-700">
+                                You can manage your business profile (company name and logo) and security settings. 
+                                System-wide settings are managed by the platform administrator.
+                            </p>
+                        </div>
+                    </div>
                 </div>
-                {isLoading && !settings ? (
-                    <div className="flex items-center justify-center py-8">
-                        <Loader2 className="w-6 h-6 animate-spin text-primary-500 mr-2" />
-                        <p className="text-xs text-gray-500">Loading settings...</p>
+            )}
+
+            {/* General Settings - Only visible to MainAdmin */}
+            {isMainAdmin && (
+                <div className="bg-white rounded-lg shadow px-4 py-3">
+                    <div className="flex items-center gap-2 mb-3">
+                        <Globe className="w-4 h-4 text-primary-500" />
+                        <h2 className="text-sm font-semibold text-gray-900">General Settings</h2>
                     </div>
-                ) : (
-                    <div className="space-y-2.5">
-                        <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-0.5">Site Name</label>
-                            <input type="text" value={settings?.siteName || ''} readOnly className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded bg-gray-50 text-gray-600 cursor-not-allowed" />
+                    {isLoading && !settings ? (
+                        <div className="flex items-center justify-center py-8">
+                            <Loader2 className="w-6 h-6 animate-spin text-primary-500 mr-2" />
+                            <p className="text-xs text-gray-500">Loading settings...</p>
                         </div>
-                        <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-0.5">Site Email</label>
-                            <input type="email" value={settings?.siteEmail || ''} readOnly className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded bg-gray-50 text-gray-600 cursor-not-allowed" />
+                    ) : (
+                        <div className="space-y-2.5">
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-0.5">Site Name</label>
+                                <input type="text" value={settings?.siteName || ''} readOnly className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded bg-gray-50 text-gray-600 cursor-not-allowed" />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-0.5">Site Email</label>
+                                <input type="email" value={settings?.siteEmail || ''} readOnly className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded bg-gray-50 text-gray-600 cursor-not-allowed" />
+                            </div>
                         </div>
-                    </div>
-                )}
-            </div>
+                    )}
+                </div>
+            )}
 
             {/* Business Settings */}
             <div className="bg-white rounded-lg shadow px-4 py-3">
@@ -273,142 +302,144 @@ export default function SettingsPage() {
                 )}
             </div>
 
-            {/* Warehouse / Shipping Address */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-                <div className="flex items-center gap-3 mb-6">
-                    <Warehouse className="w-5 h-5 text-primary-500" />
-                    <div>
-                        <h2 className="text-lg font-semibold text-gray-900">Warehouse / Shipping Address</h2>
-                        <p className="text-sm text-gray-500">All pharmacy returns are shipped to this address via FedEx</p>
+            {/* Warehouse / Shipping Address - Only visible to MainAdmin */}
+            {isMainAdmin && (
+                <div className="bg-white rounded-lg shadow-md p-6">
+                    <div className="flex items-center gap-3 mb-6">
+                        <Warehouse className="w-5 h-5 text-primary-500" />
+                        <div>
+                            <h2 className="text-lg font-semibold text-gray-900">Warehouse / Shipping Address</h2>
+                            <p className="text-sm text-gray-500">All pharmacy returns are shipped to this address via FedEx</p>
+                        </div>
                     </div>
+
+                    {isLoading && !settings ? (
+                        <div className="flex items-center justify-center py-12">
+                            <div className="flex flex-col items-center gap-3">
+                                <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
+                                <p className="text-sm text-gray-600">Loading settings...</p>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Warehouse Name</label>
+                                    <input
+                                        type="text"
+                                        value={warehouseForm.warehouseName}
+                                        onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseName: e.target.value })}
+                                        placeholder="e.g. FCR Returns Warehouse"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        disabled={isUpdating}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Contact Name</label>
+                                    <input
+                                        type="text"
+                                        value={warehouseForm.warehouseContactName}
+                                        onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseContactName: e.target.value })}
+                                        placeholder="Receiving Department"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        disabled={isUpdating}
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Street Address</label>
+                                <input
+                                    type="text"
+                                    value={warehouseForm.warehouseStreet}
+                                    onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseStreet: e.target.value })}
+                                    placeholder="123 Warehouse Blvd"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                    disabled={isUpdating}
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                                    <input
+                                        type="text"
+                                        value={warehouseForm.warehouseCity}
+                                        onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseCity: e.target.value })}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        disabled={isUpdating}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+                                    <input
+                                        type="text"
+                                        value={warehouseForm.warehouseState}
+                                        onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseState: e.target.value.toUpperCase().slice(0, 2) })}
+                                        placeholder="TX"
+                                        maxLength={2}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        disabled={isUpdating}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
+                                    <input
+                                        type="text"
+                                        value={warehouseForm.warehouseZip}
+                                        onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseZip: e.target.value.replace(/\D/g, '').slice(0, 5) })}
+                                        placeholder="75001"
+                                        maxLength={5}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        disabled={isUpdating}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                                    <input
+                                        type="text"
+                                        value={warehouseForm.warehouseCountry}
+                                        onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseCountry: e.target.value.toUpperCase().slice(0, 2) })}
+                                        maxLength={2}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        disabled={isUpdating}
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                                <input
+                                    type="tel"
+                                    value={warehouseForm.warehousePhone}
+                                    onChange={(e) => {
+                                        const cleaned = e.target.value.replace(/\D/g, '').slice(0, 10);
+                                        setWarehouseForm({ ...warehouseForm, warehousePhone: cleaned });
+                                    }}
+                                    placeholder="4695557890"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 md:w-1/2"
+                                    disabled={isUpdating}
+                                />
+                            </div>
+
+                            <div className="flex justify-end pt-4">
+                                <Button
+                                    variant="primary"
+                                    size="sm"
+                                    onClick={handleSaveWarehouseAddress}
+                                    disabled={isUpdating || (isLoading && !settings)}
+                                >
+                                    {isUpdating ? (
+                                        <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Saving...</>
+                                    ) : (
+                                        <><Save className="w-3.5 h-3.5 mr-1.5" />Save Warehouse Address</>
+                                    )}
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </div>
-
-                {isLoading && !settings ? (
-                    <div className="flex items-center justify-center py-12">
-                        <div className="flex flex-col items-center gap-3">
-                            <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
-                            <p className="text-sm text-gray-600">Loading settings...</p>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Warehouse Name</label>
-                                <input
-                                    type="text"
-                                    value={warehouseForm.warehouseName}
-                                    onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseName: e.target.value })}
-                                    placeholder="e.g. FCR Returns Warehouse"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                    disabled={isUpdating}
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Contact Name</label>
-                                <input
-                                    type="text"
-                                    value={warehouseForm.warehouseContactName}
-                                    onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseContactName: e.target.value })}
-                                    placeholder="Receiving Department"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                    disabled={isUpdating}
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Street Address</label>
-                            <input
-                                type="text"
-                                value={warehouseForm.warehouseStreet}
-                                onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseStreet: e.target.value })}
-                                placeholder="123 Warehouse Blvd"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                disabled={isUpdating}
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
-                                <input
-                                    type="text"
-                                    value={warehouseForm.warehouseCity}
-                                    onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseCity: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                    disabled={isUpdating}
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
-                                <input
-                                    type="text"
-                                    value={warehouseForm.warehouseState}
-                                    onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseState: e.target.value.toUpperCase().slice(0, 2) })}
-                                    placeholder="TX"
-                                    maxLength={2}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                    disabled={isUpdating}
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
-                                <input
-                                    type="text"
-                                    value={warehouseForm.warehouseZip}
-                                    onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseZip: e.target.value.replace(/\D/g, '').slice(0, 5) })}
-                                    placeholder="75001"
-                                    maxLength={5}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                    disabled={isUpdating}
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
-                                <input
-                                    type="text"
-                                    value={warehouseForm.warehouseCountry}
-                                    onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseCountry: e.target.value.toUpperCase().slice(0, 2) })}
-                                    maxLength={2}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                    disabled={isUpdating}
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                            <input
-                                type="tel"
-                                value={warehouseForm.warehousePhone}
-                                onChange={(e) => {
-                                    const cleaned = e.target.value.replace(/\D/g, '').slice(0, 10);
-                                    setWarehouseForm({ ...warehouseForm, warehousePhone: cleaned });
-                                }}
-                                placeholder="4695557890"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 md:w-1/2"
-                                disabled={isUpdating}
-                            />
-                        </div>
-
-                        <div className="flex justify-end pt-4">
-                            <Button
-                                variant="primary"
-                                size="sm"
-                                onClick={handleSaveWarehouseAddress}
-                                disabled={isUpdating || (isLoading && !settings)}
-                            >
-                                {isUpdating ? (
-                                    <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Saving...</>
-                                ) : (
-                                    <><Save className="w-3.5 h-3.5 mr-1.5" />Save Warehouse Address</>
-                                )}
-                            </Button>
-                        </div>
-                    </div>
-                )}
-            </div>
+            )}
 
             {/* Security Settings - Reset Password */}
             <div className="bg-white rounded-lg shadow px-4 py-3">

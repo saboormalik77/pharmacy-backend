@@ -3,6 +3,7 @@ import { catchAsync } from '../utils/catchAsync';
 import { AppError } from '../utils/appError';
 import { supabaseAdmin } from '../config/supabase';
 import * as fedexService from '../services/fedexService';
+import { getWarehouseAddressFromTable } from '../utils/warehouseAddress';
 
 function ensureAdmin() {
   if (!supabaseAdmin) {
@@ -72,13 +73,10 @@ async function getPharmacyAddress(pharmacyId: string) {
 }
 
 async function getWarehouseAddress() {
-  const sb = ensureAdmin();
-  const { data, error } = await sb.rpc('get_admin_settings');
+  ensureAdmin();
+  const s = await getWarehouseAddressFromTable();
 
-  if (error) throw new AppError(`Failed to load settings: ${error.message}`, 500);
-
-  const s = data?.settings || data;
-  if (!s?.warehouseStreet || !s?.warehouseCity || !s?.warehouseState || !s?.warehouseZip) {
+  if (!s.warehouseStreet || !s.warehouseCity || !s.warehouseState || !s.warehouseZip) {
     throw new AppError(
       'Warehouse address is not configured. Please set it in Admin Settings > Warehouse Address.',
       400

@@ -5,6 +5,7 @@ import { supabaseAdmin } from '../config/supabase';
 import * as raService from '../services/raService';
 import * as fedexService from '../services/fedexService';
 import { generateBarcode } from '../services/barcodeService';
+import { getWarehouseAddressFromTable } from '../utils/warehouseAddress';
 
 // ============================================================
 // POST /api/admin/debit-memos/:id/request-ra
@@ -115,12 +116,9 @@ export const createDebitMemoFedexShipmentHandler = catchAsync(
     if (!memo.ra_number) throw new AppError('Cannot create shipment without an RA number', 400);
     if (!memo.destination) throw new AppError('Debit memo has no destination assigned', 400);
 
-    // Get warehouse address (shipper)
-    const { data: settings, error: settingsErr } = await supabaseAdmin.rpc('get_admin_settings');
-    if (settingsErr) throw new AppError(`Failed to load settings: ${settingsErr.message}`, 500);
-
-    const s = settings?.settings || settings;
-    if (!s?.warehouseStreet || !s?.warehouseCity || !s?.warehouseState || !s?.warehouseZip) {
+    // Get warehouse address (shipper) from dedicated warehouses table
+    const s = await getWarehouseAddressFromTable();
+    if (!s.warehouseStreet || !s.warehouseCity || !s.warehouseState || !s.warehouseZip) {
       throw new AppError('Warehouse address is not configured. Set it in Admin Settings.', 400);
     }
 
@@ -248,11 +246,8 @@ export const scheduleDebitMemoPickupHandler = catchAsync(
       throw new AppError('Cannot schedule pickup: Create FedEx shipment first.', 400);
     }
 
-    const { data: settings, error: settingsErr } = await supabaseAdmin.rpc('get_admin_settings');
-    if (settingsErr) throw new AppError(`Failed to load settings: ${settingsErr.message}`, 500);
-
-    const s = settings?.settings || settings;
-    if (!s?.warehouseStreet || !s?.warehouseCity || !s?.warehouseState || !s?.warehouseZip) {
+    const s = await getWarehouseAddressFromTable();
+    if (!s.warehouseStreet || !s.warehouseCity || !s.warehouseState || !s.warehouseZip) {
       throw new AppError('Warehouse address is not configured. Set it in Admin Settings.', 400);
     }
 
@@ -421,17 +416,15 @@ export const debitMemoShippingLabelHandler = catchAsync(
     if (memoErr || !memo) throw new AppError('Debit memo not found', 404);
     if (!memo.outbound_tracking) throw new AppError('No tracking number found for this memo', 400);
 
-    const { data: settings, error: settingsErr } = await supabaseAdmin.rpc('get_admin_settings');
-    if (settingsErr) throw new AppError(`Failed to load settings: ${settingsErr.message}`, 500);
-    const s = settings?.settings || settings;
+    const s = await getWarehouseAddressFromTable();
 
-    const fromName = s?.warehouseName || 'Warehouse';
-    const fromContact = s?.warehouseContactName || '';
-    const fromPhone = s?.warehousePhone || '';
-    const fromStreet = s?.warehouseStreet || '';
-    const fromCity = s?.warehouseCity || '';
-    const fromState = s?.warehouseState || '';
-    const fromZip = s?.warehouseZip || '';
+    const fromName = s.warehouseName || 'Warehouse';
+    const fromContact = s.warehouseContactName || '';
+    const fromPhone = s.warehousePhone || '';
+    const fromStreet = s.warehouseStreet || '';
+    const fromCity = s.warehouseCity || '';
+    const fromState = s.warehouseState || '';
+    const fromZip = s.warehouseZip || '';
 
     let toName = memo.destination || 'Reverse Distributor';
     let toContact = '';

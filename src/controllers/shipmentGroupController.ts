@@ -4,6 +4,7 @@ import { AppError } from '../utils/appError';
 import { supabaseAdmin } from '../config/supabase';
 import { generateBarcode } from '../services/barcodeService';
 import * as shipmentGroupService from '../services/shipmentGroupService';
+import { getWarehouseAddressFromTable } from '../utils/warehouseAddress';
 
 // ============================================================
 // GET /api/admin/shipment-groups/shipped
@@ -85,17 +86,15 @@ export const shipmentGroupShippingLabelHandler = catchAsync(
       throw new AppError('No tracking number for this shipment group', 400);
     }
 
-    const { data: settings, error: settingsErr } = await supabaseAdmin.rpc('get_admin_settings');
-    if (settingsErr) throw new AppError(`Failed to load settings: ${settingsErr.message}`, 500);
-    const s = settings?.settings || settings;
+    const s = await getWarehouseAddressFromTable();
 
-    const fromName = s?.warehouseName || 'Warehouse';
-    const fromContact = s?.warehouseContactName || '';
-    const fromPhone = s?.warehousePhone || '';
-    const fromStreet = s?.warehouseStreet || '';
-    const fromCity = s?.warehouseCity || '';
-    const fromState = s?.warehouseState || '';
-    const fromZip = s?.warehouseZip || '';
+    const fromName = s.warehouseName || 'Warehouse';
+    const fromContact = s.warehouseContactName || '';
+    const fromPhone = s.warehousePhone || '';
+    const fromStreet = s.warehouseStreet || '';
+    const fromCity = s.warehouseCity || '';
+    const fromState = s.warehouseState || '';
+    const fromZip = s.warehouseZip || '';
 
     let toName = group.destination || 'Reverse Distributor';
     let toContact = '';

@@ -1,5 +1,6 @@
 import { AppError } from '../utils/appError';
 import { generateBarcode } from './barcodeService';
+import { getWarehouseAddressFromTable } from '../utils/warehouseAddress';
 
 export interface JobSheetData {
   transaction: {
@@ -316,22 +317,8 @@ export async function getJobSheetData(transactionId: string, supabaseClient: any
 
   const addr = pharmacy.physical_address as { street?: string; city?: string; state?: string; zip?: string } | null;
 
-  // 4. Warehouse settings
-  const { data: settings, error: settingsError } = await supabaseClient.rpc('get_admin_settings');
-  if (settingsError || !settings) {
-    throw new AppError('Warehouse settings not found', 404);
-  }
-
-  // Debug: Log warehouse settings to help troubleshoot
-  console.log('Warehouse settings from admin_settings:', {
-    warehouseName: settings.warehouseName,
-    warehouseStreet: settings.warehouseStreet,
-    warehouseCity: settings.warehouseCity,
-    warehouseState: settings.warehouseState,
-    warehouseZip: settings.warehouseZip,
-    warehousePhone: settings.warehousePhone,
-    warehouseContactName: settings.warehouseContactName,
-  });
+  // 4. Warehouse address (from dedicated `warehouses` table)
+  const settings = await getWarehouseAddressFromTable();
 
   return {
     transaction: {

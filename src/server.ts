@@ -44,6 +44,7 @@ import destructionRoutes from './routes/destructionRoutes';
 import wineCellarRoutes from './routes/wineCellarRoutes';
 import emailManagementRoutes from './routes/emailManagementRoutes';
 import warehouseRoutes from './routes/warehouseRoutes';
+import warehouseManagementRoutes from './routes/warehouseManagementRoutes';
 import batchRoutes from './routes/batchRoutes';
 import debitMemoRoutes from './routes/debitMemoRoutes';
 import raTrackingRoutes from './routes/raTrackingRoutes';
@@ -166,6 +167,7 @@ app.use('/api/admin/destruction', destructionRoutes);
 app.use('/api/admin/wine-cellar', wineCellarRoutes);
 app.use('/api/admin/emails', emailManagementRoutes);
 app.use('/api/admin/warehouse', warehouseRoutes);
+app.use('/api/admin/warehouse-management', warehouseManagementRoutes);
 app.use('/api/admin/batches', batchRoutes);
 app.use('/api/admin/debit-memos', debitMemoRoutes);
 app.use('/api/admin/ra-tracking', raTrackingRoutes);
@@ -179,6 +181,66 @@ app.use('/api/pharmacy-branches', pharmacyBranchRoutes);
 app.use('/api/pharmacy-roles', pharmacyRoleRoutes);
 app.use('/api/main-admin', mainAdminRoutes);
 app.use('/api/pharmacy', pharmacyAdminBrandingRoutes);
+
+// Root route: serves an HTML page that detects Supabase recovery hash redirects.
+// Supabase redirects to the backend base URL with #access_token=...&type=recovery.
+// The hash never reaches the server, so this page reads it client-side, resolves
+// the correct frontend URL from the DB via /api/auth/resolve-redirect, and
+// redirects the browser to the correct pharmacy or admin portal.
+app.get('/', (req, res) => {
+  res.setHeader('Content-Type', 'text/html');
+  res.send(`<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Redirecting...</title></head><body>
+<p id="msg">Loading...</p>
+<script>
+(function(){
+  var hash = window.location.hash;
+  if (!hash || hash.indexOf('type=recovery') === -1) {
+    document.getElementById('msg').textContent = 'Pharmacy Backend API is running.';
+    return;
+  }
+
+  document.getElementById('msg').textContent = 'Redirecting to your portal...';
+
+  // Parse the hash to get the access_token (JWT)
+  var params = {};
+  hash.substring(1).split('&').forEach(function(pair) {
+    var kv = pair.split('=');
+    params[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1] || '');
+  });
+
+  var token = params['access_token'];
+  if (!token) {
+    document.getElementById('msg').textContent = 'Error: no access token found.';
+    return;
+  }
+
+  // Decode the JWT payload to extract email (no verification needed — just reading the claim)
+  try {
+    var payload = JSON.parse(atob(token.split('.')[1]));
+    var email = payload.email;
+    if (!email) throw new Error('no email');
+
+    fetch('/api/auth/resolve-redirect?email=' + encodeURIComponent(email))
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var base = data.url || '';
+        if (!base) {
+          document.getElementById('msg').textContent = 'Error: could not resolve portal URL.';
+          return;
+        }
+        window.location.replace(base + '/reset-password' + hash);
+      })
+      .catch(function() {
+        document.getElementById('msg').textContent = 'Error: failed to resolve redirect.';
+      });
+  } catch(e) {
+    document.getElementById('msg').textContent = 'Error: invalid token.';
+  }
+})();
+</script>
+</body></html>`);
+});
 
 /**
  * @swagger
