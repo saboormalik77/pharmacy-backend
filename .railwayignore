@@ -1,0 +1,27 @@
+# Ignore frontend apps (deploy separately if needed)
+Frontend/
+admin/
+MainAdmin/
+
+# Dev/test files
+*.test.ts
+*.spec.ts
+__tests__/
+coverage/
+
+# Local configs
+.env.local
+.env.development
+nodemon.json
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+logs/
+
+# Local supabase (if any)
+supabase/.branches/
+supabase/.temp/
