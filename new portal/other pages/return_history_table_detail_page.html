@@ -1,0 +1,997 @@
+<div class="content">
+               
+    <style>
+.w-theme-table table tbody tr td{
+white-space: pre-wrap;
+}
+
+.w-theme-table {
+overflow-x: hidden !important;
+}
+
+#infoModal {
+display: none;
+position: absolute;
+z-index: 9999;
+background: white;
+border: 1px solid #ccc;
+padding: 10px;
+box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+border-radius: 8px;
+font-size: 14px;
+}
+
+.w-theme-table table tbody tr td {
+color: #000 !important;
+}
+
+.details-icon-wrapper {
+margin-top: -60px;
+}
+
+@media (max-width: 768px) {
+.details-icon-wrapper {
+   margin-top: -40px;
+}
+}
+
+</style>
+
+<meta name="csrf-token" content="wjSMP9RealEt3cembKM4AidwiqmoxHDUDpdfLBNe">
+<div class="section-top">
+<h1 class="section-title"><i class="fa-solid fa-arrow-right"></i> Return Details</h1>
+           <a href="https://portal.drugreturns.com/customer/allReturns" class="btn-link-style mb-2">Back</a>
+   </div> 
+
+<div class="container py-3">
+<div class="row">
+   <div class="col-md-12">
+       <div class="card shadow-sm p-3 border-0">
+          <div class="theme-table">
+               <table class="table">
+                   <thead>
+                       <tr>
+                         <th>Date</th>
+                         <th>Reference Number</th>
+                         <th>Amount</th>
+                       </tr>
+                   </thead>
+                   <tbody>
+                       <tr>
+                           <td>03/24/2026</td>
+                           <td>3S38J</td>
+                           <td>$590.28</td>
+                       </tr>
+                   </tbody>
+               </table>
+           </div>  
+       </div>
+   </div>
+</div>
+
+<div class="row mt-3 mb-3 mt-5" style="align-items: center;">
+   <div class="col-md-4">
+       <div class="radio-btn">
+           <div class="form-check">
+               <input class="form-check-input" type="radio" name="returnRadio" id="returnableRadio" value="returnable" checked="">
+               <label class="form-check-label" for="returnableRadio">Returnable Products</label>
+           </div>
+       </div>
+   </div>
+
+   <div class="col-md-4">
+       <div class="radio-btn">
+           <div class="form-check">
+               <input class="form-check-input" type="radio" name="returnRadio" id="nonReturnableRadio" value="nonReturnable">
+               <label class="form-check-label" for="nonReturnableRadio">Non-Returnable Products</label>
+           </div>
+       </div>
+   </div>
+
+   <div class="col-md-4">
+       <div id="creditTypeContainer" class="custom-select-container">
+           <select class="custom-select form-select">
+               <option value="0">All</option>
+               <option value="1">RSI One Check</option>
+               <option value="2">RSI Paid On Receipt (POR)</option>
+               <option value="3">Manufacturer Direct</option>
+           </select>
+       </div>
+
+       <div id="nonReturnableReasonsContainer" class="custom-select-container" style="display: none;">
+           <select class="custom-select form-select">
+               <option value="0">All</option>
+               <option value="1">Manufacturer Does Not Accept Returns</option>
+               <option value="2">Product Sold On A Non-Returnable Basis</option>
+               <option value="3">Manufacturer Does Not Accept Partials</option>
+               <option value="4">Repackaged Product</option>
+               <option value="5">Product is too Far Past Expiration Date</option>
+               <option value="6">Product Doesn't Meet Minimum Quantity</option>
+               <option value="7">Sample Product</option>
+               <option value="8">Prescription Label On Product</option>
+               <option value="9">Label Defaced / Product Damaged</option>
+               <option value="10">Lot Number Is Non-Returnable</option>
+               <option value="11">Product Doesn't Meet Minimum $ Value</option>
+               <option value="12">Other</option>
+               <option value="13">Free/complimentary item</option>
+               <option value="14">Product not in original package</option>
+               <option value="15">Overfilled container</option>
+               <option value="16">Product too far in-date</option>
+               <option value="17">Destroy at customer request</option>
+               <option value="18">Compounded product</option>
+           </select>
+       </div>
+   </div>
+</div>
+
+<div class="row mt-4">
+   <div class="col-md-12">
+       <div class="">
+           <div class="theme-table w-theme-table">
+               <div id="data-table_wrapper" class="dataTables_wrapper no-footer"><div id="data-table_filter" class="dataTables_filter"><label>Search:<input type="search" class="" placeholder="" aria-controls="data-table"></label></div><table id="data-table" class="table table-bordered table-striped no-footer dtr-inline collapsed dataTable" aria-describedby="data-table_info" style="width: 700px;">
+                   <thead>
+                       <tr><th class="sorting" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" style="width: 89px;" aria-label="NDC: activate to sort column descending: activate to sort column ascending">NDC</th><th class="sorting" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" style="width: 144px;" aria-label="Product: activate to sort column ascending: activate to sort column ascending">Product</th><th class="sorting_disabled" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" style="width: 59px;" aria-label="Package: activate to sort column ascending">Package</th><th class="sorting_disabled" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" style="width: 61px;" aria-label="Quantity: activate to sort column ascending">Quantity</th><th class="sorting_disabled" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" style="width: 107px;" aria-label="LotNumber: activate to sort column ascending">LotNumber</th><th class="sorting" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" style="width: 60px;" aria-label="ExpDate: activate to sort column ascending: activate to sort column ascending">ExpDate</th><th class="sorting dtr-hidden" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" style="width: 0px; display: none;" aria-label="DEA: activate to sort column ascending: activate to sort column ascending">DEA</th><th class="sorting dtr-hidden" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" style="width: 0px; display: none;" aria-label="Value: activate to sort column ascending: activate to sort column ascending">Value</th><th class="sorting dtr-hidden" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" style="width: 0px; display: none;" aria-label="Manufacturer: activate to sort column ascending: activate to sort column ascending">Manufacturer</th><th class="sorting_disabled dtr-hidden" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" style="width: 0px; display: none;" aria-label="Credit Type: activate to sort column ascending">Credit Type</th><th class="sorting_disabled dtr-hidden" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" style="width: 0px; display: none;" aria-label="Details: activate to sort column ascending">Details</th></tr>
+                   </thead>
+                 <tbody>
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     
+                       
+                     <tr class="odd">
+                         <td class="dtr-control" tabindex="0">16729032010</td>
+                         <td>Olmesartan Medoxomil 5mg Tab</td>
+                         <td>30</td>
+                         <td>1</td>
+                         <td>M2308177</td>
+                         <td>05/26</td>
+                         <td class="dtr-hidden" style="display: none;">RX</td>
+                         <td class="dtr-hidden" style="display: none;">$0.47</td>
+                         <td class="dtr-hidden" style="display: none;">ACCORD HEALTHCARE</td>
+                         <td class="dtr-hidden" style="display: none;"><span style="opacity: 0.6; cursor: not-allowed;" title="Check not available">RSI OneCheck</span></td>
+                         <td class="dtr-hidden" style="display: none;">
+                             <div class="details-icon-wrapper">
+                               <img src="/assets/images/details.png" style="opacity:0.5; cursor:not-allowed; width:25px;" title="Check not available">
+                             </div>
+                        </td>
+                       </tr><tr class="even">
+                         <td class="dtr-control" tabindex="0">60505082601</td>
+                         <td>Ipratropium 0.03% Nasal Spray</td>
+                         <td>30</td>
+                         <td>1</td>
+                         <td>VE3268</td>
+                         <td>05/26</td>
+                         <td class="dtr-hidden" style="display: none;">RX</td>
+                         <td class="dtr-hidden" style="display: none;">$1.03</td>
+                         <td class="dtr-hidden" style="display: none;">APOTEX</td>
+                         <td class="dtr-hidden" style="display: none;"><span style="opacity: 0.6; cursor: not-allowed;" title="Check not available">RSI OneCheck</span></td>
+                         <td class="dtr-hidden" style="display: none;">
+                             <div class="details-icon-wrapper">
+                               <img src="/assets/images/details.png" style="opacity:0.5; cursor:not-allowed; width:25px;" title="Check not available">
+                             </div>
+                        </td>
+                       </tr><tr class="odd">
+                         <td class="dtr-control" tabindex="0">72485061311</td>
+                         <td>Ofloxacin 0.3% Ophthalmic Solution</td>
+                         <td>10</td>
+                         <td>2</td>
+                         <td>436712</td>
+                         <td>02/26</td>
+                         <td class="dtr-hidden" style="display: none;">RX</td>
+                         <td class="dtr-hidden" style="display: none;">$13.20</td>
+                         <td class="dtr-hidden" style="display: none;">ARMAS PHARMA</td>
+                         <td class="dtr-hidden" style="display: none;"><span class="text-primary" style="cursor:pointer;" data-bs-toggle="modal" data-bs-target="#editModal" onclick="loadCreditInfo('72485061311','','888-831-2292','','INMAR- Texas','13.2','')">Manufacturer Direct</span></td>
+                         <td class="dtr-hidden" style="display: none;">
+                             <div class="details-icon-wrapper">
+                               <img src="/assets/images/details.png" style="cursor:pointer; width:25px;" onclick="showInfoModal(this, 'Data not available', '', '', 0)">
+                             </div>
+                        </td>
+                       </tr><tr class="even">
+                         <td class="dtr-control" tabindex="0">23155084603</td>
+                         <td>Amlodipine/Valsartan 5mg/320mg Tablets</td>
+                         <td>30</td>
+                         <td>1</td>
+                         <td>5501283A</td>
+                         <td>05/26</td>
+                         <td class="dtr-hidden" style="display: none;">RX</td>
+                         <td class="dtr-hidden" style="display: none;">$11.55</td>
+                         <td class="dtr-hidden" style="display: none;">AVET PHARMA</td>
+                         <td class="dtr-hidden" style="display: none;"><span class="text-primary" style="cursor:pointer;" data-bs-toggle="modal" data-bs-target="#editModal" onclick="loadCreditInfo('23155084603','9622001900000666589200457559964435','866-901-1230','NZ000900018000503026','INMAR- Texas','11.55','')">Manufacturer Direct</span></td>
+                         <td class="dtr-hidden" style="display: none;">
+                             <div class="details-icon-wrapper">
+                               <img src="/assets/images/details.png" style="cursor:pointer; width:25px;" onclick="showInfoModal(this, 'Data not available', '', '', 0)">
+                             </div>
+                        </td>
+                       </tr><tr class="odd">
+                         <td class="dtr-control" tabindex="0">23155084703</td>
+                         <td>Amlodipine/Valsartan 10mg/320mg Tablets</td>
+                         <td>30</td>
+                         <td>1</td>
+                         <td>5501291A</td>
+                         <td>05/26</td>
+                         <td class="dtr-hidden" style="display: none;">RX</td>
+                         <td class="dtr-hidden" style="display: none;">$14.13</td>
+                         <td class="dtr-hidden" style="display: none;">AVET PHARMA</td>
+                         <td class="dtr-hidden" style="display: none;"><span class="text-primary" style="cursor:pointer;" data-bs-toggle="modal" data-bs-target="#editModal" onclick="loadCreditInfo('23155084703','9622001900000666589200457559964435','866-901-1230','NZ000900018000503026','INMAR- Texas','14.13','')">Manufacturer Direct</span></td>
+                         <td class="dtr-hidden" style="display: none;">
+                             <div class="details-icon-wrapper">
+                               <img src="/assets/images/details.png" style="cursor:pointer; width:25px;" onclick="showInfoModal(this, 'Data not available', '', '', 0)">
+                             </div>
+                        </td>
+                       </tr><tr class="even">
+                         <td class="dtr-control" tabindex="0">00713063215</td>
+                         <td>Fluticasone 0.005% Oint</td>
+                         <td>15</td>
+                         <td>1</td>
+                         <td>L403042</td>
+                         <td>03/26</td>
+                         <td class="dtr-hidden" style="display: none;">RX</td>
+                         <td class="dtr-hidden" style="display: none;">$5.35</td>
+                         <td class="dtr-hidden" style="display: none;">COSETTE PHARMA </td>
+                         <td class="dtr-hidden" style="display: none;"><span style="opacity: 0.6; cursor: not-allowed;" title="Check not available">RSI OneCheck</span></td>
+                         <td class="dtr-hidden" style="display: none;">
+                             <div class="details-icon-wrapper">
+                               <img src="/assets/images/details.png" style="opacity:0.5; cursor:not-allowed; width:25px;" title="Check not available">
+                             </div>
+                        </td>
+                       </tr><tr class="odd">
+                         <td class="dtr-control" tabindex="0">00713063260</td>
+                         <td>Fluticasone 0.005% Oint</td>
+                         <td>60</td>
+                         <td>1</td>
+                         <td>L403027</td>
+                         <td>02/26</td>
+                         <td class="dtr-hidden" style="display: none;">RX</td>
+                         <td class="dtr-hidden" style="display: none;">$13.97</td>
+                         <td class="dtr-hidden" style="display: none;">COSETTE PHARMA </td>
+                         <td class="dtr-hidden" style="display: none;"><span style="opacity: 0.6; cursor: not-allowed;" title="Check not available">RSI OneCheck</span></td>
+                         <td class="dtr-hidden" style="display: none;">
+                             <div class="details-icon-wrapper">
+                               <img src="/assets/images/details.png" style="opacity:0.5; cursor:not-allowed; width:25px;" title="Check not available">
+                             </div>
+                        </td>
+                       </tr><tr class="even">
+                         <td class="dtr-control" tabindex="0">21922006205</td>
+                         <td>Triamcinolone Acetonide 0.1% Cream</td>
+                         <td>30</td>
+                         <td>15</td>
+                         <td>4JM69</td>
+                         <td>04/26</td>
+                         <td class="dtr-hidden" style="display: none;">RX</td>
+                         <td class="dtr-hidden" style="display: none;">$39.72</td>
+                         <td class="dtr-hidden" style="display: none;">ENCUBE ETHICALS</td>
+                         <td class="dtr-hidden" style="display: none;"><span class="text-primary" style="cursor:pointer;" data-bs-toggle="modal" data-bs-target="#editModal" onclick="loadCreditInfo('21922006205','','919-767-3292','TCX3S38J15381','NONE','39.72','')">Manufacturer Direct</span></td>
+                         <td class="dtr-hidden" style="display: none;">
+                             <div class="details-icon-wrapper">
+                               <img src="/assets/images/details.png" style="cursor:pointer; width:25px;" onclick="showInfoModal(this, 'Data not available', '', '', 0)">
+                             </div>
+                        </td>
+                       </tr><tr class="odd">
+                         <td class="dtr-control" tabindex="0">21922001706</td>
+                         <td>Clobetasol 0.05% Ointment</td>
+                         <td>45</td>
+                         <td>2</td>
+                         <td>4BL05</td>
+                         <td>01/26</td>
+                         <td class="dtr-hidden" style="display: none;">RX</td>
+                         <td class="dtr-hidden" style="display: none;">$28.80</td>
+                         <td class="dtr-hidden" style="display: none;">ENCUBE ETHICALS</td>
+                         <td class="dtr-hidden" style="display: none;"><span class="text-primary" style="cursor:pointer;" data-bs-toggle="modal" data-bs-target="#editModal" onclick="loadCreditInfo('21922001706','','919-767-3292','TCX3S38J15381','NONE','28.8','')">Manufacturer Direct</span></td>
+                         <td class="dtr-hidden" style="display: none;">
+                             <div class="details-icon-wrapper">
+                               <img src="/assets/images/details.png" style="cursor:pointer; width:25px;" onclick="showInfoModal(this, 'Data not available', '', '', 0)">
+                             </div>
+                        </td>
+                       </tr><tr class="even">
+                         <td class="dtr-control" tabindex="0">21922001607</td>
+                         <td>Clobetasol 0.05% Topical Cream</td>
+                         <td>60</td>
+                         <td>1</td>
+                         <td>4BK07</td>
+                         <td>12/25</td>
+                         <td class="dtr-hidden" style="display: none;">RX</td>
+                         <td class="dtr-hidden" style="display: none;">$8.61</td>
+                         <td class="dtr-hidden" style="display: none;">ENCUBE ETHICALS</td>
+                         <td class="dtr-hidden" style="display: none;"><span class="text-primary" style="cursor:pointer;" data-bs-toggle="modal" data-bs-target="#editModal" onclick="loadCreditInfo('21922001607','','919-767-3292','TCX3S38J15381','NONE','8.61','')">Manufacturer Direct</span></td>
+                         <td class="dtr-hidden" style="display: none;">
+                             <div class="details-icon-wrapper">
+                               <img src="/assets/images/details.png" style="cursor:pointer; width:25px;" onclick="showInfoModal(this, 'Data not available', '', '', 0)">
+                             </div>
+                        </td>
+                       </tr></tbody>
+               </table><div class="dataTables_info" id="data-table_info" role="status" aria-live="polite">Showing 1 to 10 of 33 entries</div><div class="dataTables_paginate paging_simple_numbers" id="data-table_paginate"><a class="paginate_button previous disabled" aria-controls="data-table" aria-disabled="true" role="link" data-dt-idx="previous" tabindex="-1" id="data-table_previous">Previous</a><span><a class="paginate_button current" aria-controls="data-table" role="link" aria-current="page" data-dt-idx="0" tabindex="0">1</a><a class="paginate_button " aria-controls="data-table" role="link" data-dt-idx="1" tabindex="0">2</a><a class="paginate_button " aria-controls="data-table" role="link" data-dt-idx="2" tabindex="0">3</a><a class="paginate_button " aria-controls="data-table" role="link" data-dt-idx="3" tabindex="0">4</a></span><a class="paginate_button next" aria-controls="data-table" role="link" data-dt-idx="next" tabindex="0" id="data-table_next">Next</a></div></div>
+           </div>  
+       </div>
+   </div>
+</div>
+</div>
+
+<!--Credit data Add/ Update-->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+<div class="modal-dialog modal-xl">
+   <div class="modal-content">
+       <div class="modal-header d-flex justify-content-between align-items-center">
+           <h5 class="modal-title mb-0" id="editModalLabel">Credit Information</h5>
+           <div>
+               <button class="btn btn-success btn-sm" onclick="openAddModal()">
+                  + Add Credit
+               </button>
+           </div>
+       </div>
+
+       <div class="modal-body">
+           <div class="theme-table" id="show">
+               <table>
+                 <thead>
+                   <tr>
+                     <th>Processor</th>
+                     <th>RSI Estimate</th>
+                     <th>RA Number</th>
+                     <th>Debit Memo</th>
+                     <th>Phone Number</th>
+                     <th>Tracking Number</th>
+                   </tr>
+                 </thead>
+                 <tbody>
+                 </tbody>
+               </table>
+           </div>
+           
+           <div id="editFormMessage" class="mt-2"></div>
+           
+           <div id="creditFormContainer" style="display: none;" class="theme-table my-3">
+               <form id="editForm" method="POST" action="https://portal.drugreturns.com/customer/addCreditData">
+                   <input type="hidden" name="_token" value="wjSMP9RealEt3cembKM4AidwiqmoxHDUDpdfLBNe" autocomplete="off">                            <input type="hidden" id="manID_hidden" name="primarykey"> 
+                   <input type="hidden" id="editID" name="editID">
+                   <input type="hidden" id="unicode_hidden" name="unicode">
+                   <input type="hidden" id="refnum" name="refnum">
+                   <input type="hidden" id="actionType" name="actionType" value="1">
+
+                   <table class="table table-bordered my-3">
+                       <tbody><tr>
+                           <td><label for="modalName" class="form-label">Received Amount</label></td>
+                           <td><input type="text" class="form-control" id="modalName" name="received" required=""></td>
+                       </tr>
+                       <tr>
+                           <td><label for="creditType" class="form-label">Credit Type</label></td>
+                           <td>
+                               <select id="creditType" name="credit_type" class="form-control" required="">
+                                   <option value="">-- Select Credit Type --</option>
+                                   <option value="1">Replacement Product</option>
+                                   <option value="3">Manufacturer to wholesaler</option>
+                                   <option value="4">Wholesaler to pharmacy</option>
+                                   <option value="5">Credit to direct account</option>
+                                   <option value="6">Manufacturer check</option>
+                                   <option value="7">Pending/Other</option>
+                                   <option value="8">No Credit Issued</option>
+                                   <option value="9">Problem</option>
+                               </select>
+                           </td>
+                       </tr>
+                       <tr>
+                           <td><label for="modalUnicode" class="form-label">Credit Memo</label></td>
+                           <td><input type="text" class="form-control" id="modalUnicode" name="credit_memo" required=""></td>
+                       </tr>
+                       <tr>
+                           <td><label for="modalRSIestimate" class="form-label">Date Issued</label></td>
+                           <td><input type="date" class="form-control" id="modalRSIestimate" name="date_issued" required=""></td>
+                       </tr>
+                       <tr>
+                           <td><label for="modalCreditReceived" class="form-label">Notes</label></td>
+                           <td><input type="text" class="form-control" id="modalCreditReceived" name="notes"></td>
+                       </tr>
+                   </tbody></table>
+               </form>
+           </div>
+
+           <div class="theme-table">
+               <table class="table table-bordered" id="credit-info-table">
+                   <thead>
+                       <tr>
+                           <th>Primary Key</th>
+                           <th>Amount</th>
+                           <th>Credit Type</th>
+                           <th>Check Number</th>
+                           <th>Pay Date</th>
+                           <th>Memo</th>
+                           <th>Changed By</th>
+                           <th>Actions</th>
+                       </tr>
+                   </thead>
+                   <tbody>
+                       <tr><td colspan="8" class="text-center">Loading...</td></tr>
+                   </tbody>
+               </table>
+           </div>
+       </div>
+
+       <div class="modal-footer">
+           <button type="submit" form="editForm" class="primary-btn">Save</button>
+           <button type="button" class="secondary-btn" onclick="closeAllModals()">Close</button>
+       </div>
+   </div>
+</div>
+</div>
+
+<div id="infoModal"></div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+
+<script>
+$(document).ready(function () {
+   $('#data-table').DataTable({
+       responsive: true
+   });
+});
+</script>
+
+   <script>
+   $(document).ready(function () {
+       $("#ras").val("3S38J").change();
+   });
+</script>
+
+<script>
+function rasOnchange() {
+   let index = document.getElementById("ras").selectedIndex;
+   $(".refnum-content").hide();
+   $("#div" + index).show();
+}
+
+document.getElementById('returnableRadio').addEventListener('click', function() {
+   document.getElementById('creditTypeContainer').style.display = 'block';
+   document.getElementById('nonReturnableReasonsContainer').style.display = 'none';
+});
+
+document.getElementById('nonReturnableRadio').addEventListener('click', function() {
+   document.getElementById('creditTypeContainer').style.display = 'none';
+   document.getElementById('nonReturnableReasonsContainer').style.display = 'block';
+});
+</script>
+
+<script>
+$(document).ready(function () {
+   function loadReturnDetail() {
+       let refnum = "3S38J";
+       let selectedOption = $('input[name="returnRadio"]:checked').val(); 
+       let returnable = selectedOption === 'returnable' ? 1 : 0;
+       let nonReturnable = selectedOption === 'nonReturnable' ? 1 : 0;
+       let credit_type = $('#creditTypeContainer select').val(); 
+       let non_returnable_reason = $('#nonReturnableReasonsContainer select').val(); 
+       const customerID = "13846";
+       const refNumOnly = "3S38J";
+       const userGuard = "customer";
+
+       if (!refnum) return;
+       let url = ''; 
+       if (userGuard === 'chain') {
+           url = '/chain/return-historyData';
+       } else if (userGuard === 'representative') {
+           url = '/rep/return-history-data';
+       } else {
+           url = '/customer/return-historyData';
+       }
+        
+       $.ajax({
+           url: url,
+           type: 'GET',
+           data: { 
+               refnum,
+               credit_type,
+               non_returnable_reason,
+               returnable,
+               nonReturnable
+           },
+           success: function(response) {
+               const data = response.data || [];
+
+               if ( $.fn.DataTable.isDataTable('#data-table') ) {
+                   $('#data-table').DataTable().clear().destroy();
+               }
+
+               const tbody = $('#data-table tbody');
+               tbody.empty(); 
+
+               if (data.length === 0) {
+                   tbody.append('<tr><td colspan="11" class="text-center">No data found</td></tr>');
+                   return; 
+               }
+   
+               data.forEach(row => {
+                   const isRSI = row.creditType === "RSI OneCheck" || row.creditType === "RSI Pay-On-Receipt"; 
+                   const isOneCheck = row.creditType === "RSI OneCheck";
+                   const isPOR = row.creditType === "RSI Pay-On-Receipt";
+                   const isManufacturer = row.creditType === "Manufacturer Direct";
+                   const hasCheck = row.ClosingCheckNum && String(row.ClosingCheckNum).trim() !== "";
+                
+                   let checkLink = "";
+                   if (hasCheck) {
+                       if (isOneCheck) {
+                           const routeBase = userGuard === "customer" ? "/customer/RSICheck" : "/chain/RSICheck";
+                           checkLink = `${routeBase}?refnum=${refNumOnly}&checknumber=${row.ClosingCheckNum}`;
+                       } 
+                   }
+
+                   const formatDate = (dateStr) => {
+                     const d = new Date(dateStr);
+                     return `${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')}/${d.getFullYear()}`;
+                   };
+                   
+                   const formatMonth = (dateStr) => {
+                     const m = new Date(dateStr);
+                     return `${(m.getMonth() + 1).toString().padStart(2, '0')}/${m.getFullYear().toString().slice(-2)}`;
+                   };
+                       
+                   const creditTypeHtml = isRSI
+                     ? (isOneCheck
+                         ? (checkLink !== ''
+                             ? `<a href="${checkLink}" target="_blank">${row.creditType}</a>`
+                             : `<span style="opacity: 0.6; cursor: not-allowed;" title="Check not available">${row.creditType}</span>`)
+                       : isPOR
+                           ? `${row.creditType}`
+                           : `<span style="opacity: 0.6; cursor: not-allowed;" title="Check not available">${row.creditType}</span>`)
+                       : isManufacturer
+                           ? `<span class="text-primary" style="cursor:pointer;" data-bs-toggle="modal" data-bs-target="#editModal" onclick="loadCreditInfo('${row.NDC ?? ''}','${row.TrackingNumber ?? ''}','${row.phone1 ?? ''}','${row.RANum ?? ''}','${row.processorname ?? ''}','${row.value ?? ''}','${row.id ?? ''}')">${row.creditType}</span>`
+                       : row.creditType ?? '';
+                   
+                   const nonReturnableReasons = {
+                       1: "Manufacturer Doesn't Accept Returns",
+                       2: "Product Sold On A Non-Returnable Basis",
+                       3: "Manufacturer Doesn't Accept Partials",
+                       4: "Repackaged Product",
+                       5: "Product Is Too Far Past Expiration Date",
+                       6: "Product Doesn't Meet Minimum Quantity",
+                       7: "Sample Product",
+                       8: "Prescription Label On Product",
+                       9: "Label Defaced / Product Damaged",
+                       10: "Lot Number Is Non-Returnable",
+                       11: "Product Doesn't Meet Minimum $ Value",
+                       12: "Other",
+                       13: "Free/complimentary item",
+                       14: "Product not in original package",
+                       15: "Overfilled container",
+                       16: "Product too far in-date",
+                       17: "Destroy at customer request",
+                       18: "Compounded product"
+                   };
+                   
+                   tbody.append(`
+                       <tr>
+                         <td>${row.NDC ?? ''}</td>
+                         <td>${row.LabelName ?? ''}</td>
+                         <td>${row.Package ?? ''}</td>
+                         <td>${row.quantity ?? ''}</td>
+                         <td>${row.LotNumber ?? '-'}</td>
+                         <td>${row.ExpDate ? formatMonth(row.ExpDate) : ''}</td>
+                         <td>${row.DEA ?? ''}</td>
+                         <td>$${parseFloat(row.value ?? 0).toFixed(2)}</td>
+                         <td>${row.name ?? '-'}</td>
+                         <td>${creditTypeHtml}</td>
+                         <td>
+                             <div class="details-icon-wrapper">
+                               ${
+                                 row.batchtype == 2
+                                   ? (nonReturnableReasons[parseInt(row.returncode)] ?? '')
+                                   : row.batchtype == 0
+                                     ? `<img src="/assets/images/details.png" style="cursor:pointer; width:25px;" 
+                                          onclick="showInfoModal(this, 'Data not available', '', '', ${row.batchtype})">`
+                                     : (
+                                         hasCheck
+                                           ? `<img src="/assets/images/details.png" style="cursor:pointer; width:25px;" 
+                                                onclick="showInfoModal(this, '${row.ClosingCheckNum}', '${row.value ?? ''}', '${row.PayDate ? formatDate(row.PayDate) : ''}', ${row.batchtype})">`
+                                           : `<img src="/assets/images/details.png" style="opacity:0.5; cursor:not-allowed; width:25px;" title="Check not available">`
+                                       )
+                               }
+                             </div>
+                        </td>
+                       </tr>
+                     `);
+                   });
+
+               $('#data-table').DataTable({
+                   dom: 'Bfrtip',
+                   ordering: true,
+                   pageLength: 10,
+                   responsive: true,
+                   order: [], 
+                   columnDefs: [
+                       { orderable: true, targets: [0, 1, 6, 5, 7, 8] }, // NDC, Product, DEA, Exp Date, Value, Manufacturer
+                       { orderable: false, targets: '_all' } 
+                   ]
+               });
+           },
+           error: function() {
+               $('#creditDistribution').html('<p class="text-danger">Failed to load Return Details.</p>');
+           }
+       });
+   }
+
+   $('input[name="returnRadio"]').on('change', loadReturnDetail);
+   $('#ras').on('change', loadReturnDetail);
+   $('#creditTypeContainer select').on('change', loadReturnDetail);
+   $('#nonReturnableReasonsContainer select').on('change', loadReturnDetail);
+
+   loadReturnDetail();
+
+   function breakAfterTwoWords(text) {
+       if (!text) return '';
+
+       const words = text.trim().split(/\s+/);
+
+       if (words.length <= 2) {
+           return words.join(' ');
+       }
+
+       return `
+           ${words.slice(0, 2).join(' ')}<br>
+           ${words.slice(2).join(' ')}
+       `;
+   }
+
+});
+</script>
+
+<script>
+let currentCreditInfo = {};
+
+function loadCreditInfo(unicode, TrackingNumber, phone1, RANum, processorname, RSIestimate, id) {
+   currentCreditInfo = {
+       unicode, TrackingNumber, phone1, RANum, processorname, RSIestimate, id
+   };
+   
+   const tbody = document.querySelector('#show tbody');
+   tbody.innerHTML = '';
+
+   document.getElementById('unicode_hidden').value = unicode;
+   document.getElementById('manID_hidden').value = id;
+
+   // const trackingLink = TrackingNumber
+   //     ? `<a href="https://www.ups.com/track?loc=en_US&tracknum=${TrackingNumber}&requester=UPSHome&agreeTerms=yes" target="_blank">${TrackingNumber}</a>`
+   //     : '-';
+       
+   let trackingCell = '-';
+
+   if (TrackingNumber) {
+       trackingCell = `
+           <a href="https://www.fedex.com/fedextrack/?trknbr=${TrackingNumber}" 
+              target="_blank" 
+              class="btn btn-sm btn-outline-primary" 
+              title="Track Shipment">
+              <i class="bi bi-truck"></i> Track
+           </a>`;
+   } else {
+       trackingCell = `
+           <button class="btn btn-sm btn-outline-secondary" disabled>
+               <i class="bi bi-exclamation-circle"></i> No Tracking
+           </button>`;
+   }
+
+   const row = `
+       <tr>
+           <td>${processorname || '-'}</td>
+           <td>$${RSIestimate || '-'}</td>
+           <td>${RANum || '-'}</td>
+           <td>${unicode || '-'}</td>
+           <td>${phone1 || '-'}</td>
+           <td>${trackingCell}</td>
+       </tr>
+   `;
+
+   tbody.innerHTML = row;
+
+   $('#credit-info-table tbody').html(`<tr><td colspan="8" class="text-center">Loading credits...</td></tr>`);
+   
+   let url = '';
+                   var guard = "customer";
+   
+   if (guard === 'chain') {
+       url = '/chain/get-DirectCredits';
+   } else if (guard === 'customer') {
+       url = '/customer/get-DirectCredits';
+   } else {
+       console.warn('Unknown guard:', guard);
+   }
+
+   $.ajax({
+       url: url,
+       method: 'GET',
+       data: { unicode: unicode },
+       success: function(response) {
+           let rows = '';
+           if (response && response.length > 0) {
+               $.each(response, function(index, credit) {
+                   const memo = credit.memo ?? '';
+                   const words = memo.split(' ');
+                   const firstLine = words.slice(0, 6).join(' ');
+                   const secondLine = words.slice(6).join(' ');
+       
+                   const formattedMemo = `
+                       <div>${firstLine}</div>
+                       ${secondLine ? `<div style="margin-top:2px; color:#555;">${secondLine}</div>` : ''}
+                   `;
+                   
+                   //m/d/y format
+                   let paydate = credit.paydate ? new Date(credit.paydate) : null;
+                   let formattedDate = paydate
+                       ? `${paydate.getMonth() + 1}/${paydate.getDate()}/${paydate.getFullYear().toString().slice(-2)}`
+                       : '';
+                       
+                   rows += `
+                       <tr>
+                           <td>${credit.primarykey}</td>
+                           <td>$${parseFloat(credit.amount).toFixed(2)}</td>
+                           <td>${credit.credittype}</td>
+                           <td>${credit.checknumber ?? ''}</td>
+                           <td>${formattedDate}</td>
+                           <td>${formattedMemo}</td>
+                           <td>${credit.changedby ?? ''}</td>
+                           <td>
+                               <button onclick="editCredit(${credit.primarykey})" class="btn btn-sm btn-primary">Edit</button>
+                               <button onclick="deleteCredit(${credit.primarykey})" class="btn btn-sm btn-danger">Delete</button>
+                           </td>
+                       </tr>`;
+               });
+           } else {
+               rows = `<tr><td colspan="8" class="text-center">No credit records found.</td></tr>`;
+           }
+
+           $('#credit-info-table tbody').html(rows);
+       },
+       error: function() {
+           $('#credit-info-table tbody').html(`<tr><td colspan="8" class="text-center text-danger">Error loading data.</td></tr>`);
+       }
+   });
+}
+
+function deleteCredit(primaryKey) {
+   if (confirm('Are you sure you want to delete this credit?')) {
+       $.post("https://portal.drugreturns.com/customer/addCreditData", {
+           _token: 'wjSMP9RealEt3cembKM4AidwiqmoxHDUDpdfLBNe',
+           actionType: 3,
+           primarykey: primaryKey
+       }, function(response) {
+           if (response === true || response === 'true') {
+               // alert('Deleted successfully');
+               
+               $('#editFormMessage').html(`
+                   <div class="alert alert-success" role="alert">
+                       Credit Deleted successfully.
+                   </div>
+               `);
+               
+               $('#editForm')[0].reset();
+               
+               setTimeout(() => {
+                   $('#editFormMessage .alert').fadeOut('slow', function () {
+                       $(this).remove();
+                   });
+               }, 3000);
+
+               const {
+                   unicode, TrackingNumber, RANum,
+                   phone1, RSIestimate, processorname, id
+               } = currentCreditInfo;
+
+               // loadCreditInfo(unicode, TrackingNumber, RANum, phone1, RSIestimate, processorname, id);
+               loadCreditInfo(unicode, TrackingNumber, phone1, RANum, processorname, RSIestimate, id);
+               // closeAllModals();
+           } else {
+               alert('Error deleting credit.');
+           }
+       }).fail(function() {
+           alert('Server error while deleting credit.');
+       });
+   }
+}
+
+function closeAllModals() {
+   document.querySelectorAll('.modal.show').forEach(modalEl => {
+       const modalInstance = bootstrap.Modal.getInstance(modalEl);
+       if (modalInstance) {
+           modalInstance.hide();
+       }
+   });
+
+   const backdrops = document.querySelectorAll('.modal-backdrop');
+   backdrops.forEach(backdrop => backdrop.remove());
+
+   document.body.classList.remove('modal-open');
+   location.reload();
+}
+
+function openAddModal() {
+   const refnum = $('#ras').val();
+   $('#editModalLabel').text('Add Credit');
+   $('#editForm')[0].reset();
+
+   $('#actionType').val(1);
+   $('#primarykey').val('');
+   $('#refnum').val(refnum || '');
+   $('#unicode').val('');
+   $('#creditFormContainer').show();
+}
+
+function editCredit(primarykey) {
+   $.ajax({
+       url: '/customer/getCreditData/' + primarykey,
+       method: 'GET',
+       success: function(credit) {
+           if (credit) {
+               $('#editModalLabel').text('Edit Credit');
+               $('#actionType').val(2);
+               $('#primarykey').val(credit.primarykey);
+               $('#editID').val(primarykey);
+               $('#modalName').val(credit.received);
+               $('#creditType').val(credit.credit_type);
+               $('#modalUnicode').val(credit.credit_memo);
+               $('#modalRSIestimate').val(credit.date_issued);
+               $('#modalCreditReceived').val(credit.notes);
+
+               $('#creditFormContainer').show();
+
+               const modal = new bootstrap.Modal(document.getElementById('editModal'));
+               modal.show();
+           }
+       },
+       error: function() {
+           alert('Failed to load credit data.');
+       }
+   });
+}
+
+$(document).ready(function () {
+   $('#editForm').on('submit', function (e) {
+       e.preventDefault();
+
+       $.ajax({
+           url: $(this).attr('action'),
+           method: 'POST',
+           data: $(this).serialize(),
+           success: function (response) {
+               $('#editFormMessage').html(`
+                   <div class="alert alert-success" role="alert">
+                       Credit data saved successfully.
+                   </div>
+               `);
+               
+               $('#editForm')[0].reset();
+               // $('#editForm').hide();  
+
+               setTimeout(() => {
+                   $('#editFormMessage .alert').fadeOut('slow', function () {
+                       $(this).remove();
+                   });
+               }, 3000);
+
+               if (typeof currentCreditInfo !== 'undefined') {
+                   loadCreditInfo(
+                       currentCreditInfo.unicode,
+                       currentCreditInfo.TrackingNumber,
+                       currentCreditInfo.RANum,
+                       currentCreditInfo.phone1,
+                       currentCreditInfo.RSIestimate,
+                       currentCreditInfo.processorname,
+                       currentCreditInfo.id
+                   );
+               }
+           },
+           error: function (xhr) {
+               let errorMessage = 'Something went wrong.';
+               if (xhr.responseJSON && xhr.responseJSON.errors) {
+                   errorMessage = Object.values(xhr.responseJSON.errors).flat().join('<br>');
+               }
+
+               $('#editFormMessage').html(`
+                   <div class="alert alert-danger" role="alert">${errorMessage}</div>
+               `);
+           }
+       });
+   });
+});
+
+function formatDate(dateStr) {
+ const d = new Date(dateStr);
+ return `${(d.getMonth() + 1).toString().padStart(2, '0')}/` +
+        `${d.getDate().toString().padStart(2, '0')}/` +
+        `${d.getFullYear()}`;
+}
+
+function showInfoModal(el, checkNum, value, payDate, batchtype) {
+   const modal = document.getElementById("infoModal");
+
+   if (checkNum === 0 || checkNum === "0" || !checkNum || batchtype === 0 || batchtype === 6) {
+       modal.innerHTML = `Data Not Available`;
+   } else {
+       modal.innerHTML = `
+           <div><strong>Check #: </strong>${checkNum}</div>
+           <div><strong>Value: </strong>&nbsp;$${parseFloat(value || 0).toFixed(2)}</div>
+           <div><strong>Pay Date: </strong>&nbsp;${payDate || 'N/A'}</div>
+       `;
+   }
+
+   // const rect = el.getBoundingClientRect();
+   // modal.style.top = `${rect.top + window.scrollY + 30}px`;
+   // modal.style.left = '1260.73px';  //'1378.73px'; 
+   // modal.style.display = 'block';
+   
+   const rect = el.getBoundingClientRect();
+   modal.style.top = `${rect.top + window.scrollY + 30}px`; 
+   modal.style.left = `${rect.left + window.scrollX - 90}px`;  
+   modal.style.display = 'block';
+}
+
+document.addEventListener("click", function(e) {
+   const modal = document.getElementById("infoModal");
+   if (!modal.contains(e.target) && !e.target.matches("img[onclick^='showInfoModal']")) {
+       modal.style.display = "none";
+   }
+});
+</script>
+
+ </div>
