@@ -13,6 +13,7 @@ import {
   UpdatePharmacyStoreSettingsData,
 } from '../services/adminPharmaciesService';
 import { AppError } from '../utils/appError';
+import { supabaseAdmin } from '../config/supabase';
 
 /**
  * @swagger
@@ -89,6 +90,15 @@ export const getSettings = catchAsync(async (req: Request, res: Response, next: 
  *                 type: string
  *                 format: date
  *                 description: Expiration date of the pharmacy license (YYYY-MM-DD)
+ *               corporate_name:
+ *                 type: string
+ *                 description: Corporate name if different from pharmacy/facility name
+ *               mailing_address:
+ *                 type: string
+ *                 description: Mailing address if different from pharmacy address
+ *               store_hours:
+ *                 type: string
+ *                 description: Store operating hours (e.g. M-F 9-7 Sat 10-3)
  *               physical_address:
  *                 type: object
  *                 properties:
@@ -290,6 +300,99 @@ export const updateStoreSettings = catchAsync(
       status: 'success',
       message: 'Store settings updated successfully',
       data: { storeSettings: settings },
+    });
+  }
+);
+
+/**
+ * @swagger
+ * /api/settings/upload-document:
+ *   post:
+ *     summary: Upload a DEA or State Pharmacy License document
+ *     tags: [Settings]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - file
+ *               - documentType
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *               documentType:
+ *                 type: string
+ *                 enum: [dea, license]
+ *     responses:
+ *       200:
+ *         description: Document uploaded successfully
+ */
+export const uploadDocument = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const pharmacyId = req.pharmacyId;
+
+    if (!pharmacyId) {
+      return next(new AppError('Pharmacy ID is required', 400));
+    }
+
+    if (!supabaseAdmin) {
+      return next(new AppError('Storage service not configured', 500));
+    }
+
+    const file = req.file;
+    if (!file) {
+      return next(new AppError('No file provided', 400));
+    }
+
+    const documentType = req.body.documentType;
+    if (!documentType || !['dea', 'license'].includes(documentType)) {
+      return next(new AppError('documentType must be "dea" or "license"', 400));
+    }
+
+    const ext = file.originalname.split('.').pop() || 'pdf';
+    const fileName = `${pharmacyId}/${documentType}_${Date.now()}.${ext}`;
+
+    const { error: uploadError } = await supabaseAdmin.storage
+      .from('pharmacy-documents')
+      .upload(fileName, file.buffer, {
+        contentType: file.mimetype,
+        upsert: true,
+      });
+
+    if (uploadError) {
+      return next(new AppError(`Failed to upload document: ${uploadError.message}`, 500));
+    }
+
+    // Use signed URL (works for both private and public buckets)
+    const TEN_YEARS_IN_SECONDS = 60 * 60 * 24 * 365 * 10;
+    const { data: signedUrlData, error: signedUrlError } = await supabaseAdmin.storage
+      .from('pharmacy-documents')
+      .createSignedUrl(fileName, TEN_YEARS_IN_SECONDS);
+
+    if (signedUrlError || !signedUrlData?.signedUrl) {
+      return next(new AppError(`Failed to generate document URL: ${signedUrlError?.message ?? 'unknown error'}`, 500));
+    }
+
+    const publicUrl = signedUrlData.signedUrl;
+
+    const columnName = documentType === 'dea' ? 'dea_file_url' : 'license_file_url';
+
+    await updatePharmacySettings(pharmacyId, {
+      [columnName]: publicUrl,
+    } as any);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Document uploaded successfully',
+      data: {
+        url: publicUrl,
+        documentType,
+      },
     });
   }
 );
