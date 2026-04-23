@@ -42,7 +42,7 @@ export type { DocumentsFilters } from './documentsService';
 export type { OptimizationRecommendations, Recommendation, AlternativeDistributor, OptimizationSuggestionsResponse, OptimizationSuggestionItem, OptimizationSuggestionDistributor, OptimizationSuggestionProduct, CustomPackageItem, CreateCustomPackageRequest, PackageSuggestionsResponse, PackageSuggestion, PackageSuggestionProduct, DistributorSuggestionResponse, DistributorSuggestionPackage, DistributorSuggestionProduct } from './optimizationService';
 export type { PackagesResponse, Package, PackageProduct, DistributorContact, PackagesSummary, PackagesStats } from './packagesService';
 export type { TopDistributor, TopDistributorsResponse } from './distributorsService';
-export type { UserSettings, ChangePasswordRequest } from './settingsService';
+export type { UserSettings, ChangePasswordRequest, UploadDocumentResponse } from './settingsService';
 export type { FcrStoreSettings, UpdateFcrStoreSettings } from './fcrStoreSettingsService';
 export type { SubscriptionPlan, CheckoutSessionResponse, PortalSessionResponse } from './subscriptionService';
 export type { 
