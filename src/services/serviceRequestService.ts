@@ -86,7 +86,6 @@ export const createServiceRequest = async (
 
   if (!input.pharmacyId) throw new AppError('pharmacy_id is required', 400);
   if (!input.requestedDate) throw new AppError('requested_date is required', 400);
-  if (!input.purpose) throw new AppError('purpose is required', 400);
 
   const { data, error } = await sb.rpc('create_service_request', {
     p_pharmacy_id: input.pharmacyId,

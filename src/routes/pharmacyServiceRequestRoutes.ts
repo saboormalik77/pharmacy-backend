@@ -31,7 +31,7 @@ router.use(authenticate);
  *         application/json:
  *           schema:
  *             type: object
- *             required: [requested_date, purpose]
+ *             required: [requested_date]
  *             properties:
  *               requested_date:
  *                 type: string
@@ -43,6 +43,7 @@ router.use(authenticate);
  *               purpose:
  *                 type: string
  *                 enum: [return_pickup, training, inventory_review, destruction_pickup, other]
+ *                 nullable: true
  *               special_instructions:
  *                 type: string
  *                 nullable: true

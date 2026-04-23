@@ -30,8 +30,8 @@ CREATE TABLE IF NOT EXISTS service_requests (
     requested_by_user_id    UUID,
     buying_group_id         UUID,
     requested_date          DATE NOT NULL,
-    purpose                 TEXT NOT NULL
-        CHECK (purpose IN ('return_pickup','training','inventory_review','destruction_pickup','other')),
+    purpose                 TEXT
+        CHECK (purpose IS NULL OR purpose IN ('return_pickup','training','inventory_review','destruction_pickup','other')),
     special_instructions    TEXT,
     status                  TEXT NOT NULL DEFAULT 'pending'
         CHECK (status IN ('pending','scheduled','completed','cancelled')),
@@ -97,11 +97,11 @@ FOR EACH ROW EXECUTE FUNCTION service_requests_set_updated_at();
 
 CREATE OR REPLACE FUNCTION create_service_request(
     p_pharmacy_id          UUID,
-    p_branch_id            UUID,
     p_requested_date       DATE,
-    p_purpose              TEXT,
-    p_special_instructions TEXT,
-    p_requested_by_user_id UUID
+    p_branch_id            UUID DEFAULT NULL,
+    p_purpose              TEXT DEFAULT NULL,
+    p_special_instructions TEXT DEFAULT NULL,
+    p_requested_by_user_id UUID DEFAULT NULL
 ) RETURNS JSONB
 LANGUAGE plpgsql
 AS $$
@@ -939,7 +939,7 @@ ON CONFLICT (permission_key) DO NOTHING;
 -- GRANTS (RPCs are invoked via supabaseAdmin which bypasses RLS; grants are
 -- mostly ceremonial but included for completeness).
 -- ============================================================================
-GRANT EXECUTE ON FUNCTION create_service_request          (UUID, UUID, DATE, TEXT, TEXT, UUID)    TO service_role, authenticated;
+GRANT EXECUTE ON FUNCTION create_service_request          (UUID, DATE, UUID, TEXT, TEXT, UUID)    TO service_role, authenticated;
 GRANT EXECUTE ON FUNCTION list_pharmacy_service_requests  (UUID, TEXT, INTEGER, INTEGER)          TO service_role, authenticated;
 GRANT EXECUTE ON FUNCTION cancel_pharmacy_service_request (UUID, UUID, TEXT)                      TO service_role, authenticated;
 GRANT EXECUTE ON FUNCTION list_processor_service_requests (UUID, TEXT, INTEGER, INTEGER)          TO service_role, authenticated;

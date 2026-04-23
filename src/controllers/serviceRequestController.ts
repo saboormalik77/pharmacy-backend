@@ -38,7 +38,6 @@ export const createHandler = catchAsync(
     } = req.body || {};
 
     if (!requested_date) throw new AppError('requested_date is required', 400);
-    if (!purpose) throw new AppError('purpose is required', 400);
 
     // Date validation (not in past)
     const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -50,7 +49,8 @@ export const createHandler = catchAsync(
       throw new AppError('requested_date cannot be in the past', 400);
     }
 
-    if (!['return_pickup', 'training', 'inventory_review', 'destruction_pickup', 'other'].includes(purpose)) {
+    // Purpose is optional now, but if provided, must be valid
+    if (purpose && !['return_pickup', 'training', 'inventory_review', 'destruction_pickup', 'other'].includes(purpose)) {
       throw new AppError('Invalid purpose value', 400);
     }
 

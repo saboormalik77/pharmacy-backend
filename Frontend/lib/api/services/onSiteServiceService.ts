@@ -19,7 +19,7 @@ export interface ServiceRequestListItem {
   branch_id: string | null;
   requested_by_user_id: string | null;
   requested_date: string;
-  purpose: ServiceRequestPurpose;
+  purpose: ServiceRequestPurpose | null;
   special_instructions: string | null;
   status: ServiceRequestStatus;
   scheduled_date: string | null;
@@ -81,7 +81,7 @@ export interface ServiceRequestDetail extends ServiceRequestListItem {
 export interface CreateServiceRequestPayload {
   requested_date: string; // YYYY-MM-DD
   branch_id?: string | null;
-  purpose: ServiceRequestPurpose;
+  purpose: ServiceRequestPurpose | null;
   special_instructions?: string | null;
 }
 
