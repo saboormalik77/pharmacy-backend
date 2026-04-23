@@ -1,4 +1,5 @@
-// Knowledge base for the chatbot with website information and links
+// Knowledge base for the pharmacy portal chatbot
+// Only covers features that are currently active in the sidebar/portal
 
 export interface KnowledgeItem {
   keywords: string[];
@@ -9,161 +10,233 @@ export interface KnowledgeItem {
 
 export const chatbotKnowledge: KnowledgeItem[] = [
   {
-    keywords: ['inventory', 'stock', 'add inventory', 'manage inventory', 'inventory management', 'add stock', 'stock entry'],
-    content: 'Inventory Management is your central hub for tracking pharmaceutical stock. You can: 1) Add items manually by entering an NDC code, 2) Import bulk inventory via CSV or Excel files, 3) View all items with their expiration dates, quantities, and locations, 4) Monitor items expiring within 180 days, 5) Manage expired medications by creating packages for warehouse disposal. The system automatically calculates days until expiration and categorizes items as active, expiring soon, or expired. You can search by product name, NDC, or lot number, and filter by status.',
-    links: [
-      { title: 'View All Inventory', url: '/inventory' },
-      { title: 'Add New Stock', url: '/inventory?view=add' },
-      { title: 'Expired Medications', url: '/inventory?view=expired' },
-      { title: 'Inventory Overview', url: '/inventory?view=overview' },
+    keywords: [
+      'return', 'returns', 'create return', 'return medication', 'return process',
+      'return item', 'return status', 'return reason', 'draft', 'ready to ship',
+      'in transit', 'processing', 'completed return',
     ],
-    suggestions: [
-      'How do I add inventory items manually?',
-      'How to import inventory from CSV?',
-      'How to find expired medications?',
-      'What does "expiring soon" mean?',
-    ],
-  },
-  {
-    keywords: ['return', 'returns', 'create return', 'return medication', 'return process', 'return item'],
-    content: 'Returns Management enables you to create and track returns of pharmaceutical products. To create a return: 1) Go to Create Return page, 2) Select items from your available inventory, 3) Specify return reasons (expired, damaged, expiring soon, etc.), 4) Review estimated credits, 5) Submit the return. The system tracks returns through stages: Draft → Ready to Ship → In Transit → Processing → Completed. You can view return details, shipment information, chain of custody, and estimated credits. Returns are linked to shipments for tracking.',
+    content:
+      'Returns is the core feature of the portal. You can create, submit, and track pharmaceutical product returns from start to finish.\n\nHow to create a return:\n1. Click "Create Return" in the sidebar\n2. Scan barcodes or manually search for items to include\n3. Review the item list and confirm quantities\n4. Submit the return\n\nReturn status flow:\nDraft → Ready to Ship → In Transit → Processing → Completed\n\nEach status means:\n• Draft — Being built, not yet submitted\n• Ready to Ship — Confirmed, waiting for you to pack and ship\n• In Transit — Shipped, tracking is active\n• Processing — Warehouse is verifying your items\n• Completed — Done, credits have been applied\n\nFrom the Returns page you can view all returns, open any return for full details, see the item breakdown, shipment tracking, and expected credits.',
     links: [
       { title: 'All Returns', url: '/returns' },
       { title: 'Create New Return', url: '/returns/create' },
     ],
     suggestions: [
       'How do I create a return?',
-      'What items are eligible for return?',
-      'How to track a return status?',
-      'What are return reasons?',
+      'What are the return status stages?',
+      'How to track a return?',
+      'What items can be returned?',
     ],
   },
   {
-    keywords: ['shipment', 'shipments', 'track shipment', 'shipping', 'delivery'],
-    content: 'Shipments Management tracks all your return shipments. You can view shipment status, tracking numbers, carrier information, and delivery confirmations. The system provides real-time updates on shipment progress.',
-    links: [
-      { title: 'Shipments', url: '/shipments' },
+    keywords: [
+      'tbd', 'tbd items', 'to be determined', 'pending review', 'items review',
     ],
+    content:
+      'TBD Items (To Be Determined) are return items that require additional review before they can be processed.\n\nThese items are held separately until a decision is made on whether they are eligible for credit or need to be handled differently.\n\nYou can view and manage TBD items from the TBD Items page in the sidebar.',
+    links: [{ title: 'TBD Items', url: '/returns/tbd-items' }],
     suggestions: [
-      'How to track a shipment?',
-      'What carriers are supported?',
-      'How to create a shipment label?',
+      'What are TBD items?',
+      'How to resolve TBD items?',
+      'Why is my item marked as TBD?',
     ],
   },
   {
-    keywords: ['warehouse', 'receiving', 'warehouse receiving', 'package', 'packages', 'expired package', 'disposal'],
-    content: 'Warehouse Operations include: 1) Receiving - When packages arrive, warehouse staff receive and inspect them, checking condition and integrity, 2) Classification - Items are classified as returnable (for credit) or non-returnable (for destruction), 3) Processing - Warehouse orders track the complete lifecycle from receiving to completion, 4) Expired Medication Packages - You can create packages of expired items from your inventory and send them to the warehouse for FDA-compliant disposal. The system tracks quality checks, compliance checks, and provides detailed timelines.',
-    links: [
-      { title: 'Warehouse Receiving', url: '/warehouse/receiving' },
-      { title: 'Warehouse Orders', url: '/warehouse/orders' },
-      { title: 'Create Expired Package', url: '/warehouse/packages/create' },
+    keywords: [
+      'destruction', 'destroy', 'disposal', 'destroy items', 'return destruction',
     ],
+    content:
+      'Destruction refers to return items that have been approved for proper pharmaceutical disposal rather than credit.\n\nThese items go through a compliant destruction process. You can view destruction items and their status from the Destruction page in the sidebar.',
+    links: [{ title: 'Destruction', url: '/returns/destruction' }],
     suggestions: [
-      'How does warehouse receiving work?',
-      'How to create an expired medication package?',
-      'What is the warehouse order timeline?',
-      'What are quality and compliance checks?',
+      'What is the destruction process?',
+      'How are items approved for destruction?',
+      'How to view destruction items?',
     ],
   },
   {
-    keywords: ['payment', 'payments', 'credit', 'credits', 'expected credit', 'received payment'],
-    content: 'Payments & Credits tracks expected credits from returns and received payments from suppliers. You can view payment history, expected credits, commission calculations, and financial analytics. The system provides detailed breakdowns of payment status and credit estimates.',
+    keywords: [
+      'wine cellar', 'wine-cellar', 'wine celler', 'wine sellor', 'wine seller',
+      'wineceller', 'winecellar', 'archived items', 'archive', 'cellar',
+    ],
+    content:
+      'The Wine Cellar is a specialized section within the portal for managing certain pharmaceutical items that are held or archived separately from the regular returns workflow.\n\nItems in the Wine Cellar may be there because they:\n• Require additional review or special handling\n• Are being held pending further instructions\n• Are archived for record-keeping purposes\n\nYou can access the Wine Cellar directly from the sidebar if your account has the required permission (wine_cellar:view). If you do not see it in your sidebar, contact your admin to enable the permission for your role.',
+    links: [{ title: 'Wine Cellar', url: '/wine-cellar' }],
+    suggestions: [
+      'What is the Wine Cellar?',
+      'How to access the Wine Cellar?',
+      'Why can\'t I see the Wine Cellar in my sidebar?',
+    ],
+  },
+  {
+    keywords: [
+      'credit', 'credits', 'expected credit', 'credit history', 'credit statement',
+      'statement', 'credit value', 'credit breakdown', 'payment', 'payments',
+    ],
+    content:
+      'Credits are earned from items verified in your completed returns.\n\nHow credits work:\n• When a return reaches "Completed" status, each eligible item is assigned a credit value based on product type and condition\n• "Expected Credits" — credits that have been calculated but not yet paid out\n• "Received Credits" — credits that have been confirmed and paid by the supplier\n• Every credit entry is linked back to the original return item for full traceability\n• Credits are issued by the supplier/distributor after warehouse confirmation\n\nThe Credit Statement gives you a full itemized financial record — useful for bookkeeping, audits, and reconciliation with suppliers.\n\nGo to Credits in the sidebar to view your full credit history and download your statement.',
     links: [
-      { title: 'Payments', url: '/payments' },
       { title: 'Credits', url: '/credits' },
+      { title: 'Credit Statement', url: '/credits/statement' },
     ],
     suggestions: [
       'How are credits calculated?',
-      'When will I receive payment?',
-      'How to view payment history?',
+      'How to view my credit history?',
+      'How to download a credit statement?',
+      'When will I receive credit?',
     ],
   },
   {
-    keywords: ['marketplace', 'buy', 'sell', 'purchase', 'products'],
-    content: 'Marketplace allows you to browse and purchase pharmaceutical products from suppliers. You can search by NDC, view product details, compare prices, and place orders directly through the platform.',
-    links: [
-      { title: 'Marketplace', url: '/marketplace' },
+    keywords: [
+      'analytics', 'reports', 'statistics', 'dashboard', 'data', 'charts',
+      'insights', 'analytics reports', 'performance',
     ],
-    suggestions: [
-      'How to search for products?',
-      'How to place an order?',
-      'What suppliers are available?',
-    ],
-  },
-  {
-    keywords: ['analytics', 'reports', 'statistics', 'dashboard', 'data'],
-    content: 'Analytics provides comprehensive insights into your operations including inventory trends, return statistics, financial performance, and operational metrics. You can view charts, graphs, and detailed reports to make data-driven decisions.',
-    links: [
-      { title: 'Analytics', url: '/analytics' },
-      { title: 'Dashboard', url: '/dashboard' },
-    ],
+    content:
+      'Analytics & Reports gives you insights into your operations:\n• Return statistics and trends\n• Credit and financial performance summaries\n• Activity breakdowns by time period\n\nGo to Analytics & Reports from the sidebar to view charts, summaries, and exportable reports.',
+    links: [{ title: 'Analytics & Reports', url: '/analytics' }],
     suggestions: [
       'What analytics are available?',
-      'How to view inventory trends?',
-      'How to export reports?',
+      'How to view return trends?',
+      'How to export a report?',
     ],
   },
   {
-    keywords: ['expired', 'expiration', 'expiring soon', 'expired medication', 'disposal'],
-    content: 'Expired medications must be properly packaged and sent to authorized warehouse facilities for destruction per FDA regulations (21 CFR Part 1317). You can view expired items in the inventory, select them, and create packages for warehouse disposal. The system tracks the entire disposal process.',
-    links: [
-      { title: 'Expired Items', url: '/inventory?view=expired' },
-      { title: 'Create Package', url: '/warehouse/packages/create' },
+    keywords: [
+      'branch', 'branches', 'location', 'multiple locations', 'pharmacy branch',
+      'create branch', 'branch management', 'add location',
     ],
+    content:
+      'Branches lets you manage multiple pharmacy locations under one parent account.\n\nHow to create a branch:\n1. Go to Branches in the sidebar (visible to parent accounts only)\n2. Click "Create Branch"\n3. Fill in branch name, NPI, address, and contact details\n4. Assign staff and roles to the branch\n\nYou can switch between branches using the Branch Switcher at the top of the page.',
+    links: [{ title: 'Branches', url: '/branches' }],
     suggestions: [
-      'How to handle expired medications?',
-      'What is the FDA compliance process?',
-      'How to create a disposal package?',
+      'How to create a branch?',
+      'How to switch between branches?',
+      'How to assign staff to a branch?',
     ],
   },
   {
-    keywords: ['ndc', 'national drug code', 'product code', 'lookup'],
-    content: 'NDC (National Drug Code) is a unique identifier for pharmaceutical products. You can search and validate NDCs in the inventory system. The system automatically looks up product information including name, manufacturer, strength, and dosage form when you enter an NDC.',
-    links: [
-      { title: 'Add Inventory', url: '/inventory?view=add' },
+    keywords: [
+      'role', 'roles', 'permission', 'permissions', 'access control',
+      'staff access', 'user role', 'create role', 'manage roles',
     ],
+    content:
+      'Roles & Permissions lets you control what your staff can access.\n\nHow to manage roles:\n1. Go to Roles & Permissions in the sidebar (parent accounts only)\n2. Click "Create Role"\n3. Set permissions for each section (returns, credits, analytics, etc.)\n4. Assign the role to staff members from the branch management\n\nRoles define exactly which pages and actions each staff member can access.',
+    links: [{ title: 'Roles & Permissions', url: '/roles' }],
     suggestions: [
-      'How to lookup an NDC?',
-      'What is an NDC format?',
-      'How to validate an NDC?',
+      'How to create a custom role?',
+      'How to change user permissions?',
+      'How to restrict staff access?',
     ],
   },
   {
-    keywords: ['help', 'support', 'assistance', 'how to', 'guide'],
-    content: 'I\'m here to help you navigate the pharmacy management system! I can assist with inventory management, returns, shipments, warehouse operations, payments, and more. Feel free to ask me any questions about using the system.',
-    links: [
-      { title: 'Dashboard', url: '/dashboard' },
-      { title: 'Settings', url: '/settings' },
+    keywords: [
+      'settings', 'profile', 'account', 'store settings', 'store hours',
+      'corporate name', 'mailing address', 'password', 'change password',
+      'dea number', 'license number', 'upload document', 'profile settings',
+      'npi', 'pharmacy name', 'facility name', 'contact info',
     ],
+    content:
+      'Settings lets you manage all your pharmacy account information. It has three tabs:\n\n1. Profile Tab:\n   • Personal info: name, email, phone\n   • Pharmacy/facility name, NPI number, corporate name\n   • DEA number, state license number, license expiration date\n   • Mailing address (if different from physical address)\n   • Upload DEA certificate and State Pharmacy License documents\n\n2. Store Settings Tab:\n   • Store number, service type, buying group/GPO affiliation\n   • Primary and secondary wholesaler, wholesale account number\n   • DEA expiration date, days between visits\n   • Fax number and store operating hours\n\n3. Security Tab:\n   • Change your account password\n   • Enter current password and set a new one\n\nTo edit your profile, click the "Edit Profile" button on the Settings page. Click "Save Changes" when done.',
+    links: [{ title: 'Settings', url: '/settings' }],
     suggestions: [
-      'How do I get started?',
-      'What features are available?',
+      'How to update my profile?',
+      'How to change my password?',
+      'How to upload license documents?',
+      'How to update store hours?',
+    ],
+  },
+  {
+    keywords: [
+      'support', 'help', 'contact', 'issue', 'problem', 'report', 'assistance',
+    ],
+    content:
+      'Need help?\n\n• Use this chat assistant for questions about portal features\n• For technical issues or bugs, contact our support team directly\n• If you see an error or something is not working, note the page and what action you were taking when reporting the issue',
+    links: [{ title: 'Settings', url: '/settings' }],
+    suggestions: [
+      'How to report a bug?',
       'How to contact support?',
+    ],
+  },
+  {
+    keywords: [
+      'get started', 'new user', 'onboarding', 'setup', 'first time', 'welcome', 'how to use',
+    ],
+    content:
+      'Getting started with the pharmacy portal:\n\n1. Settings — Complete your profile, NPI, DEA number, and license info first\n2. Returns — Create your first return by clicking "Create Return" in the sidebar\n3. Credits — Monitor credits earned from your returns\n4. Analytics & Reports — Track your performance\n5. Branches — If you manage multiple locations, set them up under Branches\n6. Roles & Permissions — Control what your staff can access',
+    links: [
+      { title: 'Settings', url: '/settings' },
+      { title: 'Returns', url: '/returns' },
+      { title: 'Credits', url: '/credits' },
+    ],
+    suggestions: [
+      'How do I create my first return?',
+      'How to complete my profile setup?',
+      'How to manage staff access?',
     ],
   },
 ];
 
-// Helper function to find relevant knowledge based on user query
+// Levenshtein distance for fuzzy/typo-tolerant matching
+function levenshtein(a: string, b: string): number {
+  const m = a.length;
+  const n = b.length;
+  const dp: number[][] = Array.from({ length: m + 1 }, (_, i) =>
+    Array.from({ length: n + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0))
+  );
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] =
+        a[i - 1] === b[j - 1]
+          ? dp[i - 1][j - 1]
+          : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+    }
+  }
+  return dp[m][n];
+}
+
+// Check if two words are "close enough" (handles typos up to 2 edits for longer words)
+function isFuzzyMatch(queryWord: string, keyword: string): boolean {
+  if (queryWord.length < 3) return queryWord === keyword;
+  const maxEdits = queryWord.length <= 5 ? 1 : 2;
+  return levenshtein(queryWord, keyword) <= maxEdits;
+}
+
+// Find relevant knowledge items based on user query (exact + fuzzy matching)
 export function findRelevantKnowledge(query: string): KnowledgeItem[] {
   const lowerQuery = query.toLowerCase();
+  const queryWords = lowerQuery.split(/\s+/).filter((w) => w.length >= 3);
   const matches: Array<{ item: KnowledgeItem; score: number }> = [];
 
   chatbotKnowledge.forEach((item) => {
     let score = 0;
+
     item.keywords.forEach((keyword) => {
-      if (lowerQuery.includes(keyword.toLowerCase())) {
-        score += 1;
+      const lowerKeyword = keyword.toLowerCase();
+
+      // Exact substring match (highest score — weight by word count)
+      if (lowerQuery.includes(lowerKeyword)) {
+        score += keyword.split(' ').length * 3;
+        return;
       }
+
+      // Fuzzy word-level match — each query word checked against each keyword word
+      const keywordWords = lowerKeyword.split(/\s+/);
+      queryWords.forEach((qWord) => {
+        keywordWords.forEach((kWord) => {
+          if (kWord.length >= 3 && isFuzzyMatch(qWord, kWord)) {
+            score += 1;
+          }
+        });
+      });
     });
+
     if (score > 0) {
       matches.push({ item, score });
     }
   });
 
-  // Sort by score and return top matches
   return matches
     .sort((a, b) => b.score - a.score)
     .slice(0, 3)
     .map((m) => m.item);
 }
-

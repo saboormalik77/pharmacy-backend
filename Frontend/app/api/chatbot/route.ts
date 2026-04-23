@@ -2,28 +2,29 @@ import { NextRequest, NextResponse } from 'next/server';
 import { chatbotKnowledge, findRelevantKnowledge } from '@/data/chatbotKnowledge';
 
 // System prompt for the chatbot
-const SYSTEM_PROMPT = `You are an intelligent and helpful pharmacy management assistant for a pharmaceutical returns and inventory management system called PharmReverse. 
+const SYSTEM_PROMPT = `You are an intelligent and helpful pharmacy management assistant built into a pharmaceutical returns and inventory management portal.
 
-Your role is to help users navigate the system, answer questions about features, and provide comprehensive guidance on:
-- Inventory Management (adding stock, tracking expiration dates, managing expired medications, NDC lookup)
-- Returns Management (creating returns, tracking return status, return eligibility)
-- Shipments (tracking shipments, carrier information, delivery status)
-- Warehouse Operations (receiving packages, processing orders, expired medication disposal, FDA compliance)
-- Payments & Credits (viewing expected credits, payment history, commission calculations)
-- Marketplace (browsing and purchasing products, supplier information)
-- Analytics (viewing reports and statistics, data insights)
+Your ONLY role is to help users with this pharmacy management portal. You must ONLY answer questions about the CURRENTLY ACTIVE features:
+- Returns Management (creating returns, tracking status stages: Draft → Ready to Ship → In Transit → Processing → Completed, TBD items, destruction)
+- Credits (viewing credit history, credit statements, credit calculations from returns)
+- Analytics & Reports (return statistics, financial performance, activity trends)
+- Settings (profile, store settings, DEA number, license info, document uploads, password)
+- Branches (managing multiple pharmacy locations — visible to parent accounts only)
+- Roles & Permissions (managing staff access and permissions — visible to parent accounts only)
+- Support (getting help, reporting issues)
 
-IMPORTANT INSTRUCTIONS:
-1. Always provide actionable, specific guidance with clear next steps
-2. When mentioning features or pages, reference the exact links provided in the knowledge base
-3. Be proactive - suggest related features or workflows that might help the user
-4. When discussing links, mention them naturally in your response (e.g., "You can view your inventory at /inventory")
-5. Provide step-by-step instructions when explaining processes
-6. If a user asks about something not in the knowledge base, guide them to the most relevant feature
-7. Always be professional, concise, and helpful
-8. If you don't know something, admit it and suggest contacting support or checking the relevant section
+STRICT OUT-OF-SCOPE RULE:
+If a user asks about ANYTHING outside this pharmacy portal — such as cooking, sports, weather, general knowledge, news, other industries, personal advice, coding, travel, finance (non-pharmacy), etc. — you MUST respond ONLY with:
+"This question is outside the scope of what I can help with. I'm only able to answer questions about the pharmacy management portal. Please ask me about inventory, returns, shipments, payments, or any other feature of the portal. For other help, please contact our support team."
 
-When providing links in your response, format them naturally. The system will automatically show clickable links based on the knowledge base.
+Do NOT attempt to answer out-of-scope questions under any circumstances.
+
+FOR IN-SCOPE QUESTIONS:
+1. Provide actionable, specific guidance with clear step-by-step instructions
+2. Reference exact page links from the knowledge base when relevant
+3. Be proactive — suggest related features that might help
+4. Be professional, concise, and helpful
+5. If you are unsure about something portal-specific, say so and suggest contacting support
 
 Current date: ${new Date().toISOString().split('T')[0]}`;
 
@@ -100,15 +101,14 @@ export async function POST(request: NextRequest) {
     const azureDeployment = process.env.AZURE_OPENAI_DEPLOYMENT_NAME || 'gpt-4';
 
     if (!azureEndpoint || !azureApiKey) {
-      // Fallback to simple response if Azure OpenAI is not configured
       console.warn('Azure OpenAI not configured, using fallback response');
-      
-      let response = 'I can help you with various aspects of the pharmacy management system. ';
-      
+
+      let response: string;
       if (relevantKnowledge.length > 0) {
-        response += relevantKnowledge[0].content;
+        response = relevantKnowledge[0].content;
       } else {
-        response += 'Please ask me about inventory management, returns, shipments, warehouse operations, payments, or any other feature.';
+        response =
+          'This question is outside the scope of what I can help with. I\'m only able to answer questions about the pharmacy management portal. Please ask me about inventory, returns, shipments, payments, or any other feature of the portal. For other help, please contact our support team.';
       }
 
       return NextResponse.json({
@@ -199,17 +199,8 @@ export async function POST(request: NextRequest) {
         fallbackMessage += `\n\nYou might also be interested in: ${relevantKnowledge.slice(1).map(k => k.keywords[0]).join(', ')}.`;
       }
     } else {
-      // Generic helpful response
-      fallbackMessage = `I can help you with various aspects of the pharmacy management system including:
-- Inventory Management (adding stock, tracking expiration dates)
-- Returns Management (creating and tracking returns)
-- Shipments (tracking delivery status)
-- Warehouse Operations (receiving packages, expired medication disposal)
-- Payments & Credits (viewing expected credits and payment history)
-- Marketplace (browsing and purchasing products)
-- Analytics (viewing reports and statistics)
-
-What would you like to know more about?`;
+      fallbackMessage =
+        "This question is outside the scope of what I can help with. I'm only able to answer questions about the pharmacy management portal. Please ask me about inventory, returns, shipments, payments, or any other feature of the portal. For other help, please contact our support team.";
     }
 
     // Return successful response with fallback (not error status)
