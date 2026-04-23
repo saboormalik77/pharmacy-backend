@@ -22,6 +22,7 @@ const ASSIGNABLE_PERMISSIONS = [
     { key: 'analytics', label: 'Analytics' },
     { key: 'settings', label: 'Settings' },
     { key: 'processors', label: 'Processors' },
+    { key: 'service_requests', label: 'Service Requests' },
     { key: 'policies', label: 'Labeler Info' },
     { key: 'ndc_pricing', label: 'NDC Pricing' },
     { key: 'tbd_items', label: 'TBD Items' },

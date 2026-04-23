@@ -9,13 +9,18 @@ import { usePharmacyContextStore } from '@/lib/store/pharmacyContextStore'
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const { isLoaded, fetchContext } = usePharmacyContextStore()
 
   useEffect(() => {
-    if (!isLoaded) {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (mounted && !isLoaded) {
       fetchContext()
     }
-  }, [isLoaded, fetchContext])
+  }, [mounted, isLoaded, fetchContext])
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">

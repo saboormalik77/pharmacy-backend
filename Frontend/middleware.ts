@@ -30,6 +30,7 @@ const protectedRoutes = [
   '/warehouse',
   '/branches',
   '/roles',
+  '/on-site-service',
 ]
 
 // Routes that are publicly accessible (for external redirects like Stripe)
