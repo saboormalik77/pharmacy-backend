@@ -7,6 +7,11 @@ import { cn, formatRelativeTime } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { logoutUser } from '@/lib/store/authSlice';
 import { fetchRecentActivity, markActivityAsRead, Activity } from '@/lib/store/recentActivitySlice';
+import {
+    fetchProcessorNotifications,
+    markProcessorNotificationRead,
+    ProcessorNotification,
+} from '@/lib/store/processorNotificationsSlice';
 import { fetchSettings } from '@/lib/store/settingsSlice';
 
 interface NavbarProps {
@@ -18,6 +23,11 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
     const dispatch = useAppDispatch();
     const { user, isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
     const { notifications, isLoadingNotifications } = useAppSelector((state) => state.recentActivity);
+    const {
+        notifications: processorNotifications,
+        unreadCount: processorUnreadCount,
+        isLoading: isLoadingProcessorNotifications,
+    } = useAppSelector((state) => state.processorNotifications);
     const { settings } = useAppSelector((state) => state.settings);
     const [showNotifications, setShowNotifications] = useState(false);
     const [showProfile, setShowProfile] = useState(false);
@@ -25,19 +35,37 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
     const notificationsRef = useRef<HTMLDivElement>(null);
     const profileRef = useRef<HTMLDivElement>(null);
 
-    // Fetch settings and recent activity when authenticated
+    // Processors get their own personal notifications feed. Admins/super_admins
+    // use the buying-group-wide admin_recent_activity feed.
+    const isProcessor = user?.role === 'processor';
+
+    // Fetch settings and the appropriate notification feed when authenticated
     useEffect(() => {
-        if (isAuthenticated) {
-            if (!settings) {
-                dispatch(fetchSettings());
-            }
+        if (!isAuthenticated) return;
+
+        if (!settings) {
+            dispatch(fetchSettings());
+        }
+
+        if (isProcessor) {
+            dispatch(fetchProcessorNotifications({ limit: 20, offset: 0 }));
+        } else {
             dispatch(fetchRecentActivity({
                 limit: 20,
                 offset: 0,
                 filter: 'notifications',
             }));
         }
-    }, [dispatch, isAuthenticated]);
+    }, [dispatch, isAuthenticated, isProcessor]);
+
+    // Poll every 60s so a processor sees new requests appear without refreshing
+    useEffect(() => {
+        if (!isAuthenticated || !isProcessor) return;
+        const id = setInterval(() => {
+            dispatch(fetchProcessorNotifications({ limit: 20, offset: 0 }));
+        }, 60_000);
+        return () => clearInterval(id);
+    }, [dispatch, isAuthenticated, isProcessor]);
 
     // Update document title and favicon when branding changes
     useEffect(() => {
@@ -152,7 +180,11 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
         ).join(' ');
     };
 
-    const unreadCount = notifications.filter((activity) => !activity.isRead).length;
+    const adminUnreadCount = notifications.filter((activity) => !activity.isRead).length;
+    const unreadCount = isProcessor ? processorUnreadCount : adminUnreadCount;
+    const isLoadingActiveFeed = isProcessor
+        ? isLoadingProcessorNotifications
+        : isLoadingNotifications;
 
     const handleMarkAsRead = async (activityId: string) => {
         // Only mark as read if it's not already read
@@ -172,6 +204,27 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
         if (activity.activityType === 'pharmacy_registered' && activity.pharmacy?.id) {
             setShowNotifications(false);
             router.push(`/pharmacies?pharmacyId=${activity.pharmacy.id}`);
+        }
+    };
+
+    // --- processor notification helpers ---------------------------------
+    const getProcessorNotificationTitle = (n: ProcessorNotification): string => {
+        if (n.title) return n.title;
+        switch (n.type) {
+            case 'service_request_new':        return 'New on-site service request';
+            case 'service_request_cancelled':  return 'Service request cancelled';
+            case 'service_request_reassigned': return 'Service request reassigned';
+            default:                           return 'Notification';
+        }
+    };
+
+    const handleProcessorNotificationClick = (n: ProcessorNotification) => {
+        if (!n.is_read) {
+            dispatch(markProcessorNotificationRead(n.id));
+        }
+        if (n.entity_type === 'service_request' && n.entity_id) {
+            setShowNotifications(false);
+            router.push(`/service-requests?requestId=${n.entity_id}`);
         }
     };
 
@@ -242,10 +295,47 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
                                     <h3 className="font-semibold text-gray-900">Notifications</h3>
                                 </div>
                                 <div className="max-h-96 overflow-y-auto">
-                                    {isLoadingNotifications ? (
+                                    {isLoadingActiveFeed ? (
                                         <div className="px-4 py-8 text-center">
                                             <p className="text-sm text-gray-500">Loading notifications...</p>
                                         </div>
+                                    ) : isProcessor ? (
+                                        processorNotifications.length === 0 ? (
+                                            <div className="px-4 py-8 text-center">
+                                                <p className="text-sm text-gray-500">No notifications</p>
+                                            </div>
+                                        ) : (
+                                            processorNotifications.map((n) => {
+                                                const isRead = n.is_read;
+                                                return (
+                                                    <div
+                                                        key={n.id}
+                                                        onClick={() => handleProcessorNotificationClick(n)}
+                                                        className={cn(
+                                                            'px-4 py-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors',
+                                                            !isRead && 'bg-blue-50'
+                                                        )}
+                                                    >
+                                                        <div className="flex items-start justify-between">
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="font-medium text-sm text-gray-900">
+                                                                    {getProcessorNotificationTitle(n)}
+                                                                </p>
+                                                                <p className="text-sm text-gray-600 mt-1 break-words">
+                                                                    {n.message}
+                                                                </p>
+                                                                <p className="text-xs text-gray-500 mt-1">
+                                                                    {formatRelativeTime(n.created_at)}
+                                                                </p>
+                                                            </div>
+                                                            {!isRead && (
+                                                                <div className="w-2 h-2 bg-blue-500 rounded-full mt-1 flex-shrink-0 ml-2"></div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })
+                                        )
                                     ) : notifications.length === 0 ? (
                                         <div className="px-4 py-8 text-center">
                                             <p className="text-sm text-gray-500">No notifications</p>

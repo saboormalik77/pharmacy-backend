@@ -18,6 +18,7 @@ export function getFirstAllowedDashboardPath(args: {
     { href: '/returns/tbd-items', visible: has('tbd_items:view') },
     { href: '/returns/destruction', visible: has('destruction:view') },
     { href: '/wine-cellar', visible: has('wine_cellar:view') },
+    { href: '/on-site-service', visible: hasAny(['on_site_service:view', 'on_site_service:create']) },
     // { href: '/products', visible: has('products:view') },
     // { href: '/optimization', visible: has('optimization:view') },
     // { href: '/marketplace', visible: has('marketplace:view') },

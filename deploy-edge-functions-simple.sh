@@ -22,6 +22,7 @@ npx supabase functions deploy send-ra-email-enhanced --no-verify-jwt
 npx supabase functions deploy send-ra-email --no-verify-jwt
 npx supabase functions deploy read-ra-emails --no-verify-jwt
 npx supabase functions deploy resend-webhook --no-verify-jwt
+npx supabase functions deploy send-service-request-notifications --no-verify-jwt
 
 echo "🎉 All edge functions deployed successfully!"
 echo "📋 Deployed functions:"
@@ -33,3 +34,4 @@ echo "  - send-ra-email-enhanced"
 echo "  - send-ra-email"
 echo "  - read-ra-emails"
 echo "  - resend-webhook"
+echo "  - send-service-request-notifications"

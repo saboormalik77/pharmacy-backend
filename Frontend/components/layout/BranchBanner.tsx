@@ -9,8 +9,14 @@ const ADMIN_BACKUP_KEY = 'pharmacy_admin_auth_backup'
 export function BranchBanner() {
   const { switchBackToAdmin, pharmacyName } = usePharmacyContextStore()
   const [adminName, setAdminName] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
     try {
       const raw = localStorage.getItem(ADMIN_BACKUP_KEY)
       if (raw) {
@@ -20,9 +26,9 @@ export function BranchBanner() {
     } catch {
       // ignore
     }
-  }, [])
+  }, [mounted])
 
-  if (!adminName) return null
+  if (!mounted || !adminName) return null
 
   return (
     <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 flex items-center justify-between">

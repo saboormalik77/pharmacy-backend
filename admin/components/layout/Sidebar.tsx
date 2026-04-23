@@ -11,6 +11,7 @@ import {
     UserCog,
     ClipboardList,
     Scan,
+    Truck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppSelector } from '@/lib/store/hooks';
@@ -48,6 +49,7 @@ const adminSidebarLinks = [
     { href: '/settings', icon: Settings, label: 'Settings', permission: 'settings' },
     // { href: '/admins', icon: Users, label: 'Admins', permission: 'admins' },
     { href: '/processors', icon: UserCog, label: 'Processors', permission: 'processors' },
+    { href: '/service-requests', icon: Truck, label: 'Service Requests', permission: 'service_requests' },
     // { href: '/policies', icon: Shield, label: 'Labeler Info', permission: 'policies' },
     // { href: '/ndc-pricing', icon: DollarSign, label: 'NDC Pricing', permission: 'ndc_pricing' },
     // { href: '/warehouse/tbd-items', icon: AlertTriangle, label: 'TBD Items', permission: 'tbd_items' },
@@ -60,6 +62,7 @@ const processorSidebarLinks = [
     { href: '/', icon: LayoutDashboard, label: 'Dashboard' },
     { href: '/warehouse/returns', icon: ClipboardList, label: 'Returns' },
     { href: '/warehouse/returns/create', icon: Scan, label: 'Create Return' },
+    { href: '/service-requests', icon: Truck, label: 'Service Requests' },
     // { href: '/ndc-pricing', icon: DollarSign, label: 'NDC Pricing' },
     // { href: '/warehouse/tbd-items', icon: AlertTriangle, label: 'TBD Items' },
     // { href: '/warehouse/destruction', icon: Trash2, label: 'Destruction' },

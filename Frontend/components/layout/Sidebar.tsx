@@ -32,6 +32,7 @@ import {
   DollarSign,
   Trash2,
   ShieldCheck,
+  Truck,
 } from 'lucide-react'
 
 interface SidebarProps {
@@ -47,6 +48,11 @@ export function Sidebar({ onClose }: SidebarProps) {
   const pathname = usePathname()
   const { hasPermission, hasAnyPermission, isParent, isLoaded, isSigningOut } = usePharmacyPermissions()
   const [branding, setBranding] = useState<AdminBranding | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     const fetchBranding = async () => {
@@ -107,6 +113,12 @@ export function Sidebar({ onClose }: SidebarProps) {
       href: '/wine-cellar',
       icon: Archive,
       visible: hasPermission('wine_cellar:view'),
+    },
+    {
+      title: 'On-Site Service',
+      href: '/on-site-service',
+      icon: Truck,
+      visible: hasAnyPermission(['on_site_service:view', 'on_site_service:create']),
     },
     // {
     //   title: 'My Products',
@@ -218,8 +230,8 @@ export function Sidebar({ onClose }: SidebarProps) {
         </button>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3 overflow-y-auto">
-        {!isLoaded || isSigningOut ? (
+      <nav className="flex-1 space-y-1 px-3 overflow-y-auto" suppressHydrationWarning>
+        {!mounted || !isLoaded || isSigningOut ? (
           <div className="space-y-2 px-2">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="h-7 bg-muted/50 rounded-lg animate-pulse" />
@@ -250,8 +262,8 @@ export function Sidebar({ onClose }: SidebarProps) {
         )}
       </nav>
 
-      <div className="border-t p-3 space-y-1">
-        {!isLoaded || isSigningOut ? (
+      <div className="border-t p-3 space-y-1" suppressHydrationWarning>
+        {!mounted || !isLoaded || isSigningOut ? (
           <div className="space-y-2 px-2">
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="h-7 bg-muted/50 rounded-lg animate-pulse" />
