@@ -1,0 +1,93 @@
+<div class="content">
+               
+    <div class="section-top">
+<h1 class="section-title"><i class="fa-solid fa-arrow-right"></i>REQUEST ON-SITE SERVICE</h1>
+</div> 
+<div class="container py-5 vh-100">
+<div class="row">
+<div class="card border-0 p-3 shadow-sm">
+  <div class="col-md-12">
+      <div id="responseMessage" class="mt-3"></div>
+     <form id="requestForm" action="https://portal.drugreturns.com/customer/submitRequestForm" method="POST">
+          <input type="hidden" name="_token" value="q2yTn37GQJArL7xUYxDYZaRb7HOTyAPW9KNuViNT" autocomplete="off">                    <div class="col-md-6">
+              <p>* Selecting a date does not guarantee that the Rep will be available on that particular date.
+              <br> Your scheduler will be in touch to confirm the date of your next appointment.</p>
+              <div class="input-container">
+                  <input type="hidden" id="datepicker" name="dp" class="form-control flatpickr-input" placeholder="Select Date" required=""><input class="form-control form-control input" placeholder="Select Date" required="" tabindex="0" type="text">
+                  <i class="fa-solid fa-calendar-days position-absolute end-0 top-50 translate-middle-y pe-2"></i>
+              </div>
+          </div>
+          <div class="form-group mt-3">
+              <textarea class="form-control" autocomplete="off" rows="8" id="msg" name="msg" placeholder="Special Instructions"></textarea>
+          </div>
+      
+          <button type="submit" class="primary-btn mt-3">Submit Request</button>
+      </form>
+  </div>
+</div>
+</div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+flatpickr("#datepicker", {
+dateFormat: "Y-m-d",
+altInput: true,
+altFormat: "F j, Y",
+allowInput: true,
+monthSelectorType: 'dropdown',
+wrap: false,
+});
+</script>
+
+<script>
+$(document).ready(function() {
+$('#requestForm').on('submit', function(e) {
+  e.preventDefault();
+
+  $.ajax({
+      url: $(this).attr('action'),
+      method: 'POST',
+      data: $(this).serialize(),
+      success: function(response) {
+          let alertType = response.status === 'success' ? 'alert-success' : 'alert-danger';
+          $('#responseMessage').html(`
+              <div class="alert ${alertType}" role="alert">
+                  ${response.message}
+              </div>
+          `);
+
+          // Hide alert
+          setTimeout(function() {
+              $('#responseMessage .alert').fadeOut('slow', function() {
+                  $(this).remove();
+              });
+          }, 3000);
+
+          if (response.status === 'success') {
+              $('#requestForm')[0].reset();
+          }
+      },
+      error: function() {
+          $('#responseMessage').html(`
+              <div class="alert alert-danger" role="alert">
+                  Something went wrong. Please try again.
+              </div>
+          `);
+
+          setTimeout(function() {
+              $('#responseMessage .alert').fadeOut('slow', function() {
+                  $(this).remove();
+              });
+          }, 3000);
+      }
+  });
+});
+});
+</script>
+
+
+</div>

@@ -1,0 +1,233 @@
+<div class="content">
+               
+    <style>
+.bg-light{
+background: #ECEEF1 !important;
+}
+</style>
+
+<div class="section-top">
+<h1 class="section-title"><i class="fa-solid fa-arrow-right"></i>Reports</h1>
+</div> 
+
+<div class="container-fluid py-5 vh-100"> 
+<div class="row">
+<div class="col-md-12">
+   <div class="card shadow-sm p-4 border-0 mb-3">
+       <div class="row mb-3">
+           <div class="col-md-6">
+               <div class="custom-select-container">
+                   <select name="ras" id="ras" class="form-select select2 select2-hidden-accessible" onchange="rasOnchange();" data-select2-id="select2-data-ras" tabindex="-1" aria-hidden="true">
+                                                               <option value="3S38J" data-select2-id="select2-data-2-ttz7">
+                               2026-03-24 | 3S38J | $590.28
+                           </option>
+                                                               <option value="3S15L">
+                               2026-01-23 | 3S15L | $3,937.73
+                           </option>
+                                                               <option value="3RC56">
+                               2025-12-10 | 3RC56 | $6,482.82
+                           </option>
+                                                               <option value="3R9DK">
+                               2025-10-09 | 3R9DK | $2,996.88
+                           </option>
+                                                               <option value="3R8B9">
+                               2025-09-04 | 3R8B9 | $5,653.13
+                           </option>
+                                                               <option value="3R70Y">
+                               2025-07-22 | 3R70Y | $1,765.38
+                           </option>
+                                                               <option value="3R626">
+                               2025-06-09 | 3R626 | $1,613.55
+                           </option>
+                                                               <option value="3R526">
+                               2025-05-12 | 3R526 | $3,651.47
+                           </option>
+                                                               <option value="3R38R">
+                               2025-03-28 | 3R38R | $5,174.72
+                           </option>
+                                                               <option value="3R22Y">
+                               2025-02-19 | 3R22Y | $2,198.88
+                           </option>
+                                                               <option value="3QB6P">
+                               2024-11-22 | 3QB6P | $488.88
+                           </option>
+                                                               <option value="3Q970">
+                               2024-09-16 | 3Q970 | $831.75
+                           </option>
+                                                               <option value="3Q70T">
+                               2024-07-16 | 3Q70T | $756.55
+                           </option>
+                                                               <option value="3Q41Z">
+                               2024-04-16 | 3Q41Z | $605.96
+                           </option>
+                                                               <option value="3Q1DM">
+                               2024-02-08 | 3Q1DM | $1,734.23
+                           </option>
+                                                               <option value="3PAAB">
+                               2023-11-06 | 3PAAB | $551.95
+                           </option>
+                                                               <option value="3P5BX">
+                               2023-08-11 | 3P5BX | $1,749.18
+                           </option>
+                                                               <option value="3P3C2">
+                               2023-04-03 | 3P3C2 | $1,439.43
+                           </option>
+                                                       </select><span class="select2 select2-container select2-container--default" dir="ltr" data-select2-id="select2-data-1-z1dh" style="width: 100%;"><span class="selection"><span class="select2-selection select2-selection--single" role="combobox" aria-haspopup="true" aria-expanded="false" tabindex="0" aria-disabled="false" aria-labelledby="select2-ras-container" aria-controls="select2-ras-container"><span class="select2-selection__rendered" id="select2-ras-container" role="textbox" aria-readonly="true" title="
+                               2026-03-24 | 3S38J | $590.28
+                           ">
+                               2026-03-24 | 3S38J | $590.28
+                           </span><span class="select2-selection__arrow" role="presentation"><b role="presentation"></b></span></span></span><span class="dropdown-wrapper" aria-hidden="true"></span></span>
+               </div>
+           </div>
+       </div>
+
+       <div class="row">
+           <div class="col-md-6">
+               <div class="flex-layout">
+                   <h3>Return Reports</h3>
+                   <button class="primary-btn" onclick="reports_click();">View</button>
+                </div>
+           </div>
+           
+           <div class="col-md-6">
+               <div class="flex-layout">
+                   <h3>Controlled Substance Report</h3>
+                   <button class="primary-btn" onclick="substance_click();">View</button>
+               </div>
+           </div>
+       </div>
+            
+       <div class="col-md-6">
+         <h2 class="section-sub-title">Proof Of Destruction</h2>
+       </div>
+       <div class="row">
+           <div class="col-md-6">
+               <div class="flex-layout">
+                   <h3>Controls</h3>
+                     <!--<button class="primary-btn" id="view-controls-btn">View</button>-->
+                   <button class="primary-btn" onclick="controls_click();">View</button>
+               </div>
+           </div>
+   
+           <div class="col-md-6">
+               <div class="flex-layout">
+                   <h3>Non Controls</h3>
+                   <button class="primary-btn" onclick="non_controls();">View</button>
+               </div>
+           </div>
+       </div>
+   </div>
+</div>
+</div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+$(document).ready(function() {
+$('#ras').select2({
+   placeholder: "Select Reference",
+   width: '100%' 
+});
+});
+</script>
+
+
+<script>
+function rasOnchange() {
+let index = document.getElementById("ras").selectedIndex;
+$(".refnum-content").hide();
+$("#div" + index).show();
+}
+</script>
+
+
+<script>
+const roleRouteNonControls = "https://portal.drugreturns.com/customer/destructions";
+const roleRouteControlSubstance = "https://portal.drugreturns.com/customer/controlSubstance";
+const customerID = "13846";
+
+function reports_click() {
+const refNum = document.getElementById('ras').value;
+const customerID = "13846";
+const viewURL = `https://portal.drugreturns.com/customer/returnReport?customerID=${customerID}&refNum=${refNum}&pdf=true`;
+
+if (refNum) {
+   const url = `http://reporting.drugreturns.com/Report?ReportName=ReturnPacket&RefNum=${refNum}`;
+   // const url = `https://reportsvc.drugreturns.com/home/returnreports?customerID=${customerID}&refNum=${refNum}&pdf=true`;
+     window.open(url, '_blank');
+} else {
+   alert("Please select a Reference Number before viewing the report.");
+}
+}
+
+function controls_click() {
+const refNum = document.getElementById('ras').value;
+const receipt = 1;
+
+if (refNum) {
+   const checkUrlBase = "https://portal.drugreturns.com/customer/checkDestructionRefnum";
+   // const checkUrlBase = "https://portal.drugreturns.com/customer/podControls";
+   // const viewUrl = `${roleRouteNonControls}?refNum=${refNum}&receipt=${receipt}`;
+   const checkUrl = `${checkUrlBase}?refNum=${refNum}&receipt=${receipt}`;
+   const viewUrl = `https://reporting.drugreturns.com/Report?ReportName=PackingListDestruction&RefNum=${refNum}&CTRLS=ALL`;
+
+   fetch(checkUrl)
+       .then(response => response.json())
+       .then(data => {
+           if (data.status === 'ok') {
+               window.open(viewUrl, '_blank');
+           } else {
+               alert(data.error || 'Something went wrong.');
+           }
+       })
+       .catch(error => {
+           alert(error.message || 'Failed to check destruction status.');
+       });
+
+} else {
+   alert("Please select a Reference Number before viewing the report.");
+}
+}
+
+function non_controls() {
+const refNum = document.getElementById('ras').value;
+if (refNum) {
+   const checkUrl = "https://portal.drugreturns.com/customer/checkDestructionRefnum"; 
+   // const viewUrl = `${roleRouteNonControls}?refNum=${refNum}`; 
+   const viewUrl = `https://reporting.drugreturns.com/Report?ReportName=PackingListDestruction&RefNum=${refNum}&CTRLS=NONE`;
+   
+   fetch(`${checkUrl}?refNum=${refNum}`)
+       .then(response => response.json())
+       .then(data => {
+           if (data.status === 'ok') {
+               window.open(viewUrl, '_blank');
+           } else {
+               alert(data.error || 'Something went wrong.');
+           }
+       })
+       .catch(error => {
+           alert(error.message || 'Failed to check destruction status.');
+       });
+
+} else {
+   alert("Please select a Reference Number before viewing the report.");
+}
+}
+
+function substance_click() {
+const refNum = document.getElementById('ras').value;
+if (refNum) {
+   // const fileUrl = `${roleRouteControlSubstance}?refnum=${refNum}`;
+  
+   const fileUrl = `http://reporting.drugreturns.com/Report?ReportName=ControlledSubstance&RefNum=${refNum}`;
+   window.open(fileUrl, '_blank');
+} else {
+   alert("Please select a Reference Number before viewing the report.");
+}
+}
+</script>
+
+</div>

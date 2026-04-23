@@ -1,0 +1,112 @@
+<div class="content">
+               
+    <meta name="csrf-token" content="q2yTn37GQJArL7xUYxDYZaRb7HOTyAPW9KNuViNT">
+<div class="section-top">
+<h1 class="section-title"><i class="fa-solid fa-arrow-right"></i>Invoices</h1>
+</div>
+
+<div class="container py-5 vh-100">
+<div class="row">
+<div class="col-md-12">
+   <div class="card shadow-sm p-3 border-0">
+       <div class="card-datatable table-responsive theme-table">
+           <form id="payForm" method="GET" action="https://portal.drugreturns.com/customer/payInvoice">
+               <div id="data-table_wrapper" class="dataTables_wrapper no-footer"><div class="dataTables_length" id="data-table_length"><label>Show <select name="data-table_length" aria-controls="data-table" class=""><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select> entries</label></div><div id="data-table_filter" class="dataTables_filter"><label>Search:<input type="search" class="" placeholder="" aria-controls="data-table"></label></div><table class="datatables-basic table border-top dataTable no-footer" id="data-table" aria-describedby="data-table_info">
+                   <thead class="table-light">
+                       <tr><th class="sorting sorting_asc" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" aria-sort="ascending" aria-label=": activate to sort column descending" style="width: 30.8281px;"><input type="checkbox" id="select-all"></th><th class="sorting" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" aria-label="Date: activate to sort column ascending" style="width: 56.8516px;">Date</th><th class="sorting" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" aria-label="RefNum: activate to sort column ascending" style="width: 83.8672px;">RefNum</th><th class="sorting" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" aria-label="Invoice Type: activate to sort column ascending" style="width: 123.016px;">Invoice Type</th><th class="sorting" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" aria-label="Amount: activate to sort column ascending" style="width: 82.8047px;">Amount</th><th class="sorting" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" aria-label="Action: activate to sort column ascending" style="width: 70.6328px;">Action</th></tr>
+                   </thead>
+                   <tbody>
+                                                   <tr class="odd"><td valign="top" colspan="6" class="dataTables_empty">No data available in table</td></tr></tbody>
+               </table><div class="dataTables_info" id="data-table_info" role="status" aria-live="polite">Showing 0 to 0 of 0 entries</div><div class="dataTables_paginate paging_simple_numbers" id="data-table_paginate"><a class="paginate_button previous disabled" aria-controls="data-table" aria-disabled="true" role="link" data-dt-idx="previous" tabindex="-1" id="data-table_previous">Previous</a><span></span><a class="paginate_button next disabled" aria-controls="data-table" aria-disabled="true" role="link" data-dt-idx="next" tabindex="-1" id="data-table_next">Next</a></div></div>
+               
+                                   </form>
+        </div>
+   </div>
+</div>
+</div>
+
+<div class="row mt-5">
+<h5 class="section-sub-title">Paid Invoices</h5>
+<div class="col-md-12">
+    <div class="card shadow-sm p-3 border-0">
+   <div class="card-datatable table-responsive theme-table">
+           <div id="dataTable_wrapper" class="dataTables_wrapper no-footer"><div class="dataTables_length" id="dataTable_length"><label>Show <select name="dataTable_length" aria-controls="dataTable" class=""><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select> entries</label></div><div id="dataTable_filter" class="dataTables_filter"><label>Search:<input type="search" class="" placeholder="" aria-controls="dataTable"></label></div><table class="datatables-basic table border-top dataTable no-footer" id="dataTable" aria-describedby="dataTable_info">
+               <thead class="table-light">
+                   <tr><th class="sorting sorting_asc" tabindex="0" aria-controls="dataTable" rowspan="1" colspan="1" aria-sort="ascending" aria-label="S.No.: activate to sort column descending" style="width: 54.7656px;">S.No.</th><th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1" colspan="1" aria-label="Date: activate to sort column ascending" style="width: 50.6641px;">Date</th><th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1" colspan="1" aria-label="RefNum: activate to sort column ascending" style="width: 75.8828px;">RefNum</th><th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1" colspan="1" aria-label="Amount: activate to sort column ascending" style="width: 74.8828px;">Amount</th><th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1" colspan="1" aria-label="Payment Date: activate to sort column ascending" style="width: 128.281px;">Payment Date</th><th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1" colspan="1" aria-label="Action: activate to sort column ascending" style="width: 63.5234px;">Action</th></tr>
+               </thead>
+               <tbody class="table-border-bottom-0">
+                                          <tr class="odd"><td valign="top" colspan="6" class="dataTables_empty">No data available in table</td></tr></tbody>
+           </table><div class="dataTables_info" id="dataTable_info" role="status" aria-live="polite">Showing 0 to 0 of 0 entries</div><div class="dataTables_paginate paging_simple_numbers" id="dataTable_paginate"><a class="paginate_button previous disabled" aria-controls="dataTable" aria-disabled="true" role="link" data-dt-idx="previous" tabindex="-1" id="dataTable_previous">Previous</a><span></span><a class="paginate_button next disabled" aria-controls="dataTable" aria-disabled="true" role="link" data-dt-idx="next" tabindex="-1" id="dataTable_next">Next</a></div></div>
+       </div>
+   </div>
+</div>
+</div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+window.addEventListener('DOMContentLoaded', function () {
+const form = document.getElementById('payForm');
+const payNowBtn = document.getElementById('payNowBtn');
+const checkboxes = document.querySelectorAll('input[name="refnums[]"]');
+
+if (!form || !payNowBtn) {
+   console.warn('Form or Pay Now button not found in the DOM.');
+   return;
+}
+
+function toggleButtonState() {
+   const anyChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+   payNowBtn.disabled = !anyChecked;
+}
+
+checkboxes.forEach(checkbox => {
+   checkbox.addEventListener('change', toggleButtonState);
+});
+
+form.addEventListener('submit', function (e) {
+   const anyChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+   if (!anyChecked) {
+       e.preventDefault();
+       alert('Please select at least one invoice to proceed with payment.');
+   }
+});
+});
+</script>
+
+
+<script>
+document.getElementById('select-all').addEventListener('change', function () {
+   let checkboxes = document.querySelectorAll('input[name="refnums[]"]');
+   checkboxes.forEach(cb => cb.checked = this.checked);
+});
+</script>
+
+<script>
+$(document).ready(function () {
+   $('#data-table').DataTable({
+       responsive: true
+   });
+});
+</script>   
+
+<script>
+$(document).ready(function () {
+   $('#dataTable').DataTable({
+       responsive: true
+   });
+});
+</script>
+
+<script>
+function viewInvoice(refnum, customerId) {
+   // const url = `https://reportsvc.drugreturns.com/home/destructioninvoiceandneedsreview?refnum=${refnum}&customerid=${customerId}&pdf=true`;
+   const url = `/customer/destruction/invoice?refnum=${refnum}&customerid=${customerId}`;
+   window.open(url, '_blank');
+}
+</script>
+
+ </div>
