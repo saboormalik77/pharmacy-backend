@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import {
     Truck, Loader2, Search, CheckCircle2, Clock, CalendarClock, XCircle, AlertCircle,
     ChevronLeft, ChevronRight, X, Calendar, User, Mail, Phone, MapPin, FileText,
@@ -51,6 +52,7 @@ function getStatusBadge(status: ServiceRequestStatus) {
 }
 
 export default function ServiceRequestsPage() {
+    const router = useRouter();
     const dispatch = useAppDispatch();
     const { user } = useAppSelector((s) => s.auth);
     const { items, total, page, limit, statusFilter, isLoading, isActing, error } =
@@ -70,7 +72,6 @@ export default function ServiceRequestsPage() {
     const removeToast = (id: string) => setToasts((t) => t.filter((x) => x.id !== id));
 
     const [active, setActive] = useState<ServiceRequest | null>(null);
-    const [scheduleModal, setScheduleModal] = useState<ServiceRequest | null>(null);
     const [completeModal, setCompleteModal] = useState<ServiceRequest | null>(null);
 
     const reload = useCallback(() => {
@@ -97,17 +98,6 @@ export default function ServiceRequestsPage() {
 
     const totalPages = useMemo(() => Math.max(1, Math.ceil(total / limit)), [total, limit]);
 
-    const handleSchedule = async (req: ServiceRequest, scheduledDate: string, notes: string) => {
-        try {
-            await dispatch(processorScheduleServiceRequest({ id: req.id, scheduledDate, notes })).unwrap();
-            pushToast('Request scheduled', 'success');
-            setScheduleModal(null);
-            setActive(null);
-            reload();
-        } catch (e: any) {
-            pushToast(e || 'Failed to schedule', 'error');
-        }
-    };
 
     const handleComplete = async (req: ServiceRequest, notes: string) => {
         try {
@@ -230,7 +220,6 @@ export default function ServiceRequestsPage() {
                             <thead className="bg-gray-50 text-gray-600">
                                 <tr>
                                     <th className="py-2 px-3 text-left font-medium">Pharmacy</th>
-                                    <th className="py-2 px-3 text-left font-medium">Purpose</th>
                                     <th className="py-2 px-3 text-left font-medium">Requested</th>
                                     <th className="py-2 px-3 text-left font-medium">Scheduled</th>
                                     <th className="py-2 px-3 text-left font-medium">Status</th>
@@ -255,7 +244,6 @@ export default function ServiceRequestsPage() {
                                                 </div>
                                             )}
                                         </td>
-                                        <td className="py-2.5 px-3">{PURPOSE_LABELS[r.purpose]}</td>
                                         <td className="py-2.5 px-3">{formatDate(r.requested_date)}</td>
                                         <td className="py-2.5 px-3">
                                             {r.scheduled_date ? formatDate(r.scheduled_date) : <span className="text-gray-400">—</span>}
@@ -270,7 +258,7 @@ export default function ServiceRequestsPage() {
                                             <ActionButtons
                                                 r={r}
                                                 isProcessor={isProcessor}
-                                                onSchedule={() => setScheduleModal(r)}
+                                                router={router}
                                                 onComplete={() => setCompleteModal(r)}
                                                 onCancel={() => handleCancel(r)}
                                                 onRelease={() => handleRelease(r)}
@@ -314,7 +302,7 @@ export default function ServiceRequestsPage() {
                     isProcessor={isProcessor}
                     isActing={isActing}
                     onClose={() => setActive(null)}
-                    onSchedule={() => setScheduleModal(active)}
+                    router={router}
                     onComplete={() => setCompleteModal(active)}
                     onCancel={() => handleCancel(active)}
                     onRelease={() => handleRelease(active)}
@@ -322,15 +310,6 @@ export default function ServiceRequestsPage() {
                 />
             )}
 
-            {/* Schedule modal */}
-            {scheduleModal && (
-                <ScheduleModal
-                    request={scheduleModal}
-                    isActing={isActing}
-                    onClose={() => setScheduleModal(null)}
-                    onSubmit={(date, notes) => handleSchedule(scheduleModal, date, notes)}
-                />
-            )}
 
             {/* Complete modal */}
             {completeModal && (
@@ -350,11 +329,11 @@ export default function ServiceRequestsPage() {
 // =====================================================================
 
 function ActionButtons({
-    r, isProcessor, onSchedule, onComplete, onCancel, onRelease, onReassign,
+    r, isProcessor, router, onComplete, onCancel, onRelease, onReassign,
 }: {
     r: ServiceRequest;
     isProcessor: boolean;
-    onSchedule: () => void;
+    router: ReturnType<typeof useRouter>;
     onComplete: () => void;
     onCancel: () => void;
     onRelease: () => void;
@@ -363,7 +342,7 @@ function ActionButtons({
     if (isProcessor) {
         if (r.status === 'pending') {
             return (
-                <Button size="sm" variant="outline" onClick={onSchedule} className="h-7 text-[11px]">
+                <Button size="sm" variant="outline" onClick={() => router.push(`/service-requests/${r.id}/schedule`)} className="h-7 text-[11px]">
                     <Play className="w-3 h-3 mr-1" /> Schedule
                 </Button>
             );
@@ -371,7 +350,7 @@ function ActionButtons({
         if (r.status === 'scheduled' && r.is_claimed_by_me) {
             return (
                 <div className="flex justify-end gap-1">
-                    <Button size="sm" variant="outline" onClick={onSchedule} className="h-7 text-[11px]">
+                    <Button size="sm" variant="outline" onClick={() => router.push(`/service-requests/${r.id}/schedule`)} className="h-7 text-[11px]">
                         <Calendar className="w-3 h-3 mr-1" /> Reschedule
                     </Button>
                     <Button size="sm" onClick={onComplete} className="h-7 text-[11px] bg-green-600 hover:bg-green-700 text-white">
@@ -401,14 +380,14 @@ function ActionButtons({
 // =====================================================================
 
 function DetailModal({
-    r, isProcessor, isActing, onClose,
-    onSchedule, onComplete, onCancel, onRelease, onReassign,
+    r, isProcessor, isActing, onClose, router,
+    onComplete, onCancel, onRelease, onReassign,
 }: {
     r: ServiceRequest;
     isProcessor: boolean;
     isActing: boolean;
     onClose: () => void;
-    onSchedule: () => void;
+    router: ReturnType<typeof useRouter>;
     onComplete: () => void;
     onCancel: () => void;
     onRelease: () => void;
@@ -465,9 +444,6 @@ function DetailModal({
                     </Section>
 
                     <Section title="Request">
-                        <Row label="Purpose" icon={<Calendar className="w-3.5 h-3.5" />}>
-                            {PURPOSE_LABELS[r.purpose]}
-                        </Row>
                         <Row label="Preferred Date" icon={<Calendar className="w-3.5 h-3.5" />}>
                             {formatDate(r.requested_date)}
                         </Row>
@@ -545,7 +521,7 @@ function DetailModal({
                     {isProcessor ? (
                         <>
                             {r.status === 'pending' && (
-                                <Button size="sm" onClick={onSchedule} disabled={isActing}
+                                <Button size="sm" onClick={() => router.push(`/service-requests/${r.id}/schedule`)} disabled={isActing}
                                         className="bg-teal-600 hover:bg-teal-700 text-white">
                                     <Play className="w-3.5 h-3.5 mr-1" /> Claim & Schedule
                                 </Button>
@@ -555,7 +531,7 @@ function DetailModal({
                                     <Button size="sm" variant="outline" onClick={onRelease} disabled={isActing}>
                                         <RotateCcw className="w-3.5 h-3.5 mr-1" /> Release
                                     </Button>
-                                    <Button size="sm" variant="outline" onClick={onSchedule} disabled={isActing}>
+                                    <Button size="sm" variant="outline" onClick={() => router.push(`/service-requests/${r.id}/schedule`)} disabled={isActing}>
                                         <Calendar className="w-3.5 h-3.5 mr-1" /> Reschedule
                                     </Button>
                                     <Button size="sm" onClick={onComplete} disabled={isActing}
@@ -589,83 +565,6 @@ function DetailModal({
 // Schedule modal
 // =====================================================================
 
-function ScheduleModal({ request, isActing, onClose, onSubmit }: {
-    request: ServiceRequest;
-    isActing: boolean;
-    onClose: () => void;
-    onSubmit: (scheduledDate: string, notes: string) => void;
-}) {
-    const today = new Date().toISOString().slice(0, 10);
-    const [date, setDate] = useState<string>(
-        request.scheduled_date ? String(request.scheduled_date).slice(0, 10) : String(request.requested_date).slice(0, 10)
-    );
-    const [notes, setNotes] = useState<string>(request.scheduler_notes || '');
-    const [err, setErr] = useState<string | null>(null);
-
-    const submit = (e: React.FormEvent) => {
-        e.preventDefault();
-        setErr(null);
-        if (!date) { setErr('Please pick a date'); return; }
-        if (date < today) { setErr('Date cannot be in the past'); return; }
-        onSubmit(date, notes);
-    };
-
-    return (
-        <div className="fixed inset-0 z-[60] bg-black/40 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
-                <div className="flex items-center justify-between px-5 py-3 border-b">
-                    <h3 className="text-sm font-semibold flex items-center gap-2">
-                        <CalendarClock className="w-4 h-4 text-teal-600" />
-                        {request.status === 'scheduled' ? 'Reschedule' : 'Schedule Visit'}
-                    </h3>
-                    <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded">
-                        <X className="w-4 h-4" />
-                    </button>
-                </div>
-                <form onSubmit={submit} className="p-5 space-y-3 text-xs">
-                    <div>
-                        <label className="block text-gray-600 mb-1">Visit Date</label>
-                        <input
-                            type="date"
-                            min={today}
-                            value={date}
-                            onChange={(e) => setDate(e.target.value)}
-                            className="w-full h-9 rounded border border-gray-200 px-2 text-xs focus:outline-none focus:ring-2 focus:ring-teal-500"
-                        />
-                        <div className="text-[11px] text-gray-500 mt-1">
-                            Pharmacy requested: {formatDate(request.requested_date)}
-                        </div>
-                    </div>
-                    <div>
-                        <label className="block text-gray-600 mb-1">Notes to pharmacy (optional)</label>
-                        <textarea
-                            value={notes}
-                            onChange={(e) => setNotes(e.target.value)}
-                            rows={4}
-                            maxLength={1000}
-                            className="w-full rounded border border-gray-200 px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-teal-500"
-                            placeholder="Anything the pharmacy should know..."
-                        />
-                    </div>
-                    {err && (
-                        <div className="flex items-center gap-1.5 p-2 rounded bg-red-50 border border-red-200 text-red-700 text-[11px]">
-                            <AlertCircle className="w-3 h-3" /> {err}
-                        </div>
-                    )}
-                    <div className="flex items-center justify-end gap-2 pt-1">
-                        <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={isActing}>
-                            Cancel
-                        </Button>
-                        <Button type="submit" size="sm" disabled={isActing}
-                                className="bg-teal-600 hover:bg-teal-700 text-white">
-                            {isActing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Save'}
-                        </Button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
-}
 
 // =====================================================================
 // Complete modal

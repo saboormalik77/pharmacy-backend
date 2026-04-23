@@ -214,7 +214,7 @@ BEGIN
             'pharmacy_business_name', ph.name,
             'pharmacy_email',    ph.email,
             'pharmacy_phone',    ph.phone,
-            'pharmacy_address',  ph.address
+            'pharmacy_address',  ph.physical_address
         ) INTO v_request_row
     FROM service_requests sr
     LEFT JOIN pharmacy ph ON ph.id = sr.pharmacy_id

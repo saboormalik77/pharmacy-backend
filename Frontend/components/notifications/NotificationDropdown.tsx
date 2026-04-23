@@ -427,11 +427,6 @@ export function NotificationDropdown() {
                             {notification.metadata.scheduled_date && (
                               <div>Date: {new Date(notification.metadata.scheduled_date).toLocaleDateString()}</div>
                             )}
-                            {notification.metadata.purpose && (
-                              <div className="capitalize">
-                                Purpose: {notification.metadata.purpose.replace(/_/g, ' ')}
-                              </div>
-                            )}
                           </div>
                         )}
 

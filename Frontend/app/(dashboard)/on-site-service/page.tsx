@@ -33,11 +33,7 @@ import {
   ServiceRequestListItem,
   ServiceRequestDetail,
   ServiceRequestStatus,
-  ServiceRequestPurpose,
-  CreateServiceRequestPayload,
-  purposeLabels,
 } from '@/lib/api/services/onSiteServiceService';
-import { branchService, Branch } from '@/lib/api/services/branchService';
 import { usePharmacyPermissions } from '@/hooks/usePharmacyPermissions';
 import { toast } from 'react-toastify';
 import { getToken } from '@/lib/utils/cookies';
@@ -106,11 +102,9 @@ export default function OnSiteServicePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [showForm, setShowForm] = useState(false);
   const [detail, setDetail] = useState<ServiceRequestDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
-  const [branches, setBranches] = useState<Branch[]>([]);
   const [manuallyClosedId, setManuallyClosedId] = useState<string | null>(null);
 
   // Derived values (not hooks, safe to compute here)
@@ -178,14 +172,6 @@ export default function OnSiteServicePage() {
     }
   }, [fetchItems, mounted, isLoaded, hasViewPermission, isSigningOut]);
 
-  // Load branches once for the form selector (parent pharmacies only)
-  useEffect(() => {
-    if (!mounted || !isParent) return;
-    branchService
-      .listBranches({ status: 'active', limit: 200 })
-      .then((res) => setBranches(res.branches || []))
-      .catch(() => { /* non-critical */ });
-  }, [mounted, isParent]);
 
   // Auto-open service request details if 'open' parameter is in URL
   useEffect(() => {
@@ -309,7 +295,7 @@ export default function OnSiteServicePage() {
           </div>
           {hasCreatePermission && (
             <Button
-              onClick={() => setShowForm(true)}
+              onClick={() => router.push('/on-site-service/new')}
               className="bg-teal-600 hover:bg-teal-700 text-white"
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -379,7 +365,6 @@ export default function OnSiteServicePage() {
                   <thead>
                     <tr className="border-b text-left text-xs uppercase text-muted-foreground">
                       <th className="py-2 pr-4 font-medium">Requested</th>
-                      <th className="py-2 pr-4 font-medium">Purpose</th>
                       <th className="py-2 pr-4 font-medium">Requested Date</th>
                       <th className="py-2 pr-4 font-medium">Scheduled</th>
                       <th className="py-2 pr-4 font-medium">Rep</th>
@@ -398,7 +383,6 @@ export default function OnSiteServicePage() {
                         <td className="py-3 pr-4 text-xs text-muted-foreground">
                           {formatDate(r.created_at)}
                         </td>
-                        <td className="py-3 pr-4">{purposeLabels[r.purpose]}</td>
                         <td className="py-3 pr-4">{formatDate(r.requested_date)}</td>
                         <td className="py-3 pr-4">
                           {r.scheduled_date ? formatDate(r.scheduled_date) : <span className="text-muted-foreground">—</span>}
@@ -458,18 +442,6 @@ export default function OnSiteServicePage() {
         </Card>
       </div>
 
-      {/* Create modal */}
-      {showForm && (
-        <NewRequestModal
-          branches={isParent ? branches : []}
-          onClose={() => setShowForm(false)}
-          onCreated={() => {
-            setShowForm(false);
-            setPage(1);
-            fetchItems();
-          }}
-        />
-      )}
 
       {/* Detail modal */}
       {detail && (
@@ -488,169 +460,6 @@ export default function OnSiteServicePage() {
   );
 }
 
-// =====================================================================
-// Create modal
-// =====================================================================
-
-function NewRequestModal({
-  branches,
-  onClose,
-  onCreated,
-}: {
-  branches: Branch[];
-  onClose: () => void;
-  onCreated: () => void;
-}) {
-  const today = new Date().toISOString().slice(0, 10);
-  const [purpose, setPurpose] = useState<ServiceRequestPurpose>('return_pickup');
-  const [requestedDate, setRequestedDate] = useState(today);
-  const [branchId, setBranchId] = useState<string>('');
-  const [specialInstructions, setSpecialInstructions] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError(null);
-    if (!requestedDate) {
-      setFormError('Please choose a preferred date');
-      return;
-    }
-    if (requestedDate < today) {
-      setFormError('Preferred date cannot be in the past');
-      return;
-    }
-    setSubmitting(true);
-    try {
-      const payload: CreateServiceRequestPayload = {
-        requested_date: requestedDate,
-        purpose,
-        branch_id: branchId || null,
-        special_instructions: specialInstructions || null,
-      };
-      await onSiteServiceService.create(payload);
-      toast.success('Service request submitted');
-      onCreated();
-    } catch (err: any) {
-      setFormError(err?.message || 'Failed to submit request');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-      <div className="bg-background w-full max-w-lg rounded-lg shadow-lg border">
-        <div className="flex items-center justify-between px-6 py-4 border-b">
-          <h2 className="font-semibold flex items-center gap-2">
-            <Truck className="w-5 h-5 text-teal-600" />
-            Request On-Site Service
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1 hover:bg-accent rounded"
-            aria-label="Close"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <form onSubmit={submit} className="p-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Preferred Date <span className="text-red-500">*</span>
-            </label>
-            <Input
-              type="date"
-              min={today}
-              value={requestedDate}
-              onChange={(e) => setRequestedDate(e.target.value)}
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Purpose <span className="text-red-500">*</span>
-            </label>
-            <select
-              value={purpose}
-              onChange={(e) => setPurpose(e.target.value as ServiceRequestPurpose)}
-              className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-            >
-              {(Object.keys(purposeLabels) as ServiceRequestPurpose[]).map((k) => (
-                <option key={k} value={k}>{purposeLabels[k]}</option>
-              ))}
-            </select>
-          </div>
-
-          {branches.length > 0 && (
-            <div>
-              <label className="block text-sm font-medium mb-1">Branch (optional)</label>
-              <select
-                value={branchId}
-                onChange={(e) => setBranchId(e.target.value)}
-                className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-              >
-                <option value="">Main pharmacy</option>
-                {branches.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.pharmacyName || b.name}
-                  </option>
-                ))}
-              </select>
-              <p className="text-xs text-muted-foreground mt-1">
-                Select a branch if the visit should be to a branch location.
-              </p>
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Special Instructions</label>
-            <textarea
-              value={specialInstructions}
-              onChange={(e) => setSpecialInstructions(e.target.value)}
-              rows={4}
-              maxLength={2000}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-              placeholder="Access hours, parking notes, contact person, etc. (optional)"
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              {specialInstructions.length} / 2000 characters
-            </p>
-          </div>
-
-          {formError && (
-            <div className="flex items-center gap-2 p-3 rounded-md border border-red-200 bg-red-50 text-red-800 text-sm">
-              <AlertCircle className="w-4 h-4" /> {formError}
-            </div>
-          )}
-
-          <div className="flex items-center justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose} disabled={submitting}>
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={submitting}
-              className="bg-teal-600 hover:bg-teal-700 text-white"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Submitting...
-                </>
-              ) : (
-                'Submit Request'
-              )}
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
 
 // =====================================================================
 // Detail modal
@@ -699,9 +508,6 @@ function DetailModal({
 
         <div className="p-6 space-y-5 text-sm">
           <Section title="Request">
-            <Row icon={<Calendar className="w-4 h-4" />} label="Purpose">
-              {purposeLabels[detail.purpose]}
-            </Row>
             <Row icon={<Calendar className="w-4 h-4" />} label="Preferred Date">
               {formatDate(detail.requested_date)}
             </Row>
