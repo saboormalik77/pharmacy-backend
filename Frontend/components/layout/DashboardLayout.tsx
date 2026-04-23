@@ -5,6 +5,7 @@ import { Sidebar } from './Sidebar'
 import { TopBar } from './TopBar'
 import { BranchBanner } from './BranchBanner'
 import { CartDrawer } from '@/components/marketplace/CartDrawer'
+import { Chatbot } from '@/components/chatbot/Chatbot'
 import { usePharmacyContextStore } from '@/lib/store/pharmacyContextStore'
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -50,6 +51,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       </div>
 
       <CartDrawer />
+      <Chatbot />
     </div>
   )
 }
