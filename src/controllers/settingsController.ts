@@ -251,8 +251,6 @@ export const getStoreSettings = catchAsync(
  *                 type: string
  *               secondaryWholesaler:
  *                 type: string
- *               gpoAffiliation:
- *                 type: string
  *               serviceType:
  *                 type: string
  *                 enum: [full_service, self_service, express]
@@ -279,7 +277,7 @@ export const updateStoreSettings = catchAsync(
 
     const allowedFields = [
       'storeNumber', 'primaryWholesaler', 'wholesalerAccountNumber',
-      'secondaryWholesaler', 'gpoAffiliation', 'serviceType',
+      'secondaryWholesaler', 'serviceType',
       'deaExpirationDate', 'daysBetweenVisits', 'faxNumber',
     ];
 

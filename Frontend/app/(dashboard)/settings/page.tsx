@@ -29,7 +29,6 @@ import {
   Store,
   Calendar,
   Truck,
-  FileText,
   AlertTriangle,
   Lock,
   Upload
@@ -443,8 +442,6 @@ export default function SettingsPage() {
       updates.wholesalerAccountNumber = storeSettings.wholesalerAccountNumber || '';
     if (storeSettings.secondaryWholesaler !== originalStoreSettings.secondaryWholesaler)
       updates.secondaryWholesaler = storeSettings.secondaryWholesaler || '';
-    if (storeSettings.gpoAffiliation !== originalStoreSettings.gpoAffiliation)
-      updates.gpoAffiliation = storeSettings.gpoAffiliation || '';
     if (storeSettings.serviceType !== originalStoreSettings.serviceType)
       updates.serviceType = storeSettings.serviceType;
     if (storeSettings.deaExpirationDate !== originalStoreSettings.deaExpirationDate)
@@ -1030,35 +1027,6 @@ export default function SettingsPage() {
 
                     <div className="pt-3 border-t-2 border-indigo-200">
                       <div className="flex items-center gap-2 mb-3">
-                        <FileText className="h-4 w-4 text-indigo-600" />
-                        <h4 className="font-bold text-sm text-gray-900">GPO & Compliance</h4>
-                      </div>
-                      <div className="grid gap-3 md:grid-cols-2">
-                        <div>
-                          <label className="block text-xs font-bold text-gray-900 mb-1">GPO Affiliation</label>
-                          <Input
-                            value={storeSettings.gpoAffiliation || ''}
-                            onChange={(e) => updateStoreField('gpoAffiliation', e.target.value)}
-                            disabled={!isEditingStore}
-                            className="text-xs h-7"
-                            placeholder="e.g. BuyLine"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-gray-900 mb-1">DEA Expiration Date</label>
-                          <Input
-                            type="date"
-                            value={storeSettings.deaExpirationDate || ''}
-                            onChange={(e) => updateStoreField('deaExpirationDate', e.target.value)}
-                            disabled={!isEditingStore}
-                            className="text-xs h-7"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="pt-3 border-t-2 border-indigo-200">
-                      <div className="flex items-center gap-2 mb-3">
                         <Calendar className="h-4 w-4 text-indigo-600" />
                         <h4 className="font-bold text-sm text-gray-900">Visit Schedule & Contact</h4>
                       </div>
@@ -1114,32 +1082,6 @@ export default function SettingsPage() {
                       </div>
                     </div>
 
-                    {(storeSettings.assignedProcessorName || storeSettings.assignedProcessorId || storeSettings.assignedSalesPersonId) && (
-                      <div className="pt-3 border-t-2 border-indigo-200">
-                        <div className="flex items-center gap-2 mb-3">
-                          <User className="h-4 w-4 text-indigo-600" />
-                          <h4 className="font-bold text-sm text-gray-900">Assigned Staff</h4>
-                        </div>
-                        <div className="grid gap-3 md:grid-cols-2">
-                          <div>
-                            <label className="block text-xs font-bold text-gray-900 mb-1">Assigned Processor</label>
-                            <Input
-                              value={storeSettings.assignedProcessorName || 'Not assigned'}
-                              disabled
-                              className="text-xs h-7 bg-gray-50"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-bold text-gray-900 mb-1">Assigned Sales Person</label>
-                            <Input
-                              value={storeSettings.assignedSalesPersonId ? storeSettings.assignedSalesPersonId : 'Not assigned'}
-                              disabled
-                              className="text-xs h-7 bg-gray-50"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 )}
               </CardContent>
