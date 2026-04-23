@@ -1,30 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { chatbotKnowledge, findRelevantKnowledge } from '@/data/chatbotKnowledge';
+import { findRelevantKnowledge } from '@/data/chatbotKnowledge';
 
 // System prompt for the chatbot
-const SYSTEM_PROMPT = `You are an intelligent and helpful pharmacy management assistant built into a pharmaceutical returns and inventory management portal.
+const SYSTEM_PROMPT = `You are an intelligent pharmacy portal assistant embedded in a pharmaceutical returns and inventory management system.
 
-Your ONLY role is to help users with this pharmacy management portal. You must ONLY answer questions about the CURRENTLY ACTIVE features:
-- Returns Management (creating returns, tracking status stages: Draft → Ready to Ship → In Transit → Processing → Completed, TBD items, destruction)
-- Credits (viewing credit history, credit statements, credit calculations from returns)
-- Analytics & Reports (return statistics, financial performance, activity trends)
-- Settings (profile, store settings, DEA number, license info, document uploads, password)
-- Branches (managing multiple pharmacy locations — visible to parent accounts only)
-- Roles & Permissions (managing staff access and permissions — visible to parent accounts only)
-- Support (getting help, reporting issues)
+SCOPE: You ONLY answer questions about these active portal features:
+- Returns (create, track, TBD items, destruction)
+- Credits (credit history, statements, calculations)
+- Analytics & Reports
+- Settings (profile, store settings, license documents, password)
+- Branches (multiple locations — parent accounts only)
+- Roles & Permissions (staff access control — parent accounts only)
 
-STRICT OUT-OF-SCOPE RULE:
-If a user asks about ANYTHING outside this pharmacy portal — such as cooking, sports, weather, general knowledge, news, other industries, personal advice, coding, travel, finance (non-pharmacy), etc. — you MUST respond ONLY with:
-"This question is outside the scope of what I can help with. I'm only able to answer questions about the pharmacy management portal. Please ask me about inventory, returns, shipments, payments, or any other feature of the portal. For other help, please contact our support team."
+OUT-OF-SCOPE RULE: If the user asks about anything unrelated to this pharmacy portal (cooking, sports, weather, general knowledge, other industries, personal topics, etc.), respond ONLY with:
+"This question is outside the scope of what I can help with. I'm only able to answer questions about the pharmacy management portal."
 
-Do NOT attempt to answer out-of-scope questions under any circumstances.
+CONVERSATION CONTEXT RULES:
+- You have the full conversation history. USE IT.
+- If the user asks a follow-up question that references earlier context, answer based on that context.
+- Do NOT repeat information already given in the same conversation unless explicitly asked again.
+- If the user said "what about X?" or "and Y?" treat it as a follow-up to the previous topic.
 
-FOR IN-SCOPE QUESTIONS:
-1. Provide actionable, specific guidance with clear step-by-step instructions
-2. Reference exact page links from the knowledge base when relevant
-3. Be proactive — suggest related features that might help
-4. Be professional, concise, and helpful
-5. If you are unsure about something portal-specific, say so and suggest contacting support
+ANSWER SPECIFICITY RULES — THIS IS CRITICAL:
+- First, identify what the user is SPECIFICALLY asking. Match your answer to EXACTLY that.
+- "How do I X?" or "How to X?" → Give ONLY the steps for that specific task. Do NOT describe the entire feature/page.
+  WRONG: "To upload a license document, go to Settings where you can manage your profile, store settings, and security..."
+  RIGHT: "To upload a license document: 1. Go to Settings 2. Click Edit Profile 3. Scroll to MY DOCUMENTS section 4. Click the upload area under State Pharmacy License 5. Choose your file 6. Save."
+- "What is X?" or "Tell me about X?" → Give an overview of that specific thing.
+- "Where do I find X?" → Just say where it is, nothing more.
+- Short follow-up question → Short focused answer using prior conversation context.
+- Keep answers concise and match the length to what was asked. Never pad with unrelated details.
 
 Current date: ${new Date().toISOString().split('T')[0]}`;
 
@@ -103,18 +108,49 @@ export async function POST(request: NextRequest) {
     if (!azureEndpoint || !azureApiKey) {
       console.warn('Azure OpenAI not configured, using fallback response');
 
-      let response: string;
+      // ALWAYS try current message first — never let previous context override it
       if (relevantKnowledge.length > 0) {
-        response = relevantKnowledge[0].content;
-      } else {
-        response =
-          'This question is outside the scope of what I can help with. I\'m only able to answer questions about the pharmacy management portal. Please ask me about inventory, returns, shipments, payments, or any other feature of the portal. For other help, please contact our support team.';
+        return NextResponse.json({
+          message: relevantKnowledge[0].content,
+          links: relevantKnowledge[0].links.slice(0, 5),
+          suggestions: (relevantKnowledge[0].suggestions ?? []).slice(0, 4),
+        });
+      }
+
+      // Only if current message found nothing, try enriching with recent context
+      // (handles vague follow-ups like "and that?" or "what about it?")
+      const wordCount = userMessage.trim().split(/\s+/).length;
+      if (wordCount <= 4 && conversationHistory.length > 0) {
+        const lastUserMsg = [...conversationHistory]
+          .reverse()
+          .find((m: { role: string }) => m.role === 'user');
+        const contextHint = lastUserMsg?.content || '';
+        const enrichedQuery = `${contextHint} ${userMessage}`;
+        const contextualKnowledge = findRelevantKnowledge(enrichedQuery);
+
+        if (contextualKnowledge.length > 0) {
+          return NextResponse.json({
+            message: contextualKnowledge[0].content,
+            links: contextualKnowledge[0].links.slice(0, 5),
+            suggestions: (contextualKnowledge[0].suggestions ?? []).slice(0, 4),
+          });
+        }
       }
 
       return NextResponse.json({
-        message: response,
-        links: allLinks.slice(0, 5),
-        suggestions: allSuggestions.slice(0, 4),
+        message:
+          "I don't have specific information about that. I can help with:\n• Returns (creating, tracking, status)\n• Credits & statements\n• Settings (profile, store settings, documents, password)\n• Branches & Roles\n\nTry asking about one of these, or select a quick question below.",
+        links: [
+          { title: 'Returns', url: '/returns' },
+          { title: 'Credits', url: '/credits' },
+          { title: 'Settings', url: '/settings' },
+        ],
+        suggestions: [
+          'How do I create a return?',
+          'How do credits work?',
+          'How to change my password?',
+          'How to manage roles?',
+        ],
       });
     }
 
@@ -182,45 +218,17 @@ export async function POST(request: NextRequest) {
 
   } catch (error: any) {
     console.error('Chatbot API error:', error);
-    
-    // Enhanced fallback response
-    const relevantKnowledge = findRelevantKnowledge(userMessage);
-    
-    // Build a helpful response based on knowledge base
-    let fallbackMessage = '';
-    
-    if (relevantKnowledge.length > 0) {
-      // Use the most relevant knowledge item
-      const primaryKnowledge = relevantKnowledge[0];
-      fallbackMessage = primaryKnowledge.content;
-      
-      // Add helpful context
-      if (relevantKnowledge.length > 1) {
-        fallbackMessage += `\n\nYou might also be interested in: ${relevantKnowledge.slice(1).map(k => k.keywords[0]).join(', ')}.`;
-      }
-    } else {
-      fallbackMessage =
-        "This question is outside the scope of what I can help with. I'm only able to answer questions about the pharmacy management portal. Please ask me about inventory, returns, shipments, payments, or any other feature of the portal. For other help, please contact our support team.";
-    }
 
-    // Return successful response with fallback (not error status)
+    const fallbackKnowledge = findRelevantKnowledge(userMessage);
+    const fallbackMessage =
+      fallbackKnowledge.length > 0
+        ? fallbackKnowledge[0].content
+        : "This question is outside the scope of what I can help with. I'm only able to answer questions about the pharmacy management portal. Please ask me about returns, credits, settings, branches, or roles.";
+
     return NextResponse.json({
       message: fallbackMessage,
-      links: relevantKnowledge.length > 0 
-        ? relevantKnowledge.flatMap(k => k.links).slice(0, 5)
-        : [
-            { title: 'Dashboard', url: '/dashboard' },
-            { title: 'Inventory', url: '/inventory' },
-            { title: 'Returns', url: '/returns' },
-          ],
-      suggestions: relevantKnowledge.length > 0 
-        ? relevantKnowledge.flatMap(k => k.suggestions || []).slice(0, 4)
-        : [
-            'How do I add inventory?',
-            'How to create a return?',
-            'How to track shipments?',
-            'What is warehouse receiving?',
-          ],
+      links: fallbackKnowledge.flatMap((k) => k.links).slice(0, 5),
+      suggestions: fallbackKnowledge.flatMap((k) => k.suggestions ?? []).slice(0, 4),
     });
   }
 }
