@@ -24,7 +24,7 @@ export interface CreateServiceRequestInput {
   pharmacyId: string;
   branchId?: string | null;
   requestedDate: string; // ISO date (YYYY-MM-DD)
-  purpose: ServiceRequestPurpose;
+  purpose?: ServiceRequestPurpose | null;
   specialInstructions?: string | null;
   requestedByUserId?: string | null;
 }
@@ -91,7 +91,7 @@ export const createServiceRequest = async (
     p_pharmacy_id: input.pharmacyId,
     p_branch_id: input.branchId ?? null,
     p_requested_date: input.requestedDate,
-    p_purpose: input.purpose,
+    p_purpose: input.purpose ?? null,
     p_special_instructions: input.specialInstructions ?? null,
     p_requested_by_user_id: input.requestedByUserId ?? null,
   });

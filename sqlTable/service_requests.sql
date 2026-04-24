@@ -124,7 +124,8 @@ BEGIN
     IF p_requested_date < CURRENT_DATE THEN
         RAISE EXCEPTION 'requested_date cannot be in the past' USING ERRCODE = '22023';
     END IF;
-    IF p_purpose IS NULL OR p_purpose NOT IN
+    -- Purpose is OPTIONAL: only validate if provided
+    IF p_purpose IS NOT NULL AND p_purpose NOT IN
        ('return_pickup','training','inventory_review','destruction_pickup','other') THEN
         RAISE EXCEPTION 'Invalid purpose value' USING ERRCODE = '22023';
     END IF;
@@ -189,7 +190,10 @@ BEGIN
             COALESCE(ph.pharmacy_name, ph.name, 'A pharmacy')
                 || ' requested an on-site visit for '
                 || to_char(p_requested_date, 'Mon DD, YYYY')
-                || ' (' || REPLACE(INITCAP(REPLACE(p_purpose, '_', ' ')), ' ', ' ') || ')',
+                || CASE
+                    WHEN p_purpose IS NOT NULL THEN ' (' || INITCAP(REPLACE(p_purpose, '_', ' ')) || ')'
+                    ELSE ''
+                END,
             'service_request',
             v_request_id,
             jsonb_build_object(

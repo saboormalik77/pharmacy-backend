@@ -62,7 +62,7 @@ export const createHandler = catchAsync(
       pharmacyId,
       branchId: branch_id || null,
       requestedDate: String(requested_date).slice(0, 10),
-      purpose,
+      purpose: purpose || null,
       specialInstructions: special_instructions || null,
       requestedByUserId: pharmacyId,
     });
