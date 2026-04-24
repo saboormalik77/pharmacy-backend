@@ -16,7 +16,7 @@ export const chatbotKnowledge: KnowledgeItem[] = [
       'pharmaceutical return', 'submit return', 'returns feature',
     ],
     content:
-      'Returns is the core feature of the portal. You can create, submit, and track pharmaceutical product returns from start to finish.\n\nHow to create a return:\n1. Click "Create Return" in the sidebar\n2. Scan barcodes or manually search for items to include\n3. Review the item list and confirm quantities\n4. Submit the return\n\nReturn status flow:\nDraft → Ready to Ship → In Transit → Processing → Completed\n\nEach status means:\n• Draft — Being built, not yet submitted\n• Ready to Ship — Confirmed, waiting for you to pack and ship\n• In Transit — Shipped, tracking is active\n• Processing — Warehouse is verifying your items\n• Completed — Done, credits have been applied\n\nFrom the Returns page you can view all returns, open any return for full details, see the item breakdown, shipment tracking, and expected credits.',
+      'Returns lets you create and track pharmaceutical product returns.\n\nTo create a return: Click "Create Return" in sidebar → Add items (scan/enter NDC, enter expiration) → System runs policy check (shows green/red/yellow banner) → Complete all items → Click "Complete" then "Finalize" to submit.\n\nNote: You cannot finalize if any item has TBD status — resolve those first from TBD Items page.\n\nReturn status flow: In Progress → Completed → Finalized → Received → Closed Out\n\nFrom the Returns page you can view all returns, see item breakdown, shipment tracking, and credit information.',
     links: [
       { title: 'All Returns', url: '/returns' },
       { title: 'Create New Return', url: '/returns/create' },
@@ -30,43 +30,166 @@ export const chatbotKnowledge: KnowledgeItem[] = [
   },
   {
     keywords: [
-      'tbd items', 'tbd item', 'what is tbd', 'what are tbd', 'about tbd',
-      'to be determined', 'pending review', 'items review', 'tbd status',
+      'difference between', 'diff between', 'what is difference',
+      'what is diff', 'compare tabs', 'tabs difference',
+      'difference between all tabs', 'difference between sidebar tabs',
+      'difference between portal tabs', 'what each tab does',
+      'sidebar tabs explained', 'each section does',
+      'returns vs credits', 'credits vs returns',
+      'returns vs destruction', 'destruction vs returns',
+      'returns vs wine cellar', 'wine cellar vs returns',
+      'returns vs analytics & reports', 'analytics & reports vs returns',
+      'returns vs tbd items', 'tbd items vs returns',
+      'credits vs destruction', 'destruction vs credits',
+      'credits vs analytics & reports', 'analytics & reports vs credits',
+      'destruction vs analytics & reports', 'analytics & reports vs destruction',
+      'destruction vs wine cellar', 'wine cellar vs destruction',
+      'tbd items vs wine cellar', 'wine cellar vs tbd items',
+      'tbd items vs analytics & reports', 'analytics & reports vs tbd',
+      'tbd items vs credits', 'credits vs tbd items',
+      'returns and credits difference', 'returns credits difference',
+      'difference between my return and credit',
+      'difference between return and credit tab',
     ],
     content:
-      'TBD Items (To Be Determined) are return items that require additional review before they can be processed.\n\nThese items are held separately until a decision is made on whether they are eligible for credit or need to be handled differently.\n\nYou can view and manage TBD items from the TBD Items page in the sidebar.',
+      'Here is what each sidebar tab does:\n\n• Returns — Create and track return shipments (add items, finalize, track status)\n• TBD Items — Resolve items that need manual Returnable/Non-Returnable classification (blocks finalization until resolved)\n• Destruction — Registry for non-returnable items going to compliant disposal (scheduling and status tracking)\n• Wine Cellar — Hold products until manufacturer return window opens\n• On-Site Service — Request field representative visits (for returns, training, or inventory review)\n• Credits — View payments, payouts, fees, and download statements\n• Analytics & Reports — View charts and summaries of returns and activity\n• Branches — Manage multiple pharmacy locations (parent accounts only)\n• Roles & Permissions — Control staff access to different sections (parent accounts only)\n• Settings — Your profile, store details, license documents, and password',
+    links: [
+      { title: 'Returns', url: '/returns' },
+      { title: 'Credits', url: '/credits' },
+      { title: 'TBD Items', url: '/returns/tbd-items' },
+      { title: 'Destruction', url: '/returns/destruction' },
+      { title: 'Wine Cellar', url: '/wine-cellar' },
+      { title: 'Analytics & Reports', url: '/analytics' },
+      { title: 'Settings', url: '/settings' },
+    ],
+    suggestions: [
+      'How do I create a return?',
+      'How do credits work?',
+      'What is the difference between TBD and Destruction?',
+    ],
+  },
+  {
+    keywords: [
+      'difference between tbd and destruction',
+      'diff between tbd and destruction',
+      'tbd vs destruction',
+      'tbd versus destruction',
+      'tbd and destruction difference',
+      'difference tbd destruction',
+      'tbd or destruction',
+      'what is difference tbd destruction',
+    ],
+    content:
+      'TBD and Destruction are two different things in the portal:\n\nTBD (To Be Determined)\n• An item is TBD when the policy check could not determine if it is returnable or not\n• It is NOT yet classified — the decision is still pending\n• TBD items sit inside your return and block finalization until resolved\n• You resolve them from the TBD Items page by manually setting the status to Returnable or Non-Returnable\n\nDestruction\n• An item goes to Destruction when it has already been confirmed as Non-Returnable and you chose "Destruction" as the disposal route when adding it\n• The decision is fully made — the item will be disposed\n• Destruction items move to the separate Destruction page (a disposal registry, not part of the return)\n\nIn short:\nTBD = classification is unknown, needs a decision\nDestruction = classification is final (Non-Returnable), going to disposal',
+    links: [
+      { title: 'TBD Items', url: '/returns/tbd-items' },
+      { title: 'Destruction', url: '/returns/destruction' },
+    ],
+    suggestions: [
+      'How to resolve TBD items?',
+      'What happens to non-returnable items?',
+      'When does my item go to destruction?',
+    ],
+  },
+  {
+    keywords: [
+      'tbd items', 'tbd item', 'what is tbd', 'what are tbd', 'about tbd',
+      'to be determined', 'pending review', 'items review', 'tbd status',
+      'resolve tbd', 'how to resolve tbd', 'tbd blocking', 'cannot finalize',
+      'finalize blocked', 'why cant i finalize',
+    ],
+    content:
+      'TBD Items (To Be Determined) are return items where the system could not automatically determine if they are returnable or not.\n\nA TBD item appears when the policy check returns a yellow banner and you did not manually select a status.\n\nImportant: You cannot finalize a return if it has any TBD items. Resolve them from the TBD Items page in the sidebar by setting the status to Returnable or Non-Returnable. If Non-Returnable, choose Wine Cellar or Destruction.',
     links: [{ title: 'TBD Items', url: '/returns/tbd-items' }],
     suggestions: [
       'What are TBD items?',
       'How to resolve TBD items?',
       'Why is my item marked as TBD?',
+      'How do I finalize a return?',
+    ],
+  },
+  {
+    keywords: [
+      'what happens non returnable', 'non returnable what happens', 'after non returnable',
+      'non returnable item where', 'where does non returnable go', 'non returnable destination',
+      'non returnable wine cellar', 'non returnable destruction', 'non returnable route',
+      'what happens to non returnable', 'non returnable added', 'non returnable item added',
+      'non returnable ends up', 'how non returnable wine cellar',
+      'item go to destruction', 'when item destruction', 'send item to destruction',
+      'item sent to destruction', 'item goes destruction', 'when does item go to destruction',
+      'item go to wine cellar', 'item sent to wine cellar',
+      'where non returnable', 'non returnable item show',
+      'non returnable item portal', 'where non returnable item',
+      'non returnable show', 'non returnable item',
+    ],
+    content:
+      'When an item is classified as Non-Returnable in Add Items, the portal asks you to choose where it goes before saving:\n\n• Wine Cellar — The item is shelved and held for a future return when the manufacturer\'s return window opens\n• Destruction — The item is sent to the destruction registry for compliant pharmaceutical disposal\n\nOnce saved, the item does not stay in your regular return — it goes to the Wine Cellar or Destruction page depending on the route you selected.',
+    links: [
+      { title: 'Wine Cellar', url: '/wine-cellar' },
+      { title: 'Destruction', url: '/returns/destruction' },
+    ],
+    suggestions: [
+      'What is the Wine Cellar?',
+      'What is the Destruction page?',
+      'How do I know if a product is returnable?',
     ],
   },
   {
     keywords: [
       'destruction', 'destroy', 'disposal', 'destroy items', 'return destruction',
+      'destruction page', 'destruction status', 'destruction registry',
     ],
     content:
-      'Destruction refers to return items that have been approved for proper pharmaceutical disposal rather than credit.\n\nThese items go through a compliant destruction process. You can view destruction items and their status from the Destruction page in the sidebar.',
+      'The Destruction page (in the sidebar) is a registry of non-returnable items that are going through compliant pharmaceutical disposal.\n\nDestruction item statuses:\n• Pending — Awaiting scheduling\n• Scheduled — Destruction has been scheduled\n• Picked Up — Items have been picked up for destruction\n• Destroyed — Destruction is complete\n• Cancelled — The destruction record was cancelled\n\nThe page also shows details like destruction company, scheduled date, federal form, weight, and notes.',
     links: [{ title: 'Destruction', url: '/returns/destruction' }],
     suggestions: [
-      'What is the destruction process?',
-      'How are items approved for destruction?',
-      'How to view destruction items?',
+      'What happens to non-returnable items?',
+      'What is the Wine Cellar?',
     ],
   },
   {
     keywords: [
       'wine cellar', 'wine-cellar', 'wine celler', 'wine sellor', 'wine seller',
       'wineceller', 'winecellar', 'archived items', 'archive', 'cellar',
+      'shelved products', 'hold for return', 'future return', 'too early to return',
     ],
     content:
-      'The Wine Cellar is a specialized section within the portal for managing certain pharmaceutical items that are held or archived separately from the regular returns workflow.\n\nItems in the Wine Cellar may be there because they:\n• Require additional review or special handling\n• Are being held pending further instructions\n• Are archived for record-keeping purposes\n\nYou can access the Wine Cellar directly from the sidebar if your account has the required permission (wine_cellar:view). If you do not see it in your sidebar, contact your admin to enable the permission for your role.',
+      'The Wine Cellar holds products that are shelved for future return when the manufacturer return window opens.\n\nItems go into the Wine Cellar when:\n• A product is too early to return — the policy window has not opened yet. The system shows a purple strip with the date the product becomes eligible and gives you the option to move it to the Wine Cellar to hold it until then.\n• A non-returnable item is held instead of being sent to destruction.\n\nWine Cellar page shows:\n• Items with status: Shelved, Ready to Return, Returned, or Destroyed\n• The expected returnable date for each item\n• The date it was shelved\n• Estimated value\n• Whether it is a partial quantity',
     links: [{ title: 'Wine Cellar', url: '/wine-cellar' }],
     suggestions: [
-      'What is the Wine Cellar?',
-      'How to access the Wine Cellar?',
-      'Why can\'t I see the Wine Cellar in my sidebar?',
+      'How does the policy check work?',
+      'What happens to non-returnable items?',
+      'How do I know if a product is returnable?',
+    ],
+  },
+  {
+    keywords: [
+      'no tab', 'no sidebar', 'no tbd tab', 'no wine cellar tab', 'no credits tab',
+      'no returns tab', 'no analytics tab', 'no destruction tab',
+      'there is no tab', 'there is no tbd', 'there is no sidebar',
+      'cant see sidebar', 'missing sidebar', 'tab not showing', 'tab missing',
+      'sidebar not showing', 'cant see tab', 'cant access tab',
+      'missing tab', 'tab not visible', 'tab hidden', 'sidebar permission',
+      'cant see wine cellar', "can't see wine cellar", "can't see tab",
+      'cant see returns', 'returns not showing', 'returns missing',
+      'cant see credits', "can't see credits", 'credits not showing', 'credits missing',
+      'cant see tbd', 'tbd not showing', 'tbd missing',
+      'cant see destruction', 'destruction not showing', 'destruction missing',
+      'cant see analytics', 'analytics not showing', 'analytics missing',
+      'cant see branches', 'branches not showing', 'branches missing',
+      'cant see roles', 'roles not showing', 'roles missing',
+      'cant see settings', 'settings not showing', 'settings missing',
+      'tab permission', 'sidebar access', 'sidebar permission',
+      'why cant i see', 'why i cant see', "why can't i see", "why i can't see",
+      'where is my tab', 'where is my sidebar',
+    ],
+    content:
+      'If you cannot see a tab in the sidebar, your account may not have permission to access that section.\n\nContact your admin to enable the required permission for your role.',
+    links: [
+      { title: 'Roles & Permissions', url: '/roles-permissions' },
+    ],
+    suggestions: [
+      'How do I manage roles and permissions?',
     ],
   },
   {
@@ -75,7 +198,7 @@ export const chatbotKnowledge: KnowledgeItem[] = [
       'statement', 'credit value', 'credit breakdown', 'payment', 'payments',
     ],
     content:
-      'Credits are earned from items verified in your completed returns.\n\nHow credits work:\n• When a return reaches "Completed" status, each eligible item is assigned a credit value based on product type and condition\n• "Expected Credits" — credits that have been calculated but not yet paid out\n• "Received Credits" — credits that have been confirmed and paid by the supplier\n• Every credit entry is linked back to the original return item for full traceability\n• Credits are issued by the supplier/distributor after warehouse confirmation\n\nThe Credit Statement gives you a full itemized financial record — useful for bookkeeping, audits, and reconciliation with suppliers.\n\nGo to Credits in the sidebar to view your full credit history and download your statement.',
+      'Credits are earned when a return reaches "Closed Out" status.\n\nCredits page shows: Total Credits, Total Payout, Total Fees, Paid, Pending, and Payout Rate. Each payment record includes Date, Batch, Credit Received, Company Fee, GPO Share, Your Payout, Method, Reference, and Status.\n\nDownload your Credit Statement as CSV from the Credits page for bookkeeping and supplier reconciliation.',
     links: [
       { title: 'Credits', url: '/credits' },
       { title: 'Credit Statement', url: '/credits/statement' },
@@ -107,7 +230,7 @@ export const chatbotKnowledge: KnowledgeItem[] = [
       'create branch', 'branch management', 'add location',
     ],
     content:
-      'Branches lets you manage multiple pharmacy locations under one parent account.\n\nHow to create a branch:\n1. Go to Branches in the sidebar (visible to parent accounts only)\n2. Click "Create Branch"\n3. Fill in branch name, NPI, address, and contact details\n4. Assign staff and roles to the branch\n\nYou can switch between branches using the Branch Switcher at the top of the page.',
+      'Branches lets you manage multiple pharmacy locations under one parent account.\n\nGo to Branches → Click "Create Branch" → Fill in details → Assign staff and roles. Use Branch Switcher at the top to switch between locations.',
     links: [{ title: 'Branches', url: '/branches' }],
     suggestions: [
       'How to create a branch?',
@@ -121,7 +244,7 @@ export const chatbotKnowledge: KnowledgeItem[] = [
       'staff access', 'user role', 'create role', 'manage roles',
     ],
     content:
-      'Roles & Permissions lets you control what your staff can access.\n\nHow to manage roles:\n1. Go to Roles & Permissions in the sidebar (parent accounts only)\n2. Click "Create Role"\n3. Set permissions for each section (returns, credits, analytics, etc.)\n4. Assign the role to staff members from the branch management\n\nRoles define exactly which pages and actions each staff member can access.',
+      'Roles & Permissions lets you control what your staff can access (parent accounts only).\n\nGo to Roles & Permissions → Click "Create Role" → Set permissions for each section (returns, credits, analytics, etc.) → Assign the role to staff from branch management.\n\nRoles define which pages and actions each staff member can access.',
     links: [{ title: 'Roles & Permissions', url: '/roles' }],
     suggestions: [
       'How to create a custom role?',
@@ -135,7 +258,7 @@ export const chatbotKnowledge: KnowledgeItem[] = [
       'settings overview', 'what is settings', 'tell me about settings',
     ],
     content:
-      'Settings lets you manage all your pharmacy account information. It has three tabs:\n\n1. Profile Tab:\n   • Personal info: name, email, phone\n   • Pharmacy/facility name, NPI number, corporate name\n   • DEA number, state license number, license expiration date\n   • Mailing address (if different from physical address)\n   • Upload DEA certificate and State Pharmacy License documents\n\n2. Store Settings Tab:\n   • Store number, service type, buying group/GPO affiliation\n   • Primary and secondary wholesaler, wholesale account number\n   • DEA expiration date, days between visits\n   • Fax number and store operating hours\n\n3. Security Tab:\n   • Change your account password\n   • Enter current password and set a new one\n\nTo edit your profile, click the "Edit Profile" button on the Settings page. Click "Save Changes" when done.',
+      'Settings has three tabs:\n\n• Profile — Personal info, pharmacy name, NPI, DEA, license info, and upload DEA/license documents\n• Store Settings — Store number, wholesaler, GPO, DEA expiration, fax, store hours\n• Security — Change your password\n\nClick "Edit Profile" to modify information. Click "Save Changes" when done.',
     links: [{ title: 'Settings', url: '/settings' }],
     suggestions: [
       'How to update my profile?',
@@ -152,7 +275,7 @@ export const chatbotKnowledge: KnowledgeItem[] = [
       'state pharmacy license upload', 'license document upload', 'how to upload license',
     ],
     content:
-      'To upload your State Pharmacy License document:\n1. Go to Settings from the sidebar\n2. Click "Edit Profile" to enter edit mode\n3. Scroll down to the "MY DOCUMENTS" section\n4. Click the upload area under "State Pharmacy License"\n5. Select your file (PDF, image, etc. — max 10MB)\n6. The file uploads automatically\n7. Click "Save Changes"\n\nThe uploaded document link is saved to your profile and can be viewed anytime from the same section.',
+      'To upload your State Pharmacy License: Go to Settings → Click "Edit Profile" → Scroll to "MY DOCUMENTS" → Click upload area under "State Pharmacy License" → Select file (PDF/image, max 10MB) → File uploads automatically → Click "Save Changes".',
     links: [{ title: 'Settings', url: '/settings' }],
     suggestions: [
       'How to upload a DEA document?',
@@ -166,7 +289,7 @@ export const chatbotKnowledge: KnowledgeItem[] = [
       'how to upload dea', 'dea file upload', 'dea certificate upload',
     ],
     content:
-      'To upload your DEA certificate document:\n1. Go to Settings from the sidebar\n2. Click "Edit Profile" to enter edit mode\n3. Scroll down to the "MY DOCUMENTS" section\n4. Click the upload area under "DEA Certificate"\n5. Select your file (PDF, image, etc. — max 10MB)\n6. The file uploads automatically\n7. Click "Save Changes"\n\nThe DEA document is saved to your profile and accessible anytime from Settings.',
+      'To upload your DEA certificate: Go to Settings → Click "Edit Profile" → Scroll to "MY DOCUMENTS" → Click upload area under "DEA Certificate" → Select file (PDF/image, max 10MB) → File uploads automatically → Click "Save Changes".',
     links: [{ title: 'Settings', url: '/settings' }],
     suggestions: [
       'How to upload a State Pharmacy License document?',
@@ -179,7 +302,7 @@ export const chatbotKnowledge: KnowledgeItem[] = [
       'how to change password', 'password change',
     ],
     content:
-      'To change your password:\n1. Go to Settings from the sidebar\n2. Click the "Security" tab (third tab)\n3. Enter your current password\n4. Enter your new password\n5. Confirm the new password\n6. Click "Update Password"\n\nIf you have forgotten your password, use the "Forgot Password" link on the login page instead.',
+      'To change your password: Go to Settings → Click "Security" tab → Enter current password → Enter new password → Confirm new password → Click "Update Password".\n\nIf you forgot your password, use the "Forgot Password" link on the login page.',
     links: [{ title: 'Settings', url: '/settings' }],
     suggestions: [
       'How to update my profile?',
@@ -188,12 +311,14 @@ export const chatbotKnowledge: KnowledgeItem[] = [
   },
   {
     keywords: [
-      'return status', 'what does status mean', 'status meaning', 'draft status',
-      'ready to ship status', 'in transit status', 'processing status', 'completed status',
-      'what is draft', 'what is processing', 'what is in transit',
+      'return status', 'what does status mean', 'status meaning',
+      'in progress status', 'completed status', 'finalized status',
+      'received status', 'closed out status', 'paused status',
+      'what is in progress', 'what is finalized', 'what is closed out',
+      'what does in progress mean', 'what does finalized mean',
     ],
     content:
-      'Return status meanings:\n\n• Draft — The return has been created but not yet submitted. You can still add or remove items. No action needed by the warehouse yet.\n\n• Ready to Ship — You have submitted the return. Pack the items and ship them using the provided label. The return is waiting on your shipment.\n\n• In Transit — The shipment has been sent and is on its way to the warehouse. Tracking is active.\n\n• Processing — The warehouse has received your items and is verifying them against the return manifest. This may take 1–3 business days.\n\n• Completed — All items have been verified. Credits have been calculated and applied to your account.',
+      'Return status meanings:\n\n• In Progress — Building the return; can add/edit items\n• Paused — Temporarily paused; can resume\n• Completed — Ready to be finalized\n• Finalized — Submitted; manifest available; no longer editable\n• Received — Warehouse has received shipment\n• Closed Out — Processing complete; credits applied',
     links: [{ title: 'All Returns', url: '/returns' }],
     suggestions: [
       'How do I create a return?',
@@ -207,7 +332,7 @@ export const chatbotKnowledge: KnowledgeItem[] = [
       'how to get statement', 'print statement', 'export credits',
     ],
     content:
-      'To view or download your Credit Statement:\n1. Go to Credits from the sidebar\n2. Click the "Credit Statement" option or navigate to the Statement tab\n3. You can view the full itemized breakdown of all credits\n4. Use the download/export option to save it as a PDF or spreadsheet\n\nThe statement shows every credit line item linked to its original return, useful for bookkeeping and supplier reconciliation.',
+      'To view or download Credit Statement: Go to Credits → Click "Credit Statement" or Statement tab → View itemized breakdown → Use download/export option to save as PDF or spreadsheet.\n\nThe statement shows every credit line item linked to its original return.',
     links: [
       { title: 'Credits', url: '/credits' },
       { title: 'Credit Statement', url: '/credits/statement' },
@@ -223,7 +348,7 @@ export const chatbotKnowledge: KnowledgeItem[] = [
       'how to create branch', 'how to add branch',
     ],
     content:
-      'To create a new branch (available to parent/admin accounts only):\n1. Go to Branches from the sidebar\n2. Click "Create Branch"\n3. Fill in: branch name, NPI number, physical address, and contact phone\n4. Click Save to create the branch\n5. Once created, open the branch and assign staff members and their roles\n\nBranches let you manage multiple pharmacy locations under one parent account. Each branch has its own staff and data.',
+      'To create a branch (parent/admin accounts only): Go to Branches → Click "Create Branch" → Fill in branch name, NPI, address, phone → Click Save → Open the branch and assign staff and roles.\n\nBranches let you manage multiple pharmacy locations under one parent account. Use Branch Switcher at the top to switch between locations.',
     links: [{ title: 'Branches', url: '/branches' }],
     suggestions: [
       'How to switch between branches?',
@@ -237,7 +362,7 @@ export const chatbotKnowledge: KnowledgeItem[] = [
       'how to assign role', 'set staff access', 'user access',
     ],
     content:
-      'To assign a role to a staff member:\n1. Go to Branches in the sidebar\n2. Open the branch where the staff member works\n3. Find the staff member in the list\n4. Click on their name or the edit icon\n5. Select the role you want to assign from the dropdown\n6. Save\n\nIf the role you need does not exist yet, first go to Roles & Permissions to create it, then come back to assign it.',
+      'To assign a role to staff: Go to Branches → Open the branch → Find staff member → Click their name or edit icon → Select role from dropdown → Save.\n\nIf the role does not exist, first create it in Roles & Permissions.',
     links: [
       { title: 'Branches', url: '/branches' },
       { title: 'Roles & Permissions', url: '/roles' },
@@ -253,7 +378,7 @@ export const chatbotKnowledge: KnowledgeItem[] = [
       'update pharmacy name', 'update npi', 'update dea number', 'edit my info',
     ],
     content:
-      'To update your profile information:\n1. Go to Settings from the sidebar\n2. Click the "Edit Profile" button at the top right\n3. Edit any of the following: full name, email, phone, pharmacy/facility name, NPI number, DEA number, state license number, license expiration, corporate name, mailing address\n4. Click "Save Changes" when done\n\nNote: DEA expiration and wholesaler information are edited under the "Store Settings" tab, not the Profile tab.',
+      'To update your profile: Go to Settings → Click "Edit Profile" → Edit any field (name, email, phone, pharmacy name, NPI, DEA, license info, address) → Click "Save Changes".\n\nNote: DEA expiration and wholesaler info are in "Store Settings" tab, not Profile.',
     links: [{ title: 'Settings', url: '/settings' }],
     suggestions: [
       'How to upload license documents?',
@@ -267,7 +392,7 @@ export const chatbotKnowledge: KnowledgeItem[] = [
       'set store hours', 'edit store hours',
     ],
     content:
-      'To update your store hours:\n1. Go to Settings from the sidebar\n2. Click the "Store Settings" tab (second tab)\n3. Click "Edit" to enter edit mode\n4. Find the "Store Hours" field and enter your hours (e.g., M–F 9am–6pm, Sat 10am–3pm)\n5. Click "Save Changes"\n\nStore hours are stored as free text so you can enter any format that suits your pharmacy.',
+      'To update store hours: Go to Settings → Click "Store Settings" tab → Click "Edit" → Find "Store Hours" field and enter your hours (e.g., M–F 9am–6pm, Sat 10am–3pm) → Click "Save Changes".\n\nStore hours are stored as free text in any format.',
     links: [{ title: 'Settings', url: '/settings' }],
     suggestions: [
       'How to update my wholesaler?',
@@ -280,7 +405,7 @@ export const chatbotKnowledge: KnowledgeItem[] = [
       'logout', 'log out', 'sign out', 'signout', 'how to logout', 'exit portal', 'end session',
     ],
     content:
-      'To log out of the portal:\n1. Click on your name or avatar in the top-right corner of the page\n2. Click "Sign Out" or "Logout" from the dropdown menu\n\nThis will end your session and take you back to the login page.',
+      'To log out: Click your name or avatar in top-right corner → Click "Sign Out" or "Logout".\n\nThis ends your session and returns you to the login page.',
     links: [],
     suggestions: [
       'How to change my password?',
@@ -289,8 +414,8 @@ export const chatbotKnowledge: KnowledgeItem[] = [
   },
   {
     keywords: [
-      'chat history', 'previous chat', 'old messages', 'conversation history',
-      'chat log', 'past conversations', 'save chat',
+      'history', 'chat history', 'previous chat', 'old messages', 'conversation history',
+      'chat log', 'past conversations', 'save chat', 'my history',
     ],
     content:
       'Chat history is only available during your current session. Once you close the chat window or refresh the page, previous messages are cleared.\n\nThis assistant does not store or save conversation history between sessions. If you need to reference an answer later, we recommend copying the text before closing the chat.',
@@ -303,16 +428,29 @@ export const chatbotKnowledge: KnowledgeItem[] = [
   {
     keywords: [
       'what items can be returned', 'eligible items', 'return eligibility',
-      'which items return', 'returnable items', 'what can i return',
+      'which items return', 'what can i return',
+      'how do i know if a product is returnable',
+      'how do i know if product is returnable',
+      'how to check if product is returnable',
+      'how to check if a product is returnable',
+      'is my product returnable', 'check product eligibility', 'product returnable',
+      'how to know returnable', 'returnable check',
+      'policy check', 'check policy', 'product return policy',
+      'item returnable or not', 'item returnable', 'returnable or not',
+      'know item returnable', 'know returnable', 'check returnable',
+      'how know returnable or not', 'item is returnable',
     ],
     content:
-      'Items eligible for return typically include:\n• Expired pharmaceutical products\n• Products expiring soon\n• Damaged items\n• Overstocked medications\n\nEligibility depends on the product type, condition, and your agreements with the supplier/distributor. Not all items qualify for full credit.\n\nTo check, go to Create Return and search for the item — the system will indicate if it can be added to a return.',
+      'The system automatically checks if a product is returnable when you add it to a return.\n\nIt shows a colored banner:\n• Green — Returnable (status locked)\n• Red — Non-Returnable (status locked)\n• Yellow — No policy found; you must select the status manually (can become TBD)\n\nClick "View Policy" for full details. If a product is too early to return, a purple strip shows the eligible date and offers to move it to Wine Cellar.',
     links: [
       { title: 'Create Return', url: '/returns/create' },
+      { title: 'All Returns', url: '/returns' },
     ],
     suggestions: [
-      'How do I create a return?',
-      'How are credits calculated?',
+      'What does the green/red/yellow banner mean?',
+      'What happens to non-returnable items?',
+      'What is the Wine Cellar?',
+      'What are TBD items?',
     ],
   },
   {
@@ -321,7 +459,7 @@ export const chatbotKnowledge: KnowledgeItem[] = [
       'find my return', 'return progress',
     ],
     content:
-      'To track a return:\n1. Go to Returns in the sidebar\n2. Find your return in the list (use search or scroll)\n3. Click on it to open the detail page\n4. You will see the current status, item list, shipment tracking, and credit information\n\nThe status bar at the top shows exactly where your return is in the process: Draft → Ready to Ship → In Transit → Processing → Completed.',
+      'To track a return: Go to Returns → Find your return (search or scroll) → Click to open detail page → View status, item list, shipment tracking, and credit info.\n\nStatus bar shows: Draft → Ready to Ship → In Transit → Processing → Completed.',
     links: [{ title: 'All Returns', url: '/returns' }],
     suggestions: [
       'What do the return statuses mean?',
@@ -348,7 +486,7 @@ export const chatbotKnowledge: KnowledgeItem[] = [
       'get started', 'new user', 'onboarding', 'setup', 'first time', 'welcome', 'how to use',
     ],
     content:
-      'Getting started with the pharmacy portal:\n\n1. Settings — Complete your profile, NPI, DEA number, and license info first\n2. Returns — Create your first return by clicking "Create Return" in the sidebar\n3. Credits — Monitor credits earned from your returns\n4. Analytics & Reports — Track your performance\n5. Branches — If you manage multiple locations, set them up under Branches\n6. Roles & Permissions — Control what your staff can access',
+      'Getting started:\n\n1. Settings — Complete your profile, NPI, DEA, and license info\n2. Returns — Create your first return from the sidebar\n3. Credits — Monitor credits from closed-out returns\n4. Analytics & Reports — Track performance\n5. Branches — Set up multiple locations (if applicable)\n6. Roles & Permissions — Control staff access',
     links: [
       { title: 'Settings', url: '/settings' },
       { title: 'Returns', url: '/returns' },
@@ -358,6 +496,89 @@ export const chatbotKnowledge: KnowledgeItem[] = [
       'How do I create my first return?',
       'How to complete my profile setup?',
       'How to manage staff access?',
+    ],
+  },
+  {
+    keywords: [
+      'what is on-site service', 'what is onsite service', 'what is on site service',
+      'tell me about on-site service', 'tell me about onsite',
+      'about on-site service', 'about onsite service',
+      'on-site service tab', 'onsite tab', 'onsite service tab',
+      'explain on-site service', 'explain onsite service',
+      'know about on-site service', 'know about onsite',
+    ],
+    content:
+      'On-Site Service lets you request a field representative to visit your pharmacy.\n\nHow it works: Submit request with preferred date → Automatically routed to all assigned reps → First rep to claim it schedules the visit → You receive email confirmation.\n\nStatuses: Pending (waiting for rep) → Scheduled (confirmed date) → Completed (visit done) → Cancelled\n\nYou can only cancel "Pending" requests. Once scheduled, contact the rep directly to reschedule.',
+    links: [
+      { title: 'On-Site Service', url: '/on-site-service' },
+      { title: 'Request New Visit', url: '/on-site-service/new' },
+    ],
+    suggestions: [
+      'How do I request a field rep visit?',
+      'How do I cancel a service request?',
+      'Can I see rep contact information?',
+    ],
+  },
+  {
+    keywords: [
+      'request on-site service', 'request onsite', 'request field rep',
+      'schedule on-site service', 'schedule field rep',
+      'create service request', 'submit service request',
+      'how to request on-site', 'how to request visit',
+      'how do i request on-site service', 'how do i request field rep',
+      'how do i request visit', 'how to request field rep',
+      'how request field rep', 'book rep visit', 'how book rep visit',
+      'request rep visit', 'request a visit',
+    ],
+    content:
+      'To request a field rep visit: Go to On-Site Service → Click "New Request" → Choose preferred date → Add special instructions (optional) → Submit.\n\nRequest is automatically routed to all assigned reps. First rep to claim it will schedule and email you.',
+    links: [
+      { title: 'On-Site Service', url: '/on-site-service' },
+      { title: 'Request New Visit', url: '/on-site-service/new' },
+    ],
+    suggestions: [
+      'What is On-Site Service?',
+      'How do I cancel a service request?',
+    ],
+  },
+  {
+    keywords: [
+      'cancel service request', 'cancel on-site service', 'cancel field rep',
+      'cancel visit', 'cancel rep visit', 'stop service request',
+      'how cancel service request', 'how cancel on-site',
+      'how do i cancel service request', 'how to cancel service request',
+      'how do i cancel on-site service', 'how to cancel on-site service',
+      'how cancel visit', 'how do i cancel visit', 'how to cancel visit',
+      'cancel my service request', 'cancel my visit',
+    ],
+    content:
+      'To cancel a service request: Go to On-Site Service → Open request → Click "Cancel Request" → Provide reason (optional).\n\nOnly "Pending" requests can be cancelled. Once scheduled, contact the rep directly.',
+    links: [
+      { title: 'On-Site Service', url: '/on-site-service' },
+    ],
+    suggestions: [
+      'What is On-Site Service?',
+      'How do I request a field rep visit?',
+    ],
+  },
+  {
+    keywords: [
+      'rep contact', 'rep email', 'rep phone', 'rep information',
+      'field rep contact', 'field representative contact',
+      'contact field rep', 'call field rep', 'email field rep',
+      'who is my rep', 'my field rep', 'assigned rep',
+      'how to contact rep', 'how do i contact rep',
+      'see rep contact', 'view rep contact', 'get rep contact',
+      'how to see rep info', 'how see rep information',
+    ],
+    content:
+      'To see rep contact info: Go to On-Site Service → Open a scheduled request → View rep details (name, email, phone).\n\nRep contact info only appears once a rep has claimed and scheduled your request.',
+    links: [
+      { title: 'On-Site Service', url: '/on-site-service' },
+    ],
+    suggestions: [
+      'What is On-Site Service?',
+      'How do I request a field rep visit?',
     ],
   },
 ];
@@ -420,6 +641,9 @@ export function findRelevantKnowledge(query: string): KnowledgeItem[] {
 
   chatbotKnowledge.forEach((item) => {
     let score = 0;
+    // Deduplicate fuzzy pairs across ALL keywords of this entry so that an entry
+    // with many keywords containing the same word doesn't get inflated score.
+    const matchedFuzzyPairs = new Set<string>();
 
     item.keywords.forEach((keyword) => {
       const lowerKeyword = keyword.toLowerCase();
@@ -440,11 +664,13 @@ export function findRelevantKnowledge(query: string): KnowledgeItem[] {
         }
       }
 
-      // Fuzzy match: only for meaningful query words against meaningful keyword words
+      // Fuzzy match: each unique (queryWord, keywordWord) pair counted only once per entry
       const keywordWords = lowerKeyword.split(/\s+/).filter((w) => w.length >= 4 && !STOP_WORDS.has(w));
       queryWords.forEach((qWord) => {
         keywordWords.forEach((kWord) => {
-          if (isFuzzyMatch(qWord, kWord)) {
+          const pair = `${qWord}:${kWord}`;
+          if (!matchedFuzzyPairs.has(pair) && isFuzzyMatch(qWord, kWord)) {
+            matchedFuzzyPairs.add(pair);
             score += 2;
           }
         });

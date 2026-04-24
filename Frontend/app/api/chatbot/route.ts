@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { findRelevantKnowledge } from '@/data/chatbotKnowledge';
 
 // System prompt for the chatbot
-const SYSTEM_PROMPT = `You are an intelligent pharmacy portal assistant embedded in a pharmaceutical returns and inventory management system.
+const SYSTEM_PROMPT = `You are a pharmacy portal assistant. You help users understand how to use this specific pharmacy management portal.
+
+CRITICAL — KNOWLEDGE SOURCE RULE:
+Answer ONLY using the "Relevant Information" section provided with each request. Do NOT use any general pharmaceutical knowledge, medical knowledge, internet knowledge, or assumptions about how pharmacy systems work in general. If the answer is not explicitly in the Relevant Information, respond: "I don't have specific information about that. Please try rephrasing your question or contact support."
 
 SCOPE: You ONLY answer questions about these active portal features:
 - Returns (create, track, TBD items, destruction)
@@ -11,6 +14,7 @@ SCOPE: You ONLY answer questions about these active portal features:
 - Settings (profile, store settings, license documents, password)
 - Branches (multiple locations — parent accounts only)
 - Roles & Permissions (staff access control — parent accounts only)
+- Wine Cellar
 
 OUT-OF-SCOPE RULE: If the user asks about anything unrelated to this pharmacy portal (cooking, sports, weather, general knowledge, other industries, personal topics, etc.), respond ONLY with:
 "This question is outside the scope of what I can help with. I'm only able to answer questions about the pharmacy management portal."
@@ -166,11 +170,11 @@ export async function POST(request: NextRequest) {
         },
         body: JSON.stringify({
           messages: messages,
-          temperature: 0.7,
+          temperature: 0.1,
           max_tokens: 800,
           top_p: 0.95,
-          frequency_penalty: 0.3,
-          presence_penalty: 0.3,
+          frequency_penalty: 0,
+          presence_penalty: 0,
         }),
       });
 
