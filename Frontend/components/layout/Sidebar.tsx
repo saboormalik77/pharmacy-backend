@@ -162,6 +162,12 @@ export function Sidebar({ onClose }: SidebarProps) {
       icon: BarChart3,
       visible: hasPermission('analytics:view'),
     },
+    {
+      title: 'Reports',
+      href: '/reports-hub',
+      icon: FileText,
+      visible: hasAnyPermission(['returns:view', 'analytics:view', 'documents:view']),
+    },
     // {
     //   title: 'Upload Documents',
     //   href: '/upload',

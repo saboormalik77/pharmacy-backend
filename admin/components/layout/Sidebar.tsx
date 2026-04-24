@@ -84,6 +84,11 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose }: SidebarProps) 
     // Choose navigation links based on user role, filtered by permissions
     const rawLinks = user?.role === 'processor' ? processorSidebarLinks : adminSidebarLinks;
     const sidebarLinks = rawLinks.filter((link) => {
+        // Hide service requests for buying group users
+        if (link.href === '/service-requests' && user?.buying_group_id) {
+            return false;
+        }
+        
         const perm = (link as any).permission as string | undefined;
         if (!perm) return true;
         if (perm === 'admins' && !isSuperAdmin) return false;

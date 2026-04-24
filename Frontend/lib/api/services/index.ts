@@ -18,6 +18,7 @@ export { distributorsService } from './distributorsService';
 export { settingsService } from './settingsService';
 export { fcrStoreSettingsService } from './fcrStoreSettingsService';
 export { marketplaceService } from './marketplaceService';
+export { pharmacyReportsService } from './pharmacyReportsService';
 export { 
   getSubscriptionPlans,
   getSubscriptionPlanById,
@@ -44,6 +45,17 @@ export type { PackagesResponse, Package, PackageProduct, DistributorContact, Pac
 export type { TopDistributor, TopDistributorsResponse } from './distributorsService';
 export type { UserSettings, ChangePasswordRequest, UploadDocumentResponse } from './settingsService';
 export type { FcrStoreSettings, UpdateFcrStoreSettings } from './fcrStoreSettingsService';
+export type {
+  ReportDropdownItem,
+  PharmacyHeader,
+  ProcessorInfo,
+  ReportReturnMeta,
+  ReportItem,
+  ManufacturerCreditGroup,
+  NeedsReviewReasonGroup,
+  ReturnPacketReport,
+  ItemizedReport,
+} from './pharmacyReportsService';
 export type { SubscriptionPlan, CheckoutSessionResponse, PortalSessionResponse } from './subscriptionService';
 export type { 
   MarketplaceDeal, 

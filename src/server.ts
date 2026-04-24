@@ -62,6 +62,7 @@ import processorServiceRequestRoutes from './routes/processorServiceRequestRoute
 import processorNotificationRoutes from './routes/processorNotificationRoutes';
 import pharmacyNotificationRoutes from './routes/pharmacyNotificationRoutes';
 import adminServiceRequestRoutes from './routes/adminServiceRequestRoutes';
+import pharmacyReportsRoutes from './routes/pharmacyReportsRoutes';
 import { globalErrorHandler } from './controllers/errorController';
 import { checkExpiringProductsAndNotify } from './services/notificationCronService';
 import { surfaceReadyWineCellarItems } from './services/wineCellarCronService';
@@ -175,6 +176,7 @@ app.use('/api/processors/service-requests', processorServiceRequestRoutes);
 app.use('/api/processors/notifications', processorNotificationRoutes);
 app.use('/api/pharmacy/notifications', pharmacyNotificationRoutes);
 app.use('/api/admin/service-requests', adminServiceRequestRoutes);
+app.use('/api/pharmacy-reports', pharmacyReportsRoutes);
 
 // Root route: serves an HTML page that detects Supabase recovery hash redirects.
 // Supabase redirects to the backend base URL with #access_token=...&type=recovery.
