@@ -96,24 +96,25 @@ export function Sidebar({ onClose }: SidebarProps) {
       icon: Scan,
       visible: hasPermission('returns:create'),
     },
-    {
-      title: 'TBD Items',
-      href: '/returns/tbd-items',
-      icon: AlertTriangle,
-      visible: hasPermission('tbd_items:view'),
-    },
-    {
-      title: 'Destruction',
-      href: '/returns/destruction',
-      icon: Trash2,
-      visible: hasPermission('destruction:view'),
-    },
-    {
-      title: 'Wine Cellar',
-      href: '/wine-cellar',
-      icon: Archive,
-      visible: hasPermission('wine_cellar:view'),
-    },
+    // NOTE: TBD Items, Destruction, and Wine Cellar functionality moved to warehouse verification
+    // {
+    //   title: 'TBD Items',
+    //   href: '/returns/tbd-items',
+    //   icon: AlertTriangle,
+    //   visible: hasPermission('tbd_items:view'),
+    // },
+    // {
+    //   title: 'Destruction',
+    //   href: '/returns/destruction',
+    //   icon: Trash2,
+    //   visible: hasPermission('destruction:view'),
+    // },
+    // {
+    //   title: 'Wine Cellar',
+    //   href: '/wine-cellar',
+    //   icon: Archive,
+    //   visible: hasPermission('wine_cellar:view'),
+    // },
     {
       title: 'On-Site Service',
       href: '/on-site-service',

@@ -54,6 +54,9 @@ export interface VerifiedItem {
   conditionNotes: string | null;
   returnStatus: string;
   destination: string | null;
+  wineCellarId?: string | null;
+  dosageForm?: string | null;
+  isPartial?: boolean;
   estimatedValue: number | null;
   discrepancyId?: string | null;
 }
@@ -499,21 +502,41 @@ export const getVerificationSummary = async (
 
   const summary = data.data as VerificationSummary;
 
-  // Fetch serial numbers from return_transaction_items and merge into items
+  // Enrich summary items with fields not currently returned by the RPC payload.
   if (summary.items && summary.items.length > 0) {
     const itemIds = summary.items.map((item: VerifiedItem) => item.id);
     const { data: rawItems } = await sb
       .from('return_transaction_items')
-      .select('id, serial_number')
+      .select('id, serial_number, destination, wine_cellar_id, dosage_form, is_partial')
       .in('id', itemIds);
 
     if (rawItems && rawItems.length > 0) {
-      const serialMap: Record<string, string | null> = {};
+      const itemMap: Record<string, {
+        serialNumber: string | null;
+        destination: string | null;
+        wineCellarId: string | null;
+        dosageForm: string | null;
+        isPartial: boolean;
+      }> = {};
+
       for (const row of rawItems) {
-        serialMap[row.id] = row.serial_number ?? null;
+        itemMap[row.id] = {
+          serialNumber: row.serial_number ?? null,
+          destination: row.destination ?? null,
+          wineCellarId: row.wine_cellar_id ?? null,
+          dosageForm: row.dosage_form ?? null,
+          isPartial: Boolean(row.is_partial),
+        };
       }
+
       for (const item of summary.items) {
-        (item as VerifiedItem).serialNumber = serialMap[item.id] ?? null;
+        const merged = itemMap[item.id];
+        if (!merged) continue;
+        (item as VerifiedItem).serialNumber = merged.serialNumber;
+        (item as VerifiedItem).destination = merged.destination;
+        (item as VerifiedItem).wineCellarId = merged.wineCellarId;
+        (item as VerifiedItem).dosageForm = merged.dosageForm;
+        (item as VerifiedItem).isPartial = merged.isPartial;
       }
     }
   }

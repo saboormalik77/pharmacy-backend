@@ -1045,9 +1045,10 @@ export default function ReturnDetailPage() {
                             <button onClick={() => router.push(`/warehouse/returns/${id}/add-items`)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors">
                                 <Plus className="w-3 h-3" /> Add Items
                             </button>
-                            <button onClick={() => openWcModal()} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors">
+                            {/* Wine Cellar Items functionality moved to MainAdmin warehouse verification */}
+                            {/* <button onClick={() => openWcModal()} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors">
                                 <Archive className="w-3 h-3" /> Wine Cellar Items
-                            </button>
+                            </button> */}
                         </div>
                     )}
                     {isProcessor && canDoAction(tx, 'edit') && !canEdit && (

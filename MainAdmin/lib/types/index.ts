@@ -1157,6 +1157,10 @@ export interface VerificationV2Item {
     verificationStatus: 'correct' | 'damaged' | 'missing' | 'wrong_item' | null;
     conditionNotes: string | null;
     returnStatus: string;
+    destination?: string | null;
+    wineCellarId?: string | null;
+    dosageForm?: string | null;
+    isPartial?: boolean;
     estimatedValue: number;
 }
 

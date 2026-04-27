@@ -92,13 +92,13 @@ export default function FinalizeReturnPage() {
         dispatch(updateFinalizeSteps({ id, steps: step }));
     };
 
-    // TBD items check
-    const tbdItems = items.filter((i) => i.returnStatus === 'tbd');
-    const hasTbdItems = tbdItems.length > 0;
+    // NOTE: TBD items check removed - handled by warehouse verification
+    // const tbdItems = items.filter((i) => i.returnStatus === 'tbd');
+    // const hasTbdItems = tbdItems.length > 0;
     const hasCiiItems = items.some((i) => i.deaForm222Required);
 
     const allStepsDone = finalizeStepsDone.printManifest && finalizeStepsDone.fedexEntered && finalizeStepsDone.printJobSheets;
-    const canFinalize = allStepsDone && !hasTbdItems;
+    const canFinalize = allStepsDone;
 
     // ── Document / Print helpers ─────────────────────────────
     const printHtml = async (endpoint: string, docType: string) => {
@@ -343,23 +343,10 @@ export default function FinalizeReturnPage() {
             <div className="max-w-5xl mx-auto px-4 py-4">
                 <div className="space-y-4">
 
-                    {/* TBD blocker */}
-                    {hasTbdItems && (
-                        <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
-                            <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
-                            <div>
-                                <p className="text-xs font-semibold text-red-800">
-                                    {tbdItems.length} item{tbdItems.length !== 1 ? 's' : ''} still have TBD status
-                                </p>
-                                <p className="text-xs text-red-700 mt-0.5">
-                                    Resolve all TBD items before finalizing.
-                                </p>
-                            </div>
-                        </div>
-                    )}
+                    {/* NOTE: TBD blocker removed - TBD items handled by warehouse verification */}
 
                     {/* ── Step 1: Print Itemized Return ── */}
-                    <div className={`border rounded-lg p-4 transition-all ${hasTbdItems ? 'opacity-50 pointer-events-none' : ''} ${finalizeStepsDone.printManifest ? 'border-green-300 bg-green-50' : 'border-gray-300 bg-white'}`}>
+                    <div className={`border rounded-lg p-4 transition-all ${finalizeStepsDone.printManifest ? 'border-green-300 bg-green-50' : 'border-gray-300 bg-white'}`}>
                         <div className="flex items-start gap-3">
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${finalizeStepsDone.printManifest ? 'bg-green-500 text-white' : 'bg-blue-500 text-white'}`}>
                                 {finalizeStepsDone.printManifest ? <CheckCircle className="w-4 h-4" /> : '1'}
@@ -392,7 +379,7 @@ export default function FinalizeReturnPage() {
                     </div>
 
                     {/* ── Step 2: Enter FedEx Tracking ── */}
-                    <div className={`border rounded-lg p-4 transition-all ${hasTbdItems || !finalizeStepsDone.printManifest ? 'opacity-50 pointer-events-none' : ''} ${finalizeStepsDone.fedexEntered ? 'border-green-300 bg-green-50' : 'border-gray-300 bg-white'}`}>
+                    <div className={`border rounded-lg p-4 transition-all ${!finalizeStepsDone.printManifest ? 'opacity-50 pointer-events-none' : ''} ${finalizeStepsDone.fedexEntered ? 'border-green-300 bg-green-50' : 'border-gray-300 bg-white'}`}>
                         <div className="flex items-start gap-3">
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${finalizeStepsDone.fedexEntered ? 'bg-green-500 text-white' : finalizeStepsDone.printManifest ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600'}`}>
                                 {finalizeStepsDone.fedexEntered ? <CheckCircle className="w-4 h-4" /> : '2'}
@@ -440,7 +427,7 @@ export default function FinalizeReturnPage() {
                     </div>
 
                     {/* ── Step 3: Print Job Sheets ── */}
-                    <div className={`border rounded-lg p-4 transition-all ${hasTbdItems || !finalizeStepsDone.fedexEntered ? 'opacity-50 pointer-events-none' : ''} ${finalizeStepsDone.printJobSheets ? 'border-green-300 bg-green-50' : 'border-gray-300 bg-white'}`}>
+                    <div className={`border rounded-lg p-4 transition-all ${!finalizeStepsDone.fedexEntered ? 'opacity-50 pointer-events-none' : ''} ${finalizeStepsDone.printJobSheets ? 'border-green-300 bg-green-50' : 'border-gray-300 bg-white'}`}>
                         <div className="flex items-start gap-3">
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${finalizeStepsDone.printJobSheets ? 'bg-green-500 text-white' : finalizeStepsDone.fedexEntered ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600'}`}>
                                 {finalizeStepsDone.printJobSheets ? <CheckCircle className="w-4 h-4" /> : '3'}
@@ -488,7 +475,7 @@ export default function FinalizeReturnPage() {
                     </div>
 
                     {/* ── Step 4: Finalize Return ── */}
-                    <div className={`border-2 rounded-lg p-4 transition-all ${hasTbdItems || !finalizeStepsDone.printJobSheets ? 'opacity-50 pointer-events-none' : ''} ${canFinalize ? 'border-green-300 bg-green-50' : 'border-dashed border-gray-300 bg-gray-50'}`}>
+                    <div className={`border-2 rounded-lg p-4 transition-all ${!finalizeStepsDone.printJobSheets ? 'opacity-50 pointer-events-none' : ''} ${canFinalize ? 'border-green-300 bg-green-50' : 'border-dashed border-gray-300 bg-gray-50'}`}>
                         <div className="flex items-start gap-3">
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${canFinalize ? 'bg-green-500 text-white' : finalizeStepsDone.printJobSheets ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-500'}`}>
                                 {canFinalize ? <CheckCircle className="w-4 h-4" /> : '4'}
@@ -505,14 +492,7 @@ export default function FinalizeReturnPage() {
                                 )}
                                 {allStepsDone && (
                                     <div className="mt-3">
-                                        {hasTbdItems && (
-                                            <div className="bg-red-50 border border-red-200 rounded-md p-2 flex items-start gap-1.5 mb-2">
-                                                <AlertTriangle className="w-3.5 h-3.5 text-red-500 flex-shrink-0 mt-0.5" />
-                                                <p className="text-xs text-red-700">
-                                                    Resolve all TBD items before finalizing.
-                                                </p>
-                                            </div>
-                                        )}
+                                        {/* NOTE: TBD items warning removed - handled by warehouse verification */}
                                         <div className="bg-yellow-50 border border-yellow-200 rounded-md p-2 flex items-start gap-1.5 mb-3">
                                             <AlertTriangle className="w-3.5 h-3.5 text-yellow-600 flex-shrink-0 mt-0.5" />
                                             <p className="text-xs text-yellow-800">
