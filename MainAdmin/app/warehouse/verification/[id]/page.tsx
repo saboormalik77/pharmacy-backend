@@ -9,6 +9,7 @@ import {
     ArrowLeft, ChevronLeft, Loader2, CheckCircle, XCircle, AlertTriangle,
     HelpCircle, Plus, ClipboardCheck, BarChart3, ShieldAlert,
     BoxIcon, Package, ScanLine, Camera, Keyboard, Layers, PlusCircle, X,
+    Archive, Ban,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -29,14 +30,20 @@ import {
     assignReturnsToBatch,
     fetchUsedBatchMonths,
 } from '@/lib/store/batchSlice';
+import {
+    scanBarcode,
+    // Removed unused imports: updateTransactionItem, moveItemToWineCellar, resolveTransactionItem
+} from '@/lib/store/returnTransactionsSlice';
+// import { checkReturnability } from '@/lib/store/policiesSlice'; // Moved to dedicated verification page
 import type {
     VerificationV2Item,
     WarehouseSurplusItem,
     WarehouseDiscrepancy,
-    VerificationV2Counts,
     CompleteVerificationSummary,
     BarcodeScanResponse,
     ReturnBatch,
+    ReturnabilityCheckResult,
+    WineCellarItem,
 } from '@/lib/types';
 import {
     shouldShowWarehouseBoxCountStep,
@@ -47,6 +54,13 @@ import { buildAvailableBatchMonthOptions } from '@/lib/utils/batchMonths';
 const QrScannerModal = dynamic(() => import('@/components/scanner/QrScannerModal'), { ssr: false });
 
 type ActiveTab = 'items' | 'surplus' | 'discrepancies';
+
+const normalizeNdc = (value?: string | null): string => (value || '').replace(/\D/g, '');
+
+const normalizeDateKey = (value?: string | null): string => {
+    if (!value) return '';
+    return value.slice(0, 10);
+};
 
 export default function VerificationSessionPage() {
     const dispatch = useAppDispatch();
@@ -66,17 +80,37 @@ export default function VerificationSessionPage() {
 
     const [toasts, setToasts] = useState<Toast[]>([]);
     const [activeTab, setActiveTab] = useState<ActiveTab>('items');
+    
+    // Reverse distributors
+    const [reverseDistributors, setReverseDistributors] = useState<Array<{id: string; name: string; email: string}>>([]);
+    const [loadingDistributors, setLoadingDistributors] = useState(false);
 
     // Box count step
     const [needsBoxCount, setNeedsBoxCount] = useState(false);
     const [boxCount, setBoxCount] = useState('');
     const [boxResult, setBoxResult] = useState<{ expectedBoxes: number; receivedBoxes: number; boxCountMatch: boolean } | null>(null);
 
-    // Verify item modal
-    const [verifyingItem, setVerifyingItem] = useState<VerificationV2Item | null>(null);
-    const [verifyStatus, setVerifyStatus] = useState('');
-    const [verifyActualQty, setVerifyActualQty] = useState('');
-    const [verifyNotes, setVerifyNotes] = useState('');
+    // Verify item modal - state moved to dedicated page
+    // const [verifyingItem, setVerifyingItem] = useState<VerificationV2Item | null>(null);
+    // const [verifyStatus, setVerifyStatus] = useState('');
+    // const [verifyActualQty, setVerifyActualQty] = useState('');
+    // const [verifyNotes, setVerifyNotes] = useState('');
+    // Policy and routing state moved to dedicated verification page
+    // const [policyResult, setPolicyResult] = useState<ReturnabilityCheckResult | null>(null);
+    // const [isPolicyChecking, setIsPolicyChecking] = useState(false);
+    // const [disposition, setDisposition] = useState<'returnable' | 'wine_cellar' | 'destruction'>('returnable');
+    // const [returnStatus, setReturnStatus] = useState<'returnable' | 'non_returnable'>('returnable');
+    // const [nonReturnableRoute, setNonReturnableRoute] = useState<'wine_cellar' | 'destruction'>('destruction');
+    // const [wineCellarDate, setWineCellarDate] = useState('');
+    // const [manualDestination, setManualDestination] = useState('');
+
+    // Item scanner (verification tab)
+    const [itemScanMode, setItemScanMode] = useState<'camera' | 'input'>('input');
+    const [itemScanInput, setItemScanInput] = useState('');
+    const [itemCameraOpen, setItemCameraOpen] = useState(false);
+    const [itemScanError, setItemScanError] = useState('');
+    const [isItemScanning, setIsItemScanning] = useState(false);
+    const itemScanInputRef = useRef<HTMLInputElement>(null);
 
     // Surplus form
     const [showSurplusForm, setShowSurplusForm] = useState(false);
@@ -114,6 +148,13 @@ export default function VerificationSessionPage() {
     const [batchAssigning, setBatchAssigning] = useState(false);
     const [usedMonthsLoading, setUsedMonthsLoading] = useState(false);
 
+    // Wine Cellar integration state
+    const [wcModal, setWcModal] = useState(false);
+    const [wcItems, setWcItems] = useState<WineCellarItem[]>([]);
+    const [wcLoading, setWcLoading] = useState(false);
+    const [wcSelected, setWcSelected] = useState<Set<string>>(new Set());
+    const [wcAdding, setWcAdding] = useState(false);
+
     const showToast = (msg: string, type: Toast['type'] = 'success') => {
         setToasts(prev => [...prev, { id: Date.now().toString(), message: msg, type }]);
     };
@@ -138,6 +179,57 @@ export default function VerificationSessionPage() {
         if (verificationAlreadyCompleted) setShowCompleteConfirm(false);
     }, [verificationAlreadyCompleted]);
 
+    useEffect(() => {
+        if (activeTab === 'items' && itemScanMode === 'input') {
+            itemScanInputRef.current?.focus();
+        }
+    }, [activeTab, itemScanMode]);
+
+    // Verification routing functions moved to dedicated page
+    // const resetVerificationRoutingState = useCallback(() => { ... }, []);
+    // const fetchReverseDistributors = useCallback(async () => { ... }, [reverseDistributors.length, showToast]);
+
+    // Policy check useEffect moved to dedicated verification page
+    /*
+    useEffect(() => {
+        if (!verifyingItem || verifyStatus !== 'correct') {
+            setIsPolicyChecking(false);
+            return;
+        }
+        // ... (policy checking logic moved to dedicated page)
+    }, [dispatch, verifyingItem, verifyStatus]);
+    */
+
+    // Calculate policy counts - moved here to avoid React Hooks order violation
+    const policyCounts = useMemo(() => {
+        if (!v2Summary?.items) {
+            return { returnable: 0, nonReturnable: 0, wineCellar: 0, destruction: 0, pending: 0 };
+        }
+
+        let returnable = 0;
+        let nonReturnable = 0;
+        let wineCellar = 0;
+        let destruction = 0;
+        let pending = 0;
+
+        for (const item of v2Summary.items) {
+            const destination = String(item.destination || '').trim().toLowerCase();
+            if (item.wineCellarId) {
+                wineCellar++;
+            } else if (destination === 'destruction') {
+                destruction++;
+            } else if (item.returnStatus === 'returnable') {
+                returnable++;
+            } else if (item.returnStatus === 'non_returnable') {
+                nonReturnable++;
+            } else {
+                pending++;
+            }
+        }
+
+        return { returnable, nonReturnable, wineCellar, destruction, pending };
+    }, [v2Summary?.items]);
+
     const handleStartVerification = async () => {
         const count = Number(boxCount);
         if (!boxCount || count < 0) { showToast('Enter a valid box count', 'error'); return; }
@@ -155,27 +247,123 @@ export default function VerificationSessionPage() {
         }
     };
 
-    const openVerifyItem = (item: VerificationV2Item) => {
-        setVerifyingItem(item);
-        setVerifyStatus('');
-        setVerifyActualQty(String(item.quantity));
-        setVerifyNotes('');
+    // Verification functions moved to dedicated page
+    // const openVerifyItem = (item: VerificationV2Item) => { ... };
+    // const closeVerifyModal = () => { ... };
+
+    const runPhysicalVerification = async (
+        itemId: string,
+        verificationStatus: string,
+        actualQuantity?: number,
+        conditionNotes?: string,
+    ): Promise<boolean> => {
+        const body: any = { verificationStatus };
+        if (verificationStatus === 'missing') body.actualQuantity = 0;
+        else if (actualQuantity != null) body.actualQuantity = actualQuantity;
+        if (conditionNotes) body.conditionNotes = conditionNotes;
+
+        const result = await dispatch(verifyItemV2({ transactionId: returnId, itemId, ...body }));
+        if (!verifyItemV2.fulfilled.match(result)) {
+            showToast((result.payload as string) || 'Failed to verify item', 'error');
+            return false;
+        }
+        return true;
     };
 
-    const handleVerifyItem = async () => {
-        if (!verifyStatus || !verifyingItem) return;
-        const body: any = { verificationStatus: verifyStatus };
-        if (verifyStatus === 'missing') body.actualQuantity = 0;
-        else if (verifyActualQty !== '') body.actualQuantity = Number(verifyActualQty);
-        if (verifyNotes.trim()) body.conditionNotes = verifyNotes.trim();
+    // Verification logic moved to dedicated page
+    // const handleVerifyItem = async () => { ... };
 
-        const result = await dispatch(verifyItemV2({ transactionId: returnId, itemId: verifyingItem.id, ...body }));
-        if (verifyItemV2.fulfilled.match(result)) {
-            showToast('Item verified');
-            setVerifyingItem(null);
-            await loadSummary();
-        } else {
-            showToast((result.payload as string) || 'Failed to verify item', 'error');
+    const findScannedItemMatch = (scanData: BarcodeScanResponse): VerificationV2Item | null => {
+        if (!v2Summary?.items?.length) return null;
+
+        const ndcCandidates = new Set<string>();
+        if (scanData.autoFill?.ndc) ndcCandidates.add(normalizeNdc(scanData.autoFill.ndc));
+        if (scanData.product?.ndc) ndcCandidates.add(normalizeNdc(scanData.product.ndc));
+        for (const ndc of scanData.scan.ndcCandidates || []) {
+            ndcCandidates.add(normalizeNdc(ndc));
+        }
+
+        const usableNdcs = Array.from(ndcCandidates).filter(Boolean);
+        if (usableNdcs.length === 0) return null;
+
+        const serial = (scanData.scan.serialNumber || '').trim();
+        const lot = (scanData.scan.lotNumber || '').trim();
+        const exp = normalizeDateKey(scanData.scan.expirationDate);
+
+        const allMatches = v2Summary.items.filter((item) =>
+            usableNdcs.includes(normalizeNdc(item.ndc))
+        );
+        if (allMatches.length === 0) return null;
+
+        const unverifiedMatches = allMatches.filter(item => !item.verificationStatus);
+        const candidates = unverifiedMatches.length > 0 ? unverifiedMatches : allMatches;
+
+        if (serial) {
+            const bySerial = candidates.find(item => (item.serialNumber || '').trim() === serial);
+            if (bySerial) return bySerial;
+        }
+
+        if (lot && exp) {
+            const byLotAndExp = candidates.find(item =>
+                (item.lotNumber || '').trim() === lot &&
+                normalizeDateKey(item.expirationDate) === exp
+            );
+            if (byLotAndExp) return byLotAndExp;
+        }
+
+        if (exp) {
+            const byExpOnly = candidates.find(item => normalizeDateKey(item.expirationDate) === exp);
+            if (byExpOnly) return byExpOnly;
+        }
+
+        return candidates[0] || null;
+    };
+
+    const handleItemScan = async (raw: string) => {
+        const trimmed = raw.trim();
+        if (!trimmed) return;
+
+        setItemCameraOpen(false);
+        setItemScanInput('');
+        setItemScanError('');
+        setIsItemScanning(true);
+
+        try {
+            const result = await dispatch(scanBarcode(trimmed));
+            if (!scanBarcode.fulfilled.match(result)) {
+                const msg = (result.payload as string) || 'Failed to scan barcode';
+                setItemScanError(msg);
+                showToast(msg, 'error');
+                return;
+            }
+
+            const matched = findScannedItemMatch(result.payload);
+            if (!matched) {
+                const msg = 'Scanned item was not found in this return';
+                setItemScanError(msg);
+                showToast(msg, 'warning');
+                return;
+            }
+
+            if (matched.verificationStatus) {
+                showToast('This item is already verified', 'warning');
+                return;
+            }
+
+            // Navigate to verification page instead of modal
+            router.push(`/warehouse/verification/${returnId}/verify-item?itemId=${matched.id}`);
+            showToast('Item scanned. Redirecting to verification page.');
+        } finally {
+            setIsItemScanning(false);
+        }
+    };
+
+    const handleItemScanKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (itemScanInput.trim()) {
+                void handleItemScan(itemScanInput);
+            }
         }
     };
 
@@ -350,6 +538,61 @@ export default function VerificationSessionPage() {
             }
         } finally {
             setBatchAssigning(false);
+        }
+    };
+
+    // ── Wine Cellar handlers ────────────────────────────────────
+    const openWcModal = async () => {
+        if (!v2Summary?.transaction) return;
+        
+        setWcModal(true);
+        setWcLoading(true);
+        setWcSelected(new Set());
+        try {
+            const { apiClient } = await import('@/lib/api/apiClient');
+            const res = await apiClient.get<{ status: string; data: { items: WineCellarItem[] } }>(
+                '/admin/wine-cellar', true, { 
+                    pharmacy_id: v2Summary.transaction.pharmacyId, 
+                    status: 'ready_to_return', 
+                    limit: '100' 
+                }
+            );
+            setWcItems(res.data.items || []);
+        } catch (error) {
+            console.error('Failed to fetch wine cellar items:', error);
+            showToast('Failed to load wine cellar items', 'error');
+            setWcItems([]);
+        } finally {
+            setWcLoading(false);
+        }
+    };
+
+    const handleAddWineCellarItems = async () => {
+        if (!v2Summary?.transaction || wcSelected.size === 0) return;
+        
+        setWcAdding(true);
+        let successCount = 0;
+        
+        try {
+            const { apiClient } = await import('@/lib/api/apiClient');
+            for (const wcId of wcSelected) {
+                try {
+                    await apiClient.post(`/admin/wine-cellar/${encodeURIComponent(wcId)}/return`, 
+                        { transactionId: v2Summary.transaction.id }, true);
+                    successCount++;
+                } catch (error) {
+                    console.error('Failed to add wine cellar item:', error);
+                }
+            }
+        } finally {
+            setWcAdding(false);
+            setWcModal(false);
+            if (successCount > 0) {
+                showToast(`${successCount} wine cellar item(s) added to return!`);
+                await loadSummary(); // Refresh the summary
+            } else {
+                showToast('Failed to add wine cellar items', 'error');
+            }
         }
     };
 
@@ -677,7 +920,27 @@ export default function VerificationSessionPage() {
                         <span className="text-orange-700">{counts.wrongItem} wrong</span>
                         <span className="text-blue-700">{counts.surplus} surplus</span>
                     </div>
+                    <div className="flex gap-3 mt-1 text-[10px] font-medium">
+                        <span className="text-emerald-700">{policyCounts.returnable} returnable</span>
+                        <span className="text-rose-700">{policyCounts.nonReturnable} non-returnable</span>
+                        <span className="text-amber-700">{policyCounts.wineCellar} wine cellar</span>
+                        <span className="text-orange-700">{policyCounts.destruction} destruction</span>
+                        <span className="text-gray-400">{policyCounts.pending} pending policy</span>
+                    </div>
                 </div>
+
+                {/* Wine Cellar Items Button */}
+                {v2Summary?.transaction?.status !== 'completed' && (
+                    <div className="flex justify-end">
+                        <button
+                            onClick={openWcModal}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-purple-700 bg-purple-50 border border-purple-200 rounded-md hover:bg-purple-100 transition-colors"
+                        >
+                            <Archive className="w-3.5 h-3.5" />
+                            Wine Cellar Items
+                        </button>
+                    </div>
+                )}
 
                 {/* Tabs */}
                 <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
@@ -702,120 +965,157 @@ export default function VerificationSessionPage() {
 
                 {/* ITEMS TAB */}
                 {activeTab === 'items' && (
-                    <div className="bg-white rounded-lg shadow overflow-hidden">
-                        {items.length === 0 ? (
-                            <div className="text-center py-12 text-gray-400 text-xs">No items found</div>
-                        ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="bg-gray-50 border-b border-gray-200">
-                                        <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Product</th>
-                                        <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">NDC</th>
-                                        <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Serial #</th>
-                                        <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Lot</th>
-                                        <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Exp</th>
-                                        <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Qty</th>
-                                        <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Status</th>
-                                        <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-100">
-                                    {items.map(item => (
-                                        <tr key={item.id} className="hover:bg-gray-50">
-                                            <td className="px-3 py-2">
-                                                <div className="text-xs font-medium text-gray-900">{item.proprietaryName || item.genericName}</div>
-                                                {item.manufacturer && <div className="text-[10px] text-gray-400">{item.manufacturer}</div>}
-                                            </td>
-                                            <td className="px-3 py-2 text-[11px] font-mono text-gray-600">{item.ndc}</td>
-                                            <td className="px-3 py-2 text-[11px] font-mono text-gray-600">{item.serialNumber || '—'}</td>
-                                            <td className="px-3 py-2 text-[11px] text-gray-600">{item.lotNumber || '—'}</td>
-                                            <td className="px-3 py-2 text-[11px] text-gray-600">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
-                                            <td className="px-3 py-2 text-xs font-medium">{item.quantity}</td>
-                                            <td className="px-3 py-2">
-                                                <Badge className={`text-[10px] border ${statusColor(item.verificationStatus)}`}>
-                                                    {item.verificationStatus ? item.verificationStatus.replace('_', ' ') : 'unverified'}
-                                                </Badge>
-                                            </td>
-                                            <td className="px-3 py-2">
-                                                {!item.verificationStatus ? (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => openVerifyItem(item)}
-                                                        className="px-2 py-1 text-[10px] font-medium rounded-md transition text-white bg-primary-600 hover:bg-primary-700"
-                                                    >
-                                                        Verify
-                                                    </button>
-                                                ) : (
-                                                    <span className="text-[10px] text-gray-300">—</span>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                    <div className="space-y-3">
+                        <div className="bg-white rounded-lg shadow p-3 space-y-2">
+                            <div className="flex items-center justify-between gap-2 flex-wrap">
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-800">Scan item during verification</p>
+                                    <p className="text-[10px] text-gray-500">Scan barcode and auto-open the matching return item.</p>
+                                </div>
+                                <div className="flex gap-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => setItemScanMode('input')}
+                                        className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium transition-colors ${
+                                            itemScanMode === 'input'
+                                                ? 'bg-primary-100 text-primary-700 ring-1 ring-primary-300'
+                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        <Keyboard className="w-3 h-3" /> USB / Keyboard
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setItemScanMode('camera')}
+                                        className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium transition-colors ${
+                                            itemScanMode === 'camera'
+                                                ? 'bg-primary-100 text-primary-700 ring-1 ring-primary-300'
+                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        <Camera className="w-3 h-3" /> Camera
+                                    </button>
+                                </div>
+                            </div>
+
+                            {itemScanMode === 'input' && (
+                                <div className="flex gap-2">
+                                    <div className="relative flex-1">
+                                        <ScanLine className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                                        <input
+                                            ref={itemScanInputRef}
+                                            type="text"
+                                            value={itemScanInput}
+                                            onChange={e => setItemScanInput(e.target.value)}
+                                            onKeyDown={handleItemScanKeyDown}
+                                            placeholder="Scan item barcode and press Enter..."
+                                            className="w-full pl-8 pr-3 py-2 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 font-mono"
+                                            disabled={isItemScanning}
+                                        />
+                                    </div>
+                                    <button
+                                        type="button"
+                                        disabled={isItemScanning || !itemScanInput.trim()}
+                                        onClick={() => void handleItemScan(itemScanInput)}
+                                        className="px-3 py-2 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md disabled:opacity-50 flex items-center gap-1"
+                                    >
+                                        {isItemScanning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ScanLine className="w-3.5 h-3.5" />}
+                                        Scan
+                                    </button>
+                                </div>
+                            )}
+
+                            {itemScanMode === 'camera' && (
+                                <button
+                                    type="button"
+                                    onClick={() => setItemCameraOpen(true)}
+                                    disabled={isItemScanning}
+                                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-dashed border-primary-300 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors disabled:opacity-50"
+                                >
+                                    {isItemScanning ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 animate-spin text-primary-600" />
+                                            <span className="text-xs font-medium text-primary-700">Processing scan…</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Camera className="w-4 h-4 text-primary-600" />
+                                            <span className="text-xs font-semibold text-primary-800">Open camera scanner</span>
+                                        </>
+                                    )}
+                                </button>
+                            )}
+
+                            {itemScanError && (
+                                <p className="text-[11px] text-red-600 flex items-center gap-1">
+                                    <XCircle className="w-3 h-3 flex-shrink-0" /> {itemScanError}
+                                </p>
+                            )}
                         </div>
+
+                        <div className="bg-white rounded-lg shadow overflow-hidden">
+                            {items.length === 0 ? (
+                                <div className="text-center py-12 text-gray-400 text-xs">No items found</div>
+                            ) : (
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="bg-gray-50 border-b border-gray-200">
+                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Product</th>
+                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">NDC</th>
+                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Serial #</th>
+                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Lot</th>
+                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Exp</th>
+                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Qty</th>
+                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Status</th>
+                                            {/* <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Action</th> */}
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100">
+                                        {items.map(item => (
+                                            <tr key={item.id} className="hover:bg-gray-50">
+                                                <td className="px-3 py-2">
+                                                    <div className="text-xs font-medium text-gray-900">{item.proprietaryName || item.genericName}</div>
+                                                    {item.manufacturer && <div className="text-[10px] text-gray-400">{item.manufacturer}</div>}
+                                                </td>
+                                                <td className="px-3 py-2 text-[11px] font-mono text-gray-600">{item.ndc}</td>
+                                                <td className="px-3 py-2 text-[11px] font-mono text-gray-600">{item.serialNumber || '—'}</td>
+                                                <td className="px-3 py-2 text-[11px] text-gray-600">{item.lotNumber || '—'}</td>
+                                                <td className="px-3 py-2 text-[11px] text-gray-600">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
+                                                <td className="px-3 py-2 text-xs font-medium">{item.quantity}</td>
+                                                <td className="px-3 py-2">
+                                                    <Badge className={`text-[10px] border ${statusColor(item.verificationStatus)}`}>
+                                                        {item.verificationStatus ? item.verificationStatus.replace('_', ' ') : 'unverified'}
+                                                    </Badge>
+                                                </td>
+                                                {/* <td className="px-3 py-2">
+                                                    {!item.verificationStatus ? (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => openVerifyItem(item)}
+                                                            className="px-2 py-1 text-[10px] font-medium rounded-md transition text-white bg-primary-600 hover:bg-primary-700"
+                                                        >
+                                                            Verify
+                                                        </button>
+                                                    ) : (
+                                                        <span className="text-[10px] text-gray-300">—</span>
+                                                    )}
+                                                </td> */}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                            )}
+                        </div>
+
+                        {itemCameraOpen && (
+                            <QrScannerModal onScan={(raw) => void handleItemScan(raw)} onClose={() => setItemCameraOpen(false)} />
                         )}
                     </div>
                 )}
 
-                {/* VERIFY ITEM MODAL */}
-                {verifyingItem && (
-                    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-                        <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-5 space-y-4">
-                            <h3 className="font-bold text-sm text-gray-900">Verify Item</h3>
-                            <p className="text-[11px] text-gray-500">{verifyingItem.proprietaryName || verifyingItem.genericName}</p>
-
-                            <div className="grid grid-cols-2 gap-2">
-                                {([
-                                    { value: 'correct', label: 'Correct', icon: CheckCircle, base: 'border-green-300 bg-green-50 text-green-700', active: 'border-green-500 bg-green-200 text-green-900 ring-2 ring-green-300' },
-                                    { value: 'damaged', label: 'Damaged', icon: XCircle, base: 'border-red-300 bg-red-50 text-red-700', active: 'border-red-500 bg-red-200 text-red-900 ring-2 ring-red-300' },
-                                    { value: 'missing', label: 'Missing', icon: HelpCircle, base: 'border-gray-300 bg-gray-50 text-gray-700', active: 'border-gray-500 bg-gray-300 text-gray-900 ring-2 ring-gray-400' },
-                                    { value: 'wrong_item', label: 'Wrong Item', icon: AlertTriangle, base: 'border-orange-300 bg-orange-50 text-orange-700', active: 'border-orange-500 bg-orange-200 text-orange-900 ring-2 ring-orange-300' },
-                                ] as const).map(opt => {
-                                    const Icon = opt.icon;
-                                    return (
-                                        <button
-                                            key={opt.value}
-                                            type="button"
-                                            onClick={() => { setVerifyStatus(opt.value); if (opt.value === 'missing') setVerifyActualQty('0'); }}
-                                            className={`flex items-center gap-2 p-2.5 rounded-md border-2 text-xs font-medium transition-all ${verifyStatus === opt.value ? opt.active : opt.base}`}
-                                        >
-                                            <Icon className="w-4 h-4" /> {opt.label}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-
-                            {/* {verifyStatus && verifyStatus !== 'missing' && (
-                                <div>
-                                    <label className="text-[10px] font-medium text-gray-700">Actual Quantity (if different)</label>
-                                    <input type="number" min="0" value={verifyActualQty} onChange={e => setVerifyActualQty(e.target.value)}
-                                        className="mt-1 w-full px-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500" />
-                                </div>
-                            )} */}
-
-                            {(verifyStatus === 'damaged' || verifyStatus === 'wrong_item') && (
-                                <div>
-                                    <label className="text-[10px] font-medium text-gray-700">Condition Notes</label>
-                                    <textarea rows={2} placeholder="Describe the issue..." value={verifyNotes} onChange={e => setVerifyNotes(e.target.value)}
-                                        className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none" />
-                                </div>
-                            )}
-
-                            <div className="flex gap-2 justify-end">
-                                <button onClick={() => setVerifyingItem(null)} className="px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-md hover:bg-gray-50">Cancel</button>
-                                <button
-                                    disabled={!verifyStatus || isActionLoading}
-                                    onClick={handleVerifyItem}
-                                    className="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md disabled:opacity-50 flex items-center gap-1 transition"
-                                >
-                                    {isActionLoading && <Loader2 className="w-3 h-3 animate-spin" />} Save
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                {/* VERIFY ITEM MODAL - Moved to dedicated page /warehouse/verification/[id]/verify-item */}
 
                 {/* SURPLUS TAB */}
                 {activeTab === 'surplus' && (
@@ -1266,7 +1566,147 @@ export default function VerificationSessionPage() {
                         </div>
                     </div>
                 )}
+
+                {/* ── Wine Cellar Items Modal ─────────────────────── */}
+                {wcModal && (
+                    <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setWcModal(false)}>
+                        <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col shadow-xl" onClick={e => e.stopPropagation()}>
+                            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+                                <div>
+                                    <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                                        <Archive className="w-4 h-4 text-purple-600" />
+                                        Wine Cellar Items
+                                    </h2>
+                                    <p className="text-xs text-gray-500">Select ready-to-return items for {v2Summary?.transaction?.pharmacyName}</p>
+                                </div>
+                                <button onClick={() => setWcModal(false)} className="text-gray-400 hover:text-gray-600">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            
+                            <div className="flex-1 overflow-auto">
+                                {wcLoading ? (
+                                    <div className="flex items-center justify-center py-12">
+                                        <div className="text-center">
+                                            <Loader2 className="w-6 h-6 animate-spin text-primary-600 mx-auto mb-2" />
+                                            <p className="text-sm text-gray-500">Loading wine cellar items...</p>
+                                        </div>
+                                    </div>
+                                ) : wcItems.length === 0 ? (
+                                    <div className="flex items-center justify-center py-12">
+                                        <div className="text-center">
+                                            <Archive className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                                            <p className="text-sm font-medium text-gray-500">No wine cellar items ready</p>
+                                            <p className="text-xs text-gray-400 mt-1">
+                                                Items will appear here when they reach their expected return date
+                                            </p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full table-auto text-xs">
+                                            <thead>
+                                                <tr className="bg-gray-50 border-b border-gray-200">
+                                                    <th className="text-left px-3 py-2 w-8">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={wcSelected.size === wcItems.length && wcItems.length > 0}
+                                                            onChange={e => {
+                                                                if (e.target.checked) {
+                                                                    setWcSelected(new Set(wcItems.map(item => item.id)));
+                                                                } else {
+                                                                    setWcSelected(new Set());
+                                                                }
+                                                            }}
+                                                            className="text-primary-600 focus:ring-primary-500"
+                                                        />
+                                                    </th>
+                                                    <th className="text-left px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">NDC</th>
+                                                    <th className="text-left px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                                                    <th className="text-center px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">QTY</th>
+                                                    <th className="text-right px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">Value</th>
+                                                    <th className="text-left px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">Shelved</th>
+                                                    <th className="text-left px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">Expected Return</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {wcItems.map((item) => (
+                                                    <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                                        <td className="px-3 py-2">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={wcSelected.has(item.id)}
+                                                                onChange={e => {
+                                                                    const newSelected = new Set(wcSelected);
+                                                                    if (e.target.checked) {
+                                                                        newSelected.add(item.id);
+                                                                    } else {
+                                                                        newSelected.delete(item.id);
+                                                                    }
+                                                                    setWcSelected(newSelected);
+                                                                }}
+                                                                className="text-primary-600 focus:ring-primary-500"
+                                                            />
+                                                        </td>
+                                                        <td className="px-3 py-2 font-mono text-gray-900">{item.ndc || '—'}</td>
+                                                        <td className="px-3 py-2 text-gray-900 max-w-[200px] truncate" title={item.productName || ''}>
+                                                            <div>
+                                                                <p className="truncate font-medium">{item.productName || '—'}</p>
+                                                                {item.manufacturer && (
+                                                                    <p className="text-gray-400 truncate text-[10px]">{item.manufacturer}</p>
+                                                                )}
+                                                                {item.lotNumber && (
+                                                                    <p className="text-gray-500 truncate text-[10px]">Lot: {item.lotNumber}</p>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-3 py-2 text-center text-gray-900">
+                                                            {item.quantity}{item.isPartial && <span className="text-yellow-600 ml-0.5">P</span>}
+                                                        </td>
+                                                        <td className="px-3 py-2 text-right text-gray-900">
+                                                            {item.standardPrice != null ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.standardPrice) : '—'}
+                                                        </td>
+                                                        <td className="px-3 py-2 text-gray-600">{item.dateShelved ? new Date(item.dateShelved).toLocaleDateString() : '—'}</td>
+                                                        <td className="px-3 py-2 text-gray-600">
+                                                            {item.expectedReturnableDate ? new Date(item.expectedReturnableDate).toLocaleDateString() : '—'}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+                            
+                            {wcItems.length > 0 && (
+                                <div className="flex justify-between items-center px-4 py-3 border-t border-gray-200 bg-gray-50 flex-shrink-0">
+                                    <p className="text-xs text-gray-500">
+                                        {wcSelected.size} of {wcItems.length} items selected
+                                    </p>
+                                    <div className="flex gap-2">
+                                        <button 
+                                            onClick={() => setWcModal(false)}
+                                            className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={handleAddWineCellarItems}
+                                            disabled={wcAdding || wcSelected.size === 0}
+                                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 transition-colors"
+                                        >
+                                            {wcAdding ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Archive className="w-4 h-4 mr-1" />}
+                                            Add Selected ({wcSelected.size})
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
             </div>
         </PermissionGate>
     );
 }
+
