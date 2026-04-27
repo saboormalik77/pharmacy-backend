@@ -67,7 +67,7 @@ export function Chatbot({ className }: ChatbotProps) {
       id: '1',
       role: 'assistant',
       content:
-        "Hello! I'm your Pharmacy Portal Assistant. I can help you with inventory, returns, shipments, warehouse operations, payments, and more.\n\nSelect a quick question below or type your own:",
+        "Hello! I'm your Pharmacy Portal Assistant. I can help you with inventory, returns operations, payments, and more.\n\nSelect a quick question below or type your own:",
       timestamp: new Date(),
     },
   ]);
