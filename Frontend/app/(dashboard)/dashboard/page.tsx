@@ -1,5 +1,23 @@
 "use client";
 
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { NewDashboardUI } from '@/components/dashboard/NewDashboardUI';
+
+export default function DashboardPage() {
+  return (
+    <DashboardLayout>
+      <NewDashboardUI />
+    </DashboardLayout>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PREVIOUS DASHBOARD CODE — COMMENTED OUT (NOT REMOVED)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/*
+"use client";
+
 import { useEffect, useState, useRef } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -180,7 +198,7 @@ export default function DashboardPage() {
       <div className="space-y-2 p-2">
         <h1 className="text-lg sm:text-xl font-bold text-gray-900">Dashboard</h1>
 
-        {/* Key Metrics */}
+        {/* Key Metrics * /}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
             <div className="p-2 rounded-lg border-2 border-teal-200 bg-gradient-to-br from-teal-50 to-teal-100 hover:from-teal-100 hover:to-teal-200 transition-all cursor-pointer shadow-sm hover:shadow-md">
               <div className="flex items-center justify-between gap-2">
@@ -249,7 +267,7 @@ export default function DashboardPage() {
             </div>
         </div>
 
-        {/* Earnings Cards */}
+        {/* Earnings Cards * /}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <Card className="border-2 border-teal-200">
             <CardContent className="p-2">
@@ -287,11 +305,11 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Charts - Side by Side */}
+        {/* Charts - Side by Side * /}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-          {/* Left Column - Earnings History Chart + Period Information */}
+          {/* Left Column - Earnings History Chart + Period Information * /}
           <div className="space-y-2">
-            {/* Earnings History Chart */}
+            {/* Earnings History Chart * /}
             <Card className="border-2 border-teal-200">
               <CardHeader className="p-2">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
@@ -369,11 +387,11 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            {/* Period Information */}
+            {/* Period Information * /}
           
           </div>
 
-          {/* Right Column - Earnings Estimation Chart */}
+          {/* Right Column - Earnings Estimation Chart * /}
           <div>
             <Card className="border-2 border-teal-200">
               <CardHeader className="p-2">
@@ -473,3 +491,4 @@ export default function DashboardPage() {
     </DashboardLayout>
   );
 }
+*/

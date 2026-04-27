@@ -85,6 +85,12 @@ export function Sidebar({ onClose }: SidebarProps) {
 
   const navItems = [
     {
+      title: 'Dashboard',
+      href: '/dashboard',
+      icon: LayoutDashboard,
+      visible: hasPermission('dashboard:view'),
+    },
+    {
       title: 'Returns',
       href: '/returns',
       icon: ClipboardList,
