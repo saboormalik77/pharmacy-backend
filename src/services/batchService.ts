@@ -398,3 +398,120 @@ export const updateDebitMemo = async (
   handleRpcError(data, error, 'Failed to update debit memo');
   return data.data as DebitMemo;
 };
+
+export const getDebitMemoPdfData = async (memoId: string): Promise<any> => {
+  const sb = ensureAdmin();
+
+  // Get debit memo with items
+  const memoResult = await getDebitMemo(memoId);
+  const { memo, items } = memoResult;
+
+  // Get pharmacy details (physical_address is a JSONB column)
+  const { data: pharmacyData, error: pharmacyError } = await sb
+    .from('pharmacy')
+    .select('id, name, physical_address, phone, fax_number, dea_number, dea_expiration_date')
+    .eq('id', memo.pharmacyId)
+    .single();
+
+  if (pharmacyError) throw new AppError(`Failed to get pharmacy: ${pharmacyError.message}`, 400);
+
+  // Get labeler details from manufacturer_policies table
+  const { data: labelerData, error: labelerError } = await sb
+    .from('manufacturer_policies')
+    .select('labeler_id, manufacturer_name, address_1, city, state, zip, main_phone, fax')
+    .eq('labeler_id', memo.labelerId)
+    .single();
+
+  // If labeler not found in manufacturer_policies, use labeler info from memo
+  const labelerInfo = labelerData || {
+    labeler_id: memo.labelerId,
+    manufacturer_name: memo.labelerName,
+    address_1: null,
+    city: null,
+    state: null,
+    zip: null,
+    main_phone: null,
+    fax: null,
+  };
+
+  // Get return transaction items for full/partial quantities and package size
+  const itemIds = items.map(item => item.transactionItemId).filter(Boolean);
+  let transactionItems: any[] = [];
+  
+  if (itemIds.length > 0) {
+    const { data: transactionItemsData, error: transactionItemsError } = await sb
+      .from('return_transaction_items')
+      .select('id, ndc, quantity_full, quantity_partial, package_size, proprietary_name, generic_name')
+      .in('id', itemIds);
+
+    if (transactionItemsError) {
+      console.warn('Failed to get transaction items:', transactionItemsError.message);
+    } else {
+      transactionItems = transactionItemsData || [];
+    }
+  }
+
+  // Create a map of transaction items for easy lookup
+  const transactionItemsMap = new Map();
+  transactionItems.forEach((item: any) => {
+    transactionItemsMap.set(item.id, item);
+  });
+
+  // Prepare PDF data
+  const physicalAddress = pharmacyData.physical_address || {};
+  
+  const pdfData = {
+    memo: {
+      memoNumber: memo.memoNumber,
+      raNumber: memo.raNumber,
+      createdAt: memo.createdAt,
+      totalAskValue: memo.totalAskValue,
+      destination: memo.destination,
+      baggieManifest: memo.baggieManifest,
+    },
+    pharmacy: {
+      name: pharmacyData.name,
+      address: physicalAddress.street || null,
+      city: physicalAddress.city || null,
+      state: physicalAddress.state || null,
+      zipCode: physicalAddress.zip || null,
+      phone: pharmacyData.phone,
+      fax: pharmacyData.fax_number,
+      deaNumber: pharmacyData.dea_number,
+      deaExpiration: pharmacyData.dea_expiration_date,
+    },
+    labeler: {
+      labelerId: labelerInfo.labeler_id,
+      labelerName: labelerInfo.manufacturer_name,
+      address: labelerInfo.address_1,
+      city: labelerInfo.city,
+      state: labelerInfo.state,
+      zipCode: labelerInfo.zip,
+      phone: labelerInfo.main_phone,
+      fax: labelerInfo.fax,
+    },
+    items: items.map(item => {
+      const transactionItem = item.transactionItemId ? transactionItemsMap.get(item.transactionItemId) : null;
+      
+      return {
+        ndc: item.ndc,
+        drugName: item.productName || transactionItem?.proprietary_name || transactionItem?.generic_name,
+        lotNumber: item.lotNumber,
+        expirationDate: item.expirationDate,
+        packageSize: transactionItem?.package_size || null,
+        fullQuantity: transactionItem?.quantity_full || 0,
+        partialQuantity: transactionItem?.quantity_partial || 0,
+        askPrice: item.askPrice,
+        askValue: item.askPrice ? item.askPrice * item.quantity : null,
+      };
+    }),
+    remitTo: {
+      companyName: 'FCR Pharmacy Returns LLC',
+      address: '123 Business Way, Suite 100, City, ST 12345',
+      phone: '(555) 123-4567',
+      fax: '(555) 123-4568',
+    },
+  };
+
+  return pdfData;
+};

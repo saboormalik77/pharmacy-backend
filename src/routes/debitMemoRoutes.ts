@@ -5,6 +5,7 @@ import {
   listDebitMemosHandler,
   getDebitMemoHandler,
   updateDebitMemoHandler,
+  downloadDebitMemoPdfHandler,
 } from '../controllers/debitMemoController';
 import {
   requestRAHandler,
@@ -126,6 +127,33 @@ router.get('/', listDebitMemosHandler);
  *         description: Debit memo not found
  */
 router.get('/:id', getDebitMemoHandler);
+
+/**
+ * @swagger
+ * /api/admin/debit-memos/{id}/download:
+ *   get:
+ *     summary: Download debit memo as PDF
+ *     tags: [Debit Memos]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *         description: Debit memo ID
+ *     responses:
+ *       200:
+ *         description: Debit memo PDF file
+ *         content:
+ *           application/pdf:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       404:
+ *         description: Debit memo not found
+ */
+router.get('/:id/download', downloadDebitMemoPdfHandler);
 
 /**
  * @swagger

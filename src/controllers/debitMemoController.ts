@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { catchAsync } from '../utils/catchAsync';
 import * as batchService from '../services/batchService';
+import { generateDebitMemoPdf } from '../services/debitMemoPdfService';
 
 // ============================================================
 // GET /api/admin/debit-memos — List debit memos
@@ -60,5 +61,28 @@ export const updateDebitMemoHandler = catchAsync(
     });
 
     res.status(200).json({ status: 'success', data: memo });
+  }
+);
+
+// ============================================================
+// GET /api/admin/debit-memos/:id/download — Download debit memo PDF
+// ============================================================
+export const downloadDebitMemoPdfHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const memoId = req.params.id;
+
+    // Get debit memo PDF data
+    const pdfData = await batchService.getDebitMemoPdfData(memoId);
+
+    // Generate PDF
+    const pdfBuffer = await generateDebitMemoPdf(pdfData);
+
+    // Set headers for PDF response
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="Debit_Memo_${pdfData.memo.memoNumber}.pdf"`);
+    res.setHeader('Content-Length', pdfBuffer.length);
+
+    // Send PDF
+    res.end(pdfBuffer);
   }
 );
