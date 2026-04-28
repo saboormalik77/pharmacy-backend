@@ -54,10 +54,18 @@ export const pharmacyPaymentService = {
    */
   async getCheckPdf(checkNumber: string): Promise<Blob> {
     try {
-      const response = await fetch(`/api/pharmacy-payments/check-pdf/${checkNumber}`, {
+      const { getToken } = await import('@/lib/utils/cookies');
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+      const token = getToken();
+      
+      if (!token) {
+        throw new Error('Authentication required. Please log in.');
+      }
+      
+      const response = await fetch(`${apiUrl}/pharmacy-payments/check-pdf/${checkNumber}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${token}`,
         },
       });
       

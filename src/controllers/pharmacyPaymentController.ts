@@ -150,6 +150,7 @@ export const updatePaymentHandler = catchAsync(
       status, paymentMethod, paymentReference, paidAt,
       notes, companyFee, companyFeePercent, gpoShare,
       pharmacyPayout, totalCreditReceived,
+      checkNumber, checkDate, paymentType, returnReferenceNumber,
     } = req.body;
 
     const result = await pharmacyPaymentService.updatePaymentRecord(
@@ -165,10 +166,28 @@ export const updatePaymentHandler = catchAsync(
         gpoShare: gpoShare != null ? Number(gpoShare) : undefined,
         pharmacyPayout: pharmacyPayout != null ? Number(pharmacyPayout) : undefined,
         totalCreditReceived: totalCreditReceived != null ? Number(totalCreditReceived) : undefined,
+        checkNumber,
+        checkDate,
+        paymentType,
+        returnReferenceNumber,
       }
     );
 
     res.status(200).json({ status: 'success', data: result });
+  }
+);
+
+// ============================================================
+// POST /api/admin/pharmacy-payments/generate-check-number — Generate unique check number
+// ============================================================
+export const generateCheckNumberHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const checkNumber = await pharmacyPaymentService.generateCheckNumber();
+
+    res.status(200).json({ 
+      status: 'success', 
+      data: { checkNumber } 
+    });
   }
 );
 

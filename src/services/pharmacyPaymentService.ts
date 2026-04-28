@@ -170,6 +170,10 @@ export const updatePaymentRecord = async (
     gpoShare?: number;
     pharmacyPayout?: number;
     totalCreditReceived?: number;
+    checkNumber?: string;
+    checkDate?: string;
+    paymentType?: string;
+    returnReferenceNumber?: string;
   }
 ): Promise<PharmacyPayment> => {
   const sb = ensureAdmin();
@@ -185,6 +189,10 @@ export const updatePaymentRecord = async (
     p_gpo_share: params.gpoShare ?? null,
     p_pharmacy_payout: params.pharmacyPayout ?? null,
     p_total_credit: params.totalCreditReceived ?? null,
+    p_check_number: params.checkNumber || null,
+    p_check_date: params.checkDate || null,
+    p_payment_type: params.paymentType || null,
+    p_return_reference_number: params.returnReferenceNumber || null,
   });
   handleRpcError(data, error, 'Failed to update payment record');
   return data.data as PharmacyPayment;

@@ -130,35 +130,98 @@ $$;
 -- ────────────────────────────────────────────────────────────
 
 CREATE OR REPLACE FUNCTION _get_manufacturer_credits(p_payment_id UUID)
-RETURNS jsonb LANGUAGE sql STABLE AS $$
+RETURNS jsonb LANGUAGE plpgsql STABLE AS $$
+DECLARE
+  v_payment pharmacy_payments;
+  v_manual_credits jsonb;
+  v_debit_memo_credits jsonb;
+  v_has_manual_credits BOOLEAN;
+BEGIN
+  -- Get payment details
+  SELECT * INTO v_payment FROM pharmacy_payments WHERE id = p_payment_id;
+  
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('included', '[]'::jsonb, 'direct', '[]'::jsonb, 'por', '[]'::jsonb);
+  END IF;
+
+  -- Check if manual manufacturer credits exist
+  SELECT EXISTS(
+    SELECT 1 FROM payment_manufacturer_credits WHERE payment_id = p_payment_id
+  ) INTO v_has_manual_credits;
+
+  -- If manual credits exist, use those
+  IF v_has_manual_credits THEN
+    SELECT jsonb_build_object(
+      'included', COALESCE(jsonb_agg(
+        jsonb_build_object(
+          'manufacturerName', pmc.manufacturer_name,
+          'creditAmount', pmc.credit_amount,
+          'isControlledSubstance', pmc.is_controlled_substance,
+          'notes', pmc.notes
+        ) ORDER BY pmc.manufacturer_name
+      ) FILTER (WHERE pmc.credit_type = 'included'), '[]'::jsonb),
+      'direct', COALESCE(jsonb_agg(
+        jsonb_build_object(
+          'manufacturerName', pmc.manufacturer_name,
+          'creditAmount', pmc.credit_amount,
+          'isControlledSubstance', pmc.is_controlled_substance,
+          'notes', pmc.notes
+        ) ORDER BY pmc.manufacturer_name
+      ) FILTER (WHERE pmc.credit_type = 'direct'), '[]'::jsonb),
+      'por', COALESCE(jsonb_agg(
+        jsonb_build_object(
+          'manufacturerName', pmc.manufacturer_name,
+          'creditAmount', pmc.credit_amount,
+          'isControlledSubstance', pmc.is_controlled_substance,
+          'notes', pmc.notes
+        ) ORDER BY pmc.manufacturer_name
+      ) FILTER (WHERE pmc.credit_type = 'por'), '[]'::jsonb)
+    ) INTO v_manual_credits
+    FROM payment_manufacturer_credits pmc
+    WHERE pmc.payment_id = p_payment_id;
+    
+    RETURN v_manual_credits;
+  END IF;
+
+  -- Otherwise, fetch from debit memos for this payment's pharmacy and batch
   SELECT jsonb_build_object(
     'included', COALESCE(jsonb_agg(
       jsonb_build_object(
-        'manufacturerName', pmc.manufacturer_name,
-        'creditAmount', pmc.credit_amount,
-        'isControlledSubstance', pmc.is_controlled_substance,
-        'notes', pmc.notes
-      ) ORDER BY pmc.manufacturer_name
-    ) FILTER (WHERE pmc.credit_type = 'included'), '[]'::jsonb),
+        'manufacturerName', dm.labeler_name,
+        'creditAmount', COALESCE(dm.amount_received, dm.total_ask_value, 0),
+        'isControlledSubstance', false,
+        'notes', 'From debit memo ' || dm.memo_number
+      ) ORDER BY dm.labeler_name
+    ) FILTER (WHERE dm.payment_status = 'paid' AND dm.amount_received > 0), '[]'::jsonb),
     'direct', COALESCE(jsonb_agg(
       jsonb_build_object(
-        'manufacturerName', pmc.manufacturer_name,
-        'creditAmount', pmc.credit_amount,
-        'isControlledSubstance', pmc.is_controlled_substance,
-        'notes', pmc.notes
-      ) ORDER BY pmc.manufacturer_name
-    ) FILTER (WHERE pmc.credit_type = 'direct'), '[]'::jsonb),
+        'manufacturerName', dm.labeler_name,
+        'creditAmount', COALESCE(dm.amount_received, dm.total_ask_value, 0),
+        'isControlledSubstance', false,
+        'notes', 'Direct credit from memo ' || dm.memo_number
+      ) ORDER BY dm.labeler_name
+    ) FILTER (WHERE dm.payment_status = 'partial' AND dm.amount_received > 0), '[]'::jsonb),
     'por', COALESCE(jsonb_agg(
       jsonb_build_object(
-        'manufacturerName', pmc.manufacturer_name,
-        'creditAmount', pmc.credit_amount,
-        'isControlledSubstance', pmc.is_controlled_substance,
-        'notes', pmc.notes
-      ) ORDER BY pmc.manufacturer_name
-    ) FILTER (WHERE pmc.credit_type = 'por'), '[]'::jsonb)
-  )
-  FROM payment_manufacturer_credits pmc
-  WHERE pmc.payment_id = p_payment_id;
+        'manufacturerName', dm.labeler_name,
+        'creditAmount', COALESCE(dm.amount_received, dm.total_ask_value, 0),
+        'isControlledSubstance', false,
+        'notes', 'POR from memo ' || dm.memo_number
+      ) ORDER BY dm.labeler_name
+    ) FILTER (WHERE dm.payment_status = 'disputed' AND dm.amount_received > 0), '[]'::jsonb)
+  ) INTO v_debit_memo_credits
+  FROM debit_memos dm
+  WHERE dm.pharmacy_id = v_payment.pharmacy_id
+    AND dm.batch_id = v_payment.batch_id
+    AND dm.labeler_name IS NOT NULL
+    AND dm.labeler_name != '';
+
+  -- Return debit memo credits or empty structure
+  RETURN COALESCE(
+    v_debit_memo_credits,
+    jsonb_build_object('included', '[]'::jsonb, 'direct', '[]'::jsonb, 'por', '[]'::jsonb)
+  );
+END;
 $$;
 
 
@@ -289,6 +352,7 @@ DECLARE
   v_payment pharmacy_payments;
   v_pharmacy_data jsonb;
   v_manufacturer_credits jsonb;
+  v_has_credits BOOLEAN;
 BEGIN
   -- Get payment by check number
   SELECT * INTO v_payment 
@@ -302,17 +366,31 @@ BEGIN
   -- Get pharmacy details
   SELECT jsonb_build_object(
     'pharmacyName', p.pharmacy_name,
-    'address', p.address,
-    'city', p.city,
-    'state', p.state,
-    'zipCode', p.zip_code,
-    'storeNumber', p.store_number
+    'address', COALESCE(p.physical_address->>'street', ''),
+    'city', COALESCE(p.physical_address->>'city', ''),
+    'state', COALESCE(p.physical_address->>'state', ''),
+    'zipCode', COALESCE(p.physical_address->>'zip', ''),
+    'storeNumber', COALESCE(p.store_number, '')
   ) INTO v_pharmacy_data
   FROM pharmacy p
   WHERE p.id = v_payment.pharmacy_id;
 
-  -- Get manufacturer credits
+  -- Check if there are any manufacturer credits
+  SELECT EXISTS(
+    SELECT 1 FROM payment_manufacturer_credits WHERE payment_id = v_payment.id
+  ) INTO v_has_credits;
+
+  -- Get manufacturer credits (will return empty arrays if none exist)
   SELECT _get_manufacturer_credits(v_payment.id) INTO v_manufacturer_credits;
+  
+  -- If no manufacturer credits exist, use empty arrays
+  IF v_manufacturer_credits IS NULL THEN
+    v_manufacturer_credits := jsonb_build_object(
+      'included', '[]'::jsonb,
+      'direct', '[]'::jsonb,
+      'por', '[]'::jsonb
+    );
+  END IF;
 
   RETURN jsonb_build_object(
     'error', false,
@@ -393,3 +471,70 @@ SET return_reference_number = COALESCE(rb.batch_name, rb.id::text)
 FROM return_batches rb
 WHERE pp.batch_id = rb.id 
 AND pp.return_reference_number IS NULL;
+
+-- ════════════════════════════════════════════════════════════════════════════════════════
+-- 9. UPDATE EXISTING RPC FUNCTIONS FOR CHECK FUNCTIONALITY
+-- ════════════════════════════════════════════════════════════════════════════════════════
+
+-- Update pharmacy_payment_update RPC to handle new check-related fields
+CREATE OR REPLACE FUNCTION pharmacy_payment_update(
+  p_payment_id UUID,
+  p_status TEXT DEFAULT NULL,
+  p_payment_method TEXT DEFAULT NULL,
+  p_payment_reference TEXT DEFAULT NULL,
+  p_paid_at TIMESTAMPTZ DEFAULT NULL,
+  p_notes TEXT DEFAULT NULL,
+  p_company_fee DECIMAL(12,2) DEFAULT NULL,
+  p_company_fee_pct DECIMAL(5,2) DEFAULT NULL,
+  p_gpo_share DECIMAL(12,2) DEFAULT NULL,
+  p_pharmacy_payout DECIMAL(12,2) DEFAULT NULL,
+  p_total_credit DECIMAL(12,2) DEFAULT NULL,
+  p_check_number TEXT DEFAULT NULL,
+  p_check_date TIMESTAMPTZ DEFAULT NULL,
+  p_payment_type TEXT DEFAULT NULL,
+  p_return_reference_number TEXT DEFAULT NULL
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_payment pharmacy_payments%ROWTYPE;
+  v_result jsonb;
+BEGIN
+  -- Update the payment record
+  UPDATE pharmacy_payments
+  SET
+    status = COALESCE(p_status, status),
+    payment_method = COALESCE(p_payment_method, payment_method),
+    payment_reference = COALESCE(p_payment_reference, payment_reference),
+    paid_at = COALESCE(p_paid_at, paid_at),
+    notes = COALESCE(p_notes, notes),
+    company_fee = COALESCE(p_company_fee, company_fee),
+    company_fee_percent = COALESCE(p_company_fee_pct, company_fee_percent),
+    gpo_share = COALESCE(p_gpo_share, gpo_share),
+    pharmacy_payout = COALESCE(p_pharmacy_payout, pharmacy_payout),
+    total_credit_received = COALESCE(p_total_credit, total_credit_received),
+    check_number = COALESCE(p_check_number, check_number),
+    check_date = COALESCE(p_check_date, check_date),
+    payment_type = COALESCE(p_payment_type, payment_type),
+    return_reference_number = COALESCE(p_return_reference_number, return_reference_number),
+    updated_at = NOW()
+  WHERE id = p_payment_id
+  RETURNING * INTO v_payment;
+
+  IF NOT FOUND THEN
+    RETURN json_build_object('success', false, 'message', 'Payment not found')::jsonb;
+  END IF;
+
+  -- Return the updated payment with nested data
+  SELECT jsonb_build_object(
+    'success', true,
+    'data', _pharmacy_payment_to_json(v_payment) || jsonb_build_object(
+      'manufacturerCredits', _get_manufacturer_credits(v_payment.id)
+    )
+  ) INTO v_result;
+
+  RETURN v_result;
+END;
+$$;

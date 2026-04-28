@@ -10,6 +10,7 @@ import {
   updatePaymentHandler,
   myPaymentsHandler,
   checkPdfHandler,
+  generateCheckNumberHandler,
 } from '../controllers/pharmacyPaymentController';
 
 // ============================================================
@@ -75,6 +76,30 @@ adminRouter.get('/summary', authenticateAdmin, paymentSummaryHandler);
  *         description: Calculated payout breakdown
  */
 adminRouter.post('/calculate', authenticateAdmin, calculatePayoutHandler);
+
+/**
+ * @swagger
+ * /api/admin/pharmacy-payments/generate-check-number:
+ *   post:
+ *     summary: Generate a unique check number
+ *     tags: [Pharmacy Payments]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Generated check number
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status: { type: string, example: success }
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     checkNumber: { type: string, example: "216461" }
+ */
+adminRouter.post('/generate-check-number', authenticateAdmin, generateCheckNumberHandler);
 
 /**
  * @swagger

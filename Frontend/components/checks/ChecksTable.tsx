@@ -67,9 +67,23 @@ export function ChecksTable({
     }
 
     try {
-      // Open PDF in new window
-      const url = `/api/pharmacy-payments/check-pdf/${checkNumber}`;
-      window.open(url, '_blank');
+      // Use the pharmacy payment service to get PDF with proper authentication
+      const { pharmacyPaymentService } = await import('@/lib/api/services');
+      const pdfBlob = await pharmacyPaymentService.getCheckPdf(checkNumber);
+      
+      // Create blob URL and open in new window
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      const newWindow = window.open(pdfUrl, '_blank');
+      
+      // Clean up blob URL after window is opened
+      if (newWindow) {
+        newWindow.onload = () => {
+          URL.revokeObjectURL(pdfUrl);
+        };
+      } else {
+        URL.revokeObjectURL(pdfUrl);
+        alert('Please allow popups for this site to view PDFs.');
+      }
     } catch (error) {
       console.error('Error opening check PDF:', error);
       alert('Failed to open check PDF. Please try again.');
