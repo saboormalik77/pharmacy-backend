@@ -7,6 +7,7 @@
  */
 
 import PDFDocument from 'pdfkit';
+import { formatNonReturnableReason } from '../constants/nonReturnableReasons';
 
 // ============================================================
 // Types (matching RPC output shapes)
@@ -270,6 +271,13 @@ export async function generateManifestPdf(data: ManifestData): Promise<Buffer> {
     drawItemsTable(doc, 'RETURNABLE ITEMS', data.returnableItems, pageWidth, true);
   }
 
+  // ── Non-Returnable Items Table ──
+  // FCR-52: Non-returnable items must now appear in manifests/PDFs
+  // so warehouse and pharmacies have full visibility.
+  if (data.nonReturnableItems.length > 0) {
+    drawItemsTable(doc, 'NON-RETURNABLE ITEMS', data.nonReturnableItems, pageWidth, false);
+  }
+
   // ── Notes ──
   if (data.transaction.notes) {
     if (doc.y > 680) doc.addPage();
@@ -310,7 +318,7 @@ function manifestItemsTableHtml(
       const namePlain = productName(item) + (item.isPartial ? ` (${item.partialPercentage || 0}%)` : '');
       const destOrReason = showDestination
         ? (item.destination || '—').toUpperCase()
-        : (item.nonReturnableReason || '—').toUpperCase();
+        : formatNonReturnableReason(item.nonReturnableReason).toUpperCase();
       const bg = idx % 2 === 0 ? ' class="alt"' : '';
       return `<tr${bg}>
         <td class="mono">${escapeHtml(item.ndc || '—')}</td>
@@ -342,7 +350,9 @@ export function generateManifestHtml(data: ManifestData): string {
   const proc = data.processor;
   const dateStr = fmtDate(t.finalizedAt || t.createdAt);
   const returnableBlock = manifestItemsTableHtml('RETURNABLE ITEMS', data.returnableItems, true);
-  const nonRetBlock = '';
+  const nonRetBlock = data.nonReturnableItems.length > 0
+    ? manifestItemsTableHtml('NON-RETURNABLE ITEMS', data.nonReturnableItems, false)
+    : '';
   const notesBlock = t.notes
     ? `<div class="notes"><strong>Notes:</strong> ${escapeHtml(t.notes)}</div>`
     : '';
@@ -490,7 +500,8 @@ function drawItemsTable(
     if (showDestination) {
       doc.text((item.destination || '—').toUpperCase(), cx, rowY, { width: (cols as any).dest });
     } else {
-      doc.text((item.nonReturnableReason || '—').toUpperCase(), cx, rowY, { width: (cols as any).reason });
+      const reasonLabel = formatNonReturnableReason(item.nonReturnableReason);
+      doc.text(reasonLabel.toUpperCase(), cx, rowY, { width: (cols as any).reason });
     }
 
     doc.y = rowY + 13;

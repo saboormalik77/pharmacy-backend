@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { catchAsync } from '../utils/catchAsync';
 import { AppError } from '../utils/appError';
 import * as warehouseService from '../services/warehouseService';
+import { isValidNonReturnableReason } from '../constants/nonReturnableReasons';
 
 // ============================================================
 // POST /api/admin/warehouse/receive  (legacy — kept for compat)
@@ -223,13 +224,31 @@ export const startVerificationHandler = catchAsync(
 // ============================================================
 // PATCH /api/admin/warehouse/:id/items/:itemId/verify-v2
 // ============================================================
+// FCR-52: When the verification status flips an item to non-returnable
+// (i.e. anything other than `correct`), require a canonical
+// non_returnable_reason from the RSI list. The RPC layer also derives
+// a sensible fallback if the warehouse user does not pick one, but the
+// controller surfaces a clear 400 if the value is missing or invalid
+// so the frontend can prompt the user.
+// ============================================================
+const STATUSES_THAT_FLIP_NON_RETURNABLE = new Set(['damaged', 'missing', 'wrong_item']);
+
 export const verifyItemV2Handler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const { id: transactionId, itemId } = req.params;
-    const { verificationStatus, actualQuantity, conditionNotes } = req.body;
+    const { verificationStatus, actualQuantity, conditionNotes, nonReturnableReason } = req.body;
 
     if (!verificationStatus) {
       throw new AppError('verificationStatus is required (correct, damaged, missing, wrong_item)', 400);
+    }
+
+    if (STATUSES_THAT_FLIP_NON_RETURNABLE.has(String(verificationStatus))) {
+      if (!nonReturnableReason || !isValidNonReturnableReason(nonReturnableReason)) {
+        throw new AppError(
+          'A valid nonReturnableReason is required when marking an item as damaged, missing, or wrong_item',
+          400
+        );
+      }
     }
 
     const reportedBy = (req as any).adminId || (req as any).userId;
@@ -240,7 +259,8 @@ export const verifyItemV2Handler = catchAsync(
       verificationStatus,
       actualQuantity != null ? Number(actualQuantity) : undefined,
       conditionNotes,
-      reportedBy
+      reportedBy,
+      nonReturnableReason
     );
 
     res.status(200).json({

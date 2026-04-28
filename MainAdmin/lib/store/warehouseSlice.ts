@@ -278,7 +278,14 @@ export const fetchVerificationSummary = createAsyncThunk<
 
 export const verifyItemV2 = createAsyncThunk<
     any,
-    { transactionId: string; itemId: string; verificationStatus: string; actualQuantity?: number; conditionNotes?: string },
+    {
+        transactionId: string;
+        itemId: string;
+        verificationStatus: string;
+        actualQuantity?: number;
+        conditionNotes?: string;
+        nonReturnableReason?: string;
+    },
     { rejectValue: string }
 >('warehouse/verifyItemV2', async ({ transactionId, itemId, ...payload }, { rejectWithValue }) => {
     try {
