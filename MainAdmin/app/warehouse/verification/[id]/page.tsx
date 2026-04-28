@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
 import { formatDate, formatCurrency } from '@/lib/utils';
+import { formatNonReturnableReason } from '@/lib/constants/nonReturnableReasons';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import {
     startVerification,
@@ -678,6 +679,21 @@ export default function VerificationSessionPage() {
                             </div>
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <div className="p-3 rounded-md border border-gray-200 bg-gray-50">
+                                <p className="text-[10px] text-gray-500">Total Items</p>
+                                <p className="text-xl font-bold text-gray-900">{completedSummary.totalItems ?? 0}</p>
+                            </div>
+                            <div className="p-3 rounded-md border border-emerald-200 bg-emerald-50">
+                                <p className="text-[10px] text-emerald-700">Returnable</p>
+                                <p className="text-xl font-bold text-emerald-700">{v2Summary ? policyCounts.returnable : completedSummary.correctItems ?? 0}</p>
+                            </div>
+                            <div className="p-3 rounded-md border border-rose-200 bg-rose-50">
+                                <p className="text-[10px] text-rose-700">Non-Returnable</p>
+                                <p className="text-xl font-bold text-rose-700">{v2Summary ? (policyCounts.nonReturnable + policyCounts.wineCellar + policyCounts.destruction) : ((completedSummary.damagedItems ?? 0) + (completedSummary.missingItems ?? 0) + (completedSummary.wrongItems ?? 0))}</p>
+                            </div>
+                        </div>
+                        {/* Hidden verification stats - showing only routing-focused summary now
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             {([
                                 { label: 'Total Items', value: completedSummary.totalItems, color: 'text-gray-900' },
                                 { label: 'Correct', value: completedSummary.correctItems, color: 'text-green-700' },
@@ -692,6 +708,7 @@ export default function VerificationSessionPage() {
                                 </div>
                             ))}
                         </div>
+                        */}
                         {completedSummary.correctItemsValue != null && (
                             <div className="p-3 rounded-md bg-green-50 border border-green-200 text-center">
                                 <p className="text-[10px] text-green-700">Correct Items Value</p>
@@ -913,14 +930,14 @@ export default function VerificationSessionPage() {
                             </div>
                         </div>
                     </div>
-                    <div className="flex gap-3 mt-2 text-[10px] font-medium">
+                    {/* <div className="flex gap-3 mt-2 text-[10px] font-medium">
                         <span className="text-green-700">{counts.correct} correct</span>
                         <span className="text-red-700">{counts.damaged} damaged</span>
                         <span className="text-gray-500">{counts.missing} missing</span>
                         <span className="text-orange-700">{counts.wrongItem} wrong</span>
                         <span className="text-blue-700">{counts.surplus} surplus</span>
-                    </div>
-                    <div className="flex gap-3 mt-1 text-[10px] font-medium">
+                    </div> */}
+                    <div className="flex gap-3 mt-2 text-[10px] font-medium">
                         <span className="text-emerald-700">{policyCounts.returnable} returnable</span>
                         <span className="text-rose-700">{policyCounts.nonReturnable} non-returnable</span>
                         <span className="text-amber-700">{policyCounts.wineCellar} wine cellar</span>
@@ -1067,7 +1084,8 @@ export default function VerificationSessionPage() {
                                             <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Lot</th>
                                             <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Exp</th>
                                             <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Qty</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Status</th>
+                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Verification</th>
+                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Return Status</th>
                                             {/* <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Action</th> */}
                                         </tr>
                                     </thead>
@@ -1087,6 +1105,33 @@ export default function VerificationSessionPage() {
                                                     <Badge className={`text-[10px] border ${statusColor(item.verificationStatus)}`}>
                                                         {item.verificationStatus ? item.verificationStatus.replace('_', ' ') : 'unverified'}
                                                     </Badge>
+                                                </td>
+                                                <td className="px-3 py-2">
+                                                    {item.returnStatus ? (
+                                                        <div className="space-y-1">
+                                                            <Badge className={`text-[10px] border ${
+                                                                item.returnStatus === 'returnable' 
+                                                                    ? 'bg-emerald-100 text-emerald-700 border-emerald-200' 
+                                                                    : item.wineCellarId 
+                                                                        ? 'bg-purple-100 text-purple-700 border-purple-200'
+                                                                        : 'bg-rose-100 text-rose-700 border-rose-200'
+                                                            }`}>
+                                                                {item.wineCellarId 
+                                                                    ? 'wine cellar' 
+                                                                    : item.returnStatus === 'returnable' 
+                                                                        ? 'returnable' 
+                                                                        : 'non-returnable'
+                                                                }
+                                                            </Badge>
+                                                            {item.returnStatus === 'non_returnable' && item.nonReturnableReason && (
+                                                                <div className="text-[9px] text-gray-500 font-medium">
+                                                                    {formatNonReturnableReason(item.nonReturnableReason)}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-[10px] text-gray-400">pending</span>
+                                                    )}
                                                 </td>
                                                 {/* <td className="px-3 py-2">
                                                     {!item.verificationStatus ? (
@@ -1405,11 +1450,11 @@ export default function VerificationSessionPage() {
                         {showCompleteConfirm ? (
                             <div className="space-y-3">
                                 <h3 className="font-bold text-xs text-gray-900">Confirm Complete Verification</h3>
-                                <div className="grid grid-cols-3 gap-2 text-[11px]">
+                                {/* <div className="grid grid-cols-3 gap-2 text-[11px]">
                                     <div className="p-2 bg-green-50 rounded border border-green-200"><span className="text-green-700">Correct:</span> <strong>{counts.correct}</strong></div>
                                     <div className="p-2 bg-red-50 rounded border border-red-200"><span className="text-red-700">Damaged:</span> <strong>{counts.damaged}</strong></div>
                                     <div className="p-2 bg-gray-50 rounded border border-gray-200"><span className="text-gray-600">Missing:</span> <strong>{counts.missing}</strong></div>
-                                </div>
+                                </div> */}
                                 <div>
                                     <label className="text-[10px] font-medium text-gray-700">Completion Notes (optional)</label>
                                     <textarea rows={2} value={completeNotes} onChange={e => setCompleteNotes(e.target.value)} placeholder="Summary notes..."

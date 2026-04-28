@@ -1159,6 +1159,7 @@ export interface VerificationV2Item {
     returnStatus: string;
     destination?: string | null;
     wineCellarId?: string | null;
+    nonReturnableReason?: string | null;
     dosageForm?: string | null;
     isPartial?: boolean;
     estimatedValue: number;

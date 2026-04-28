@@ -46,7 +46,10 @@ BEGIN
       'verificationStatus', rti.verification_status,
       'conditionNotes',     rti.condition_notes,
       'returnStatus',       rti.return_status,
-      'estimatedValue',     rti.estimated_value
+      'estimatedValue',     rti.estimated_value,
+      'wineCellarId',       rti.wine_cellar_id,
+      'destination',        rti.destination,
+      'nonReturnableReason', rti.non_returnable_reason
     ) ORDER BY rti.created_at
   ), '[]'::jsonb)
   INTO v_items
@@ -98,55 +101,46 @@ BEGIN
   -- Discrepancies
   SELECT COALESCE(jsonb_agg(
     jsonb_build_object(
-      'id',                 wd.id,
-      'type',               wd.type,
-      'ndc',                wd.ndc,
-      'productName',        wd.product_name,
-      'expectedQuantity',   wd.expected_quantity,
-      'actualQuantity',     wd.actual_quantity,
-      'notes',              wd.notes,
-      'status',             wd.status,
-      'resolution',         wd.resolution,
-      'resolvedBy',         wd.resolved_by,
-      'resolvedAt',         wd.resolved_at,
-      'createdAt',          wd.created_at
-    ) ORDER BY wd.created_at
-  ), '[]'::jsonb), COUNT(*), COUNT(CASE WHEN wd.status = 'open' THEN 1 END)
+      'id',               wd.id,
+      'itemId',           wd.item_id,
+      'type',             wd.type,
+      'ndc',              wd.ndc,
+      'productName',      wd.product_name,
+      'expectedQuantity', wd.expected_quantity,
+      'actualQuantity',   wd.actual_quantity,
+      'notes',            wd.notes,
+      'status',           wd.status,
+      'resolutionNotes',  wd.resolution_notes,
+      'resolvedBy',       wd.resolved_by,
+      'resolvedAt',       wd.resolved_at,
+      'createdAt',        wd.created_at
+    ) ORDER BY wd.created_at DESC
+  ), '[]'::jsonb), COUNT(*),
+  COUNT(*) FILTER (WHERE wd.status = 'open')
   INTO v_discrepancies, v_disc_total, v_disc_open
   FROM warehouse_discrepancies wd
   WHERE wd.transaction_id = p_transaction_id;
 
   RETURN jsonb_build_object(
     'error', false,
-    'transaction', jsonb_build_object(
-      'id',                        v_txn.id,
-      'pharmacyId',                v_txn.pharmacy_id,
-      'status',                    v_txn.status,
-      'receivedInWarehouseDate',   v_txn.received_in_warehouse_date,
-      'verificationStartedAt',     v_txn.verification_started_at,
-      'verificationCompletedAt',   v_txn.verification_completed_at,
-      'verifiedIntegrity',         v_txn.verified_integrity,
-      'expectedBoxCount',          v_txn.expected_box_count,
-      'actualBoxCount',            v_txn.actual_box_count,
-      'boxCountMatch',             v_txn.box_count_match,
-      'totalReturnableValue',      v_txn.total_returnable_value,
-      'totalNonReturnableValue',   v_txn.total_non_returnable_value
-    ),
-    'items', v_items,
-    'counts', jsonb_build_object(
-      'totalItems',   v_total_items,
-      'correct',      v_correct,
-      'damaged',      v_damaged,
-      'missing',      v_missing,
-      'wrongItem',    v_wrong,
-      'unverified',   v_unverified
-    ),
-    'surplus', v_surplus,
-    'surplusCount', v_surplus_count,
-    'discrepancies', v_discrepancies,
-    'discrepancyCounts', jsonb_build_object(
-      'total', v_disc_total,
-      'open',  v_disc_open
+    'data', jsonb_build_object(
+      'transaction', _rt_to_json(v_txn),
+      'items',       v_items,
+      'counts', jsonb_build_object(
+        'totalItems',    v_total_items,
+        'correct',       v_correct,
+        'damaged',       v_damaged,
+        'missing',       v_missing,
+        'wrongItem',     v_wrong,
+        'unverified',    v_unverified,
+        'surplus',       v_surplus_count
+      ),
+      'surplus',        v_surplus,
+      'discrepancies',  v_discrepancies,
+      'discrepancyCounts', jsonb_build_object(
+        'total', v_disc_total,
+        'open',  v_disc_open
+      )
     )
   );
 END;
