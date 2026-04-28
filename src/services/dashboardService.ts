@@ -229,6 +229,299 @@ export const getDashboardSummary = async (pharmacyId: string): Promise<Dashboard
   };
 };
 
+// Interface for return stats response
+export interface ReturnStatsResponse {
+  totalReturns: number; // Total returns for this pharmacy (created by pharmacy + created by processor for pharmacy)
+  totalPharmacyCreatedReturns: number; // Returns created by pharmacy itself (processor_id is NULL)
+  totalProcessorHandledReturns: number; // Returns created by processor on behalf of pharmacy (processor_id is NOT NULL)
+  totalReturnValue: number; // Sum of all returnable + non-returnable values
+  totalCredits: number; // Sum of totalCreditReceived from pharmacy_payments table (matches Credits tab)
+}
+
+/**
+ * Get return statistics for a specific pharmacy
+ * - Total returns: all returns for this pharmacy (created by pharmacy itself + created by processor for pharmacy)
+ * - Pharmacy created returns: returns created directly by the pharmacy
+ * - Processor created returns: returns created by a processor on behalf of the pharmacy
+ * - Total return value: sum of all returnable and non-returnable values
+ * - Total credits: sum of totalCreditReceived from pharmacy_payments table (same logic as Credits tab)
+ */
+export const getReturnStats = async (pharmacyId: string): Promise<ReturnStatsResponse> => {
+  if (!supabaseAdmin) {
+    throw new AppError('Supabase admin client not configured', 500);
+  }
+
+  const db = supabaseAdmin;
+
+  // Get count of returns created by this pharmacy (where processor is NULL - pharmacy created it themselves)
+  const { count: pharmacyCreatedReturns } = await db
+    .from('return_transactions')
+    .select('*', { count: 'exact', head: true })
+    .eq('pharmacy_id', pharmacyId)
+    .is('processor_id', null);
+
+  // Get count of returns created by a processor for this pharmacy (where processor is NOT NULL)
+  const { count: processorCreatedReturns } = await db
+    .from('return_transactions')
+    .select('*', { count: 'exact', head: true })
+    .eq('pharmacy_id', pharmacyId)
+    .not('processor_id', 'is', null);
+
+  // Calculate total returns for this pharmacy (pharmacy created + processor created)
+  const totalReturns = (pharmacyCreatedReturns || 0) + (processorCreatedReturns || 0);
+
+  // Get sum of all return values (returnable + non-returnable) for pharmacy-created returns
+  const { data: returnValuesData, error: returnValuesError } = await db
+    .from('return_transactions')
+    .select('total_returnable_value, total_non_returnable_value')
+    .eq('pharmacy_id', pharmacyId);
+
+  if (returnValuesError) {
+    throw new AppError(`Failed to fetch return values: ${returnValuesError.message}`, 400);
+  }
+
+  // Calculate total return value
+  const totalReturnValue = (returnValuesData || []).reduce((sum, rt) => {
+    return sum + (Number(rt.total_returnable_value) || 0) + (Number(rt.total_non_returnable_value) || 0);
+  }, 0);
+
+  // Get sum of received credits for this pharmacy's returns
+  // Use the same logic as the Credits tab - sum totalCreditReceived from pharmacy_payments table
+  const { data: paymentsData, error: paymentsError } = await db
+    .from('pharmacy_payments')
+    .select('total_credit_received')
+    .eq('pharmacy_id', pharmacyId);
+
+  if (paymentsError) {
+    console.warn('⚠️ Failed to fetch pharmacy payments data:', paymentsError.message);
+  }
+
+  const totalCredits = (paymentsData || []).reduce((sum, p) => sum + (Number(p.total_credit_received) || 0), 0);
+
+  return {
+    totalReturns,
+    totalPharmacyCreatedReturns: pharmacyCreatedReturns || 0,
+    totalProcessorHandledReturns: processorCreatedReturns || 0,
+    totalReturnValue: Math.round(totalReturnValue * 100) / 100, // Round to 2 decimal places
+    totalCredits: Math.round(totalCredits * 100) / 100, // Round to 2 decimal places
+  };
+};
+
+// Interface for returns list item (dropdown)
+export interface ReturnListItem {
+  id: string;
+  licensePlate: string;
+  createdAt: string;
+  status: string;
+  totalReturnableValue: number;
+  totalNonReturnableValue: number;
+}
+
+// Interface for return detail response (credit summary + product value breakdown)
+export interface ReturnDetailResponse {
+  returnTransaction: {
+    id: string;
+    licensePlate: string;
+    status: string;
+    totalItems: number;
+    totalReturnableValue: number;
+    totalNonReturnableValue: number;
+    createdAt: string;
+  };
+  creditSummary: {
+    fcrOneCheck: {
+      expected: number;
+      received: number;
+    };
+    manufacturerDirect: {
+      expected: number;
+      received: number;
+    };
+    totalExpected: number;
+    totalReceived: number;
+  };
+  productValueBreakdown: {
+    returnable: number;
+    nonReturnable: number;
+  };
+  nonReturnableReasons: Array<{
+    reason: string;
+    value: number;
+  }>;
+  productValuesOverTime: Array<{
+    date: string;
+    returnableValue: number;
+    nonReturnableValue: number;
+  }>;
+}
+
+/**
+ * Get list of all return transactions for dropdown (id, license plate, date)
+ */
+export const getReturnsList = async (pharmacyId: string): Promise<ReturnListItem[]> => {
+  if (!supabaseAdmin) {
+    throw new AppError('Supabase admin client not configured', 500);
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from('return_transactions')
+    .select('id, license_plate, created_at, status, total_returnable_value, total_non_returnable_value')
+    .eq('pharmacy_id', pharmacyId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw new AppError(`Failed to fetch returns list: ${error.message}`, 400);
+  }
+
+  return (data || []).map((rt: any) => ({
+    id: rt.id,
+    licensePlate: rt.license_plate,
+    createdAt: rt.created_at,
+    status: rt.status,
+    totalReturnableValue: Number(rt.total_returnable_value) || 0,
+    totalNonReturnableValue: Number(rt.total_non_returnable_value) || 0,
+  }));
+};
+
+/**
+ * Get detailed data for a specific return transaction:
+ * - Credit summary (FCR OneCheck vs Manufacturer Direct from pharmacy_payments)
+ * - Product value breakdown (returnable vs non-returnable)
+ * - Non-returnable reasons breakdown
+ * - Product values over time (all returns for this pharmacy)
+ */
+export const getReturnDetail = async (pharmacyId: string, returnId: string): Promise<ReturnDetailResponse> => {
+  if (!supabaseAdmin) {
+    throw new AppError('Supabase admin client not configured', 500);
+  }
+
+  const db = supabaseAdmin;
+
+  // 1. Get the return transaction
+  const { data: rtData, error: rtError } = await db
+    .from('return_transactions')
+    .select('id, license_plate, status, total_items, total_returnable_value, total_non_returnable_value, created_at')
+    .eq('id', returnId)
+    .eq('pharmacy_id', pharmacyId)
+    .single();
+
+  if (rtError || !rtData) {
+    throw new AppError('Return transaction not found', 404);
+  }
+
+  // 2. Get items for non-returnable reasons breakdown
+  const { data: items, error: itemsError } = await db
+    .from('return_transaction_items')
+    .select('return_status, non_returnable_reason, estimated_value')
+    .eq('transaction_id', returnId);
+
+  if (itemsError) {
+    throw new AppError(`Failed to fetch return items: ${itemsError.message}`, 400);
+  }
+
+  // Calculate non-returnable reasons
+  const reasonMap: Record<string, number> = {};
+  (items || []).forEach((item: any) => {
+    if (item.return_status === 'non_returnable') {
+      const reason = item.non_returnable_reason || 'other';
+      const reasonLabel = reason === 'date' ? 'Expired'
+        : reason === 'policy' ? 'Manufacturer Policy'
+        : reason === 'no_data' ? 'No Data'
+        : reason === 'manual' ? 'Manual'
+        : 'Other';
+      reasonMap[reasonLabel] = (reasonMap[reasonLabel] || 0) + (Number(item.estimated_value) || 0);
+    }
+  });
+
+  const nonReturnableReasons = Object.entries(reasonMap).map(([reason, value]) => ({
+    reason,
+    value: Math.round(value * 100) / 100,
+  }));
+
+  // 3. Get credit data from pharmacy_payments for this pharmacy
+  //    FCR OneCheck = payment_type 'ocs' (included credits via RSI check)
+  //    Manufacturer Direct = payment_type 'direct' 
+  const { data: paymentsData, error: paymentsError } = await db
+    .from('pharmacy_payments')
+    .select('payment_type, total_credit_received, included_credit_amount, direct_credit_amount, por_credit_amount, pharmacy_payout, status')
+    .eq('pharmacy_id', pharmacyId);
+
+  if (paymentsError) {
+    console.warn('Failed to fetch pharmacy payments:', paymentsError.message);
+  }
+
+  let fcrReceived = 0;
+  let manufacturerDirectReceived = 0;
+
+  (paymentsData || []).forEach((p: any) => {
+    const included = Number(p.included_credit_amount) || 0;
+    const direct = Number(p.direct_credit_amount) || 0;
+    fcrReceived += included;
+    manufacturerDirectReceived += direct;
+  });
+
+  const totalReturnableValue = Number(rtData.total_returnable_value) || 0;
+  const totalNonReturnableValue = Number(rtData.total_non_returnable_value) || 0;
+
+  // Expected values: Since expected values are not stored in the database, we calculate them as follows:
+  // - Total Expected = totalReturnableValue from the selected return transaction
+  // - We split this total between FCR and Manufacturer Direct based on the historical ratio of received credits
+  // - This gives a reasonable estimate for comparison, though these are calculated/dummy values
+  const totalExpected = totalReturnableValue;
+  const fcrExpectedRatio = fcrReceived > 0 || manufacturerDirectReceived > 0
+    ? fcrReceived / (fcrReceived + manufacturerDirectReceived)
+    : 0.72; // Default 72% FCR, 28% Manufacturer Direct if no historical data
+  const fcrExpected = Math.round(totalExpected * fcrExpectedRatio * 100) / 100;
+  const manufacturerDirectExpected = Math.round((totalExpected - fcrExpected) * 100) / 100;
+
+  // 4. Get product values over time (all returns for this pharmacy, ordered by date)
+  const { data: allReturns, error: allReturnsError } = await db
+    .from('return_transactions')
+    .select('created_at, total_returnable_value, total_non_returnable_value')
+    .eq('pharmacy_id', pharmacyId)
+    .order('created_at', { ascending: true });
+
+  if (allReturnsError) {
+    console.warn('Failed to fetch all returns for timeline:', allReturnsError.message);
+  }
+
+  const productValuesOverTime = (allReturns || []).map((r: any) => ({
+    date: new Date(r.created_at).toISOString().split('T')[0],
+    returnableValue: Number(r.total_returnable_value) || 0,
+    nonReturnableValue: Number(r.total_non_returnable_value) || 0,
+  }));
+
+  return {
+    returnTransaction: {
+      id: rtData.id,
+      licensePlate: rtData.license_plate,
+      status: rtData.status,
+      totalItems: rtData.total_items,
+      totalReturnableValue,
+      totalNonReturnableValue,
+      createdAt: rtData.created_at,
+    },
+    creditSummary: {
+      fcrOneCheck: {
+        expected: fcrExpected,
+        received: Math.round(fcrReceived * 100) / 100,
+      },
+      manufacturerDirect: {
+        expected: manufacturerDirectExpected,
+        received: Math.round(manufacturerDirectReceived * 100) / 100,
+      },
+      totalExpected: Math.round(totalExpected * 100) / 100,
+      totalReceived: Math.round((fcrReceived + manufacturerDirectReceived) * 100) / 100,
+    },
+    productValueBreakdown: {
+      returnable: totalReturnableValue,
+      nonReturnable: totalNonReturnableValue,
+    },
+    nonReturnableReasons,
+    productValuesOverTime,
+  };
+};
+
 // Interface for period earnings data point (monthly or yearly)
 export interface PeriodEarnings {
   period: string; // Format: "YYYY-MM" for monthly, "YYYY" for yearly

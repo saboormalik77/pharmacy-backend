@@ -206,33 +206,33 @@ export default function ReturnsPage() {
 
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                <div className="bg-white rounded-lg shadow px-3 py-2">
+                <div className="bg-white rounded-lg shadow px-3 py-2 border-2 border-teal-200">
                     <div className="flex items-center gap-1.5 mb-0.5">
-                        <ClipboardList className="w-3.5 h-3.5 text-gray-500" />
-                        <span className="text-[10px] text-gray-500">Total Returns</span>
+                        <ClipboardList className="w-4 h-4 text-teal-600" />
+                        <span className="text-xs text-teal-600 font-semibold uppercase tracking-wide">Total Returns</span>
                     </div>
-                    <p className="text-sm font-bold text-gray-900">{stats.total}</p>
+                    <p className="text-lg font-bold text-teal-700">{stats.total}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow px-3 py-2">
+                <div className="bg-white rounded-lg shadow px-3 py-2 border-2 border-cyan-200">
                     <div className="flex items-center gap-1.5 mb-0.5">
-                        <Play className="w-3.5 h-3.5 text-blue-500" />
-                        <span className="text-[10px] text-gray-500">In Progress</span>
+                        <Play className="w-4 h-4 text-cyan-600" />
+                        <span className="text-xs text-cyan-600 font-semibold uppercase tracking-wide">In Progress</span>
                     </div>
-                    <p className="text-sm font-bold text-gray-900">{stats.inProgress}</p>
+                    <p className="text-lg font-bold text-cyan-700">{stats.inProgress}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow px-3 py-2">
+                <div className="bg-white rounded-lg shadow px-3 py-2 border-2 border-emerald-200">
                     <div className="flex items-center gap-1.5 mb-0.5">
-                        <CheckCircle className="w-3.5 h-3.5 text-green-500" />
-                        <span className="text-[10px] text-gray-500">Completed</span>
+                        <CheckCircle className="w-4 h-4 text-emerald-600" />
+                        <span className="text-xs text-emerald-600 font-semibold uppercase tracking-wide">Completed</span>
                     </div>
-                    <p className="text-sm font-bold text-gray-900">{stats.completed}</p>
+                    <p className="text-lg font-bold text-emerald-700">{stats.completed}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow px-3 py-2">
+                <div className="bg-white rounded-lg shadow px-3 py-2 border-2 border-teal-200">
                     <div className="flex items-center gap-1.5 mb-0.5">
-                        <DollarSign className="w-3.5 h-3.5 text-emerald-500" />
-                        <span className="text-[10px] text-gray-500">Total Value</span>
+                        <DollarSign className="w-4 h-4 text-teal-600" />
+                        <span className="text-xs text-teal-600 font-semibold uppercase tracking-wide">Total Value</span>
                     </div>
-                    <p className="text-sm font-bold text-gray-900">{formatCurrency(stats.totalValue)}</p>
+                    <p className="text-lg font-bold text-teal-700">{formatCurrency(stats.totalValue)}</p>
                 </div>
             </div>
 
@@ -241,19 +241,19 @@ export default function ReturnsPage() {
                 {/* Filters */}
                 <div className="flex flex-wrap gap-2 px-3 py-2 border-b border-gray-100">
                     <div className="relative flex-1 min-w-[160px]">
-                        <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <Search className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                         <input
                             type="text"
                             placeholder="Search by license plate or store name..."
                             value={searchTerm}
                             onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                            className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500"
+                            className="w-full pl-8 pr-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500"
                         />
                     </div>
                     <select
                         value={statusFilter}
                         onChange={e => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-                        className="px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500"
+                        className="px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500"
                     >
                         {STATUS_OPTIONS.map(opt => (
                             <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -263,14 +263,14 @@ export default function ReturnsPage() {
                         type="date"
                         value={dateFrom}
                         onChange={e => { setDateFrom(e.target.value); setCurrentPage(1); }}
-                        className="px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500"
+                        className="px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500"
                         title="Date from"
                     />
                     <input
                         type="date"
                         value={dateTo}
                         onChange={e => { setDateTo(e.target.value); setCurrentPage(1); }}
-                        className="px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500"
+                        className="px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500"
                         title="Date to"
                     />
                 </div>
@@ -299,46 +299,47 @@ export default function ReturnsPage() {
                     <div className="overflow-x-auto">
                         <table className="w-full table-auto">
                             <thead>
-                                <tr className="bg-gray-50 border-b border-gray-200">
-                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">License Plate</th>
-                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Store</th>
-                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
-                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Items</th>
-                                    {/* <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Value</th> */}
-                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Date</th>
-                                    <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
+                                <tr className="bg-gradient-to-r from-teal-600 to-teal-700 border-b-2 border-teal-800">
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">License Plate</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Processor</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Status</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Items</th>
+                                    {/* <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Value</th> */}
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Date</th>
+                                    <th className="text-right px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {transactions.map((tx) => {
+                                {transactions.map((tx, index) => {
                                     const badge = getStatusBadge(tx.status);
+                                    const isEven = index % 2 === 0;
                                     return (
-                                        <tr key={tx.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => router.push(`/returns/${tx.id}`)}>
-                                            <td className="px-3 py-1.5">
-                                                <span className="text-xs font-mono font-semibold text-gray-900">{tx.licensePlate}</span>
+                                        <tr key={tx.id} className={`border-b border-gray-100 hover:bg-teal-100 transition-colors cursor-pointer ${isEven ? 'bg-white' : 'bg-teal-50/40'}`} onClick={() => router.push(`/returns/${tx.id}`)}>
+                                            <td className="px-4 py-3">
+                                                <span className="text-sm font-mono font-semibold text-gray-900">{tx.licensePlate}</span>
                                             </td>
-                                            <td className="px-3 py-1.5">
-                                                <p className="text-xs font-medium text-gray-900 truncate max-w-[140px]">{tx.pharmacyName || '—'}</p>
+                                            <td className="px-4 py-3">
+                                                <p className="text-sm font-medium text-gray-900 truncate max-w-[140px]">{tx.processorName || '—'}</p>
                                             </td>
-                                            <td className="px-3 py-1.5">
-                                                <Badge variant={badge.variant}><span className="text-[10px]">{badge.label}</span></Badge>
+                                            <td className="px-4 py-3">
+                                                <Badge variant={badge.variant}><span className="text-xs">{badge.label}</span></Badge>
                                             </td>
-                                            <td className="px-3 py-1.5 text-xs text-gray-600">{tx.totalItems}</td>
-                                            {/* <td className="px-3 py-1.5 text-xs text-gray-900 font-medium">{formatCurrency(tx.totalReturnableValue)}</td> */}
-                                            <td className="px-3 py-1.5 text-xs text-gray-500">{formatDate(tx.createdAt)}</td>
-                                            <td className="px-3 py-1.5" onClick={e => e.stopPropagation()}>
-                                                <div className="flex items-center justify-end gap-0.5">
-                                                    <button onClick={() => setViewModal(tx)} className="p-1 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded" title="View Details">
-                                                        <Eye className="w-3.5 h-3.5" />
+                                            <td className="px-4 py-3 text-sm text-gray-700 font-medium">{tx.totalItems}</td>
+                                            {/* <td className="px-4 py-3 text-sm text-gray-900 font-medium">{formatCurrency(tx.totalReturnableValue)}</td> */}
+                                            <td className="px-4 py-3 text-sm text-gray-600">{formatDate(tx.createdAt)}</td>
+                                            <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
+                                                <div className="flex items-center justify-end gap-1">
+                                                    <button onClick={() => setViewModal(tx)} className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded transition-colors" title="View Details">
+                                                        <Eye className="w-4 h-4" />
                                                     </button>
                                                     {canDoAction(tx, 'edit') && (
-                                                        <button onClick={() => router.push(`/returns/${tx.id}`)} className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title="Edit">
-                                                            <Edit className="w-3.5 h-3.5" />
+                                                        <button onClick={() => router.push(`/returns/${tx.id}`)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
+                                                            <Edit className="w-4 h-4" />
                                                         </button>
                                                     )}
                                                     {canDoAction(tx, 'delete') && (
-                                                        <button onClick={() => setDeleteModal(tx)} className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded" title="Delete">
-                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                        <button onClick={() => setDeleteModal(tx)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" title="Delete">
+                                                            <Trash2 className="w-4 h-4" />
                                                         </button>
                                                     )}
                                                 </div>
@@ -353,17 +354,17 @@ export default function ReturnsPage() {
 
                 {/* Pagination */}
                 {pagination && pagination.totalPages > 1 && (
-                    <div className="flex items-center justify-between px-3 py-2 border-t border-gray-100 bg-gray-50">
-                        <p className="text-[10px] text-gray-500">
-                            Page {pagination.page} of {pagination.totalPages} ({pagination.total} total)
+                    <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50">
+                        <p className="text-sm text-gray-600 font-medium">
+                            Page <span className="font-bold text-gray-900">{pagination.page}</span> of <span className="font-bold text-gray-900">{pagination.totalPages}</span> (<span className="font-bold text-gray-900">{pagination.total}</span> total)
                         </p>
-                        <div className="flex items-center gap-1.5">
-                            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage <= 1} className="p-1 border border-gray-300 rounded disabled:opacity-40 hover:bg-gray-50">
-                                <ChevronLeft className="w-3.5 h-3.5" />
+                        <div className="flex items-center gap-2">
+                            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage <= 1} className="p-1.5 border border-gray-300 rounded disabled:opacity-40 hover:bg-teal-50 transition-colors">
+                                <ChevronLeft className="w-4 h-4" />
                             </button>
-                            <span className="text-xs font-medium text-gray-700 px-1">{currentPage}</span>
-                            <button onClick={() => setCurrentPage(p => p + 1)} disabled={currentPage >= pagination.totalPages} className="p-1 border border-gray-300 rounded disabled:opacity-40 hover:bg-gray-50">
-                                <ChevronRight className="w-3.5 h-3.5" />
+                            <span className="text-sm font-semibold text-gray-700 px-2">{currentPage}</span>
+                            <button onClick={() => setCurrentPage(p => p + 1)} disabled={currentPage >= pagination.totalPages} className="p-1.5 border border-gray-300 rounded disabled:opacity-40 hover:bg-teal-50 transition-colors">
+                                <ChevronRight className="w-4 h-4" />
                             </button>
                         </div>
                     </div>
