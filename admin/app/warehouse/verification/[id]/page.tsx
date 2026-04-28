@@ -453,6 +453,21 @@ export default function VerificationSessionPage() {
                             </div>
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <div className="p-3 rounded-md border border-gray-200 bg-gray-50">
+                                <p className="text-[10px] text-gray-500">Total Items</p>
+                                <p className="text-xl font-bold text-gray-900">{completedSummary.totalItems ?? 0}</p>
+                            </div>
+                            <div className="p-3 rounded-md border border-emerald-200 bg-emerald-50">
+                                <p className="text-[10px] text-emerald-700">Returnable</p>
+                                <p className="text-xl font-bold text-emerald-700">{completedSummary.correctItems ?? 0}</p>
+                            </div>
+                            <div className="p-3 rounded-md border border-rose-200 bg-rose-50">
+                                <p className="text-[10px] text-rose-700">Non-Returnable</p>
+                                <p className="text-xl font-bold text-rose-700">{(completedSummary.damagedItems ?? 0) + (completedSummary.missingItems ?? 0) + (completedSummary.wrongItems ?? 0)}</p>
+                            </div>
+                        </div>
+                        {/* Hidden verification stats - showing only routing-focused summary now
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             {([
                                 { label: 'Total Items', value: completedSummary.totalItems, color: 'text-gray-900' },
                                 { label: 'Correct', value: completedSummary.correctItems, color: 'text-green-700' },
@@ -467,6 +482,7 @@ export default function VerificationSessionPage() {
                                 </div>
                             ))}
                         </div>
+                        */}
                         {completedSummary.correctItemsValue != null && (
                             <div className="p-3 rounded-md bg-green-50 border border-green-200 text-center">
                                 <p className="text-[10px] text-green-700">Correct Items Value</p>
@@ -688,13 +704,13 @@ export default function VerificationSessionPage() {
                             </div>
                         </div>
                     </div>
-                    <div className="flex gap-3 mt-2 text-[10px] font-medium">
+                    {/* <div className="flex gap-3 mt-2 text-[10px] font-medium">
                         <span className="text-green-700">{counts.correct} correct</span>
                         <span className="text-red-700">{counts.damaged} damaged</span>
                         <span className="text-gray-500">{counts.missing} missing</span>
                         <span className="text-orange-700">{counts.wrongItem} wrong</span>
                         <span className="text-blue-700">{counts.surplus} surplus</span>
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* Tabs */}
