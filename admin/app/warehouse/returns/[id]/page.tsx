@@ -32,6 +32,11 @@ import { unassignSingleReturn } from '@/lib/store/batchSlice';
 import { checkReturnability } from '@/lib/store/policiesSlice';
 import { ReturnTransaction, ReturnTransactionItem, WineCellarItem } from '@/lib/types';
 import { apiClient } from '@/lib/api/apiClient';
+import {
+    NON_RETURNABLE_REASONS,
+    formatNonReturnableReason,
+    isValidNonReturnableReason,
+} from '@/lib/constants/nonReturnableReasons';
 
 // ── Helpers ────────────────────────────────────────────────────
 
@@ -204,7 +209,7 @@ export default function ReturnDetailPage() {
     const [itemStatusFilter, setItemStatusFilter] = useState('');
     const [deleteItemModal, setDeleteItemModal] = useState<ReturnTransactionItem | null>(null);
     const [editItemModal, setEditItemModal] = useState<ReturnTransactionItem | null>(null);
-    const [editItemForm, setEditItemForm] = useState({ fullPackageSize: '', fullPackageQtyReturned: '', standardPrice: '', returnStatus: 'tbd', destination: '', memo: '' });
+    const [editItemForm, setEditItemForm] = useState({ fullPackageSize: '', fullPackageQtyReturned: '', standardPrice: '', returnStatus: 'tbd', destination: '', memo: '', nonReturnableReason: '' });
     const [editPolicyCheck, setEditPolicyCheck] = useState<{
         status: 'returnable' | 'non_returnable' | 'tbd';
         reason: string | null;
@@ -349,6 +354,7 @@ export default function ReturnDetailPage() {
                 returnStatus: editItemModal.returnStatus,
                 destination: editItemModal.destination || '',
                 memo: editItemModal.memo || '',
+                nonReturnableReason: (editItemModal as any).nonReturnableReason || '',
             });
             setEditPolicyCheck(null);
         }
@@ -422,7 +428,7 @@ export default function ReturnDetailPage() {
     const handleUpdateItem = async () => {
         if (!editItemModal) return;
         const payload: Record<string, any> = {};
-        
+
         // Core data fields — only include if not locked
         if (!isLocked) {
             const pkgSize = editItemForm.fullPackageSize ? parseInt(editItemForm.fullPackageSize) : 0;
@@ -442,11 +448,21 @@ export default function ReturnDetailPage() {
             }
             if (editItemForm.standardPrice) payload.standardPrice = parseFloat(editItemForm.standardPrice);
         }
-        
+
         // Classification fields — always allowed
         payload.returnStatus = editItemForm.returnStatus;
         if (editItemForm.destination) payload.destination = editItemForm.destination;
         if (editItemForm.memo) payload.memo = editItemForm.memo;
+
+        // FCR-52: A non-returnable reason is required whenever the row ends
+        // up non_returnable. The dropdown is shown in the modal in that case.
+        if (editItemForm.returnStatus === 'non_returnable') {
+            if (!isValidNonReturnableReason(editItemForm.nonReturnableReason)) {
+                showToast('Please select a non-returnable reason for this item.', 'error');
+                return;
+            }
+            payload.nonReturnableReason = editItemForm.nonReturnableReason;
+        }
 
         const result = await dispatch(updateTransactionItem({ transactionId: id, itemId: editItemModal.id, payload }));
         if (updateTransactionItem.fulfilled.match(result)) {
@@ -1184,10 +1200,18 @@ export default function ReturnDetailPage() {
                                                 {item.expirationDate ? formatDate(item.expirationDate) : '—'}
                                             </td>
                                             <td className="px-2 py-1.5">
-                                                <div className="flex items-center gap-1">
-                                                    <Badge variant={sBadge.variant}><span className="text-[10px]">{sBadge.label}</span></Badge>
-                                                    {item.wineCellarId && (
-                                                        <Badge variant="info"><span className="text-[10px]"><Archive className="w-2.5 h-2.5 mr-0.5 inline" />WC</span></Badge>
+                                                <div className="flex flex-col gap-0.5">
+                                                    <div className="flex items-center gap-1">
+                                                        <Badge variant={sBadge.variant}><span className="text-[10px]">{sBadge.label}</span></Badge>
+                                                        {item.wineCellarId && (
+                                                            <Badge variant="info"><span className="text-[10px]"><Archive className="w-2.5 h-2.5 mr-0.5 inline" />WC</span></Badge>
+                                                        )}
+                                                    </div>
+                                                    {/* FCR-52: Show reason for non-returnable items */}
+                                                    {item.returnStatus === 'non_returnable' && item.nonReturnableReason && (
+                                                        <span className="text-[10px] text-red-700 italic" title={formatNonReturnableReason(item.nonReturnableReason)}>
+                                                            {formatNonReturnableReason(item.nonReturnableReason)}
+                                                        </span>
                                                     )}
                                                 </div>
                                             </td>
@@ -1288,6 +1312,24 @@ export default function ReturnDetailPage() {
                                         <option value="non_returnable">Non-Returnable</option>
                                     </select>
                                 </div>
+                                {/* FCR-52: Required reason when status is non_returnable */}
+                                {editItemForm.returnStatus === 'non_returnable' && (
+                                    <div className="p-2.5 rounded border border-red-200 bg-red-50">
+                                        <label className="block text-[11px] font-semibold text-red-800 mb-1">
+                                            Non-Returnable Reason <span className="text-red-600">*</span>
+                                        </label>
+                                        <select
+                                            value={editItemForm.nonReturnableReason}
+                                            onChange={e => setEditItemForm({ ...editItemForm, nonReturnableReason: e.target.value })}
+                                            className="w-full px-2.5 py-1.5 text-xs border border-red-300 rounded bg-white focus:outline-none focus:ring-1 focus:ring-red-500"
+                                        >
+                                            <option value="">— Select a reason —</option>
+                                            {NON_RETURNABLE_REASONS.map(r => (
+                                                <option key={r.id} value={r.value}>{r.label}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
                                 <div>
                                     <label className="block text-[11px] font-medium text-gray-700 mb-0.5">
                                         Destination

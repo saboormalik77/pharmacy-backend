@@ -21,6 +21,10 @@ import {
 } from '@/lib/store/returnTransactionsSlice';
 import { BarcodeScanResponse, ReturnabilityCheckResult, ReturnTransactionItem } from '@/lib/types';
 import { apiClient } from '@/lib/api/apiClient';
+import {
+    NON_RETURNABLE_REASONS,
+    isValidNonReturnableReason,
+} from '@/lib/constants/nonReturnableReasons';
 
 // Dynamically imported so it only loads in the browser (uses WebRTC APIs)
 const QrScannerModal = dynamic(() => import('@/components/scanner/QrScannerModal'), { ssr: false });
@@ -40,6 +44,7 @@ const EMPTY_FORM = {
     standardPrice: '', fullPackageSize: '',
     fullPackageQtyReturned: '', qtyMode: 'units' as 'units' | 'percent',
     returnStatus: 'tbd' as 'returnable' | 'non_returnable' | 'tbd',
+    nonReturnableReason: '',
     deaSchedule: '', productType: '',
     returnReason: '', memo: '',
     scanSource: 'manual' as string,
@@ -258,6 +263,7 @@ export default function AddItemsPage() {
                 fullPackageQtyReturned: '',
                 qtyMode: 'units',
                 returnStatus: 'tbd',
+                nonReturnableReason: '',
                 deaSchedule: af.deaSchedule || '',
                 productType: af.productType || '',
                 returnReason: '',
@@ -373,6 +379,12 @@ export default function AddItemsPage() {
             return;
         }
 
+        // FCR-52: Reason is required when explicitly adding as non_returnable
+        if (form.returnStatus === 'non_returnable' && !isValidNonReturnableReason(form.nonReturnableReason)) {
+            showToast('Please select a non-returnable reason for this item.', 'error');
+            return;
+        }
+
         // ── Compute quantity / partial from the new Qty Returned field ──
         const pkgSize = parseFloat(form.fullPackageSize) || 0;
         const qtyInput = parseFloat(form.fullPackageQtyReturned) || 0;
@@ -429,6 +441,9 @@ export default function AddItemsPage() {
         payload.isPartial = payloadIsPartial;
         if (payloadIsPartial && payloadPartialPercentage != null) payload.partialPercentage = payloadPartialPercentage;
         payload.returnStatus = form.returnStatus;
+        if (form.returnStatus === 'non_returnable' && form.nonReturnableReason) {
+            payload.nonReturnableReason = form.nonReturnableReason;
+        }
         if (form.returnReason) payload.returnReason = form.returnReason;
         if (form.deaSchedule) payload.deaSchedule = form.deaSchedule;
         if (form.productType) payload.productType = form.productType;
@@ -992,6 +1007,25 @@ export default function AddItemsPage() {
                         );
                     })}
                 </div>
+
+                {/* FCR-52: Required reason when adding directly as non_returnable */}
+                {form.returnStatus === 'non_returnable' && (
+                    <div className="mb-2 p-2 rounded border border-red-200 bg-red-50">
+                        <label className="block text-[11px] font-semibold text-red-800 mb-1">
+                            Non-Returnable Reason <span className="text-red-600">*</span>
+                        </label>
+                        <select
+                            value={form.nonReturnableReason}
+                            onChange={e => updateField('nonReturnableReason', e.target.value)}
+                            className="w-full px-2 py-1 text-xs border border-red-300 rounded bg-white focus:outline-none focus:ring-1 focus:ring-red-500"
+                        >
+                            <option value="">— Select a reason —</option>
+                            {NON_RETURNABLE_REASONS.map(r => (
+                                <option key={r.id} value={r.value}>{r.label}</option>
+                            ))}
+                        </select>
+                    </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-2">
                     <div>

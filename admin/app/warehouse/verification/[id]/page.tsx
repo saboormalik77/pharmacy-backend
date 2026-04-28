@@ -43,6 +43,10 @@ import {
     isWarehouseVerificationAlreadyCompleted,
 } from '@/lib/utils/warehouseVerificationUi';
 import { buildAvailableBatchMonthOptions } from '@/lib/utils/batchMonths';
+import {
+    NON_RETURNABLE_REASONS,
+    isValidNonReturnableReason,
+} from '@/lib/constants/nonReturnableReasons';
 
 const QrScannerModal = dynamic(() => import('@/components/scanner/QrScannerModal'), { ssr: false });
 
@@ -77,6 +81,8 @@ export default function VerificationSessionPage() {
     const [verifyStatus, setVerifyStatus] = useState('');
     const [verifyActualQty, setVerifyActualQty] = useState('');
     const [verifyNotes, setVerifyNotes] = useState('');
+    // FCR-52: Required when an item is marked non-returnable
+    const [verifyNonReturnableReason, setVerifyNonReturnableReason] = useState('');
 
     // Surplus form
     const [showSurplusForm, setShowSurplusForm] = useState(false);
@@ -160,7 +166,11 @@ export default function VerificationSessionPage() {
         setVerifyStatus('');
         setVerifyActualQty(String(item.quantity));
         setVerifyNotes('');
+        setVerifyNonReturnableReason('');
     };
+
+    // FCR-52: any status other than `correct` flips the row to non_returnable.
+    const STATUSES_FLIP_NON_RETURNABLE = new Set(['damaged', 'missing', 'wrong_item']);
 
     const handleVerifyItem = async () => {
         if (!verifyStatus || !verifyingItem) return;
@@ -168,6 +178,14 @@ export default function VerificationSessionPage() {
         if (verifyStatus === 'missing') body.actualQuantity = 0;
         else if (verifyActualQty !== '') body.actualQuantity = Number(verifyActualQty);
         if (verifyNotes.trim()) body.conditionNotes = verifyNotes.trim();
+
+        if (STATUSES_FLIP_NON_RETURNABLE.has(verifyStatus)) {
+            if (!isValidNonReturnableReason(verifyNonReturnableReason)) {
+                showToast('Please select a non-returnable reason for this item.', 'error');
+                return;
+            }
+            body.nonReturnableReason = verifyNonReturnableReason;
+        }
 
         const result = await dispatch(verifyItemV2({ transactionId: returnId, itemId: verifyingItem.id, ...body }));
         if (verifyItemV2.fulfilled.match(result)) {
@@ -803,10 +821,37 @@ export default function VerificationSessionPage() {
                                 </div>
                             )}
 
+                            {/* FCR-52: Required reason when item is marked non-returnable
+                                (damaged / missing / wrong_item). */}
+                            {STATUSES_FLIP_NON_RETURNABLE.has(verifyStatus) && (
+                                <div className="p-3 rounded-md border border-red-200 bg-red-50">
+                                    <label className="block text-[11px] font-semibold text-red-800 mb-1">
+                                        Non-Returnable Reason <span className="text-red-600">*</span>
+                                    </label>
+                                    <p className="text-[10px] text-red-700 mb-2">
+                                        This item will be marked as non-returnable. Please choose a reason.
+                                    </p>
+                                    <select
+                                        value={verifyNonReturnableReason}
+                                        onChange={e => setVerifyNonReturnableReason(e.target.value)}
+                                        className="w-full px-2 py-1.5 text-xs border border-red-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-red-500"
+                                    >
+                                        <option value="">— Select a reason —</option>
+                                        {NON_RETURNABLE_REASONS.map(r => (
+                                            <option key={r.id} value={r.value}>{r.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
                             <div className="flex gap-2 justify-end">
                                 <button onClick={() => setVerifyingItem(null)} className="px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-md hover:bg-gray-50">Cancel</button>
                                 <button
-                                    disabled={!verifyStatus || isActionLoading}
+                                    disabled={
+                                        !verifyStatus
+                                        || isActionLoading
+                                        || (STATUSES_FLIP_NON_RETURNABLE.has(verifyStatus) && !isValidNonReturnableReason(verifyNonReturnableReason))
+                                    }
                                     onClick={handleVerifyItem}
                                     className="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md disabled:opacity-50 flex items-center gap-1 transition"
                                 >

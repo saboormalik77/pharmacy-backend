@@ -9,6 +9,7 @@ import { resolveNDCPrice } from '../services/ndcPricingBookService';
 import * as wcService from '../services/wineCellarService';
 import * as destructionService from '../services/destructionService';
 import { getReturnTransactionById } from '../services/returnTransactionService';
+import { isValidNonReturnableReason } from '../constants/nonReturnableReasons';
 
 const parseBooleanInput = (value: unknown): boolean => value === true || value === 'true';
 
@@ -68,6 +69,15 @@ export const addItemHandler = catchAsync(
     let nonReturnableReason = body.nonReturnableReason;
     let destination = body.destination;
     const policyResult = null;
+
+    if (returnStatus === 'non_returnable') {
+      if (!nonReturnableReason || !isValidNonReturnableReason(nonReturnableReason)) {
+        throw new AppError(
+          'A valid nonReturnableReason is required when adding an item as non-returnable',
+          400
+        );
+      }
+    }
 
     /*
      * Policy auto-classification for add-item is intentionally disabled.
@@ -243,6 +253,23 @@ export const addItemHandler = catchAsync(
 // ============================================================
 // GET /api/return-transactions/:id/items — List items
 // ============================================================
+//
+// FCR-52: Non-returnable items must appear alongside returnable items
+// in every return-detail list (pharmacy + admin warehouse). The legacy
+// destruction filter was overly aggressive — it hid both:
+//   • Returnable items that somehow ended up with destination='destruction'
+//   • Non-returnable items routed to destruction
+//
+// We keep the filter for returnable rows only (defensive; that scenario
+// is unexpected and would likely be a bug) but always show
+// non-returnable rows so admins / warehouse / pharmacies have full
+// visibility.
+//
+// Pricing in the summary still uses the historical rule:
+//   totalReturnableValue → returnable rows only
+//   totalNonReturnableValue → non_returnable rows only
+//   totalValue → returnable rows only (unchanged for back-compat)
+// ============================================================
 export const listItemsHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const transactionId = req.params.id;
@@ -254,12 +281,23 @@ export const listItemsHandler = catchAsync(
       search,
     );
 
-    // Destruction-routed items belong to the destruction workflow and should
-    // not appear in return item lists across any portal.
     const filteredItems = (result.items || []).filter((item: any) => {
       const normalizedDestination = String(item?.destination || '').trim().toLowerCase();
-      return normalizedDestination !== 'destruction';
+      const normalizedStatus = String(item?.returnStatus || '').trim().toLowerCase();
+      // Only hide returnable rows accidentally routed to destruction.
+      // Non-returnable items routed to destruction must still be visible.
+      if (normalizedStatus === 'returnable' && normalizedDestination === 'destruction') {
+        return false;
+      }
+      return true;
     });
+
+    const totalReturnableValue = filteredItems
+      .filter((item: any) => item.returnStatus === 'returnable')
+      .reduce((sum: number, item: any) => sum + (Number(item.estimatedValue) || 0), 0);
+    const totalNonReturnableValue = filteredItems
+      .filter((item: any) => item.returnStatus === 'non_returnable')
+      .reduce((sum: number, item: any) => sum + (Number(item.estimatedValue) || 0), 0);
 
     res.status(200).json({
       status: 'success',
@@ -268,16 +306,11 @@ export const listItemsHandler = catchAsync(
         items: filteredItems,
         summary: {
           totalItems: filteredItems.length,
-          totalReturnableValue: filteredItems
-            .filter((item: any) => item.returnStatus === 'returnable')
-            .reduce((sum: number, item: any) => sum + (Number(item.estimatedValue) || 0), 0),
-          totalNonReturnableValue: filteredItems
-            .filter((item: any) => item.returnStatus === 'non_returnable')
-            .reduce((sum: number, item: any) => sum + (Number(item.estimatedValue) || 0), 0),
-          totalValue: filteredItems.reduce(
-            (sum: number, item: any) => sum + (Number(item.estimatedValue) || 0),
-            0
-          ),
+          totalReturnableValue,
+          totalNonReturnableValue,
+          totalValue: totalReturnableValue,
+          returnableCount: filteredItems.filter((item: any) => item.returnStatus === 'returnable').length,
+          nonReturnableCount: filteredItems.filter((item: any) => item.returnStatus === 'non_returnable').length,
         },
       },
     });
@@ -296,6 +329,10 @@ export const getItemHandler = catchAsync(
 
 // ============================================================
 // PATCH /api/return-transactions/:id/items/:itemId — Update item
+// ============================================================
+// FCR-52: If returnStatus is being set to 'non_returnable', a valid
+// nonReturnableReason must be supplied (either in this request or
+// already present on the row).
 // ============================================================
 export const updateItemHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
@@ -317,6 +354,19 @@ export const updateItemHandler = catchAsync(
       }
     } else if (hasIsPartial || hasPartialPercentage) {
       partialPercentage = null;
+    }
+
+    if (body.returnStatus === 'non_returnable') {
+      const incomingReason = body.nonReturnableReason;
+      const effectiveReason =
+        (incomingReason && String(incomingReason).trim()) ||
+        (existingItem.nonReturnableReason || '').trim();
+      if (!effectiveReason || !isValidNonReturnableReason(effectiveReason)) {
+        throw new AppError(
+          'A valid nonReturnableReason is required when marking an item as non-returnable',
+          400
+        );
+      }
     }
 
     const normalizedUpdates = {
@@ -403,6 +453,11 @@ export const moveToWineCellarHandler = catchAsync(
 // ============================================================
 // PATCH /api/return-transactions/:id/items/:itemId/resolve — Resolve TBD item
 // ============================================================
+// FCR-52: When `new_status` is `non_returnable`, a `reason` from the
+// canonical RSI list (or a legacy value) is REQUIRED — except for the
+// wine cellar route where the reason is implicitly 'date' (item is
+// being shelved because it's too early).
+// ============================================================
 export const resolveItemHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const { id: transactionId, itemId } = req.params;
@@ -449,7 +504,7 @@ export const resolveItemHandler = catchAsync(
       const updated = await itemsService.updateItem(itemId, {
         wineCellarId: wineCellarItem.id,
         returnStatus: 'non_returnable',
-        nonReturnableReason: 'date',
+        nonReturnableReason: reason && isValidNonReturnableReason(reason) ? reason : 'date',
         memo: memo || undefined,
       } as any);
 
@@ -458,6 +513,15 @@ export const resolveItemHandler = catchAsync(
         data: updated,
         message: `Item moved to wine cellar (eligible ${expected_returnable_date})`,
       });
+    }
+
+    if (new_status === 'non_returnable') {
+      if (!reason || !isValidNonReturnableReason(reason)) {
+        throw new AppError(
+          'A valid non-returnable reason is required when marking an item as non-returnable',
+          400
+        );
+      }
     }
 
     const destinationForResolve =

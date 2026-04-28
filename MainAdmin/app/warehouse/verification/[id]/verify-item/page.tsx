@@ -13,6 +13,10 @@ import { verifyItemV2 } from '@/lib/store/warehouseSlice';
 import { checkReturnability } from '@/lib/store/policiesSlice';
 import type { VerificationV2Item, ReturnabilityCheckResult } from '@/lib/types';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
+import {
+    NON_RETURNABLE_REASONS,
+    isValidNonReturnableReason,
+} from '@/lib/constants/nonReturnableReasons';
 
 // Helper functions
 const normalizeNdc = (ndc: string): string => ndc.replace(/\D/g, '');
@@ -46,6 +50,8 @@ export default function VerifyItemPage() {
     const [reverseDistributors, setReverseDistributors] = useState<Array<{id: string; name: string; email: string}>>([]);
     const [loadingDistributors, setLoadingDistributors] = useState(false);
     const [toasts, setToasts] = useState<Toast[]>([]);
+    // FCR-52: Required when an item ends up non_returnable
+    const [nonReturnableReason, setNonReturnableReason] = useState<string>('');
 
     const showToast = (msg: string, type: Toast['type'] = 'success') => {
         const id = Date.now().toString();
@@ -136,6 +142,23 @@ export default function VerifyItemPage() {
                         setDisposition('destruction');
                         setNonReturnableRoute('destruction');
                     }
+
+                    // FCR-52: Seed reason from policy when applicable so the
+                    // user just confirms it. They can still override with the
+                    // dropdown.
+                    const policyToCanonical: Record<string, string> = {
+                        too_early: 'date',
+                        too_late: 'too_far_past_expiration',
+                        deferred_inside_policy_period: 'date',
+                        policy_exception: 'manufacturer_no_returns',
+                        no_partials: 'manufacturer_no_partials',
+                        dosage_form_not_accepted: 'manufacturer_no_returns',
+                        not_returnable_in_policy_window: 'manufacturer_no_returns',
+                    };
+                    const seeded = policyToCanonical[reason];
+                    if (seeded && isValidNonReturnableReason(seeded)) {
+                        setNonReturnableReason(seeded);
+                    }
                 }
 
                 if (policy.destination) {
@@ -153,10 +176,17 @@ export default function VerifyItemPage() {
         };
     }, [dispatch, verifyingItem]); // Removed fetchReverseDistributors and verifyStatus
 
-    const runPhysicalVerification = async (itemId: string, verificationStatus: string, actualQuantity?: number, conditionNotes?: string): Promise<boolean> => {
+    const runPhysicalVerification = async (
+        itemId: string,
+        verificationStatus: string,
+        actualQuantity?: number,
+        conditionNotes?: string,
+        reasonOverride?: string,
+    ): Promise<boolean> => {
         const body: any = { verificationStatus };
         if (actualQuantity != null) body.actualQuantity = actualQuantity;
         if (conditionNotes) body.conditionNotes = conditionNotes;
+        if (reasonOverride) body.nonReturnableReason = reasonOverride;
 
         const result = await dispatch(verifyItemV2({ transactionId: returnId, itemId, ...body }));
         if (!verifyItemV2.fulfilled.match(result)) {
@@ -168,13 +198,25 @@ export default function VerifyItemPage() {
 
     const handleVerifyItem = async () => {
         if (!verifyStatus || !verifyingItem) return;
-        
+
         const parsedQty = verifyActualQty !== '' ? Number(verifyActualQty) : undefined;
         const actualQty = parsedQty != null && Number.isFinite(parsedQty) ? parsedQty : undefined;
         const notes = verifyNotes.trim() || undefined;
 
+        // FCR-52: damaged / missing / wrong_item all flip the row to
+        // non_returnable, so a reason is required.
         if (verifyStatus !== 'correct') {
-            const verified = await runPhysicalVerification(verifyingItem.id, verifyStatus, actualQty, notes);
+            if (!nonReturnableReason || !isValidNonReturnableReason(nonReturnableReason)) {
+                showToast('Please select a non-returnable reason for this item.', 'error');
+                return;
+            }
+            const verified = await runPhysicalVerification(
+                verifyingItem.id,
+                verifyStatus,
+                actualQty,
+                notes,
+                nonReturnableReason,
+            );
             if (!verified) return;
             showToast('Item verified');
             router.push(`/warehouse/verification/${returnId}`);
@@ -184,6 +226,22 @@ export default function VerifyItemPage() {
         if (returnStatus === 'non_returnable' && nonReturnableRoute === 'wine_cellar' && !wineCellarDate) {
             showToast('Expected returnable date is required for wine cellar', 'error');
             return;
+        }
+
+        // FCR-52: When the user is explicitly marking a `correct` item as
+        // non_returnable from the policy/routing section, a reason is required.
+        if (returnStatus === 'non_returnable') {
+            // Wine cellar items automatically use 'date' reason
+            if (nonReturnableRoute === 'wine_cellar') {
+                if (!nonReturnableReason) {
+                    setNonReturnableReason('date');
+                }
+            } else {
+                if (!nonReturnableReason || !isValidNonReturnableReason(nonReturnableReason)) {
+                    showToast('Please select a non-returnable reason for this item.', 'error');
+                    return;
+                }
+            }
         }
 
         if (returnStatus === 'returnable') {
@@ -214,6 +272,14 @@ export default function VerifyItemPage() {
                     showToast((wcResult.payload as string) || 'Failed to move item to wine cellar', 'error');
                     return;
                 }
+                // After wine-cellar move, persist canonical reason if user picked one.
+                if (nonReturnableReason && isValidNonReturnableReason(nonReturnableReason)) {
+                    await dispatch(updateTransactionItem({
+                        transactionId: returnId,
+                        itemId: verifyingItem.id,
+                        payload: { nonReturnableReason } as any,
+                    }));
+                }
             } else {
                 // destruction
                 const resolveResult = await dispatch(resolveTransactionItem({
@@ -222,7 +288,7 @@ export default function VerifyItemPage() {
                     payload: {
                         new_status: 'non_returnable',
                         non_returnable_route: 'destruction',
-                        ...(policyResult?.reason ? { reason: policyResult.reason } : {}),
+                        reason: nonReturnableReason,
                         ...(notes ? { memo: notes } : {}),
                     },
                 }));
@@ -233,7 +299,13 @@ export default function VerifyItemPage() {
             }
         }
 
-        const verified = await runPhysicalVerification(verifyingItem.id, 'correct', actualQty, notes);
+        const verified = await runPhysicalVerification(
+            verifyingItem.id,
+            'correct',
+            actualQty,
+            notes,
+            returnStatus === 'non_returnable' ? nonReturnableReason : undefined,
+        );
         if (!verified) return;
 
         const dispositionLabel =
@@ -373,6 +445,28 @@ export default function VerifyItemPage() {
                             </div>
                         )}
 
+                        {/* FCR-52: Non-returnable reason for damaged/missing/wrong_item — required */}
+                        {(verifyStatus === 'damaged' || verifyStatus === 'missing' || verifyStatus === 'wrong_item') && (
+                            <div className="p-4 rounded-lg border border-red-200 bg-red-50">
+                                <label className="block text-sm font-semibold text-red-800 mb-2">
+                                    Non-Returnable Reason <span className="text-red-600">*</span>
+                                </label>
+                                <p className="text-xs text-red-700 mb-2">
+                                    This item will be marked as non-returnable. Please choose the reason from the list below.
+                                </p>
+                                <select
+                                    value={nonReturnableReason}
+                                    onChange={e => setNonReturnableReason(e.target.value)}
+                                    className="w-full px-3 py-2 text-sm border border-red-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                                >
+                                    <option value="">— Select a reason —</option>
+                                    {NON_RETURNABLE_REASONS.map(r => (
+                                        <option key={r.id} value={r.value}>{r.label}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
                         {/* Policy Check & Routing */}
                         {verifyStatus === 'correct' && (
                             <div className="space-y-4 p-4 rounded-lg border border-primary-200 bg-primary-50">
@@ -385,7 +479,7 @@ export default function VerifyItemPage() {
                                     <p className="text-sm text-amber-700">
                                         Missing NDC or expiration date, so policy could not run. Choose routing manually.
                                     </p>
-                                ) : policyResult ? (
+                                ) : policyResult && policyResult.status !== 'tbd' ? (
                                     <div className="space-y-3">
                                         <div className="text-sm text-gray-700 space-y-2">
                                             <p>
@@ -446,7 +540,10 @@ export default function VerifyItemPage() {
                                 ) : (
                                     <div className="space-y-4">
                                         <p className="text-sm text-gray-600">
-                                            Policy check could not return a result. You can still choose routing manually.
+                                            {policyResult?.status === 'tbd' 
+                                                ? 'Policy status is TBD. Please choose routing manually.' 
+                                                : 'Policy check could not return a result. You can still choose routing manually.'
+                                            }
                                         </p>
                                         
                                         {/* Manual routing selection */}
@@ -529,6 +626,8 @@ export default function VerifyItemPage() {
                                                                 onChange={() => {
                                                                     setNonReturnableRoute('wine_cellar');
                                                                     setDisposition('wine_cellar');
+                                                                    // Auto-set wine cellar reason
+                                                                    setNonReturnableReason('date');
                                                                 }} 
                                                             />
                                                             <Archive className="w-4 h-4 text-purple-600" />
@@ -543,6 +642,10 @@ export default function VerifyItemPage() {
                                                                 onChange={() => {
                                                                     setNonReturnableRoute('destruction');
                                                                     setDisposition('destruction');
+                                                                    // Clear auto-set reason so user must choose
+                                                                    if (nonReturnableReason === 'date') {
+                                                                        setNonReturnableReason('');
+                                                                    }
                                                                 }} 
                                                             />
                                                             <Ban className="w-4 h-4 text-red-600" />
@@ -550,7 +653,35 @@ export default function VerifyItemPage() {
                                                         </label>
                                                     </div>
                                                 </div>
-                                                
+
+                                                {/* FCR-52: Required reason dropdown */}
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                        Non-Returnable Reason <span className="text-red-600">*</span>
+                                                    </label>
+                                                    {nonReturnableRoute === 'wine_cellar' ? (
+                                                        <div className="p-3 rounded-md border border-purple-200 bg-purple-50">
+                                                            <p className="text-sm font-medium text-purple-800">
+                                                                🍷 Wine Cellar items are automatically assigned reason: <strong>"Past Expiration Date"</strong>
+                                                            </p>
+                                                            <p className="text-xs text-purple-700 mt-1">
+                                                                This indicates the item is being shelved for future return when policy allows.
+                                                            </p>
+                                                        </div>
+                                                    ) : (
+                                                        <select
+                                                            value={nonReturnableReason}
+                                                            onChange={e => setNonReturnableReason(e.target.value)}
+                                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                        >
+                                                            <option value="">— Select a reason —</option>
+                                                            {NON_RETURNABLE_REASONS.map(r => (
+                                                                <option key={r.id} value={r.value}>{r.label}</option>
+                                                            ))}
+                                                        </select>
+                                                    )}
+                                                </div>
+
                                                 {nonReturnableRoute === 'wine_cellar' && (
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-2">Expected Returnable Date *</label>
@@ -563,6 +694,43 @@ export default function VerifyItemPage() {
                                                     </div>
                                                 )}
                                             </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* FCR-52: Policy-locked routing — show reason
+                                    dropdown so admin can confirm/override even
+                                    in the policy path (it's required). */}
+                                {policyResult && policyResult.status === 'non_returnable' && (
+                                    <div className="space-y-2 pt-2 border-t border-primary-200">
+                                        <label className="block text-sm font-medium text-gray-700">
+                                            Non-Returnable Reason <span className="text-red-600">*</span>
+                                        </label>
+                                        {disposition === 'wine_cellar' ? (
+                                            <div className="p-3 rounded-md border border-purple-200 bg-purple-50">
+                                                <p className="text-sm font-medium text-purple-800">
+                                                    🍷 Wine Cellar routing uses reason: <strong>"Past Expiration Date"</strong>
+                                                </p>
+                                                <p className="text-xs text-purple-700 mt-1">
+                                                    This is automatically set for wine cellar items based on policy determination.
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <select
+                                                    value={nonReturnableReason}
+                                                    onChange={e => setNonReturnableReason(e.target.value)}
+                                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                >
+                                                    <option value="">— Select a reason —</option>
+                                                    {NON_RETURNABLE_REASONS.map(r => (
+                                                        <option key={r.id} value={r.value}>{r.label}</option>
+                                                    ))}
+                                                </select>
+                                                <p className="text-xs text-gray-500">
+                                                    Pre-selected based on the policy result; please confirm or change before saving.
+                                                </p>
+                                            </>
                                         )}
                                     </div>
                                 )}
@@ -597,6 +765,8 @@ export default function VerifyItemPage() {
                                     || isActionLoading
                                     || (verifyStatus === 'correct' && isPolicyChecking)
                                     || (verifyStatus === 'correct' && returnStatus === 'non_returnable' && nonReturnableRoute === 'wine_cellar' && !wineCellarDate)
+                                    || (verifyStatus === 'correct' && returnStatus === 'non_returnable' && nonReturnableRoute !== 'wine_cellar' && !isValidNonReturnableReason(nonReturnableReason))
+                                    || ((verifyStatus === 'damaged' || verifyStatus === 'missing' || verifyStatus === 'wrong_item') && !isValidNonReturnableReason(nonReturnableReason))
                                 }
                                 onClick={handleVerifyItem}
                                 className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg disabled:opacity-50 flex items-center gap-2 transition"

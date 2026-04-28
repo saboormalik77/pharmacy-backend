@@ -23,6 +23,10 @@ import {
 import { checkReturnability } from '@/lib/store/policiesSlice';
 import { BarcodeScanResponse, ReturnabilityCheckResult, ReturnTransactionItem } from '@/lib/types';
 import { apiClient } from '@/lib/api/apiClient';
+import {
+    NON_RETURNABLE_REASONS,
+    isValidNonReturnableReason,
+} from '@/lib/constants/nonReturnableReasons';
 
 // Dynamically imported so it only loads in the browser (uses WebRTC APIs)
 const QrScannerModal = dynamic(() => import('@/components/scanner/QrScannerModal'), { ssr: false });

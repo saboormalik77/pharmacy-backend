@@ -331,7 +331,8 @@ export const verifyItemV2 = async (
   verificationStatus: string,
   actualQuantity?: number,
   conditionNotes?: string,
-  reportedBy?: string
+  reportedBy?: string,
+  nonReturnableReason?: string
 ): Promise<VerifiedItem> => {
   const sb = ensureAdmin();
 
@@ -342,6 +343,7 @@ export const verifyItemV2 = async (
     p_actual_quantity: actualQuantity ?? null,
     p_condition_notes: conditionNotes || null,
     p_reported_by: reportedBy || null,
+    p_non_returnable_reason: nonReturnableReason || null,
   });
 
   handleRpcError(data, error, 'Failed to verify item');
