@@ -105,6 +105,19 @@ export interface Credit {
   status: 'expected' | 'received' | 'overdue' | 'disputed'
 }
 
+export interface ManufacturerCredit {
+  manufacturerName: string
+  creditAmount: number
+  isControlledSubstance: boolean
+  notes?: string | null
+}
+
+export interface ManufacturerCredits {
+  included: ManufacturerCredit[]
+  direct: ManufacturerCredit[]
+  por: ManufacturerCredit[]
+}
+
 export interface PharmacyPayment {
   id: string
   pharmacyId: string
@@ -126,6 +139,21 @@ export interface PharmacyPayment {
   createdBy: string | null
   createdAt: string
   updatedAt: string
+  // New check-specific fields
+  paymentType?: 'ocs' | 'por' | 'direct'
+  checkNumber?: string | null
+  returnReferenceNumber?: string | null
+  pharmacyAccountNumber?: string | null
+  serviceDate?: string | null
+  checkDate?: string | null
+  grossCreditAmount?: number
+  includedCreditAmount?: number
+  directCreditAmount?: number
+  porCreditAmount?: number
+  rsiFeeIncludedPercent?: number
+  rsiFeeDirectPercent?: number
+  isLegacy?: boolean
+  manufacturerCredits?: ManufacturerCredits
 }
 
 export interface PharmacyPaymentSummary {

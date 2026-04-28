@@ -1,0 +1,50 @@
+# MainAdmin-specific ignores
+
+# Build outputs
+.next/
+out/
+build/
+dist/
+
+# Dependencies
+node_modules/
+.pnp.*
+
+# Cache files
+.eslintcache
+.turbo/
+
+# Logs
+*.log
+
+# Environment files
+.env*
+!.env.example
+
+# TypeScript build info
+*.tsbuildinfo
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Media files (not needed for code context)
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+*.webp
+*.pdf
+*.mp4
+*.avi
+*.mov
+
+# Large or generated files
+coverage/
+storybook-static/

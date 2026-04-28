@@ -1,76 +1,8 @@
-# Dependencies
+# Recommended .cursorignore Additions
 
-node_modules/
-.pnpm-store/
-.npm/
+Add these lines to your existing `.cursorignore` file to reduce token usage:
 
-# Build outputs
-
-dist/
-build/
-out/
-.next/
-.nuxt/
-
-# TypeScript
-
-*.tsbuildinfo
-
-# Logs
-
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# Environment files
-
-.env
-.env.*
-!.env.example
-
-# OS files
-
-.DS_Store
-Thumbs.db
-
-# IDE / Editor
-
-.vscode/
-.idea/
-
-# Testing
-
-coverage/
-.nyc_output/
-
-# Temporary files
-
-tmp/
-temp/
-*.tmp
-
-# Cache
-
-.cache/
-.turbo/
-.eslintcache
-
-# Prisma (optional)
-
-prisma/migrations/
-
-# Docker (optional)
-
-docker-data/
-
-# Misc
-
-*.pem
-*.key
-
+```
 # Large document and media files (not needed for code context)
 *.pdf
 *.doc
@@ -156,9 +88,11 @@ Procfile
 # Supabase generated files
 supabase/.branches/
 supabase/.temp/
+*.pnp.*
 
 # Terminal output files (these can be very large)
 terminals/
+**/*.txt
 
 # Keep essential files visible
 !README.md
@@ -167,3 +101,49 @@ terminals/
 !CHECKS_IMPLEMENTATION_PLAN.md
 !PHASE_3_4_5_IMPLEMENTATION_SUMMARY.md
 !IMPLEMENTATION_SUMMARY.md
+```
+
+## Manual Steps Required:
+
+1. **Add to Root .cursorignore**: Copy the above content and append it to your existing `/home/saboor.malik@2bvision.com/2bvt/pharmacy-backend/.cursorignore` file
+
+2. **Create Frontend .cursorignore**: Create `/home/saboor.malik@2bvision.com/2bvision.com/2bvt/pharmacy-backend/Frontend/.cursorignore` with:
+```
+# Frontend-specific ignores
+.next/
+out/
+build/
+dist/
+node_modules/
+.eslintcache
+.turbo/
+*.log
+.env*
+!.env.example
+*.tsbuildinfo
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+*.webp
+coverage/
+storybook-static/
+```
+
+3. **Create MainAdmin .cursorignore**: Create `/home/saboor.malik@2bvision.com/2bvt/pharmacy-backend/MainAdmin/.cursorignore` with similar content
+
+This will significantly reduce the token usage by excluding:
+- All PDF files and media assets
+- Large documentation files  
+- Node modules and build outputs
+- Debug scripts and temporary files
+- Data directories and backups
+- Configuration files that rarely change
+
+The ignore rules will keep essential code files while excluding the noise that consumes tokens unnecessarily.

@@ -28,6 +28,8 @@ import { formatCurrency, formatDate } from '@/lib/utils/format'
 import Link from 'next/link'
 import { pharmacyPaymentService } from '@/lib/api/services'
 import type { PharmacyPayment, PharmacyPaymentSummary } from '@/types'
+import { DateRangeFilter } from '@/components/checks/DateRangeFilter'
+import { ChecksTable } from '@/components/checks/ChecksTable'
 
 export default function CreditsPage() {
   const [payments, setPayments] = useState<PharmacyPayment[]>([]);
@@ -38,16 +40,39 @@ export default function CreditsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+  
+  // Tab state for Credits vs Checks
+  const [activeTab, setActiveTab] = useState<'credits' | 'checks'>('credits');
+  
+  // Date range filters for checks
+  const [dateFilters, setDateFilters] = useState<{
+    dateRange?: string;
+    startDate?: string;
+    endDate?: string;
+  }>({});
 
   const loadPayments = async () => {
     try {
       setLoading(true);
       setError(null);
-      const result = await pharmacyPaymentService.getMyPayments({
-        status: filterStatus || undefined,
+      
+      // Build parameters based on active tab
+      const params: any = {
         page,
         limit: 20,
-      });
+      };
+      
+      // Add filters based on active tab
+      if (activeTab === 'credits') {
+        if (filterStatus) params.status = filterStatus;
+      } else {
+        // For checks tab, include date filters
+        if (dateFilters.dateRange) params.dateRange = dateFilters.dateRange;
+        if (dateFilters.startDate) params.startDate = dateFilters.startDate;
+        if (dateFilters.endDate) params.endDate = dateFilters.endDate;
+      }
+      
+      const result = await pharmacyPaymentService.getMyPayments(params);
       setPayments(result.data);
       setSummary(result.summary);
       setTotalPages(result.pagination.totalPages);
@@ -61,12 +86,26 @@ export default function CreditsPage() {
 
   useEffect(() => {
     loadPayments();
-  }, [filterStatus, page]);
+  }, [filterStatus, page, activeTab, dateFilters]);
 
-  // Reset page when filter changes
+  // Reset page when filters change
   useEffect(() => {
     setPage(1);
-  }, [filterStatus]);
+  }, [filterStatus, activeTab, dateFilters]);
+
+  // Handle date range filter changes
+  const handleDateFilter = (filters: {
+    dateRange?: string;
+    startDate?: string;
+    endDate?: string;
+  }) => {
+    setDateFilters(filters);
+  };
+
+  // Handle page changes for checks table
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
 
   const getStatusVariant = (status: string) => {
     switch (status) {
@@ -115,7 +154,35 @@ export default function CreditsPage() {
           </Link>
         </div>
 
-        {/* Summary Stats */}
+        {/* Tabs */}
+        <div className="flex gap-2 border-b-2 border-gray-200 bg-white rounded-t-lg p-1">
+          <button 
+            onClick={() => setActiveTab('credits')}
+            className={`px-4 py-2 text-sm font-medium rounded-lg border-2 transition-all ${
+              activeTab === 'credits' 
+                ? 'bg-teal-100 text-teal-700 border-teal-300 shadow-md scale-105' 
+                : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+            }`}
+          >
+            Credits ({summary?.totalPayments || 0})
+          </button>
+          <button 
+            onClick={() => setActiveTab('checks')}
+            className={`px-4 py-2 text-sm font-medium rounded-lg border-2 transition-all ${
+              activeTab === 'checks' 
+                ? 'bg-cyan-100 text-cyan-700 border-cyan-300 shadow-md scale-105' 
+                : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+            }`}
+          >
+            Checks ({summary?.totalPayments || 0})
+          </button>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === 'credits' ? (
+          /* Credits Tab Content */
+          <>
+            {/* Summary Stats */}
         {loading && !summary ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
@@ -355,6 +422,30 @@ export default function CreditsPage() {
             )}
           </CardContent>
         </Card>
+          </>
+        ) : (
+          /* Checks Tab Content */
+          <>
+            {/* Date Range Filter for Checks */}
+            <DateRangeFilter 
+              onFilter={handleDateFilter}
+              loading={loading}
+            />
+
+            {/* Checks Table */}
+            <ChecksTable
+              payments={payments}
+              loading={loading}
+              error={error}
+              pagination={totalPages > 1 ? {
+                page,
+                totalPages,
+                total
+              } : undefined}
+              onPageChange={handlePageChange}
+            />
+          </>
+        )}
       </div>
       </PermissionGuard>
     </DashboardLayout>

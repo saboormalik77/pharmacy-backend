@@ -23,6 +23,9 @@ export const pharmacyPaymentService = {
    */
   async getMyPayments(params?: {
     status?: string;
+    dateRange?: string;
+    startDate?: string;
+    endDate?: string;
     page?: number;
     limit?: number;
   }): Promise<PharmacyPaymentListResponse> {
@@ -44,5 +47,27 @@ export const pharmacyPaymentService = {
       };
     }
     throw new Error(response.message || 'Failed to fetch payments');
+  },
+
+  /**
+   * Get check PDF data for generating PDF
+   */
+  async getCheckPdf(checkNumber: string): Promise<Blob> {
+    try {
+      const response = await fetch(`/api/pharmacy-payments/check-pdf/${checkNumber}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate check PDF');
+      }
+      
+      return await response.blob();
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : 'Failed to generate check PDF');
+    }
   },
 };
