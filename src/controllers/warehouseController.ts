@@ -236,7 +236,7 @@ const STATUSES_THAT_FLIP_NON_RETURNABLE = new Set(['damaged', 'missing', 'wrong_
 export const verifyItemV2Handler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const { id: transactionId, itemId } = req.params;
-    const { verificationStatus, actualQuantity, conditionNotes, nonReturnableReason } = req.body;
+    const { verificationStatus, actualQuantity, conditionNotes, nonReturnableReason, serialNumber, lotNumber } = req.body;
 
     if (!verificationStatus) {
       throw new AppError('verificationStatus is required (correct, damaged, missing, wrong_item)', 400);
@@ -260,7 +260,9 @@ export const verifyItemV2Handler = catchAsync(
       actualQuantity != null ? Number(actualQuantity) : undefined,
       conditionNotes,
       reportedBy,
-      nonReturnableReason
+      nonReturnableReason,
+      serialNumber,
+      lotNumber
     );
 
     res.status(200).json({

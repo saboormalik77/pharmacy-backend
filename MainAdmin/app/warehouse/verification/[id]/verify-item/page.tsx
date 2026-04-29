@@ -52,6 +52,9 @@ export default function VerifyItemPage() {
     const [toasts, setToasts] = useState<Toast[]>([]);
     // FCR-52: Required when an item ends up non_returnable
     const [nonReturnableReason, setNonReturnableReason] = useState<string>('');
+    // Serial number and lot number for verification
+    const [verifySerialNumber, setVerifySerialNumber] = useState('');
+    const [verifyLotNumber, setVerifyLotNumber] = useState('');
 
     const showToast = (msg: string, type: Toast['type'] = 'success') => {
         const id = Date.now().toString();
@@ -64,12 +67,20 @@ export default function VerifyItemPage() {
         router.push(`/warehouse/verification/${returnId}`);
     };
 
-    // Set initial quantity when item loads
+    // Set initial quantity, serial, and lot when item loads
     useEffect(() => {
-        if (verifyingItem && !verifyActualQty) {
-            setVerifyActualQty(verifyingItem.quantity?.toString() || '');
+        if (verifyingItem) {
+            if (!verifyActualQty) {
+                setVerifyActualQty(verifyingItem.quantity?.toString() || '');
+            }
+            if (!verifySerialNumber && verifyingItem.serialNumber) {
+                setVerifySerialNumber(verifyingItem.serialNumber);
+            }
+            if (!verifyLotNumber && verifyingItem.lotNumber) {
+                setVerifyLotNumber(verifyingItem.lotNumber);
+            }
         }
-    }, [verifyingItem, verifyActualQty]);
+    }, [verifyingItem, verifyActualQty, verifySerialNumber, verifyLotNumber]);
 
     const fetchReverseDistributors = useCallback(async () => {
         if (reverseDistributors.length > 0) return;
@@ -187,6 +198,8 @@ export default function VerifyItemPage() {
         if (actualQuantity != null) body.actualQuantity = actualQuantity;
         if (conditionNotes) body.conditionNotes = conditionNotes;
         if (reasonOverride) body.nonReturnableReason = reasonOverride;
+        if (verifySerialNumber) body.serialNumber = verifySerialNumber;
+        if (verifyLotNumber) body.lotNumber = verifyLotNumber;
 
         const result = await dispatch(verifyItemV2({ transactionId: returnId, itemId, ...body }));
         if (!verifyItemV2.fulfilled.match(result)) {
@@ -416,6 +429,41 @@ export default function VerifyItemPage() {
                                 ))}
                             </div>
                         </div>
+
+                        {/* Serial Number and Lot Number Verification */}
+                        {verifyStatus === 'correct' && (
+                            <div className="space-y-4 p-4 rounded-lg border border-blue-200 bg-blue-50">
+                                <h3 className="text-sm font-semibold text-blue-800">Product Verification</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-700">Serial Number</label>
+                                        <input
+                                            type="text"
+                                            value={verifySerialNumber}
+                                            onChange={e => setVerifySerialNumber(e.target.value)}
+                                            placeholder="Scan or enter serial number"
+                                            className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                        {verifyingItem?.serialNumber && (
+                                            <p className="text-xs text-gray-500 mt-1">Expected: {verifyingItem.serialNumber}</p>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-700">Lot Number</label>
+                                        <input
+                                            type="text"
+                                            value={verifyLotNumber}
+                                            onChange={e => setVerifyLotNumber(e.target.value)}
+                                            placeholder="Scan or enter lot number"
+                                            className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                        {verifyingItem?.lotNumber && (
+                                            <p className="text-xs text-gray-500 mt-1">Expected: {verifyingItem.lotNumber}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Quantity verification for damaged/wrong items */}
                         {(verifyStatus === 'damaged' || verifyStatus === 'wrong_item') && (

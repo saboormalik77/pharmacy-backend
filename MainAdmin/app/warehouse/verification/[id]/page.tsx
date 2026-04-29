@@ -274,8 +274,8 @@ export default function VerificationSessionPage() {
     // Verification logic moved to dedicated page
     // const handleVerifyItem = async () => { ... };
 
-    const findScannedItemMatch = (scanData: BarcodeScanResponse): VerificationV2Item | null => {
-        if (!v2Summary?.items?.length) return null;
+    const findScannedItemMatch = (scanData: BarcodeScanResponse): { item: VerificationV2Item | null; error?: string } => {
+        if (!v2Summary?.items?.length) return { item: null };
 
         const ndcCandidates = new Set<string>();
         if (scanData.autoFill?.ndc) ndcCandidates.add(normalizeNdc(scanData.autoFill.ndc));
@@ -285,7 +285,7 @@ export default function VerificationSessionPage() {
         }
 
         const usableNdcs = Array.from(ndcCandidates).filter(Boolean);
-        if (usableNdcs.length === 0) return null;
+        if (usableNdcs.length === 0) return { item: null };
 
         const serial = (scanData.scan.serialNumber || '').trim();
         const lot = (scanData.scan.lotNumber || '').trim();
@@ -294,30 +294,67 @@ export default function VerificationSessionPage() {
         const allMatches = v2Summary.items.filter((item) =>
             usableNdcs.includes(normalizeNdc(item.ndc))
         );
-        if (allMatches.length === 0) return null;
+        if (allMatches.length === 0) return { item: null };
 
         const unverifiedMatches = allMatches.filter(item => !item.verificationStatus);
         const candidates = unverifiedMatches.length > 0 ? unverifiedMatches : allMatches;
 
+        // Strict matching: NDC matched, now verify serial and lot also match
+        const mismatches: string[] = [];
+
         if (serial) {
-            const bySerial = candidates.find(item => (item.serialNumber || '').trim() === serial);
-            if (bySerial) return bySerial;
+            const expectedItem = candidates.find(item => (item.serialNumber || '').trim().toLowerCase() === serial.toLowerCase());
+            if (!expectedItem) {
+                const expectedSerials = candidates
+                    .filter(item => (item.serialNumber || '').trim())
+                    .map(item => (item.serialNumber || '').trim());
+                if (expectedSerials.length > 0) {
+                    mismatches.push(`Serial number "${serial}" does not match expected: "${expectedSerials[0]}"`);
+                }
+            }
+        }
+
+        if (lot) {
+            const expectedItem = candidates.find(item => (item.lotNumber || '').trim().toLowerCase() === lot.toLowerCase());
+            if (!expectedItem) {
+                const expectedLots = candidates
+                    .filter(item => (item.lotNumber || '').trim())
+                    .map(item => (item.lotNumber || '').trim());
+                if (expectedLots.length > 0) {
+                    mismatches.push(`Lot number "${lot}" does not match expected: "${expectedLots[0]}"`);
+                }
+            }
+        }
+
+        if (mismatches.length > 0) {
+            return { item: null, error: mismatches.join('. ') };
+        }
+
+        // All scanned fields match — find best candidate
+        if (serial) {
+            const bySerial = candidates.find(item => (item.serialNumber || '').trim().toLowerCase() === serial.toLowerCase());
+            if (bySerial) return { item: bySerial };
         }
 
         if (lot && exp) {
             const byLotAndExp = candidates.find(item =>
-                (item.lotNumber || '').trim() === lot &&
+                (item.lotNumber || '').trim().toLowerCase() === lot.toLowerCase() &&
                 normalizeDateKey(item.expirationDate) === exp
             );
-            if (byLotAndExp) return byLotAndExp;
+            if (byLotAndExp) return { item: byLotAndExp };
+        }
+
+        if (lot) {
+            const byLot = candidates.find(item => (item.lotNumber || '').trim().toLowerCase() === lot.toLowerCase());
+            if (byLot) return { item: byLot };
         }
 
         if (exp) {
             const byExpOnly = candidates.find(item => normalizeDateKey(item.expirationDate) === exp);
-            if (byExpOnly) return byExpOnly;
+            if (byExpOnly) return { item: byExpOnly };
         }
 
-        return candidates[0] || null;
+        return { item: candidates[0] || null };
     };
 
     const handleItemScan = async (raw: string) => {
@@ -338,7 +375,13 @@ export default function VerificationSessionPage() {
                 return;
             }
 
-            const matched = findScannedItemMatch(result.payload);
+            const { item: matched, error: matchError } = findScannedItemMatch(result.payload);
+            if (matchError) {
+                const msg = 'Product is not valid';
+                setItemScanError(msg);
+                showToast(msg, 'error');
+                return;
+            }
             if (!matched) {
                 const msg = 'Scanned item was not found in this return';
                 setItemScanError(msg);
