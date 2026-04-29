@@ -1285,36 +1285,6 @@ export default function ReturnDetailPage() {
                                     />
                                 </div> */}
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-0.5">Return Status</label>
-                                    <select
-                                        value={editItemForm.returnStatus}
-                                        onChange={e => setEditItemForm({ ...editItemForm, returnStatus: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
-                                    >
-                                        <option value="tbd">TBD</option>
-                                        <option value="returnable">Returnable</option>
-                                        <option value="non_returnable">Non-Returnable</option>
-                                    </select>
-                                </div>
-                                {/* FCR-52: Non-returnable reason — required when status is non_returnable */}
-                                {editItemForm.returnStatus === 'non_returnable' && (
-                                    <div className="p-2.5 rounded border border-red-200 bg-red-50">
-                                        <label className="block text-xs font-semibold text-red-800 mb-1">
-                                            Non-Returnable Reason <span className="text-red-600">*</span>
-                                        </label>
-                                        <select
-                                            value={editItemForm.nonReturnableReason}
-                                            onChange={e => setEditItemForm({ ...editItemForm, nonReturnableReason: e.target.value })}
-                                            className="w-full px-2.5 py-1.5 text-xs border border-red-300 rounded bg-white focus:outline-none focus:ring-1 focus:ring-red-500"
-                                        >
-                                            <option value="">— Select a reason —</option>
-                                            {NON_RETURNABLE_REASONS.map(r => (
-                                                <option key={r.id} value={r.value}>{r.label}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                )}
-                                <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-0.5">Destination</label>
                                     <select
                                         value={editItemForm.destination}
