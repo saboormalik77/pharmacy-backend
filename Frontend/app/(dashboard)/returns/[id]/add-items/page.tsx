@@ -72,6 +72,10 @@ const RETURN_REASONS = [
     'Discontinued', 'Wrong product', 'Formulary change', 'Other',
 ];
 
+const DEA_SCHEDULE_OPTIONS = [
+    '', 'CI', 'CII', 'CIII', 'CIV', 'CV', 'Non-Controlled'
+];
+
 const EMPTY_FORM = {
     ndc: '', ndc10: '', gtin: '', proprietaryName: '', genericName: '',
     manufacturer: '', packageDescription: '', dosageForm: '',
@@ -132,6 +136,8 @@ export default function AddItemsPage() {
     const [isPolicyChecking, setIsPolicyChecking] = useState(false);
     const [policyModalOpen, setPolicyModalOpen] = useState(false);
     const [formErrors, setFormErrors] = useState<Set<string>>(new Set());
+    // Track which fields came from API/scan data (these should be uneditable)
+    const [scannedFields, setScannedFields] = useState<Set<string>>(new Set());
     const [wineCellarDate, setWineCellarDate] = useState('');
     const [nonReturnableRoute, setNonReturnableRoute] = useState<'wine_cellar' | 'destruction'>('destruction');
     const [manualDestination, setManualDestination] = useState('');
@@ -322,6 +328,26 @@ export default function AddItemsPage() {
 
                 setForm(newForm);
 
+                // Track which fields came from API/scan data to make them uneditable
+                const fieldsFromApi = new Set<string>();
+                if (af.ndc) fieldsFromApi.add('ndc');
+                if (af.ndc10) fieldsFromApi.add('ndc10');
+                if (af.gtin) fieldsFromApi.add('gtin');
+                if (af.proprietaryName) fieldsFromApi.add('proprietaryName');
+                if (af.genericName) fieldsFromApi.add('genericName');
+                if (af.manufacturer) fieldsFromApi.add('manufacturer');
+                if (af.packageDescription) fieldsFromApi.add('packageDescription');
+                if (af.dosageForm) fieldsFromApi.add('dosageForm');
+                if (af.strength) { fieldsFromApi.add('strengthValue'); fieldsFromApi.add('strengthUnit'); }
+                if (af.route) fieldsFromApi.add('route');
+                if (af.lotNumber) fieldsFromApi.add('lotNumber');
+                if (af.serialNumber) fieldsFromApi.add('serialNumber');
+                if (af.expirationDate) fieldsFromApi.add('expirationDate');
+                if (af.fullPackageSize) fieldsFromApi.add('fullPackageSize');
+                if (af.deaSchedule) fieldsFromApi.add('deaSchedule');
+                if (af.productType) fieldsFromApi.add('productType');
+                setScannedFields(fieldsFromApi);
+
                 if (!res.data.product) {
                     setScanError('Barcode parsed but product not found in database. Fields partially filled — please complete manually.');
                 }
@@ -411,6 +437,18 @@ export default function AddItemsPage() {
         const pkgSize = parseFloat(form.fullPackageSize) || 0;
         const qtyInput = parseFloat(form.fullPackageQtyReturned) || 0;
 
+        // Validate quantity does not exceed full package size
+        if (pkgSize > 0 && form.fullPackageQtyReturned.trim() && qtyInput > 0) {
+            if (form.qtyMode === 'units' && qtyInput > pkgSize) {
+                showToast(`Quantity returned (${qtyInput}) cannot exceed full package size (${pkgSize})`, 'error');
+                return;
+            }
+            if (form.qtyMode === 'percent' && qtyInput > 100) {
+                showToast('Percentage returned cannot exceed 100%', 'error');
+                return;
+            }
+        }
+
         let payloadQuantity = 1;
         let payloadIsPartial = false;
         let payloadPartialPercentage: number | null = null;
@@ -499,6 +537,7 @@ export default function AddItemsPage() {
 
                 setForm({ ...EMPTY_FORM });
                 setFormErrors(new Set());
+                setScannedFields(new Set());
                 setManualDestination('');
                 setNonReturnableRoute('destruction');
                 setScannedPrices(null);
@@ -528,6 +567,7 @@ export default function AddItemsPage() {
     const handleClearForm = () => {
         setForm({ ...EMPTY_FORM });
         setFormErrors(new Set());
+        setScannedFields(new Set());
         setWineCellarDate('');
         setManualDestination('');
         setNonReturnableRoute('destruction');
@@ -819,37 +859,87 @@ export default function AddItemsPage() {
                         <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Product Information</h2>
 
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-                            <Field label="NDC" value={form.ndc} onChange={v => updateField('ndc', v)} placeholder="e.g. 43547-3250-06" required hasError={formErrors.has('ndc')} />
-                            <Field label="Proprietary Name" value={form.proprietaryName} onChange={v => updateField('proprietaryName', v)} placeholder="Brand name" required hasError={formErrors.has('proprietaryName')} />
-                            <Field label="Generic Name" value={form.genericName} onChange={v => updateField('genericName', v)} placeholder="Generic name" hasError={formErrors.has('genericName')} />
-                            <Field label="Manufacturer" value={form.manufacturer} onChange={v => updateField('manufacturer', v)} placeholder="Manufacturer" required hasError={formErrors.has('manufacturer')} />
-                            <Field label="Package Description" value={form.packageDescription} onChange={v => updateField('packageDescription', v)} placeholder="e.g. 60 TABLET in BOTTLE" />
-                            <Field label="Dosage Form" value={form.dosageForm} onChange={v => updateField('dosageForm', v)} placeholder="e.g. TABLET" />
+                            <Field label="NDC" value={form.ndc} onChange={v => updateField('ndc', v)} placeholder="e.g. 43547-3250-06" required hasError={formErrors.has('ndc')} readOnly={scannedFields.has('ndc')} />
+                            <Field label="Proprietary Name" value={form.proprietaryName} onChange={v => updateField('proprietaryName', v)} placeholder="Brand name" required hasError={formErrors.has('proprietaryName')} readOnly={scannedFields.has('proprietaryName')} />
+                            <Field label="Generic Name" value={form.genericName} onChange={v => updateField('genericName', v)} placeholder="Generic name" hasError={formErrors.has('genericName')} readOnly={scannedFields.has('genericName')} />
+                            <Field label="Manufacturer" value={form.manufacturer} onChange={v => updateField('manufacturer', v)} placeholder="Manufacturer" required hasError={formErrors.has('manufacturer')} readOnly={scannedFields.has('manufacturer')} />
+                            <Field label="Package Description" value={form.packageDescription} onChange={v => updateField('packageDescription', v)} placeholder="e.g. 60 TABLET in BOTTLE" readOnly={scannedFields.has('packageDescription')} />
+                            <Field label="Dosage Form" value={form.dosageForm} onChange={v => updateField('dosageForm', v)} placeholder="e.g. TABLET" readOnly={scannedFields.has('dosageForm')} />
 
                             {/* Strength */}
                             <div>
-                                <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Strength</label>
+                                <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
+                                    Strength
+                                    {(scannedFields.has('strengthValue') || scannedFields.has('strengthUnit')) && <span className="text-gray-400 ml-1 text-[9px]">(from API)</span>}
+                                </label>
                                 <div className="flex gap-1">
-                                    <input type="text" value={form.strengthValue} onChange={e => updateField('strengthValue', e.target.value)} placeholder="500" className="w-1/2 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
-                                    <input type="text" value={form.strengthUnit} onChange={e => updateField('strengthUnit', e.target.value)} placeholder="mg" className="w-1/2 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                    <input 
+                                        type="text" 
+                                        value={form.strengthValue} 
+                                        onChange={e => !scannedFields.has('strengthValue') && updateField('strengthValue', e.target.value)} 
+                                        placeholder="500" 
+                                        readOnly={scannedFields.has('strengthValue')}
+                                        className={`w-1/2 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
+                                            scannedFields.has('strengthValue') 
+                                                ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed' 
+                                                : 'border-gray-300 focus:ring-primary-500'
+                                        }`} 
+                                    />
+                                    <input 
+                                        type="text" 
+                                        value={form.strengthUnit} 
+                                        onChange={e => !scannedFields.has('strengthUnit') && updateField('strengthUnit', e.target.value)} 
+                                        placeholder="mg" 
+                                        readOnly={scannedFields.has('strengthUnit')}
+                                        className={`w-1/2 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
+                                            scannedFields.has('strengthUnit') 
+                                                ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed' 
+                                                : 'border-gray-300 focus:ring-primary-500'
+                                        }`} 
+                                    />
                                 </div>
                             </div>
 
-                            <Field label="Route" value={form.route} onChange={v => updateField('route', v)} placeholder="e.g. ORAL" />
-                            <Field label="DEA Schedule" value={form.deaSchedule} onChange={v => updateField('deaSchedule', v)} placeholder="e.g. CII" />
-                            <Field label="Lot Number" value={form.lotNumber} onChange={v => updateField('lotNumber', v)} placeholder="Lot #" required hasError={formErrors.has('lotNumber')} />
-                            <Field label="Serial Number" value={form.serialNumber} onChange={v => updateField('serialNumber', v)} placeholder="Serial #" />
+                            <Field label="Route" value={form.route} onChange={v => updateField('route', v)} placeholder="e.g. ORAL" readOnly={scannedFields.has('route')} />
+                            <div>
+                                <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
+                                    DEA Schedule
+                                    {scannedFields.has('deaSchedule') && <span className="text-gray-400 ml-1 text-[9px]">(from API)</span>}
+                                </label>
+                                <select
+                                    value={form.deaSchedule}
+                                    onChange={e => !scannedFields.has('deaSchedule') && updateField('deaSchedule', e.target.value)}
+                                    disabled={scannedFields.has('deaSchedule')}
+                                    className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
+                                        scannedFields.has('deaSchedule')
+                                            ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed'
+                                            : 'border-gray-300 focus:ring-primary-500'
+                                    }`}
+                                >
+                                    {DEA_SCHEDULE_OPTIONS.map(option => (
+                                        <option key={option} value={option}>
+                                            {option || '— Select DEA Schedule —'}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <Field label="Lot Number" value={form.lotNumber} onChange={v => updateField('lotNumber', v)} placeholder="Lot #" required hasError={formErrors.has('lotNumber')} readOnly={scannedFields.has('lotNumber')} />
+                            <Field label="Serial Number" value={form.serialNumber} onChange={v => updateField('serialNumber', v)} placeholder="Serial #" readOnly={scannedFields.has('serialNumber')} />
                             <div>
                                 <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
                                     Expiration Date<span className="text-red-500 ml-0.5">*</span>
+                                    {scannedFields.has('expirationDate') && <span className="text-gray-400 ml-1 text-[9px]">(from API)</span>}
                                 </label>
                                 <input
                                     type="date"
                                     value={form.expirationDate}
-                                    onChange={e => { updateField('expirationDate', e.target.value); }}
+                                    onChange={e => { if (!scannedFields.has('expirationDate')) updateField('expirationDate', e.target.value); }}
+                                    readOnly={scannedFields.has('expirationDate')}
                                     className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
                                         formErrors.has('expirationDate')
                                             ? 'border-red-400 bg-red-50 focus:ring-red-400'
+                                            : scannedFields.has('expirationDate')
+                                            ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed'
                                             : 'border-gray-300 focus:ring-primary-500'
                                     }`}
                                 />
@@ -879,23 +969,67 @@ export default function AddItemsPage() {
                                         <input type="number" step="0.01" min="0" value={form.standardPrice} onChange={e => updateField('standardPrice', e.target.value)} placeholder="0.00" className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
                                     </div> */}
                                     <div>
-                                        <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Pkg Size</label>
-                                        <input type="number" min="1" value={form.fullPackageSize} onChange={e => updateField('fullPackageSize', e.target.value)} placeholder="e.g. 60" className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                        <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
+                                            Pkg Size
+                                            {scannedFields.has('fullPackageSize') && <span className="text-gray-400 ml-1 text-[9px]">(from API)</span>}
+                                        </label>
+                                        <input 
+                                            type="number" 
+                                            min="1" 
+                                            value={form.fullPackageSize} 
+                                            onChange={e => !scannedFields.has('fullPackageSize') && updateField('fullPackageSize', e.target.value)} 
+                                            placeholder="e.g. 60" 
+                                            readOnly={scannedFields.has('fullPackageSize')}
+                                            className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
+                                                scannedFields.has('fullPackageSize')
+                                                    ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed'
+                                                    : 'border-gray-300 focus:ring-primary-500'
+                                            }`} 
+                                        />
                                     </div>
                                     <div>
                                         <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
                                             Qty Returned <span className="text-gray-400">({form.qtyMode === 'units' ? 'units' : '%'})</span>
                                         </label>
                                         <div className="flex gap-1">
-                                            <input type="number" min="0" step="any" value={form.fullPackageQtyReturned} onChange={e => updateField('fullPackageQtyReturned', e.target.value)} placeholder={form.qtyMode === 'units' ? '45' : '75'} className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                            <input 
+                                                type="number" 
+                                                min="0" 
+                                                step="any" 
+                                                value={form.fullPackageQtyReturned} 
+                                                onChange={e => {
+                                                    const value = e.target.value;
+                                                    const numValue = parseFloat(value);
+                                                    const maxAllowed = form.qtyMode === 'units' ? pkgSize : 100;
+                                                    
+                                                    // Allow empty value or values within limits
+                                                    if (value === '' || (numValue >= 0 && numValue <= maxAllowed)) {
+                                                        updateField('fullPackageQtyReturned', value);
+                                                    }
+                                                }}
+                                                placeholder={form.qtyMode === 'units' ? '45' : '75'} 
+                                                className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" 
+                                            />
                                             <button type="button" onClick={() => updateField('qtyMode', form.qtyMode === 'units' ? 'percent' : 'units')} className="px-1.5 text-[10px] font-semibold rounded border border-gray-300 bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors" title="Toggle units/percent">
                                                 {form.qtyMode === 'units' ? '#' : '%'}
                                             </button>
                                         </div>
                                         {form.fullPackageQtyReturned.trim() && qtyNum > 0 && pkgSize > 0 && (
-                                            <p className="text-[10px] mt-0.5 font-medium text-green-600">
-                                                {isPartialDerived ? `Partial — ${pctDerived.toFixed(1)}% (${unitsDerived.toFixed(1)} units)` : 'Full bottle'}
-                                            </p>
+                                            <>
+                                                {form.qtyMode === 'units' && qtyNum > pkgSize ? (
+                                                    <p className="text-[10px] mt-0.5 font-medium text-red-600">
+                                                        Quantity cannot exceed package size ({pkgSize})
+                                                    </p>
+                                                ) : form.qtyMode === 'percent' && qtyNum > 100 ? (
+                                                    <p className="text-[10px] mt-0.5 font-medium text-red-600">
+                                                        Percentage cannot exceed 100%
+                                                    </p>
+                                                ) : (
+                                                    <p className="text-[10px] mt-0.5 font-medium text-green-600">
+                                                        {isPartialDerived ? `Partial — ${pctDerived.toFixed(1)}% (${unitsDerived.toFixed(1)} units)` : 'Full bottle'}
+                                                    </p>
+                                                )}
+                                            </>
                                         )}
                                     </div>
                                 </div>
@@ -1077,27 +1211,32 @@ export default function AddItemsPage() {
 
 // ── Reusable field component ───────────────────────────────────
 
-function Field({ label, value, onChange, placeholder, required, hasError }: {
+function Field({ label, value, onChange, placeholder, required, hasError, readOnly }: {
     label: string;
     value: string;
     onChange: (v: string) => void;
     placeholder?: string;
     required?: boolean;
     hasError?: boolean;
+    readOnly?: boolean;
 }) {
     return (
         <div>
             <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
                 {label}{required && <span className="text-red-500 ml-0.5">*</span>}
+                {readOnly && <span className="text-gray-400 ml-1 text-[9px]">(from API)</span>}
             </label>
             <input
                 type="text"
                 value={value}
-                onChange={e => onChange(e.target.value)}
+                onChange={e => !readOnly && onChange(e.target.value)}
                 placeholder={placeholder}
+                readOnly={readOnly}
                 className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
                     hasError
                         ? 'border-red-400 bg-red-50 focus:ring-red-400'
+                        : readOnly
+                        ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed'
                         : 'border-gray-300 focus:ring-primary-500'
                 }`}
             />

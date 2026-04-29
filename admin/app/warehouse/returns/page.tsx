@@ -180,7 +180,7 @@ export default function ReturnsPage() {
     const stats = {
         total: pagination?.totalCount ?? transactions.length,
         inProgress: transactions.filter(t => t.status === 'in_progress').length,
-        completed: transactions.filter(t => t.status === 'completed').length,
+        verified: transactions.filter(t => t.status === 'verified').length,
         totalValue: transactions.reduce((sum, t) => sum + t.totalReturnableValue, 0),
     };
 
@@ -241,9 +241,9 @@ export default function ReturnsPage() {
                 <div className="bg-white rounded-lg shadow px-3 py-2">
                     <div className="flex items-center gap-1.5 mb-0.5">
                         <CheckCircle className="w-3.5 h-3.5 text-green-500" />
-                        <span className="text-[10px] text-gray-500">Completed</span>
+                        <span className="text-[10px] text-gray-500">Verified</span>
                     </div>
-                    <p className="text-sm font-bold text-gray-900">{stats.completed}</p>
+                    <p className="text-sm font-bold text-gray-900">{stats.verified}</p>
                 </div>
                 <div className="bg-white rounded-lg shadow px-3 py-2">
                     <div className="flex items-center gap-1.5 mb-0.5">
@@ -427,8 +427,11 @@ export default function ReturnsPage() {
                                     { label: 'Processor', value: viewModal.processorName || '—' },
                                     { label: 'Service Type', value: viewModal.serviceType.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) },
                                     { label: 'Total Items', value: String(viewModal.totalItems) },
-                                    { label: 'Returnable Value', value: formatCurrency(viewModal.totalReturnableValue), className: 'text-green-700' },
-                                    { label: 'Non-Returnable', value: formatCurrency(viewModal.totalNonReturnableValue), className: 'text-red-700' },
+                                    // Show Returnable/Non-Returnable values only when status is verified
+                                    ...(viewModal.status === 'verified' ? [
+                                        { label: 'Returnable Value', value: formatCurrency(viewModal.totalReturnableValue), className: 'text-green-700' },
+                                        { label: 'Non-Returnable', value: formatCurrency(viewModal.totalNonReturnableValue), className: 'text-red-700' },
+                                    ] : []),
                                     { label: 'Created', value: formatDate(viewModal.createdAt) },
                                     { label: 'Updated', value: formatDate(viewModal.updatedAt) },
                                 ].map(({ label, value, className }) => (
@@ -438,12 +441,11 @@ export default function ReturnsPage() {
                                     </div>
                                 ))}
                             </div>
-                            {(viewModal.fedexTracking || viewModal.fedexPickupConfirmation) && (
+                            {viewModal.fedexTracking && (
                                 <div className="border-t border-gray-100 pt-2">
                                     <p className="text-[10px] font-medium text-gray-400 mb-1.5 uppercase">Shipping</p>
                                     <div className="grid grid-cols-2 gap-2">
                                         <div><p className="text-[10px] text-gray-400">FedEx Tracking</p><p className="text-xs font-medium">{viewModal.fedexTracking || '—'}</p></div>
-                                        <div><p className="text-[10px] text-gray-400">Pickup Confirmation</p><p className="text-xs font-medium">{viewModal.fedexPickupConfirmation || '—'}</p></div>
                                     </div>
                                 </div>
                             )}

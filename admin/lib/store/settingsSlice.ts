@@ -78,7 +78,7 @@ const initialState: SettingsState = {
 // Async thunk for fetching settings
 export const fetchSettings = createAsyncThunk(
   'settings/fetch',
-  async (_, { rejectWithValue }) => {
+  async (_, { rejectWithValue, getState }) => {
     try {
       const { apiClient } = await import('@/lib/api/apiClient');
       const { cookieUtils } = await import('@/lib/utils/cookies');
@@ -88,6 +88,14 @@ export const fetchSettings = createAsyncThunk(
       if (!token) {
         console.error('No auth token found');
         return rejectWithValue('Authentication required. Please login again.');
+      }
+      
+      // Check if user is a processor - they don't need settings data
+      const state = getState() as any;
+      const user = state.auth?.user;
+      if (user?.role === 'processor') {
+        console.log('Skipping settings fetch for processor user');
+        return null; // Return null or empty settings for processors
       }
       
       const data: SettingsResponse = await apiClient.get<SettingsResponse>(
@@ -280,11 +288,11 @@ const settingsSlice = createSlice({
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(fetchSettings.fulfilled, (state, action: PayloadAction<Settings>) => {
+      .addCase(fetchSettings.fulfilled, (state, action: PayloadAction<Settings | null>) => {
         state.isLoading = false;
         state.settings = action.payload;
         state.error = null;
-        if (typeof window !== 'undefined') {
+        if (typeof window !== 'undefined' && action.payload) {
           localStorage.setItem('adminBranding', JSON.stringify({
             logoUrl: action.payload.logoUrl ?? null,
             businessName: action.payload.businessName ?? null,

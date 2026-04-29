@@ -16,6 +16,7 @@ export default function SettingsPage() {
     // Check if user is MainAdmin (buying_group_id is null) or buying group admin
     const isMainAdmin = user?.buying_group_id === null;
     const isBuyingGroupAdmin = user?.buying_group_id !== null;
+    const isProcessor = user?.role === 'processor';
 
     const [businessForm, setBusinessForm] = useState({ businessName: '' });
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -63,10 +64,10 @@ export default function SettingsPage() {
     };
 
     useEffect(() => {
-        if (isAuthenticated) {
+        if (isAuthenticated && !isProcessor) {
             dispatch(fetchSettings());
         }
-    }, [dispatch, isAuthenticated]);
+    }, [dispatch, isAuthenticated, isProcessor]);
 
     useEffect(() => {
         if (settings) {
@@ -164,6 +165,95 @@ export default function SettingsPage() {
         }
     };
 
+    // Processors get a simplified settings page without permission gate
+    if (isProcessor) {
+        return (
+            <div className="space-y-3">
+                <div>
+                    <h1 className="text-lg font-bold text-gray-900">Settings</h1>
+                    <p className="text-xs text-gray-500">Manage your account settings</p>
+                </div>
+
+                {/* Profile Info for Processor */}
+                <div className="bg-white rounded-lg shadow px-4 py-3">
+                    <div className="flex items-center gap-2 mb-3">
+                        <Building2 className="w-4 h-4 text-primary-500" />
+                        <h2 className="text-sm font-semibold text-gray-900">Profile Information</h2>
+                    </div>
+                    <div className="space-y-2.5">
+                        <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-0.5">Name</label>
+                            <input type="text" value={user?.name || ''} readOnly className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded bg-gray-50 text-gray-600 cursor-not-allowed" />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-0.5">Email</label>
+                            <input type="email" value={user?.email || ''} readOnly className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded bg-gray-50 text-gray-600 cursor-not-allowed" />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Security Settings - Reset Password */}
+                <div className="bg-white rounded-lg shadow px-4 py-3">
+                    <div className="flex items-center gap-2 mb-3">
+                        <Shield className="w-4 h-4 text-primary-500" />
+                        <h2 className="text-sm font-semibold text-gray-900">Security Settings</h2>
+                    </div>
+
+                    <div className="space-y-2.5 max-w-md">
+                        {[
+                            { key: 'currentPassword' as const, label: 'Current Password', hint: '' },
+                            { key: 'newPassword' as const, label: 'New Password', hint: 'Minimum 8 characters' },
+                            { key: 'confirmPassword' as const, label: 'Confirm New Password', hint: '' },
+                        ].map(({ key, label, hint }) => (
+                            <div key={key}>
+                                <label className="block text-xs font-medium text-gray-700 mb-0.5">{label}</label>
+                                <div className="relative">
+                                    <input
+                                        type={showPasswords[key] ? 'text' : 'password'}
+                                        value={passwordForm[key]}
+                                        onChange={(e) => {
+                                            setPasswordForm({ ...passwordForm, [key]: e.target.value });
+                                            if (passwordErrors[key]) setPasswordErrors({ ...passwordErrors, [key]: '' });
+                                            if (key === 'newPassword' && passwordErrors.confirmPassword && e.target.value === passwordForm.confirmPassword) {
+                                                setPasswordErrors(prev => ({ ...prev, confirmPassword: '' }));
+                                            }
+                                        }}
+                                        className={`w-full px-2.5 py-1.5 pr-8 text-xs border rounded focus:outline-none focus:ring-1 ${
+                                            passwordErrors[key] ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-primary-500'
+                                        }`}
+                                        disabled={isResettingPassword}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPasswords({ ...showPasswords, [key]: !showPasswords[key] })}
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                        disabled={isResettingPassword}
+                                    >
+                                        {showPasswords[key] ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                    </button>
+                                </div>
+                                {passwordErrors[key] && <p className="mt-0.5 text-[10px] text-red-600">{passwordErrors[key]}</p>}
+                                {hint && !passwordErrors[key] && <p className="mt-0.5 text-[10px] text-gray-400">{hint}</p>}
+                            </div>
+                        ))}
+
+                        <div className="flex justify-end pt-1">
+                            <Button variant="primary" size="sm" onClick={handleResetPassword} disabled={isResettingPassword}>
+                                {isResettingPassword ? (
+                                    <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Resetting...</>
+                                ) : (
+                                    <><Save className="w-3.5 h-3.5 mr-1.5" />Reset Password</>
+                                )}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+
+                <ToastContainer toasts={toasts} onClose={removeToast} />
+            </div>
+        );
+    }
+
     return (
         <PermissionGate permission="settings">
         <div className="space-y-3">
@@ -177,15 +267,14 @@ export default function SettingsPage() {
                 </p>
             </div>
 
-            {/* Info message for buying group admins */}
-            {isBuyingGroupAdmin && (
+            {/* Info message for buying group admins - removed heading per requirements */}
+            {isBuyingGroupAdmin && !isProcessor && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <div className="flex items-start gap-3">
                         <div className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center mt-0.5">
                             <Building2 className="w-3 h-3 text-blue-600" />
                         </div>
                         <div>
-                            <h3 className="text-sm font-medium text-blue-900 mb-1">Buying Group Admin Settings</h3>
                             <p className="text-xs text-blue-700">
                                 You can manage your business profile (company name and logo) and security settings. 
                                 System-wide settings are managed by the platform administrator.

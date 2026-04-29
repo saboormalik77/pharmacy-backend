@@ -44,6 +44,7 @@ interface ReturnTransaction {
     fedexLabels?: Record<string, string>;
     manifestGeneratedAt?: string;
     receivedInWarehouseDate?: string;
+    createdByProcessor?: boolean;
 }
 
 interface ReturnTransactionItem {
@@ -90,6 +91,11 @@ interface ReverseDistributor {
 // ── Helpers ────────────────────────────────────────────────────
 
 function canDoAction(tx: ReturnTransaction, action: string): boolean {
+    // If return was created by processor, pharmacy can only view - no actions allowed
+    if (tx.processorId) {
+        return false;
+    }
+    
     switch (action) {
         case 'pause': return tx.status === 'in_progress';
         case 'resume': return tx.status === 'paused';
@@ -656,7 +662,14 @@ export default function ReturnDetailPage() {
                         )}
                         {canDoAction(tx, 'complete') && (
                             <button
-                                onClick={() => setActionModal({ action: 'complete' })}
+                                onClick={() => {
+                                    // Require at least 1 item to complete a return
+                                    if (!items || items.length === 0) {
+                                        showToast('Cannot complete return: At least 1 item is required', 'error');
+                                        return;
+                                    }
+                                    setActionModal({ action: 'complete' });
+                                }}
                                 className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
                             >
                                 <CheckCircle className="w-3 h-3" /> Complete
@@ -805,12 +818,7 @@ export default function ReturnDetailPage() {
                                         <dd className="text-xs font-medium text-gray-900 font-mono">{tx.fedexTracking}</dd>
                                     </div>
                                 )}
-                                {tx.fedexPickupConfirmation && (
-                                    <div className="flex justify-between">
-                                        <dt className="text-xs text-gray-500">Pickup Confirmation</dt>
-                                        <dd className="text-xs font-medium text-gray-900 font-mono">{tx.fedexPickupConfirmation}</dd>
-                                    </div>
-                                )}
+                                {/* Pickup Confirmation removed per user request */}
                                 
                                 {/* Package Tracking with Print Labels */}
                                 {tx.packageTracking && Object.keys(tx.packageTracking).length > 0 && (

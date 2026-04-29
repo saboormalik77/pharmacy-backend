@@ -43,7 +43,7 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
     useEffect(() => {
         if (!isAuthenticated) return;
 
-        if (!settings) {
+        if (!settings && !isProcessor) {
             dispatch(fetchSettings());
         }
 
