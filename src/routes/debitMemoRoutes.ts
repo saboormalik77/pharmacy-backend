@@ -6,6 +6,7 @@ import {
   getDebitMemoHandler,
   updateDebitMemoHandler,
   downloadDebitMemoPdfHandler,
+  downloadDebitMemoSummaryHandler,
 } from '../controllers/debitMemoController';
 import {
   requestRAHandler,
@@ -106,6 +107,38 @@ router.get('/unpaid', listUnpaidHandler);
  *         description: Paginated list of debit memos
  */
 router.get('/', listDebitMemosHandler);
+
+/**
+ * @swagger
+ * /api/admin/debit-memos/summary/{returnId}/{batchId}:
+ *   get:
+ *     summary: Download debit memo summary PDF for a return transaction
+ *     tags: [Debit Memos]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: returnId
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *         description: Return transaction ID
+ *       - in: path
+ *         name: batchId
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *         description: Batch ID
+ *     responses:
+ *       200:
+ *         description: Debit memo summary PDF file
+ *         content:
+ *           application/pdf:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       404:
+ *         description: Return transaction or batch not found
+ */
+router.get('/summary/:returnId/:batchId', downloadDebitMemoSummaryHandler);
 
 /**
  * @swagger

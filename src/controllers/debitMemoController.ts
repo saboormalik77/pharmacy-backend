@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { catchAsync } from '../utils/catchAsync';
 import * as batchService from '../services/batchService';
-import { generateDebitMemoPdf } from '../services/debitMemoPdfService';
+import { generateDebitMemoPdf, generateDebitMemoSummaryPdf } from '../services/debitMemoPdfService';
 
 // ============================================================
 // GET /api/admin/debit-memos — List debit memos
@@ -83,6 +83,25 @@ export const downloadDebitMemoPdfHandler = catchAsync(
     res.setHeader('Content-Length', pdfBuffer.length);
 
     // Send PDF
+    res.end(pdfBuffer);
+  }
+);
+
+// ============================================================
+// GET /api/admin/debit-memos/summary/:returnId/:batchId — Download debit memo summary PDF
+// ============================================================
+export const downloadDebitMemoSummaryHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { returnId, batchId } = req.params;
+
+    const summaryData = await batchService.getDebitMemoSummaryData(returnId, batchId);
+
+    const pdfBuffer = await generateDebitMemoSummaryPdf(summaryData);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="DM_Summary_${summaryData.licensePlate}.pdf"`);
+    res.setHeader('Content-Length', pdfBuffer.length);
+
     res.end(pdfBuffer);
   }
 );

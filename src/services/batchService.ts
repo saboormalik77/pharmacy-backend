@@ -556,3 +556,150 @@ export const getDebitMemoPdfData = async (memoId: string): Promise<any> => {
 
   return pdfData;
 };
+
+// ============================================================
+// Debit Memo Summary for a Return Transaction
+// ============================================================
+
+export interface DebitMemoSummaryData {
+  licensePlate: string;
+  processorName: string | null;
+  returnDate: string | null;
+  closeOutDate: string | null;
+  batchMonth: string;
+  cardinalBatch: string;
+  pharmacy: {
+    name: string;
+    address: string | null;
+    city: string | null;
+    state: string | null;
+    zipCode: string | null;
+    deaNumber: string | null;
+    contact: string | null;
+    phone: string | null;
+    email: string | null;
+  };
+  memos: Array<{
+    memoNumber: string;
+    labelerName: string | null;
+    destination: string | null;
+    raNeeded: boolean;
+    totalAskValue: number;
+  }>;
+  grandTotal: number;
+}
+
+export const getDebitMemoSummaryData = async (
+  returnTransactionId: string,
+  batchId: string
+): Promise<DebitMemoSummaryData> => {
+  const sb = ensureAdmin();
+
+  // 1. Get return transaction details
+  const { data: returnTx, error: returnError } = await sb
+    .from('return_transactions')
+    .select('id, license_plate, pharmacy_id, processor_id, created_at, finalized_at, batch_id')
+    .eq('id', returnTransactionId)
+    .single();
+
+  if (returnError) throw new AppError(`Failed to get return transaction: ${returnError.message}`, 400);
+
+  // 2. Get pharmacy details
+  const { data: pharmacyData, error: pharmacyError } = await sb
+    .from('pharmacy')
+    .select('id, name, pharmacy_name, physical_address, phone, contact_phone, dea_number, email')
+    .eq('id', returnTx.pharmacy_id)
+    .single();
+
+  if (pharmacyError) throw new AppError(`Failed to get pharmacy: ${pharmacyError.message}`, 400);
+
+  // 3. Get processor name
+  let processorName: string | null = null;
+  if (returnTx.processor_id) {
+    const { data: processorData } = await sb
+      .from('processors')
+      .select('name')
+      .eq('id', returnTx.processor_id)
+      .single();
+    processorName = processorData?.name || null;
+  }
+
+  // 4. Get batch info
+  const { data: batchData, error: batchError } = await sb
+    .from('return_batches')
+    .select('batch_name, batch_month, closed_at')
+    .eq('id', batchId)
+    .single();
+
+  if (batchError) throw new AppError(`Failed to get batch: ${batchError.message}`, 400);
+
+  // 5. Find all debit memos in this batch whose items belong to this return transaction
+  const { data: memoRows, error: memoError } = await sb
+    .rpc('list_debit_memos', {
+      p_batch_id: batchId,
+      p_pharmacy_id: returnTx.pharmacy_id,
+      p_limit: 500,
+    });
+
+  if (memoError) throw new AppError(`Failed to list debit memos: ${memoError.message}`, 400);
+
+  const allMemos: any[] = memoRows?.data || [];
+
+  // 6. For each memo, check if it has items from this return transaction
+  const relevantMemos: DebitMemoSummaryData['memos'] = [];
+
+  for (const memo of allMemos) {
+    const { data: itemCheck } = await sb
+      .from('debit_memo_items')
+      .select('id, transaction_item_id')
+      .eq('debit_memo_id', memo.id);
+
+    if (!itemCheck || itemCheck.length === 0) continue;
+
+    const txItemIds = itemCheck
+      .map((i: any) => i.transaction_item_id)
+      .filter(Boolean);
+
+    if (txItemIds.length === 0) continue;
+
+    const { data: matchingItems } = await sb
+      .from('return_transaction_items')
+      .select('id')
+      .in('id', txItemIds)
+      .eq('transaction_id', returnTransactionId);
+
+    if (matchingItems && matchingItems.length > 0) {
+      relevantMemos.push({
+        memoNumber: memo.memoNumber,
+        labelerName: memo.labelerName,
+        destination: memo.destination,
+        raNeeded: !!memo.raNumber || !!memo.raRequestedAt,
+        totalAskValue: memo.totalAskValue || 0,
+      });
+    }
+  }
+
+  const physicalAddress = pharmacyData.physical_address || {};
+
+  return {
+    licensePlate: returnTx.license_plate,
+    processorName,
+    returnDate: returnTx.created_at,
+    closeOutDate: batchData.closed_at,
+    batchMonth: new Date(batchData.batch_month).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
+    cardinalBatch: batchData.batch_name,
+    pharmacy: {
+      name: pharmacyData.pharmacy_name || pharmacyData.name,
+      address: physicalAddress.street || null,
+      city: physicalAddress.city || null,
+      state: physicalAddress.state || null,
+      zipCode: physicalAddress.zip || null,
+      deaNumber: pharmacyData.dea_number,
+      contact: null,
+      phone: pharmacyData.phone || pharmacyData.contact_phone,
+      email: pharmacyData.email || null,
+    },
+    memos: relevantMemos,
+    grandTotal: relevantMemos.reduce((sum, m) => sum + m.totalAskValue, 0),
+  };
+};
