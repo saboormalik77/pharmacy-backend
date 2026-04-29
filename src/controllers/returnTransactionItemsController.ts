@@ -369,11 +369,19 @@ export const updateItemHandler = catchAsync(
       }
     }
 
-    const normalizedUpdates = {
-      ...body,
-      ...(hasIsPartial ? { isPartial } : {}),
-      ...(partialPercentage !== undefined ? { partialPercentage } : {}),
-    };
+    // Only include isPartial/partialPercentage in the update if they were explicitly provided in the request
+    // This prevents the RPC from thinking we're trying to update core fields when we're just updating classification fields
+    const normalizedUpdates: Record<string, any> = { ...body };
+    
+    // Only add isPartial if it was explicitly provided in the request
+    if (hasIsPartial) {
+      normalizedUpdates.isPartial = isPartial;
+    }
+    
+    // Only add partialPercentage if it was explicitly provided in the request
+    if (hasPartialPercentage) {
+      normalizedUpdates.partialPercentage = partialPercentage;
+    }
 
     const item = await itemsService.updateItem(req.params.itemId, normalizedUpdates);
     res.status(200).json({ status: 'success', data: item });

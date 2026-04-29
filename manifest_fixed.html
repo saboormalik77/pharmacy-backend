@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Genoa Healthcare Itemized Return</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 10pt; color: #111; margin: 0; padding: 24px; background: #fff; }
+  h1 { font-size: 18pt; text-align: center; margin: 0 0 4px; }
+  .subtitle { text-align: center; color: #666; font-size: 9pt; margin: 0 0 16px; }
+  .rule { border: 0; border-top: 1px solid #333; margin: 12px 0; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; margin-bottom: 12px; }
+  .grid dt { font-weight: bold; color: #333; }
+  .grid dd { margin: 0; }
+  .summary { background: #f0f4f8; border: 1px solid #ccc; padding: 10px 12px; margin: 12px 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; font-size: 9pt; }
+  .summary .wide { grid-column: span 2; }
+  h2.section-title { font-size: 11pt; margin: 16px 0 8px; }
+  table.items { width: 100%; border-collapse: collapse; font-size: 7pt; margin-bottom: 8px; }
+  table.items th { background: #e2e8f0; text-align: left; padding: 4px 3px; border: 1px solid #ccc; font-weight: bold; }
+  table.items td { padding: 3px; border: 1px solid #ddd; vertical-align: top; }
+  table.items tr.alt td { background: #f8fafc; }
+  table.items .num { text-align: right; white-space: nowrap; }
+  table.items .mono { font-family: 'Courier New', monospace; }
+  .subtotal { text-align: right; font-size: 8pt; margin: 0 0 12px; }
+  .notes { margin-top: 16px; font-size: 9pt; }
+  .footer { margin-top: 24px; font-size: 7pt; color: #999; text-align: center; }
+  @media print {
+    body { padding: 12px; }
+    table.items { page-break-inside: auto; }
+    tr { page-break-inside: avoid; page-break-after: auto; }
+    h2.section-title { page-break-after: avoid; }
+  }
+</style>
+</head>
+<body>
+  <h1>RETURN MANIFEST</h1>
+  <p class="subtitle">FCR Pharmacy Returns</p>
+  <hr class="rule" />
+  <div class="grid">
+    <dl style="margin:0;">
+      <dt>Pharmacy</dt><dd>Genoa Healthcare</dd>
+      <dt>DEA</dt><dd>FT0556184</dd>
+      
+      <dt>Phone</dt><dd>2063246990</dd>
+    </dl>
+    <dl style="margin:0;">
+      <dt>License Plate</dt><dd>042926-23HA-3CEE-D</dd>
+      <dt>Status</dt><dd>COMPLETED</dd>
+      
+      <dt>Date</dt><dd>04/29/2026</dd>
+      
+    </dl>
+  </div>
+  <div class="summary">
+    <div>Total Items: <strong>1</strong></div>
+    <!-- <div>Returnable: <strong>0</strong></div>
+    <div>Non-Returnable: <strong>0</strong></div> -->
+    <div>CII Items: <strong>Yes</strong></div>
+    <!-- <div class="wide">Returnable Value: <strong>$0.00</strong></div>
+    <div class="wide">Non-Ret. Value: <strong>$0.00</strong> &nbsp; Total: <strong>$0.00</strong></div> -->
+  </div>
+  
+    <h2 class="section-title">ALL ITEMS</h2>
+    <table class="items">
+      <thead><tr><th>NDC</th><th>Product</th><th>Lot</th><th>Exp</th><th class="num">Qty</th><th>Status</th><th>Reason</th></tr></thead>
+      <tbody><tr class="alt">
+        <td class="mono">43547-3250-06</td>
+        <td>DOXYCYCLINE HYCLATE</td>
+        <td>0000054575</td>
+        <td>11/10/2025</td>
+        <td class="num">1</td>
+        <td>TBD</td><td>—</td>
+      </tr></tbody>
+    </table>
+    <p class="subtotal"><strong>ALL ITEMS total:</strong> 1 items</p>
+  
+  
+  
+  <p class="footer">Manifest generated 4/29/2026, 9:48:38 PM</p>
+</body>
+</html>

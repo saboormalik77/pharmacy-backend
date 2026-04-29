@@ -65,6 +65,10 @@ const RETURN_REASONS = [
   'Discontinued', 'Wrong product', 'Formulary change', 'Other',
 ];
 
+const DEA_SCHEDULE_OPTIONS = [
+  '', 'CI', 'CII', 'CIII', 'CIV', 'CV', 'Non-Controlled'
+];
+
 const EMPTY_FORM = {
   ndc: '', ndc10: '', gtin: '', proprietaryName: '', genericName: '',
   manufacturer: '', packageDescription: '', dosageForm: '',
@@ -442,6 +446,8 @@ export default function PharmacyScanPage() {
     payload.returnStatus = form.returnStatus;
     if (form.returnReason) payload.returnReason = form.returnReason;
     if (form.deaSchedule) payload.deaSchedule = form.deaSchedule;
+    // Automatically set deaForm222Required for Schedule II items
+    if (form.deaSchedule === 'CII') payload.deaForm222Required = true;
     if (form.productType) payload.productType = form.productType;
     if (form.memo) payload.memo = form.memo;
     payload.scanSource = form.scanSource;
@@ -835,7 +841,22 @@ export default function PharmacyScanPage() {
                   </div>
                 </div>
                 <Field label="Route" value={form.route} onChange={v => updateField('route', v)} placeholder="e.g. ORAL" />
-                <Field label="DEA Schedule" value={form.deaSchedule} onChange={v => updateField('deaSchedule', v)} placeholder="e.g. CII" />
+                <div>
+                  <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
+                    DEA Schedule
+                  </label>
+                  <select
+                    value={form.deaSchedule}
+                    onChange={e => updateField('deaSchedule', e.target.value)}
+                    className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                  >
+                    {DEA_SCHEDULE_OPTIONS.map(option => (
+                      <option key={option} value={option}>
+                        {option || '— Select DEA Schedule —'}
+                      </option>
+                    ))}
+                  </select>
+                </div>
                 <Field label="Lot Number" value={form.lotNumber} onChange={v => updateField('lotNumber', v)} placeholder="Lot #" required hasError={formErrors.has('lotNumber')} />
                 <Field label="Serial Number" value={form.serialNumber} onChange={v => updateField('serialNumber', v)} placeholder="Serial #" />
                 <div>

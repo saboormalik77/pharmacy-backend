@@ -71,6 +71,7 @@ interface ManifestData {
   };
   returnableItems: ManifestItem[];
   nonReturnableItems: ManifestItem[];
+  allItems?: ManifestItem[]; // NEW: Optional field for all items regardless of status
 }
 
 interface DeaFormItem {
@@ -252,11 +253,11 @@ export async function generateManifestPdf(data: ManifestData): Promise<Buffer> {
   doc.rect(40, sumY, pageWidth, 20).fillAndStroke('#f0f4f8', '#cccccc');
   doc.fillColor('#000000').fontSize(9).font('Helvetica-Bold');
 
-  const colW = pageWidth / 4;
+  const colW = pageWidth / 2; // Adjusted for 2 columns instead of 4
   doc.text(`Total Items: ${data.summary.totalItems}`, 50, sumY + 8, { width: colW });
-  doc.text(`Returnable: ${data.summary.returnableCount}`, 50 + colW, sumY + 8, { width: colW });
-  doc.text(`Non-Returnable: ${data.summary.nonReturnableCount}`, 50 + colW * 2, sumY + 8, { width: colW });
-  doc.text(`CII Items: ${data.summary.hasCiiItems ? 'Yes' : 'No'}`, 50 + colW * 3, sumY + 8, { width: colW });
+  // doc.text(`Returnable: ${data.summary.returnableCount}`, 50 + colW, sumY + 8, { width: colW });
+  // doc.text(`Non-Returnable: ${data.summary.nonReturnableCount}`, 50 + colW * 2, sumY + 8, { width: colW });
+  doc.text(`CII Items: ${data.summary.hasCiiItems ? 'Yes' : 'No'}`, 50 + colW, sumY + 8, { width: colW });
 
   // doc.text(`Returnable Value: ${fmt$(data.summary.totalReturnableValue)}`, 50, sumY + 22, { width: colW * 2 });
   // doc.text(`Non-Ret. Value: ${fmt$(data.summary.totalNonReturnableValue)}`, 50 + colW * 2, sumY + 22, { width: colW });
@@ -308,35 +309,49 @@ function manifestItemsTableHtml(
   showReason: boolean
 ): string {
   if (items.length === 0) return '';
-  // Destination column removed per user request - only show Reason for non-returnable items
-  const th = showReason
-    ? '<th>NDC</th><th>Product</th><th>Lot</th><th>Exp</th><th class="num">Qty</th><!-- <th class="num">Price</th><th class="num">Value</th> --><th>Reason</th>'
-    : '<th>NDC</th><th>Product</th><th>Lot</th><th>Exp</th><th class="num">Qty</th><!-- <th class="num">Price</th><th class="num">Value</th> -->';
+  
+  // For ALL ITEMS, show status column. For specific categories, show reason if requested
+  const showStatus = false; // title === 'ALL ITEMS';  // COMMENTED OUT: Remove status column
+  
+  let th = '<th>NDC</th><th>Product</th><th>Lot</th><th>Exp</th><th class="num">Qty</th>';
+  // if (showStatus) {
+  //   th += '<th>Status</th><th>Reason</th>';
+  // } else if (showReason) {
+  //   th += '<th>Reason</th>';
+  // }
+  
   const rows = items
     .map((item, idx) => {
       const namePlain = productName(item) + (item.isPartial ? ` (${item.partialPercentage || 0}%)` : '');
       const reason = formatNonReturnableReason(item.nonReturnableReason).toUpperCase();
+      const status = ((item as any).returnStatus || 'TBD').toUpperCase();
       const bg = idx % 2 === 0 ? ' class="alt"' : '';
+      
+      let statusCell = '';
+      // if (showStatus) {
+      //   statusCell = `<td>${escapeHtml(status)}</td><td>${escapeHtml(reason || '—')}</td>`;
+      // } else if (showReason) {
+      //   statusCell = `<td>${escapeHtml(reason)}</td>`;
+      // }
+      
       return `<tr${bg}>
         <td class="mono">${escapeHtml(item.ndc || '—')}</td>
         <td>${escapeHtml(namePlain)}</td>
         <td>${escapeHtml(item.lotNumber || '—')}</td>
         <td>${escapeHtml(fmtDate(item.expirationDate))}</td>
         <td class="num">${item.quantity}</td>
-        <!-- <td class="num">${escapeHtml(fmt$(item.standardPrice))}</td> -->
-        <!-- <td class="num">${escapeHtml(fmt$(item.estimatedValue))}</td> -->
-        ${showReason ? `<td>${escapeHtml(reason)}</td>` : ''}
+        ${statusCell}
       </tr>`;
     })
     .join('');
-  const total = items.reduce((sum, i) => sum + (i.estimatedValue || 0), 0);
+    
   return `
     <h2 class="section-title">${escapeHtml(title)}</h2>
     <table class="items">
       <thead><tr>${th}</tr></thead>
       <tbody>${rows}</tbody>
     </table>
-    <!-- <p class="subtotal"><strong>${escapeHtml(title)} total:</strong> ${items.length} items — ${escapeHtml(fmt$(total))}</p> -->
+    <p class="subtotal"><strong>${escapeHtml(title)} total:</strong> ${items.length} items</p>
   `;
 }
 
@@ -346,10 +361,26 @@ export function generateManifestHtml(data: ManifestData): string {
   const s = data.summary;
   const proc = data.processor;
   const dateStr = fmtDate(t.finalizedAt || t.createdAt);
-  const returnableBlock = manifestItemsTableHtml('RETURNABLE ITEMS', data.returnableItems, false);
-  const nonRetBlock = data.nonReturnableItems.length > 0
-    ? manifestItemsTableHtml('NON-RETURNABLE ITEMS', data.nonReturnableItems, true)
-    : '';
+  
+  // Show all items if specific categories are empty
+  let returnableBlock = '';
+  let nonRetBlock = '';
+  
+  if (data.returnableItems.length > 0) {
+    returnableBlock = manifestItemsTableHtml('RETURNABLE ITEMS', data.returnableItems, false);
+  } else if (data.nonReturnableItems.length > 0) {
+    nonRetBlock = manifestItemsTableHtml('NON-RETURNABLE ITEMS', data.nonReturnableItems, true);
+  } else if ((data as any).allItems && (data as any).allItems.length > 0) {
+    // Fallback: show all items if returnable/non-returnable are empty
+    returnableBlock = manifestItemsTableHtml('ALL ITEMS', (data as any).allItems, true);
+  } else {
+    // Show message if no items found
+    returnableBlock = `
+      <h2 class="section-title">NO ITEMS FOUND</h2>
+      <p>This return transaction appears to have no items or the items have not been classified yet.</p>
+    `;
+  }
+  
   const notesBlock = t.notes
     ? `<div class="notes"><strong>Notes:</strong> ${escapeHtml(t.notes)}</div>`
     : '';
@@ -410,8 +441,8 @@ export function generateManifestHtml(data: ManifestData): string {
   </div>
   <div class="summary">
     <div>Total Items: <strong>${s.totalItems}</strong></div>
-    <div>Returnable: <strong>${s.returnableCount}</strong></div>
-    <div>Non-Returnable: <strong>${s.nonReturnableCount}</strong></div>
+    <!-- <div>Returnable: <strong>${s.returnableCount}</strong></div>
+    <div>Non-Returnable: <strong>${s.nonReturnableCount}</strong></div> -->
     <div>CII Items: <strong>${s.hasCiiItems ? 'Yes' : 'No'}</strong></div>
     <!-- <div class="wide">Returnable Value: <strong>${escapeHtml(fmt$(s.totalReturnableValue))}</strong></div>
     <div class="wide">Non-Ret. Value: <strong>${escapeHtml(fmt$(s.totalNonReturnableValue))}</strong> &nbsp; Total: <strong>${escapeHtml(fmt$(s.totalValue))}</strong></div> -->

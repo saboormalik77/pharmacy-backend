@@ -49,6 +49,7 @@ const RAW_RUNTIME_STATE =
           ["@types/swagger-ui-express", "npm:4.1.8"],\
           ["archiver", "npm:7.0.1"],\
           ["bcryptjs", "npm:2.4.3"],\
+          ["bwip-js", "npm:4.10.1"],\
           ["cors", "npm:2.8.6"],\
           ["csv-parse", "npm:6.2.1"],\
           ["dotenv", "npm:16.6.1"],\
@@ -3139,6 +3140,15 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["busboy", "npm:1.6.0"],\
           ["streamsearch", "npm:1.1.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["bwip-js", [\
+      ["npm:4.10.1", {\
+        "packageLocation": "./.yarn/unplugged/bwip-js-npm-4.10.1-4c2d8abb2e/node_modules/bwip-js/",\
+        "packageDependencies": [\
+          ["bwip-js", "npm:4.10.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -6974,6 +6984,7 @@ const RAW_RUNTIME_STATE =
           ["@types/swagger-ui-express", "npm:4.1.8"],\
           ["archiver", "npm:7.0.1"],\
           ["bcryptjs", "npm:2.4.3"],\
+          ["bwip-js", "npm:4.10.1"],\
           ["cors", "npm:2.8.6"],\
           ["csv-parse", "npm:6.2.1"],\
           ["dotenv", "npm:16.6.1"],\

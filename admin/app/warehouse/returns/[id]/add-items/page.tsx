@@ -484,6 +484,8 @@ export default function AddItemsPage() {
         }
         if (form.returnReason) payload.returnReason = form.returnReason;
         if (form.deaSchedule) payload.deaSchedule = form.deaSchedule;
+        // Automatically set deaForm222Required for Schedule II items
+        if (form.deaSchedule === 'CII') payload.deaForm222Required = true;
         if (form.productType) payload.productType = form.productType;
         if (form.memo) payload.memo = form.memo;
         payload.scanSource = form.scanSource;
