@@ -657,7 +657,7 @@ export default function ReturnDetailPage() {
                         {canDoAction(tx, 'complete') && (
                             <button
                                 onClick={() => setActionModal({ action: 'complete' })}
-                                className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded bg-green-600 text-white hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
                             >
                                 <CheckCircle className="w-3 h-3" /> Complete
                             </button>
