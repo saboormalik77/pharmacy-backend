@@ -15,7 +15,6 @@ const router = Router();
 
 // Apply admin authentication to all routes
 router.use(authenticateAdmin);
-router.use(requirePermission('settings'));
 
 // ============================================================
 // Swagger Schemas
@@ -229,7 +228,7 @@ router.use(requirePermission('settings'));
  *       500:
  *         description: Internal server error
  */
-router.get('/', getAdminSettingsHandler);
+router.get('/', requirePermission('settings'), getAdminSettingsHandler);
 
 /**
  * @swagger
@@ -288,7 +287,7 @@ router.get('/', getAdminSettingsHandler);
  *       500:
  *         description: Internal server error
  */
-router.patch('/', updateAdminSettingsHandler);
+router.patch('/', requirePermission('settings'), updateAdminSettingsHandler);
 
 /**
  * @swagger
@@ -322,7 +321,7 @@ router.patch('/', updateAdminSettingsHandler);
  *       500:
  *         description: Internal server error
  */
-router.get('/timezones', getTimezonesHandler);
+router.get('/timezones', requirePermission('settings'), getTimezonesHandler);
 
 /**
  * @swagger
@@ -356,7 +355,7 @@ router.get('/timezones', getTimezonesHandler);
  *       500:
  *         description: Internal server error
  */
-router.get('/languages', getLanguagesHandler);
+router.get('/languages', requirePermission('settings'), getLanguagesHandler);
 
 /**
  * @swagger
@@ -437,7 +436,7 @@ router.get('/profile', getAdminProfileHandler);
  *         description: Internal server error
  */
 router.post('/reset-password', resetPasswordHandler);
-router.post('/upload-logo', uploadLogoMiddleware, uploadLogoHandler);
+router.post('/upload-logo', requirePermission('settings'), uploadLogoMiddleware, uploadLogoHandler);
 
 export default router;
 

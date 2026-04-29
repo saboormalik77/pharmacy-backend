@@ -33,7 +33,7 @@ function ProcessorDashboard() {
       {/* Quick Actions for Processors */}
       <div className="bg-white rounded-lg shadow px-4 py-3">
         <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Quick Actions</p>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => router.push('/warehouse/returns/create')}
             className="flex flex-col items-center gap-1 p-3 border border-dashed border-gray-300 rounded-lg hover:border-primary-400 hover:bg-primary-50 transition-colors"
@@ -48,6 +48,7 @@ function ProcessorDashboard() {
             <ClipboardList className="w-4 h-4 text-gray-600" />
             <span className="text-xs font-medium text-gray-800 text-center">View Returns</span>
           </button>
+          {/* TBD Items commented out per user request
           <button
             onClick={() => router.push('/warehouse/tbd-items')}
             className="flex flex-col items-center gap-1 p-3 border border-dashed border-gray-300 rounded-lg hover:border-primary-400 hover:bg-primary-50 transition-colors"
@@ -55,6 +56,7 @@ function ProcessorDashboard() {
             <Archive className="w-4 h-4 text-yellow-600" />
             <span className="text-xs font-medium text-gray-800 text-center">TBD Items</span>
           </button>
+          */}
         </div>
       </div>
 

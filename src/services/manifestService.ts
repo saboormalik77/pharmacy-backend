@@ -218,9 +218,7 @@ export async function generateManifestPdf(data: ManifestData): Promise<Buffer> {
   doc.font('Helvetica').text(data.transaction.licensePlate, rightX + 90, rY);
   rY += 14;
 
-  doc.font('Helvetica-Bold').text('FedEx Tracking:', rightX, rY);
-  doc.font('Helvetica').text(data.transaction.fedexTracking || '—', rightX + 90, rY);
-  rY += 14;
+  // FedEx Tracking removed per user request
 
   doc.font('Helvetica-Bold').text('Status:', rightX, rY);
   doc.font('Helvetica').text(data.transaction.status.toUpperCase(), rightX + 90, rY);
@@ -268,14 +266,14 @@ export async function generateManifestPdf(data: ManifestData): Promise<Buffer> {
 
   // ── Returnable Items Table ──
   if (data.returnableItems.length > 0) {
-    drawItemsTable(doc, 'RETURNABLE ITEMS', data.returnableItems, pageWidth, true);
+    drawItemsTable(doc, 'RETURNABLE ITEMS', data.returnableItems, pageWidth, false);
   }
 
   // ── Non-Returnable Items Table ──
   // FCR-52: Non-returnable items must now appear in manifests/PDFs
   // so warehouse and pharmacies have full visibility.
   if (data.nonReturnableItems.length > 0) {
-    drawItemsTable(doc, 'NON-RETURNABLE ITEMS', data.nonReturnableItems, pageWidth, false);
+    drawItemsTable(doc, 'NON-RETURNABLE ITEMS', data.nonReturnableItems, pageWidth, true);
   }
 
   // ── Notes ──
@@ -307,18 +305,17 @@ export async function generateManifestPdf(data: ManifestData): Promise<Buffer> {
 function manifestItemsTableHtml(
   title: string,
   items: ManifestItem[],
-  showDestination: boolean
+  showReason: boolean
 ): string {
   if (items.length === 0) return '';
-  const th = showDestination
-    ? '<th>NDC</th><th>Product</th><th>Lot</th><th>Exp</th><th class="num">Qty</th><!-- <th class="num">Price</th><th class="num">Value</th> --><th>Dest</th>'
-    : '<th>NDC</th><th>Product</th><th>Lot</th><th>Exp</th><th class="num">Qty</th><!-- <th class="num">Price</th><th class="num">Value</th> --><th>Reason</th>';
+  // Destination column removed per user request - only show Reason for non-returnable items
+  const th = showReason
+    ? '<th>NDC</th><th>Product</th><th>Lot</th><th>Exp</th><th class="num">Qty</th><!-- <th class="num">Price</th><th class="num">Value</th> --><th>Reason</th>'
+    : '<th>NDC</th><th>Product</th><th>Lot</th><th>Exp</th><th class="num">Qty</th><!-- <th class="num">Price</th><th class="num">Value</th> -->';
   const rows = items
     .map((item, idx) => {
       const namePlain = productName(item) + (item.isPartial ? ` (${item.partialPercentage || 0}%)` : '');
-      const destOrReason = showDestination
-        ? (item.destination || '—').toUpperCase()
-        : formatNonReturnableReason(item.nonReturnableReason).toUpperCase();
+      const reason = formatNonReturnableReason(item.nonReturnableReason).toUpperCase();
       const bg = idx % 2 === 0 ? ' class="alt"' : '';
       return `<tr${bg}>
         <td class="mono">${escapeHtml(item.ndc || '—')}</td>
@@ -328,7 +325,7 @@ function manifestItemsTableHtml(
         <td class="num">${item.quantity}</td>
         <!-- <td class="num">${escapeHtml(fmt$(item.standardPrice))}</td> -->
         <!-- <td class="num">${escapeHtml(fmt$(item.estimatedValue))}</td> -->
-        <td>${escapeHtml(destOrReason)}</td>
+        ${showReason ? `<td>${escapeHtml(reason)}</td>` : ''}
       </tr>`;
     })
     .join('');
@@ -349,9 +346,9 @@ export function generateManifestHtml(data: ManifestData): string {
   const s = data.summary;
   const proc = data.processor;
   const dateStr = fmtDate(t.finalizedAt || t.createdAt);
-  const returnableBlock = manifestItemsTableHtml('RETURNABLE ITEMS', data.returnableItems, true);
+  const returnableBlock = manifestItemsTableHtml('RETURNABLE ITEMS', data.returnableItems, false);
   const nonRetBlock = data.nonReturnableItems.length > 0
-    ? manifestItemsTableHtml('NON-RETURNABLE ITEMS', data.nonReturnableItems, false)
+    ? manifestItemsTableHtml('NON-RETURNABLE ITEMS', data.nonReturnableItems, true)
     : '';
   const notesBlock = t.notes
     ? `<div class="notes"><strong>Notes:</strong> ${escapeHtml(t.notes)}</div>`
@@ -405,7 +402,6 @@ export function generateManifestHtml(data: ManifestData): string {
     </dl>
     <dl style="margin:0;">
       <dt>License Plate</dt><dd>${escapeHtml(t.licensePlate)}</dd>
-      <dt>FedEx Tracking</dt><dd>${escapeHtml(t.fedexTracking || '—')}</dd>
       <dt>Status</dt><dd>${escapeHtml(String(t.status).toUpperCase())}</dd>
       ${t.boxCount != null ? `<dt>Box Count</dt><dd>${escapeHtml(String(t.boxCount))}</dd>` : ''}
       <dt>Date</dt><dd>${escapeHtml(dateStr)}</dd>
@@ -438,16 +434,16 @@ function drawItemsTable(
   title: string,
   items: ManifestItem[],
   pageWidth: number,
-  showDestination: boolean
+  showReason: boolean
 ): void {
   doc.moveDown(0.3);
   doc.fontSize(11).font('Helvetica-Bold').fillColor('#000000').text(title);
   doc.moveDown(0.3);
 
-  // Column widths
-  const cols = showDestination
-    ? { ndc: 75, name: 145, lot: 55, exp: 55, qty: 30, price: 0, value: 0, dest: 62 }
-    : { ndc: 80, name: 165, lot: 60, exp: 60, qty: 35, price: 0, value: 0, reason: 62 };
+  // Column widths - destination removed per user request, only show reason for non-returnable
+  const cols = showReason
+    ? { ndc: 80, name: 165, lot: 60, exp: 60, qty: 35, price: 0, value: 0, reason: 62 }
+    : { ndc: 85, name: 200, lot: 70, exp: 70, qty: 40, price: 0, value: 0 };
 
   const headerY = doc.y;
 
@@ -464,9 +460,7 @@ function drawItemsTable(
   doc.text('QTY', x, headerY, { width: cols.qty }); x += cols.qty;
   // doc.text('PRICE', x, headerY, { width: cols.price }); x += cols.price;
   // doc.text('VALUE', x, headerY, { width: cols.value }); x += cols.value;
-  if (showDestination) {
-    doc.text('DEST', x, headerY, { width: (cols as any).dest });
-  } else {
+  if (showReason) {
     doc.text('REASON', x, headerY, { width: (cols as any).reason });
   }
 
@@ -497,9 +491,7 @@ function drawItemsTable(
     doc.text(String(item.quantity), cx, rowY, { width: cols.qty }); cx += cols.qty;
     // doc.text(fmt$(item.standardPrice), cx, rowY, { width: cols.price }); cx += cols.price;
     // doc.text(fmt$(item.estimatedValue), cx, rowY, { width: cols.value }); cx += cols.value;
-    if (showDestination) {
-      doc.text((item.destination || '—').toUpperCase(), cx, rowY, { width: (cols as any).dest });
-    } else {
+    if (showReason) {
       const reasonLabel = formatNonReturnableReason(item.nonReturnableReason);
       doc.text(reasonLabel.toUpperCase(), cx, rowY, { width: (cols as any).reason });
     }
@@ -573,8 +565,7 @@ export async function generateDeaForm222Pdf(data: DeaFormData): Promise<Buffer> 
   // ── Return Info ──
   doc.font('Helvetica-Bold').text('License Plate:', 40, doc.y, { continued: true, width: labelWidth });
   doc.font('Helvetica').text(`  ${data.transaction.licensePlate}`);
-  doc.font('Helvetica-Bold').text('FedEx Tracking:', 40, doc.y, { continued: true, width: labelWidth });
-  doc.font('Helvetica').text(`  ${data.transaction.fedexTracking || '—'}`);
+  // FedEx Tracking removed per user request
   doc.font('Helvetica-Bold').text('Date:', 40, doc.y, { continued: true, width: labelWidth });
   doc.font('Helvetica').text(`  ${fmtDate(data.transaction.finalizedAt || data.transaction.createdAt)}`);
 

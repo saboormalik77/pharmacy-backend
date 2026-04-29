@@ -547,9 +547,6 @@ export default function FinalizeReturnPage() {
                                                 {fedexForm.packages.filter((p: string) => p.trim()).length > 0 && (
                                                     <p><span className="font-semibold">Packages:</span> {fedexForm.packages.filter((p: string) => p.trim()).length} tracking number(s)</p>
                                                 )}
-                                                {tx.fedexPickupConfirmation && (
-                                                    <p><span className="font-semibold">Pickup:</span> <span className="font-mono">{tx.fedexPickupConfirmation}</span></p>
-                                                )}
                                             </div>
                                         )}
                                     </div>

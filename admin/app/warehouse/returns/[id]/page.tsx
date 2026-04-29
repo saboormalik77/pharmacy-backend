@@ -723,7 +723,14 @@ export default function ReturnDetailPage() {
                             </button>
                         )}
                         {canDoAction(tx, 'complete') && canEdit && (
-                            <button onClick={() => checkActionWithToast('complete return', () => setActionModal('complete'))} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors">
+                            <button onClick={() => {
+                                // Require at least 1 item to complete a return
+                                if (!items || items.length === 0) {
+                                    showToast('Cannot complete return: At least 1 item is required', 'error');
+                                    return;
+                                }
+                                checkActionWithToast('complete return', () => setActionModal('complete'));
+                            }} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors">
                                 <CheckCircle className="w-3 h-3" /> Complete
                             </button>
                         )}
@@ -822,10 +829,7 @@ export default function ReturnDetailPage() {
                                 <dt className="text-[11px] text-gray-500">FedEx Tracking</dt>
                                 <dd className="text-[11px] text-gray-900 font-mono">{tx.fedexTracking || '—'}</dd>
                             </div>
-                            <div className="flex justify-between">
-                                <dt className="text-[11px] text-gray-500">Pickup Confirmation</dt>
-                                <dd className="text-[11px] text-gray-900">{tx.fedexPickupConfirmation || '—'}</dd>
-                            </div>
+                            {/* Pickup Confirmation removed per user request */}
                             {/* Commented out as requested:
                             <div className="flex justify-between">
                                 <dt className="text-[11px] text-gray-500 flex items-center gap-1"><Clock className="w-3 h-3" /> Time In</dt>
