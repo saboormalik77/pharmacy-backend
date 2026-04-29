@@ -398,3 +398,308 @@ export const updateDebitMemo = async (
   handleRpcError(data, error, 'Failed to update debit memo');
   return data.data as DebitMemo;
 };
+
+export const getDebitMemoPdfData = async (memoId: string): Promise<any> => {
+  const sb = ensureAdmin();
+
+  // Get debit memo with items
+  const memoResult = await getDebitMemo(memoId);
+  const { memo, items } = memoResult;
+
+  // Get pharmacy details including primary wholesaler (physical_address is a JSONB column)
+  const { data: pharmacyData, error: pharmacyError } = await sb
+    .from('pharmacy')
+    .select('id, name, physical_address, phone, fax_number, dea_number, dea_expiration_date, primary_wholesaler, wholesaler_account_number')
+    .eq('id', memo.pharmacyId)
+    .single();
+
+  if (pharmacyError) throw new AppError(`Failed to get pharmacy: ${pharmacyError.message}`, 400);
+
+  // Get warehouse address from warehouses table (for top header)
+  const { data: warehouseData, error: warehouseError } = await sb
+    .from('warehouses')
+    .select('name, contact_name, phone, street, city, state, zip')
+    .eq('is_default', true)
+    .single();
+
+  if (warehouseError) {
+    console.warn('Failed to get warehouse address:', warehouseError.message);
+  }
+
+  // Get primary wholesaler/processor details (from processors table)
+  let wholesalerInfo: any = null;
+  if (pharmacyData.primary_wholesaler) {
+    const { data: processorData, error: processorError } = await sb
+      .from('processors')
+      .select('id, name, address, city, state, zip_code, phone, fax')
+      .eq('name', pharmacyData.primary_wholesaler)
+      .single();
+
+    if (!processorError && processorData) {
+      wholesalerInfo = processorData;
+    }
+  }
+
+  // Get labeler details from manufacturer_policies table
+  const { data: labelerData, error: labelerError } = await sb
+    .from('manufacturer_policies')
+    .select('labeler_id, manufacturer_name, address_1, city, state, zip, main_phone, fax')
+    .eq('labeler_id', memo.labelerId)
+    .single();
+
+  // If labeler not found in manufacturer_policies, use labeler info from memo
+  const labelerInfo = labelerData || {
+    labeler_id: memo.labelerId,
+    manufacturer_name: memo.labelerName,
+    address_1: null,
+    city: null,
+    state: null,
+    zip: null,
+    main_phone: null,
+    fax: null,
+  };
+
+  // Get return transaction items for full/partial quantities and package size
+  const itemIds = items.map(item => item.transactionItemId).filter(Boolean);
+  let transactionItems: any[] = [];
+  
+  if (itemIds.length > 0) {
+    const { data: transactionItemsData, error: transactionItemsError } = await sb
+      .from('return_transaction_items')
+      .select('id, ndc, quantity_full, quantity_partial, package_size, proprietary_name, generic_name')
+      .in('id', itemIds);
+
+    if (transactionItemsError) {
+      console.warn('Failed to get transaction items:', transactionItemsError.message);
+    } else {
+      transactionItems = transactionItemsData || [];
+    }
+  }
+
+  // Create a map of transaction items for easy lookup
+  const transactionItemsMap = new Map();
+  transactionItems.forEach((item: any) => {
+    transactionItemsMap.set(item.id, item);
+  });
+
+  // Prepare PDF data
+  const physicalAddress = pharmacyData.physical_address || {};
+  
+  const pdfData = {
+    memo: {
+      memoNumber: memo.memoNumber,
+      raNumber: memo.raNumber,
+      createdAt: memo.createdAt,
+      totalAskValue: memo.totalAskValue,
+      destination: memo.destination,
+      baggieManifest: memo.baggieManifest,
+    },
+    pharmacy: {
+      name: pharmacyData.name,
+      address: physicalAddress.street || null,
+      city: physicalAddress.city || null,
+      state: physicalAddress.state || null,
+      zipCode: physicalAddress.zip || null,
+      phone: pharmacyData.phone,
+      fax: pharmacyData.fax_number,
+      deaNumber: pharmacyData.dea_number,
+      deaExpiration: pharmacyData.dea_expiration_date,
+    },
+    labeler: {
+      labelerId: labelerInfo.labeler_id,
+      labelerName: labelerInfo.manufacturer_name,
+      address: labelerInfo.address_1,
+      city: labelerInfo.city,
+      state: labelerInfo.state,
+      zipCode: labelerInfo.zip,
+      phone: labelerInfo.main_phone,
+      fax: labelerInfo.fax,
+    },
+    items: items.map(item => {
+      const transactionItem = item.transactionItemId ? transactionItemsMap.get(item.transactionItemId) : null;
+      
+      // Use quantity from debit memo item if transaction item not available
+      const totalQty = item.quantity || 0;
+      const isPartial = transactionItem?.is_partial || false;
+      
+      return {
+        ndc: item.ndc,
+        drugName: item.productName || transactionItem?.proprietary_name || transactionItem?.generic_name,
+        lotNumber: item.lotNumber,
+        expirationDate: item.expirationDate,
+        packageSize: transactionItem?.full_package_size || transactionItem?.package_size || '1',
+        fullQuantity: isPartial ? 0 : (transactionItem?.quantity || totalQty),
+        partialQuantity: isPartial ? (transactionItem?.quantity || totalQty) : 0,
+        askPrice: item.askPrice,
+        askValue: item.askPrice ? item.askPrice * totalQty : null,
+      };
+    }),
+    // Top header: Warehouse/FCR company info
+    warehouse: {
+      companyName: 'FCR First Class Return LLC',
+      address: warehouseData ? [
+        warehouseData.street,
+        warehouseData.city,
+        warehouseData.state,
+        warehouseData.zip
+      ].filter(Boolean).join(', ') : null,
+      phone: warehouseData?.phone || null,
+    },
+    // "Remit Credits to:" section - Hardcoded for now
+    remitTo: {
+      companyName: 'Cardinal Health',
+      address: '7000 Cardinal Place, Dublin, Ohio 42017',
+      phone: '(614) 757-4804',
+      fax: '(614) 553-6255',
+    },
+  };
+
+  return pdfData;
+};
+
+// ============================================================
+// Debit Memo Summary for a Return Transaction
+// ============================================================
+
+export interface DebitMemoSummaryData {
+  licensePlate: string;
+  processorName: string | null;
+  returnDate: string | null;
+  closeOutDate: string | null;
+  batchMonth: string;
+  cardinalBatch: string;
+  pharmacy: {
+    name: string;
+    address: string | null;
+    city: string | null;
+    state: string | null;
+    zipCode: string | null;
+    deaNumber: string | null;
+    contact: string | null;
+    phone: string | null;
+    email: string | null;
+  };
+  memos: Array<{
+    memoNumber: string;
+    labelerName: string | null;
+    destination: string | null;
+    raNeeded: boolean;
+    totalAskValue: number;
+  }>;
+  grandTotal: number;
+}
+
+export const getDebitMemoSummaryData = async (
+  returnTransactionId: string,
+  batchId: string
+): Promise<DebitMemoSummaryData> => {
+  const sb = ensureAdmin();
+
+  // 1. Get return transaction details
+  const { data: returnTx, error: returnError } = await sb
+    .from('return_transactions')
+    .select('id, license_plate, pharmacy_id, processor_id, created_at, finalized_at, batch_id')
+    .eq('id', returnTransactionId)
+    .single();
+
+  if (returnError) throw new AppError(`Failed to get return transaction: ${returnError.message}`, 400);
+
+  // 2. Get pharmacy details
+  const { data: pharmacyData, error: pharmacyError } = await sb
+    .from('pharmacy')
+    .select('id, name, pharmacy_name, physical_address, phone, contact_phone, dea_number, email')
+    .eq('id', returnTx.pharmacy_id)
+    .single();
+
+  if (pharmacyError) throw new AppError(`Failed to get pharmacy: ${pharmacyError.message}`, 400);
+
+  // 3. Get processor name
+  let processorName: string | null = null;
+  if (returnTx.processor_id) {
+    const { data: processorData } = await sb
+      .from('processors')
+      .select('name')
+      .eq('id', returnTx.processor_id)
+      .single();
+    processorName = processorData?.name || null;
+  }
+
+  // 4. Get batch info
+  const { data: batchData, error: batchError } = await sb
+    .from('return_batches')
+    .select('batch_name, batch_month, closed_at')
+    .eq('id', batchId)
+    .single();
+
+  if (batchError) throw new AppError(`Failed to get batch: ${batchError.message}`, 400);
+
+  // 5. Find all debit memos in this batch whose items belong to this return transaction
+  const { data: memoRows, error: memoError } = await sb
+    .rpc('list_debit_memos', {
+      p_batch_id: batchId,
+      p_pharmacy_id: returnTx.pharmacy_id,
+      p_limit: 500,
+    });
+
+  if (memoError) throw new AppError(`Failed to list debit memos: ${memoError.message}`, 400);
+
+  const allMemos: any[] = memoRows?.data || [];
+
+  // 6. For each memo, check if it has items from this return transaction
+  const relevantMemos: DebitMemoSummaryData['memos'] = [];
+
+  for (const memo of allMemos) {
+    const { data: itemCheck } = await sb
+      .from('debit_memo_items')
+      .select('id, transaction_item_id')
+      .eq('debit_memo_id', memo.id);
+
+    if (!itemCheck || itemCheck.length === 0) continue;
+
+    const txItemIds = itemCheck
+      .map((i: any) => i.transaction_item_id)
+      .filter(Boolean);
+
+    if (txItemIds.length === 0) continue;
+
+    const { data: matchingItems } = await sb
+      .from('return_transaction_items')
+      .select('id')
+      .in('id', txItemIds)
+      .eq('transaction_id', returnTransactionId);
+
+    if (matchingItems && matchingItems.length > 0) {
+      relevantMemos.push({
+        memoNumber: memo.memoNumber,
+        labelerName: memo.labelerName,
+        destination: memo.destination,
+        raNeeded: !!memo.raNumber || !!memo.raRequestedAt,
+        totalAskValue: memo.totalAskValue || 0,
+      });
+    }
+  }
+
+  const physicalAddress = pharmacyData.physical_address || {};
+
+  return {
+    licensePlate: returnTx.license_plate,
+    processorName,
+    returnDate: returnTx.created_at,
+    closeOutDate: batchData.closed_at,
+    batchMonth: new Date(batchData.batch_month).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
+    cardinalBatch: batchData.batch_name,
+    pharmacy: {
+      name: pharmacyData.pharmacy_name || pharmacyData.name,
+      address: physicalAddress.street || null,
+      city: physicalAddress.city || null,
+      state: physicalAddress.state || null,
+      zipCode: physicalAddress.zip || null,
+      deaNumber: pharmacyData.dea_number,
+      contact: null,
+      phone: pharmacyData.phone || pharmacyData.contact_phone,
+      email: pharmacyData.email || null,
+    },
+    memos: relevantMemos,
+    grandTotal: relevantMemos.reduce((sum, m) => sum + m.totalAskValue, 0),
+  };
+};

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { getDashboardSummary, getHistoricalEarnings } from '../services/dashboardService';
+import { getDashboardSummary, getHistoricalEarnings, getReturnStats, getReturnsList, getReturnDetail } from '../services/dashboardService';
 import { catchAsync } from '../utils/catchAsync';
 import { AppError } from '../utils/appError';
 
@@ -45,6 +45,62 @@ export const getHistoricalEarningsHandler = catchAsync(
     res.status(200).json({
       status: 'success',
       data: earnings,
+    });
+  }
+);
+
+// Get return statistics for a pharmacy
+export const getReturnStatsHandler = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const pharmacyId = req.pharmacyId;
+    if (!pharmacyId) {
+      throw new AppError('Pharmacy ID is required', 400);
+    }
+
+    const stats = await getReturnStats(pharmacyId);
+
+    res.status(200).json({
+      status: 'success',
+      data: stats,
+    });
+  }
+);
+
+// Get list of returns for dropdown
+export const getReturnsListHandler = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const pharmacyId = req.pharmacyId;
+    if (!pharmacyId) {
+      throw new AppError('Pharmacy ID is required', 400);
+    }
+
+    const returns = await getReturnsList(pharmacyId);
+
+    res.status(200).json({
+      status: 'success',
+      data: returns,
+    });
+  }
+);
+
+// Get detailed data for a specific return (credit summary + product value breakdown)
+export const getReturnDetailHandler = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const pharmacyId = req.pharmacyId;
+    if (!pharmacyId) {
+      throw new AppError('Pharmacy ID is required', 400);
+    }
+
+    const { returnId } = req.params;
+    if (!returnId) {
+      throw new AppError('Return ID is required', 400);
+    }
+
+    const detail = await getReturnDetail(pharmacyId, returnId);
+
+    res.status(200).json({
+      status: 'success',
+      data: detail,
     });
   }
 );

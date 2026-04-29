@@ -7,12 +7,13 @@ import Link from 'next/link';
 import {
     Search, Loader2, ChevronLeft, ChevronRight, X, Edit,
     Receipt, FileText, DollarSign, Truck, AlertCircle,
-    ChevronDown, ChevronUp, Save,
+    ChevronDown, ChevronUp, Save, Download,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
 import { formatDate } from '@/lib/utils';
+import { cookieUtils } from '@/lib/utils/cookies';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { useDebounce } from '@/lib/hooks/useDebounce';
 import {
@@ -68,6 +69,7 @@ export default function DebitMemosPage() {
     const [expandedMemoId, setExpandedMemoId] = useState<string | null>(null);
     const [editing, setEditing] = useState(false);
     const [editForm, setEditForm] = useState<Record<string, any>>({});
+    const [downloadingMemoId, setDownloadingMemoId] = useState<string | null>(null);
 
     const addToast = useCallback((msg: string, type: Toast['type']) => {
         setToasts(prev => [...prev, { id: Date.now().toString(), message: msg, type }]);
@@ -144,6 +146,47 @@ export default function DebitMemosPage() {
         }
     };
 
+    const handleDownload = async (memoId: string) => {
+        setDownloadingMemoId(memoId);
+        try {
+            const token = cookieUtils.getAuthToken();
+            if (!token) {
+                addToast('Not authenticated', 'error');
+                setDownloadingMemoId(null);
+                return;
+            }
+
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+            const response = await fetch(`${apiUrl}/admin/debit-memos/${memoId}/download`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to download debit memo');
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Debit_Memo_${memoId.substring(0, 8)}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            addToast('Debit memo downloaded', 'success');
+        } catch (error) {
+            console.error('Download error:', error);
+            addToast('Failed to download debit memo', 'error');
+        } finally {
+            setDownloadingMemoId(null);
+        }
+    };
+
     const totalPages = memoPagination?.totalPages || 1;
 
     return (
@@ -209,11 +252,11 @@ export default function DebitMemosPage() {
                             const pb = getPaymentBadge(memo.paymentStatus);
 
                             return (
-                                <div key={memo.id} className={`border-b border-gray-200 last:border-b-0 ${isExpanded ? 'ring-1 ring-inset ring-blue-200' : highlightId === memo.id ? 'bg-yellow-50' : ''}`}>
+                                <div key={memo.id} className={`border-b border-gray-200 last:border-b-0 ${isExpanded ? 'ring-2 ring-inset ring-teal-300' : highlightId === memo.id ? 'bg-yellow-50' : ''}`}>
                                     {/* Collapsed Row */}
                                     <button
                                         onClick={() => toggleExpand(memo.id)}
-                                        className={`w-full flex items-center gap-3 px-4 py-2 transition-colors text-left ${isExpanded ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-50'}`}
+                                        className={`w-full flex items-center gap-3 px-4 py-2 transition-colors text-left ${isExpanded ? 'bg-teal-50 hover:bg-teal-100' : 'hover:bg-gray-50'}`}
                                     >
                                         <div className="flex-1 grid grid-cols-2 md:grid-cols-7 gap-2">
                                             <div>
@@ -245,12 +288,12 @@ export default function DebitMemosPage() {
                                                 <Badge variant={pb.variant}><span className="text-[10px]">{memo.paymentStatus}</span></Badge>
                                             </div>
                                         </div>
-                                        {isExpanded ? <ChevronUp className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />}
+                                        {isExpanded ? <ChevronUp className="w-3.5 h-3.5 text-teal-600 flex-shrink-0" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />}
                                     </button>
 
                                     {/* Expanded Detail */}
                                     {isExpanded && (
-                                        <div className="border-t border-blue-200 bg-blue-50/60 px-4 py-3">
+                                        <div className="border-t border-teal-200 bg-teal-50/50 px-4 py-3">
                                             {!currentMemo || currentMemo.id !== memo.id ? (
                                                 <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-primary-500" /></div>
                                             ) : (
@@ -258,13 +301,26 @@ export default function DebitMemosPage() {
                                                     {/* Actions */}
                                                     <div className="flex justify-end">
                                                         {!editing ? (
-                                                            <button onClick={() => startEditing(currentMemo)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors">
-                                                                <Edit className="w-3 h-3" /> Edit
-                                                            </button>
+                                                            <div className="flex gap-1.5">
+                                                                <button 
+                                                                    onClick={() => handleDownload(currentMemo.id)} 
+                                                                    disabled={downloadingMemoId === currentMemo.id}
+                                                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                >
+                                                                    {downloadingMemoId === currentMemo.id ? (
+                                                                        <><Loader2 className="w-3 h-3 animate-spin" /> Downloading...</>
+                                                                    ) : (
+                                                                        <><Download className="w-3 h-3" /> Download</>
+                                                                    )}
+                                                                </button>
+                                                                <button onClick={() => startEditing(currentMemo)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer">
+                                                                    <Edit className="w-3 h-3" /> Edit
+                                                                </button>
+                                                            </div>
                                                         ) : (
                                                             <div className="flex gap-1.5">
-                                                                <button onClick={() => setEditing(false)} className="px-2.5 py-1 rounded text-xs border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                                                                <button onClick={handleSave} disabled={isActionLoading} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                                                                <button onClick={() => setEditing(false)} className="px-2.5 py-1 rounded text-xs border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer">Cancel</button>
+                                                                <button onClick={handleSave} disabled={isActionLoading} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors cursor-pointer">
                                                                     {isActionLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
                                                                     Save
                                                                 </button>

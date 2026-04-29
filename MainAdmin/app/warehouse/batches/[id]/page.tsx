@@ -5,12 +5,13 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import {
     ArrowLeft, Loader2, AlertCircle, Layers, Lock, Send,
     Plus, ChevronDown, ChevronUp, Package,
-    CheckCircle, X, Search, ExternalLink, Trash2, UserX,
+    CheckCircle, X, Search, ExternalLink, Trash2, UserX, Download,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
 import { formatDate, formatDateTime } from '@/lib/utils';
+import { cookieUtils } from '@/lib/utils/cookies';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import {
     fetchBatchDetail, assignReturnsToBatch, closeBatch, submitCardinal,
@@ -81,6 +82,7 @@ export default function BatchDetailPage() {
     const [selectedReturnIds, setSelectedReturnIds] = useState<string[]>([]);
     const [assignSearch, setAssignSearch] = useState('');
     const [returnsExpanded, setReturnsExpanded] = useState(true);
+    const [downloadingReturnId, setDownloadingReturnId] = useState<string | null>(null);
 
     const addToast = useCallback((msg: string, type: Toast['type']) => {
         setToasts(prev => [...prev, { id: Date.now().toString(), message: msg, type }]);
@@ -195,6 +197,38 @@ export default function BatchDetailPage() {
             r.fedexTracking?.toLowerCase().includes(s)
         );
     });
+
+    const handleDownloadSummary = async (returnId: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setDownloadingReturnId(returnId);
+        try {
+            const token = cookieUtils.getAuthToken();
+            if (!token) { addToast('Not authenticated', 'error'); setDownloadingReturnId(null); return; }
+
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+            const response = await fetch(`${apiUrl}/admin/debit-memos/summary/${returnId}/${batchId}`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+
+            if (!response.ok) throw new Error('Failed to download debit memo summary');
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `DM_Summary_${returnId.substring(0, 8)}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            addToast('Debit memo summary downloaded', 'success');
+        } catch {
+            addToast('Failed to download debit memo summary', 'error');
+        } finally {
+            setDownloadingReturnId(null);
+        }
+    };
 
     // ─────────────────────────────────────────────────────────
 
@@ -363,6 +397,7 @@ export default function BatchDetailPage() {
                                             <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Items</th>
                                             <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Value</th>
                                             <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Tracking</th>
+                                            <th className="px-3 py-1.5 text-center text-[10px] font-semibold text-gray-500 uppercase">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
@@ -375,6 +410,19 @@ export default function BatchDetailPage() {
                                                 <td className="px-3 py-1.5 text-xs text-gray-700">{rt.totalItems}</td>
                                                 <td className="px-3 py-1.5 text-xs font-medium">{formatCurrency(rt.totalReturnableValue || 0)}</td>
                                                 <td className="px-3 py-1.5 text-[11px] text-gray-500">{rt.fedexTracking || '—'}</td>
+                                                <td className="px-3 py-1.5 text-center">
+                                                    <button
+                                                        onClick={(e) => handleDownloadSummary(rt.id, e)}
+                                                        disabled={downloadingReturnId === rt.id}
+                                                        className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        {downloadingReturnId === rt.id ? (
+                                                            <><Loader2 className="w-3 h-3 animate-spin" /> Downloading...</>
+                                                        ) : (
+                                                            <><Download className="w-3 h-3" /> DM Summary</>
+                                                        )}
+                                                    </button>
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>
