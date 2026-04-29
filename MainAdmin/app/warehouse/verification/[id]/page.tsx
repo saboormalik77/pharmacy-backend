@@ -134,6 +134,9 @@ export default function VerificationSessionPage() {
     const [completeNotes, setCompleteNotes] = useState('');
     const [completedSummary, setCompletedSummary] = useState<CompleteVerificationSummary | null>(null);
 
+    // Mark as missing
+    const [markingMissingId, setMarkingMissingId] = useState<string | null>(null);
+
     // Discrepancy resolve
     const [resolvingId, setResolvingId] = useState<string | null>(null);
     const [resolveNotes, setResolveNotes] = useState('');
@@ -257,11 +260,13 @@ export default function VerificationSessionPage() {
         verificationStatus: string,
         actualQuantity?: number,
         conditionNotes?: string,
+        nonReturnableReason?: string,
     ): Promise<boolean> => {
         const body: any = { verificationStatus };
         if (verificationStatus === 'missing') body.actualQuantity = 0;
         else if (actualQuantity != null) body.actualQuantity = actualQuantity;
         if (conditionNotes) body.conditionNotes = conditionNotes;
+        if (nonReturnableReason) body.nonReturnableReason = nonReturnableReason;
 
         const result = await dispatch(verifyItemV2({ transactionId: returnId, itemId, ...body }));
         if (!verifyItemV2.fulfilled.match(result)) {
@@ -271,8 +276,18 @@ export default function VerificationSessionPage() {
         return true;
     };
 
-    // Verification logic moved to dedicated page
-    // const handleVerifyItem = async () => { ... };
+    const handleMarkAsMissing = async (itemId: string) => {
+        setMarkingMissingId(itemId);
+        try {
+            const success = await runPhysicalVerification(itemId, 'missing', undefined, undefined, 'other');
+            if (success) {
+                showToast('Item marked as missing', 'success');
+                await loadSummary();
+            }
+        } finally {
+            setMarkingMissingId(null);
+        }
+    };
 
     const findScannedItemMatch = (scanData: BarcodeScanResponse): { item: VerificationV2Item | null; error?: string } => {
         if (!v2Summary?.items?.length) return { item: null };
@@ -985,6 +1000,7 @@ export default function VerificationSessionPage() {
                         <span className="text-rose-700">{policyCounts.nonReturnable} non-returnable</span>
                         <span className="text-amber-700">{policyCounts.wineCellar} wine cellar</span>
                         <span className="text-orange-700">{policyCounts.destruction} destruction</span>
+                        <span className="text-gray-500">{counts.missing} missing</span>
                         <span className="text-gray-400">{policyCounts.pending} pending policy</span>
                     </div>
                 </div>
@@ -1129,7 +1145,7 @@ export default function VerificationSessionPage() {
                                             <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Qty</th>
                                             <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Verification</th>
                                             <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Return Status</th>
-                                            {/* <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Action</th> */}
+                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
@@ -1180,19 +1196,30 @@ export default function VerificationSessionPage() {
                                                         <span className="text-[10px] text-gray-400">pending</span>
                                                     )}
                                                 </td>
-                                                {/* <td className="px-3 py-2">
+                                                <td className="px-3 py-2">
                                                     {!item.verificationStatus ? (
                                                         <button
                                                             type="button"
-                                                            onClick={() => openVerifyItem(item)}
-                                                            className="px-2 py-1 text-[10px] font-medium rounded-md transition text-white bg-primary-600 hover:bg-primary-700"
+                                                            disabled={markingMissingId === item.id}
+                                                            onClick={() => handleMarkAsMissing(item.id)}
+                                                            className="px-2 py-1 text-[10px] font-medium rounded-md transition text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
                                                         >
-                                                            Verify
+                                                            {markingMissingId === item.id ? (
+                                                                <span className="flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" />Marking...</span>
+                                                            ) : (
+                                                                'Mark as Missing'
+                                                            )}
                                                         </button>
                                                     ) : (
-                                                        <span className="text-[10px] text-gray-300">—</span>
+                                                        <button
+                                                            type="button"
+                                                            disabled
+                                                            className="px-2 py-1 text-[10px] font-medium rounded-md bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
+                                                        >
+                                                            Mark as Missing
+                                                        </button>
                                                     )}
-                                                </td> */}
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>

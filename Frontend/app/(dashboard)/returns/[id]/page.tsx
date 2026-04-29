@@ -695,7 +695,7 @@ export default function ReturnDetailPage() {
                                 Print Job Sheet
                             </button>
                         )}
-                        {canDoAction(tx, 'edit') && (
+                        {/* {canDoAction(tx, 'edit') && (
                             <button
                                 onClick={() => setEditModal(true)}
                                 className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -703,7 +703,7 @@ export default function ReturnDetailPage() {
                             >
                                 <Edit className="w-4 h-4" />
                             </button>
-                        )}
+                        )} */}
                         {canDoAction(tx, 'delete') && (
                             <button
                                 onClick={() => setDeleteModal(true)}
