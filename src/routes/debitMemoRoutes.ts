@@ -379,7 +379,7 @@ router.post('/:id/schedule-pickup', scheduleDebitMemoPickupHandler);
  *       404:
  *         description: Debit memo not found
  */
-router.post('/:id/record-payment', upload.single('creditMemo'), recordPaymentHandler);
+router.post('/:id/record-payment', upload.single('creditMemo') as any, recordPaymentHandler);
 
 /**
  * @swagger
@@ -415,7 +415,7 @@ router.post('/:id/record-payment', upload.single('creditMemo'), recordPaymentHan
  *       404:
  *         description: Debit memo not found
  */
-router.patch('/:id/update-payment', upload.single('creditMemo'), updatePaymentHandler);
+router.patch('/:id/update-payment', upload.single('creditMemo') as any, updatePaymentHandler);
 
 /**
  * @swagger

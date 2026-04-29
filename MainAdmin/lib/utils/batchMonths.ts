@@ -1,10 +1,10 @@
 /**
  * Build selectable months from the current calendar month forward (no past months),
- * up to monthsForward ahead, excluding months that already have a batch (YYYY-MM).
+ * up to monthsForward ahead (default 46), excluding months that already have a batch (YYYY-MM).
  */
 export function buildAvailableBatchMonthOptions(
     usedMonths: string[],
-    monthsForward = 24
+    monthsForward = 46
 ): { value: string; label: string }[] {
     const used = new Set(usedMonths.map((m) => (m.length >= 7 ? m.slice(0, 7) : m)));
     const out: { value: string; label: string }[] = [];

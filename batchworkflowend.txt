@@ -107,8 +107,12 @@ $$;
 -- 3. Execute the cleanup for the specific batch
 -- ────────────────────────────────────────────────────────────
 
--- Clean up the "batchess · April 2028" batch
-SELECT skip_workflow_by_batch_name('batchess', '2028-04-01'::DATE);
+-- "batch May 2028" · May 2028 (Post-Closeout Workflow — Cardinal Invoice .xlsx step)
+-- batch_name must match return_batches.batch_name exactly.
+SELECT skip_workflow_by_batch_name('batch May 2028', '2028-05-01'::DATE);
+
+-- If steps still show in UI, run this once (replace batch id from return_batches):
+-- DELETE FROM batch_workflow_steps WHERE batch_id = '<uuid>';
 
 -- Grant permissions
 GRANT EXECUTE ON FUNCTION skip_post_closeout_workflow(UUID) TO authenticated, anon, service_role;

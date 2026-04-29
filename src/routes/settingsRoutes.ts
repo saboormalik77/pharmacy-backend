@@ -26,7 +26,7 @@ router.patch('/', updateSettings);
 router.post('/change-password', changePasswordHandler);
 
 // Document upload (DEA / State Pharmacy License)
-router.post('/upload-document', documentUpload.single('file'), uploadDocument);
+router.post('/upload-document', documentUpload.single('file') as any, uploadDocument);
 
 // FCR Store Settings (pharmacy-facing)
 router.get('/store-settings', getStoreSettings);

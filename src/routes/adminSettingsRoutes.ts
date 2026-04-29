@@ -436,7 +436,7 @@ router.get('/profile', getAdminProfileHandler);
  *         description: Internal server error
  */
 router.post('/reset-password', resetPasswordHandler);
-router.post('/upload-logo', requirePermission('settings'), uploadLogoMiddleware, uploadLogoHandler);
+router.post('/upload-logo', requirePermission('settings'), uploadLogoMiddleware as any, uploadLogoHandler);
 
 export default router;
 

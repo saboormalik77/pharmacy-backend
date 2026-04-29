@@ -102,7 +102,7 @@ app.use(cors({
 }));
 
 // Swagger Documentation
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/api-docs', swaggerUi.serve as any, swaggerUi.setup(swaggerSpec) as any);
 
 // Webhook route (must be before JSON middleware to get raw body)
 import { handleWebhook } from './controllers/webhookController';

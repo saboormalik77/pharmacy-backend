@@ -15,7 +15,7 @@ import {
   deleteHandler,
   updateFinalizeStepsHandler,
 } from '../controllers/returnTransactionController';
-import { unassignSingleReturnHandler } from '../controllers/batchController';
+import { unassignSingleReturnHandler, downloadPharmacyItemizedReturnHandler } from '../controllers/batchController';
 import {
   createShipmentHandler,
   schedulePickupHandler,
@@ -440,6 +440,36 @@ router.get('/:id/manifest-data', authenticateAny, manifestDataHandler);
  *         description: No CII items found or return not found
  */
 router.get('/:id/dea-form-222', authenticateAny, deaForm222Handler);
+
+// ============================================================
+// GET    /api/return-transactions/:id/itemized-return — Pharmacy Itemized Return XLSX
+// ============================================================
+/**
+ * @swagger
+ * /api/return-transactions/{id}/itemized-return:
+ *   get:
+ *     summary: Download Pharmacy Itemized Return as XLSX
+ *     description: |
+ *       Generates a Pharmacy Itemized Return XLSX in the Cardinal Invoice format.
+ *       Includes manufacturer summary with CVN, debit memo numbers, amounts, and pieces.
+ *     tags: [Return Transactions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: XLSX file
+ *         content:
+ *           application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+ *             schema: { type: string, format: binary }
+ *       404:
+ *         description: Return not found
+ */
+router.get('/:id/itemized-return', authenticateAny, downloadPharmacyItemizedReturnHandler);
 
 // ============================================================
 // POST   /api/return-transactions/:id/create-shipment — FedEx API

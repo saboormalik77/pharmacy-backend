@@ -814,7 +814,7 @@ router.get('/:id', getMarketplaceDealByIdHandler);
  *       500:
  *         description: Internal server error
  */
-router.post('/', uploadImage.single('image'), createMarketplaceDealHandler);
+router.post('/', uploadImage.single('image') as any, createMarketplaceDealHandler);
 
 /**
  * @swagger
@@ -928,7 +928,7 @@ router.post('/', uploadImage.single('image'), createMarketplaceDealHandler);
  *       500:
  *         description: Internal server error
  */
-router.patch('/:id', uploadImage.single('image'), updateMarketplaceDealHandler);
+router.patch('/:id', uploadImage.single('image') as any, updateMarketplaceDealHandler);
 
 /**
  * @swagger

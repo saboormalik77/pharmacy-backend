@@ -10,6 +10,7 @@ import {
 import { Badge } from '@/components/ui/Badge';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
 import { formatDate, formatDateTime } from '@/lib/utils';
+import { cookieUtils } from '@/lib/utils/cookies';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import {
     fetchBatchDetail, clearCurrentBatch, clearError,
@@ -40,7 +41,7 @@ const WORKFLOW_STEPS = [
         key: 'cardinal_generated',
         stateKey: 'cardinalGenerated' as const,
         label: 'Generate Cardinal Invoice',
-        description: 'Download the Cardinal CSV file for this batch.',
+        description: 'Download the Cardinal Invoice PDF for this batch.',
         icon: Download,
         color: 'blue',
     },
@@ -78,7 +79,6 @@ export default function BatchWorkflowPage() {
 
     const {
         currentBatch: batch,
-        batchReturns,
         batchMemos,
         isLoading,
         isActionLoading,
@@ -118,30 +118,86 @@ export default function BatchWorkflowPage() {
     const handleGenerateCardinal = async () => {
         if (!batch) return;
 
-        const rows: string[] = [
-            'License Plate,Pharmacy,Items,Returnable Value,Non-Returnable Value,Status',
-            ...batchReturns.map(r =>
-                [
-                    r.licensePlate || '',
-                    (r.pharmacyName || '').replace(/,/g, ' '),
-                    r.totalItems ?? 0,
-                    r.totalReturnableValue ?? 0,
-                    r.totalNonReturnableValue ?? 0,
-                    r.status || '',
-                ].join(',')
-            ),
-        ];
-        const csv = rows.join('\n');
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `cardinal_${batch.batchName.replace(/\s+/g, '_')}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
+        try {
+            const token = cookieUtils.getAuthToken();
+            if (!token) {
+                addToast('Not signed in. Please log in again.', 'error');
+                return;
+            }
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
-        await handleCompleteStep('cardinal_generated');
-        addToast('Cardinal file downloaded and step saved.', 'success');
+            // 1. Download Cardinal Invoice PDF
+            const pdfResponse = await fetch(`${apiUrl}/admin/batches/${batchId}/cardinal-invoice`, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'X-Tenant-Domain': typeof window !== 'undefined' ? window.location.hostname : '',
+                },
+            });
+
+            if (!pdfResponse.ok) {
+                const errorData = await pdfResponse.json().catch(() => ({ message: 'Failed to download' }));
+                throw new Error(errorData.message || 'Failed to download Cardinal Invoice');
+            }
+
+            const pdfBlob = await pdfResponse.blob();
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            const pdfLink = document.createElement('a');
+            pdfLink.href = pdfUrl;
+
+            const pdfContentDisposition = pdfResponse.headers.get('Content-Disposition');
+            let pdfFilename = `Cardinal_Invoice_${batch.batchName.replace(/\s+/g, '_')}.pdf`;
+            if (pdfContentDisposition) {
+                const filenameMatch = pdfContentDisposition.match(/filename="?([^";\n]+)"?/);
+                if (filenameMatch) pdfFilename = filenameMatch[1];
+            }
+
+            pdfLink.download = pdfFilename;
+            pdfLink.click();
+            URL.revokeObjectURL(pdfUrl);
+
+            // 2. Download Pharmacy Itemized Return XLSX files
+            const xlsxResponse = await fetch(`${apiUrl}/admin/batches/${batchId}/pharmacy-returns`, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'X-Tenant-Domain': typeof window !== 'undefined' ? window.location.hostname : '',
+                },
+            });
+
+            if (!xlsxResponse.ok) {
+                const errorData = await xlsxResponse.json().catch(() => ({ message: 'Failed to download' }));
+                throw new Error(errorData.message || 'Failed to download Pharmacy Returns');
+            }
+
+            const xlsxData = await xlsxResponse.json();
+            const files = xlsxData.data?.files || [];
+            
+            // Download each XLSX file
+            for (const file of files) {
+                const byteCharacters = atob(file.base64);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const fileBlob = new Blob([byteArray], { 
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                });
+                
+                const fileUrl = URL.createObjectURL(fileBlob);
+                const fileLink = document.createElement('a');
+                fileLink.href = fileUrl;
+                fileLink.download = file.filename;
+                fileLink.click();
+                URL.revokeObjectURL(fileUrl);
+            }
+
+            await handleCompleteStep('cardinal_generated');
+            addToast(`Cardinal Invoice (PDF) and ${files.length} Pharmacy Return (XLSX) file(s) downloaded. Step saved.`, 'success');
+        } catch (error: unknown) {
+            addToast(error instanceof Error ? error.message : 'Failed to generate Cardinal Invoice', 'error');
+        }
     };
 
     const handleSendCardinal = async () => {

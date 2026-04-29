@@ -2,6 +2,14 @@ import { Request, Response, NextFunction } from 'express';
 import { catchAsync } from '../utils/catchAsync';
 import { AppError } from '../utils/appError';
 import * as batchService from '../services/batchService';
+import {
+  generateCardinalInvoicePdf,
+  getCardinalInvoiceFilename,
+  generatePharmacyReturnXlsx,
+  getPharmacyReturnFilename,
+  generateAllPharmacyReturnXlsx,
+  getPharmacyDebitMemoData,
+} from '../services/cardinalInvoiceService';
 
 // ============================================================
 // GET /api/admin/batches — List batches
@@ -257,5 +265,74 @@ export const completeBatchWorkflowStepHandler = catchAsync(
       message: `Step '${step}' marked as complete`,
       data: workflow,
     });
+  }
+);
+
+// ============================================================
+// Cardinal Invoice & Pharmacy Itemized Return (New Format)
+// ============================================================
+
+// GET /api/admin/batches/:id/cardinal-invoice — Download Cardinal Invoice PDF
+export const downloadCardinalInvoiceHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const batchId = req.params.id;
+    
+    // Get batch to determine filename
+    const { batch } = await batchService.getBatch(batchId);
+    
+    // Generate PDF
+    const buffer = await generateCardinalInvoicePdf(batchId);
+    const filename = getCardinalInvoiceFilename(batch.batchMonth);
+    
+    // Send file
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', buffer.length);
+    res.end(buffer);
+  }
+);
+
+// GET /api/admin/batches/:id/pharmacy-returns — Get all pharmacy itemized return XLSX files as JSON (base64)
+export const downloadAllPharmacyReturnsHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const batchId = req.params.id;
+    
+    // Get all pharmacy XLSX files
+    const xlsxFiles = await generateAllPharmacyReturnXlsx(batchId);
+    
+    if (xlsxFiles.length === 0) {
+      throw new AppError('No pharmacy returns found in this batch', 400);
+    }
+    
+    // Return as JSON with base64 encoded XLSX files
+    const files = xlsxFiles.map(file => ({
+      filename: file.filename,
+      base64: file.buffer.toString('base64'),
+    }));
+    
+    res.json({
+      status: 'success',
+      data: { files },
+    });
+  }
+);
+
+// GET /api/admin/return-transactions/:id/itemized-return — Download single pharmacy itemized return XLSX
+export const downloadPharmacyItemizedReturnHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const transactionId = req.params.id;
+    
+    // Get pharmacy data for filename
+    const data = await getPharmacyDebitMemoData(transactionId);
+    
+    // Generate XLSX
+    const buffer = await generatePharmacyReturnXlsx(transactionId);
+    const filename = getPharmacyReturnFilename(data.pharmacyName, data.batchMonth);
+    
+    // Send file
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', buffer.length);
+    res.end(buffer);
   }
 );
