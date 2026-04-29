@@ -1049,18 +1049,18 @@ export default function AddItemsPage() {
 
                         <hr className="my-3 border-gray-100" />
                         <div className="flex items-center justify-between mb-2">
-                            <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Item Status</h2>
+                            {/* <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Item Status</h2> */}
                             <span className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded">
                                 Policy/Wine Cellar/Destruction handled in warehouse verification
                             </span>
                         </div>
 
-                        <div className="flex flex-wrap gap-3 mb-2">
+                        {/* <div className="flex flex-wrap gap-3 mb-2">
                             <label className="flex items-center gap-1.5 text-xs cursor-pointer">
                                 <input type="radio" name="returnStatus" value="tbd" checked={form.returnStatus === 'tbd'} onChange={() => updateField('returnStatus', 'tbd')} className="text-primary-600 focus:ring-primary-500" />
                                 <span className="font-medium text-gray-700">Add Item (Status determined at warehouse)</span>
                             </label>
-                        </div>
+                        </div> */}
 
                         <div className="grid grid-cols-2 gap-2">
                             <div>
