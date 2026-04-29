@@ -1051,18 +1051,18 @@ export default function AddItemsPage() {
 
                         <hr className="my-3 border-gray-100" />
                         <div className="flex items-center justify-between mb-2">
-                            <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Item Status</h2>
+                            {/* <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Item Status</h2> */}
                             <span className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded">
                                 Policy/Wine Cellar/Destruction handled in warehouse verification
                             </span>
                         </div>
 
-                        <div className="flex flex-wrap gap-3 mb-2">
+                        {/* <div className="flex flex-wrap gap-3 mb-2">
                             <label className="flex items-center gap-1.5 text-xs cursor-pointer">
                                 <input type="radio" name="returnStatus" value="tbd" checked={form.returnStatus === 'tbd'} onChange={() => updateField('returnStatus', 'tbd')} className="text-primary-600 focus:ring-primary-500" />
                                 <span className="font-medium text-gray-700">Add Item (Status determined at warehouse)</span>
                             </label>
-                        </div>
+                        </div> */}
 
                         <div className="grid grid-cols-2 gap-2">
                             <div>
@@ -1097,106 +1097,6 @@ export default function AddItemsPage() {
                         </div>
                     </div>
                     </>
-                )}
-
-                {/* Policy Modal */}
-                {policyModalOpen && (
-                    <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setPolicyModalOpen(false)}>
-                        <div className="bg-white rounded-lg max-w-md w-full shadow-2xl" onClick={e => e.stopPropagation()}>
-                            <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50 rounded-t-lg">
-                                <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-1.5">
-                                    <ShieldCheck className="w-4 h-4 text-blue-600" /> Manufacturer Return Policy
-                                </h2>
-                                <button onClick={() => setPolicyModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
-                            </div>
-
-                            <div className="px-4 py-3">
-                                {isPolicyChecking ? (
-                                    <div className="flex flex-col items-center py-8 gap-2 text-gray-500">
-                                        <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
-                                        <p className="text-xs">Checking manufacturer policy...</p>
-                                    </div>
-                                ) : !policyAutoCheck ? (
-                                    <div className="text-center py-6 text-gray-500">
-                                        <Info className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                                        <p className="text-sm font-medium">No policy data available</p>
-                                        <p className="text-xs text-gray-400 mt-1">
-                                            {form.ndc || form.manufacturer ? 'No matching policy found in the system.' : 'Scan or enter a product first.'}
-                                        </p>
-                                        {(form.ndc && form.expirationDate) && (
-                                            <button onClick={async () => { await runPolicyCheck(form.ndc, form.expirationDate, form.dosageForm || undefined); }} className="mt-3 px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 inline-flex items-center gap-1 mx-auto">
-                                                <ShieldCheck className="w-3.5 h-3.5" /> Check Now
-                                            </button>
-                                        )}
-                                    </div>
-                                ) : (
-                                    <div className="space-y-3">
-                                        <div className={`flex items-center gap-2 rounded px-3 py-2 ${
-                                            policyAutoCheck.status === 'returnable' ? 'bg-green-100 border border-green-300' :
-                                            policyAutoCheck.status === 'non_returnable' ? 'bg-red-100 border border-red-300' :
-                                            'bg-yellow-100 border border-yellow-300'
-                                        }`}>
-                                            <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                                policyAutoCheck.status === 'returnable' ? 'bg-green-200' :
-                                                policyAutoCheck.status === 'non_returnable' ? 'bg-red-200' : 'bg-yellow-200'
-                                            }`}>
-                                                {policyAutoCheck.status === 'returnable' ? <CheckCircle className="w-4 h-4 text-green-700" /> :
-                                                 policyAutoCheck.status === 'non_returnable' ? <Ban className="w-4 h-4 text-red-700" /> :
-                                                 <AlertTriangle className="w-4 h-4 text-yellow-700" />}
-                                            </div>
-                                            <div>
-                                                <p className={`text-xs font-bold ${
-                                                    policyAutoCheck.status === 'returnable' ? 'text-green-800' :
-                                                    policyAutoCheck.status === 'non_returnable' ? 'text-red-800' : 'text-yellow-800'
-                                                }`}>
-                                                    {policyAutoCheck.status === 'returnable' ? 'RETURNABLE' : policyAutoCheck.status === 'non_returnable' ? 'NON-RETURNABLE' : 'TBD — No Policy Found'}
-                                                </p>
-                                                {policyAutoCheck.reason && <p className="text-[10px] text-gray-600 mt-0.5 capitalize">{policyAutoCheck.reason.replace(/_/g, ' ')}</p>}
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {policyAutoCheck.manufacturerName && <PolicyDetail label="Manufacturer" value={policyAutoCheck.manufacturerName} />}
-                                            {policyAutoCheck.destination && <PolicyDetail label="Destination" value={policyAutoCheck.destination} capitalize />}
-                                            {policyAutoCheck.windowStart && <PolicyDetail label="Window Start" value={policyAutoCheck.windowStart} />}
-                                            {policyAutoCheck.windowEnd && <PolicyDetail label="Window End" value={policyAutoCheck.windowEnd} />}
-                                            {policyAutoCheck.expectedReturnableDate && <PolicyDetail label="Returnable From" value={policyAutoCheck.expectedReturnableDate} highlight="purple" />}
-                                            {policyAutoCheck.discountRate != null && <PolicyDetail label="Discount Rate" value={`${policyAutoCheck.discountRate}%`} />}
-                                            {policyAutoCheck.reimbursementType && <PolicyDetail label="Reimbursement" value={policyAutoCheck.reimbursementType} capitalize />}
-                                            {policyAutoCheck.partialsAccepted != null && <PolicyDetail label="Partials" value={policyAutoCheck.partialsAccepted ? 'Yes' : 'No'} highlight={policyAutoCheck.partialsAccepted ? 'green' : 'red'} />}
-                                            {policyAutoCheck.returnableWithinPolicyPeriod != null && (
-                                                <PolicyDetail
-                                                    label="Returnable in window"
-                                                    value={policyAutoCheck.returnableWithinPolicyPeriod ? 'Yes' : 'No'}
-                                                    highlight={policyAutoCheck.returnableWithinPolicyPeriod ? 'green' : 'red'}
-                                                />
-                                            )}
-                                            {policyAutoCheck.policyNumber != null && <PolicyDetail label="Policy #" value={String(policyAutoCheck.policyNumber)} />}
-                                            {policyAutoCheck.autoRaEmail && <PolicyDetail label="RA Email" value={policyAutoCheck.autoRaEmail} />}
-                                        </div>
-
-                                        {policyAutoCheck.policyDescription && (
-                                            <div>
-                                                <p className="text-[10px] font-medium text-gray-500 mb-1">Policy Notes</p>
-                                                <p className="text-[11px] text-gray-700 bg-gray-50 rounded p-2 border leading-relaxed">{policyAutoCheck.policyDescription}</p>
-                                            </div>
-                                        )}
-
-                                        {policyAutoCheck.status === 'tbd' && (
-                                            <div className="flex items-start gap-1.5 bg-yellow-50 border border-yellow-200 rounded p-2 text-[11px] text-yellow-800">
-                                                <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
-                                                No policy matched. Set the return status manually using the radio buttons.
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="flex justify-end px-4 py-3 border-t bg-gray-50 rounded-b-lg">
-                                <button onClick={() => setPolicyModalOpen(false)} className="px-3 py-1.5 text-xs font-medium bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors">Close</button>
-                            </div>
-                        </div>
-                    </div>
                 )}
 
                 {/* Camera Scanner Modal */}
