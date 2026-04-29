@@ -69,6 +69,7 @@ export default function DebitMemosPage() {
     const [expandedMemoId, setExpandedMemoId] = useState<string | null>(null);
     const [editing, setEditing] = useState(false);
     const [editForm, setEditForm] = useState<Record<string, any>>({});
+    const [downloadingMemoId, setDownloadingMemoId] = useState<string | null>(null);
 
     const addToast = useCallback((msg: string, type: Toast['type']) => {
         setToasts(prev => [...prev, { id: Date.now().toString(), message: msg, type }]);
@@ -146,10 +147,12 @@ export default function DebitMemosPage() {
     };
 
     const handleDownload = async (memoId: string) => {
+        setDownloadingMemoId(memoId);
         try {
             const token = cookieUtils.getAuthToken();
             if (!token) {
                 addToast('Not authenticated', 'error');
+                setDownloadingMemoId(null);
                 return;
             }
 
@@ -179,6 +182,8 @@ export default function DebitMemosPage() {
         } catch (error) {
             console.error('Download error:', error);
             addToast('Failed to download debit memo', 'error');
+        } finally {
+            setDownloadingMemoId(null);
         }
     };
 
@@ -297,8 +302,16 @@ export default function DebitMemosPage() {
                                                     <div className="flex justify-end">
                                                         {!editing ? (
                                                             <div className="flex gap-1.5">
-                                                                <button onClick={() => handleDownload(currentMemo.id)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer">
-                                                                    <Download className="w-3 h-3" /> Download
+                                                                <button 
+                                                                    onClick={() => handleDownload(currentMemo.id)} 
+                                                                    disabled={downloadingMemoId === currentMemo.id}
+                                                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                >
+                                                                    {downloadingMemoId === currentMemo.id ? (
+                                                                        <><Loader2 className="w-3 h-3 animate-spin" /> Downloading...</>
+                                                                    ) : (
+                                                                        <><Download className="w-3 h-3" /> Download</>
+                                                                    )}
                                                                 </button>
                                                                 <button onClick={() => startEditing(currentMemo)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer">
                                                                     <Edit className="w-3 h-3" /> Edit

@@ -406,14 +406,39 @@ export const getDebitMemoPdfData = async (memoId: string): Promise<any> => {
   const memoResult = await getDebitMemo(memoId);
   const { memo, items } = memoResult;
 
-  // Get pharmacy details (physical_address is a JSONB column)
+  // Get pharmacy details including primary wholesaler (physical_address is a JSONB column)
   const { data: pharmacyData, error: pharmacyError } = await sb
     .from('pharmacy')
-    .select('id, name, physical_address, phone, fax_number, dea_number, dea_expiration_date')
+    .select('id, name, physical_address, phone, fax_number, dea_number, dea_expiration_date, primary_wholesaler, wholesaler_account_number')
     .eq('id', memo.pharmacyId)
     .single();
 
   if (pharmacyError) throw new AppError(`Failed to get pharmacy: ${pharmacyError.message}`, 400);
+
+  // Get warehouse address from warehouses table (for top header)
+  const { data: warehouseData, error: warehouseError } = await sb
+    .from('warehouses')
+    .select('name, contact_name, phone, street, city, state, zip')
+    .eq('is_default', true)
+    .single();
+
+  if (warehouseError) {
+    console.warn('Failed to get warehouse address:', warehouseError.message);
+  }
+
+  // Get primary wholesaler/processor details (from processors table)
+  let wholesalerInfo: any = null;
+  if (pharmacyData.primary_wholesaler) {
+    const { data: processorData, error: processorError } = await sb
+      .from('processors')
+      .select('id, name, address, city, state, zip_code, phone, fax')
+      .eq('name', pharmacyData.primary_wholesaler)
+      .single();
+
+    if (!processorError && processorData) {
+      wholesalerInfo = processorData;
+    }
+  }
 
   // Get labeler details from manufacturer_policies table
   const { data: labelerData, error: labelerError } = await sb
@@ -493,23 +518,39 @@ export const getDebitMemoPdfData = async (memoId: string): Promise<any> => {
     items: items.map(item => {
       const transactionItem = item.transactionItemId ? transactionItemsMap.get(item.transactionItemId) : null;
       
+      // Use quantity from debit memo item if transaction item not available
+      const totalQty = item.quantity || 0;
+      const isPartial = transactionItem?.is_partial || false;
+      
       return {
         ndc: item.ndc,
         drugName: item.productName || transactionItem?.proprietary_name || transactionItem?.generic_name,
         lotNumber: item.lotNumber,
         expirationDate: item.expirationDate,
-        packageSize: transactionItem?.package_size || null,
-        fullQuantity: transactionItem?.quantity_full || 0,
-        partialQuantity: transactionItem?.quantity_partial || 0,
+        packageSize: transactionItem?.full_package_size || transactionItem?.package_size || '1',
+        fullQuantity: isPartial ? 0 : (transactionItem?.quantity || totalQty),
+        partialQuantity: isPartial ? (transactionItem?.quantity || totalQty) : 0,
         askPrice: item.askPrice,
-        askValue: item.askPrice ? item.askPrice * item.quantity : null,
+        askValue: item.askPrice ? item.askPrice * totalQty : null,
       };
     }),
+    // Top header: Warehouse/FCR company info
+    warehouse: {
+      companyName: 'FCR First Class Return LLC',
+      address: warehouseData ? [
+        warehouseData.street,
+        warehouseData.city,
+        warehouseData.state,
+        warehouseData.zip
+      ].filter(Boolean).join(', ') : null,
+      phone: warehouseData?.phone || null,
+    },
+    // "Remit Credits to:" section - Hardcoded for now
     remitTo: {
-      companyName: 'FCR Pharmacy Returns LLC',
-      address: '123 Business Way, Suite 100, City, ST 12345',
-      phone: '(555) 123-4567',
-      fax: '(555) 123-4568',
+      companyName: 'Cardinal Health',
+      address: '7000 Cardinal Place, Dublin, Ohio 42017',
+      phone: '(614) 757-4804',
+      fax: '(614) 553-6255',
     },
   };
 

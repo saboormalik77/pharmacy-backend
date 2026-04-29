@@ -6,6 +6,7 @@
  */
 
 import PDFDocument from 'pdfkit';
+import bwipjs from 'bwip-js';
 
 // ============================================================
 // Types
@@ -52,11 +53,16 @@ export interface DebitMemoPdfData {
     askPrice: number | null;
     askValue: number | null;
   }>;
+  warehouse: {
+    companyName: string;
+    address: string | null;
+    phone: string | null;
+  };
   remitTo: {
     companyName: string;
-    address: string;
-    phone: string;
-    fax: string;
+    address: string | null;
+    phone: string | null;
+    fax: string | null;
   };
 }
 
@@ -102,106 +108,96 @@ export async function generateDebitMemoPdf(data: DebitMemoPdfData): Promise<Buff
   let yPos = 30;
 
   // ══════════════════════════════════════════════════════════
+  // TOP HEADER - COMPANY INFORMATION (Centered)
+  // ══════════════════════════════════════════════════════════
+  doc.fontSize(14).font('Helvetica-Bold').text(data.warehouse.companyName, 30, yPos, { align: 'center', width: pageWidth });
+  yPos += 18;
+  
+  if (data.warehouse.address) {
+    doc.fontSize(11).font('Helvetica').text(data.warehouse.address, 30, yPos, { align: 'center', width: pageWidth });
+    yPos += 14;
+  }
+  
+  if (data.warehouse.phone) {
+    doc.fontSize(11).text(`Phone: ${data.warehouse.phone}`, 30, yPos, { align: 'center', width: pageWidth });
+    yPos += 18;
+  }
+  
+  // Horizontal divider line
+  doc.strokeColor('#000000').lineWidth(1)
+    .moveTo(30, yPos).lineTo(582, yPos).stroke();
+  yPos += 20;
+
+  // ══════════════════════════════════════════════════════════
   // STORE/PHARMACY INFORMATION (Top Left)
   // ══════════════════════════════════════════════════════════
-  doc.fontSize(10).font('Helvetica-Bold').text('STORE:', 30, yPos);
-  yPos += 12;
-  doc.fontSize(9).font('Helvetica').text(data.pharmacy.name, 30, yPos);
-  yPos += 11;
+  doc.fontSize(11).font('Helvetica-Bold').text('Store Name:', 30, yPos);
+  doc.fontSize(11).font('Helvetica').text(data.pharmacy.name, 120, yPos);
+  yPos += 15;
   
   if (data.pharmacy.address) {
-    doc.text(data.pharmacy.address, 30, yPos);
-    yPos += 11;
+    doc.fontSize(11).font('Helvetica-Bold').text('Street:', 30, yPos);
+    doc.fontSize(11).font('Helvetica').text(data.pharmacy.address, 120, yPos);
+    yPos += 15;
   }
   
   if (data.pharmacy.city || data.pharmacy.state || data.pharmacy.zipCode) {
+    doc.fontSize(11).font('Helvetica-Bold').text('C/S/Z:', 30, yPos);
     const cityStateZip = [
       data.pharmacy.city,
       data.pharmacy.state,
       data.pharmacy.zipCode
     ].filter(Boolean).join(', ');
-    doc.text(cityStateZip, 30, yPos);
-    yPos += 11;
+    doc.fontSize(11).font('Helvetica').text(cityStateZip, 120, yPos);
+    yPos += 15;
   }
   
-  if (data.pharmacy.phone) {
-    doc.text(`Phone: ${data.pharmacy.phone}`, 30, yPos);
-    yPos += 11;
-  }
-  
-  if (data.pharmacy.fax) {
-    doc.text(`Fax: ${data.pharmacy.fax}`, 30, yPos);
-    yPos += 11;
-  }
-  
-  if (data.pharmacy.deaNumber) {
-    doc.text(`DEA #: ${data.pharmacy.deaNumber}`, 30, yPos);
-    yPos += 11;
-  }
-  
-  if (data.pharmacy.deaExpiration) {
-    doc.text(`DEA Exp: ${fmtDate(data.pharmacy.deaExpiration)}`, 30, yPos);
-    yPos += 11;
+  if (data.pharmacy.deaNumber && data.pharmacy.deaExpiration) {
+    doc.fontSize(11).font('Helvetica-Bold').text('DEA # & Exp:', 30, yPos);
+    doc.fontSize(11).font('Helvetica').text(`${data.pharmacy.deaNumber}    ${fmtDate(data.pharmacy.deaExpiration)}`, 120, yPos);
+    yPos += 15;
   }
 
   // ══════════════════════════════════════════════════════════
-  // DEBIT MEMO TITLE (Top Right)
+  // REMIT CREDITS TO SECTION (Top Right)
   // ══════════════════════════════════════════════════════════
-  doc.fontSize(20).font('Helvetica-Bold').text('DEBIT MEMO', 400, 30, { align: 'right', width: 152 });
+  const rightColX = 340;
+  let rightYPos = yPos - 75; // Start at same level as pharmacy info
   
-  // Memo Number
-  doc.fontSize(10).font('Helvetica-Bold').text(`#${data.memo.memoNumber}`, 400, 55, { align: 'right', width: 152 });
+  doc.fontSize(11).font('Helvetica-Bold').text('Remit Credits to:', rightColX, rightYPos);
+  rightYPos += 15;
   
-  // Date
-  doc.fontSize(9).font('Helvetica').text(`Date: ${fmtDate(data.memo.createdAt)}`, 400, 70, { align: 'right', width: 152 });
+  doc.fontSize(11).font('Helvetica-Bold').text(data.remitTo.companyName, rightColX + 20, rightYPos);
+  rightYPos += 15;
+  
+  if (data.remitTo.address) {
+    doc.fontSize(11).font('Helvetica').text(data.remitTo.address, rightColX + 20, rightYPos);
+    rightYPos += 15;
+  }
+  
+  if (data.remitTo.phone) {
+    doc.fontSize(11).font('Helvetica').text(`Phone: ${data.remitTo.phone}`, rightColX + 20, rightYPos);
+    rightYPos += 15;
+  }
+  
+  if (data.remitTo.fax) {
+    doc.fontSize(11).font('Helvetica').text(`Fax: ${data.remitTo.fax}`, rightColX + 20, rightYPos);
+    rightYPos += 15;
+  }
 
-  yPos = Math.max(yPos, 90);
-
-  // ══════════════════════════════════════════════════════════
-  // REMIT CREDITS TO SECTION
-  // ══════════════════════════════════════════════════════════
-  yPos += 10;
-  doc.fontSize(10).font('Helvetica-Bold').text('REMIT CREDITS TO:', 30, yPos);
-  yPos += 12;
-  
-  doc.fontSize(9).font('Helvetica').text(data.remitTo.companyName, 30, yPos);
-  yPos += 11;
-  doc.text(data.remitTo.address, 30, yPos);
-  yPos += 11;
-  doc.text(`Phone: ${data.remitTo.phone}`, 30, yPos);
-  yPos += 11;
-  doc.text(`Fax: ${data.remitTo.fax}`, 30, yPos);
-  yPos += 15;
+  yPos = Math.max(yPos, rightYPos + 10);
 
   // Divider Line
-  doc.strokeColor('#000000').lineWidth(1.5)
+  yPos += 10;
+  doc.strokeColor('#000000').lineWidth(1)
     .moveTo(30, yPos).lineTo(582, yPos).stroke();
   yPos += 15;
 
   // ══════════════════════════════════════════════════════════
   // MANUFACTURER/LABELER SECTION HEADER
   // ══════════════════════════════════════════════════════════
-  doc.fontSize(12).font('Helvetica-Bold').text(`MANUFACTURER/LABELER: ${data.labeler.labelerName}`, 30, yPos);
-  yPos += 12;
-  doc.fontSize(9).font('Helvetica').text(`Labeler ID: ${data.labeler.labelerId}`, 30, yPos);
-  
-  if (data.labeler.address || data.labeler.city || data.labeler.state) {
-    const labelerLocation = [
-      data.labeler.address,
-      data.labeler.city,
-      data.labeler.state,
-      data.labeler.zipCode
-    ].filter(Boolean).join(', ');
-    yPos += 11;
-    doc.text(labelerLocation, 30, yPos);
-  }
-  
-  if (data.labeler.phone) {
-    yPos += 11;
-    doc.text(`Phone: ${data.labeler.phone}`, 30, yPos);
-  }
-  
-  yPos += 15;
+  doc.fontSize(14).font('Helvetica-Bold').text(data.labeler.labelerName, 30, yPos, { align: 'center', width: pageWidth });
+  yPos += 20;
 
   // ══════════════════════════════════════════════════════════
   // LINE ITEMS TABLE
@@ -209,37 +205,39 @@ export async function generateDebitMemoPdf(data: DebitMemoPdfData): Promise<Buff
   
   // Table Header
   const tableTop = yPos;
-  doc.rect(30, tableTop, pageWidth, 16).fillAndStroke('#e0e0e0', '#000000');
+  doc.rect(30, tableTop, pageWidth, 18).fillAndStroke('#f0f0f0', '#000000');
   
-  doc.fillColor('#000000').fontSize(8).font('Helvetica-Bold');
+  doc.fillColor('#000000').fontSize(10).font('Helvetica-Bold');
   
   const colX = {
-    drugName: 32,
-    ndc: 160,
-    lot: 240,
-    exp: 290,
-    pkg: 340,
-    full: 390,
-    partial: 430,
-    price: 470,
-    value: 515,
+    num: 32,
+    ndc: 50,
+    drugName: 140,
+    lot: 280,
+    exp: 330,
+    pkg: 380,
+    full: 425,
+    partial: 460,
+    price: 500,
+    value: 540,
   };
   
   yPos = tableTop + 5;
-  doc.text('Drug Name', colX.drugName, yPos, { width: 125 });
-  doc.text('NDC', colX.ndc, yPos, { width: 75 });
+  doc.text(' ', colX.num, yPos, { width: 15 });
+  doc.text('NDC', colX.ndc, yPos, { width: 85 });
+  doc.text('Drug Name', colX.drugName, yPos, { width: 135 });
   doc.text('Lot #', colX.lot, yPos, { width: 45 });
   doc.text('Exp Date', colX.exp, yPos, { width: 45 });
-  doc.text('Pkg', colX.pkg, yPos, { width: 45 });
-  doc.text('Full', colX.full, yPos, { width: 35, align: 'right' });
-  doc.text('Part', colX.partial, yPos, { width: 35, align: 'right' });
-  doc.text('Price', colX.price, yPos, { width: 40, align: 'right' });
-  doc.text('Value', colX.value, yPos, { width: 37, align: 'right' });
+  doc.text('Pkg Size', colX.pkg, yPos, { width: 40 });
+  doc.text('Full Qty', colX.full, yPos, { width: 30, align: 'right' });
+  doc.text('Partial', colX.partial, yPos, { width: 35, align: 'right' });
+  doc.text('Price', colX.price, yPos, { width: 35, align: 'right' });
+  doc.text('Value', colX.value, yPos, { width: 42, align: 'right' });
   
-  yPos = tableTop + 18;
+  yPos = tableTop + 20;
   
   // Table Rows
-  doc.font('Helvetica').fontSize(7);
+  doc.font('Helvetica').fontSize(9);
   
   data.items.forEach((item, idx) => {
     // Check for page break
@@ -248,102 +246,115 @@ export async function generateDebitMemoPdf(data: DebitMemoPdfData): Promise<Buff
       yPos = 30;
     }
     
-    const rowHeight = 12;
+    const rowHeight = 14;
     
     // Alternating row background
     if (idx % 2 === 0) {
-      doc.rect(30, yPos - 2, pageWidth, rowHeight).fill('#f5f5f5');
+      doc.rect(30, yPos - 2, pageWidth, rowHeight).fill('#fafafa');
     }
     
     doc.fillColor('#000000');
     
-    // Drug Name (truncate if too long)
-    const drugName = (item.drugName || 'Unknown').substring(0, 40);
-    doc.text(drugName, colX.drugName, yPos, { width: 125 });
+    // Row number
+    doc.text(String(idx + 1) + '.', colX.num, yPos, { width: 15 });
     
     // NDC
-    doc.text(item.ndc || '—', colX.ndc, yPos, { width: 75 });
+    doc.text(item.ndc || '—', colX.ndc, yPos, { width: 85 });
+    
+    // Drug Name (truncate if too long)
+    const drugName = (item.drugName || 'Unknown').substring(0, 35);
+    doc.text(drugName, colX.drugName, yPos, { width: 135 });
     
     // Lot Number
     doc.text(item.lotNumber || '—', colX.lot, yPos, { width: 45 });
     
-    // Expiration Date
-    doc.text(fmtDate(item.expirationDate), colX.exp, yPos, { width: 45 });
+    // Expiration Date (shorter format: MM/YY)
+    const expDate = item.expirationDate ? new Date(item.expirationDate).toLocaleDateString('en-US', { month: '2-digit', year: '2-digit' }).replace('/', '/') : '—';
+    doc.text(expDate, colX.exp, yPos, { width: 45 });
     
     // Package Size
-    doc.text(item.packageSize || '—', colX.pkg, yPos, { width: 45 });
+    doc.text(item.packageSize || '—', colX.pkg, yPos, { width: 40 });
     
     // Full Quantity
-    doc.text(String(item.fullQuantity || 0), colX.full, yPos, { width: 35, align: 'right' });
+    doc.text(String(item.fullQuantity || 0), colX.full, yPos, { width: 30, align: 'right' });
     
     // Partial Quantity
     doc.text(String(item.partialQuantity || 0), colX.partial, yPos, { width: 35, align: 'right' });
     
     // Price
-    doc.text(fmt$(item.askPrice), colX.price, yPos, { width: 40, align: 'right' });
+    doc.text(fmt$(item.askPrice), colX.price, yPos, { width: 35, align: 'right' });
     
     // Value
-    doc.text(fmt$(item.askValue), colX.value, yPos, { width: 37, align: 'right' });
+    doc.text(fmt$(item.askValue), colX.value, yPos, { width: 42, align: 'right' });
     
     yPos += rowHeight;
     
     // Row bottom border
-    doc.strokeColor('#cccccc').lineWidth(0.5)
+    doc.strokeColor('#dddddd').lineWidth(0.5)
       .moveTo(30, yPos - 2).lineTo(582, yPos - 2).stroke();
   });
   
   // ══════════════════════════════════════════════════════════
   // SUBTOTAL (ERV This Labeler)
   // ══════════════════════════════════════════════════════════
-  yPos += 5;
-  doc.fontSize(10).font('Helvetica-Bold');
-  doc.text(`ERV This Labeler: ${fmt$(data.memo.totalAskValue)}`, 400, yPos, { align: 'right', width: 152 });
+  yPos += 10;
+  doc.fontSize(11).font('Helvetica-Bold');
+  doc.text('ERV This Labeler:', 420, yPos);
+  doc.text(fmt$(data.memo.totalAskValue), 520, yPos, { align: 'right', width: 62 });
   
-  yPos += 20;
+  yPos += 30;
 
   // ══════════════════════════════════════════════════════════
   // BATCH SHIP SECTION
   // ══════════════════════════════════════════════════════════
   if (data.memo.baggieManifest || data.memo.destination) {
-    yPos += 10;
-    doc.fontSize(10).font('Helvetica-Bold').text('BATCH SHIP THIS BAGGIE MANIFEST TO:', 30, yPos);
-    yPos += 12;
-    
-    if (data.memo.destination) {
-      doc.fontSize(9).font('Helvetica').text(`Destination: ${data.memo.destination}`, 30, yPos);
-      yPos += 11;
-    }
-    
-    if (data.memo.baggieManifest) {
-      doc.text(`Baggie Manifest: ${data.memo.baggieManifest}`, 30, yPos);
-      yPos += 11;
-    }
-    
-    if (data.memo.raNumber) {
-      doc.text(`RA Number: ${data.memo.raNumber}`, 30, yPos);
-      yPos += 11;
-    }
+    yPos += 20;
+    doc.fontSize(11).font('Helvetica-Bold').text(`Batch Ship This Baggie Manifest To:  ${data.memo.destination || ''}`, 30, yPos);
+    yPos += 20;
   }
 
   // ══════════════════════════════════════════════════════════
-  // BARCODE PLACEHOLDERS
+  // BARCODE SECTION
   // ══════════════════════════════════════════════════════════
   yPos += 20;
-  doc.fontSize(8).font('Helvetica');
-  doc.text(`Debit Memo Barcode: ${data.memo.memoNumber}`, 30, yPos);
-  yPos += 12;
-  doc.text(`DALLC Internal Use Barcode: ${data.memo.memoNumber}`, 30, yPos);
-  yPos += 12;
-  doc.text(`Date: ${fmtDate(data.memo.createdAt)}`, 30, yPos);
-
-  // ══════════════════════════════════════════════════════════
-  // FOOTER
-  // ══════════════════════════════════════════════════════════
-  doc.fontSize(7).font('Helvetica').fillColor('#999999');
-  doc.text(
-    `Debit Memo generated ${new Date().toLocaleString('en-US')}`,
-    30, 750, { align: 'center', width: pageWidth }
-  );
+  doc.strokeColor('#000000').lineWidth(2)
+    .moveTo(30, yPos).lineTo(582, yPos).stroke();
+  yPos += 15;
+  
+  // Generate barcode for debit memo number
+  try {
+    const barcodeBuffer = await bwipjs.toBuffer({
+      bcid: 'code128',
+      text: data.memo.memoNumber,
+      scale: 2,
+      height: 8,
+      includetext: false,
+    });
+    
+    doc.fontSize(11).font('Helvetica-Bold').text('Debit Memo:', 30, yPos);
+    yPos += 20;
+    
+    // Embed barcode image (smaller size)
+    doc.image(barcodeBuffer, 30, yPos, { width: 180 });
+    yPos += 45;
+    
+    // Show memo number below barcode
+    doc.fontSize(10).font('Helvetica').text(data.memo.memoNumber, 30, yPos);
+    yPos += 15;
+  } catch (error) {
+    console.error('Failed to generate barcode:', error);
+    // Fallback if barcode generation fails
+    doc.fontSize(11).font('Helvetica-Bold').text('Debit Memo:', 30, yPos);
+    yPos += 15;
+    doc.fontSize(10).font('Helvetica').text(data.memo.memoNumber, 30, yPos);
+    yPos += 20;
+  }
+  
+  doc.strokeColor('#000000').lineWidth(2)
+    .moveTo(30, yPos).lineTo(582, yPos).stroke();
+  yPos += 15;
+  
+  doc.fontSize(10).font('Helvetica').text(`${fmtDate(data.memo.createdAt)}`, 30, yPos);
 
   return pdfToBuffer(doc);
 }
