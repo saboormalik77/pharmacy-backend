@@ -820,7 +820,7 @@ export default function AddItemsPage() {
                                             </span>
                                         )}
                                     </div>
-                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-1 text-[11px]">
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-1 text-sm">
                                         <div><span className="text-gray-500">NDC:</span> <span className="font-semibold text-gray-900 font-mono">{item.ndc || '—'}</span></div>
                                         <div><span className="text-gray-500">Lot:</span> <span className="font-medium text-gray-800">{item.lotNumber || '—'}</span></div>
                                         <div><span className="text-gray-500">Exp:</span> <span className="font-medium text-gray-800">{item.expirationDate ? new Date(item.expirationDate).toLocaleDateString() : '—'}</span></div>
@@ -1492,12 +1492,12 @@ export default function AddItemsPage() {
                                     {policyAutoCheck.policyDescription && (
                                         <div>
                                             <p className="text-[10px] font-medium text-gray-500 mb-1">Policy Notes</p>
-                                            <p className="text-[11px] text-gray-700 bg-gray-50 rounded p-2 border leading-relaxed">{policyAutoCheck.policyDescription}</p>
+                                            <p className="text-sm text-gray-700 bg-gray-50 rounded p-2 border leading-relaxed">{policyAutoCheck.policyDescription}</p>
                                         </div>
                                     )}
 
                                     {policyAutoCheck.status === 'tbd' && (
-                                        <div className="flex items-start gap-1.5 bg-yellow-50 border border-yellow-200 rounded p-2 text-[11px] text-yellow-800">
+                                        <div className="flex items-start gap-1.5 bg-yellow-50 border border-yellow-200 rounded p-2 text-sm text-yellow-800">
                                             <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
                                             No policy matched. Set the return status manually using the radio buttons.
                                         </div>
@@ -1562,7 +1562,7 @@ function PolicyDetail({ label, value, capitalize, highlight }: {
     return (
         <div className="bg-gray-50 rounded p-2 border border-gray-100">
             <p className="text-[10px] text-gray-500 mb-0.5">{label}</p>
-            <p className={`text-xs ${valueClass} ${capitalize ? 'capitalize' : ''}`}>{value}</p>
+            <p className={`text-sm ${valueClass} ${capitalize ? 'capitalize' : ''}`}>{value}</p>
         </div>
     );
 }

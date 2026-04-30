@@ -458,27 +458,27 @@ export default function DebitMemosPage() {
                                                         ) : (
                                                             <div className="overflow-x-auto">
                                                                 <table className="min-w-full">
-                                                                    <thead className="bg-gray-50 border-b border-gray-200">
-                                                                        <tr>
-                                                                            <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">NDC</th>
-                                                                            <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Product</th>
-                                                                            <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Lot #</th>
-                                                                            <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Expires</th>
-                                                                            <th className="px-3 py-1.5 text-right text-[10px] font-semibold text-gray-500 uppercase">Qty</th>
-                                                                            <th className="px-3 py-1.5 text-right text-[10px] font-semibold text-gray-500 uppercase">Ask Price</th>
-                                                                            <th className="px-3 py-1.5 text-right text-[10px] font-semibold text-gray-500 uppercase">Received</th>
+                                                                    <thead>
+                                                                        <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">NDC</th>
+                                                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Product</th>
+                                                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Lot #</th>
+                                                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Expires</th>
+                                                                            <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Qty</th>
+                                                                            <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Ask Price</th>
+                                                                            <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Received</th>
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody className="divide-y divide-gray-100">
                                                                         {memoItems.map((item: DebitMemoItem) => (
                                                                             <tr key={item.id} className="hover:bg-gray-50">
-                                                                                <td className="px-3 py-1.5 text-[11px] font-mono text-gray-900">{item.ndc || '—'}</td>
-                                                                                <td className="px-3 py-1.5 text-[11px] text-gray-700">{item.productName || '—'}</td>
-                                                                                <td className="px-3 py-1.5 text-[11px] text-gray-700">{item.lotNumber || '—'}</td>
-                                                                                <td className="px-3 py-1.5 text-[11px] text-gray-500">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
-                                                                                <td className="px-3 py-1.5 text-[11px] text-right text-gray-700">{item.quantity}</td>
-                                                                                <td className="px-3 py-1.5 text-[11px] text-right font-medium">{item.askPrice != null ? formatCurrency(item.askPrice) : '—'}</td>
-                                                                                <td className="px-3 py-1.5 text-[11px] text-right font-medium">{item.receivedPrice != null ? formatCurrency(item.receivedPrice) : '—'}</td>
+                                                                                <td className="px-4 py-3 text-sm font-mono text-gray-900">{item.ndc || '—'}</td>
+                                                                                <td className="px-4 py-3 text-sm text-gray-700">{item.productName || '—'}</td>
+                                                                                <td className="px-4 py-3 text-sm text-gray-700">{item.lotNumber || '—'}</td>
+                                                                                <td className="px-4 py-3 text-sm text-gray-500">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
+                                                                                <td className="px-4 py-3 text-sm text-right text-gray-700">{item.quantity}</td>
+                                                                                <td className="px-4 py-3 text-sm text-right font-medium">{item.askPrice != null ? formatCurrency(item.askPrice) : '—'}</td>
+                                                                                <td className="px-4 py-3 text-sm text-right font-medium">{item.receivedPrice != null ? formatCurrency(item.receivedPrice) : '—'}</td>
                                                                             </tr>
                                                                         ))}
                                                                     </tbody>

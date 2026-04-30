@@ -336,15 +336,15 @@ export default function NDCPricingPage() {
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
-                            <tr className="bg-gray-50 border-b border-gray-200">
-                                <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">NDC</th>
-                                <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Product Name</th>
-                                <th className="text-right px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Current Price</th>
-                                <th className="text-right px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Est. Store Price</th>
-                                <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Source</th>
-                                <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Destination</th>
-                                <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Updated</th>
-                                <th className="text-center px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                            <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
+                                <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product Name</th>
+                                <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Current Price</th>
+                                <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Est. Store Price</th>
+                                <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Source</th>
+                                <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Destination</th>
+                                <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Updated</th>
+                                <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -362,26 +362,26 @@ export default function NDCPricingPage() {
                                 </tr>
                             ) : items.map(row => (
                                 <tr key={row.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                                    <td className="px-3 py-2">
-                                        <span className="font-mono text-xs font-semibold text-primary-600">{row.ndc}</span>
+                                    <td className="px-4 py-3">
+                                        <span className="font-mono text-sm font-semibold text-primary-600">{row.ndc}</span>
                                     </td>
-                                    <td className="px-3 py-2">
-                                        <span className="text-xs text-gray-900 truncate block max-w-[200px]">{row.productName || '—'}</span>
+                                    <td className="px-4 py-3">
+                                        <span className="text-sm text-gray-900 truncate block max-w-[200px]">{row.productName || '—'}</span>
                                     </td>
-                                    <td className="px-3 py-2 text-right font-mono text-xs font-medium text-gray-900">{fmt(row.currentPrice)}</td>
-                                    <td className="px-3 py-2 text-right font-mono text-xs text-gray-900">{fmt(row.estimatedStorePrice)}</td>
-                                    <td className="px-3 py-2">
+                                    <td className="px-4 py-3 text-right font-mono text-sm font-medium text-gray-900">{fmt(row.currentPrice)}</td>
+                                    <td className="px-4 py-3 text-right font-mono text-sm text-gray-900">{fmt(row.estimatedStorePrice)}</td>
+                                    <td className="px-4 py-3">
                                         {row.priceSource
                                             ? <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200 truncate max-w-[130px]">{row.priceSource}</span>
-                                            : <span className="text-gray-400 text-xs">—</span>}
+                                            : <span className="text-gray-400 text-sm">—</span>}
                                     </td>
-                                    <td className="px-3 py-2">
+                                    <td className="px-4 py-3">
                                         {row.closeOutDestination
                                             ? <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-50 text-purple-700 border border-purple-200 capitalize">{row.closeOutDestination}</span>
-                                            : <span className="text-gray-400 text-xs">—</span>}
+                                            : <span className="text-gray-400 text-sm">—</span>}
                                     </td>
-                                    <td className="px-3 py-2 text-xs text-gray-500">{fmtDate(row.updatedAt)}</td>
-                                    <td className="px-3 py-2">
+                                    <td className="px-4 py-3 text-sm text-gray-500">{fmtDate(row.updatedAt)}</td>
+                                    <td className="px-4 py-3">
                                         <div className="flex items-center justify-center gap-1">
                                             <button
                                                 onClick={() => openEdit(row)}

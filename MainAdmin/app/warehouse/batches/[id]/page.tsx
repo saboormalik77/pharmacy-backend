@@ -389,28 +389,28 @@ export default function BatchDetailPage() {
                         ) : (
                             <div className="overflow-x-auto">
                                 <table className="min-w-full">
-                                    <thead className="bg-gray-50 border-b border-gray-200">
-                                        <tr>
-                                            <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">License Plate</th>
-                                            <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Pharmacy</th>
-                                            <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Status</th>
-                                            <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Items</th>
-                                            <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Value</th>
-                                            <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Tracking</th>
-                                            <th className="px-3 py-1.5 text-center text-[10px] font-semibold text-gray-500 uppercase">Action</th>
+                                    <thead>
+                                        <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">License Plate</th>
+                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Pharmacy</th>
+                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Status</th>
+                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Items</th>
+                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Value</th>
+                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Tracking</th>
+                                            <th className="px-4 py-3.5 text-center text-xs font-semibold uppercase tracking-wider text-white">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
                                         {batchReturns.map((rt: ReturnTransaction) => (
                                             <tr key={rt.id} className="hover:bg-gray-50 cursor-pointer"
                                                 onClick={() => router.push(`/warehouse/returns/${rt.id}`)}>
-                                                <td className="px-3 py-1.5 text-xs font-medium text-gray-900">{rt.licensePlate}</td>
-                                                <td className="px-3 py-1.5 text-xs text-gray-700">{rt.pharmacyName}</td>
-                                                <td className="px-3 py-1.5"><Badge variant="default"><span className="text-[10px]">{rt.status?.replace(/_/g, ' ')}</span></Badge></td>
-                                                <td className="px-3 py-1.5 text-xs text-gray-700">{rt.totalItems}</td>
-                                                <td className="px-3 py-1.5 text-xs font-medium">{formatCurrency(rt.totalReturnableValue || 0)}</td>
-                                                <td className="px-3 py-1.5 text-[11px] text-gray-500">{rt.fedexTracking || '—'}</td>
-                                                <td className="px-3 py-1.5 text-center">
+                                                <td className="px-4 py-3 text-sm font-medium text-gray-900">{rt.licensePlate}</td>
+                                                <td className="px-4 py-3 text-sm text-gray-700">{rt.pharmacyName}</td>
+                                                <td className="px-4 py-3"><Badge variant="default"><span className="text-[10px]">{rt.status?.replace(/_/g, ' ')}</span></Badge></td>
+                                                <td className="px-4 py-3 text-sm text-gray-700">{rt.totalItems}</td>
+                                                <td className="px-4 py-3 text-sm font-medium">{formatCurrency(rt.totalReturnableValue || 0)}</td>
+                                                <td className="px-4 py-3 text-sm text-gray-500">{rt.fedexTracking || '—'}</td>
+                                                <td className="px-4 py-3 text-center">
                                                     <button
                                                         onClick={(e) => handleDownloadSummary(rt.id, e)}
                                                         disabled={downloadingReturnId === rt.id}

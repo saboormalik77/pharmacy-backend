@@ -368,7 +368,7 @@ export default function BuyingGroupsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Buying Groups</h1>
+          <h1 className="text-lg font-bold text-gray-900">Buying Groups</h1>
           <p className="text-gray-600 mt-1">Manage your buying groups and their admin accounts</p>
         </div>
         <Button variant="primary" onClick={openCreateModal} className="flex items-center gap-2">
@@ -445,27 +445,27 @@ export default function BuyingGroupsPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-gradient-to-r from-indigo-500 to-indigo-400 text-white">
                 <tr>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Name</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 hidden md:table-cell">Contact Email</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 hidden lg:table-cell">Phone</th>
-                  <th className="text-center px-4 py-3 font-medium text-gray-600">Admins</th>
-                  <th className="text-center px-4 py-3 font-medium text-gray-600">Status</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 hidden sm:table-cell">Created</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-600">Actions</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Name</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden md:table-cell">Contact Email</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">Phone</th>
+                  <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Admins</th>
+                  <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Status</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">Created</th>
+                  <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {buyingGroups.map((group) => (
-                  <tr key={group.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 font-medium text-gray-900">{group.name}</td>
-                    <td className="px-4 py-3 text-gray-600 hidden md:table-cell">{group.contactEmail || '-'}</td>
-                    <td className="px-4 py-3 text-gray-600 hidden lg:table-cell">{group.contactPhone || '-'}</td>
-                    <td className="px-4 py-3 text-center text-gray-600">{group.adminCount}</td>
-                    <td className="px-4 py-3 text-center">{statusBadge(group.status)}</td>
-                    <td className="px-4 py-3 text-gray-500 hidden sm:table-cell">{formatDate(group.createdAt)}</td>
-                    <td className="px-4 py-3">
+                  <tr key={group.id} className="odd:bg-white even:bg-gray-50/40 hover:bg-gray-50 transition-colors">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{group.name}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600 hidden md:table-cell">{group.contactEmail || '-'}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600 hidden lg:table-cell">{group.contactPhone || '-'}</td>
+                    <td className="px-4 py-3 text-sm text-center text-gray-600">{group.adminCount}</td>
+                    <td className="px-4 py-3 text-sm text-center">{statusBadge(group.status)}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500 hidden sm:table-cell">{formatDate(group.createdAt)}</td>
+                    <td className="px-4 py-3 text-sm">
                       <div className="flex items-center justify-end gap-1">
                         <button onClick={() => openViewModal(group)} className="p-1.5 rounded hover:bg-gray-100 text-gray-500 hover:text-indigo-600" title="View">
                           <Eye className="w-4 h-4" />

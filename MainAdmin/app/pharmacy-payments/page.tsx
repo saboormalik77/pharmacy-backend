@@ -682,20 +682,20 @@ function PharmacyPaymentsPageContent() {
           <>
             <div className="overflow-x-auto">
               <table className="w-full table-auto">
-                <thead className="bg-gray-50 border-b border-gray-100">
-                  <tr>
+                <thead>
+                  <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
                     {['Payment ID', 'Check #', 'Pharmacy', 'Batch', 'Total Credit', 'Payout Amount', 'Type', 'Status', 'Created', 'Actions'].map(h => (
-                      <th key={h} className="px-3 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider">{h}</th>
+                      <th key={h} className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-100">
                   {payments.map((payment) => (
                     <tr key={payment.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-3 py-1.5 whitespace-nowrap text-xs font-mono text-gray-500">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm font-mono text-gray-500">
                         #{payment.id.slice(0, 8)}…
                       </td>
-                      <td className="px-3 py-1.5 whitespace-nowrap">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         {payment.checkNumber ? (
                           <button
                             onClick={() => handleViewCheckPdf(payment.checkNumber!)}
@@ -707,33 +707,33 @@ function PharmacyPaymentsPageContent() {
                             <ExternalLink className="w-2.5 h-2.5" />
                           </button>
                         ) : (
-                          <span className="text-xs text-gray-400">—</span>
+                          <span className="text-sm text-gray-400">—</span>
                         )}
                       </td>
-                      <td className="px-3 py-1.5 whitespace-nowrap">
-                        <div className="text-xs font-medium text-gray-900">{payment.pharmacyName || 'N/A'}</div>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">{payment.pharmacyName || 'N/A'}</div>
                         <div className="text-[10px] text-gray-400">{payment.pharmacyId.slice(0, 8)}…</div>
                       </td>
-                      <td className="px-3 py-1.5 whitespace-nowrap">
-                        <div className="text-xs text-gray-900">{payment.batchName || 'N/A'}</div>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{payment.batchName || 'N/A'}</div>
                         <div className="text-[10px] text-gray-400">{payment.batchId ? payment.batchId.slice(0, 8) + '…' : 'None'}</div>
                       </td>
-                      <td className="px-3 py-1.5 whitespace-nowrap text-xs font-medium text-gray-900">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
                         ${payment.totalCreditReceived?.toFixed(2) || '0.00'}
                       </td>
-                      <td className="px-3 py-1.5 whitespace-nowrap text-xs font-semibold text-green-600">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold text-green-600">
                         ${payment.pharmacyPayout?.toFixed(2) || '0.00'}
                       </td>
-                      <td className="px-3 py-1.5 whitespace-nowrap">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         {payment.paymentType ? (
                           <Badge variant={payment.paymentType === 'ocs' ? 'default' : payment.paymentType === 'por' ? 'warning' : 'secondary'}>
                             {payment.paymentType.toUpperCase()}
                           </Badge>
                         ) : (
-                          <span className="text-xs text-gray-400">—</span>
+                          <span className="text-sm text-gray-400">—</span>
                         )}
                       </td>
-                      <td className="px-3 py-1.5 whitespace-nowrap">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center gap-1">
                           {getStatusIcon(payment.status)}
                           <Badge variant={getStatusVariant(payment.status)}>
@@ -741,10 +741,10 @@ function PharmacyPaymentsPageContent() {
                           </Badge>
                         </div>
                       </td>
-                      <td className="px-3 py-1.5 whitespace-nowrap text-xs text-gray-500">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                         {payment.createdAt ? new Date(payment.createdAt).toLocaleDateString() : 'N/A'}
                       </td>
-                      <td className="px-3 py-1.5">
+                      <td className="px-4 py-3">
                         <div className="flex flex-wrap items-center gap-1">
                           <button
                             type="button"

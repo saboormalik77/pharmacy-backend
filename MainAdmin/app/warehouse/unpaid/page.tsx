@@ -326,18 +326,18 @@ export default function UnpaidMemosPage() {
                         ) : (
                             <div className="overflow-x-auto">
                                 <table className="w-full">
-                                    <thead className="bg-gray-50 border-b border-gray-200">
-                                        <tr>
-                                            <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Memo #</th>
-                                            <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Manufacturer</th>
-                                            <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Pharmacy</th>
-                                            <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Destination</th>
-                                            <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Asked</th>
-                                            <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Received</th>
-                                            <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Outstanding</th>
-                                            <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Days</th>
-                                            <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
-                                            <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
+                                    <thead>
+                                        <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                            <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Memo #</th>
+                                            <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Manufacturer</th>
+                                            <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Pharmacy</th>
+                                            <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Destination</th>
+                                            <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Asked</th>
+                                            <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Received</th>
+                                            <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Outstanding</th>
+                                            <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Days</th>
+                                            <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Status</th>
+                                            <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
@@ -346,24 +346,24 @@ export default function UnpaidMemosPage() {
                                             const days = (memo as any).daysOutstanding ?? 0;
                                             return (
                                                 <tr key={memo.id} className="hover:bg-gray-50">
-                                                    <td className="px-3 py-1.5 text-xs font-medium text-gray-900">{memo.memoNumber}</td>
-                                                    <td className="px-3 py-1.5 text-xs text-gray-600">{memo.labelerName || '—'}</td>
-                                                    <td className="px-3 py-1.5 text-xs text-gray-600">{(memo as any).pharmacyName || '—'}</td>
-                                                    <td className="px-3 py-1.5 text-xs text-gray-600">{memo.destination || '—'}</td>
-                                                    <td className="px-3 py-1.5 text-xs text-right font-medium">{fmt(memo.amountRequested)}</td>
-                                                    <td className="px-3 py-1.5 text-xs text-right">{fmt(memo.amountReceived)}</td>
-                                                    <td className="px-3 py-1.5 text-xs text-right font-semibold text-red-600">{fmt(outstanding)}</td>
-                                                    <td className="px-3 py-1.5 text-center">
-                                                        <span className={`inline-flex items-center gap-0.5 text-xs ${days > 30 ? 'text-red-600 font-semibold' : days > 14 ? 'text-orange-500' : 'text-gray-600'}`}>
+                                                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{memo.memoNumber}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">{memo.labelerName || '—'}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">{(memo as any).pharmacyName || '—'}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">{memo.destination || '—'}</td>
+                                                    <td className="px-4 py-3 text-sm text-right font-medium">{fmt(memo.amountRequested)}</td>
+                                                    <td className="px-4 py-3 text-sm text-right">{fmt(memo.amountReceived)}</td>
+                                                    <td className="px-4 py-3 text-sm text-right font-semibold text-red-600">{fmt(outstanding)}</td>
+                                                    <td className="px-4 py-3 text-center">
+                                                        <span className={`inline-flex items-center gap-0.5 text-sm ${days > 30 ? 'text-red-600 font-semibold' : days > 14 ? 'text-orange-500' : 'text-gray-600'}`}>
                                                             <Clock className="w-3 h-3" />{days}d
                                                         </span>
                                                     </td>
-                                                    <td className="px-3 py-1.5 text-center">
+                                                    <td className="px-4 py-3 text-center">
                                                         <Badge variant={getPaymentBadge(memo.paymentStatus).variant}>
                                                             <span className="text-[10px]">{memo.paymentStatus}</span>
                                                         </Badge>
                                                     </td>
-                                                    <td className="px-3 py-1.5">
+                                                    <td className="px-4 py-3">
                                                         <div className="flex items-center justify-end gap-1">
                                                             {isDebitMemoShipped(memo) ? (
                                                                 <>
@@ -464,33 +464,33 @@ export default function UnpaidMemosPage() {
                         ) : (
                             <div className="overflow-x-auto">
                                 <table className="w-full">
-                                    <thead className="bg-gray-50 border-b border-gray-200">
-                                        <tr>
-                                            <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Memo #</th>
-                                            <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Manufacturer</th>
-                                            <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Pharmacy</th>
-                                            <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Destination</th>
-                                            <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Asked</th>
-                                            <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Received</th>
-                                            <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
-                                            <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
+                                    <thead>
+                                        <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                            <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Memo #</th>
+                                            <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Manufacturer</th>
+                                            <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Pharmacy</th>
+                                            <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Destination</th>
+                                            <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Asked</th>
+                                            <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Received</th>
+                                            <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Status</th>
+                                            <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
                                         {(paidMemos ?? []).map(memo => (
                                             <tr key={memo.id} className="hover:bg-gray-50">
-                                                <td className="px-3 py-1.5 text-xs font-medium text-gray-900">{memo.memoNumber}</td>
-                                                <td className="px-3 py-1.5 text-xs text-gray-600">{memo.labelerName || '—'}</td>
-                                                <td className="px-3 py-1.5 text-xs text-gray-600">{memo.pharmacyName || '—'}</td>
-                                                <td className="px-3 py-1.5 text-xs text-gray-600">{memo.destination || '—'}</td>
-                                                <td className="px-3 py-1.5 text-xs text-right font-medium">{fmt(memo.amountRequested)}</td>
-                                                <td className="px-3 py-1.5 text-xs text-right text-green-600 font-semibold">{fmt(memo.amountReceived)}</td>
-                                                <td className="px-3 py-1.5 text-center">
+                                                <td className="px-4 py-3 text-sm font-medium text-gray-900">{memo.memoNumber}</td>
+                                                <td className="px-4 py-3 text-sm text-gray-600">{memo.labelerName || '—'}</td>
+                                                <td className="px-4 py-3 text-sm text-gray-600">{memo.pharmacyName || '—'}</td>
+                                                <td className="px-4 py-3 text-sm text-gray-600">{memo.destination || '—'}</td>
+                                                <td className="px-4 py-3 text-sm text-right font-medium">{fmt(memo.amountRequested)}</td>
+                                                <td className="px-4 py-3 text-sm text-right text-green-600 font-semibold">{fmt(memo.amountReceived)}</td>
+                                                <td className="px-4 py-3 text-center">
                                                     <Badge variant="success">
                                                         <span className="text-[10px]">paid</span>
                                                     </Badge>
                                                 </td>
-                                                <td className="px-3 py-1.5">
+                                                <td className="px-4 py-3">
                                                     <div className="flex items-center justify-end">
                                                         <button
                                                             type="button"
@@ -569,25 +569,25 @@ export default function UnpaidMemosPage() {
                         ) : (
                             <div className="overflow-x-auto">
                                 <table className="w-full">
-                                    <thead className="bg-gray-50 border-b border-gray-200">
-                                        <tr>
-                                            <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">{analyticsGroupBy === 'manufacturer' ? 'Manufacturer' : 'Period'}</th>
-                                            <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Memos</th>
-                                            <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Total Ask</th>
-                                            <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Total Received</th>
-                                            <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Difference</th>
-                                            <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Pay %</th>
+                                    <thead>
+                                        <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                            <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">{analyticsGroupBy === 'manufacturer' ? 'Manufacturer' : 'Period'}</th>
+                                            <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Memos</th>
+                                            <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Total Ask</th>
+                                            <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Total Received</th>
+                                            <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Difference</th>
+                                            <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Pay %</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
                                         {askVsReceived.map((row: AskVsReceivedRow, i: number) => (
                                             <tr key={i} className="hover:bg-gray-50">
-                                                <td className="px-3 py-1.5 text-xs font-medium text-gray-900">{analyticsGroupBy === 'manufacturer' ? (row.labelerName || row.labelerId || '—') : (row.period || '—')}</td>
-                                                <td className="px-3 py-1.5 text-xs text-center">{row.memoCount ?? '—'}</td>
-                                                <td className="px-3 py-1.5 text-xs text-right">{fmt(row.totalAskValue ?? row.totalAsk ?? 0)}</td>
-                                                <td className="px-3 py-1.5 text-xs text-right text-green-600 font-medium">{fmt(row.totalReceived)}</td>
-                                                <td className="px-3 py-1.5 text-xs text-right text-red-600">{fmt(row.difference)}</td>
-                                                <td className="px-3 py-1.5 text-xs text-center">
+                                                <td className="px-4 py-3 text-sm font-medium text-gray-900">{analyticsGroupBy === 'manufacturer' ? (row.labelerName || row.labelerId || '—') : (row.period || '—')}</td>
+                                                <td className="px-4 py-3 text-sm text-center">{row.memoCount ?? '—'}</td>
+                                                <td className="px-4 py-3 text-sm text-right">{fmt(row.totalAskValue ?? row.totalAsk ?? 0)}</td>
+                                                <td className="px-4 py-3 text-sm text-right text-green-600 font-medium">{fmt(row.totalReceived)}</td>
+                                                <td className="px-4 py-3 text-sm text-right text-red-600">{fmt(row.difference)}</td>
+                                                <td className="px-4 py-3 text-sm text-center">
                                                     <span className={`font-semibold ${row.payPercent >= 80 ? 'text-green-600' : row.payPercent >= 50 ? 'text-orange-500' : 'text-red-600'}`}>{pct(row.payPercent)}</span>
                                                 </td>
                                             </tr>
@@ -628,37 +628,37 @@ export default function UnpaidMemosPage() {
                         ) : (
                             <div className="overflow-x-auto">
                                 <table className="w-full">
-                                    <thead className="bg-gray-50 border-b border-gray-200">
-                                        <tr>
-                                            <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Manufacturer</th>
-                                            <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Total</th>
-                                            <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Unpaid</th>
-                                            <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Paid</th>
-                                            <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Ask Value</th>
-                                            <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Paid Amt</th>
-                                            <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Outstanding</th>
-                                            <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Avg Pay %</th>
-                                            <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Avg Days</th>
+                                    <thead>
+                                        <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                            <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Manufacturer</th>
+                                            <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Total</th>
+                                            <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Unpaid</th>
+                                            <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Paid</th>
+                                            <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Ask Value</th>
+                                            <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Paid Amt</th>
+                                            <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Outstanding</th>
+                                            <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Avg Pay %</th>
+                                            <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Avg Days</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
                                         {manufacturerSummary.map((row: ManufacturerPaymentSummary, i: number) => (
                                             <tr key={i} className="hover:bg-gray-50">
-                                                <td className="px-3 py-1.5">
-                                                    <p className="text-xs font-medium text-gray-900">{row.labelerName || '—'}</p>
+                                                <td className="px-4 py-3">
+                                                    <p className="text-sm font-medium text-gray-900">{row.labelerName || '—'}</p>
                                                     {row.labelerId && <p className="text-[10px] text-gray-400">{row.labelerId}</p>}
                                                 </td>
-                                                <td className="px-3 py-1.5 text-xs text-center">{row.totalMemos}</td>
-                                                <td className="px-3 py-1.5 text-xs text-center">{row.unpaidMemos > 0 ? <span className="text-red-600 font-semibold">{row.unpaidMemos}</span> : <span className="text-gray-400">0</span>}</td>
-                                                <td className="px-3 py-1.5 text-xs text-center text-green-600">{row.paidMemos}</td>
-                                                <td className="px-3 py-1.5 text-xs text-right">{fmt(row.totalAskValue)}</td>
-                                                <td className="px-3 py-1.5 text-xs text-right text-green-600">{fmt(row.totalPaidAmount)}</td>
-                                                <td className="px-3 py-1.5 text-xs text-right font-semibold text-red-600">{fmt(row.outstandingAmount)}</td>
-                                                <td className="px-3 py-1.5 text-xs text-center">
+                                                <td className="px-4 py-3 text-sm text-center">{row.totalMemos}</td>
+                                                <td className="px-4 py-3 text-sm text-center">{row.unpaidMemos > 0 ? <span className="text-red-600 font-semibold">{row.unpaidMemos}</span> : <span className="text-gray-400">0</span>}</td>
+                                                <td className="px-4 py-3 text-sm text-center text-green-600">{row.paidMemos}</td>
+                                                <td className="px-4 py-3 text-sm text-right">{fmt(row.totalAskValue)}</td>
+                                                <td className="px-4 py-3 text-sm text-right text-green-600">{fmt(row.totalPaidAmount)}</td>
+                                                <td className="px-4 py-3 text-sm text-right font-semibold text-red-600">{fmt(row.outstandingAmount)}</td>
+                                                <td className="px-4 py-3 text-sm text-center">
                                                     <span className={`font-semibold ${row.averagePayPercent >= 80 ? 'text-green-600' : row.averagePayPercent >= 50 ? 'text-orange-500' : 'text-red-600'}`}>{pct(row.averagePayPercent)}</span>
                                                     {row.policyAvgPayPercent != null && <p className="text-[10px] text-gray-400">P: {pct(row.policyAvgPayPercent)}</p>}
                                                 </td>
-                                                <td className="px-3 py-1.5 text-xs text-center">
+                                                <td className="px-4 py-3 text-sm text-center">
                                                     <span className="font-medium">{row.averageDaysToPay}d</span>
                                                     {row.policyAvgDaysToPay != null && <p className="text-[10px] text-gray-400">P: {row.policyAvgDaysToPay}d</p>}
                                                 </td>

@@ -1253,20 +1253,20 @@ export default function ReturnDetailPage() {
                     <div className="overflow-x-auto">
                         <table className="w-full table-auto">
                             <thead>
-                                <tr className="bg-gray-50 border-b border-gray-200">
-                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">NDC</th>
-                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Name</th>
-                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Manufacturer</th>
-                                    <th className="text-center px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Pkg Size</th>
-                                    <th className="text-center px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Qty Returned</th>
-                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Serial#</th>
-                                    {/* <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Price</th>
-                                    <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Est. Value</th> */}
-                                    {/* <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Est. Store Value</th> */}
-                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Expires</th>
-                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
-                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Destination</th>
-                                    <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
+                                <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Name</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Manufacturer</th>
+                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Pkg Size</th>
+                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Qty Returned</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Serial#</th>
+                                    {/* <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Price</th>
+                                    <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Est. Value</th> */}
+                                    {/* <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Est. Store Value</th> */}
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Expires</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Status</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Destination</th>
+                                    <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
@@ -1274,39 +1274,39 @@ export default function ReturnDetailPage() {
                                     const sBadge = getItemStatusBadge(item.returnStatus);
                                     return (
                                         <tr key={item.id} className="hover:bg-gray-50">
-                                            <td className="px-2 py-1.5 text-[11px] font-mono text-gray-900">{item.ndc || '—'}</td>
-                                            <td className="px-2 py-1.5 text-[11px] text-gray-900 max-w-[130px] truncate" title={item.proprietaryName || ''}>
+                                            <td className="px-4 py-3 text-sm font-mono text-gray-900">{item.ndc || '—'}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-900 max-w-[130px] truncate" title={item.proprietaryName || ''}>
                                                 {item.proprietaryName || item.genericName || '—'}
                                             </td>
-                                            <td className="px-2 py-1.5 text-[11px] text-gray-600 max-w-[110px] truncate" title={item.manufacturer || ''}>
+                                            <td className="px-4 py-3 text-sm text-gray-600 max-w-[110px] truncate" title={item.manufacturer || ''}>
                                                 {item.manufacturer || '—'}
                                             </td>
-                                            <td className="px-2 py-1.5 text-[11px] text-center text-gray-900">
+                                            <td className="px-4 py-3 text-sm text-center text-gray-900">
                                                 {item.fullPackageSize || '—'}
                                             </td>
-                                            <td className="px-2 py-1.5 text-[11px] text-center text-gray-900">
+                                            <td className="px-4 py-3 text-sm text-center text-gray-900">
                                                 {(() => {
                                                     const qtyReturned = item.fullPackageQtyReturned ?? item.quantity;
                                                     const displayQty = (item.fullPackageQtyReturned && item.fullPackageSize && item.fullPackageQtyReturned === item.fullPackageSize) ? 1 : qtyReturned;
                                                     return <>{displayQty}{item.isPartial && <span className="text-yellow-600 ml-0.5">P</span>}</>;
                                                 })()}
                                             </td>
-                                            <td className="px-2 py-1.5 text-[11px] text-gray-600 font-mono whitespace-nowrap">
+                                            <td className="px-4 py-3 text-sm text-gray-600 font-mono whitespace-nowrap">
                                                 {item.serialNumber || '—'}
                                             </td>
-                                            {/* <td className="px-2 py-1.5 text-[11px] text-right text-gray-900">
+                                            {/* <td className="px-4 py-3 text-sm text-right text-gray-900">
                                                 {item.standardPrice != null ? formatCurrency(item.standardPrice) : '—'}
                                             </td>
-                                            <td className="px-2 py-1.5 text-[11px] text-right font-medium text-gray-900">
+                                            <td className="px-4 py-3 text-sm text-right font-medium text-gray-900">
                                                 {item.estimatedValue != null ? formatCurrency(item.estimatedValue) : '—'}
                                             </td> */}
-                                            {/* <td className="px-2 py-1.5 text-[11px] text-right font-medium text-gray-900">
+                                            {/* <td className="px-4 py-3 text-sm text-right font-medium text-gray-900">
                                                 {item.estimatedStoreValue != null ? formatCurrency(item.estimatedStoreValue) : '—'}
                                             </td> */}
-                                            <td className="px-2 py-1.5 text-[11px] text-gray-600 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
                                                 {item.expirationDate ? formatDate(item.expirationDate) : '—'}
                                             </td>
-                                            <td className="px-2 py-1.5">
+                                            <td className="px-4 py-3 text-sm">
                                                 <div className="flex items-center gap-1">
                                                     <Badge variant={sBadge.variant}><span className="text-[10px]">{sBadge.label}</span></Badge>
                                                     {item.wineCellarId && (
@@ -1314,7 +1314,7 @@ export default function ReturnDetailPage() {
                                                     )}
                                                 </div>
                                             </td>
-                                            <td className="px-2 py-1.5 text-[11px] text-gray-600">
+                                            <td className="px-4 py-3 text-sm text-gray-600">
                                                 {item.returnStatus === 'returnable' ? (
                                                     item.destination ? (
                                                         <span className="capitalize font-medium text-gray-900">{item.destination}</span>
@@ -1323,7 +1323,7 @@ export default function ReturnDetailPage() {
                                                     )
                                                 ) : '—'}
                                             </td>
-                                            <td className="px-2 py-1.5">
+                                            <td className="px-4 py-3 text-sm">
                                                 <div className="flex items-center justify-end gap-0.5">
                                                     {canAddDeleteItems && item.nonReturnableReason === 'date' && !item.wineCellarId && (
                                                         <button onClick={() => handleMoveToWineCellar(item)} className="p-1 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded" title="Move to Wine Cellar">
@@ -1771,8 +1771,8 @@ export default function ReturnDetailPage() {
                                     <div className="overflow-x-auto">
                                         <table className="w-full table-auto text-xs">
                                             <thead>
-                                                <tr className="bg-purple-50 border-b border-purple-200">
-                                                    <th className="px-3 py-2 w-8">
+                                                <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                                    <th className="px-4 py-3.5 w-8">
                                                         <input
                                                             type="checkbox"
                                                             checked={wcSelected.size === wcItems.length && wcItems.length > 0}
@@ -1786,12 +1786,12 @@ export default function ReturnDetailPage() {
                                                             className="rounded text-purple-600 focus:ring-purple-500"
                                                         />
                                                     </th>
-                                                    <th className="text-left px-3 py-2 font-medium text-purple-700">NDC</th>
-                                                    <th className="text-left px-3 py-2 font-medium text-purple-700">Product</th>
-                                                    <th className="text-center px-3 py-2 font-medium text-purple-700">QTY</th>
-                                                    <th className="text-right px-3 py-2 font-medium text-purple-700">Price</th>
-                                                    <th className="text-left px-3 py-2 font-medium text-purple-700">Shelved</th>
-                                                    <th className="text-left px-3 py-2 font-medium text-purple-700">Location</th>
+                                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
+                                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product</th>
+                                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">QTY</th>
+                                                    <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Price</th>
+                                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Shelved</th>
+                                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Location</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -1801,7 +1801,7 @@ export default function ReturnDetailPage() {
                                                         className={`border-b border-gray-100 cursor-pointer transition-colors ${wcSelected.has(item.id) ? 'bg-purple-50' : 'hover:bg-gray-50'}`}
                                                         onClick={() => toggleWcSelect(item.id)}
                                                     >
-                                                        <td className="px-3 py-2">
+                                                        <td className="px-4 py-3 text-sm">
                                                             <input
                                                                 type="checkbox"
                                                                 checked={wcSelected.has(item.id)}
@@ -1809,19 +1809,19 @@ export default function ReturnDetailPage() {
                                                                 className="rounded text-purple-600 focus:ring-purple-500"
                                                             />
                                                         </td>
-                                                        <td className="px-3 py-2 font-mono text-gray-900">{item.ndc || '—'}</td>
-                                                        <td className="px-3 py-2 text-gray-900 max-w-[140px] truncate" title={item.productName || ''}>
+                                                        <td className="px-4 py-3 text-sm font-mono text-gray-900">{item.ndc || '—'}</td>
+                                                        <td className="px-4 py-3 text-sm text-gray-900 max-w-[140px] truncate" title={item.productName || ''}>
                                                             <div>
                                                                 <p className="truncate">{item.productName || '—'}</p>
                                                                 {item.manufacturer && <p className="text-gray-400 text-[10px] truncate">{item.manufacturer}</p>}
                                                             </div>
                                                         </td>
-                                                        <td className="px-3 py-2 text-center text-gray-900">{item.quantity}</td>
-                                                        <td className="px-3 py-2 text-right text-gray-900">
+                                                        <td className="px-4 py-3 text-sm text-center text-gray-900">{item.quantity}</td>
+                                                        <td className="px-4 py-3 text-sm text-right text-gray-900">
                                                             {item.standardPrice != null ? formatCurrency(item.standardPrice) : '—'}
                                                         </td>
-                                                        <td className="px-3 py-2 text-gray-600">{formatDate(item.dateShelved)}</td>
-                                                        <td className="px-3 py-2 text-gray-600">{item.physicalLocation || '—'}</td>
+                                                        <td className="px-4 py-3 text-sm text-gray-600">{formatDate(item.dateShelved)}</td>
+                                                        <td className="px-4 py-3 text-sm text-gray-600">{item.physicalLocation || '—'}</td>
                                                     </tr>
                                                 ))}
                                             </tbody>

@@ -26,19 +26,19 @@ export default function DashboardPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-        <p className="text-gray-600 mt-1">Overview of buying groups, warehouse operations, and system metrics</p>
+        <h1 className="text-lg font-bold text-gray-900">Admin Dashboard</h1>
+        <p className="text-xs text-gray-500 mt-0.5">Overview of buying groups, warehouse operations, and system metrics</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {statCards.map((card) => {
           const Icon = card.icon;
           return (
-            <div key={card.label} className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+            <div key={card.label} className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500">{card.label}</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">
+                  <p className="text-xs font-medium text-gray-500">{card.label}</p>
+                  <p className="text-lg font-bold text-gray-900 mt-1">
                     {(isLoading || warehouseStats.isLoading) ? '...' : card.value}
                   </p>
                 </div>
@@ -53,13 +53,13 @@ export default function DashboardPage() {
 
       {/* Active Batch Info */}
       {!warehouseStats.isLoading && !warehouseStats.error && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+        <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
               <Calendar className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Current Active Batch</p>
+              <p className="text-xs font-medium text-gray-500">Current Active Batch</p>
               <p className="text-lg font-bold text-gray-900">
                 {warehouseStats.activeBatch || 'No active batch'}
               </p>
@@ -80,8 +80,8 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+      <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100 mt-4">
+        <h2 className="text-sm font-semibold text-gray-900 mb-3">Quick Actions</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <Link
             href="/buying-groups"

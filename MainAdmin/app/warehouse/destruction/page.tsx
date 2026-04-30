@@ -230,32 +230,32 @@ export default function DestructionPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="text-left px-3 py-2 text-[10px] uppercase text-gray-500">Item</th>
-                  <th className="text-left px-3 py-2 text-[10px] uppercase text-gray-500">Pharmacy</th>
-                  <th className="text-left px-3 py-2 text-[10px] uppercase text-gray-500">Status</th>
-                  <th className="text-left px-3 py-2 text-[10px] uppercase text-gray-500">Company</th>
-                  <th className="text-left px-3 py-2 text-[10px] uppercase text-gray-500">Scheduled</th>
-                  <th className="text-left px-3 py-2 text-[10px] uppercase text-gray-500">Destroyed</th>
-                  <th className="text-right px-3 py-2 text-[10px] uppercase text-gray-500">Actions</th>
+              <thead>
+                <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Item</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Pharmacy</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Status</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Company</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Scheduled</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Destroyed</th>
+                  <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {rows.map((r) => (
-                  <tr key={r.id} className="hover:bg-gray-50">
-                    <td className="px-3 py-2 text-xs">
+                  <tr key={r.id} className="odd:bg-white even:bg-gray-50/40 hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm">
                       <p className="font-medium text-gray-900">{r.productName || 'Unknown item'}</p>
                       <p className="text-gray-500">NDC: {r.ndc || '—'} | Lot: {r.lotNumber || '—'}</p>
                     </td>
-                    <td className="px-3 py-2 text-xs text-gray-600">{r.pharmacyId}</td>
-                    <td className="px-3 py-2 text-xs">
+                    <td className="px-4 py-3 text-sm text-gray-600">{r.pharmacyId}</td>
+                    <td className="px-4 py-3 text-sm">
                       <Badge variant={statusBadge(r.status)}>{r.status.replace('_', ' ')}</Badge>
                     </td>
-                    <td className="px-3 py-2 text-xs text-gray-600">{r.destructionCompany || '—'}</td>
-                    <td className="px-3 py-2 text-xs text-gray-600">{r.scheduledDate ? formatDate(r.scheduledDate) : '—'}</td>
-                    <td className="px-3 py-2 text-xs text-gray-600">{r.destroyedAt ? formatDate(r.destroyedAt) : '—'}</td>
-                    <td className="px-3 py-2">
+                    <td className="px-4 py-3 text-sm text-gray-600">{r.destructionCompany || '—'}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{r.scheduledDate ? formatDate(r.scheduledDate) : '—'}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{r.destroyedAt ? formatDate(r.destroyedAt) : '—'}</td>
+                    <td className="px-4 py-3">
                       <div className="flex justify-end gap-1">
                         {r.status === 'pending' && (
                           <Button size="sm" variant="outline" onClick={() => quickMove(r, 'scheduled')}>

@@ -738,16 +738,16 @@ export default function VerificationSessionPage() {
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             <div className="p-3 rounded-md border border-gray-200 bg-gray-50">
-                                <p className="text-[10px] text-gray-500">Total Items</p>
-                                <p className="text-xl font-bold text-gray-900">{completedSummary.totalItems ?? 0}</p>
+                                <p className="text-xs font-medium text-gray-500">Total Items</p>
+                                <p className="text-lg font-bold text-gray-900">{completedSummary.totalItems ?? 0}</p>
                             </div>
                             <div className="p-3 rounded-md border border-emerald-200 bg-emerald-50">
-                                <p className="text-[10px] text-emerald-700">Returnable</p>
-                                <p className="text-xl font-bold text-emerald-700">{v2Summary ? policyCounts.returnable : completedSummary.correctItems ?? 0}</p>
+                                <p className="text-xs font-medium text-emerald-700">Returnable</p>
+                                <p className="text-lg font-bold text-emerald-700">{v2Summary ? policyCounts.returnable : completedSummary.correctItems ?? 0}</p>
                             </div>
                             <div className="p-3 rounded-md border border-rose-200 bg-rose-50">
-                                <p className="text-[10px] text-rose-700">Non-Returnable</p>
-                                <p className="text-xl font-bold text-rose-700">{v2Summary ? (policyCounts.nonReturnable + policyCounts.wineCellar + policyCounts.destruction) : ((completedSummary.damagedItems ?? 0) + (completedSummary.missingItems ?? 0) + (completedSummary.wrongItems ?? 0))}</p>
+                                <p className="text-xs font-medium text-rose-700">Non-Returnable</p>
+                                <p className="text-lg font-bold text-rose-700">{v2Summary ? (policyCounts.nonReturnable + policyCounts.wineCellar + policyCounts.destruction) : ((completedSummary.damagedItems ?? 0) + (completedSummary.missingItems ?? 0) + (completedSummary.wrongItems ?? 0))}</p>
                             </div>
                         </div>
                         {/* Hidden verification stats - showing only routing-focused summary now
@@ -769,8 +769,8 @@ export default function VerificationSessionPage() {
                         */}
                         {completedSummary.correctItemsValue != null && (
                             <div className="p-3 rounded-md bg-green-50 border border-green-200 text-center">
-                                <p className="text-[10px] text-green-700">Correct Items Value</p>
-                                <p className="text-2xl font-bold text-green-900">{formatCurrency(completedSummary.correctItemsValue)}</p>
+                                <p className="text-xs font-medium text-green-700">Correct Items Value</p>
+                                <p className="text-lg font-bold text-green-900">{formatCurrency(completedSummary.correctItemsValue)}</p>
                             </div>
                         )}
                         {(completedSummary.excludedFromBatch ?? 0) > 0 && (
@@ -1136,42 +1136,42 @@ export default function VerificationSessionPage() {
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
-                                        <tr className="bg-gray-50 border-b border-gray-200">
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Product</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">NDC</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Serial #</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Lot</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Exp</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Full Qty</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Partial Qty</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Verification</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Return Status</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Action</th>
+                                        <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Product</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">NDC</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Serial #</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Lot</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Exp</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Full Qty</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Partial Qty</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Verification</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Return Status</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
                                         {items.map(item => (
                                             <tr key={item.id} className="hover:bg-gray-50">
-                                                <td className="px-3 py-2">
-                                                    <div className="text-xs font-medium text-gray-900">{item.proprietaryName || item.genericName}</div>
-                                                    {item.manufacturer && <div className="text-[10px] text-gray-400">{item.manufacturer}</div>}
+                                                <td className="px-4 py-3">
+                                                    <div className="text-sm font-medium text-gray-900">{item.proprietaryName || item.genericName}</div>
+                                                    {item.manufacturer && <div className="text-xs text-gray-400">{item.manufacturer}</div>}
                                                 </td>
-                                                <td className="px-3 py-2 text-[11px] font-mono text-gray-600">{item.ndc}</td>
-                                                <td className="px-3 py-2 text-[11px] font-mono text-gray-600">{item.serialNumber || '—'}</td>
-                                                <td className="px-3 py-2 text-[11px] text-gray-600">{item.lotNumber || '—'}</td>
-                                                <td className="px-3 py-2 text-[11px] text-gray-600">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
-                                                <td className="px-3 py-2 text-xs font-medium">
+                                                <td className="px-4 py-3 text-sm font-mono text-gray-600">{item.ndc}</td>
+                                                <td className="px-4 py-3 text-sm font-mono text-gray-600">{item.serialNumber || '—'}</td>
+                                                <td className="px-4 py-3 text-sm text-gray-600">{item.lotNumber || '—'}</td>
+                                                <td className="px-4 py-3 text-sm text-gray-600">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
+                                                <td className="px-4 py-3 text-sm font-medium">
                                                     {item.isPartial ? '—' : (item.fullPackageQtyReturned ?? item.quantity ?? '—')}
                                                 </td>
-                                                <td className="px-3 py-2 text-xs font-medium">
+                                                <td className="px-4 py-3 text-sm font-medium">
                                                     {item.isPartial ? (item.quantity ?? '—') : '—'}
                                                 </td>
-                                                <td className="px-3 py-2">
+                                                <td className="px-4 py-3">
                                                     <Badge className={`text-[10px] border ${statusColor(item.verificationStatus)}`}>
                                                         {item.verificationStatus ? item.verificationStatus.replace('_', ' ') : 'unverified'}
                                                     </Badge>
                                                 </td>
-                                                <td className="px-3 py-2">
+                                                <td className="px-4 py-3">
                                                     {item.returnStatus ? (
                                                         <div className="space-y-1">
                                                             <Badge className={`text-[10px] border ${
@@ -1202,7 +1202,7 @@ export default function VerificationSessionPage() {
                                                         <span className="text-[10px] text-gray-400">pending</span>
                                                     )}
                                                 </td>
-                                                <td className="px-3 py-2">
+                                                <td className="px-4 py-3">
                                                     {!item.verificationStatus ? (
                                                         <button
                                                             type="button"
@@ -1426,24 +1426,24 @@ export default function VerificationSessionPage() {
                                 <div className="overflow-x-auto">
                                     <table className="w-full">
                                         <thead>
-                                            <tr className="bg-gray-50 border-b border-gray-200">
-                                                <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Product</th>
-                                                <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">NDC</th>
-                                                <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Lot</th>
-                                                <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Qty</th>
-                                                <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Location</th>
-                                                <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Condition</th>
+                                            <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                                <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Product</th>
+                                                <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">NDC</th>
+                                                <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Lot</th>
+                                                <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Qty</th>
+                                                <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Location</th>
+                                                <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Condition</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-100">
                                             {surplus.map(s => (
                                                 <tr key={s.id} className="hover:bg-gray-50">
-                                                    <td className="px-3 py-2 text-xs font-medium text-gray-900">{s.productName || '—'}</td>
-                                                    <td className="px-3 py-2 text-[11px] font-mono text-gray-600">{s.ndc || '—'}</td>
-                                                    <td className="px-3 py-2 text-[11px] text-gray-600">{s.lotNumber || '—'}</td>
-                                                    <td className="px-3 py-2 text-xs font-medium">{s.quantity}</td>
-                                                    <td className="px-3 py-2 text-[11px] text-gray-600">{s.warehouseLocation}</td>
-                                                    <td className="px-3 py-2">
+                                                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{s.productName || '—'}</td>
+                                                    <td className="px-4 py-3 text-sm font-mono text-gray-600">{s.ndc || '—'}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">{s.lotNumber || '—'}</td>
+                                                    <td className="px-4 py-3 text-sm font-medium">{s.quantity}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">{s.warehouseLocation}</td>
+                                                    <td className="px-4 py-3">
                                                         <Badge className={`text-[10px] ${s.condition === 'good' ? 'bg-green-100 text-green-700' : s.condition === 'damaged' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'}`}>
                                                             {s.condition}
                                                         </Badge>
@@ -1467,22 +1467,22 @@ export default function VerificationSessionPage() {
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
-                                        <tr className="bg-gray-50 border-b border-gray-200">
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Type</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Product</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Expected</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Actual</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Actions</th>
+                                        <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Type</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Product</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Expected</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Actual</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
                                         {discrepancies.filter(d => d.status === 'open').map(d => (
                                             <tr key={d.id} className="hover:bg-gray-50">
-                                                <td className="px-3 py-2"><Badge className={`text-[10px] ${discrepancyColor(d.type)}`}>{d.type}</Badge></td>
-                                                <td className="px-3 py-2 text-xs text-gray-900">{d.productName || d.ndc || '—'}</td>
-                                                <td className="px-3 py-2 text-xs font-medium">{d.expectedQuantity ?? '—'}</td>
-                                                <td className="px-3 py-2 text-xs font-medium">{d.actualQuantity ?? '—'}</td>
-                                                <td className="px-3 py-2">
+                                                <td className="px-4 py-3"><Badge className={`text-[10px] ${discrepancyColor(d.type)}`}>{d.type}</Badge></td>
+                                                <td className="px-4 py-3 text-sm text-gray-900">{d.productName || d.ndc || '—'}</td>
+                                                <td className="px-4 py-3 text-sm font-medium">{d.expectedQuantity ?? '—'}</td>
+                                                <td className="px-4 py-3 text-sm font-medium">{d.actualQuantity ?? '—'}</td>
+                                                <td className="px-4 py-3">
                                                     {resolvingId === d.id ? (
                                                         <div className="space-y-1.5">
                                                             <textarea
@@ -1731,8 +1731,8 @@ export default function VerificationSessionPage() {
                                     <div className="overflow-x-auto">
                                         <table className="w-full table-auto text-xs">
                                             <thead>
-                                                <tr className="bg-gray-50 border-b border-gray-200">
-                                                    <th className="text-left px-3 py-2 w-8">
+                                                <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                                    <th className="text-left px-4 py-3.5 w-8">
                                                         <input
                                                             type="checkbox"
                                                             checked={wcSelected.size === wcItems.length && wcItems.length > 0}
@@ -1746,18 +1746,18 @@ export default function VerificationSessionPage() {
                                                             className="text-primary-600 focus:ring-primary-500"
                                                         />
                                                     </th>
-                                                    <th className="text-left px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">NDC</th>
-                                                    <th className="text-left px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                                                    <th className="text-center px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">QTY</th>
-                                                    <th className="text-right px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">Value</th>
-                                                    <th className="text-left px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">Shelved</th>
-                                                    <th className="text-left px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">Expected Return</th>
+                                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
+                                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product</th>
+                                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">QTY</th>
+                                                    <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Value</th>
+                                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Shelved</th>
+                                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Expected Return</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {wcItems.map((item) => (
                                                     <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
-                                                        <td className="px-3 py-2">
+                                                        <td className="px-4 py-3">
                                                             <input
                                                                 type="checkbox"
                                                                 checked={wcSelected.has(item.id)}
@@ -1773,26 +1773,26 @@ export default function VerificationSessionPage() {
                                                                 className="text-primary-600 focus:ring-primary-500"
                                                             />
                                                         </td>
-                                                        <td className="px-3 py-2 font-mono text-gray-900">{item.ndc || '—'}</td>
-                                                        <td className="px-3 py-2 text-gray-900 max-w-[200px] truncate" title={item.productName || ''}>
+                                                        <td className="px-4 py-3 font-mono text-sm text-gray-900">{item.ndc || '—'}</td>
+                                                        <td className="px-4 py-3 text-sm text-gray-900 max-w-[200px] truncate" title={item.productName || ''}>
                                                             <div>
                                                                 <p className="truncate font-medium">{item.productName || '—'}</p>
                                                                 {item.manufacturer && (
-                                                                    <p className="text-gray-400 truncate text-[10px]">{item.manufacturer}</p>
+                                                                    <p className="text-gray-400 truncate text-xs">{item.manufacturer}</p>
                                                                 )}
                                                                 {item.lotNumber && (
-                                                                    <p className="text-gray-500 truncate text-[10px]">Lot: {item.lotNumber}</p>
+                                                                    <p className="text-gray-500 truncate text-xs">Lot: {item.lotNumber}</p>
                                                                 )}
                                                             </div>
                                                         </td>
-                                                        <td className="px-3 py-2 text-center text-gray-900">
+                                                        <td className="px-4 py-3 text-center text-sm text-gray-900">
                                                             {item.quantity}{item.isPartial && <span className="text-yellow-600 ml-0.5">P</span>}
                                                         </td>
-                                                        <td className="px-3 py-2 text-right text-gray-900">
+                                                        <td className="px-4 py-3 text-right text-sm text-gray-900">
                                                             {item.standardPrice != null ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.standardPrice) : '—'}
                                                         </td>
-                                                        <td className="px-3 py-2 text-gray-600">{item.dateShelved ? new Date(item.dateShelved).toLocaleDateString() : '—'}</td>
-                                                        <td className="px-3 py-2 text-gray-600">
+                                                        <td className="px-4 py-3 text-sm text-gray-600">{item.dateShelved ? new Date(item.dateShelved).toLocaleDateString() : '—'}</td>
+                                                        <td className="px-4 py-3 text-sm text-gray-600">
                                                             {item.expectedReturnableDate ? new Date(item.expectedReturnableDate).toLocaleDateString() : '—'}
                                                         </td>
                                                     </tr>

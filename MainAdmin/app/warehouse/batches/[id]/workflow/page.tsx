@@ -343,7 +343,7 @@ export default function BatchWorkflowPage() {
                             <Layers className="w-4 h-4 text-blue-600" />
                             <h1 className="text-base font-bold text-gray-900">Post-Closeout Workflow</h1>
                         </div>
-                        <p className="text-[11px] text-gray-500 mt-0.5">{batch.batchName} · {formatBatchMonth(batch.batchMonth)}</p>
+                        <p className="text-sm text-gray-500 mt-0.5">{batch.batchName} · {formatBatchMonth(batch.batchMonth)}</p>
                     </div>
                 </div>
                 <Badge variant={sb.variant}><span className="text-[10px]">{sb.label}</span></Badge>
@@ -419,7 +419,7 @@ export default function BatchWorkflowPage() {
                                         {done && <span className="text-[10px] font-medium text-green-600 bg-green-100 px-1.5 py-0.5 rounded">Done</span>}
                                         {isLocked && !done && <span className="text-[10px] text-gray-400">Locked</span>}
                                     </div>
-                                    <p className="text-[11px] text-gray-500">{step.description}</p>
+                                    <p className="text-sm text-gray-500">{step.description}</p>
 
                                     {isActive && !done && (
                                         <div className="mt-2.5">
@@ -443,7 +443,7 @@ export default function BatchWorkflowPage() {
                                                         className="flex items-center gap-2 px-3 py-2 border-2 border-dashed border-blue-300 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors"
                                                     >
                                                         <Upload className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
-                                                        <span className="text-[11px] text-blue-600 truncate">
+                                                        <span className="text-sm text-blue-600 truncate">
                                                             {cardinalFile ? cardinalFile.name : 'Click to select file'}
                                                         </span>
                                                         <input
@@ -469,7 +469,7 @@ export default function BatchWorkflowPage() {
                                                 <div className="space-y-2.5">
                                                     {batchMemos.length === 0 ? (
                                                         <div className="space-y-1.5">
-                                                            <p className="text-[11px] text-gray-500">
+                                                            <p className="text-sm text-gray-500">
                                                                 No debit memos created yet. Click below to generate them grouped by pharmacy, destination and labeler.
                                                             </p>
                                                             <button
@@ -483,12 +483,12 @@ export default function BatchWorkflowPage() {
                                                         </div>
                                                     ) : (
                                                         <div className="space-y-2">
-                                                            <p className="text-[11px] text-gray-600">
+                                                            <p className="text-sm text-gray-600">
                                                                 <span className="font-semibold text-orange-600">{batchMemos.length}</span> debit memo{batchMemos.length !== 1 ? 's' : ''} created for this batch:
                                                             </p>
                                                             <div className="max-h-36 overflow-y-auto space-y-1 pr-1">
                                                                 {batchMemos.map(m => (
-                                                                    <div key={m.id} className="flex items-center justify-between bg-white border border-gray-200 rounded px-2.5 py-1.5 text-[11px]">
+                                                                    <div key={m.id} className="flex items-center justify-between bg-white border border-gray-200 rounded px-4 py-3 text-sm">
                                                                         <div className="flex items-center gap-2 min-w-0">
                                                                             <span className="font-semibold text-gray-900">{m.memoNumber}</span>
                                                                             <span className="text-gray-500 truncate">{m.pharmacyName}</span>
@@ -513,7 +513,7 @@ export default function BatchWorkflowPage() {
                                                                     href={`/warehouse/debit-memos?batchId=${batchId}`}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
-                                                                    className="inline-flex items-center gap-1 text-[11px] text-orange-600 hover:underline"
+                                                                    className="inline-flex items-center gap-1 text-sm text-orange-600 hover:underline"
                                                                 >
                                                                     View Details <ExternalLink className="w-3 h-3" />
                                                                 </a>
@@ -546,7 +546,7 @@ export default function BatchWorkflowPage() {
                                                         ).length;
                                                         return (
                                                             <div className="space-y-1.5">
-                                                                <p className="text-[11px] text-gray-600">
+                                                                <p className="text-sm text-gray-600">
                                                                     Send one RA request per reverse distributor ({distributorGroups.length} distributor{distributorGroups.length !== 1 ? 's' : ''}):
                                                                 </p>
                                                                 <div className="max-h-48 overflow-y-auto space-y-1 pr-1">
@@ -559,7 +559,7 @@ export default function BatchWorkflowPage() {
                                                                             m => m.raRequestedAt || m.raStatus === 'requested' || m.raStatus === 'received' || m.raStatus === 'shipped'
                                                                         ).length;
                                                                         return (
-                                                                            <div key={group.destination} className={`flex items-center justify-between rounded px-2.5 py-1.5 text-[11px] border ${allSent ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'}`}>
+                                                                            <div key={group.destination} className={`flex items-center justify-between rounded px-4 py-3 text-sm border ${allSent ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'}`}>
                                                                                 <div className="flex items-center gap-2 min-w-0">
                                                                                     {allSent ? (
                                                                                         <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
@@ -595,7 +595,7 @@ export default function BatchWorkflowPage() {
                                                             </div>
                                                         );
                                                     })() : (
-                                                        <p className="text-[11px] text-gray-500">No debit memos to send RA requests for.</p>
+                                                        <p className="text-sm text-gray-500">No debit memos to send RA requests for.</p>
                                                     )}
                                                     {(() => {
                                                         const anyRaSent = batchMemos.some(
@@ -634,7 +634,7 @@ export default function BatchWorkflowPage() {
                                                                     href="/warehouse/ra-tracking"
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
-                                                                    className="inline-flex items-center gap-1 text-[11px] text-green-700 hover:underline"
+                                                                    className="inline-flex items-center gap-1 text-sm text-green-700 hover:underline"
                                                                 >
                                                                     Open RA Tracking <ExternalLink className="w-3 h-3" />
                                                                 </a>
@@ -659,7 +659,7 @@ export default function BatchWorkflowPage() {
                         <CheckCircle className="w-4 h-4 text-green-500" /> All steps completed
                     </span>
                 ) : (
-                    <span className="text-[11px] text-gray-500">
+                    <span className="text-sm text-gray-500">
                         Step {Math.min(activeStepIndex + 1, WORKFLOW_STEPS.length)} of {WORKFLOW_STEPS.length}
                     </span>
                 )}

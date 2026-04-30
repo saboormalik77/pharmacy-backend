@@ -157,34 +157,34 @@ export default function WarehouseVerificationListPage() {
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
-                                        <tr className="bg-gray-50 border-b border-gray-200">
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">License Plate</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Pharmacy</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Items</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Received</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Verification</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Action</th>
+                                        <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">License Plate</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Pharmacy</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Items</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Received</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Verification</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
                                         {receivedReturns.map(r => {
                                             const phase = deriveWarehouseVerificationUiStatus(r);
                                             return (
-                                            <tr key={r.id} className="hover:bg-gray-50">
-                                                <td className="px-3 py-2 text-xs font-semibold text-primary-700">{r.licensePlate}</td>
-                                                <td className="px-3 py-2 text-xs text-gray-700">{r.pharmacyName || '—'}</td>
-                                                <td className="px-3 py-2">
+                                            <tr key={r.id} className="odd:bg-white even:bg-gray-50/40 hover:bg-gray-50">
+                                                <td className="px-4 py-3 text-sm font-semibold text-primary-700">{r.licensePlate}</td>
+                                                <td className="px-4 py-3 text-sm text-gray-700">{r.pharmacyName || '—'}</td>
+                                                <td className="px-4 py-3">
                                                     <span className="inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-50 text-purple-700">
                                                         {r.totalItems ?? '—'}
                                                     </span>
                                                 </td>
-                                                <td className="px-3 py-2 text-[11px] text-gray-500">
+                                                <td className="px-4 py-3 text-sm text-gray-500">
                                                     {formatDate(r.receivedInWarehouseDate || r.createdAt)}
                                                 </td>
-                                                <td className="px-3 py-2">
+                                                <td className="px-4 py-3">
                                                     {getStatusBadge(phase)}
                                                 </td>
-                                                <td className="px-3 py-2">
+                                                <td className="px-4 py-3">
                                                     <Link href={`/warehouse/verification/${r.id}`}>
                                                         <button className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md transition">
                                                             {getActionLabel(phase)}

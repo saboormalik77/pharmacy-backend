@@ -514,14 +514,14 @@ export default function WarehouseReceivingPage() {
                         <div className="bg-white rounded-lg shadow overflow-hidden">
                             <table className="w-full">
                                 <thead>
-                                    <tr className="bg-gray-50 border-b border-gray-200">
-                                        <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">License Plate</th>
-                                        <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Pharmacy</th>
-                                        <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">FedEx Tracking</th>
-                                        <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Items</th>
-                                        <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Boxes</th>
-                                        <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Scan Status</th>
-                                        <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Finalized</th>
+                                    <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                        <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">License Plate</th>
+                                        <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Pharmacy</th>
+                                        <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">FedEx Tracking</th>
+                                        <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Items</th>
+                                        <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Boxes</th>
+                                        <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Scan Status</th>
+                                        <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Finalized</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
@@ -535,10 +535,10 @@ export default function WarehouseReceivingPage() {
                                         const fedexCopyKey = `${r.id}:fedex`;
                                         const fedexJustCopied = copiedTrackingKey === fedexCopyKey;
                                         return (
-                                            <tr key={r.id} className="hover:bg-gray-50">
-                                                <td className="px-3 py-1.5 text-xs font-mono font-semibold text-gray-900">{r.licensePlate}</td>
-                                                <td className="px-3 py-1.5 text-xs text-gray-700">{r.pharmacyName}</td>
-                                                <td className="px-3 py-1.5">
+                                            <tr key={r.id} className="odd:bg-white even:bg-gray-50/40 hover:bg-gray-50">
+                                                <td className="px-4 py-3 text-sm font-mono font-semibold text-gray-900">{r.licensePlate}</td>
+                                                <td className="px-4 py-3 text-sm text-gray-700">{r.pharmacyName}</td>
+                                                <td className="px-4 py-3">
                                                     {r.packageTracking && Object.keys(r.packageTracking).length > 0 ? (
                                                         <div className="flex flex-col gap-0.5">
                                                             {Object.values(r.packageTracking).map((tn: any, i) => {
@@ -591,9 +591,9 @@ export default function WarehouseReceivingPage() {
                                                         </div>
                                                     )}
                                                 </td>
-                                                <td className="px-3 py-1.5 text-xs text-center text-gray-900">{r.totalItems}</td>
-                                                <td className="px-3 py-1.5 text-xs text-center text-gray-900">{r.boxCount ?? '—'}</td>
-                                                <td className="px-3 py-1.5 text-center">
+                                                <td className="px-4 py-3 text-sm text-center text-gray-900">{r.totalItems}</td>
+                                                <td className="px-4 py-3 text-sm text-center text-gray-900">{r.boxCount ?? '—'}</td>
+                                                <td className="px-4 py-3 text-center">
                                                     {scannedPkgs > 0 ? (
                                                         <Badge variant="warning">
                                                             <span className="text-[10px]">{scannedPkgs}/{totalPkgs} scanned</span>
@@ -604,7 +604,7 @@ export default function WarehouseReceivingPage() {
                                                         </Badge>
                                                     )}
                                                 </td>
-                                                <td className="px-3 py-1.5 text-[11px] text-gray-500">{r.finalizedAt ? formatDate(r.finalizedAt) : '—'}</td>
+                                                <td className="px-4 py-3 text-sm text-gray-500">{r.finalizedAt ? formatDate(r.finalizedAt) : '—'}</td>
                                             </tr>
                                         );
                                     })}
@@ -686,30 +686,30 @@ export default function WarehouseReceivingPage() {
                         <div className="bg-white rounded-lg shadow overflow-hidden">
                             <table className="w-full">
                                 <thead>
-                                    <tr className="bg-gray-50 border-b border-gray-200">
-                                        <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">License Plate</th>
-                                        <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Pharmacy</th>
-                                        <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Items</th>
-                                        <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Received</th>
-                                        <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Verified</th>
-                                        <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
+                                    <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                        <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">License Plate</th>
+                                        <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Pharmacy</th>
+                                        <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Items</th>
+                                        <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Received</th>
+                                        <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Verified</th>
+                                        <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
                                     {receivedReturns.map(r => (
-                                        <tr key={r.id} className="hover:bg-gray-50">
-                                            <td className="px-3 py-1.5 text-xs font-mono font-semibold text-gray-900">{r.licensePlate}</td>
-                                            <td className="px-3 py-1.5 text-xs text-gray-700">{r.pharmacyName}</td>
-                                            <td className="px-3 py-1.5 text-xs text-center text-gray-900">{r.totalItems}</td>
-                                            <td className="px-3 py-1.5 text-[11px] text-gray-500">{r.receivedInWarehouseDate ? formatDateTime(r.receivedInWarehouseDate) : '—'}</td>
-                                            <td className="px-3 py-1.5 text-center">
+                                        <tr key={r.id} className="odd:bg-white even:bg-gray-50/40 hover:bg-gray-50">
+                                            <td className="px-4 py-3 text-sm font-mono font-semibold text-gray-900">{r.licensePlate}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-700">{r.pharmacyName}</td>
+                                            <td className="px-4 py-3 text-sm text-center text-gray-900">{r.totalItems}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-500">{r.receivedInWarehouseDate ? formatDateTime(r.receivedInWarehouseDate) : '—'}</td>
+                                            <td className="px-4 py-3 text-center">
                                                 {r.verifiedIntegrity ? (
                                                     <Badge variant="success"><span className="text-[10px]">Verified</span></Badge>
                                                 ) : (
                                                     <Badge variant="warning"><span className="text-[10px]">Pending</span></Badge>
                                                 )}
                                             </td>
-                                            <td className="px-3 py-1.5 text-right">
+                                            <td className="px-4 py-3 text-right">
                                                 {r.verifiedIntegrity ? (
                                                     <button
                                                         type="button"

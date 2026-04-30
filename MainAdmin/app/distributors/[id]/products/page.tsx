@@ -60,7 +60,7 @@ export default function DistributorProductsPage() {
                     <ArrowLeft className="w-5 h-5 text-gray-600" />
                 </button>
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Products</h1>
+                    <h1 className="text-lg font-bold text-gray-900">Products</h1>
                     {distributorName && (
                         <p className="text-gray-600 mt-1">{distributorName}</p>
                     )}
@@ -88,33 +88,33 @@ export default function DistributorProductsPage() {
                             <>
                                 <div className="overflow-x-auto">
                                     <table className="w-full table-auto">
-                                        <thead className="bg-gray-50 border-b border-gray-200">
+                                        <thead className="bg-gradient-to-r from-indigo-500 to-indigo-400">
                                             <tr>
-                                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NDC Code</th>
-                                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product Name</th>
-                                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Manufacturer</th>
-                                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price/Unit</th>
-                                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Credit Amount</th>
-                                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lot Number</th>
-                                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expiration Date</th>
-                                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Package Size</th>
-                                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report Date</th>
+                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">NDC Code</th>
+                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Product Name</th>
+                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Manufacturer</th>
+                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Quantity</th>
+                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Price/Unit</th>
+                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Credit Amount</th>
+                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Lot Number</th>
+                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Expiration Date</th>
+                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Package Size</th>
+                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Report Date</th>
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white divide-y divide-gray-200">
                                             {products.map((product, index) => (
                                                 <tr key={`${product.reportId}-${index}`} className="hover:bg-gray-50 transition-colors">
-                                                    <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-900">{product.ndcCode}</td>
-                                                    <td className="px-3 py-2 text-xs text-gray-900 max-w-[200px] truncate" title={product.productName}>{product.productName}</td>
-                                                    <td className="px-3 py-2 text-xs text-gray-600 max-w-[150px] truncate" title={product.manufacturer}>{product.manufacturer}</td>
-                                                    <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-900">{product.quantity}</td>
-                                                    <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-900">${product.pricePerUnit.toFixed(2)}</td>
-                                                    <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-900 font-medium">${product.creditAmount.toFixed(2)}</td>
-                                                    <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-600">{product.lotNumber}</td>
-                                                    <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-600">{new Date(product.expirationDate).toLocaleDateString()}</td>
-                                                    <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-600">{product.packageSize}</td>
-                                                    <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-600">{new Date(product.reportDate).toLocaleDateString()}</td>
+                                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{product.ndcCode}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-900 max-w-[200px] truncate" title={product.productName}>{product.productName}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600 max-w-[150px] truncate" title={product.manufacturer}>{product.manufacturer}</td>
+                                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{product.quantity}</td>
+                                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">${product.pricePerUnit.toFixed(2)}</td>
+                                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">${product.creditAmount.toFixed(2)}</td>
+                                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{product.lotNumber}</td>
+                                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{new Date(product.expirationDate).toLocaleDateString()}</td>
+                                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{product.packageSize}</td>
+                                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{new Date(product.reportDate).toLocaleDateString()}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
