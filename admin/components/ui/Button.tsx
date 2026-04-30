@@ -10,7 +10,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ({ className, variant = 'default', size = 'md', ...props }, ref) => {
         const variantStyles = {
             default: 'bg-gray-600 text-white hover:bg-gray-700',
-            primary: 'bg-primary-500 text-white hover:bg-primary-600',
+            primary: 'bg-[#1e293b] text-white hover:bg-[#334155]',
             success: 'bg-green-600 text-white hover:bg-green-700',
             danger: 'bg-red-600 text-white hover:bg-red-700',
             warning: 'bg-yellow-500 text-white hover:bg-yellow-600',
@@ -28,7 +28,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             <button
                 className={cn(
                     'inline-flex items-center justify-center rounded-md font-medium transition-colors',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2',
                     'disabled:opacity-50 disabled:cursor-not-allowed',
                     variantStyles[variant],
                     sizeStyles[size],

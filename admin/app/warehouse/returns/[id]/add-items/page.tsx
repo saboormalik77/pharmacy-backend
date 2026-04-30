@@ -802,7 +802,7 @@ export default function AddItemsPage() {
                                 className={`w-full pl-8 pr-8 py-2 text-xs border-2 rounded focus:outline-none focus:ring-2 ${
                                     !canEdit 
                                         ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed' 
-                                        : 'border-primary-300 bg-primary-50 focus:ring-primary-500 focus:border-primary-500'
+                                        : 'border-primary-300 bg-primary-50 focus:ring-slate-500 focus:border-primary-500'
                                 }`}
                                 autoFocus={canEdit}
                             />
@@ -830,7 +830,7 @@ export default function AddItemsPage() {
                                 className={`flex-1 px-2.5 py-1.5 text-xs border rounded focus:outline-none focus:ring-1 ${
                                     !canEdit 
                                         ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed' 
-                                        : 'border-gray-300 focus:ring-primary-500'
+                                        : 'border-gray-300 focus:ring-slate-500'
                                 }`}
                                 autoFocus={canEdit}
                             />
@@ -838,7 +838,7 @@ export default function AddItemsPage() {
                                 if (checkActionAllowed('lookup NDC')) {
                                     handleManualLookup();
                                 }
-                            }} disabled={isScanLoading || !manualNdc.trim() || !canEdit} className="px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                            }} disabled={isScanLoading || !manualNdc.trim() || !canEdit} className="px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">
                                 {isScanLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Lookup'}
                             </button>
                         </div>
@@ -935,7 +935,7 @@ export default function AddItemsPage() {
                                 className={`w-1/2 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
                                     scannedFields.has('strengthValue') 
                                         ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed' 
-                                        : 'border-gray-300 focus:ring-primary-500'
+                                        : 'border-gray-300 focus:ring-slate-500'
                                 }`} 
                             />
                             <input 
@@ -947,7 +947,7 @@ export default function AddItemsPage() {
                                 className={`w-1/2 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
                                     scannedFields.has('strengthUnit') 
                                         ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed' 
-                                        : 'border-gray-300 focus:ring-primary-500'
+                                        : 'border-gray-300 focus:ring-slate-500'
                                 }`} 
                             />
                         </div>
@@ -966,7 +966,7 @@ export default function AddItemsPage() {
                                     className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
                                         scannedFields.has('deaSchedule')
                                             ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed'
-                                            : 'border-gray-300 focus:ring-primary-500'
+                                            : 'border-gray-300 focus:ring-slate-500'
                                     }`}
                                 >
                                     {DEA_SCHEDULE_OPTIONS.map(option => (
@@ -993,7 +993,7 @@ export default function AddItemsPage() {
                                     ? 'border-red-400 bg-red-50 focus:ring-red-400'
                                     : scannedFields.has('expirationDate')
                                     ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed'
-                                    : 'border-gray-300 focus:ring-primary-500'
+                                    : 'border-gray-300 focus:ring-slate-500'
                             }`}
                         />
                         {formErrors.has('expirationDate') && <p className="text-[10px] text-red-500 mt-0.5">Required</p>}
@@ -1019,7 +1019,7 @@ export default function AddItemsPage() {
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                             {/* <div>
                                 <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Price ($)</label>
-                                <input type="number" step="0.01" min="0" value={form.standardPrice} onChange={e => updateField('standardPrice', e.target.value)} placeholder="0.00" className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                <input type="number" step="0.01" min="0" value={form.standardPrice} onChange={e => updateField('standardPrice', e.target.value)} placeholder="0.00" className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500" />
                             </div> */}
                             <div>
                                 <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
@@ -1036,7 +1036,7 @@ export default function AddItemsPage() {
                                     className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
                                         scannedFields.has('fullPackageSize')
                                             ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed'
-                                            : 'border-gray-300 focus:ring-primary-500'
+                                            : 'border-gray-300 focus:ring-slate-500'
                                     }`} 
                                 />
                             </div>
@@ -1061,7 +1061,7 @@ export default function AddItemsPage() {
                                             }
                                         }}
                                         placeholder={form.qtyMode === 'units' ? '45' : '75'} 
-                                        className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" 
+                                        className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500" 
                                     />
                                     <button type="button" onClick={() => updateField('qtyMode', form.qtyMode === 'units' ? 'percent' : 'units')} className="px-1.5 text-[10px] font-semibold rounded border border-gray-300 bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors" title="Toggle units/percent">
                                         {form.qtyMode === 'units' ? '#' : '%'}
@@ -1105,13 +1105,13 @@ export default function AddItemsPage() {
                 <div className="grid grid-cols-2 gap-2">
                     <div>
                         <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Return Reason</label>
-                        <select value={form.returnReason} onChange={e => updateField('returnReason', e.target.value)} className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500">
+                        <select value={form.returnReason} onChange={e => updateField('returnReason', e.target.value)} className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500">
                             {RETURN_REASONS.map(r => <option key={r} value={r}>{r || '— Select reason —'}</option>)}
                         </select>
                     </div>
                     <div>
                         <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Memo</label>
-                        <input type="text" value={form.memo} onChange={e => updateField('memo', e.target.value)} placeholder="Optional memo" className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                        <input type="text" value={form.memo} onChange={e => updateField('memo', e.target.value)} placeholder="Optional memo" className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500" />
                     </div>
                 </div>
 
@@ -1120,7 +1120,7 @@ export default function AddItemsPage() {
                 {/* Action Buttons */}
                 <div className="mt-3 pt-3 border-t border-gray-100">
                     <div className="flex flex-wrap gap-1.5">
-                        <button onClick={() => handleSave()} disabled={isItemActionLoading || (!form.ndc && !form.proprietaryName) || !canEdit} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                        <button onClick={() => handleSave()} disabled={isItemActionLoading || (!form.ndc && !form.proprietaryName) || !canEdit} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">
                             {isItemActionLoading
                                 ? <><Loader2 className="w-3 h-3 animate-spin" />Saving...</>
                                 : <><CheckCircle className="w-3 h-3" />Save &amp; Scan Next</>}
@@ -1169,7 +1169,7 @@ function Field({ label, value, onChange, placeholder, required, hasError, readOn
                         ? 'border-red-400 bg-red-50 focus:ring-red-400'
                         : readOnly
                         ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed'
-                        : 'border-gray-300 focus:ring-primary-500'
+                        : 'border-gray-300 focus:ring-slate-500'
                 }`}
             />
             {hasError && <p className="text-[10px] text-red-500 mt-0.5">Required</p>}

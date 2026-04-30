@@ -453,17 +453,17 @@ export default function VerificationSessionPage() {
                             </div>
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            <div className="p-3 rounded-md border border-gray-200 bg-gray-50">
-                                <p className="text-[10px] text-gray-500">Total Items</p>
-                                <p className="text-xl font-bold text-gray-900">{completedSummary.totalItems ?? 0}</p>
+                            <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                                <p className="text-xs font-medium text-gray-500 mb-1">Total Items</p>
+                                <p className="text-lg font-bold text-gray-900">{completedSummary.totalItems ?? 0}</p>
                             </div>
-                            <div className="p-3 rounded-md border border-emerald-200 bg-emerald-50">
-                                <p className="text-[10px] text-emerald-700">Returnable</p>
-                                <p className="text-xl font-bold text-emerald-700">{completedSummary.correctItems ?? 0}</p>
+                            <div className="bg-white rounded-lg shadow px-4 py-3 border border-emerald-100">
+                                <p className="text-xs font-medium text-emerald-700 mb-1">Returnable</p>
+                                <p className="text-lg font-bold text-emerald-700">{completedSummary.correctItems ?? 0}</p>
                             </div>
-                            <div className="p-3 rounded-md border border-rose-200 bg-rose-50">
-                                <p className="text-[10px] text-rose-700">Non-Returnable</p>
-                                <p className="text-xl font-bold text-rose-700">{(completedSummary.damagedItems ?? 0) + (completedSummary.missingItems ?? 0) + (completedSummary.wrongItems ?? 0)}</p>
+                            <div className="bg-white rounded-lg shadow px-4 py-3 border border-rose-100">
+                                <p className="text-xs font-medium text-rose-700 mb-1">Non-Returnable</p>
+                                <p className="text-lg font-bold text-rose-700">{(completedSummary.damagedItems ?? 0) + (completedSummary.missingItems ?? 0) + (completedSummary.wrongItems ?? 0)}</p>
                             </div>
                         </div>
                         {/* Hidden verification stats - showing only routing-focused summary now
@@ -484,9 +484,9 @@ export default function VerificationSessionPage() {
                         </div>
                         */}
                         {completedSummary.correctItemsValue != null && (
-                            <div className="p-3 rounded-md bg-green-50 border border-green-200 text-center">
-                                <p className="text-[10px] text-green-700">Correct Items Value</p>
-                                <p className="text-2xl font-bold text-green-900">{formatCurrency(completedSummary.correctItemsValue)}</p>
+                            <div className="bg-white rounded-lg shadow px-4 py-3 border border-green-100">
+                                <p className="text-xs font-medium text-green-700 mb-1">Correct Items Value</p>
+                                <p className="text-lg font-bold text-green-900">{formatCurrency(completedSummary.correctItemsValue)}</p>
                             </div>
                         )}
                         {(completedSummary.excludedFromBatch ?? 0) > 0 && (
