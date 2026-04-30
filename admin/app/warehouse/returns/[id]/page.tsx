@@ -120,12 +120,29 @@ function ReturnTransactionStoreAndProcessorDl({
             </div>
             
             {/* Shipping Details */}
-            {/* {tx.fedexTracking && (
-                <div className={`${rowCls} pt-2 border-t border-gray-100`}>
-                    <dt className={`${labelCls} shrink-0`}>FedEx Tracking</dt>
-                    <dd className={`${valueCls} text-right font-mono`}>{tx.fedexTracking}</dd>
-                </div>
-            )} */}
+            {(tx.fedexTracking || tx.fedexPickupConfirmation || tx.fedexShipmentId) && (
+                <>
+                    <div className={`pt-2 border-t ${emerald ? 'border-emerald-200' : 'border-gray-100'}`} />
+                    {tx.fedexTracking && (
+                        <div className={rowCls}>
+                            <dt className={`${labelCls} shrink-0`}>FedEx Tracking</dt>
+                            <dd className={`${valueCls} text-right font-mono`}>{tx.fedexTracking}</dd>
+                        </div>
+                    )}
+                    {tx.fedexPickupConfirmation && (
+                        <div className={rowCls}>
+                            <dt className={`${labelCls} shrink-0`}>Pickup Confirmation</dt>
+                            <dd className={`${valueCls} text-right font-mono`}>{tx.fedexPickupConfirmation}</dd>
+                        </div>
+                    )}
+                    {tx.fedexShipmentId && (
+                        <div className={rowCls}>
+                            <dt className={`${labelCls} shrink-0`}>Shipment ID</dt>
+                            <dd className={`${valueCls} text-right font-mono`}>{tx.fedexShipmentId}</dd>
+                        </div>
+                    )}
+                </>
+            )}
             
             {/* Package Tracking with Print Labels */}
             {tx.packageTracking && Object.keys(tx.packageTracking).length > 0 && (
@@ -146,21 +163,27 @@ function ReturnTransactionStoreAndProcessorDl({
                     <dd className="space-y-1.5 mt-1">
                         {Object.entries(tx.packageTracking)
                             .filter(([, v]) => v)
-                            .map(([key, val], idx) => (
-                                <div key={key} className="flex justify-between items-center text-xs">
-                                    <span className="text-gray-500 capitalize">{key.replace(/([0-9]+)/, ' $1')}</span>
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="font-mono text-gray-900">{val}</span>
-                                        <button
-                                            onClick={() => window.printHtml?.(`shipping-label/${idx + 1}`, `shipping-label-${idx + 1}`)}
-                                            className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors"
-                                            title={`Print shipping label for ${val}`}
-                                        >
-                                            <Printer className="w-3 h-3" />
-                                        </button>
+                            .map(([key, val], idx) => {
+                                // Handle both formats: "package1" and "1"
+                                const displayKey = key.startsWith('package') 
+                                    ? key.replace(/([0-9]+)/, ' $1')
+                                    : `Package ${key}`;
+                                return (
+                                    <div key={key} className="flex justify-between items-center text-xs">
+                                        <span className="text-gray-500 capitalize">{displayKey}</span>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="font-mono text-gray-900">{val}</span>
+                                            <button
+                                                onClick={() => window.printHtml?.(`shipping-label/${idx + 1}`, `shipping-label-${idx + 1}`)}
+                                                className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors"
+                                                title={`Print shipping label for ${val}`}
+                                            >
+                                                <Printer className="w-3 h-3" />
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            ))
+                                );
+                            })
                         }
                     </dd>
                 </div>

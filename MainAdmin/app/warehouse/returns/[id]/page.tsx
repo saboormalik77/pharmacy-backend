@@ -119,6 +119,55 @@ function ReturnTransactionStoreAndProcessorDl({
                     {tx.processorName || '—'}
                 </dd>
             </div>
+            
+            {/* Shipping Details */}
+            {(tx.fedexTracking || tx.fedexPickupConfirmation || tx.fedexShipmentId) && (
+                <>
+                    <div className={`pt-2 border-t ${emerald ? 'border-emerald-200' : 'border-gray-100'}`} />
+                    {tx.fedexTracking && (
+                        <div className={rowCls}>
+                            <dt className={`${labelCls} shrink-0`}>FedEx Tracking</dt>
+                            <dd className={`${valueCls} text-right font-mono`}>{tx.fedexTracking}</dd>
+                        </div>
+                    )}
+                    {tx.fedexPickupConfirmation && (
+                        <div className={rowCls}>
+                            <dt className={`${labelCls} shrink-0`}>Pickup Confirmation</dt>
+                            <dd className={`${valueCls} text-right font-mono`}>{tx.fedexPickupConfirmation}</dd>
+                        </div>
+                    )}
+                    {tx.fedexShipmentId && (
+                        <div className={rowCls}>
+                            <dt className={`${labelCls} shrink-0`}>Shipment ID</dt>
+                            <dd className={`${valueCls} text-right font-mono`}>{tx.fedexShipmentId}</dd>
+                        </div>
+                    )}
+                </>
+            )}
+            
+            {/* Package Tracking */}
+            {tx.packageTracking && Object.keys(tx.packageTracking).length > 0 && (
+                <div className={`pt-2 border-t ${emerald ? 'border-emerald-200' : 'border-gray-100'}`}>
+                    <dt className={`${labelCls} mb-1`}>Package Tracking</dt>
+                    <dd className="space-y-1">
+                        {Object.entries(tx.packageTracking)
+                            .filter(([, v]) => v)
+                            .map(([key, val]) => {
+                                // Handle both formats: "package1" and "1"
+                                const displayKey = key.startsWith('package') 
+                                    ? key.replace(/([0-9]+)/, ' $1')
+                                    : `Package ${key}`;
+                                return (
+                                    <div key={key} className={`${rowCls} text-xs`}>
+                                        <span className={`${labelCls} capitalize`}>{displayKey}</span>
+                                        <span className={`${valueCls} font-mono`}>{val}</span>
+                                    </div>
+                                );
+                            })
+                        }
+                    </dd>
+                </div>
+            )}
         </dl>
     );
 }

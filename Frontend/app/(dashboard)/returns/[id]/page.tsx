@@ -24,6 +24,10 @@ interface ReturnTransaction {
     licensePlate: string;
     pharmacyId: string;
     pharmacyName?: string;
+    storeNumber?: string | null;
+    pharmacyStreetAddress?: string | null;
+    pharmacyCity?: string | null;
+    pharmacyState?: string | null;
     processorId?: string;
     processorName?: string;
     serviceType: string;
@@ -761,18 +765,55 @@ export default function ReturnDetailPage() {
                                 <dt className="text-xs text-gray-500">Store Name</dt>
                                 <dd className="text-xs font-medium text-gray-900">{tx.pharmacyName || '—'}</dd>
                             </div>
+                            
+                            {/* Store Address */}
+                            {tx.pharmacyStreetAddress && (
+                                <div className="flex justify-between">
+                                    <dt className="text-xs text-gray-500">Address</dt>
+                                    <dd className="text-xs font-medium text-gray-900">{tx.pharmacyStreetAddress}</dd>
+                                </div>
+                            )}
+                            
+                            {/* City / State */}
+                            {(tx.pharmacyCity || tx.pharmacyState) && (
+                                <div className="flex justify-between">
+                                    <dt className="text-xs text-gray-500">City / State</dt>
+                                    <dd className="text-xs font-medium text-gray-900">
+                                        {[tx.pharmacyCity, tx.pharmacyState].filter(Boolean).join(', ') || '—'}
+                                    </dd>
+                                </div>
+                            )}
+                            
+                            <div className="flex justify-between">
+                                <dt className="text-xs text-gray-500">Service Type</dt>
+                                <dd className="text-xs font-medium text-gray-900">
+                                    {tx.serviceType ? tx.serviceType.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : '—'}
+                                </dd>
+                            </div>
+                            
                             <div className="flex justify-between">
                                 <dt className="text-xs text-gray-500">Processor</dt>
                                 <dd className="text-xs font-medium text-gray-900">{tx.processorName || '—'}</dd>
                             </div>
                             
-                            {/* Shipping Details */}
-                            {/* {tx.fedexTracking && (
-                                <div className="flex justify-between pt-2 border-t border-gray-100">
-                                    <dt className="text-xs text-gray-500">FedEx Tracking</dt>
-                                    <dd className="text-xs font-medium text-gray-900 font-mono">{tx.fedexTracking}</dd>
-                                </div>
-                            )} */}
+                            {/* Shipping Details Section */}
+                            {(tx.fedexTracking || tx.fedexPickupConfirmation) && (
+                                <>
+                                    <div className="pt-2 border-t border-gray-100" />
+                                    {tx.fedexTracking && (
+                                        <div className="flex justify-between">
+                                            <dt className="text-xs text-gray-500">FedEx Tracking</dt>
+                                            <dd className="text-xs font-medium text-gray-900 font-mono">{tx.fedexTracking}</dd>
+                                        </div>
+                                    )}
+                                    {tx.fedexPickupConfirmation && (
+                                        <div className="flex justify-between">
+                                            <dt className="text-xs text-gray-500">Pickup Confirmation</dt>
+                                            <dd className="text-xs font-medium text-gray-900 font-mono">{tx.fedexPickupConfirmation}</dd>
+                                        </div>
+                                    )}
+                                </>
+                            )}
                             
                             {/* Package Tracking with Print Labels */}
                             {tx.packageTracking && Object.keys(tx.packageTracking).length > 0 && (
@@ -794,22 +835,28 @@ export default function ReturnDetailPage() {
                                     <dd className="space-y-1.5 mt-1">
                                         {Object.entries(tx.packageTracking)
                                             .filter(([, v]) => v)
-                                            .map(([key, val], idx) => (
-                                                <div key={key} className="flex justify-between items-center text-xs">
-                                                    <span className="text-gray-500 capitalize">{key.replace(/([0-9]+)/, ' $1')}</span>
-                                                    <div className="flex items-center gap-1.5">
-                                                        <span className="font-mono text-gray-900">{val}</span>
-                                                        <button
-                                                            onClick={() => printSingleLabel(idx + 1)}
-                                                            disabled={pdfLoading === `shipping-label-${idx + 1}`}
-                                                            className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
-                                                            title={`Print shipping label for ${val}`}
-                                                        >
-                                                            {pdfLoading === `shipping-label-${idx + 1}` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
-                                                        </button>
+                                            .map(([key, val], idx) => {
+                                                // Handle both formats: "package1" and "1"
+                                                const displayKey = key.startsWith('package') 
+                                                    ? key.replace(/([0-9]+)/, ' $1')
+                                                    : `Package ${key}`;
+                                                return (
+                                                    <div key={key} className="flex justify-between items-center text-xs">
+                                                        <span className="text-gray-500 capitalize">{displayKey}</span>
+                                                        <div className="flex items-center gap-1.5">
+                                                            <span className="font-mono text-gray-900">{val}</span>
+                                                            <button
+                                                                onClick={() => printSingleLabel(idx + 1)}
+                                                                disabled={pdfLoading === `shipping-label-${idx + 1}`}
+                                                                className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
+                                                                title={`Print shipping label for ${val}`}
+                                                            >
+                                                                {pdfLoading === `shipping-label-${idx + 1}` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
+                                                            </button>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            ))
+                                                );
+                                            })
                                         }
                                     </dd>
                                 </div>
