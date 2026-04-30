@@ -686,18 +686,7 @@ export default function ReturnDetailPage() {
                                 <Lock className="w-3 h-3" /> Finalize
                             </button>
                         )}
-                        {/* Print Job Sheet - Available for completed/finalized transactions with tracking */}
-                        {(tx.status === 'completed' || tx.status === 'finalized') && (tx.fedexTracking || (tx.packageTracking && Object.keys(tx.packageTracking).length > 0)) && (
-                            <button
-                                onClick={printJobSheet}
-                                disabled={pdfLoading === 'job-sheet'}
-                                className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors disabled:opacity-50"
-                                title="Print job sheet with addresses and barcodes"
-                            >
-                                {pdfLoading === 'job-sheet' ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <FileText className="w-4 h-4 mr-1" />}
-                                Print Job Sheet
-                            </button>
-                        )}
+                        {/* Print Job Sheet - Moved to Documents section */}
                         {/* {canDoAction(tx, 'edit') && (
                             <button
                                 onClick={() => setEditModal(true)}
@@ -776,6 +765,78 @@ export default function ReturnDetailPage() {
                                 <dt className="text-xs text-gray-500">Processor</dt>
                                 <dd className="text-xs font-medium text-gray-900">{tx.processorName || '—'}</dd>
                             </div>
+                            
+                            {/* Shipping Details */}
+                            {/* {tx.fedexTracking && (
+                                <div className="flex justify-between pt-2 border-t border-gray-100">
+                                    <dt className="text-xs text-gray-500">FedEx Tracking</dt>
+                                    <dd className="text-xs font-medium text-gray-900 font-mono">{tx.fedexTracking}</dd>
+                                </div>
+                            )} */}
+                            
+                            {/* Package Tracking with Print Labels */}
+                            {tx.packageTracking && Object.keys(tx.packageTracking).length > 0 && (
+                                <div className="pt-2 border-t border-gray-100">
+                                    <dt className="text-xs text-gray-500 mb-2 flex items-center justify-between">
+                                        <span>Package Tracking</span>
+                                        <div className="flex items-center gap-1">
+                                            <button
+                                                onClick={printShippingLabels}
+                                                disabled={pdfLoading === 'shipping-labels'}
+                                                className="flex items-center gap-1 px-2 py-1 bg-green-100 hover:bg-green-200 text-xs text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
+                                                title="Print all shipping labels with addresses and barcodes"
+                                            >
+                                                {pdfLoading === 'shipping-labels' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
+                                                Print All Labels
+                                            </button>
+                                        </div>
+                                    </dt>
+                                    <dd className="space-y-1.5 mt-1">
+                                        {Object.entries(tx.packageTracking)
+                                            .filter(([, v]) => v)
+                                            .map(([key, val], idx) => (
+                                                <div key={key} className="flex justify-between items-center text-xs">
+                                                    <span className="text-gray-500 capitalize">{key.replace(/([0-9]+)/, ' $1')}</span>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="font-mono text-gray-900">{val}</span>
+                                                        <button
+                                                            onClick={() => printSingleLabel(idx + 1)}
+                                                            disabled={pdfLoading === `shipping-label-${idx + 1}`}
+                                                            className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
+                                                            title={`Print shipping label for ${val}`}
+                                                        >
+                                                            {pdfLoading === `shipping-label-${idx + 1}` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        }
+                                    </dd>
+                                </div>
+                            )}
+
+                            {/* FedEx Labels */}
+                            {tx.fedexLabels && Object.keys(tx.fedexLabels).length > 0 && (
+                                <div className="pt-2 border-t border-gray-100">
+                                    <dt className="text-xs text-gray-500 mb-1 flex items-center gap-1"><Printer className="w-3.5 h-3.5" /> Shipping Labels</dt>
+                                    <dd className="flex flex-wrap gap-2">
+                                        {Object.keys(tx.fedexLabels).map((key) => {
+                                            const num = key.replace('package', '');
+                                            return (
+                                                <a
+                                                    key={key}
+                                                    href={`${process.env.NEXT_PUBLIC_API_URL}/return-transactions/${tx.id}/labels/${num}/download`}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="flex items-center gap-1 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-xs text-gray-700 rounded border border-gray-200 transition-colors"
+                                                >
+                                                    <Download className="w-3 h-3" /> Label {num}
+                                                </a>
+                                            );
+                                        })}
+                                    </dd>
+                                </div>
+                            )}
                         </dl>
                     </div>
 
@@ -807,88 +868,7 @@ export default function ReturnDetailPage() {
                         </dl>
                     </div> */}
 
-                    {/* Shipping (conditional) */}
-                    {showShipping && (
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                <Truck className="w-4 h-4 text-gray-500" />
-                                Shipping
-                            </h2>
-                            <dl className="space-y-2">
-                                {tx.fedexTracking && (
-                                    <div className="flex justify-between">
-                                        <dt className="text-xs text-gray-500">FedEx Tracking</dt>
-                                        <dd className="text-xs font-medium text-gray-900 font-mono">{tx.fedexTracking}</dd>
-                                    </div>
-                                )}
-                                {/* Pickup Confirmation removed per user request */}
-                                
-                                {/* Package Tracking with Print Labels */}
-                                {tx.packageTracking && Object.keys(tx.packageTracking).length > 0 && (
-                                    <div className="pt-2 border-t border-gray-100">
-                                        <dt className="text-xs text-gray-500 mb-2 flex items-center justify-between">
-                                            <span>Package Tracking</span>
-                                            <div className="flex items-center gap-1">
-                                                <button
-                                                    onClick={printShippingLabels}
-                                                    disabled={pdfLoading === 'shipping-labels'}
-                                                    className="flex items-center gap-1 px-2 py-1 bg-green-100 hover:bg-green-200 text-xs text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
-                                                    title="Print all shipping labels with addresses and barcodes"
-                                                >
-                                                    {pdfLoading === 'shipping-labels' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
-                                                    Print All Labels
-                                                </button>
-                                            </div>
-                                        </dt>
-                                        <dd className="space-y-1.5 mt-1">
-                                            {Object.entries(tx.packageTracking)
-                                                .filter(([, v]) => v)
-                                                .map(([key, val], idx) => (
-                                                    <div key={key} className="flex justify-between items-center text-xs">
-                                                        <span className="text-gray-500 capitalize">{key.replace(/([0-9]+)/, ' $1')}</span>
-                                                        <div className="flex items-center gap-1.5">
-                                                            <span className="font-mono text-gray-900">{val}</span>
-                                                            <button
-                                                                onClick={() => printSingleLabel(idx + 1)}
-                                                                disabled={pdfLoading === `shipping-label-${idx + 1}`}
-                                                                className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
-                                                                title={`Print shipping label for ${val}`}
-                                                            >
-                                                                {pdfLoading === `shipping-label-${idx + 1}` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                ))
-                                            }
-                                        </dd>
-                                    </div>
-                                )}
-                                
-                                {/* FedEx Labels */}
-                                {tx.fedexLabels && Object.keys(tx.fedexLabels).length > 0 && (
-                                    <div className="pt-2 border-t border-gray-100">
-                                        <dt className="text-gray-500 mb-1 flex items-center gap-1"><Printer className="w-3.5 h-3.5" /> Shipping Labels</dt>
-                                        <dd className="flex flex-wrap gap-2">
-                                            {Object.keys(tx.fedexLabels).map((key) => {
-                                                const num = key.replace('package', '');
-                                                return (
-                                                    <a
-                                                        key={key}
-                                                        href={`${process.env.NEXT_PUBLIC_API_URL}/return-transactions/${tx.id}/labels/${num}/download`}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        className="flex items-center gap-1 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-xs text-gray-700 rounded border border-gray-200 transition-colors"
-                                                    >
-                                                        <Download className="w-3 h-3" /> Label {num}
-                                                    </a>
-                                                );
-                                            })}
-                                        </dd>
-                                    </div>
-                                )}
-                            </dl>
-                        </div>
-                    )}
+                    {/* Shipping section completely commented out - moved to Store & Processor section */}
                 </div>
 
                 {/* ── Documents Section ───────────────────────────── */}
@@ -905,6 +885,18 @@ export default function ReturnDetailPage() {
                             >
                                 <Download className="w-3.5 h-3.5" /> Download Manifest
                             </button>
+                            {/* Print Job Sheet - Available for completed/finalized transactions with tracking */}
+                            {(tx.status === 'completed' || tx.status === 'finalized') && (tx.fedexTracking || (tx.packageTracking && Object.keys(tx.packageTracking).length > 0)) && (
+                                <button
+                                    onClick={printJobSheet}
+                                    disabled={pdfLoading === 'job-sheet'}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded bg-green-600 text-white hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
+                                    title="Print job sheet with addresses and barcodes"
+                                >
+                                    {pdfLoading === 'job-sheet' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
+                                    Print Job Sheet
+                                </button>
+                            )}
                         </div>
                     </div>
                 )}
@@ -1130,7 +1122,7 @@ export default function ReturnDetailPage() {
                                 <button onClick={() => setEditModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
                             </div>
                             <div className="px-4 py-3 space-y-2.5">
-                                <div>
+                                {/* <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-0.5">FedEx Tracking Number</label>
                                     <input
                                         type="text"
@@ -1139,7 +1131,7 @@ export default function ReturnDetailPage() {
                                         className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
                                         placeholder="Enter tracking number"
                                     />
-                                </div>
+                                </div> */}
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-0.5">FedEx Pickup Confirmation</label>
                                     <input

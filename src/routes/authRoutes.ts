@@ -26,11 +26,11 @@ router.get(
     // Attach branding from admin_settings so login pages display the correct logo and business name
     try {
       const { supabaseAdmin } = await import('../config/supabase');
-      if (supabaseAdmin) {
+      if (supabaseAdmin && req.tenant?.buyingGroupId) {
         const { data: settings } = await supabaseAdmin
           .from('admin_settings')
           .select('logo_url, business_name')
-          .eq('id', 1)
+          .eq('buying_group_id', req.tenant.buyingGroupId)
           .single();
         if (settings?.logo_url) {
           req.tenant.logoUrl = settings.logo_url;

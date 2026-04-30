@@ -91,6 +91,14 @@ export const updateAdminSettingsHandler = catchAsync(
       logoUrl: logoUrl ?? logo_url,
     }, buyingGroupId);
 
+    // Clear tenant cache if branding info (logo or business name) was updated
+    if ((logoUrl || logo_url || businessName || business_name) && buyingGroupId) {
+      try {
+        const { clearTenantCacheForBuyingGroup } = await import('../services/tenantService');
+        clearTenantCacheForBuyingGroup(buyingGroupId);
+      } catch { /* non-critical */ }
+    }
+
     res.status(200).json({
       status: 'success',
       message: 'Settings updated successfully',
@@ -137,6 +145,14 @@ export const uploadLogoHandler = catchAsync(
     );
 
     const settings = await adminSettingsService.updateAdminSettings({ logoUrl }, buyingGroupId);
+
+    // Clear tenant cache so logo changes take effect immediately
+    if (buyingGroupId) {
+      try {
+        const { clearTenantCacheForBuyingGroup } = await import('../services/tenantService');
+        clearTenantCacheForBuyingGroup(buyingGroupId);
+      } catch { /* non-critical */ }
+    }
 
     res.status(200).json({
       status: 'success',

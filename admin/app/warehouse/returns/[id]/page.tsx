@@ -118,6 +118,76 @@ function ReturnTransactionStoreAndProcessorDl({
                     {tx.processorName || '—'}
                 </dd>
             </div>
+            
+            {/* Shipping Details */}
+            {/* {tx.fedexTracking && (
+                <div className={`${rowCls} pt-2 border-t border-gray-100`}>
+                    <dt className={`${labelCls} shrink-0`}>FedEx Tracking</dt>
+                    <dd className={`${valueCls} text-right font-mono`}>{tx.fedexTracking}</dd>
+                </div>
+            )} */}
+            
+            {/* Package Tracking with Print Labels */}
+            {tx.packageTracking && Object.keys(tx.packageTracking).length > 0 && (
+                <div className="pt-2 border-t border-gray-100">
+                    <dt className={`${labelCls} mb-1 flex items-center justify-between`}>
+                        <span>Package Tracking</span>
+                        <div className="flex items-center gap-1">
+                            <button
+                                onClick={() => window.printHtml?.('shipping-labels', 'shipping-labels')}
+                                className="flex items-center gap-1 px-2 py-1 bg-green-100 hover:bg-green-200 text-xs text-green-700 rounded border border-green-200 transition-colors"
+                                title="Print all shipping labels"
+                            >
+                                <Printer className="w-3 h-3" />
+                                Print All Labels
+                            </button>
+                        </div>
+                    </dt>
+                    <dd className="space-y-1.5 mt-1">
+                        {Object.entries(tx.packageTracking)
+                            .filter(([, v]) => v)
+                            .map(([key, val], idx) => (
+                                <div key={key} className="flex justify-between items-center text-xs">
+                                    <span className="text-gray-500 capitalize">{key.replace(/([0-9]+)/, ' $1')}</span>
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="font-mono text-gray-900">{val}</span>
+                                        <button
+                                            onClick={() => window.printHtml?.(`shipping-label/${idx + 1}`, `shipping-label-${idx + 1}`)}
+                                            className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors"
+                                            title={`Print shipping label for ${val}`}
+                                        >
+                                            <Printer className="w-3 h-3" />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        }
+                    </dd>
+                </div>
+            )}
+
+            {/* FedEx Labels */}
+            {tx.fedexLabels && Object.keys(tx.fedexLabels).length > 0 && (
+                <div className="pt-2 border-t border-gray-100">
+                    <dt className={`${labelCls} mb-1 flex items-center gap-1`}><Printer className="w-3.5 h-3.5" /> Shipping Labels</dt>
+                    <dd className="flex flex-wrap gap-2">
+                        {Object.keys(tx.fedexLabels).map((key) => {
+                            const num = key.replace('package', '');
+                            return (
+                                <a
+                                    key={key}
+                                    href={`${process.env.NEXT_PUBLIC_API_URL}/return-transactions/${tx.id}/labels/${num}/download`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="flex items-center gap-1 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-xs text-gray-700 rounded border border-gray-200 transition-colors"
+                                >
+                                    <Download className="w-3 h-3" /> Label {num}
+                                </a>
+                            );
+                        })}
+                    </dd>
+                </div>
+            )}
         </dl>
     );
 }
@@ -682,18 +752,7 @@ export default function ReturnDetailPage() {
                                 <Lock className="w-3 h-3" /> Finalize
                             </button>
                         )}
-                        {/* Print Job Sheet - Available for completed/finalized transactions with tracking */}
-                        {(tx.status === 'completed' || tx.status === 'finalized') && (tx.fedexTracking || (tx.packageTracking && Object.keys(tx.packageTracking).length > 0)) && (
-                            <button
-                                onClick={printJobSheet}
-                                disabled={pdfLoading === 'job-sheet'}
-                                className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors disabled:opacity-50"
-                                title="Print job sheet with addresses and barcodes"
-                            >
-                                {pdfLoading === 'job-sheet' ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <FileText className="w-4 h-4 mr-1" />}
-                                Print Job Sheet
-                            </button>
-                        )}
+                        {/* Print Job Sheet - Moved to Documents section */}
                         {canDoAction(tx, 'delete') && canEdit && (
                             <button onClick={() => checkActionWithToast('delete return', () => setDeleteModal(true))} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-red-100 text-red-800 border border-red-300 hover:bg-red-200 transition-colors">
                                 <Trash2 className="w-3 h-3" /> Delete
@@ -762,16 +821,16 @@ export default function ReturnDetailPage() {
                     <ReturnTransactionStoreAndProcessorDl tx={tx} variant="plain" />
                 </div>
 
-                    {/* Shipping & Processing */}
-                    <div className="bg-white rounded-lg shadow px-4 py-3">
+                    {/* Shipping & Processing - Commented out, moved to Store & Processor */}
+                    {/* <div className="bg-white rounded-lg shadow px-4 py-3">
                         <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                             <Truck className="w-3.5 h-3.5" /> Shipping & Processing
                         </h2>
                         <dl className="space-y-1.5">
-                            <div className="flex justify-between">
+                            {/* <div className="flex justify-between">
                                 <dt className="text-[11px] text-gray-500">FedEx Tracking</dt>
                                 <dd className="text-[11px] text-gray-900 font-mono">{tx.fedexTracking || '—'}</dd>
-                            </div>
+                            </div> */}
                             {/* Pickup Confirmation removed per user request */}
                             {/* Commented out as requested:
                             <div className="flex justify-between">
@@ -876,7 +935,7 @@ export default function ReturnDetailPage() {
                             </div>
                         )}
                         </dl>
-                    </div>
+                    </div> */}
                 </div>
             ) : (
                 /* Layout without Shipping & Processing: 3 cards in one row */
@@ -982,6 +1041,18 @@ export default function ReturnDetailPage() {
                             {pdfLoading === 'manifest' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
                             Download Manifest
                         </button>
+                        {/* Print Job Sheet - Available for completed/finalized transactions with tracking */}
+                        {(tx.status === 'completed' || tx.status === 'finalized') && (tx.fedexTracking || (tx.packageTracking && Object.keys(tx.packageTracking).length > 0)) && (
+                            <button
+                                onClick={printJobSheet}
+                                disabled={pdfLoading === 'job-sheet'}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 hover:bg-green-100 border border-green-200 rounded text-xs text-green-700 font-medium transition-colors disabled:opacity-50"
+                                title="Print job sheet with addresses and barcodes"
+                            >
+                                {pdfLoading === 'job-sheet' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
+                                Print Job Sheet
+                            </button>
+                        )}
                         {/* <button
                             onClick={() => downloadPdf('dea-form-222', `dea-form-222-${tx.licensePlate}.pdf`)}
                             disabled={pdfLoading === 'dea-form-222'}
@@ -1299,10 +1370,10 @@ export default function ReturnDetailPage() {
                                     <p className="text-[10px] text-yellow-800">Return is locked. Only notes can be updated.</p>
                                 </div>
                             )}
-                            <div>
+                            {/* <div>
                                 <label className="block text-[11px] font-medium text-gray-700 mb-0.5">FedEx Tracking Number</label>
                                 <input type="text" value={editForm.fedexTracking} onChange={e => setEditForm({ ...editForm, fedexTracking: e.target.value })} disabled={isLocked} className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} placeholder="Enter tracking number" />
-                            </div>
+                            </div> */}
                             <div>
                                 <label className="block text-[11px] font-medium text-gray-700 mb-0.5">FedEx Pickup Confirmation</label>
                                 <input type="text" value={editForm.fedexPickupConfirmation} onChange={e => setEditForm({ ...editForm, fedexPickupConfirmation: e.target.value })} disabled={isLocked} className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} placeholder="Enter pickup confirmation" />
