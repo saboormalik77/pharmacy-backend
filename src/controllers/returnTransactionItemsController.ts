@@ -70,14 +70,14 @@ export const addItemHandler = catchAsync(
     let destination = body.destination;
     const policyResult = null;
 
-    if (returnStatus === 'non_returnable') {
-      if (!nonReturnableReason || !isValidNonReturnableReason(nonReturnableReason)) {
-        throw new AppError(
-          'A valid nonReturnableReason is required when adding an item as non-returnable',
-          400
-        );
-      }
-    }
+    // if (returnStatus === 'non_returnable') {
+    //   if (!nonReturnableReason || !isValidNonReturnableReason(nonReturnableReason)) {
+    //     throw new AppError(
+    //       'A valid nonReturnableReason is required when adding an item as non-returnable',
+    //       400
+    //     );
+    //   }
+    // }
 
     /*
      * Policy auto-classification for add-item is intentionally disabled.
@@ -357,16 +357,16 @@ export const updateItemHandler = catchAsync(
     }
 
     if (body.returnStatus === 'non_returnable') {
-      const incomingReason = body.nonReturnableReason;
-      const effectiveReason =
-        (incomingReason && String(incomingReason).trim()) ||
-        (existingItem.nonReturnableReason || '').trim();
-      if (!effectiveReason || !isValidNonReturnableReason(effectiveReason)) {
-        throw new AppError(
-          'A valid nonReturnableReason is required when marking an item as non-returnable',
-          400
-        );
-      }
+      // const incomingReason = body.nonReturnableReason;
+      // const effectiveReason =
+      //   (incomingReason && String(incomingReason).trim()) ||
+      //   (existingItem.nonReturnableReason || '').trim();
+      // if (!effectiveReason || !isValidNonReturnableReason(effectiveReason)) {
+      //   throw new AppError(
+      //     'A valid nonReturnableReason is required when marking an item as non-returnable',
+      //     400
+      //   );
+      // }
     }
 
     // Only include isPartial/partialPercentage in the update if they were explicitly provided in the request

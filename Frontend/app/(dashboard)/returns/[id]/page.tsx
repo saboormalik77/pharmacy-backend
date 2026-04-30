@@ -270,7 +270,8 @@ export default function ReturnDetailPage() {
         if (editItemModal) {
             setEditItemForm({
                 fullPackageSize: editItemModal.fullPackageSize ? String(editItemModal.fullPackageSize) : '',
-                fullPackageQtyReturned: editItemModal.fullPackageQtyReturned ? String(editItemModal.fullPackageQtyReturned) : (editItemModal.quantity ? String(editItemModal.quantity) : ''),
+                fullPackageQtyReturned: editItemModal.fullPackageQtyReturned ? String(editItemModal.fullPackageQtyReturned) : 
+                    (editItemModal.quantity ? String(editItemModal.quantity) : ''),
                 standardPrice: editItemModal.standardPrice || 0,
                 returnStatus: editItemModal.returnStatus,
                 destination: editItemModal.destination || '',
@@ -282,37 +283,39 @@ export default function ReturnDetailPage() {
     }, [editItemModal]);
 
     const runEditPolicyCheck = useCallback(async () => {
-        if (!editItemModal) return;
-        const ndc = editItemModal.ndc;
-        const expDate = editItemModal.expirationDate;
-        if (!ndc || !expDate) return;
+        // Policy check disabled
+        return;
+        // if (!editItemModal) return;
+        // const ndc = editItemModal.ndc;
+        // const expDate = editItemModal.expirationDate;
+        // if (!ndc || !expDate) return;
 
-        const pkgSize = parseInt(editItemForm.fullPackageSize) || 0;
-        const qtyReturned = parseInt(editItemForm.fullPackageQtyReturned) || 0;
-        const isPartial = pkgSize > 0 && qtyReturned > 0 && qtyReturned < pkgSize;
+        // const pkgSize = parseInt(editItemForm.fullPackageSize) || 0;
+        // const qtyReturned = parseInt(editItemForm.fullPackageQtyReturned) || 0;
+        // const isPartial = pkgSize > 0 && qtyReturned > 0 && qtyReturned < pkgSize;
 
-        setIsEditPolicyChecking(true);
-        setEditPolicyCheck(null);
-        try {
-            const res = await apiClient.post<any>('/policies/check', {
-                ndc,
-                expirationDate: expDate,
-                dosageForm: editItemModal.dosageForm || undefined,
-                isPartial,
-            }, true);
-            if (res.status === 'success' && res.data) {
-                const policy = res.data;
-                setEditPolicyCheck(policy);
-                if (policy.status === 'returnable' || policy.status === 'non_returnable') {
-                    setEditItemForm(prev => ({
-                        ...prev,
-                        returnStatus: policy.status,
-                        destination: policy.destination || prev.destination,
-                    }));
-                }
-            }
-        } catch { /* non-critical */ }
-        setIsEditPolicyChecking(false);
+        // setIsEditPolicyChecking(true);
+        // setEditPolicyCheck(null);
+        // try {
+        //     const res = await apiClient.post<any>('/policies/check', {
+        //         ndc,
+        //         expirationDate: expDate,
+        //         dosageForm: editItemModal.dosageForm || undefined,
+        //         isPartial,
+        //     }, true);
+        //     if (res.status === 'success' && res.data) {
+        //         const policy = res.data;
+        //         setEditPolicyCheck(policy);
+        //         if (policy.status === 'returnable' || policy.status === 'non_returnable') {
+        //             setEditItemForm(prev => ({
+        //                 ...prev,
+        //                 returnStatus: policy.status,
+        //                 destination: policy.destination || prev.destination,
+        //             }));
+        //         }
+        //     }
+        // } catch { /* non-critical */ }
+        // setIsEditPolicyChecking(false);
     }, [editItemModal, editItemForm.fullPackageSize, editItemForm.fullPackageQtyReturned]);
 
     const editPolicyModalIdRef = useRef<string | null>(null);
@@ -503,13 +506,13 @@ export default function ReturnDetailPage() {
         if (!editItemModal) return;
 
         // FCR-52: Require a reason whenever the row ends up non_returnable.
-        if (editItemForm.returnStatus === 'non_returnable') {
-            const { isValidNonReturnableReason } = await import('@/lib/constants/nonReturnableReasons');
-            if (!isValidNonReturnableReason(editItemForm.nonReturnableReason)) {
-                showToast('Please select a non-returnable reason for this item.', 'error');
-                return;
-            }
-        }
+        // if (editItemForm.returnStatus === 'non_returnable') {
+        //     const { isValidNonReturnableReason } = await import('@/lib/constants/nonReturnableReasons');
+        //     if (!isValidNonReturnableReason(editItemForm.nonReturnableReason)) {
+        //         showToast('Please select a non-returnable reason for this item.', 'error');
+        //         return;
+        //     }
+        // }
 
         setIsActionLoading(true);
         try {
@@ -1227,75 +1230,34 @@ export default function ReturnDetailPage() {
                                 <button onClick={() => setEditItemModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
                             </div>
                             <div className="px-4 py-3 space-y-2.5">
-                                <div className="grid grid-cols-2 gap-2">
-                                    <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-0.5">Pkg Size</label>
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            value={editItemForm.fullPackageSize}
-                                            onChange={e => setEditItemForm({ ...editItemForm, fullPackageSize: e.target.value })}
-                                            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
-                                            placeholder="e.g. 60"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-0.5">Qty Returned</label>
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            value={editItemForm.fullPackageQtyReturned}
-                                            onChange={e => setEditItemForm({ ...editItemForm, fullPackageQtyReturned: e.target.value })}
-                                            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
-                                            placeholder="e.g. 45"
-                                        />
-                                    </div>
-                                </div>
-                                {isEditPolicyChecking && (
-                                    <div className="flex items-center gap-2 text-xs text-gray-600 px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded">
-                                        <Loader2 className="w-3 h-3 animate-spin" /> Checking policy...
-                                    </div>
-                                )}
-                                {editPolicyCheck && (
-                                    <div className={`flex items-start gap-1.5 text-xs rounded px-2.5 py-1.5 border ${
-                                        editPolicyCheck.status === 'returnable' ? 'bg-green-50 border-green-200 text-green-800' :
-                                        editPolicyCheck.status === 'non_returnable' ? 'bg-red-50 border-red-200 text-red-800' :
-                                        'bg-yellow-50 border-yellow-200 text-yellow-800'
-                                    }`}>
-                                        {editPolicyCheck.status === 'returnable' ? <CheckCircle className="w-3 h-3 mt-0.5 flex-shrink-0" /> :
-                                         editPolicyCheck.status === 'non_returnable' ? <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" /> :
-                                         <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />}
-                                        <div>
-                                            <span className="font-semibold">{editPolicyCheck.manufacturerName ? `${editPolicyCheck.manufacturerName}: ` : 'Policy: '}</span>
-                                            {editPolicyCheck.status === 'returnable' && 'Returnable — status & destination updated.'}
-                                            {editPolicyCheck.status === 'non_returnable' && `Non-Returnable${editPolicyCheck.reason ? ` — ${editPolicyCheck.reason.replace(/_/g, ' ')}` : ''}`}
-                                            {editPolicyCheck.status === 'tbd' && 'No policy found — set status manually.'}
-                                        </div>
-                                    </div>
-                                )}
-                                {/* <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-0.5">Price</label>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        value={editItemForm.standardPrice}
-                                        onChange={e => setEditItemForm({ ...editItemForm, standardPrice: Number(e.target.value) })}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
-                                        min="0"
-                                    />
-                                </div> */}
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-0.5">Destination</label>
-                                    <select
-                                        value={editItemForm.destination}
-                                        onChange={e => setEditItemForm({ ...editItemForm, destination: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
-                                    >
-                                        <option value="">— Select Destination —</option>
-                                        {reverseDistributors.map(rd => (
-                                            <option key={rd.id} value={rd.name}>{rd.name}</option>
-                                        ))}
-                                    </select>
+                                    <label className="block text-xs font-medium text-gray-700 mb-0.5">Quantity</label>
+                                    <div className="grid grid-cols-2 gap-2 text-xs">
+                                        <div>
+                                            <label className="block text-[10px] text-gray-500 mb-0.5">Pkg Size</label>
+                                            <div className="text-center py-1.5 bg-gray-50 border border-gray-200 rounded">
+                                                {editItemForm.fullPackageSize || '—'}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] text-gray-500 mb-0.5">Qty Returned (units)</label>
+                                            <input 
+                                                type="number" 
+                                                min="0" 
+                                                max={editItemForm.fullPackageSize || undefined}
+                                                value={editItemForm.fullPackageQtyReturned || ''} 
+                                                onChange={e => setEditItemForm({ ...editItemForm, fullPackageQtyReturned: e.target.value })} 
+                                                className="w-full px-2 py-1.5 text-center text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" 
+                                            />
+                                        </div>
+                                        {/* <div>
+                                            <label className="block text-[10px] text-gray-500 mb-0.5">#</label>
+                                            <div className="text-center py-1.5 bg-gray-50 border border-gray-200 rounded">
+                                                {editItemForm.fullPackageQtyReturned && editItemForm.fullPackageSize ? 
+                                                    Math.ceil(Number(editItemForm.fullPackageQtyReturned) / Number(editItemForm.fullPackageSize)) : '—'}
+                                            </div>
+                                        </div> */}
+                                    </div>
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-0.5">Memo</label>

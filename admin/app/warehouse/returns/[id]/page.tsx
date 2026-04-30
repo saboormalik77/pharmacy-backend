@@ -341,7 +341,8 @@ export default function ReturnDetailPage() {
         if (editItemModal) {
             setEditItemForm({
                 fullPackageSize: editItemModal.fullPackageSize ? String(editItemModal.fullPackageSize) : '',
-                fullPackageQtyReturned: editItemModal.fullPackageQtyReturned ? String(editItemModal.fullPackageQtyReturned) : (editItemModal.quantity ? String(editItemModal.quantity) : ''),
+                fullPackageQtyReturned: editItemModal.fullPackageQtyReturned ? String(editItemModal.fullPackageQtyReturned) : 
+                    (editItemModal.quantity ? String(editItemModal.quantity) : ''),
                 standardPrice: editItemModal.standardPrice != null ? String(editItemModal.standardPrice) : '',
                 returnStatus: editItemModal.returnStatus,
                 destination: editItemModal.destination || '',
@@ -397,11 +398,13 @@ export default function ReturnDetailPage() {
         // FCR-52: A non-returnable reason is required whenever the row ends
         // up non_returnable. The dropdown is shown in the modal in that case.
         if (editItemForm.returnStatus === 'non_returnable') {
-            if (!isValidNonReturnableReason(editItemForm.nonReturnableReason)) {
-                showToast('Please select a non-returnable reason for this item.', 'error');
-                return;
+            // if (!isValidNonReturnableReason(editItemForm.nonReturnableReason)) {
+            //     showToast('Please select a non-returnable reason for this item.', 'error');
+            //     return;
+            // }
+            if (editItemForm.nonReturnableReason) {
+                payload.nonReturnableReason = editItemForm.nonReturnableReason;
             }
-            payload.nonReturnableReason = editItemForm.nonReturnableReason;
         }
 
         const result = await dispatch(updateTransactionItem({ transactionId: id, itemId: editItemModal.id, payload }));
@@ -1212,31 +1215,35 @@ export default function ReturnDetailPage() {
                                 </div>
                             )}
                             <div className="space-y-2">
-                                <div className="grid grid-cols-2 gap-2">
-                                    <div>
-                                        <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Pkg Size</label>
-                                        <input type="number" min="1" value={editItemForm.fullPackageSize} onChange={e => setEditItemForm({ ...editItemForm, fullPackageSize: e.target.value })} disabled={isLocked} placeholder="e.g. 60" className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Qty Returned</label>
-                                        <input type="number" min="0" value={editItemForm.fullPackageQtyReturned} onChange={e => setEditItemForm({ ...editItemForm, fullPackageQtyReturned: e.target.value })} disabled={isLocked} placeholder="e.g. 45" className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} />
-                                    </div>
-                                </div>
                                 <div>
-                                    <label className="block text-[11px] font-medium text-gray-700 mb-0.5">
-                                        Destination
-                                        <span className="text-gray-400 font-normal ml-1">(auto-assigned if empty)</span>
-                                    </label>
-                                    <select
-                                        value={editItemForm.destination}
-                                        onChange={e => setEditItemForm({ ...editItemForm, destination: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
-                                    >
-                                        <option value="">— Auto-assign —</option>
-                                        {reverseDistributors.map(d => (
-                                            <option key={d.id} value={d.name}>{d.name}</option>
-                                        ))}
-                                    </select>
+                                    <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Quantity</label>
+                                    <div className="grid grid-cols-2 gap-2 text-xs">
+                                        <div>
+                                            <label className="block text-[10px] text-gray-500 mb-0.5">Pkg Size</label>
+                                            <div className="text-center py-1.5 bg-gray-50 border border-gray-200 rounded">
+                                                {editItemForm.fullPackageSize || '—'}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] text-gray-500 mb-0.5">Qty Returned (units)</label>
+                                            <input 
+                                                type="number" 
+                                                min="0" 
+                                                max={editItemForm.fullPackageSize || undefined}
+                                                value={editItemForm.fullPackageQtyReturned || ''} 
+                                                onChange={e => setEditItemForm({ ...editItemForm, fullPackageQtyReturned: e.target.value })} 
+                                                disabled={isLocked} 
+                                                className={`w-full px-2 py-1.5 text-center text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} 
+                                            />
+                                        </div>
+                                        {/* <div>
+                                            <label className="block text-[10px] text-gray-500 mb-0.5">#</label>
+                                            <div className="text-center py-1.5 bg-gray-50 border border-gray-200 rounded">
+                                                {editItemForm.fullPackageQtyReturned && editItemForm.fullPackageSize ? 
+                                                    Math.ceil(Number(editItemForm.fullPackageQtyReturned) / Number(editItemForm.fullPackageSize)) : '—'}
+                                            </div>
+                                        </div> */}
+                                    </div>
                                 </div>
                                 <div>
                                     <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Memo</label>
