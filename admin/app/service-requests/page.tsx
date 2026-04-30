@@ -341,7 +341,7 @@ function ActionButtons({
     if (isProcessor) {
         if (r.status === 'pending') {
             return (
-                <button onClick={() => router.push(`/service-requests/${r.id}/schedule`)} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors">
+                <button onClick={() => router.push(`/service-requests/${r.id}/schedule`)} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title="Claim and Schedule">
                     <Play className="w-3.5 h-3.5" />
                 </button>
             );
@@ -349,10 +349,10 @@ function ActionButtons({
         if (r.status === 'scheduled' && r.is_claimed_by_me) {
             return (
                 <div className="flex justify-end gap-1">
-                    <button onClick={() => router.push(`/service-requests/${r.id}/schedule`)} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors">
+                    <button onClick={() => router.push(`/service-requests/${r.id}/schedule`)} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title="Reschedule">
                         <Calendar className="w-3.5 h-3.5" />
                     </button>
-                    <button onClick={onComplete} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors">
+                    <button onClick={onComplete} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title="Mark as Complete">
                         <CheckSquare className="w-3.5 h-3.5" />
                     </button>
                     <button onClick={onRelease} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title="Release back to queue">
@@ -366,7 +366,7 @@ function ActionButtons({
     // Admin
     if (r.status === 'pending' || r.status === 'scheduled') {
         return (
-            <button onClick={onReassign} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors">
+            <button onClick={onReassign} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title="Reassign Processor">
                 <User className="w-3.5 h-3.5" />
             </button>
         );

@@ -21,6 +21,10 @@ interface ReturnTransaction {
     licensePlate: string;
     pharmacyId: string;
     pharmacyName: string | null;
+    storeNumber?: string | null;
+    pharmacyStreetAddress?: string | null;
+    pharmacyCity?: string | null;
+    pharmacyState?: string | null;
     processorId: string | null;
     processorName: string | null;
     serviceType: string;
@@ -396,6 +400,12 @@ export default function ReturnsPage() {
                                 {[
                                     { label: 'Store', value: viewModal.pharmacyName || '—' },
                                     { label: 'Processor', value: viewModal.processorName || '—' },
+                                    ...(viewModal.pharmacyStreetAddress ? [
+                                        { label: 'Address', value: viewModal.pharmacyStreetAddress, fullWidth: true }
+                                    ] : []),
+                                    ...((viewModal.pharmacyCity || viewModal.pharmacyState) ? [
+                                        { label: 'City / State', value: [viewModal.pharmacyCity, viewModal.pharmacyState].filter(Boolean).join(', ') || '—', fullWidth: true }
+                                    ] : []),
                                     { label: 'Service Type', value: (viewModal.serviceType || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) },
                                     { label: 'Total Items', value: String(viewModal.totalItems) },
                                     // Show Returnable/Non-Returnable values only when status is verified
@@ -405,18 +415,23 @@ export default function ReturnsPage() {
                                     ] : []),
                                     { label: 'Created', value: formatDate(viewModal.createdAt) },
                                     { label: 'Updated', value: formatDate(viewModal.updatedAt) },
-                                ].map(({ label, value, className }) => (
-                                    <div key={label}>
+                                ].map(({ label, value, className, fullWidth }) => (
+                                    <div key={label} className={fullWidth ? 'col-span-2' : ''}>
                                         <p className="text-[10px] text-gray-400">{label}</p>
                                         <p className={`text-xs font-medium text-gray-900 ${className || ''}`}>{value}</p>
                                     </div>
                                 ))}
                             </div>
-                            {viewModal.fedexTracking && (
+                            {(viewModal.fedexTracking || viewModal.fedexPickupConfirmation) && (
                                 <div className="border-t border-gray-100 pt-2">
-                                    <p className="text-[10px] font-medium text-gray-400 mb-1.5 uppercase">Shipping</p>
+                                    <p className="text-[10px] font-medium text-gray-400 mb-1.5 uppercase">Shipping Details</p>
                                     <div className="grid grid-cols-2 gap-2">
-                                        <div><p className="text-[10px] text-gray-400">FedEx Tracking</p><p className="text-xs font-medium">{viewModal.fedexTracking || '—'}</p></div>
+                                        {viewModal.fedexTracking && (
+                                            <div><p className="text-[10px] text-gray-400">FedEx Tracking</p><p className="text-xs font-medium font-mono">{viewModal.fedexTracking}</p></div>
+                                        )}
+                                        {viewModal.fedexPickupConfirmation && (
+                                            <div><p className="text-[10px] text-gray-400">Pickup Confirmation</p><p className="text-xs font-medium font-mono">{viewModal.fedexPickupConfirmation}</p></div>
+                                        )}
                                     </div>
                                 </div>
                             )}

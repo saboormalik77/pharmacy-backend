@@ -392,10 +392,15 @@ class ApiClient {
     
     const url = `${this.baseURL}${endpoint}`;
     
-    // Add pharmacy_id to body if available
+    // Add pharmacy_id to body if available (except for endpoints that determine it from auth)
     const requestBody = body || {};
     const pharmacyId = this.getPharmacyIdFromCookies();
-    if (pharmacyId && includeAuth && typeof requestBody === 'object' && !Array.isArray(requestBody)) {
+    const settingsEndpoints = ['/settings', '/settings/change-password'];
+    const shouldAddPharmacyId = pharmacyId && includeAuth && 
+      typeof requestBody === 'object' && !Array.isArray(requestBody) &&
+      !settingsEndpoints.some(ep => endpoint.startsWith(ep));
+    
+    if (shouldAddPharmacyId) {
       requestBody.pharmacy_id = pharmacyId;
     }
 
@@ -480,10 +485,15 @@ class ApiClient {
     
     const url = `${this.baseURL}${endpoint}`;
     
-    // Add pharmacy_id to body if available
+    // Add pharmacy_id to body if available (except for endpoints that determine it from auth)
     const requestBody = body || {};
     const pharmacyId = this.getPharmacyIdFromCookies();
-    if (pharmacyId && includeAuth && typeof requestBody === 'object' && !Array.isArray(requestBody)) {
+    const settingsEndpoints = ['/settings', '/settings/change-password'];
+    const shouldAddPharmacyId = pharmacyId && includeAuth && 
+      typeof requestBody === 'object' && !Array.isArray(requestBody) &&
+      !settingsEndpoints.some(ep => endpoint.startsWith(ep));
+    
+    if (shouldAddPharmacyId) {
       requestBody.pharmacy_id = pharmacyId;
     }
 
@@ -568,10 +578,15 @@ class ApiClient {
     
     const url = `${this.baseURL}${endpoint}`;
     
-    // Add pharmacy_id to body if available
+    // Add pharmacy_id to body if available (except for endpoints that determine it from auth)
     const requestBody = body || {};
     const pharmacyId = this.getPharmacyIdFromCookies();
-    if (pharmacyId && includeAuth && typeof requestBody === 'object' && !Array.isArray(requestBody)) {
+    const settingsEndpoints = ['/settings', '/settings/change-password'];
+    const shouldAddPharmacyId = pharmacyId && includeAuth && 
+      typeof requestBody === 'object' && !Array.isArray(requestBody) &&
+      !settingsEndpoints.some(ep => endpoint.startsWith(ep));
+    
+    if (shouldAddPharmacyId) {
       requestBody.pharmacy_id = pharmacyId;
     }
 

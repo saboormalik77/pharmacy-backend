@@ -124,12 +124,29 @@ function ReturnTransactionStoreAndProcessorDl({
             </div>
             
             {/* Shipping Details */}
-            {/* {tx.fedexTracking && (
-                <div className={`${rowCls} pt-2 border-t border-gray-100`}>
-                    <dt className={`${labelCls} shrink-0`}>FedEx Tracking</dt>
-                    <dd className={`${valueCls} text-right font-mono`}>{tx.fedexTracking}</dd>
-                </div>
-            )} */}
+            {(tx.fedexTracking || tx.fedexPickupConfirmation || tx.fedexShipmentId) && (
+                <>
+                    <div className={`pt-2 border-t ${emerald ? 'border-emerald-200' : 'border-gray-100'}`} />
+                    {/* {tx.fedexTracking && (
+                        <div className={rowCls}>
+                            <dt className={`${labelCls} shrink-0`}>FedEx Tracking</dt>
+                            <dd className={`${valueCls} text-right font-mono`}>{tx.fedexTracking}</dd>
+                        </div>
+                    )} */}
+                    {tx.fedexPickupConfirmation && (
+                        <div className={rowCls}>
+                            <dt className={`${labelCls} shrink-0`}>Pickup Confirmation</dt>
+                            <dd className={`${valueCls} text-right font-mono`}>{tx.fedexPickupConfirmation}</dd>
+                        </div>
+                    )}
+                    {/* {tx.fedexShipmentId && (
+                        <div className={rowCls}>
+                            <dt className={`${labelCls} shrink-0`}>Shipment ID</dt>
+                            <dd className={`${valueCls} text-right font-mono`}>{tx.fedexShipmentId}</dd>
+                        </div>
+                    )} */}
+                </>
+            )}
             
             {/* Package Tracking with Print Labels */}
             {tx.packageTracking && Object.keys(tx.packageTracking).length > 0 && (
@@ -153,24 +170,29 @@ function ReturnTransactionStoreAndProcessorDl({
                     <dd className="space-y-1.5 mt-1">
                         {Object.entries(tx.packageTracking)
                             .filter(([, v]) => v)
-                            .map(([key, val], idx) => (
-                                <div key={key} className="flex justify-between items-center text-xs">
-                                    <span className="text-gray-500 capitalize">{key.replace(/([0-9]+)/, ' $1')}</span>
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="font-mono text-gray-900">{val}</span>
-                                        {onPrintShippingLabel ? (
-                                            <button
-                                                type="button"
-                                                onClick={() => onPrintShippingLabel(idx + 1)}
-                                                className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors"
-                                                title={`Print shipping label for ${val}`}
-                                            >
-                                                <Printer className="w-3 h-3" />
-                                            </button>
-                                        ) : null}
+                            .map(([key, val], idx) => {
+                                const displayKey = key.startsWith('package')
+                                    ? key.replace(/([0-9]+)/, ' $1')
+                                    : `Package ${key}`;
+                                return (
+                                    <div key={key} className="flex justify-between items-center text-xs">
+                                        <span className="text-gray-500 capitalize">{displayKey}</span>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="font-mono text-gray-900">{val}</span>
+                                            {onPrintShippingLabel ? (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => onPrintShippingLabel(idx + 1)}
+                                                    className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors"
+                                                    title={`Print shipping label for ${val}`}
+                                                >
+                                                    <Printer className="w-3 h-3" />
+                                                </button>
+                                            ) : null}
+                                        </div>
                                     </div>
-                                </div>
-                            ))
+                                );
+                            })
                         }
                     </dd>
                 </div>
@@ -421,8 +443,9 @@ export default function ReturnDetailPage() {
         if (editItemModal) {
             setEditItemForm({
                 fullPackageSize: editItemModal.fullPackageSize ? String(editItemModal.fullPackageSize) : '',
-                fullPackageQtyReturned: editItemModal.fullPackageQtyReturned ? String(editItemModal.fullPackageQtyReturned) : 
-                    (editItemModal.quantity ? String(editItemModal.quantity) : ''),
+                fullPackageQtyReturned: (editItemModal.fullPackageQtyReturned ?? editItemModal.quantityReturned)
+                    ? String(editItemModal.fullPackageQtyReturned ?? editItemModal.quantityReturned)
+                    : (editItemModal.quantity ? String(editItemModal.quantity) : ''),
                 standardPrice: editItemModal.standardPrice != null ? String(editItemModal.standardPrice) : '',
                 returnStatus: editItemModal.returnStatus,
                 destination: editItemModal.destination || '',
@@ -1102,8 +1125,9 @@ export default function ReturnDetailPage() {
                                             </td>
                                             <td className="px-4 py-3 text-sm text-center text-gray-900">
                                                 {(() => {
-                                                    const qtyReturned = item.fullPackageQtyReturned ?? item.quantity;
-                                                    const displayQty = (item.fullPackageQtyReturned && item.fullPackageSize && item.fullPackageQtyReturned === item.fullPackageSize) ? 1 : qtyReturned;
+                                                    const qtyReturned = item.fullPackageQtyReturned ?? item.quantityReturned ?? item.quantity;
+                                                    const fullPkgQty = item.fullPackageQtyReturned ?? item.quantityReturned;
+                                                    const displayQty = (fullPkgQty && item.fullPackageSize && fullPkgQty === item.fullPackageSize) ? 1 : qtyReturned;
                                                     return <>{displayQty}{item.isPartial && <span className="text-yellow-600 ml-0.5">P</span>}</>;
                                                 })()}
                                             </td>
