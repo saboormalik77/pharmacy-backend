@@ -88,7 +88,7 @@ export default function PriceAuditPage() {
                 </select>
                 <button
                     onClick={() => { setPage(1); fetchData(); }}
-                    className="px-3 py-1.5 text-xs bg-primary-600 text-white rounded hover:bg-primary-700"
+                    className="px-3 py-1.5 text-xs bg-[#1e293b] text-white rounded hover:bg-[#334155]"
                 >
                     Search
                 </button>
@@ -137,45 +137,45 @@ export default function PriceAuditPage() {
                 <h2 className="text-sm font-semibold text-gray-900 mb-3">Price Change History</h2>
                 <div className="overflow-x-auto">
                     <table className="w-full table-auto">
-                        <thead className="bg-gray-50 border-b border-gray-200">
+                        <thead className="bg-gradient-to-r from-[#1e293b] to-[#334155] border-b-2 border-slate-700">
                             <tr>
-                                <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">NDC</th>
-                                <th className="px-2 py-1.5 text-right text-xs font-medium text-gray-500 uppercase">Old Price</th>
-                                <th className="px-2 py-1.5 text-right text-xs font-medium text-gray-500 uppercase">New Price</th>
-                                <th className="px-2 py-1.5 text-right text-xs font-medium text-gray-500 uppercase">Change</th>
-                                <th className="px-2 py-1.5 text-right text-xs font-medium text-gray-500 uppercase">Change %</th>
-                                <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Source</th>
-                                <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider">NDC</th>
+                                <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">Old Price</th>
+                                <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">New Price</th>
+                                <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">Change</th>
+                                <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">Change %</th>
+                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider">Source</th>
+                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider">Date</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-200">
-                            {data.data.map((item) => (
-                                <tr key={item.id} className="hover:bg-gray-50">
-                                    <td className="px-2 py-1.5 text-xs font-mono font-medium">{item.ndc}</td>
-                                    <td className="px-2 py-1.5 text-xs text-right">
+                        <tbody className="divide-y divide-gray-100">
+                            {data.data.map((item, idx) => (
+                                <tr key={item.id} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'} hover:bg-slate-50`}>
+                                    <td className="px-4 py-3 text-sm font-mono font-medium">{item.ndc}</td>
+                                    <td className="px-4 py-3 text-sm text-right">
                                         {item.oldPrice != null ? formatCurrency(item.oldPrice) : '—'}
                                     </td>
-                                    <td className="px-2 py-1.5 text-xs text-right font-medium">{formatCurrency(item.newPrice)}</td>
-                                    <td className="px-2 py-1.5 text-xs text-right">
+                                    <td className="px-4 py-3 text-sm text-right font-medium">{formatCurrency(item.newPrice)}</td>
+                                    <td className="px-4 py-3 text-sm text-right">
                                         {item.priceChange != null ? (
                                             <span className={item.priceChange > 0 ? 'text-red-600' : item.priceChange < 0 ? 'text-green-600' : ''}>
                                                 {item.priceChange > 0 ? '+' : ''}{formatCurrency(item.priceChange)}
                                             </span>
                                         ) : '—'}
                                     </td>
-                                    <td className="px-2 py-1.5 text-xs text-right">
+                                    <td className="px-4 py-3 text-sm text-right">
                                         {item.changePercent != null ? (
                                             <span className={`font-medium ${item.changePercent > 0 ? 'text-red-600' : item.changePercent < 0 ? 'text-green-600' : ''}`}>
                                                 {item.changePercent > 0 ? '+' : ''}{item.changePercent}%
                                             </span>
                                         ) : '—'}
                                     </td>
-                                    <td className="px-2 py-1.5 text-xs">
+                                    <td className="px-4 py-3 text-sm">
                                         <span className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 text-xs">
                                             {item.priceSource || 'N/A'}
                                         </span>
                                     </td>
-                                    <td className="px-2 py-1.5 text-xs text-gray-600">
+                                    <td className="px-4 py-3 text-sm text-gray-600">
                                         {item.changedAt ? formatDateTime(item.changedAt) : '—'}
                                     </td>
                                 </tr>

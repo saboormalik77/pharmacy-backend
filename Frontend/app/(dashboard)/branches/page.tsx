@@ -119,9 +119,9 @@ export default function BranchesPage() {
             <h1 className="text-xl font-bold">Branch Pharmacies</h1>
             <p className="text-sm text-muted-foreground">{total} branch{total !== 1 ? 'es' : ''} total</p>
           </div>
-          <Button className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => setShowCreateModal(true)}>
-            <Plus className="h-4 w-4 mr-2" /> Add Branch
-          </Button>
+          <button className="inline-flex items-center gap-1 px-3 py-1.5 rounded text-xs font-medium bg-teal-600 text-white hover:bg-teal-700 transition-colors" onClick={() => setShowCreateModal(true)}>
+            <Plus className="h-4 w-4" /> Add Branch
+          </button>
         </div>
 
         {/* Pending Invites */}
@@ -178,33 +178,33 @@ export default function BranchesPage() {
         {/* Table */}
         <div className="bg-card border rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full table-auto">
               <thead>
-                <tr className="border-b bg-muted/50">
-                  <th className="text-left px-4 py-3 font-medium">Branch</th>
-                  <th className="text-left px-4 py-3 font-medium hidden md:table-cell">Email</th>
-                  <th className="text-left px-4 py-3 font-medium">Status</th>
-                  <th className="text-left px-4 py-3 font-medium hidden lg:table-cell">Roles</th>
-                  <th className="text-left px-4 py-3 font-medium hidden lg:table-cell">Created</th>
-                  <th className="text-right px-4 py-3 font-medium">Actions</th>
+                <tr className="bg-gradient-to-r from-teal-600 to-teal-700 border-b-2 border-teal-800">
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Branch</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider hidden md:table-cell">Email</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Status</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider hidden lg:table-cell">Roles</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider hidden lg:table-cell">Created</th>
+                  <th className="text-right px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {isLoading ? (
-                  <tr><td colSpan={6} className="text-center py-12 text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" />Loading...</td></tr>
+                  <tr><td colSpan={6} className="text-center py-12 text-sm text-gray-600"><Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" />Loading...</td></tr>
                 ) : branches.length === 0 ? (
-                  <tr><td colSpan={6} className="text-center py-12 text-muted-foreground">
+                  <tr><td colSpan={6} className="text-center py-12 text-sm text-gray-600">
                     <Building2 className="h-8 w-8 mx-auto mb-2 opacity-40" />
                     No branches found
                   </td></tr>
                 ) : (
-                  branches.map((b) => (
-                    <tr key={b.id} className="border-b hover:bg-muted/30 cursor-pointer" onClick={() => router.push(`/branches/${b.id}`)}>
+                  branches.map((b, idx) => (
+                    <tr key={b.id} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-teal-50/40'} hover:bg-teal-50 transition-colors border-b border-gray-100 cursor-pointer`} onClick={() => router.push(`/branches/${b.id}`)}>
                       <td className="px-4 py-3">
-                        <div className="font-medium">{b.pharmacyName}</div>
-                        <div className="text-xs text-muted-foreground md:hidden">{b.email}</div>
+                        <div className="text-sm text-gray-900 font-medium">{b.pharmacyName}</div>
+                        <div className="text-xs text-gray-600 md:hidden">{b.email}</div>
                       </td>
-                      <td className="px-4 py-3 hidden md:table-cell text-muted-foreground">{b.email}</td>
+                      <td className="px-4 py-3 hidden md:table-cell text-sm text-gray-600">{b.email}</td>
                       <td className="px-4 py-3">
                         <Badge variant={b.status === 'active' ? 'success' : 'warning'}>
                           {b.status}
@@ -217,9 +217,9 @@ export default function BranchesPage() {
                               <Badge key={r.roleId} variant="info">{r.roleName}</Badge>
                             ))}
                           </div>
-                        ) : <span className="text-muted-foreground text-xs">No roles</span>}
+                        ) : <span className="text-gray-600 text-xs">No roles</span>}
                       </td>
-                      <td className="px-4 py-3 hidden lg:table-cell text-muted-foreground">
+                      <td className="px-4 py-3 hidden lg:table-cell text-sm text-gray-600">
                         {new Date(b.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-4 py-3 text-right">
@@ -229,7 +229,7 @@ export default function BranchesPage() {
                             onClick={(e) => {
                               setActionMenuId(actionMenuId === b.id ? null : b.id)
                             }}
-                            className="p-1.5 hover:bg-accent rounded-md transition-colors"
+                            className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded transition-colors"
                           >
                             <MoreVertical className="h-4 w-4" />
                           </button>

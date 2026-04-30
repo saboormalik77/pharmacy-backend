@@ -86,13 +86,13 @@ export default function InventoryPage() {
             <div className="flex gap-2">
                 <button
                     onClick={() => setActiveSection('aging')}
-                    className={`px-3 py-1.5 text-xs font-medium rounded ${activeSection === 'aging' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                    className={`px-3 py-1.5 text-xs font-medium rounded ${activeSection === 'aging' ? 'bg-[#1e293b] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                 >
                     Aging Inventory
                 </button>
                 <button
                     onClick={() => setActiveSection('outstanding-ra')}
-                    className={`px-3 py-1.5 text-xs font-medium rounded ${activeSection === 'outstanding-ra' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                    className={`px-3 py-1.5 text-xs font-medium rounded ${activeSection === 'outstanding-ra' ? 'bg-[#1e293b] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                 >
                     Outstanding RA
                 </button>
@@ -172,31 +172,31 @@ export default function InventoryPage() {
                                 <h2 className="text-sm font-semibold text-gray-900 mb-3">Inventory Items</h2>
                                 <div className="overflow-x-auto">
                                     <table className="w-full table-auto">
-                                        <thead className="bg-gray-50 border-b border-gray-200">
+                                        <thead className="bg-gradient-to-r from-[#1e293b] to-[#334155] border-b-2 border-slate-700">
                                             <tr>
-                                                <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">NDC</th>
-                                                <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
-                                                <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Pharmacy</th>
-                                                <th className="px-2 py-1.5 text-right text-xs font-medium text-gray-500 uppercase">Qty</th>
-                                                <th className="px-2 py-1.5 text-right text-xs font-medium text-gray-500 uppercase">Value</th>
-                                                <th className="px-2 py-1.5 text-right text-xs font-medium text-gray-500 uppercase">Days</th>
-                                                <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider">NDC</th>
+                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider">Product</th>
+                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider">Pharmacy</th>
+                                                <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">Qty</th>
+                                                <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">Value</th>
+                                                <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">Days</th>
+                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider">Status</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-gray-200">
-                                            {agingData.data.map((item) => (
-                                                <tr key={item.id} className="hover:bg-gray-50">
-                                                    <td className="px-2 py-1.5 text-xs font-mono">{item.ndc}</td>
-                                                    <td className="px-2 py-1.5 text-xs">{item.productName}</td>
-                                                    <td className="px-2 py-1.5 text-xs">{item.pharmacyName}</td>
-                                                    <td className="px-2 py-1.5 text-xs text-right">{item.quantity}</td>
-                                                    <td className="px-2 py-1.5 text-xs text-right">{formatCurrency(item.estimatedValue)}</td>
-                                                    <td className="px-2 py-1.5 text-xs text-right">
+                                        <tbody className="divide-y divide-gray-100">
+                                            {agingData.data.map((item, idx) => (
+                                                <tr key={item.id} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'} hover:bg-slate-50`}>
+                                                    <td className="px-4 py-3 text-sm font-mono">{item.ndc}</td>
+                                                    <td className="px-4 py-3 text-sm">{item.productName}</td>
+                                                    <td className="px-4 py-3 text-sm">{item.pharmacyName}</td>
+                                                    <td className="px-4 py-3 text-sm text-right">{item.quantity}</td>
+                                                    <td className="px-4 py-3 text-sm text-right">{formatCurrency(item.estimatedValue)}</td>
+                                                    <td className="px-4 py-3 text-sm text-right">
                                                         <span className={`font-medium ${item.daysShelved > 180 ? 'text-red-600' : item.daysShelved > 90 ? 'text-orange-600' : ''}`}>
                                                             {item.daysShelved}
                                                         </span>
                                                     </td>
-                                                    <td className="px-2 py-1.5 text-xs">
+                                                    <td className="px-4 py-3 text-sm">
                                                         <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${
                                                             item.status === 'shelved' ? 'bg-blue-100 text-blue-700' :
                                                             item.status === 'ready_to_return' ? 'bg-green-100 text-green-700' :
@@ -235,7 +235,7 @@ export default function InventoryPage() {
                                 className="w-full pl-8 pr-3 py-1.5 text-xs border rounded bg-white"
                             />
                         </div>
-                        <button onClick={fetchRA} className="px-3 py-1.5 text-xs bg-primary-600 text-white rounded hover:bg-primary-700">
+                        <button onClick={fetchRA} className="px-3 py-1.5 text-xs bg-[#1e293b] text-white rounded hover:bg-[#334155]">
                             Search
                         </button>
                     </div>
@@ -295,25 +295,25 @@ export default function InventoryPage() {
                                 <h2 className="text-sm font-semibold text-gray-900 mb-3">Outstanding RA Details</h2>
                                 <div className="overflow-x-auto">
                                     <table className="w-full table-auto">
-                                        <thead className="bg-gray-50 border-b border-gray-200">
+                                        <thead className="bg-gradient-to-r from-[#1e293b] to-[#334155] border-b-2 border-slate-700">
                                             <tr>
-                                                <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Memo #</th>
-                                                <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Manufacturer</th>
-                                                <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Destination</th>
-                                                <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Pharmacy</th>
-                                                <th className="px-2 py-1.5 text-right text-xs font-medium text-gray-500 uppercase">Amount</th>
-                                                <th className="px-2 py-1.5 text-right text-xs font-medium text-gray-500 uppercase">Days Waiting</th>
+                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider">Memo #</th>
+                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider">Manufacturer</th>
+                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider">Destination</th>
+                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider">Pharmacy</th>
+                                                <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">Amount</th>
+                                                <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">Days Waiting</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-gray-200">
-                                            {raData.data.map((item) => (
-                                                <tr key={item.id} className="hover:bg-gray-50">
-                                                    <td className="px-2 py-1.5 text-xs font-mono">{item.memoNumber}</td>
-                                                    <td className="px-2 py-1.5 text-xs">{item.labelerName}</td>
-                                                    <td className="px-2 py-1.5 text-xs">{item.destination}</td>
-                                                    <td className="px-2 py-1.5 text-xs">{item.pharmacyName}</td>
-                                                    <td className="px-2 py-1.5 text-xs text-right">{formatCurrency(item.amountRequested)}</td>
-                                                    <td className="px-2 py-1.5 text-xs text-right">
+                                        <tbody className="divide-y divide-gray-100">
+                                            {raData.data.map((item, idx) => (
+                                                <tr key={item.id} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'} hover:bg-slate-50`}>
+                                                    <td className="px-4 py-3 text-sm font-mono">{item.memoNumber}</td>
+                                                    <td className="px-4 py-3 text-sm">{item.labelerName}</td>
+                                                    <td className="px-4 py-3 text-sm">{item.destination}</td>
+                                                    <td className="px-4 py-3 text-sm">{item.pharmacyName}</td>
+                                                    <td className="px-4 py-3 text-sm text-right">{formatCurrency(item.amountRequested)}</td>
+                                                    <td className="px-4 py-3 text-sm text-right">
                                                         <span className={`font-medium ${item.daysWaiting > 120 ? 'text-red-600 font-bold' : item.daysWaiting > 60 ? 'text-orange-600' : ''}`}>
                                                             {item.daysWaiting}
                                                         </span>

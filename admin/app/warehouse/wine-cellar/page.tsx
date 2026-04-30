@@ -155,10 +155,10 @@ export default function WineCellarPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
-                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
-                        <Archive className="w-6 h-6 text-purple-600" /> Wine Cellar
+                    <h1 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                        <Archive className="w-4 h-4 text-purple-600" /> Wine Cellar
                     </h1>
-                    <p className="text-sm text-gray-500 mt-1">Products stored for future return processing</p>
+                    <p className="text-xs text-gray-500 mt-0.5">Products stored for future return processing</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                     <Button variant="outline" size="sm" onClick={handleDueThisMonth}>
@@ -174,29 +174,29 @@ export default function WineCellarPage() {
             {/* Stats Cards */}
             {stats && (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                    <div className="bg-white rounded-lg shadow-md p-4 text-center">
-                        <p className="text-xs text-gray-500">Total Items</p>
-                        <p className="text-xl font-bold text-gray-900">{stats.totalItems}</p>
+                    <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                        <p className="text-xs font-medium text-gray-500 mb-1">Total Items</p>
+                        <p className="text-lg font-bold text-gray-900">{stats.totalItems}</p>
                     </div>
-                    <div className="bg-blue-50 rounded-lg shadow-md p-4 text-center">
-                        <p className="text-xs text-blue-600">Shelved</p>
-                        <p className="text-xl font-bold text-blue-800">{stats.shelved}</p>
+                    <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                        <p className="text-xs font-medium text-gray-500 mb-1">Shelved</p>
+                        <p className="text-lg font-bold text-blue-700">{stats.shelved}</p>
                     </div>
-                    <div className="bg-yellow-50 rounded-lg shadow-md p-4 text-center">
-                        <p className="text-xs text-yellow-600">Ready to Return</p>
-                        <p className="text-xl font-bold text-yellow-800">{stats.readyToReturn}</p>
+                    <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                        <p className="text-xs font-medium text-gray-500 mb-1">Ready to Return</p>
+                        <p className="text-lg font-bold text-yellow-700">{stats.readyToReturn}</p>
                     </div>
-                    <div className="bg-green-50 rounded-lg shadow-md p-4 text-center">
-                        <p className="text-xs text-green-600">Returned</p>
-                        <p className="text-xl font-bold text-green-800">{stats.returned}</p>
+                    <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                        <p className="text-xs font-medium text-gray-500 mb-1">Returned</p>
+                        <p className="text-lg font-bold text-green-700">{stats.returned}</p>
                     </div>
-                    <div className="bg-red-50 rounded-lg shadow-md p-4 text-center">
-                        <p className="text-xs text-red-600">Destroyed</p>
-                        <p className="text-xl font-bold text-red-800">{stats.destroyed}</p>
+                    <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                        <p className="text-xs font-medium text-gray-500 mb-1">Destroyed</p>
+                        <p className="text-lg font-bold text-red-700">{stats.destroyed}</p>
                     </div>
-                    <div className="bg-purple-50 rounded-lg shadow-md p-4 text-center">
-                        <p className="text-xs text-purple-600">Total Value</p>
-                        <p className="text-lg font-bold text-purple-800">{formatCurrency(stats.totalValue)}</p>
+                    <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                        <p className="text-xs font-medium text-gray-500 mb-1">Total Value</p>
+                        <p className="text-lg font-bold text-purple-700">{formatCurrency(stats.totalValue)}</p>
                     </div>
                 </div>
             )}

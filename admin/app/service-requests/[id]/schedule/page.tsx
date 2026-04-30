@@ -128,11 +128,11 @@ export default function ScheduleServiceRequestPage() {
                             Back to Service Requests
                         </Button>
                     </div>
-                    <h1 className="text-2xl font-bold flex items-center gap-2">
-                        <CalendarClock className="w-6 h-6 text-teal-600" />
+                    <h1 className="text-lg font-bold flex items-center gap-2">
+                        <CalendarClock className="w-3.5 h-3.5 text-[#1e293b]" />
                         {request?.status === 'scheduled' ? 'Reschedule Visit' : 'Schedule Visit'}
                     </h1>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-xs text-gray-500 mt-0.5">
                         Schedule the on-site service visit for this pharmacy request.
                     </p>
                 </div>

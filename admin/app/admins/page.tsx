@@ -267,7 +267,7 @@ export default function AdminsPage() {
             <ToastContainer toasts={toasts} onClose={removeToast} />
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
                 <div>
-                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Admin Users</h1>
+                    <h1 className="text-lg font-bold text-gray-900">Admin Users</h1>
                     <p className="text-sm sm:text-base text-gray-600 mt-1">Manage admin users and their permissions</p>
                 </div>
                 <Button variant="primary" size="md" onClick={() => setAddModal(true)} className="w-full sm:w-auto whitespace-nowrap">

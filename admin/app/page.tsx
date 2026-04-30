@@ -80,7 +80,7 @@ function ProcessorDashboard() {
             <p className="text-xs text-gray-500 mb-3">No stores assigned yet</p>
             <button
               onClick={() => router.push('/warehouse/returns/create')}
-              className="px-3 py-1.5 text-xs bg-primary-600 text-white rounded hover:bg-primary-700 transition-colors"
+              className="px-3 py-1.5 text-xs bg-[#1e293b] text-white rounded hover:bg-[#334155] transition-colors"
             >
               View Stores
             </button>
@@ -205,8 +205,8 @@ export default function Dashboard() {
     <div className="space-y-4 sm:space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-sm sm:text-base text-gray-600 mt-1">Welcome to Buying group Management Portal</p>
+        <h1 className="text-lg font-bold text-gray-900">Dashboard</h1>
+        <p className="text-xs text-gray-500 mt-0.5">Welcome to Buying group Management Portal</p>
       </div>
 
       {/* Stats Grid */}
@@ -215,7 +215,7 @@ export default function Dashboard() {
           title="Total Pharmacies"
           value={data?.stats.totalPharmacies.value || 0}
           change={data?.stats.totalPharmacies.change || 0}
-          icon={<Building2 className="w-6 h-6" />}
+          icon={<Building2 className="w-3.5 h-3.5" />}
           tooltip={`Total number of registered pharmacies in the system. ${data?.stats.totalPharmacies.changeLabel || ''}`}
           changeLabel={data?.stats.totalPharmacies.changeLabel}
         />
@@ -238,7 +238,7 @@ export default function Dashboard() {
           title="Returns Value"
           value={data?.stats.returnsValue.value || 0}
           change={data?.stats.returnsValue.change || 0}
-          icon={<DollarSign className="w-6 h-6" />}
+          icon={<DollarSign className="w-3.5 h-3.5" />}
           tooltip={`Total value of pharmaceutical returns. ${data?.stats.returnsValue.changeLabel || ''}`}
           isCurrency
           changeLabel={data?.stats.returnsValue.changeLabel}
@@ -248,16 +248,16 @@ export default function Dashboard() {
       {/* Charts and Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Returns Value Trend Chart */}
-        <div className="lg:col-span-2 bg-white rounded-lg shadow-md p-4 sm:p-6">
-          <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Returns Value Trend</h2>
+        <div className="lg:col-span-2 bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+          <h2 className="text-sm font-semibold text-gray-900 mb-3">Returns Value Trend</h2>
           <div className="h-[300px] sm:h-[400px] lg:h-[500px]">
             <ReturnsValueChart />
           </div>
         </div>
 
         {/* Recent Activity */}
-        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-          <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Recent Activity</h2>
+        <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+          <h2 className="text-sm font-semibold text-gray-900 mb-3">Recent Activity</h2>
           {isLoadingRecentActivity ? (
             <div className="text-center py-8">
               <p className="text-sm text-gray-500">Loading activities...</p>
@@ -270,7 +270,7 @@ export default function Dashboard() {
             <div className="space-y-3 sm:space-y-4 max-h-[500px] overflow-y-auto">
               {recentActivity.map((activity) => (
               <div key={activity.id} className="flex items-start gap-2 sm:gap-3">
-                <div className="w-2 h-2 bg-primary-500 rounded-full mt-2 flex-shrink-0"></div>
+                <div className="w-2 h-2 bg-[#1e293b] rounded-full mt-2 flex-shrink-0"></div>
                 <div className="flex-1 min-w-0">
                     <p className="text-xs sm:text-sm text-gray-900 break-words">
                       {formatActivityMessage(activity)}

@@ -743,7 +743,7 @@ export default function ReturnDetailPage() {
                                     return;
                                 }
                                 checkActionWithToast('complete return', () => setActionModal('complete'));
-                            }} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors">
+                            }} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-[#1e293b] text-white hover:bg-[#334155] transition-colors">
                                 <CheckCircle className="w-3 h-3" /> Complete
                             </button>
                         )}
@@ -821,121 +821,6 @@ export default function ReturnDetailPage() {
                     <ReturnTransactionStoreAndProcessorDl tx={tx} variant="plain" />
                 </div>
 
-                    {/* Shipping & Processing - Commented out, moved to Store & Processor */}
-                    {/* <div className="bg-white rounded-lg shadow px-4 py-3">
-                        <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                            <Truck className="w-3.5 h-3.5" /> Shipping & Processing
-                        </h2>
-                        <dl className="space-y-1.5">
-                            {/* <div className="flex justify-between">
-                                <dt className="text-[11px] text-gray-500">FedEx Tracking</dt>
-                                <dd className="text-[11px] text-gray-900 font-mono">{tx.fedexTracking || '—'}</dd>
-                            </div> */}
-                            {/* Pickup Confirmation removed per user request */}
-                            {/* Commented out as requested:
-                            <div className="flex justify-between">
-                                <dt className="text-[11px] text-gray-500 flex items-center gap-1"><Clock className="w-3 h-3" /> Time In</dt>
-                                <dd className="text-[11px] text-gray-900">{tx.timeIn ? formatDate(tx.timeIn) : '—'}</dd>
-                            </div>
-                            <div className="flex justify-between">
-                                <dt className="text-[11px] text-gray-500 flex items-center gap-1"><Clock className="w-3 h-3" /> Time Out</dt>
-                                <dd className="text-[11px] text-gray-900">{tx.timeOut ? formatDate(tx.timeOut) : '—'}</dd>
-                            </div>
-                            */}
-                            {tx.receivedInWarehouseDate && (
-                                <div className="flex justify-between">
-                                    <dt className="text-[11px] text-gray-500">Received in Warehouse</dt>
-                                    <dd className="text-[11px] text-gray-900">{formatDate(tx.receivedInWarehouseDate)}</dd>
-                                </div>
-                            )}
-                            {/* Commented out as requested:
-                            <div className="flex justify-between">
-                                <dt className="text-[11px] text-gray-500">Verified Integrity</dt>
-                                <dd className="text-[11px] text-gray-900">{tx.verifiedIntegrity ? 'Yes' : 'No'}</dd>
-                            </div>
-                            */}
-                        {tx.boxCount != null && (
-                            <div className="flex justify-between">
-                                <dt className="text-[11px] text-gray-500">Box Count</dt>
-                                <dd className="text-[11px] text-gray-900 font-semibold">{tx.boxCount}</dd>
-                            </div>
-                        )}
-                        {tx.prpNumber && (
-                            <div className="flex justify-between">
-                                <dt className="text-gray-500">PRP Number</dt>
-                                <dd className="text-gray-900 font-mono text-xs">{tx.prpNumber}</dd>
-                            </div>
-                        )}
-                        {tx.fedexShipmentId && (
-                            <div className="flex justify-between">
-                                <dt className="text-gray-500">Shipment ID</dt>
-                                <dd className="text-gray-900 font-mono text-xs">{tx.fedexShipmentId}</dd>
-                            </div>
-                        )}
-                        {tx.packageTracking && Object.keys(tx.packageTracking).length > 0 && (
-                            <div className="pt-2 border-t border-gray-100">
-                                <dt className="text-gray-500 mb-1 flex items-center justify-between">
-                                    <span>Package Tracking</span>
-                                    <div className="flex items-center gap-1">
-                                        <button
-                                            onClick={printShippingLabels}
-                                            disabled={pdfLoading === 'shipping-labels'}
-                                            className="flex items-center gap-1 px-2 py-1 bg-green-100 hover:bg-green-200 text-xs text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
-                                            title="Print all shipping labels with addresses and barcodes"
-                                        >
-                                            {pdfLoading === 'shipping-labels' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
-                                            Print All Labels
-                                        </button>
-
-                                    </div>
-                                </dt>
-                                <dd className="space-y-1.5 mt-1">
-                                    {Object.entries(tx.packageTracking)
-                                        .filter(([, v]) => v)
-                                        .map(([key, val], idx) => (
-                                            <div key={key} className="flex justify-between items-center text-xs">
-                                                <span className="text-gray-500 capitalize">{key.replace(/([0-9]+)/, ' $1')}</span>
-                                                <div className="flex items-center gap-1.5">
-                                                    <span className="font-mono text-gray-900">{val}</span>
-                                                    <button
-                                                        onClick={() => printSingleLabel(idx + 1)}
-                                                        disabled={pdfLoading === `shipping-label-${idx + 1}`}
-                                                        className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
-                                                        title={`Print shipping label for ${val}`}
-                                                    >
-                                                        {pdfLoading === `shipping-label-${idx + 1}` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
-                                                    </button>
-
-                                                </div>
-                                            </div>
-                                        ))
-                                    }
-                                </dd>
-                            </div>
-                        )}
-                        {tx.fedexLabels && Object.keys(tx.fedexLabels).length > 0 && (
-                            <div className="pt-2 border-t border-gray-100">
-                                <dt className="text-gray-500 mb-1 flex items-center gap-1"><Printer className="w-3.5 h-3.5" /> Shipping Labels</dt>
-                                <dd className="flex flex-wrap gap-2">
-                                    {Object.keys(tx.fedexLabels).map((key) => {
-                                        const num = key.replace('package', '');
-                                        return (
-                                            <a
-                                                key={key}
-                                                href={`${process.env.NEXT_PUBLIC_API_URL}/return-transactions/${tx.id}/labels/${num}/download`}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="flex items-center gap-1 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-xs text-gray-700 rounded border border-gray-200 transition-colors"
-                                            >
-                                                <Download className="w-3 h-3" /> Label {num}
-                                            </a>
-                                        );
-                                    })}
-                                </dd>
-                            </div>
-                        )}
-                        </dl>
-                    </div> */}
                 </div>
             ) : (
                 /* Layout without Shipping & Processing: 3 cards in one row */
@@ -1076,7 +961,7 @@ export default function ReturnDetailPage() {
                     </h2>
                     {isProcessor && canAddDeleteItems && (
                         <div className="flex gap-1.5">
-                            <button onClick={() => router.push(`/warehouse/returns/${id}/add-items`)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors">
+                            <button onClick={() => router.push(`/warehouse/returns/${id}/add-items`)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-[#1e293b] text-white hover:bg-[#334155] transition-colors">
                                 <Plus className="w-3 h-3" /> Add Items
                             </button>
                             {/* Wine Cellar Items functionality moved to MainAdmin warehouse verification */}
@@ -1125,13 +1010,13 @@ export default function ReturnDetailPage() {
                             value={itemSearch}
                             onChange={e => setItemSearch(e.target.value)}
                             placeholder="Search by NDC, name, manufacturer, lot..."
-                            className="w-full pl-8 pr-3 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                            className="w-full pl-8 pr-3 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500"
                         />
                     </div>
                     <select
                         value={itemStatusFilter}
                         onChange={e => setItemStatusFilter(e.target.value)}
-                        className="px-2.5 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                        className="px-2.5 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500"
                     >
                         <option value="">All Statuses</option>
                         <option value="returnable">Returnable</option>
@@ -1150,7 +1035,7 @@ export default function ReturnDetailPage() {
                         <Package className="w-10 h-10 text-gray-300 mx-auto mb-2" />
                         <p className="text-gray-500 text-xs font-medium">No items yet</p>
                         {isProcessor && canAddDeleteItems && (
-                            <button onClick={() => router.push(`/warehouse/returns/${id}/add-items`)} className="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors">
+                            <button onClick={() => router.push(`/warehouse/returns/${id}/add-items`)} className="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-[#1e293b] text-white hover:bg-[#334155] transition-colors">
                                 <Plus className="w-3 h-3" /> Start Scanning
                             </button>
                         )}
@@ -1164,45 +1049,45 @@ export default function ReturnDetailPage() {
                     <div className="overflow-x-auto">
                         <table className="w-full table-auto">
                             <thead>
-                                <tr className="bg-gray-50 border-b border-gray-200">
-                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">NDC</th>
-                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Name</th>
-                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Manufacturer</th>
-                                    <th className="text-center px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Pkg Size</th>
-                                    <th className="text-center px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Qty Returned</th>
-                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Serial#</th>
+                                <tr className="bg-gradient-to-r from-[#1e293b] to-[#334155] border-b-2 border-slate-700">
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">NDC</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Name</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Manufacturer</th>
+                                    <th className="text-center px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Pkg Size</th>
+                                    <th className="text-center px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Qty Returned</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Serial#</th>
                                     {/* <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Price</th>
                                     <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Est. Value</th> */}
                                     {/* <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Est. Store Value</th> */}
-                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Expires</th>
-                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
-                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Destination</th>
-                                    <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Expires</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Status</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Destination</th>
+                                    <th className="text-right px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {nonWcItems.map((item) => {
+                            <tbody>
+                                {nonWcItems.map((item, idx) => {
                                     const sBadge = getItemStatusBadge(item.returnStatus);
                                     return (
-                                        <tr key={item.id} className="hover:bg-gray-50">
-                                            <td className="px-2 py-1.5 text-[11px] font-mono text-gray-900">{item.ndc || '—'}</td>
-                                            <td className="px-2 py-1.5 text-[11px] text-gray-900 max-w-[130px] truncate" title={item.proprietaryName || ''}>
+                                        <tr key={item.id} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'} hover:bg-slate-50 transition-colors border-b border-gray-100`}>
+                                            <td className="px-4 py-3 text-sm font-mono text-gray-900">{item.ndc || '—'}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-900 max-w-[130px] truncate" title={item.proprietaryName || ''}>
                                                 {item.proprietaryName || item.genericName || '—'}
                                             </td>
-                                            <td className="px-2 py-1.5 text-[11px] text-gray-600 max-w-[110px] truncate" title={item.manufacturer || ''}>
+                                            <td className="px-4 py-3 text-sm text-gray-600 max-w-[110px] truncate" title={item.manufacturer || ''}>
                                                 {item.manufacturer || '—'}
                                             </td>
-                                            <td className="px-2 py-1.5 text-[11px] text-center text-gray-900">
+                                            <td className="px-4 py-3 text-sm text-center text-gray-900">
                                                 {item.fullPackageSize || '—'}
                                             </td>
-                                            <td className="px-2 py-1.5 text-[11px] text-center text-gray-900">
+                                            <td className="px-4 py-3 text-sm text-center text-gray-900">
                                                 {(() => {
                                                     const qtyReturned = item.fullPackageQtyReturned ?? item.quantity;
                                                     const displayQty = (item.fullPackageQtyReturned && item.fullPackageSize && item.fullPackageQtyReturned === item.fullPackageSize) ? 1 : qtyReturned;
                                                     return <>{displayQty}{item.isPartial && <span className="text-yellow-600 ml-0.5">P</span>}</>;
                                                 })()}
                                             </td>
-                                            <td className="px-2 py-1.5 text-[11px] text-gray-600 font-mono whitespace-nowrap">
+                                            <td className="px-4 py-3 text-sm text-gray-600 font-mono whitespace-nowrap">
                                                 {item.serialNumber || '—'}
                                             </td>
                                             {/* <td className="px-2 py-1.5 text-[11px] text-right text-gray-900">
@@ -1214,10 +1099,10 @@ export default function ReturnDetailPage() {
                                             {/* <td className="px-2 py-1.5 text-[11px] text-right font-medium text-gray-900">
                                                 {item.estimatedStoreValue != null ? formatCurrency(item.estimatedStoreValue) : '—'}
                                             </td> */}
-                                            <td className="px-2 py-1.5 text-[11px] text-gray-600 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
                                                 {item.expirationDate ? formatDate(item.expirationDate) : '—'}
                                             </td>
-                                            <td className="px-2 py-1.5">
+                                            <td className="px-4 py-3">
                                                 <div className="flex flex-col gap-0.5">
                                                     <div className="flex items-center gap-1">
                                                         <Badge variant={sBadge.variant}><span className="text-[10px]">{sBadge.label}</span></Badge>
@@ -1233,7 +1118,7 @@ export default function ReturnDetailPage() {
                                                     )}
                                                 </div>
                                             </td>
-                                            <td className="px-2 py-1.5 text-[11px] text-gray-600">
+                                            <td className="px-4 py-3 text-sm text-gray-600">
                                                 {item.returnStatus === 'returnable' ? (
                                                     item.destination ? (
                                                         <span className="capitalize font-medium text-gray-900">{item.destination}</span>
@@ -1242,20 +1127,20 @@ export default function ReturnDetailPage() {
                                                     )
                                                 ) : '—'}
                                             </td>
-                                            <td className="px-2 py-1.5">
+                                            <td className="px-4 py-3">
                                                 <div className="flex items-center justify-end gap-0.5">
                                                     {canAddDeleteItems && item.nonReturnableReason === 'date' && !item.wineCellarId && (
-                                                        <button onClick={() => handleMoveToWineCellar(item)} className="p-1 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded" title="Move to Wine Cellar">
+                                                        <button onClick={() => handleMoveToWineCellar(item)} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title="Move to Wine Cellar">
                                                             <Archive className="w-3 h-3" />
                                                         </button>
                                                     )}
                                                     {canAddDeleteItems && (
-                                                        <button onClick={() => setEditItemModal(item)} className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title={isLocked ? 'Edit classification' : 'Edit item'}>
+                                                        <button onClick={() => setEditItemModal(item)} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title={isLocked ? 'Edit classification' : 'Edit item'}>
                                                             <Edit className="w-3 h-3" />
                                                         </button>
                                                     )}
                                                     {canAddDeleteItems && (
-                                                        <button onClick={() => setDeleteItemModal(item)} className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded" title="Delete item">
+                                                        <button onClick={() => setDeleteItemModal(item)} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title="Delete item">
                                                             <Trash2 className="w-3 h-3" />
                                                         </button>
                                                     )}
@@ -1272,8 +1157,8 @@ export default function ReturnDetailPage() {
 
             {/* ── Edit Item Modal ───────────────────────────── */}
             {editItemModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setEditItemModal(null)}>
-                    <div className="bg-white rounded-lg max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setEditItemModal(null)}>
+                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">Edit Item</h2>
                             <button onClick={() => setEditItemModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
@@ -1304,7 +1189,7 @@ export default function ReturnDetailPage() {
                                                 value={editItemForm.fullPackageQtyReturned || ''} 
                                                 onChange={e => setEditItemForm({ ...editItemForm, fullPackageQtyReturned: e.target.value })} 
                                                 disabled={isLocked} 
-                                                className={`w-full px-2 py-1.5 text-center text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} 
+                                                className={`w-full px-2 py-1.5 text-center text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} 
                                             />
                                         </div>
                                         {/* <div>
@@ -1318,13 +1203,13 @@ export default function ReturnDetailPage() {
                                 </div>
                                 <div>
                                     <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Memo</label>
-                                    <input type="text" value={editItemForm.memo} onChange={e => setEditItemForm({ ...editItemForm, memo: e.target.value })} placeholder="Optional memo" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                    <input type="text" value={editItemForm.memo} onChange={e => setEditItemForm({ ...editItemForm, memo: e.target.value })} placeholder="Optional memo" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500" />
                                 </div>
                             </div>
                         </div>
                         <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
                             <button onClick={() => setEditItemModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleUpdateItem} disabled={isItemActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                            <button onClick={handleUpdateItem} disabled={isItemActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">
                                 {isItemActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Saving...</> : 'Save'}
                             </button>
                         </div>
@@ -1334,8 +1219,8 @@ export default function ReturnDetailPage() {
 
             {/* ── Delete Item Modal ────────────────────────── */}
             {deleteItemModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setDeleteItemModal(null)}>
-                    <div className="bg-white rounded-lg max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setDeleteItemModal(null)}>
+                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">Delete Item</h2>
                             <button onClick={() => setDeleteItemModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
@@ -1358,8 +1243,8 @@ export default function ReturnDetailPage() {
 
             {/* ── Edit Modal ────────────────────────────────── */}
             {editModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setEditModal(false)}>
-                    <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setEditModal(false)}>
+                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">Edit Return — {tx.licensePlate}</h2>
                             <button onClick={() => setEditModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
@@ -1372,20 +1257,20 @@ export default function ReturnDetailPage() {
                             )}
                             {/* <div>
                                 <label className="block text-[11px] font-medium text-gray-700 mb-0.5">FedEx Tracking Number</label>
-                                <input type="text" value={editForm.fedexTracking} onChange={e => setEditForm({ ...editForm, fedexTracking: e.target.value })} disabled={isLocked} className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} placeholder="Enter tracking number" />
+                                <input type="text" value={editForm.fedexTracking} onChange={e => setEditForm({ ...editForm, fedexTracking: e.target.value })} disabled={isLocked} className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} placeholder="Enter tracking number" />
                             </div> */}
                             <div>
                                 <label className="block text-[11px] font-medium text-gray-700 mb-0.5">FedEx Pickup Confirmation</label>
-                                <input type="text" value={editForm.fedexPickupConfirmation} onChange={e => setEditForm({ ...editForm, fedexPickupConfirmation: e.target.value })} disabled={isLocked} className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} placeholder="Enter pickup confirmation" />
+                                <input type="text" value={editForm.fedexPickupConfirmation} onChange={e => setEditForm({ ...editForm, fedexPickupConfirmation: e.target.value })} disabled={isLocked} className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} placeholder="Enter pickup confirmation" />
                             </div>
                             <div>
                                 <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Notes</label>
-                                <textarea value={editForm.notes} onChange={e => setEditForm({ ...editForm, notes: e.target.value })} rows={3} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none" placeholder="Optional notes" />
+                                <textarea value={editForm.notes} onChange={e => setEditForm({ ...editForm, notes: e.target.value })} rows={3} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500 resize-none" placeholder="Optional notes" />
                             </div>
                         </div>
                         <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
                             <button onClick={() => setEditModal(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleUpdate} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                            <button onClick={handleUpdate} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">
                                 {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Saving...</> : 'Save Changes'}
                             </button>
                         </div>
@@ -1395,8 +1280,8 @@ export default function ReturnDetailPage() {
 
             {/* ── Status Action Modal ──────────────────────── */}
             {actionModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setActionModal(null)}>
-                    <div className="bg-white rounded-lg max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setActionModal(null)}>
+                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">
                                 {actionModal === 'pause' && 'Pause Return'}
@@ -1412,7 +1297,7 @@ export default function ReturnDetailPage() {
                         </div>
                         <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
                             <button onClick={() => setActionModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleStatusAction} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                            <button onClick={handleStatusAction} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">
                                 {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Processing...</> : 'Confirm'}
                             </button>
                         </div>
@@ -1422,8 +1307,8 @@ export default function ReturnDetailPage() {
 
             {/* ── Delete Modal ─────────────────────────────── */}
             {deleteModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setDeleteModal(false)}>
-                    <div className="bg-white rounded-lg max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setDeleteModal(false)}>
+                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">Delete Return</h2>
                             <button onClick={() => setDeleteModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
@@ -1445,7 +1330,7 @@ export default function ReturnDetailPage() {
 
             {/* ── Wine Cellar Items Modal ─────────────────────── */}
             {wcModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setWcModal(false)}>
+                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setWcModal(false)}>
                     <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col shadow-xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50 flex-shrink-0">
                             <div>
@@ -1491,7 +1376,7 @@ export default function ReturnDetailPage() {
                                                                 setWcSelected(new Set());
                                                             }
                                                         }}
-                                                        className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                                                        className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-slate-500"
                                                     />
                                                 </th>
                                                 <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase">NDC</th>
@@ -1523,7 +1408,7 @@ export default function ReturnDetailPage() {
                                                             type="checkbox"
                                                             checked={wcSelected.has(item.id)}
                                                             onChange={() => {}} // Handled by row click
-                                                            className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                                                            className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-slate-500"
                                                         />
                                                     </td>
                                                     <td className="px-3 py-2 text-xs font-mono text-gray-900">{item.ndc}</td>
@@ -1583,7 +1468,7 @@ export default function ReturnDetailPage() {
                                         setWcAdding(false);
                                     }}
                                     disabled={wcSelected.size === 0 || wcAdding}
-                                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors"
+                                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors"
                                 >
                                     {wcAdding ? (
                                         <>

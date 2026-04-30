@@ -294,13 +294,13 @@ export default function OnSiteServicePage() {
             </p>
           </div>
           {hasCreatePermission && (
-            <Button
+            <button
               onClick={() => router.push('/on-site-service/new')}
-              className="bg-teal-600 hover:bg-teal-700 text-white"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded text-xs font-medium bg-teal-600 text-white hover:bg-teal-700 transition-colors"
             >
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className="w-4 h-4" />
               New Request
-            </Button>
+            </button>
           )}
         </div>
 
@@ -361,80 +361,81 @@ export default function OnSiteServicePage() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full table-auto">
                   <thead>
-                    <tr className="border-b text-left text-xs uppercase text-muted-foreground">
-                      <th className="py-2 pr-4 font-medium">Requested</th>
-                      <th className="py-2 pr-4 font-medium">Requested Date</th>
-                      <th className="py-2 pr-4 font-medium">Scheduled</th>
-                      <th className="py-2 pr-4 font-medium">Rep</th>
-                      <th className="py-2 pr-4 font-medium">Status</th>
-                      <th className="py-2 pr-4 font-medium">Branch</th>
-                      <th className="py-2 pr-4 font-medium text-right">Actions</th>
+                    <tr className="bg-gradient-to-r from-teal-600 to-teal-700 border-b-2 border-teal-800">
+                      <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Requested</th>
+                      <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Requested Date</th>
+                      <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Scheduled</th>
+                      <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Rep</th>
+                      <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Status</th>
+                      <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Branch</th>
+                      <th className="text-right px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {items.map((r) => (
+                    {items.map((r, index) => {
+                      const isEven = index % 2 === 0;
+                      return (
                       <tr
                         key={r.id}
-                        className="border-b last:border-0 hover:bg-accent/40 cursor-pointer"
+                        className={`border-b border-gray-100 hover:bg-teal-50 transition-colors cursor-pointer ${isEven ? 'bg-white' : 'bg-teal-50/40'}`}
                         onClick={() => openDetail(r.id)}
                       >
-                        <td className="py-3 pr-4 text-xs text-muted-foreground">
-                          {formatDate(r.created_at)}
+                        <td className="px-4 py-3">
+                          <span className="text-sm text-gray-600">{formatDate(r.created_at)}</span>
                         </td>
-                        <td className="py-3 pr-4">{formatDate(r.requested_date)}</td>
-                        <td className="py-3 pr-4">
-                          {r.scheduled_date ? formatDate(r.scheduled_date) : <span className="text-muted-foreground">—</span>}
+                        <td className="px-4 py-3">
+                          <span className="text-sm text-gray-900">{formatDate(r.requested_date)}</span>
                         </td>
-                        <td className="py-3 pr-4">
-                          {r.claimed_processor_name || <span className="text-muted-foreground">—</span>}
+                        <td className="px-4 py-3">
+                          {r.scheduled_date ? <span className="text-sm text-gray-900">{formatDate(r.scheduled_date)}</span> : <span className="text-sm text-gray-600">—</span>}
                         </td>
-                        <td className="py-3 pr-4">{getStatusBadge(r.status)}</td>
-                        <td className="py-3 pr-4 text-xs text-muted-foreground">
-                          {r.branch_business_name || r.branch_name || 'Main'}
+                        <td className="px-4 py-3">
+                          {r.claimed_processor_name ? <span className="text-sm text-gray-900">{r.claimed_processor_name}</span> : <span className="text-sm text-gray-600">—</span>}
                         </td>
-                        <td className="py-3 pr-4 text-right" onClick={(e) => e.stopPropagation()}>
+                        <td className="px-4 py-3">{getStatusBadge(r.status)}</td>
+                        <td className="px-4 py-3">
+                          <span className="text-sm text-gray-600">{r.branch_business_name || r.branch_name || 'Main'}</span>
+                        </td>
+                        <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                           {r.status === 'pending' && (
-                            <Button
-                              size="sm"
-                              variant="outline"
+                            <button
                               onClick={() => handleCancel(r.id)}
-                              className="text-red-600 hover:text-red-700 h-7 text-xs"
+                              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
                             >
                               Cancel
-                            </Button>
+                            </button>
                           )}
                         </td>
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
             )}
 
             {!loading && totalPages > 1 && (
-              <div className="flex items-center justify-between mt-4 text-sm">
-                <div className="text-muted-foreground">
+              <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50">
+                <span className="text-sm text-gray-600 font-medium">
                   Page {page} of {totalPages}
-                </div>
+                </span>
                 <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
+                  <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page === 1}
+                    className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded transition-colors disabled:opacity-50"
                   >
                     <ChevronLeft className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
+                  </button>
+                  <button
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={page >= totalPages}
+                    className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded transition-colors disabled:opacity-50"
                   >
                     <ChevronRight className="w-4 h-4" />
-                  </Button>
+                  </button>
                 </div>
               </div>
             )}
@@ -452,7 +453,7 @@ export default function OnSiteServicePage() {
         />
       )}
       {detailLoading && !detail && (
-        <div className="fixed inset-0 z-50 bg-black/20 flex items-center justify-center">
+        <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4">
           <Loader2 className="w-8 h-8 text-teal-600 animate-spin" />
         </div>
       )}
@@ -479,17 +480,17 @@ function DetailModal({
 
   return (
     <div 
-      className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4"
       onClick={onClose}
     >
       <div 
-        className="bg-background w-full max-w-2xl rounded-lg shadow-lg border max-h-[90vh] overflow-y-auto"
+        className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b sticky top-0 bg-background z-10">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
           <div>
-            <h2 className="font-semibold">Service Request Details</h2>
-            <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+            <h2 className="text-sm font-semibold text-gray-900">Service Request Details</h2>
+            <div className="mt-1 flex items-center gap-2 text-xs text-gray-600">
               ID: {detail.id.slice(0, 8)}… · Created {formatDate(detail.created_at)}
             </div>
           </div>
@@ -498,7 +499,7 @@ function DetailModal({
             <button
               type="button"
               onClick={onClose}
-              className="p-1 hover:bg-accent rounded"
+              className="text-gray-400 hover:text-gray-600"
               aria-label="Close"
             >
               <X className="w-5 h-5" />
@@ -506,7 +507,7 @@ function DetailModal({
           </div>
         </div>
 
-        <div className="p-6 space-y-5 text-sm">
+        <div className="px-4 py-3 space-y-3 text-xs">
           <Section title="Request">
             <Row icon={<Calendar className="w-4 h-4" />} label="Preferred Date">
               {formatDate(detail.requested_date)}
@@ -594,19 +595,21 @@ function DetailModal({
           )}
         </div>
 
-        <div className="flex items-center justify-end gap-2 px-6 py-4 border-t bg-muted/20 sticky bottom-0">
+        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
           {canCancel && (
-            <Button
-              variant="outline"
+            <button
               onClick={onCancel}
-              className="text-red-600 border-red-200 hover:bg-red-50"
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
             >
               Cancel Request
-            </Button>
+            </button>
           )}
-          <Button variant="outline" onClick={onClose}>
+          <button
+            onClick={onClose}
+            className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+          >
             Close
-          </Button>
+          </button>
         </div>
       </div>
     </div>

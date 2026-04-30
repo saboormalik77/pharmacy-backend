@@ -19,7 +19,7 @@ export default function AnalyticsLayout({ children }: { children: React.ReactNod
     return (
         <div className="space-y-4">
             <div>
-                <h1 className="text-2xl font-bold text-gray-900">Analytics & Reporting</h1>
+                <h1 className="text-lg font-bold text-gray-900">Analytics & Reporting</h1>
                 <p className="text-gray-600 mt-1">Comprehensive insights, reports, and performance metrics</p>
             </div>
 
@@ -34,7 +34,7 @@ export default function AnalyticsLayout({ children }: { children: React.ReactNod
                             href={tab.href}
                             className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium border-b-2 transition-colors whitespace-nowrap ${
                                 isActive
-                                    ? 'border-primary-500 text-primary-600 bg-primary-50'
+                                    ? 'border-[#1e293b] text-[#1e293b] bg-slate-50'
                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                             }`}
                         >

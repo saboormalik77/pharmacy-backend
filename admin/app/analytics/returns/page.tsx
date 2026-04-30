@@ -208,26 +208,26 @@ export default function ReturnsPage() {
                     <h2 className="text-sm font-semibold text-gray-900 mb-3">Status Breakdown</h2>
                     <div className="overflow-x-auto">
                         <table className="w-full table-auto">
-                            <thead className="bg-gray-50 border-b border-gray-200">
+                            <thead className="bg-gradient-to-r from-[#1e293b] to-[#334155] border-b-2 border-slate-700">
                                 <tr>
-                                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                    <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Count</th>
-                                    <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Total Value</th>
-                                    <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">% of Total</th>
+                                    <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider">Status</th>
+                                    <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">Count</th>
+                                    <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">Total Value</th>
+                                    <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">% of Total</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-200">
-                                {byStatus.map((row) => (
-                                    <tr key={row.status} className="hover:bg-gray-50">
-                                        <td className="px-3 py-2 text-xs">
+                            <tbody className="divide-y divide-gray-100">
+                                {byStatus.map((row, idx) => (
+                                    <tr key={row.status} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'} hover:bg-slate-50`}>
+                                        <td className="px-4 py-3 text-sm">
                                             <span className="inline-flex items-center gap-1.5">
                                                 <span className="w-2 h-2 rounded-full" style={{ backgroundColor: STATUS_COLORS[row.status] || '#6b7280' }} />
                                                 {row.status.replace(/_/g, ' ')}
                                             </span>
                                         </td>
-                                        <td className="px-3 py-2 text-xs text-right font-medium">{formatNumber(row.count)}</td>
-                                        <td className="px-3 py-2 text-xs text-right">{formatCurrency(row.totalReturnableValue)}</td>
-                                        <td className="px-3 py-2 text-xs text-right">
+                                        <td className="px-4 py-3 text-sm text-right font-medium">{formatNumber(row.count)}</td>
+                                        <td className="px-4 py-3 text-sm text-right">{formatCurrency(row.totalReturnableValue)}</td>
+                                        <td className="px-4 py-3 text-sm text-right">
                                             {overall.totalReturns > 0 ? ((row.count / overall.totalReturns) * 100).toFixed(1) : 0}%
                                         </td>
                                     </tr>
