@@ -658,7 +658,7 @@ export default function ReturnDetailPage() {
                         {canDoAction(tx, 'resume') && (
                             <button
                                 onClick={() => setActionModal({ action: 'resume' })}
-                                className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
                             >
                                 <Play className="w-3 h-3" /> Resume
                             </button>
@@ -673,7 +673,7 @@ export default function ReturnDetailPage() {
                                     }
                                     setActionModal({ action: 'complete' });
                                 }}
-                                className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded bg-green-600 text-white hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded bg-green-600 text-white hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
                             >
                                 <CheckCircle className="w-3 h-3" /> Complete
                             </button>
@@ -701,7 +701,7 @@ export default function ReturnDetailPage() {
                         {/* {canDoAction(tx, 'edit') && (
                             <button
                                 onClick={() => setEditModal(true)}
-                                className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
                                 title="Edit"
                             >
                                 <Edit className="w-4 h-4" />
@@ -710,7 +710,7 @@ export default function ReturnDetailPage() {
                         {canDoAction(tx, 'delete') && (
                             <button
                                 onClick={() => setDeleteModal(true)}
-                                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
                                 title="Delete"
                             >
                                 <Trash2 className="w-4 h-4" />
@@ -901,7 +901,7 @@ export default function ReturnDetailPage() {
                         <div className="flex flex-wrap gap-2">
                             <button
                                 onClick={() => downloadPdf('manifest', `manifest-${tx.licensePlate}.pdf`)}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
                             >
                                 <Download className="w-3.5 h-3.5" /> Download Manifest
                             </button>
@@ -939,7 +939,7 @@ export default function ReturnDetailPage() {
                         {canDoAction(tx, 'add_items') && (
                             <button
                                 onClick={() => router.push(`/returns/${tx.id}/add-items`)}
-                                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
                             >
                                 <Plus className="w-3 h-3" /> Add Items
                             </button>
@@ -955,13 +955,13 @@ export default function ReturnDetailPage() {
                                 placeholder="Search by NDC, name, or manufacturer..."
                                 value={itemSearch}
                                 onChange={e => setItemSearch(e.target.value)}
-                                className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500"
                             />
                         </div>
                         <select
                             value={itemStatusFilter}
                             onChange={e => setItemStatusFilter(e.target.value)}
-                            className="px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                            className="px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500"
                         >
                             <option value="">All Statuses</option>
                             <option value="returnable">Returnable</option>
@@ -985,7 +985,7 @@ export default function ReturnDetailPage() {
                             {canDoAction(tx, 'add_items') && !itemSearch && !itemStatusFilter && (
                                 <button
                                     onClick={() => router.push(`/returns/${tx.id}/add-items`)}
-                                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
                                 >
                                     <ScanLine className="w-3 h-3" /> Start Scanning
                                 </button>
@@ -995,27 +995,27 @@ export default function ReturnDetailPage() {
                         <div className="overflow-x-auto">
                             <table className="w-full table-auto">
                                 <thead>
-                                    <tr className="bg-gray-50 border-b border-gray-200">
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">NDC</th>
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Name</th>
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Manufacturer</th>
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Pkg Size</th>
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Qty Returned</th>
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Serial#</th>
-                                        {/* <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Price</th>
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Est. Value</th>
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Est. Store Value</th> */}
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Expires</th>
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Destination</th>
-                                        <th className="text-right px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
+                                    <tr className="bg-gradient-to-r from-teal-600 to-teal-700 border-b-2 border-teal-800">
+                                        <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">NDC</th>
+                                        <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Name</th>
+                                        <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Manufacturer</th>
+                                        <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Pkg Size</th>
+                                        <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Qty Returned</th>
+                                        <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Serial#</th>
+                                        {/* <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Price</th>
+                                        <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Est. Value</th>
+                                        <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Est. Store Value</th> */}
+                                        <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Expires</th>
+                                        <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Status</th>
+                                        <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Destination</th>
+                                        <th className="text-right px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {items.map((item) => {
                                         const itemBadge = getItemStatusBadge(item.returnStatus);
                                         return (
-                                            <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                            <tr key={item.id} className="border-b border-gray-100 hover:bg-teal-50 transition-colors">
                                                 <td className="px-3 py-2">
                                                     <span className="text-xs font-mono text-gray-900">{item.ndc}</span>
                                                 </td>
@@ -1095,7 +1095,7 @@ export default function ReturnDetailPage() {
                                                         {canDoAction(tx, 'edit') && (
                                                             <button
                                                                 onClick={() => setEditItemModal(item)}
-                                                                className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                                className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded transition-colors"
                                                                 title="Edit Item"
                                                             >
                                                                 <Edit className="w-3.5 h-3.5" />
@@ -1104,7 +1104,7 @@ export default function ReturnDetailPage() {
                                                         {canDoAction(tx, 'delete') && (
                                                             <button
                                                                 onClick={() => setDeleteItemModal(item)}
-                                                                className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                                className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-teal-500"
                                                                 title="Delete Item"
                                                             >
                                                                 <Trash2 className="w-3.5 h-3.5" />
@@ -1136,7 +1136,7 @@ export default function ReturnDetailPage() {
                                         type="text"
                                         value={editForm.fedexTracking}
                                         onChange={e => setEditForm({ ...editForm, fedexTracking: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500"
                                         placeholder="Enter tracking number"
                                     />
                                 </div>
@@ -1146,7 +1146,7 @@ export default function ReturnDetailPage() {
                                         type="text"
                                         value={editForm.fedexPickupConfirmation}
                                         onChange={e => setEditForm({ ...editForm, fedexPickupConfirmation: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500"
                                         placeholder="Enter pickup confirmation"
                                     />
                                 </div>
@@ -1156,14 +1156,14 @@ export default function ReturnDetailPage() {
                                         value={editForm.notes}
                                         onChange={e => setEditForm({ ...editForm, notes: e.target.value })}
                                         rows={2}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none"
+                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500 resize-none"
                                         placeholder="Optional notes"
                                     />
                                 </div>
                             </div>
                             <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
                                 <button onClick={() => setEditModal(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                                <button onClick={handleUpdate} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <button onClick={handleUpdate} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500">
                                     {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Saving...</> : 'Save Changes'}
                                 </button>
                             </div>
@@ -1190,7 +1190,7 @@ export default function ReturnDetailPage() {
                             </div>
                             <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
                                 <button onClick={() => setActionModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                                <button onClick={handleStatusAction} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <button onClick={handleStatusAction} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500">
                                     {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Processing...</> : 'Confirm'}
                                 </button>
                             </div>
@@ -1213,7 +1213,7 @@ export default function ReturnDetailPage() {
                             </div>
                             <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
                                 <button onClick={() => setDeleteModal(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                                <button onClick={handleDelete} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <button onClick={handleDelete} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500">
                                     {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Deleting...</> : 'Delete'}
                                 </button>
                             </div>
@@ -1247,7 +1247,7 @@ export default function ReturnDetailPage() {
                                                 max={editItemForm.fullPackageSize || undefined}
                                                 value={editItemForm.fullPackageQtyReturned || ''} 
                                                 onChange={e => setEditItemForm({ ...editItemForm, fullPackageQtyReturned: e.target.value })} 
-                                                className="w-full px-2 py-1.5 text-center text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" 
+                                                className="w-full px-2 py-1.5 text-center text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500" 
                                             />
                                         </div>
                                         {/* <div>
@@ -1265,14 +1265,14 @@ export default function ReturnDetailPage() {
                                         value={editItemForm.memo}
                                         onChange={e => setEditItemForm({ ...editItemForm, memo: e.target.value })}
                                         rows={2}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none"
+                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500 resize-none"
                                         placeholder="Optional memo"
                                     />
                                 </div>
                             </div>
                             <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
                                 <button onClick={() => setEditItemModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                                <button onClick={handleUpdateItem} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <button onClick={handleUpdateItem} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500">
                                     {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Saving...</> : 'Save Changes'}
                                 </button>
                             </div>
@@ -1296,7 +1296,7 @@ export default function ReturnDetailPage() {
                             </div>
                             <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
                                 <button onClick={() => setDeleteItemModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                                <button onClick={handleDeleteItem} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <button onClick={handleDeleteItem} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500">
                                     {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Deleting...</> : 'Delete'}
                                 </button>
                             </div>

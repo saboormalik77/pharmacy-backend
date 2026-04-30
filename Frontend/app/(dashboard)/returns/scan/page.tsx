@@ -848,7 +848,7 @@ export default function PharmacyScanPage() {
                   <select
                     value={form.deaSchedule}
                     onChange={e => updateField('deaSchedule', e.target.value)}
-                    className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                    className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500"
                   >
                     {DEA_SCHEDULE_OPTIONS.map(option => (
                       <option key={option} value={option}>

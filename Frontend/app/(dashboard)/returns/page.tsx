@@ -50,6 +50,7 @@ const STATUS_OPTIONS = [
     { value: 'in_progress', label: 'In Progress' },
     { value: 'paused', label: 'Paused' },
     { value: 'completed', label: 'Completed' },
+    { value: 'verified', label: 'Verified' },
     { value: 'finalized', label: 'Finalized' },
     { value: 'received', label: 'Received' },
     { value: 'closed_out', label: 'Closed Out' },
@@ -60,6 +61,7 @@ function getStatusBadge(status: string): { variant: 'success' | 'warning' | 'err
         case 'in_progress': return { variant: 'info', label: 'In Progress' };
         case 'paused': return { variant: 'warning', label: 'Paused' };
         case 'completed': return { variant: 'success', label: 'Completed' };
+        case 'verified': return { variant: 'success', label: 'Verified' };
         case 'finalized': return { variant: 'default', label: 'Finalized' };
         case 'received': return { variant: 'success', label: 'Received' };
         case 'closed_out': return { variant: 'default', label: 'Closed Out' };
@@ -320,7 +322,7 @@ export default function ReturnsPage() {
                                     const badge = getStatusBadge(tx.status);
                                     const isEven = index % 2 === 0;
                                     return (
-                                        <tr key={tx.id} className={`border-b border-gray-100 hover:bg-teal-100 transition-colors cursor-pointer ${isEven ? 'bg-white' : 'bg-teal-50/40'}`} onClick={() => router.push(`/returns/${tx.id}`)}>
+                                        <tr key={tx.id} className={`border-b border-gray-100 hover:bg-teal-50 transition-colors cursor-pointer ${isEven ? 'bg-white' : 'bg-teal-50/40'}`} onClick={() => router.push(`/returns/${tx.id}`)}>
                                             <td className="px-4 py-3">
                                                 <span className="text-sm font-mono font-semibold text-gray-900">{tx.licensePlate}</span>
                                             </td>

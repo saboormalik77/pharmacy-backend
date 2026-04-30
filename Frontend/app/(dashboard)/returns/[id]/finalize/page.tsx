@@ -629,7 +629,7 @@ export default function FinalizeReturnPage() {
                                                 <button
                                                     onClick={handleFinalize}
                                                     disabled={isActionLoading || !canFinalize}
-                                                    className="inline-flex items-center gap-1 px-4 py-2 text-sm rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                    className="inline-flex items-center gap-1 px-4 py-2 text-sm rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
                                                 >
                                                     {isActionLoading
                                                         ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Finalizing...</>
