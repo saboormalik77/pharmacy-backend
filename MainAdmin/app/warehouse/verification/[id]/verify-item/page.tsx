@@ -652,11 +652,15 @@ export default function VerifyItemPage() {
 
                                         {returnStatus === 'returnable' && (
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">Destination</label>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Destination <span className="text-red-600">*</span>
+                                                </label>
                                                 <select 
                                                     value={manualDestination} 
                                                     onChange={e => setManualDestination(e.target.value)} 
-                                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                    className={`w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                                                        !manualDestination.trim() ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                                                    }`}
                                                     disabled={loadingDistributors}
                                                 >
                                                     <option value="">
@@ -668,6 +672,9 @@ export default function VerifyItemPage() {
                                                         </option>
                                                     ))}
                                                 </select>
+                                                {!manualDestination.trim() && (
+                                                    <p className="text-xs text-red-600 mt-1">Destination is required to save this item.</p>
+                                                )}
                                             </div>
                                         )}
 
@@ -826,6 +833,7 @@ export default function VerifyItemPage() {
                                     || (verifyStatus === 'correct' && returnStatus === 'non_returnable' && nonReturnableRoute === 'wine_cellar' && !wineCellarDate)
                                     || (verifyStatus === 'correct' && returnStatus === 'non_returnable' && nonReturnableRoute !== 'wine_cellar' && !isValidNonReturnableReason(nonReturnableReason))
                                     || ((verifyStatus === 'damaged' || verifyStatus === 'missing' || verifyStatus === 'wrong_item') && !isValidNonReturnableReason(nonReturnableReason))
+                                    || (verifyStatus === 'correct' && returnStatus === 'returnable' && (!policyResult || policyResult.status === 'tbd') && !manualDestination.trim())
                                 }
                                 onClick={handleVerifyItem}
                                 className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg disabled:opacity-50 flex items-center gap-2 transition"

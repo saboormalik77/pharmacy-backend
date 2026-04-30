@@ -287,8 +287,15 @@ const buyingGroupsSlice = createSlice({
       });
 
     builder
-      .addCase(updateBuyingGroup.fulfilled, (state) => {
+      .addCase(updateBuyingGroup.fulfilled, (state, action) => {
         state.error = null;
+        const updated = (action.payload as any)?.buyingGroup;
+        if (updated?.id) {
+          const idx = state.buyingGroups.findIndex(g => g.id === updated.id);
+          if (idx !== -1) {
+            state.buyingGroups[idx] = { ...state.buyingGroups[idx], ...updated };
+          }
+        }
       })
       .addCase(updateBuyingGroup.rejected, (state, action) => {
         state.error = action.payload as string;
