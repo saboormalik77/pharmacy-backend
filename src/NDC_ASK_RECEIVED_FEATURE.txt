@@ -1,0 +1,437 @@
+# NDC Ask/Received Pricing Intelligence System
+
+## Implementation Plan Document
+
+**Created:** April 30, 2026  
+**Project:** Pharmacy Backend - FCR System  
+**Feature:** AI-Powered NDC Pricing Intelligence with Ask/Received Values
+
+---
+
+## Table of Contents
+
+1. Executive Summary
+2. System Overview
+3. Database Schema Changes
+4. Backend Implementation
+5. Azure AI Document Intelligence Integration
+6. Frontend UI Implementation
+7. Pricing Formula & Algorithm
+8. Real-Time Updates System
+9. Implementation Phases
+10. File Changes Summary
+11. Testing Strategy
+12. API Endpoints
+
+---
+
+## 1. Executive Summary
+
+### 1.1 Problem Statement
+
+Currently, when items are scanned during returns, the system fetches a `currentPrice` from the NDC Pricing Book. However, there is no intelligence around:
+- What price to **ask** for from manufacturers
+- What price to **expect to receive** based on historical data
+- How to learn from credit memo payments to improve future pricing
+
+### 1.2 Solution Overview
+
+Implement an AI-powered pricing intelligence system that:
+1. **Uploads credit memo PDFs** to the system
+2. **Analyzes credit memos** using Azure AI Document Intelligence
+3. **Extracts ask vs received values** per NDC from credit memos
+4. **Stores historical payment data** in the database
+5. **Calculates optimal ask prices** during return item scanning
+6. **Updates pricing intelligence** in real-time as new data comes in
+
+### 1.3 Key Benefits
+
+- **Smarter Pricing:** Base ask prices on actual payment history
+- **Better Predictions:** Know expected received amounts before processing
+- **Self-Improving:** Each credit memo makes the system smarter
+- **Risk Assessment:** Identify NDCs with poor payment history
+- **Cash Flow Accuracy:** More realistic revenue forecasting
+
+---
+
+## 2. System Overview
+
+### 2.1 High-Level Architecture
+
+USER WORKFLOW:
+SCAN ITEM -> GET PRICING INTELLIGENCE -> SHOW ASK & EXPECTED -> ADD TO RETURN
+
+PRICING INTELLIGENCE ENGINE:
+- NDC Pricing Book (Database) stores: NDC, Current Price, Ask Avg, Received Avg, Ratio %, Confidence %, Samples
+- Learning Engine updates pricing from credit memo analysis
+
+CREDIT MEMO PROCESSING:
+UPLOAD PDF -> AZURE AI ANALYSIS -> EXTRACT VALUES -> UPDATE PRICING -> BROADCAST UPDATES
+
+### 2.2 Data Flow
+
+1. CREDIT MEMO UPLOAD FLOW:
+   Admin Uploads PDF -> Azure AI Analyzes -> Extract NDC/Ask/Received -> Store in DB -> Broadcast Updates
+
+2. SCANNING FLOW:
+   User Scans Item -> Lookup NDC Intelligence -> Calculate Optimal Ask -> Show Ask/Expected -> Add to Return
+
+---
+
+## 3. Database Schema Changes
+
+### 3.1 Enhance `ndc_pricing` Table
+
+New Columns:
+- avg_ask_price DECIMAL(12,2) - Average ask price from historical credit memos
+- avg_received_price DECIMAL(12,2) - Average received price from historical credit memos
+- ask_received_ratio DECIMAL(5,2) - Percentage: (avg_received / avg_ask) * 100
+- payment_sample_count INTEGER - Number of credit memo payments analyzed
+- ai_confidence DECIMAL(5,2) - AI analysis confidence percentage (0-100)
+- manufacturer_reliability TEXT - Rating: excellent, good, average, poor, unknown
+- last_ask_received_update TIMESTAMPTZ - When ask/received data was last updated
+- min_received_price DECIMAL(12,2) - Lowest received price observed
+- max_received_price DECIMAL(12,2) - Highest received price observed
+- last_5_payments JSONB - JSON array of last 5 payment records
+
+### 3.2 New Table: `ndc_payment_history`
+
+Stores individual payment records for detailed analytics:
+- id UUID PRIMARY KEY
+- ndc VARCHAR(20) NOT NULL
+- ndc_normalized VARCHAR(11) NOT NULL
+- debit_memo_id UUID (references debit_memos)
+- ask_price DECIMAL(12,2) NOT NULL
+- received_price DECIMAL(12,2) NOT NULL
+- payment_ratio DECIMAL(5,2) GENERATED (calculated)
+- manufacturer TEXT
+- product_name TEXT
+- ai_extracted BOOLEAN
+- ai_confidence DECIMAL(5,2)
+- created_at TIMESTAMPTZ
+
+### 3.3 New Table: `credit_memo_analysis`
+
+Stores AI extraction results for audit and review:
+- id UUID PRIMARY KEY
+- debit_memo_id UUID (references debit_memos)
+- credit_memo_url TEXT NOT NULL
+- ai_status TEXT (pending, processing, completed, failed, manual_review)
+- ai_confidence DECIMAL(5,2)
+- ai_extracted_total DECIMAL(12,2)
+- ai_extracted_items JSONB
+- human_reviewed BOOLEAN
+- human_approved BOOLEAN
+- reviewed_by UUID
+- created_at, updated_at TIMESTAMPTZ
+
+### 3.4 RPC Functions
+
+update_ndc_pricing_from_payment:
+- Updates NDC pricing book with new ask/received data
+- Calculates rolling averages
+- Determines manufacturer reliability
+- Maintains last 5 payments for trend analysis
+
+get_ndc_pricing_intelligence:
+- Retrieves complete pricing intelligence for an NDC
+- Returns all pricing fields including historical data
+
+---
+
+## 4. Backend Implementation
+
+### 4.1 New Service: Azure Document Intelligence Service
+
+File: /src/services/azureDocumentIntelligenceService.ts
+
+Functions:
+- analyzeCreditMemoPdf(pdfBuffer, filename) - Analyze PDF with Azure AI
+- matchAnalysisWithDebitMemo(analysis, debitMemoId) - Match extracted items
+
+Types:
+- CreditMemoLineItem: ndc, productName, quantity, askPrice, receivedPrice, lineTotal
+- CreditMemoAnalysisResult: success, confidence, totalAmount, manufacturerName, lineItems, errorMessage
+
+### 4.2 New Service: NDC Pricing Intelligence Service
+
+File: /src/services/ndcPricingIntelligenceService.ts
+
+Functions:
+- getNDCPricingIntelligence(ndc) - Get pricing intelligence
+- calculateOptimalAskPrice(intelligence, targetReceived) - Calculate optimal ask
+- updateNDCPricingFromCreditMemo(debitMemoId, items) - Update from credit memo
+
+Types:
+- NDCPricingIntelligence: found, ndc, currentPrice, avgAskPrice, avgReceivedPrice, askReceivedRatio, paymentSampleCount, aiConfidence, manufacturerReliability, last5Payments
+- OptimalAskPriceResult: optimalAskPrice, expectedReceivedPrice, confidence, reasoning, riskLevel, priceRange
+
+### 4.3 Enhanced Controllers
+
+Payment Controller:
+- New handler: analyzeCreditMemoHandler
+- Enhanced: recordPaymentHandler with AI data support
+
+Scan Controller:
+- Enhanced response with pricing intelligence fields
+
+---
+
+## 5. Azure AI Document Intelligence Integration
+
+### 5.1 Environment Configuration
+
+AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT=https://your-resource.cognitiveservices.azure.com/
+AZURE_DOCUMENT_INTELLIGENCE_KEY=your-api-key-here
+
+### 5.2 Package Dependencies
+
+@azure/ai-form-recognizer: ^5.0.0
+
+---
+
+## 6. Frontend UI Implementation
+
+### 6.1 Credit Memo Upload with AI Analysis
+
+Location: /MainAdmin/app/warehouse/unpaid/page.tsx
+
+UI Flow:
+1. User uploads credit memo PDF
+2. Show loading: "Analyzing with AI..."
+3. Display AI results with confidence score
+4. Show matched items with ask/received breakdown
+5. User confirms or rejects AI results
+6. Submit payment with confirmed data
+
+Key Components:
+- AI Analysis Results Card
+- Matched Items List
+- Confirm/Reject Buttons
+- Manual Entry Fallback
+
+### 6.2 Enhanced Scanning Interface
+
+Location: /Frontend/app/(dashboard)/returns/scan/page.tsx
+
+New Component: PricingIntelligenceCard
+
+Display Elements:
+- Ask Price (what to request)
+- Expected Received (what to expect)
+- Pay Rate Percentage
+- Risk Level Badge (low/medium/high)
+- Confidence Score
+- Sample Count
+- Manufacturer Reliability
+- Price Reasoning
+
+### 6.3 NDC Pricing Management Enhancement
+
+Location: /MainAdmin/app/ndc-pricing/page.tsx
+
+New Columns:
+- Avg Ask Price
+- Avg Received Price
+- Pay Rate (with color-coded badge)
+- Samples Count
+- Reliability Rating
+
+---
+
+## 7. Pricing Formula & Algorithm
+
+### 7.1 Core Formula
+
+OptimalAskPrice = TargetReceived / (HistoricalPayRate / 100) × AdjustmentMultiplier
+
+Where:
+- TargetReceived = What we want to receive (usually currentPrice)
+- HistoricalPayRate = Average (received / ask) × 100 from historical data
+- AdjustmentMultiplier = Risk-based adjustment factor
+
+### 7.2 Adjustment Multiplier Table
+
+Manufacturer Reliability:
+- Excellent: +0%
+- Good: +2%
+- Average: +5%
+- Poor: +12%
+- Unknown: +8%
+
+Sample Size:
+- < 3 samples: +8%
+- 3-5 samples: +4%
+- 5-15 samples: +0%
+- 15+ samples: -2%
+
+AI Confidence:
+- < 70%: +6%
+- 70-80%: +3%
+- > 80%: +0%
+
+### 7.3 Risk Level Classification
+
+Low Risk: Ratio >= 85% AND Samples >= 5 AND Confidence >= 80%
+Medium Risk: Ratio >= 70% AND Samples >= 3
+High Risk: Everything else
+
+### 7.4 Example Calculations
+
+Example 1: Reliable Manufacturer
+- Target Received: $15.00
+- Historical Pay Rate: 90%
+- Manufacturer: Excellent, Samples: 20, AI Confidence: 92%
+- Base Ask = $15.00 / 0.90 = $16.67
+- Multiplier = 1.0 + 0% - 2% + 0% = 0.98
+- Optimal Ask = $16.67 × 0.98 = $16.34
+- Expected Received = $14.70
+- Risk Level: LOW
+
+Example 2: Poor Manufacturer
+- Target Received: $15.00
+- Historical Pay Rate: 65%
+- Manufacturer: Poor, Samples: 2, AI Confidence: 68%
+- Base Ask = $15.00 / 0.65 = $23.08
+- Multiplier = 1.0 + 12% + 8% + 6% = 1.26
+- Optimal Ask = $23.08 × 1.26 = $29.08
+- Expected Received = $18.90
+- Risk Level: HIGH
+
+Example 3: New NDC (No History)
+- Target Received: $15.00
+- No historical data
+- Default: 15% buffer
+- Optimal Ask = $15.00 × 1.15 = $17.25
+- Expected Received = $13.00 - $15.00 (range)
+- Risk Level: HIGH
+
+---
+
+## 8. Real-Time Updates System
+
+### 8.1 Server-Sent Events (SSE)
+
+Backend: /src/controllers/sseController.ts
+- Manages SSE connections
+- Broadcasts pricing updates
+
+Frontend: /Frontend/hooks/usePricingUpdates.ts
+- Subscribes to pricing updates
+- Triggers UI updates when pricing changes
+
+### 8.2 Update Flow
+
+1. Credit memo processed
+2. Backend updates NDC pricing
+3. Backend broadcasts SSE event
+4. All connected clients receive update
+5. If user is scanning same NDC, UI updates in real-time
+
+---
+
+## 9. Implementation Phases
+
+Phase 1 (Week 1): Database Schema
+- Tables, indexes, RPC functions
+
+Phase 2 (Week 2): Azure AI Integration
+- PDF analysis service
+
+Phase 3 (Week 3): Backend Services
+- Pricing intelligence, controllers
+
+Phase 4 (Week 4): Credit Memo UI
+- AI analysis in upload flow
+
+Phase 5 (Week 5): Scanning UI
+- Intelligence display
+
+Phase 6 (Week 6): NDC Pricing UI
+- Enhanced management
+
+Phase 7 (Week 7): Real-Time Updates
+- SSE implementation
+
+Phase 8 (Week 8): Testing
+- E2E testing, refinement
+
+---
+
+## 10. File Changes Summary
+
+### New Files to Create
+
+scripts/fcr_XX_ndc_pricing_intelligence.sql - Database migrations
+src/services/azureDocumentIntelligenceService.ts - Azure AI integration
+src/services/ndcPricingIntelligenceService.ts - Pricing calculations
+src/controllers/sseController.ts - Real-time updates
+Frontend/hooks/usePricingUpdates.ts - SSE hook
+
+### Files to Modify
+
+package.json - Add Azure SDK
+src/controllers/paymentTrackingController.ts - AI analysis handlers
+src/controllers/returnTransactionItemsController.ts - Intelligence in scan
+MainAdmin/app/warehouse/unpaid/page.tsx - AI upload UI
+Frontend/app/(dashboard)/returns/scan/page.tsx - Intelligence display
+MainAdmin/app/ndc-pricing/page.tsx - New columns
+
+---
+
+## 11. Testing Strategy
+
+### Unit Tests
+- Pricing formula calculations
+- AI service parsing
+- Database RPC functions
+
+### Integration Tests
+- Credit memo upload flow
+- Pricing update propagation
+- SSE broadcasting
+
+### E2E Tests
+1. Upload credit memo
+2. Verify AI analysis
+3. Confirm and submit
+4. Scan same NDC
+5. Verify updated pricing
+
+---
+
+## 12. API Endpoints
+
+### New Endpoints
+
+POST /api/admin/debit-memos/:id/analyze-credit-memo - AI analysis
+GET /api/admin/ndc-pricing/:ndc/intelligence - Get intelligence
+GET /api/sse/pricing-updates - SSE stream
+
+### Enhanced Endpoints
+
+POST /api/admin/debit-memos/:id/record-payment - AI data support
+POST /api/barcode/scan - Intelligence in response
+
+### Enhanced Scan Response
+
+{
+  "pricing": {
+    "suggestedPrice": 15.00,
+    "askPrice": 17.25,
+    "expectedReceivedPrice": 14.66,
+    "askReceivedRatio": 85.0,
+    "paymentConfidence": 88,
+    "paymentSampleCount": 12,
+    "manufacturerReliability": "good",
+    "riskLevel": "low",
+    "priceReasoning": "Based on 85% historical rate from 12 samples",
+    "priceRange": { "minExpected": 13.50, "maxExpected": 15.20 }
+  }
+}
+
+---
+
+Document Version: 1.0
+Last Updated: April 30, 2026
+Status: Ready for Implementation
