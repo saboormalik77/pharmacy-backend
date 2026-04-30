@@ -386,7 +386,18 @@ export default function VerifyItemPage() {
                             <div><span className="font-medium text-gray-500">NDC:</span> <span className="font-mono text-gray-900">{verifyingItem.ndc || '—'}</span></div>
                             <div><span className="font-medium text-gray-500">Lot:</span> <span className="text-gray-900">{verifyingItem.lotNumber || '—'}</span></div>
                             <div><span className="font-medium text-gray-500">Expires:</span> <span className="text-gray-900">{verifyingItem.expirationDate || '—'}</span></div>
-                            <div><span className="font-medium text-gray-500">Quantity:</span> <span className="text-gray-900">{verifyingItem.quantity}</span></div>
+                            <div>
+                                <span className="font-medium text-gray-500">Full Quantity:</span>{' '}
+                                <span className="text-gray-900 font-semibold">
+                                    {verifyingItem.isPartial ? '—' : (verifyingItem.fullPackageQtyReturned ?? verifyingItem.quantity ?? '—')}
+                                </span>
+                            </div>
+                            <div>
+                                <span className="font-medium text-gray-500">Partial Quantity:</span>{' '}
+                                <span className="text-gray-900 font-semibold">
+                                    {verifyingItem.isPartial ? (verifyingItem.quantity ?? '—') : '—'}
+                                </span>
+                            </div>
                             {verifyingItem.manufacturer && (
                                 <div className="md:col-span-2"><span className="font-medium text-gray-500">Manufacturer:</span> <span className="text-gray-900">{verifyingItem.manufacturer}</span></div>
                             )}

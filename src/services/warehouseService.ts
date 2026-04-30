@@ -513,7 +513,7 @@ export const getVerificationSummary = async (
     const itemIds = summary.items.map((item: VerifiedItem) => item.id);
     const { data: rawItems } = await sb
       .from('return_transaction_items')
-      .select('id, serial_number, destination, wine_cellar_id, dosage_form, is_partial')
+      .select('id, serial_number, destination, wine_cellar_id, dosage_form, is_partial, full_package_size, full_package_qty_returned, partial_percentage')
       .in('id', itemIds);
 
     if (rawItems && rawItems.length > 0) {
@@ -523,6 +523,9 @@ export const getVerificationSummary = async (
         wineCellarId: string | null;
         dosageForm: string | null;
         isPartial: boolean;
+        fullPackageSize: number | null;
+        fullPackageQtyReturned: number | null;
+        partialPercentage: number | null;
       }> = {};
 
       for (const row of rawItems) {
@@ -532,6 +535,9 @@ export const getVerificationSummary = async (
           wineCellarId: row.wine_cellar_id ?? null,
           dosageForm: row.dosage_form ?? null,
           isPartial: Boolean(row.is_partial),
+          fullPackageSize: row.full_package_size != null ? Number(row.full_package_size) : null,
+          fullPackageQtyReturned: row.full_package_qty_returned != null ? Number(row.full_package_qty_returned) : null,
+          partialPercentage: row.partial_percentage != null ? Number(row.partial_percentage) : null,
         };
       }
 
@@ -543,6 +549,9 @@ export const getVerificationSummary = async (
         (item as VerifiedItem).wineCellarId = merged.wineCellarId;
         (item as VerifiedItem).dosageForm = merged.dosageForm;
         (item as VerifiedItem).isPartial = merged.isPartial;
+        (item as any).fullPackageSize = merged.fullPackageSize;
+        (item as any).fullPackageQtyReturned = merged.fullPackageQtyReturned;
+        (item as any).partialPercentage = merged.partialPercentage;
       }
     }
   }

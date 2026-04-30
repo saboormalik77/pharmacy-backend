@@ -33,6 +33,8 @@ export interface NDCPricingResult {
   distributors: DistributorPricing[];
   bestFullPrice: number;
   bestPartialPrice: number;
+  totalFullQuantity: number;
+  totalPartialQuantity: number;
   recommendedDistributor?: DistributorPricing;
 }
 
@@ -134,6 +136,10 @@ export const getPricingForNDCs = async (
   const distributorNdcToFullPriceMap: Record<string, number> = {};
   const distributorNdcToPartialPriceMap: Record<string, number> = {};
   const distributorNdcToReportDate: Record<string, string> = {};
+
+  // Track total full/partial quantities per NDC across all reports
+  const ndcToTotalFullQty: Record<string, number> = {};
+  const ndcToTotalPartialQty: Record<string, number> = {};
   
   // Store distributor info
   const distributorInfo: Record<string, { id: string; email?: string; phone?: string; location?: string }> = {};
@@ -193,7 +199,13 @@ export const getPricingForNDCs = async (
       // Get full and partial from item data
       const itemFull = Number(item.full) || 0;
       const itemPartial = Number(item.partial) || 0;
-      
+
+      // Accumulate total quantities per NDC across all reports
+      if (!ndcToTotalFullQty[normalizedNdcCode]) ndcToTotalFullQty[normalizedNdcCode] = 0;
+      if (!ndcToTotalPartialQty[normalizedNdcCode]) ndcToTotalPartialQty[normalizedNdcCode] = 0;
+      ndcToTotalFullQty[normalizedNdcCode] += itemFull;
+      ndcToTotalPartialQty[normalizedNdcCode] += itemPartial;
+
       // Calculate price per unit
       const quantity = Number(item.quantity) || 1;
       const creditAmount = Number(item.creditAmount) || 0;
@@ -287,6 +299,8 @@ export const getPricingForNDCs = async (
       distributors,
       bestFullPrice,
       bestPartialPrice,
+      totalFullQuantity: ndcToTotalFullQty[normalizedNdc] || 0,
+      totalPartialQuantity: ndcToTotalPartialQty[normalizedNdc] || 0,
       recommendedDistributor: distributors[0], // Best one
     });
   }

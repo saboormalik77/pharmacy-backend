@@ -1142,7 +1142,8 @@ export default function VerificationSessionPage() {
                                             <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Serial #</th>
                                             <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Lot</th>
                                             <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Exp</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Qty</th>
+                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Full Qty</th>
+                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Partial Qty</th>
                                             <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Verification</th>
                                             <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Return Status</th>
                                             <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Action</th>
@@ -1159,7 +1160,12 @@ export default function VerificationSessionPage() {
                                                 <td className="px-3 py-2 text-[11px] font-mono text-gray-600">{item.serialNumber || '—'}</td>
                                                 <td className="px-3 py-2 text-[11px] text-gray-600">{item.lotNumber || '—'}</td>
                                                 <td className="px-3 py-2 text-[11px] text-gray-600">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
-                                                <td className="px-3 py-2 text-xs font-medium">{item.quantity}</td>
+                                                <td className="px-3 py-2 text-xs font-medium">
+                                                    {item.isPartial ? '—' : (item.fullPackageQtyReturned ?? item.quantity ?? '—')}
+                                                </td>
+                                                <td className="px-3 py-2 text-xs font-medium">
+                                                    {item.isPartial ? (item.quantity ?? '—') : '—'}
+                                                </td>
                                                 <td className="px-3 py-2">
                                                     <Badge className={`text-[10px] border ${statusColor(item.verificationStatus)}`}>
                                                         {item.verificationStatus ? item.verificationStatus.replace('_', ' ') : 'unverified'}

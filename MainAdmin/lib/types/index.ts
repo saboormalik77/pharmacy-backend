@@ -975,6 +975,8 @@ export interface BarcodeScanResponse {
         suggestedPrice: number | null;
         bestFullPrice: number | null;
         bestPartialPrice: number | null;
+        fullQuantity: number | null;
+        partialQuantity: number | null;
         priceSource: string | null;
         distributorPricing: {
             distributorName: string;
@@ -1162,6 +1164,9 @@ export interface VerificationV2Item {
     nonReturnableReason?: string | null;
     dosageForm?: string | null;
     isPartial?: boolean;
+    fullPackageSize?: number | null;
+    fullPackageQtyReturned?: number | null;
+    partialPercentage?: number | null;
     estimatedValue: number;
 }
 

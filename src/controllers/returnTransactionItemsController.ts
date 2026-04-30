@@ -603,6 +603,8 @@ export const scanBarcodeHandler = catchAsync(
       suggestedPrice: number | null;
       bestFullPrice: number | null;
       bestPartialPrice: number | null;
+      fullQuantity: number | null;
+      partialQuantity: number | null;
       priceSource: string | null;
       distributorPricing: any[] | null;
       estimatedStorePrice: number | null;
@@ -611,6 +613,8 @@ export const scanBarcodeHandler = catchAsync(
       suggestedPrice: null,
       bestFullPrice: null,
       bestPartialPrice: null,
+      fullQuantity: null,
+      partialQuantity: null,
       priceSource: null,
       distributorPricing: null,
       estimatedStorePrice: null,
@@ -623,25 +627,31 @@ export const scanBarcodeHandler = catchAsync(
         const ndcPricing = await resolveNDCPrice(resolvedNdc);
         
         if (ndcPricing.found && ndcPricing.currentPrice && ndcPricing.currentPrice > 0) {
+          // Also fetch return_reports quantities even when NDC pricing book has a price
+          const pricingResult = await getPricingForSingleNDC(resolvedNdc);
           pricing = {
             suggestedPrice: ndcPricing.currentPrice,
             bestFullPrice: ndcPricing.currentPrice,
             bestPartialPrice: ndcPricing.currentPrice,
+            fullQuantity: pricingResult?.totalFullQuantity || null,
+            partialQuantity: pricingResult?.totalPartialQuantity || null,
             priceSource: ndcPricing.priceSource || 'NDC Pricing Book',
-            distributorPricing: null, // NDC pricing book doesn't have distributor breakdown
+            distributorPricing: null,
             estimatedStorePrice: ndcPricing.estimatedStorePrice,
             closeOutDestination: ndcPricing.closeOutDestination,
           };
         } else {
           // Fallback to return_reports if not found in pricing book
           const pricingResult = await getPricingForSingleNDC(resolvedNdc);
-          if (pricingResult && (pricingResult.bestFullPrice > 0 || pricingResult.bestPartialPrice > 0)) {
+          if (pricingResult && (pricingResult.bestFullPrice > 0 || pricingResult.bestPartialPrice > 0 || pricingResult.totalFullQuantity > 0 || pricingResult.totalPartialQuantity > 0)) {
             pricing = {
               suggestedPrice: pricingResult.bestFullPrice > 0
                 ? pricingResult.bestFullPrice
                 : pricingResult.bestPartialPrice,
               bestFullPrice: pricingResult.bestFullPrice || null,
               bestPartialPrice: pricingResult.bestPartialPrice || null,
+              fullQuantity: pricingResult.totalFullQuantity || null,
+              partialQuantity: pricingResult.totalPartialQuantity || null,
               priceSource: pricingResult.recommendedDistributor?.distributorName || 'return_reports',
               distributorPricing: pricingResult.distributors.map(d => ({
                 distributorName: d.distributorName,
