@@ -23,7 +23,9 @@ export default function ScheduleServiceRequestPage() {
     const params = useParams();
     const dispatch = useAppDispatch();
     
+    const { user } = useAppSelector((s) => s.auth);
     const { items: serviceRequests, isActing: isScheduling } = useAppSelector(state => state.serviceRequests);
+    const fetchRole = user?.role === 'processor' ? 'processor' : 'admin';
     
     const [date, setDate] = useState('');
     const [notes, setNotes] = useState('');
@@ -49,12 +51,12 @@ export default function ScheduleServiceRequestPage() {
         }
     }, [params?.id, serviceRequests]);
 
-    // Load service requests if not loaded
+    // Load service requests if not loaded (role required by fetch thunk; wait for auth)
     useEffect(() => {
-        if (serviceRequests.length === 0) {
-            dispatch(fetchServiceRequests({ page: 1, limit: 100 }));
+        if (serviceRequests.length === 0 && user) {
+            dispatch(fetchServiceRequests({ role: fetchRole, page: 1, limit: 100 }));
         }
-    }, [dispatch, serviceRequests.length]);
+    }, [dispatch, serviceRequests.length, fetchRole, user]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -74,7 +76,7 @@ export default function ScheduleServiceRequestPage() {
             await dispatch(processorScheduleServiceRequest({
                 id: request.id,
                 scheduledDate: date,
-                notes: notes.trim() || null,
+                notes: notes.trim() || undefined,
             })).unwrap();
             
             router.push('/service-requests');

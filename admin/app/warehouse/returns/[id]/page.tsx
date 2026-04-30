@@ -59,9 +59,13 @@ function formatCurrency(value: number): string {
 function ReturnTransactionStoreAndProcessorDl({
     tx,
     variant,
+    onPrintAllShippingLabels,
+    onPrintShippingLabel,
 }: {
     tx: ReturnTransaction;
     variant: 'plain' | 'emerald';
+    onPrintAllShippingLabels?: () => void;
+    onPrintShippingLabel?: (packageNumber: number) => void;
 }) {
     const emerald = variant === 'emerald';
     const dlCls = emerald ? 'space-y-2.5' : 'space-y-1.5';
@@ -132,16 +136,19 @@ function ReturnTransactionStoreAndProcessorDl({
                 <div className="pt-2 border-t border-gray-100">
                     <dt className={`${labelCls} mb-1 flex items-center justify-between`}>
                         <span>Package Tracking</span>
-                        <div className="flex items-center gap-1">
-                            <button
-                                onClick={() => window.printHtml?.('shipping-labels', 'shipping-labels')}
-                                className="flex items-center gap-1 px-2 py-1 bg-green-100 hover:bg-green-200 text-xs text-green-700 rounded border border-green-200 transition-colors"
-                                title="Print all shipping labels"
-                            >
-                                <Printer className="w-3 h-3" />
-                                Print All Labels
-                            </button>
-                        </div>
+                        {onPrintAllShippingLabels ? (
+                            <div className="flex items-center gap-1">
+                                <button
+                                    type="button"
+                                    onClick={() => onPrintAllShippingLabels()}
+                                    className="flex items-center gap-1 px-2 py-1 bg-green-100 hover:bg-green-200 text-xs text-green-700 rounded border border-green-200 transition-colors"
+                                    title="Print all shipping labels"
+                                >
+                                    <Printer className="w-3 h-3" />
+                                    Print All Labels
+                                </button>
+                            </div>
+                        ) : null}
                     </dt>
                     <dd className="space-y-1.5 mt-1">
                         {Object.entries(tx.packageTracking)
@@ -151,13 +158,16 @@ function ReturnTransactionStoreAndProcessorDl({
                                     <span className="text-gray-500 capitalize">{key.replace(/([0-9]+)/, ' $1')}</span>
                                     <div className="flex items-center gap-1.5">
                                         <span className="font-mono text-gray-900">{val}</span>
-                                        <button
-                                            onClick={() => window.printHtml?.(`shipping-label/${idx + 1}`, `shipping-label-${idx + 1}`)}
-                                            className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors"
-                                            title={`Print shipping label for ${val}`}
-                                        >
-                                            <Printer className="w-3 h-3" />
-                                        </button>
+                                        {onPrintShippingLabel ? (
+                                            <button
+                                                type="button"
+                                                onClick={() => onPrintShippingLabel(idx + 1)}
+                                                className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors"
+                                                title={`Print shipping label for ${val}`}
+                                            >
+                                                <Printer className="w-3 h-3" />
+                                            </button>
+                                        ) : null}
                                     </div>
                                 </div>
                             ))
@@ -818,7 +828,12 @@ export default function ReturnDetailPage() {
                     <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                         <Building2 className="w-3.5 h-3.5" /> Store & Processor
                     </h2>
-                    <ReturnTransactionStoreAndProcessorDl tx={tx} variant="plain" />
+                    <ReturnTransactionStoreAndProcessorDl
+                        tx={tx}
+                        variant="plain"
+                        onPrintAllShippingLabels={printShippingLabels}
+                        onPrintShippingLabel={printSingleLabel}
+                    />
                 </div>
 
                 </div>
@@ -878,7 +893,12 @@ export default function ReturnDetailPage() {
                             </div>
                             Store & Processor
                         </h2>
-                        <ReturnTransactionStoreAndProcessorDl tx={tx} variant="emerald" />
+                        <ReturnTransactionStoreAndProcessorDl
+                            tx={tx}
+                            variant="emerald"
+                            onPrintAllShippingLabels={printShippingLabels}
+                            onPrintShippingLabel={printSingleLabel}
+                        />
                     </div>
 
                     {/* Items & Values */}

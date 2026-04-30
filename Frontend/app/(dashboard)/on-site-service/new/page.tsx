@@ -15,6 +15,8 @@ import {
 import {
   onSiteServiceService,
   CreateServiceRequestPayload,
+  purposeLabels,
+  type ServiceRequestPurpose,
 } from '@/lib/api/services/onSiteServiceService';
 import { branchService, Branch } from '@/lib/api/services/branchService';
 import { usePharmacyPermissions } from '@/hooks/usePharmacyPermissions';
@@ -29,6 +31,7 @@ export default function NewServiceRequestPage() {
   // Form state
   const today = new Date().toISOString().slice(0, 10);
   const [requestedDate, setRequestedDate] = useState(today);
+  const [purpose, setPurpose] = useState<ServiceRequestPurpose>('return_pickup');
   const [branchId, setBranchId] = useState<string>('');
   const [specialInstructions, setSpecialInstructions] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -123,6 +126,7 @@ export default function NewServiceRequestPage() {
       const payload: CreateServiceRequestPayload = {
         requested_date: requestedDate,
         branch_id: branchId || null,
+        purpose,
         special_instructions: specialInstructions || null,
       };
       
@@ -185,6 +189,28 @@ export default function NewServiceRequestPage() {
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   Choose your preferred date for the field representative visit.
+                </p>
+              </div>
+
+              {/* Purpose */}
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Purpose of visit <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={purpose}
+                  onChange={(e) => setPurpose(e.target.value as ServiceRequestPurpose)}
+                  required
+                  className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                >
+                  {(Object.keys(purposeLabels) as ServiceRequestPurpose[]).map((key) => (
+                    <option key={key} value={key}>
+                      {purposeLabels[key]}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  What should the field representative focus on during this visit?
                 </p>
               </div>
 

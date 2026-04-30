@@ -285,8 +285,8 @@ export function ChecksTable({
                           {formatCurrency(manufacturerDirectFee)}
                         </td>
                         <td className="p-3 text-sm">
-                          <Badge 
-                            variant="outline" 
+                          <Badge
+                            variant="secondary"
                             className={`text-xs border-2 ${getPaymentTypeBadge(payment.paymentType)}`}
                           >
                             {getPaymentTypeLabel(payment.paymentType)}
@@ -356,7 +356,7 @@ export function ChecksTable({
                     return (
                       <Button
                         key={pageNum}
-                        variant={pageNum === pagination.page ? "default" : "outline"}
+                        variant={pageNum === pagination.page ? "primary" : "outline"}
                         size="sm"
                         onClick={() => onPageChange?.(pageNum)}
                         className={`h-8 w-8 p-0 text-sm ${
