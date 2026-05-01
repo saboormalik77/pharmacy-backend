@@ -640,6 +640,7 @@ export interface ReturnTransaction {
     fedexShipmentId: string | null;
     fedexLabels: Record<string, string> | null;
     finalizeSteps: { printManifest: boolean; fedexEntered: boolean; printJobSheets: boolean } | null;
+    hasCiiItems?: boolean; // For DEA Form 222 availability
     verifiedAt: string | null;
     verifiedBy: string | null;
     /** Set when v2 start-verification runs (box count) or legacy verify */

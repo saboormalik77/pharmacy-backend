@@ -78,6 +78,7 @@ export interface ReturnTransaction {
   totalItems: number;
   totalReturnableValue: number;
   totalNonReturnableValue: number;
+  hasCiiItems?: boolean; // For DEA Form 222 availability
   batchId: string | null;
   timeIn: string | null;
   timeOut: string | null;

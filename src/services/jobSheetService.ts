@@ -7,7 +7,7 @@ export interface JobSheetData {
     id: string;
     licensePlate: string;
     pharmacyName: string;
-    processorName: string;
+    processorName: string | null;
     status: string;
     boxCount: number;
     prpNumber?: string;
@@ -30,7 +30,7 @@ export interface JobSheetData {
     deaExpiration?: string;
     primaryWholesaler?: string;
     wholesalerAccountNumber?: string;
-    pharmacyProcessor?: string;
+    pharmacyProcessor?: string | null;
   };
   warehouse: {
     name: string;
@@ -73,6 +73,9 @@ export function generateJobSheetHTML(data: JobSheetData): string {
   const returnDate = new Date(tx.createdAt).toLocaleDateString('en-US');
   const licensePlateBarcode = makeBarcodeDataUrl(tx.licensePlate, 40);
 
+  // Determine if pharmacy is doing return itself (no processor involved)
+  const isPharmacySelfReturn = !tx.processorName && !ph.pharmacyProcessor;
+
   // Collect all unique tracking numbers (display without barcodes)
   const trackingNumbers: string[] = [];
   if (tx.packageTracking) {
@@ -97,6 +100,7 @@ export function generateJobSheetHTML(data: JobSheetData): string {
 
   /* ── header ── */
   .report-title { font-size:18pt; font-weight:bold; text-align:right; margin-bottom:4px; }
+  .report-title.centered { text-align:center; }
   .header-row { display:flex; justify-content:space-between; align-items:flex-start; border-bottom:3px double #000; padding-bottom:8px; margin-bottom:12px; }
   .header-left { }
   .header-right { text-align:right; }
@@ -131,7 +135,7 @@ export function generateJobSheetHTML(data: JobSheetData): string {
 <!-- ═══════════════ PAGE 1: JOB REPORT ═══════════════ -->
 <div class="page">
 
-  <div class="report-title">Return Transaction Job Report</div>
+  <div class="report-title${isPharmacySelfReturn ? ' centered' : ''}">${isPharmacySelfReturn ? 'Return Transaction Jobsheet' : 'Return Transaction Job Report'}</div>
 
   <div class="header-row">
     <div class="header-left">
@@ -153,7 +157,7 @@ export function generateJobSheetHTML(data: JobSheetData): string {
     ${ph.deaExpiration ? `<tr><td class="lbl">DEA Expiration:</td><td>${ph.deaExpiration}</td></tr>` : ''}
     ${ph.storeNumber ? `<tr><td class="lbl">Store Number:</td><td>${ph.storeNumber}</td></tr>` : ''}
     <tr><td class="lbl">Store Phone #:</td><td>${ph.phone}</td></tr>
-    ${ph.pharmacyProcessor ? `<tr><td class="lbl">Sales Rep:</td><td>${ph.pharmacyProcessor}</td></tr>` : ''}
+    ${!isPharmacySelfReturn && ph.pharmacyProcessor ? `<tr><td class="lbl">Sales Rep:</td><td>${ph.pharmacyProcessor}</td></tr>` : ''}
   </table>
 
   <hr class="thick">
@@ -324,7 +328,7 @@ export async function getJobSheetData(transactionId: string, supabaseClient: any
       id: transaction.id,
       licensePlate: transaction.license_plate,
       pharmacyName: pharmacy.pharmacy_name,
-      processorName,
+      processorName: processorName || null,
       status: transaction.status,
       boxCount: transaction.box_count,
       prpNumber: transaction.prp_number,
@@ -347,7 +351,7 @@ export async function getJobSheetData(transactionId: string, supabaseClient: any
       deaExpiration: pharmacy.dea_expiration_date || undefined,
       primaryWholesaler: pharmacy.primary_wholesaler || undefined,
       wholesalerAccountNumber: pharmacy.wholesaler_account_number || undefined,
-      pharmacyProcessor: pharmacyProcessorName || undefined,
+      pharmacyProcessor: pharmacyProcessorName || null,
     },
     warehouse: {
       name: settings.warehouseName || 'FCR Returns Warehouse',

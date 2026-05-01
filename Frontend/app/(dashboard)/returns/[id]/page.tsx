@@ -35,6 +35,7 @@ interface ReturnTransaction {
     totalItems: number;
     totalReturnableValue: number;
     totalNonReturnableValue: number;
+    hasCiiItems?: boolean; // For DEA Form 222 availability
     fedexTracking?: string;
     fedexPickupConfirmation?: string;
     notes?: string;
@@ -933,6 +934,18 @@ export default function ReturnDetailPage() {
                             >
                                 <Download className="w-3.5 h-3.5" /> Download Manifest
                             </button>
+                            {/* DEA Form 222 - Available when there are CII items */}
+                            {tx.hasCiiItems && (
+                                <button
+                                    onClick={() => downloadPdf('dea-form-222', `dea-form-222-${tx.licensePlate}.pdf`)}
+                                    disabled={pdfLoading === 'dea-form-222'}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded bg-orange-600 text-white hover:bg-orange-700 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
+                                    title="Download DEA Form 222 for Schedule II items"
+                                >
+                                    {pdfLoading === 'dea-form-222' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
+                                    DEA Form 222
+                                </button>
+                            )}
                             {/* Print Job Sheet - Available for completed/finalized transactions with tracking */}
                             {(tx.status === 'completed' || tx.status === 'finalized') && (tx.fedexTracking || (tx.packageTracking && Object.keys(tx.packageTracking).length > 0)) && (
                                 <button

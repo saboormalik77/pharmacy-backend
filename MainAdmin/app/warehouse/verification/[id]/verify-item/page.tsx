@@ -387,17 +387,28 @@ export default function VerifyItemPage() {
                             <div><span className="font-medium text-gray-500">Lot:</span> <span className="text-gray-900">{verifyingItem.lotNumber || '—'}</span></div>
                             <div><span className="font-medium text-gray-500">Expires:</span> <span className="text-gray-900">{verifyingItem.expirationDate || '—'}</span></div>
                             <div>
-                                <span className="font-medium text-gray-500">Full Quantity:</span>{' '}
+                                <span className="font-medium text-gray-500">Pkg Size:</span>{' '}
+                                <span className="text-gray-900 font-semibold">
+                                    {verifyingItem.fullPackageSize ? `${verifyingItem.fullPackageSize} units` : '—'}
+                                </span>
+                            </div>
+                            <div>
+                                <span className="font-medium text-gray-500">Full Qty:</span>{' '}
                                 <span className="text-gray-900 font-semibold">
                                     {verifyingItem.isPartial ? '—' : (verifyingItem.fullPackageQtyReturned ?? verifyingItem.quantity ?? '—')}
                                 </span>
                             </div>
                             <div>
-                                <span className="font-medium text-gray-500">Partial Quantity:</span>{' '}
+                                <span className="font-medium text-gray-500">Partial Qty:</span>{' '}
                                 <span className="text-gray-900 font-semibold">
-                                    {verifyingItem.isPartial ? (verifyingItem.quantity ?? '—') : '—'}
+                                    {verifyingItem.isPartial ? (
+                                        verifyingItem.partialPercentage 
+                                            ? `${verifyingItem.quantity || 0} (${verifyingItem.partialPercentage}%)`
+                                            : (verifyingItem.quantity ?? '—')
+                                    ) : '—'}
                                 </span>
                             </div>
+                            <div><span className="font-medium text-gray-500">Serial No:</span> <span className="font-mono text-gray-900">{verifyingItem.serialNumber || '—'}</span></div>
                             {verifyingItem.manufacturer && (
                                 <div className="md:col-span-2"><span className="font-medium text-gray-500">Manufacturer:</span> <span className="text-gray-900">{verifyingItem.manufacturer}</span></div>
                             )}

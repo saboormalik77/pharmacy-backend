@@ -27,6 +27,11 @@ interface ReturnTransaction {
     manifestGeneratedAt?: string;
     fedexShipmentId?: string;
     fedexLabels?: Record<string, string>;
+    finalizeSteps?: {
+        printManifest: boolean;
+        fedexEntered: boolean;
+        printJobSheets: boolean;
+    };
 }
 
 interface ReturnTransactionItem {
@@ -96,6 +101,15 @@ export default function FinalizeReturnPage() {
                     boxCount: transaction.boxCount ? String(transaction.boxCount) : '',
                 });
 
+                // Initialize finalize steps from transaction data
+                // Always initialize with defaults merged with server data to handle null/undefined
+                const defaultSteps = { printManifest: false, fedexEntered: false, printJobSheets: false };
+                const serverSteps = transaction.finalizeSteps || {};
+                setFinalizeStepsDone({
+                    ...defaultSteps,
+                    ...serverSteps,
+                });
+
                 // Pre-populate FedEx form
                 const pkgs = Array(12).fill('');
                 if (transaction.packageTracking) {
@@ -139,13 +153,33 @@ export default function FinalizeReturnPage() {
 
     const removeToast = (tid: string) => setToasts(prev => prev.filter(t => t.id !== tid));
 
-    const markStep = async (step: Partial<typeof finalizeStepsDone>) => {
+    const markStep = async (step: Partial<typeof finalizeStepsDone>, showFeedback = false) => {
         if (!tx) return;
         try {
-            await apiClient.patch(`/return-transactions/${tx.id}/finalize-steps`, { steps: step }, true);
-            setFinalizeStepsDone(prev => ({ ...prev, ...step }));
+            const res = await apiClient.patch(`/return-transactions/${tx.id}/finalize-steps`, { steps: step }, true);
+            // Check if the API returned success
+            if (res.status === 'success' && res.data) {
+                // Update local state from server response to ensure consistency
+                const updatedTx = res.data as ReturnTransaction;
+                if (updatedTx.finalizeSteps) {
+                    setFinalizeStepsDone(prev => ({
+                        ...prev,
+                        ...updatedTx.finalizeSteps,
+                    }));
+                } else {
+                    // Fallback to optimistic update
+                    setFinalizeStepsDone(prev => ({ ...prev, ...step }));
+                }
+                if (showFeedback) {
+                    showToast('Step completed!', 'success');
+                }
+            } else {
+                // Handle non-success response
+                throw new Error((res as any).message || 'Failed to update step');
+            }
         } catch (err: any) {
-            showToast('Failed to update step', 'error');
+            console.error('Failed to mark step:', err);
+            showToast(err.message || 'Failed to update step', 'error');
         }
     };
 
@@ -178,6 +212,13 @@ export default function FinalizeReturnPage() {
                 };
             } else {
                 throw new Error('Unable to open print window. Please check popup blockers.');
+            }
+
+            // Auto-mark step as complete when printing is successful
+            if (loadingKey === 'manifest') {
+                await markStep({ printManifest: true });
+            } else if (loadingKey === 'job-sheet') {
+                await markStep({ printJobSheets: true });
             }
         } catch (err) {
             showToast((err as Error).message || 'Failed to print document', 'error');
@@ -216,6 +257,9 @@ export default function FinalizeReturnPage() {
             } else {
                 throw new Error('Unable to open print window. Please check popup blockers.');
             }
+
+            // Auto-mark step as complete when printing is successful
+            await markStep({ printJobSheets: true });
         } catch (err) {
             showToast((err as Error).message || 'Failed to print job sheet', 'error');
         } finally {
@@ -473,6 +517,40 @@ export default function FinalizeReturnPage() {
                     <div className="max-w-5xl mx-auto px-4 py-4">
                         <div className="space-y-4">
 
+                            {/* Progress Bar */}
+                            <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                                <div className="flex items-center justify-between mb-3">
+                                    <span className="text-sm font-semibold text-gray-700">Progress</span>
+                                    <span className="text-sm font-bold text-teal-600">
+                                        {[finalizeStepsDone.printManifest, finalizeStepsDone.fedexEntered, finalizeStepsDone.printJobSheets].filter(Boolean).length} / 3 steps completed
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div 
+                                            className="h-full bg-gradient-to-r from-teal-500 to-teal-600 rounded-full transition-all duration-500"
+                                            style={{ 
+                                                width: `${([finalizeStepsDone.printManifest, finalizeStepsDone.fedexEntered, finalizeStepsDone.printJobSheets].filter(Boolean).length / 3) * 100}%` 
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex justify-between mt-3">
+                                    <div className={`flex items-center gap-1.5 text-xs ${finalizeStepsDone.printManifest ? 'text-green-600 font-semibold' : 'text-gray-400'}`}>
+                                        {finalizeStepsDone.printManifest ? <CheckCircle className="w-3.5 h-3.5" /> : <div className="w-3.5 h-3.5 rounded-full border-2 border-gray-300" />}
+                                        Print Manifest
+                                    </div>
+                                    <div className={`flex items-center gap-1.5 text-xs ${finalizeStepsDone.fedexEntered ? 'text-green-600 font-semibold' : 'text-gray-400'}`}>
+                                        {finalizeStepsDone.fedexEntered ? <CheckCircle className="w-3.5 h-3.5" /> : <div className="w-3.5 h-3.5 rounded-full border-2 border-gray-300" />}
+                                        FedEx/USPS
+                                    </div>
+                                    <div className={`flex items-center gap-1.5 text-xs ${finalizeStepsDone.printJobSheets ? 'text-green-600 font-semibold' : 'text-gray-400'}`}>
+                                        {finalizeStepsDone.printJobSheets ? <CheckCircle className="w-3.5 h-3.5" /> : <div className="w-3.5 h-3.5 rounded-full border-2 border-gray-300" />}
+                                        Job Sheets
+                                    </div>
+                                </div>
+                            </div>
+
                             {/* NOTE: TBD blocker removed - TBD items handled by warehouse verification */}
 
                             {/* ── Step 1: Print Itemized Return ── */}
@@ -488,10 +566,7 @@ export default function FinalizeReturnPage() {
                                         <p className="text-xs text-gray-600 mt-0.5">Print the full list of all items included in this return.</p>
                                         <div className="flex items-center gap-3 mt-2">
                                             <button
-                                                onClick={() => {
-                                                    printHtml('manifest-html', 'manifest');
-                                                    markStep({ printManifest: true });
-                                                }}
+                                                onClick={() => printHtml('manifest-html', 'manifest')}
                                                 disabled={pdfLoading === 'manifest'}
                                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
                                             >
@@ -566,10 +641,7 @@ export default function FinalizeReturnPage() {
                                         <p className="text-xs text-gray-600 mt-0.5">Print job sheets for all outgoing boxes.</p>
                                         <div className="flex items-center gap-2 mt-2 flex-wrap">
                                             <button
-                                                onClick={() => {
-                                                    printJobSheet();
-                                                    markStep({ printJobSheets: true });
-                                                }}
+                                                onClick={() => printJobSheet()}
                                                 disabled={pdfLoading === 'job-sheet'}
                                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
                                             >
@@ -579,10 +651,7 @@ export default function FinalizeReturnPage() {
                                             
                                             {hasCiiItems && (
                                                 <button
-                                                    onClick={() => {
-                                                        downloadPdf('dea-form-222', `dea-form-222-${tx.licensePlate}.pdf`);
-                                                        markStep({ printJobSheets: true });
-                                                    }}
+                                                    onClick={() => downloadPdf('dea-form-222', `dea-form-222-${tx.licensePlate}.pdf`)}
                                                     disabled={pdfLoading === 'dea-form-222'}
                                                     className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
                                                 >

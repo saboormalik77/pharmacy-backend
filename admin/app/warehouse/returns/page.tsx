@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     Search, Plus, ChevronLeft, ChevronRight, Loader2, AlertCircle,
-    Eye, X, Pause, Play, CheckCircle, Lock, Trash2, Edit,
+    Eye, X, Pause, Play, CheckCircle, Lock, Trash2, Edit, FileText,
     ClipboardList, DollarSign,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
@@ -86,12 +86,43 @@ export default function ReturnsPage() {
         const id = Date.now().toString();
         setToasts(prev => [...prev, { id, message, type }]);
     };
+
+    const downloadDeaForm222 = async (tx: ReturnTransaction) => {
+        try {
+            const { cookieUtils } = await import('@/lib/utils/cookies');
+            const token = cookieUtils.getAuthToken();
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'}/return-transactions/${tx.id}/dea-form-222`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+            
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({ message: 'Download failed' }));
+                throw new Error(error.message || 'Failed to download DEA Form 222');
+            }
+            
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `dea-form-222-${tx.licensePlate}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            
+            showToast('DEA Form 222 downloaded successfully');
+        } catch (error: any) {
+            showToast(error.message || 'Failed to download DEA Form 222', 'error');
+        }
+    };
     const removeToast = (id: string) => setToasts(prev => prev.filter(t => t.id !== id));
 
     useEffect(() => {
         dispatch(fetchReturnTransactions({
             page: currentPage,
-            limit: 20,
+            limit: 10,
             search: debouncedSearch || undefined,
             status: statusFilter || undefined,
             dateFrom: dateFrom || undefined,
@@ -102,7 +133,7 @@ export default function ReturnsPage() {
     const refresh = () => {
         dispatch(fetchReturnTransactions({
             page: currentPage,
-            limit: 20,
+            limit: 10,
             search: debouncedSearch || undefined,
             status: statusFilter || undefined,
             dateFrom: dateFrom || undefined,
@@ -351,6 +382,11 @@ export default function ReturnsPage() {
                                                     <button onClick={() => setViewModal(tx)} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title="View Details">
                                                         <Eye className="w-3.5 h-3.5" />
                                                     </button>
+                                                    {tx.hasCiiItems && (
+                                                        <button onClick={() => downloadDeaForm222(tx)} className="p-1.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors" title="Download DEA Form 222">
+                                                            <FileText className="w-3.5 h-3.5" />
+                                                        </button>
+                                                    )}
                                                     {canDoAction(tx, 'edit') && (
                                                         <button onClick={() => setEditModal(tx)} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title="Edit">
                                                             <Edit className="w-3.5 h-3.5" />

@@ -969,6 +969,18 @@ export default function ReturnDetailPage() {
                             {pdfLoading === 'manifest' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
                             Download Manifest
                         </button>
+                        {/* DEA Form 222 - Available when there are CII items */}
+                        {tx.hasCiiItems && (
+                            <button
+                                onClick={() => downloadPdf('dea-form-222', `dea-form-222-${tx.licensePlate}.pdf`)}
+                                disabled={pdfLoading === 'dea-form-222'}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded text-xs text-orange-700 font-medium transition-colors disabled:opacity-50"
+                                title="Download DEA Form 222 for Schedule II items"
+                            >
+                                {pdfLoading === 'dea-form-222' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
+                                DEA Form 222
+                            </button>
+                        )}
                         {/* Print Job Sheet - Available for completed/finalized transactions with tracking */}
                         {(tx.status === 'completed' || tx.status === 'finalized') && (tx.fedexTracking || (tx.packageTracking && Object.keys(tx.packageTracking).length > 0)) && (
                             <button
@@ -981,14 +993,6 @@ export default function ReturnDetailPage() {
                                 Print Job Sheet
                             </button>
                         )}
-                        {/* <button
-                            onClick={() => downloadPdf('dea-form-222', `dea-form-222-${tx.licensePlate}.pdf`)}
-                            disabled={pdfLoading === 'dea-form-222'}
-                            className="flex items-center gap-2 px-4 py-2.5 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg text-sm text-orange-700 font-medium transition-colors disabled:opacity-50"
-                        >
-                            {pdfLoading === 'dea-form-222' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
-                            DEA Form 222
-                        </button> */}
                     </div>
                     {tx.manifestGeneratedAt && (
                         <p className="text-[10px] text-gray-400 mt-2">Manifest last generated: {formatDate(tx.manifestGeneratedAt)}</p>

@@ -160,9 +160,25 @@ export const updatePharmacySettings = async (
   if (updateData.store_hours !== undefined) updateFields.store_hours = updateData.store_hours;
   if (updateData.dea_file_url !== undefined) updateFields.dea_file_url = updateData.dea_file_url;
   if (updateData.license_file_url !== undefined) updateFields.license_file_url = updateData.license_file_url;
+  // Handle physical_address: merge with existing data instead of replacing
   if (updateData.physical_address !== undefined) {
-    updateFields.physical_address = updateData.physical_address;
+    // First, get the current physical_address from the database
+    const { data: currentData } = await supabaseAdmin
+      .from('pharmacy')
+      .select('physical_address')
+      .eq('id', pharmacyId)
+      .single();
+    
+    // Merge the new fields with existing physical_address data
+    const currentPhysicalAddress = currentData?.physical_address || {};
+    const updatedPhysicalAddress = {
+      ...currentPhysicalAddress,
+      ...updateData.physical_address, // This will only include the fields that were actually provided
+    };
+    
+    updateFields.physical_address = updatedPhysicalAddress;
   }
+  
   if (updateData.billing_address !== undefined) {
     updateFields.billing_address = updateData.billing_address;
   }

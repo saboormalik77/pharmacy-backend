@@ -81,11 +81,10 @@ interface DeaFormItem {
   genericName: string | null;
   manufacturer: string | null;
   lotNumber: string | null;
-  serialNumber: string | null;
   expirationDate: string | null;
   quantity: number;
-  standardPrice: number | null;
-  estimatedValue: number | null;
+  fullPackageSize: number | null;
+  fullPackageQtyReturned: number | null;
   deaSchedule: string | null;
   strength: string | null;
   dosageForm: string | null;
@@ -109,6 +108,7 @@ interface DeaFormData {
     name: string;
     npiNumber: string | null;
     deaNumber: string | null;
+    deaExpiration: string | null;
     phone: string | null;
     email: string | null;
   };
@@ -581,6 +581,7 @@ export async function generateDeaForm222Pdf(data: DeaFormData): Promise<Buffer> 
   const fields: [string, string][] = [
     ['Pharmacy Name:', data.pharmacy.name],
     ['DEA Number:', data.pharmacy.deaNumber || 'NOT ON FILE'],
+    ['DEA Expiration:', data.pharmacy.deaExpiration ? fmtDate(data.pharmacy.deaExpiration) : 'NOT ON FILE'],
     ['NPI Number:', data.pharmacy.npiNumber || '—'],
     ['Phone:', data.pharmacy.phone || '—'],
     ['Email:', data.pharmacy.email || '—'],
@@ -614,6 +615,13 @@ export async function generateDeaForm222Pdf(data: DeaFormData): Promise<Buffer> 
     doc.moveDown(0.5);
     doc.fillColor('#000000');
   }
+  
+  if (!data.pharmacy.deaExpiration) {
+    doc.fontSize(9).fillColor('#cc0000').font('Helvetica-Bold')
+      .text('⚠ WARNING: No DEA expiration date on file for this pharmacy. Please verify DEA registration status.', 40, doc.y, { width: pageWidth });
+    doc.moveDown(0.5);
+    doc.fillColor('#000000');
+  }
 
   // ── Schedule II Items Table ──
   doc.fontSize(11).font('Helvetica-Bold').fillColor('#000000')
@@ -624,7 +632,7 @@ export async function generateDeaForm222Pdf(data: DeaFormData): Promise<Buffer> 
   const headerY = doc.y;
   doc.rect(40, headerY - 2, pageWidth, 14).fill('#fde8e8');
 
-  const colDef = { line: 25, ndc: 80, name: 130, strength: 60, lot: 55, exp: 55, qty: 30, price: 50, value: 50 };
+  const colDef = { line: 20, ndc: 70, name: 100, strength: 50, lot: 45, exp: 45, pkgSize: 45, fullQty: 40, partialQty: 50 };
 
   doc.fillColor('#000000').fontSize(7).font('Helvetica-Bold');
   let hx = 42;
@@ -634,9 +642,9 @@ export async function generateDeaForm222Pdf(data: DeaFormData): Promise<Buffer> 
   doc.text('STRENGTH', hx, headerY, { width: colDef.strength }); hx += colDef.strength;
   doc.text('LOT', hx, headerY, { width: colDef.lot }); hx += colDef.lot;
   doc.text('EXP', hx, headerY, { width: colDef.exp }); hx += colDef.exp;
-  doc.text('QTY', hx, headerY, { width: colDef.qty }); hx += colDef.qty;
-  doc.text('PRICE', hx, headerY, { width: colDef.price }); hx += colDef.price;
-  doc.text('VALUE', hx, headerY, { width: colDef.value });
+  doc.text('PKG SIZE', hx, headerY, { width: colDef.pkgSize }); hx += colDef.pkgSize;
+  doc.text('FULL QTY', hx, headerY, { width: colDef.fullQty }); hx += colDef.fullQty;
+  doc.text('PARTIAL QTY', hx, headerY, { width: colDef.partialQty });
 
   doc.y = headerY + 16;
 
@@ -657,13 +665,23 @@ export async function generateDeaForm222Pdf(data: DeaFormData): Promise<Buffer> 
     let rx = 42;
     doc.text(String(idx + 1), rx, rowY, { width: colDef.line }); rx += colDef.line;
     doc.text(item.ndc || '—', rx, rowY, { width: colDef.ndc }); rx += colDef.ndc;
-    doc.text(productName(item).substring(0, 30), rx, rowY, { width: colDef.name }); rx += colDef.name;
+    doc.text(productName(item).substring(0, 20), rx, rowY, { width: colDef.name }); rx += colDef.name;
     doc.text(item.strength || '—', rx, rowY, { width: colDef.strength }); rx += colDef.strength;
     doc.text(item.lotNumber || '—', rx, rowY, { width: colDef.lot }); rx += colDef.lot;
     doc.text(fmtDate(item.expirationDate), rx, rowY, { width: colDef.exp }); rx += colDef.exp;
-    doc.text(String(item.quantity), rx, rowY, { width: colDef.qty }); rx += colDef.qty;
-    doc.text(fmt$(item.standardPrice), rx, rowY, { width: colDef.price }); rx += colDef.price;
-    doc.text(fmt$(item.estimatedValue), rx, rowY, { width: colDef.value });
+    
+    // Package Size
+    doc.text(item.fullPackageSize ? `${item.fullPackageSize}` : '—', rx, rowY, { width: colDef.pkgSize }); rx += colDef.pkgSize;
+    
+    // Full Qty (show only if not partial)
+    const fullQty = item.isPartial ? '—' : (item.fullPackageQtyReturned ?? item.quantity ?? '—');
+    doc.text(String(fullQty), rx, rowY, { width: colDef.fullQty }); rx += colDef.fullQty;
+    
+    // Partial Qty (show only if partial)
+    const partialQty = item.isPartial 
+      ? (item.partialPercentage ? `${item.quantity || 0} (${item.partialPercentage}%)` : (item.quantity ?? '—'))
+      : '—';
+    doc.text(String(partialQty), rx, rowY, { width: colDef.partialQty });
 
     doc.y = rowY + 13;
   });
@@ -673,9 +691,9 @@ export async function generateDeaForm222Pdf(data: DeaFormData): Promise<Buffer> 
     .moveTo(40, doc.y).lineTo(572, doc.y).stroke();
   doc.moveDown(0.3);
 
-  // Total
+  // Total (removed value since we don't show prices anymore)
   doc.font('Helvetica-Bold').fontSize(9)
-    .text(`TOTAL: ${data.summary.totalCiiItems} Schedule II Items — ${fmt$(data.summary.totalValue)}`, { align: 'right' });
+    .text(`TOTAL: ${data.summary.totalCiiItems} Schedule II Items`, { align: 'right' });
 
   doc.moveDown(1);
 

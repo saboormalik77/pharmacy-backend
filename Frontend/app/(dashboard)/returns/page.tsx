@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/Badge';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
 import {
     Search, Plus, ChevronLeft, ChevronRight, Loader2, AlertCircle,
-    Eye, X, Trash2, Edit,
+    Eye, X, Trash2, Edit, FileText,
     ClipboardList, DollarSign, Play, CheckCircle,
 } from 'lucide-react';
 import { apiClient } from '@/lib/api/client';
@@ -34,6 +34,7 @@ interface ReturnTransaction {
     totalItems: number;
     totalReturnableValue: number;
     totalNonReturnableValue: number;
+    hasCiiItems?: boolean; // For DEA Form 222 availability
     notes: string | null;
     finalizedAt: string | null;
     createdAt: string;
@@ -110,6 +111,35 @@ export default function ReturnsPage() {
         const id = Date.now().toString();
         setToasts(prev => [...prev, { id, message, type }]);
     };
+
+    const downloadDeaForm222 = async (tx: ReturnTransaction) => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'}/return-transactions/${tx.id}/dea-form-222`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
+            
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({ message: 'Download failed' }));
+                throw new Error(error.message || 'Failed to download DEA Form 222');
+            }
+            
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `dea-form-222-${tx.licensePlate}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            
+            showToast('DEA Form 222 downloaded successfully');
+        } catch (error: any) {
+            showToast(error.message || 'Failed to download DEA Form 222', 'error');
+        }
+    };
     const removeToast = (id: string) => setToasts(prev => prev.filter(t => t.id !== id));
 
     const fetchReturns = useCallback(async () => {
@@ -119,7 +149,7 @@ export default function ReturnsPage() {
 
             const params: Record<string, any> = {
                 page: currentPage,
-                limit: 20,
+                limit: 10,
             };
             if (debouncedSearch) params.search = debouncedSearch;
             if (statusFilter) params.status = statusFilter;
@@ -344,6 +374,11 @@ export default function ReturnsPage() {
                                                     <button onClick={() => setViewModal(tx)} className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded transition-colors" title="View Details">
                                                         <Eye className="w-4 h-4" />
                                                     </button>
+                                                    {tx.hasCiiItems && (
+                                                        <button onClick={() => downloadDeaForm222(tx)} className="p-1.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors" title="Download DEA Form 222">
+                                                            <FileText className="w-4 h-4" />
+                                                        </button>
+                                                    )}
                                                     {canDoAction(tx, 'edit') && (
                                                         <button onClick={() => router.push(`/returns/${tx.id}`)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
                                                             <Edit className="w-4 h-4" />
