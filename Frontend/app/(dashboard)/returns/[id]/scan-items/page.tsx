@@ -40,15 +40,24 @@ export default function PharmacyScanItemsPage() {
     try {
       const res = await apiClient.post<any>('/barcode/scan', { scanData }, true);
       const d = res?.data || {};
+      const af = d.autoFill || {};
+      const pricing = d.pricing || {};
+      
+      // Get best price from pricing data
+      const bestPrice = pricing.bestFullPrice ?? pricing.bestPartialPrice ?? pricing.suggestedPrice;
+      
       setForm((f) => ({
         ...f,
-        ndc: d.ndc || d.ndc11 || f.ndc,
-        productName: d.productName || f.productName,
-        manufacturer: d.manufacturer || f.manufacturer,
-        lotNumber: d.lotNumber || f.lotNumber,
-        expirationDate: d.expirationDate || f.expirationDate,
+        ndc: af.ndc || d.ndc || d.ndc11 || f.ndc,
+        productName: af.proprietaryName || af.genericName || d.productName || f.productName,
+        manufacturer: af.manufacturer || d.manufacturer || f.manufacturer,
+        lotNumber: af.lotNumber || d.lotNumber || f.lotNumber,
+        expirationDate: af.expirationDate || d.expirationDate || f.expirationDate,
+        packageSize: af.fullPackageSize || f.packageSize,
+        unitCost: bestPrice != null ? String(bestPrice) : f.unitCost,
+        destination: af.destination || pricing.closeOutDestination || f.destination,
       }));
-      setMsg('Scan parsed and form autofilled');
+      setMsg('Scan parsed and form autofilled' + (bestPrice ? ` (Price: $${bestPrice})` : ''));
     } catch (e: any) {
       setError(e?.message || 'Failed to parse barcode');
     } finally {
@@ -98,13 +107,13 @@ export default function PharmacyScanItemsPage() {
           `/return-transactions/${id}/items`,
           {
             ndc: form.ndc,
-            productName: form.productName,
+            proprietaryName: form.productName,
             manufacturer: form.manufacturer || undefined,
             lotNumber: form.lotNumber || undefined,
             expirationDate: form.expirationDate || undefined,
             quantity: Number(form.quantity),
-            packageSize: Number(form.packageSize || 1),
-            unitCost: Number(form.unitCost || 0),
+            fullPackageSize: Number(form.packageSize || 1),
+            standardPrice: Number(form.unitCost || 0),
             returnStatus: status,
             destination: status === 'non_returnable' && route === 'destruction' ? 'destruction' : status === 'returnable' ? form.destination || undefined : undefined,
             nonReturnableReason: status === 'non_returnable' ? reason : undefined,
