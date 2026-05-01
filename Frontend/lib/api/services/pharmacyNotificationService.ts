@@ -44,9 +44,19 @@ export const pharmacyNotificationService = {
     );
 
     if (response.status === 'success') {
-      return response.data;
+      const empty: PharmacyNotificationsResponse = {
+        notifications: [],
+        pagination: {
+          total: 0,
+          limit: options.limit ?? 20,
+          offset: options.offset ?? 0,
+          has_more: false,
+        },
+        unread_count: 0,
+      };
+      return response.data ?? empty;
     }
-    
+
     throw new Error('Failed to fetch pharmacy notifications');
   },
 

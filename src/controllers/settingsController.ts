@@ -132,7 +132,21 @@ export const updateSettings = catchAsync(async (req: Request, res: Response, nex
     return next(new AppError('Pharmacy ID is required', 400));
   }
 
-  const updateData: UpdateSettingsData = req.body;
+  // Filter request body to only include allowed fields (exclude id, pharmacy_id, etc.)
+  const allowedFields = [
+    'name', 'email', 'phone', 'contact_phone', 'pharmacy_name',
+    'npi_number', 'dea_number', 'title', 'state_license_number',
+    'license_expiry_date', 'corporate_name', 'mailing_address',
+    'store_hours', 'dea_file_url', 'license_file_url',
+    'physical_address', 'billing_address'
+  ];
+
+  const updateData: UpdateSettingsData = {};
+  for (const field of allowedFields) {
+    if (req.body[field] !== undefined) {
+      (updateData as any)[field] = req.body[field];
+    }
+  }
 
   const updatedSettings = await updatePharmacySettings(pharmacyId, updateData);
 

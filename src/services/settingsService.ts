@@ -131,11 +131,21 @@ export const updatePharmacySettings = async (
     throw new AppError('Supabase admin client not configured', 500);
   }
 
-  // Prepare update object
+  // Define allowed fields for update (exclude id, pharmacy_id, created_at)
+  const allowedFields = [
+    'name', 'email', 'phone', 'contact_phone', 'pharmacy_name', 
+    'npi_number', 'dea_number', 'title', 'state_license_number',
+    'license_expiry_date', 'corporate_name', 'mailing_address', 
+    'store_hours', 'dea_file_url', 'license_file_url',
+    'physical_address', 'billing_address'
+  ];
+
+  // Prepare update object - only include allowed fields
   const updateFields: any = {
     updated_at: new Date().toISOString(),
   };
 
+  // Filter and copy only allowed fields
   if (updateData.name !== undefined) updateFields.name = updateData.name;
   if (updateData.phone !== undefined) updateFields.phone = updateData.phone;
   if (updateData.contact_phone !== undefined) updateFields.contact_phone = updateData.contact_phone;

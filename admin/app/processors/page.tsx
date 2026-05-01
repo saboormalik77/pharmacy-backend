@@ -191,7 +191,7 @@ export default function ProcessorsPage() {
             if (!adminUserId) {
                 // Try to find the admin user by email
                 const adminResponse: any = await apiClient.get('/admin/users', true, { 
-                    search: processor.email,
+                    search: processor.email ?? undefined,
                     limit: 1 
                 });
                 const admins = adminResponse?.data?.admins || adminResponse?.admins || [];
@@ -223,7 +223,7 @@ export default function ProcessorsPage() {
             if (!adminUserId) {
                 // Try to find the admin user by email
                 const adminResponse: any = await apiClient.get('/admin/users', true, { 
-                    search: processor.email,
+                    search: processor.email ?? undefined,
                     limit: 1 
                 });
                 const admins = adminResponse?.data?.admins || adminResponse?.admins || [];

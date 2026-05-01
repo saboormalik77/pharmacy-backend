@@ -715,6 +715,7 @@ export interface ReturnTransactionItem {
     expirationDate: string | null;
     standardPrice: number | null;
     quantity: number;
+    quantityReturned?: number | null;
     fullPackageSize: number | null;
     fullPackageQtyReturned: number | null;
     isPartial: boolean;

@@ -234,12 +234,17 @@ function PharmaciesPageContent() {
         }
     };
 
-    // Fetch invites when showInvites is toggled
+    // Fetch invites on mount so the badge count is correct immediately
     useEffect(() => {
-        if (showInvites && pendingInvites.length === 0 && !invitesLoading) {
+        dispatch(fetchPendingInvites());
+    }, [dispatch]);
+
+    // Always re-fetch fresh data from the server when the panel is opened
+    useEffect(() => {
+        if (showInvites) {
             dispatch(fetchPendingInvites());
         }
-    }, [showInvites, dispatch, pendingInvites.length, invitesLoading]);
+    }, [showInvites, dispatch]);
 
     const handleSuspend = (pharmacy: Pharmacy) => {
         setSuspendModal(pharmacy);
@@ -322,7 +327,7 @@ function PharmaciesPageContent() {
                         <Badge variant="secondary" className="ml-1 text-xs">{pendingInvites.length}</Badge>
                     </div>
                     <button
-                        onClick={() => { setShowInvites(!showInvites); if (!showInvites) dispatch(fetchPendingInvites()); }}
+                        onClick={() => setShowInvites(!showInvites)}
                         className="px-2.5 py-1 text-xs border border-gray-300 rounded hover:bg-gray-50 text-gray-600 transition-colors"
                     >
                         {showInvites ? 'Hide' : 'Show'} Invites
@@ -335,20 +340,22 @@ function PharmaciesPageContent() {
                             <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-xs">{invitesError}</div>
                         )}
 
-                        {pendingInvites.length === 0 && (
-                            <div className="text-center py-6 text-gray-500">
-                                <Mail className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                                <p className="text-xs font-medium">0 invites</p>
-                                <p className="text-xs mt-0.5 text-gray-400">No pending invitations</p>
-                                {invitesLoading && (
-                                    <p className="text-xs text-gray-400 mt-1 flex items-center justify-center gap-1">
-                                        <Loader2 className="w-3 h-3 animate-spin" /> Checking...
-                                    </p>
-                                )}
+                        {invitesLoading && (
+                            <div className="text-center py-6 text-gray-400">
+                                <Loader2 className="w-6 h-6 mx-auto mb-2 animate-spin text-gray-300" />
+                                <p className="text-xs">Loading invitations...</p>
                             </div>
                         )}
 
-                        {pendingInvites.length > 0 && (
+                        {!invitesLoading && pendingInvites.length === 0 && (
+                            <div className="text-center py-6 text-gray-500">
+                                <Mail className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                                <p className="text-xs font-medium">No pending invitations</p>
+                                <p className="text-xs mt-0.5 text-gray-400">Invitations sent to pharmacies will appear here</p>
+                            </div>
+                        )}
+
+                        {!invitesLoading && pendingInvites.length > 0 && (
                             <div className="overflow-x-auto">
                                 <table className="w-full table-auto">
                                     <thead>

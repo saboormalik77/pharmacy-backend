@@ -403,14 +403,10 @@ export const createPharmacyHandler = async (
 
     const { inviteId, inviteToken, email: pharmacyEmail, pharmacyName: name } = rpcResult.data;
 
-    // Resolve the pharmacy portal URL from the admin's buying group domain
+    // Resolve the pharmacy portal URL from the admin's buying group domain.
+    // req.adminBuyingGroupId is set by authenticateAdmin middleware for all admin routes.
     let portalBaseUrl = process.env.PHARMACY_PORTAL_URL || 'http://localhost:3002';
-    const buyingGroupId = req.tenant?.buyingGroupId || await (async () => {
-      const adminId = (req as any).adminId;
-      if (!adminId) return null;
-      const { data: row } = await db.from('admin').select('buying_group_id').eq('id', adminId).single();
-      return row?.buying_group_id || null;
-    })();
+    const buyingGroupId = req.adminBuyingGroupId || null;
     if (buyingGroupId) {
       const { getBuyingGroupHostnames } = await import('../services/tenantService');
       const hostnames = await getBuyingGroupHostnames(buyingGroupId);

@@ -66,7 +66,7 @@ interface ReturnTransactionItem {
     expirationDate?: string;
     standardPrice?: number;
     quantity: number;
-    quantityReturned: number;
+    quantityReturned?: number;
     isPartial?: boolean;
     partialPercentage?: number;
     fullPackageSize?: number;
@@ -274,8 +274,9 @@ export default function ReturnDetailPage() {
         if (editItemModal) {
             setEditItemForm({
                 fullPackageSize: editItemModal.fullPackageSize ? String(editItemModal.fullPackageSize) : '',
-                fullPackageQtyReturned: editItemModal.fullPackageQtyReturned ? String(editItemModal.fullPackageQtyReturned) : 
-                    (editItemModal.quantity ? String(editItemModal.quantity) : ''),
+                fullPackageQtyReturned: (editItemModal.fullPackageQtyReturned ?? editItemModal.quantityReturned)
+                    ? String(editItemModal.fullPackageQtyReturned ?? editItemModal.quantityReturned)
+                    : (editItemModal.quantity ? String(editItemModal.quantity) : ''),
                 standardPrice: editItemModal.standardPrice || 0,
                 returnStatus: editItemModal.returnStatus,
                 destination: editItemModal.destination || '',
@@ -1072,8 +1073,9 @@ export default function ReturnDetailPage() {
                                                 <td className="px-3 py-2">
                                                     <span className="text-xs text-gray-900">
                                                         {(() => {
-                                                            const qtyReturned = item.fullPackageQtyReturned ?? item.quantity;
-                                                            const displayQty = (item.fullPackageQtyReturned && item.fullPackageSize && item.fullPackageQtyReturned === item.fullPackageSize) ? 1 : qtyReturned;
+                                                            const qtyReturned = item.fullPackageQtyReturned ?? item.quantityReturned ?? item.quantity;
+                                                            const fullPkgQty = item.fullPackageQtyReturned ?? item.quantityReturned;
+                                                            const displayQty = (fullPkgQty && item.fullPackageSize && fullPkgQty === item.fullPackageSize) ? 1 : qtyReturned;
                                                             return <>{displayQty}{item.isPartial && <span className="text-orange-500 font-semibold ml-0.5">P</span>}</>;
                                                         })()}
                                                     </span>

@@ -39,7 +39,7 @@ interface UnifiedNotification {
   title: string;
   message: string;
   created_at: string;
-  status: 'unread' | 'read';
+  status: 'unread' | 'read' | 'dismissed';
   // For inventory notifications
   notification_type?: 'expiring_product' | 'order_status' | 'credit_received' | 'system';
   total_potential_value?: number;
@@ -96,7 +96,8 @@ export function NotificationDropdown() {
 
       // Process inventory notifications
       if (inventoryResponse.status === 'fulfilled' && inventoryResponse.value.status === 'success') {
-        const inventoryNotifs = inventoryResponse.value.data.map((n): UnifiedNotification => ({
+        const inventoryItems = inventoryResponse.value.data ?? [];
+        const inventoryNotifs = inventoryItems.map((n): UnifiedNotification => ({
           id: `inv_${n.id}`,
           type: 'inventory',
           title: n.title,
