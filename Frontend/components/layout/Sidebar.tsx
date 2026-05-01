@@ -230,7 +230,7 @@ export function Sidebar({ onClose }: SidebarProps) {
             <img src={branding.logoUrl} alt="Logo" className="w-8 h-8 rounded-lg object-contain flex-shrink-0" />
           )}
           <div className="min-w-0 flex-1">
-            <h2 className="text-base sm:text-lg font-bold text-teal-600 truncate">{branding?.businessName || 'PharmAnalytics'}</h2>
+            <h2 className="text-base sm:text-lg font-bold text-primary truncate">{branding?.businessName || 'PharmAnalytics'}</h2>
             {/* <p className="text-xs text-muted-foreground">Data Analytics Platform</p> */}
           </div>
         </div>
@@ -261,10 +261,11 @@ export function Sidebar({ onClose }: SidebarProps) {
                 href={item.href}
                 onClick={onClose}
                 className={cn(
-                  'flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-medium transition-colors',
+                  'flex items-center gap-2 rounded-lg px-3 py-2 transition-colors',
                   isActive
-                    ? 'bg-teal-600 text-white'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                    ? 'bg-primary text-primary-foreground font-semibold'
+                    : 'text-muted-foreground font-medium hover:bg-accent hover:text-accent-foreground',
+                  'text-sm'
                 )}
               >
                 <Icon className="h-4 w-4 flex-shrink-0" />
@@ -293,10 +294,11 @@ export function Sidebar({ onClose }: SidebarProps) {
                 href={item.href}
                 onClick={onClose}
                 className={cn(
-                  'flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-medium transition-colors',
+                  'flex items-center gap-2 rounded-lg px-3 py-2 transition-colors',
                   isActive
-                    ? 'bg-teal-600 text-white'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                    ? 'bg-primary text-primary-foreground font-semibold'
+                    : 'text-muted-foreground font-medium hover:bg-accent hover:text-accent-foreground',
+                  'text-sm'
                 )}
               >
                 <Icon className="h-4 w-4 flex-shrink-0" />

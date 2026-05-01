@@ -422,12 +422,12 @@ export default function VerifyItemPage() {
                         {/* Verification Status */}
                         <div>
                             <label className="text-sm font-medium text-gray-900 mb-3 block">Verification Status</label>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div className="grid grid-cols-2 gap-3">
                                 {[
                                     { value: 'correct', label: 'Correct', color: 'green' },
                                     { value: 'damaged', label: 'Damaged', color: 'red' },
-                                    { value: 'missing', label: 'Missing', color: 'gray' },
-                                    { value: 'wrong_item', label: 'Wrong Item', color: 'orange' },
+                                    // { value: 'missing', label: 'Missing', color: 'gray' },
+                                    // { value: 'wrong_item', label: 'Wrong Item', color: 'orange' },
                                 ].map(status => (
                                     <label key={status.value} className={`flex items-center gap-2 p-3 border-2 rounded-lg cursor-pointer transition-colors ${
                                         verifyStatus === status.value 

@@ -14,8 +14,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 47.4% 11.2%;
     
-    /* Primary: Professional Blue - Trustworthy, Medical */
-    --primary: 217 91% 60%;
+    /* Primary: Teal Green - Pharmacy/Medical */
+    --primary: 175 77% 31%;
     --primary-foreground: 0 0% 100%;
     
     /* Secondary: Soft Gray - Professional, Clean */
@@ -26,9 +26,9 @@
     --muted: 210 20% 96%;
     --muted-foreground: 215.4 16.3% 46.9%;
     
-    /* Accent: Subtle Blue - Highlights */
-    --accent: 217 33% 97%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent: Subtle Teal - Highlights */
+    --accent: 175 33% 96%;
+    --accent-foreground: 175 77% 20%;
     
     /* Destructive: Professional Red - Errors */
     --destructive: 0 84.2% 60.2%;
@@ -37,7 +37,7 @@
     /* Border: Light Gray */
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 217 91% 60%;
+    --ring: 175 77% 31%;
     
     --radius: 0.75rem;
   }
@@ -52,8 +52,8 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
     
-    --primary: 217 91% 60%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 175 77% 40%;
+    --primary-foreground: 0 0% 100%;
     
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -69,7 +69,7 @@
     
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 217 91% 60%;
+    --ring: 175 77% 40%;
   }
 }
 
