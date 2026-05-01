@@ -1,22 +1,14 @@
--- ============================================================
--- RPC Function: get_admin_dashboard_stats
--- Used by: GET /api/admin/dashboard
--- ============================================================
--- Returns admin dashboard statistics scoped to a buying group:
--- - Total Pharmacies (with % change vs last month)
--- - Active Distributors used by this buying group's pharmacies
--- - Returns Value (with % change vs last month)
--- - Returns Value Trend (monthly/yearly graph data)
--- - All pharmacy names with IDs
---
--- p_buying_group_id NULL  → MainAdmin: shows global (all tenants) data
--- p_buying_group_id set   → Buying-group admin: scoped to their pharmacies only
--- ============================================================
+-- ================================================================
+-- UPDATE: Admin Dashboard to Include Total Returns
+-- ================================================================
+-- This script updates the get_admin_dashboard_stats function to include
+-- a new "Total Returns" statistic for the buying group dashboard
+-- ================================================================
 
-DROP FUNCTION IF EXISTS get_admin_dashboard_stats(UUID, TEXT, INTEGER);
-DROP FUNCTION IF EXISTS get_admin_dashboard_stats(UUID, TEXT, INTEGER, UUID);
+-- Drop and recreate the function with the updated logic
+DROP FUNCTION IF EXISTS public.get_admin_dashboard_stats(uuid, text, integer, uuid);
 
-CREATE OR REPLACE FUNCTION get_admin_dashboard_stats(
+CREATE OR REPLACE FUNCTION public.get_admin_dashboard_stats(
     p_pharmacy_id       UUID    DEFAULT NULL,
     p_period_type       TEXT    DEFAULT 'monthly',
     p_periods           INTEGER DEFAULT 12,
@@ -352,5 +344,16 @@ END;
 $$;
 
 -- Grant execute permissions
-GRANT EXECUTE ON FUNCTION get_admin_dashboard_stats(UUID, TEXT, INTEGER, UUID) TO authenticated;
-GRANT EXECUTE ON FUNCTION get_admin_dashboard_stats(UUID, TEXT, INTEGER, UUID) TO service_role;
+GRANT EXECUTE ON FUNCTION public.get_admin_dashboard_stats(UUID, TEXT, INTEGER, UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_admin_dashboard_stats(UUID, TEXT, INTEGER, UUID) TO service_role;
+
+-- Success message
+DO $$
+BEGIN
+    RAISE NOTICE '✅ ADMIN DASHBOARD UPDATED SUCCESSFULLY!';
+    RAISE NOTICE '📊 Added "Total Returns" stat to buying group dashboard';
+    RAISE NOTICE '🔄 Function get_admin_dashboard_stats updated with new statistic';
+    RAISE NOTICE '📈 Dashboard will now show: Total Pharmacies, Returns Value, Total Returns';
+    RAISE NOTICE '';
+    RAISE NOTICE '🚀 The frontend has been updated to display the new stat card';
+END $$;

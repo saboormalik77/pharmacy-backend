@@ -204,6 +204,11 @@ export interface DashboardStatsData {
         change: number;
         changeLabel: string;
     };
+    totalReturns: {
+        value: number;
+        change: number;
+        changeLabel: string;
+    };
 }
 
 export interface DashboardResponse {

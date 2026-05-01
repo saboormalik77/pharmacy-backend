@@ -1,6 +1,6 @@
 'use client';
 
-import { Building2, Truck, FileText, DollarSign, ClipboardList, Scan, Archive, MapPin, Calendar, Loader2 } from 'lucide-react';
+import { Building2, Truck, FileText, DollarSign, ClipboardList, Scan, Archive, MapPin, Calendar, Loader2, RotateCcw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { StatCard } from '@/components/ui/StatCard';
@@ -242,6 +242,14 @@ export default function Dashboard() {
           tooltip={`Total value of pharmaceutical returns. ${data?.stats.returnsValue.changeLabel || ''}`}
           isCurrency
           changeLabel={data?.stats.returnsValue.changeLabel}
+        />
+        <StatCard
+          title="Total Returns"
+          value={data?.stats.totalReturns?.value || 0}
+          change={data?.stats.totalReturns?.change || 0}
+          icon={<RotateCcw className="w-3.5 h-3.5" />}
+          tooltip={`Total number of return documents processed by this buying group. ${data?.stats.totalReturns?.changeLabel || ''}`}
+          changeLabel={data?.stats.totalReturns?.changeLabel}
         />
       </div>
 
