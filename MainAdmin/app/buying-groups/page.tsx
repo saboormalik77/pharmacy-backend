@@ -40,6 +40,8 @@ export default function BuyingGroupsPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [formError, setFormError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -266,6 +268,7 @@ export default function BuyingGroupsPage() {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       const result = await dispatch(createBuyingGroup({
         name: formData.name.trim(),
@@ -303,6 +306,8 @@ export default function BuyingGroupsPage() {
       loadGroups();
     } catch (err: any) {
       setFormError(err || 'Failed to create buying group');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -314,6 +319,7 @@ export default function BuyingGroupsPage() {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       await dispatch(updateBuyingGroup({
         id: editingGroup.id,
@@ -330,10 +336,13 @@ export default function BuyingGroupsPage() {
       loadGroups();
     } catch (err: any) {
       setFormError(err || 'Failed to update buying group');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
+    setIsDeleting(true);
     try {
       await dispatch(deleteBuyingGroup(id)).unwrap();
       setSuccessMsg('Buying group deleted successfully');
@@ -341,6 +350,8 @@ export default function BuyingGroupsPage() {
       loadGroups();
     } catch (err: any) {
       setFormError(err || 'Failed to delete buying group');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -520,8 +531,12 @@ export default function BuyingGroupsPage() {
               Are you sure you want to delete this buying group? Associated admin accounts will be deactivated.
             </p>
             <div className="flex justify-end gap-3">
-              <Button variant="outline" size="sm" onClick={() => setDeleteConfirm(null)}>Cancel</Button>
-              <Button variant="danger" size="sm" onClick={() => handleDelete(deleteConfirm)}>Delete</Button>
+              <Button variant="outline" size="sm" onClick={() => setDeleteConfirm(null)} disabled={isDeleting}>Cancel</Button>
+              <Button variant="danger" size="sm" onClick={() => handleDelete(deleteConfirm)} disabled={isDeleting}>
+                {isDeleting ? (
+                  <span className="flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Deleting...</span>
+                ) : 'Delete'}
+              </Button>
             </div>
           </div>
         </div>
@@ -850,12 +865,20 @@ export default function BuyingGroupsPage() {
             </div>
 
             <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 sticky bottom-0 bg-white">
-              <Button variant="outline" onClick={closeModal}>Cancel</Button>
+              <Button variant="outline" onClick={closeModal} disabled={isSubmitting}>Cancel</Button>
               <Button
                 variant="primary"
                 onClick={modalMode === 'create' ? handleSubmitCreate : handleSubmitEdit}
+                disabled={isSubmitting}
               >
-                {modalMode === 'create' ? 'Add Buying Group' : 'Save Changes'}
+                {isSubmitting ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    {modalMode === 'create' ? 'Adding...' : 'Saving...'}
+                  </span>
+                ) : (
+                  modalMode === 'create' ? 'Add Buying Group' : 'Save Changes'
+                )}
               </Button>
             </div>
           </div>

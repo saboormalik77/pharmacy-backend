@@ -61,7 +61,7 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose }: SidebarProps) 
     return (
         <aside
             className={cn(
-                'bg-[#1e293b] text-[#cbd5e1] h-screen fixed left-0 top-16 transition-all duration-300 z-40',
+                'bg-[#1e293b] text-slate-400 h-screen fixed left-0 top-16 transition-all duration-300 z-40',
                 isOpen ? 'translate-x-0' : '-translate-x-full',
                 'sm:translate-x-0',
                 'w-64 sm:w-auto',
@@ -89,15 +89,19 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose }: SidebarProps) 
                                 href={link.href}
                                 onClick={handleLinkClick}
                                 className={cn(
-                                    'flex items-center gap-2.5 px-3 py-1.5 rounded-lg transition-all',
-                                    'hover:bg-[#334155]',
-                                    isActive && 'bg-[#334155] text-[#818cf8]',
+                                    'flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all',
+                                    'hover:bg-[#334155] hover:text-white',
+                                    isActive
+                                        ? 'bg-[#334155] text-[#818cf8]'
+                                        : 'text-slate-400',
                                     isCollapsed && 'justify-center'
                                 )}
                             >
                                 <Icon className="w-4 h-4 flex-shrink-0" />
                                 {!isCollapsed && (
-                                    <span className="text-xs font-medium">{link.label}</span>
+                                    <span className={cn('text-sm', isActive ? 'font-semibold' : 'font-medium')}>
+                                        {link.label}
+                                    </span>
                                 )}
                             </Link>
                         );

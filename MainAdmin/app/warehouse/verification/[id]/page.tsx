@@ -106,7 +106,7 @@ export default function VerificationSessionPage() {
     // const [manualDestination, setManualDestination] = useState('');
 
     // Item scanner (verification tab)
-    const [itemScanMode, setItemScanMode] = useState<'camera' | 'input'>('input');
+    const [itemScanMode, setItemScanMode] = useState<'camera' | 'input'>('camera');
     const [itemScanInput, setItemScanInput] = useState('');
     const [itemCameraOpen, setItemCameraOpen] = useState(false);
     const [itemScanError, setItemScanError] = useState('');
@@ -1138,15 +1138,15 @@ export default function VerificationSessionPage() {
                                     <thead>
                                         <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
                                             <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Product</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">NDC</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Serial #</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Lot</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Exp</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Full Qty</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Partial Qty</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3.5 w-28">NDC</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3.5 w-28">Serial #</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3.5">Lot</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3.5 w-20">Exp</th>
+                                            <th className="text-center text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-2 py-3.5 w-14">Full Qty</th>
+                                            <th className="text-center text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-2 py-3.5 w-16">Partial Qty</th>
                                             <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Verification</th>
                                             <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Return Status</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Action</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5 w-28">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
@@ -1156,14 +1156,23 @@ export default function VerificationSessionPage() {
                                                     <div className="text-sm font-medium text-gray-900">{item.proprietaryName || item.genericName}</div>
                                                     {item.manufacturer && <div className="text-xs text-gray-400">{item.manufacturer}</div>}
                                                 </td>
-                                                <td className="px-4 py-3 text-sm font-mono text-gray-600">{item.ndc}</td>
-                                                <td className="px-4 py-3 text-sm font-mono text-gray-600">{item.serialNumber || '—'}</td>
-                                                <td className="px-4 py-3 text-sm text-gray-600">{item.lotNumber || '—'}</td>
-                                                <td className="px-4 py-3 text-sm text-gray-600">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
-                                                <td className="px-4 py-3 text-sm font-medium">
+                                                <td className="px-3 py-3 w-28 max-w-[7rem]">
+                                                    <span className="block text-xs font-mono text-gray-600 whitespace-nowrap">{item.ndc}</span>
+                                                </td>
+                                                <td className="px-3 py-3 w-28 max-w-[7rem]">
+                                                    <span
+                                                        className="block text-xs font-mono text-gray-600 truncate"
+                                                        title={item.serialNumber || ''}
+                                                    >
+                                                        {item.serialNumber || '—'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-3 py-3 text-xs text-gray-600 whitespace-nowrap">{item.lotNumber || '—'}</td>
+                                                <td className="px-3 py-3 w-20 text-xs text-gray-600 whitespace-nowrap">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
+                                                <td className="px-2 py-3 w-14 text-xs font-medium text-center">
                                                     {item.isPartial ? '—' : (item.fullPackageQtyReturned ?? item.quantity ?? '—')}
                                                 </td>
-                                                <td className="px-4 py-3 text-sm font-medium">
+                                                <td className="px-2 py-3 w-16 text-xs font-medium text-center">
                                                     {item.isPartial ? (item.quantity ?? '—') : '—'}
                                                 </td>
                                                 <td className="px-4 py-3">
@@ -1202,13 +1211,13 @@ export default function VerificationSessionPage() {
                                                         <span className="text-[10px] text-gray-400">pending</span>
                                                     )}
                                                 </td>
-                                                <td className="px-4 py-3">
+                                                <td className="px-4 py-3 w-28">
                                                     {!item.verificationStatus ? (
                                                         <button
                                                             type="button"
                                                             disabled={markingMissingId === item.id}
                                                             onClick={() => handleMarkAsMissing(item.id)}
-                                                            className="px-2 py-1 text-[10px] font-medium rounded-md transition text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            className="px-2 py-1 text-[10px] font-medium rounded-md transition text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                                                         >
                                                             {markingMissingId === item.id ? (
                                                                 <span className="flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" />Marking...</span>
@@ -1220,7 +1229,7 @@ export default function VerificationSessionPage() {
                                                         <button
                                                             type="button"
                                                             disabled
-                                                            className="px-2 py-1 text-[10px] font-medium rounded-md bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
+                                                            className="px-2 py-1 text-[10px] font-medium rounded-md bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed whitespace-nowrap"
                                                         >
                                                             Mark as Missing
                                                         </button>
