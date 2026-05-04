@@ -44,7 +44,7 @@ import destructionRoutes from './routes/destructionRoutes';
 import wineCellarRoutes from './routes/wineCellarRoutes';
 import emailManagementRoutes from './routes/emailManagementRoutes';
 import warehouseRoutes from './routes/warehouseRoutes';
-import warehouseManagementRoutes from './routes/warehouseManagementRoutes';
+import warehouseManagementRoutes from './routes/warehouseManagementRoutes'; 
 import batchRoutes from './routes/batchRoutes';
 import debitMemoRoutes from './routes/debitMemoRoutes';
 import raTrackingRoutes from './routes/raTrackingRoutes';
@@ -72,6 +72,8 @@ if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
 
 // Initialize Firebase Admin SDK for push notifications
 initializeFirebase();
+
+
 
 const app = express();
 // Avoid 304 + If-None-Match for JSON APIs; clients otherwise keep showing stale list/detail bodies.
