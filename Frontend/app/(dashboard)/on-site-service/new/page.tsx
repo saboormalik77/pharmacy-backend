@@ -142,7 +142,7 @@ export default function NewServiceRequestPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 max-w-2xl mx-auto">
+      <div className="space-y-6">
         {/* Header */}
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
@@ -151,7 +151,7 @@ export default function NewServiceRequestPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => router.push('/on-site-service')}
-                className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+                className="flex items-center gap-2 text-muted-foreground hover:text-foreground -ml-2"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back
@@ -168,56 +168,64 @@ export default function NewServiceRequestPage() {
         </div>
 
         {/* Form Card */}
-        <Card>
-          <CardHeader>
+        <Card className="shadow-md">
+          <CardHeader className="border-b bg-muted/30">
             <CardTitle className="text-lg">Service Request Details</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Fill out the form below to request a field representative visit
+            </p>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <form onSubmit={submit} className="space-y-6">
-              {/* Preferred Date */}
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Preferred Date <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  type="date"
-                  min={today}
-                  value={requestedDate}
-                  onChange={(e) => setRequestedDate(e.target.value)}
-                  required
-                  className="w-full"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Choose your preferred date for the field representative visit.
-                </p>
-              </div>
+              {/* Form Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Preferred Date */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Preferred Date <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="date"
+                    min={today}
+                    value={requestedDate}
+                    onChange={(e) => setRequestedDate(e.target.value)}
+                    required
+                    className="w-full"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Choose your preferred date for the visit
+                  </p>
+                </div>
 
-              {/* Purpose */}
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Purpose of visit <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={purpose}
-                  onChange={(e) => setPurpose(e.target.value as ServiceRequestPurpose)}
-                  required
-                  className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-                >
-                  {(Object.keys(purposeLabels) as ServiceRequestPurpose[]).map((key) => (
-                    <option key={key} value={key}>
-                      {purposeLabels[key]}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-xs text-muted-foreground mt-1">
-                  What should the field representative focus on during this visit?
-                </p>
+                {/* Purpose */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Purpose of Visit <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={purpose}
+                    onChange={(e) => setPurpose(e.target.value as ServiceRequestPurpose)}
+                    required
+                    className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  >
+                    {(Object.keys(purposeLabels) as ServiceRequestPurpose[]).map((key) => (
+                      <option key={key} value={key}>
+                        {purposeLabels[key]}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    What should the rep focus on?
+                  </p>
+                </div>
               </div>
 
               {/* Branch Selection (for parent pharmacies) */}
               {branches.length > 0 && (
                 <div>
-                  <label className="block text-sm font-medium mb-2">Branch (optional)</label>
+                  <label className="block text-sm font-medium mb-2">
+                    Branch Location <span className="text-muted-foreground font-normal">(optional)</span>
+                  </label>
                   <select
                     value={branchId}
                     onChange={(e) => setBranchId(e.target.value)}
@@ -231,28 +239,30 @@ export default function NewServiceRequestPage() {
                     ))}
                   </select>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Select a branch if the visit should be to a branch location.
+                    Select a branch if the visit should be to a branch location
                   </p>
                 </div>
               )}
 
               {/* Special Instructions */}
               <div>
-                <label className="block text-sm font-medium mb-2">Special Instructions</label>
+                <label className="block text-sm font-medium mb-2">
+                  Special Instructions <span className="text-muted-foreground font-normal">(optional)</span>
+                </label>
                 <textarea
                   value={specialInstructions}
                   onChange={(e) => setSpecialInstructions(e.target.value)}
                   rows={6}
                   maxLength={2000}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  placeholder="Access hours, parking notes, contact person, etc. (optional)"
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+                  placeholder="e.g., Access hours, parking notes, contact person, preferred time of day..."
                 />
                 <div className="flex items-center justify-between mt-1">
                   <p className="text-xs text-muted-foreground">
-                    Provide any special instructions for the field representative.
+                    Provide any helpful information for the field representative
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {specialInstructions.length} / 2000 characters
+                    {specialInstructions.length} / 2000
                   </p>
                 </div>
               </div>
@@ -265,7 +275,7 @@ export default function NewServiceRequestPage() {
               )}
 
               {/* Submit Buttons */}
-              <div className="flex items-center justify-end gap-3 pt-4">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t">
                 <Button 
                   type="button" 
                   variant="outline" 
@@ -296,10 +306,17 @@ export default function NewServiceRequestPage() {
         {/* Info Card */}
         <Card className="border-teal-200 bg-teal-50/60">
           <CardContent className="p-4">
-            <div className="text-sm text-teal-900">
-              <strong>How this works:</strong> When you submit a request, it is automatically routed to every
-              field representative assigned to your store. The first rep to claim and schedule it owns the
-              visit. You'll receive an email once a rep confirms a date.
+            <div className="flex items-start gap-3">
+              <div className="bg-teal-600 rounded-full p-1.5 flex-shrink-0">
+                <AlertCircle className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-teal-900 text-sm mb-1">How This Works</h3>
+                <p className="text-sm text-teal-900">
+                  When you submit a request, it is automatically routed to every field representative assigned to your store. 
+                  The first rep to claim and schedule it owns the visit. You'll receive an email once a rep confirms a date.
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
