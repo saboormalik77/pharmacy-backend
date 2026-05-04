@@ -7,6 +7,7 @@
  */
 
 import PDFDocument from 'pdfkit';
+import { formatNonReturnableReason } from '../constants/nonReturnableReasons';
 
 // ============================================================
 // Types (matching RPC output shapes)
@@ -70,6 +71,7 @@ interface ManifestData {
   };
   returnableItems: ManifestItem[];
   nonReturnableItems: ManifestItem[];
+  allItems?: ManifestItem[]; // NEW: Optional field for all items regardless of status
 }
 
 interface DeaFormItem {
@@ -79,11 +81,10 @@ interface DeaFormItem {
   genericName: string | null;
   manufacturer: string | null;
   lotNumber: string | null;
-  serialNumber: string | null;
   expirationDate: string | null;
   quantity: number;
-  standardPrice: number | null;
-  estimatedValue: number | null;
+  fullPackageSize: number | null;
+  fullPackageQtyReturned: number | null;
   deaSchedule: string | null;
   strength: string | null;
   dosageForm: string | null;
@@ -107,6 +108,7 @@ interface DeaFormData {
     name: string;
     npiNumber: string | null;
     deaNumber: string | null;
+    deaExpiration: string | null;
     phone: string | null;
     email: string | null;
   };
@@ -217,9 +219,7 @@ export async function generateManifestPdf(data: ManifestData): Promise<Buffer> {
   doc.font('Helvetica').text(data.transaction.licensePlate, rightX + 90, rY);
   rY += 14;
 
-  doc.font('Helvetica-Bold').text('FedEx Tracking:', rightX, rY);
-  doc.font('Helvetica').text(data.transaction.fedexTracking || '—', rightX + 90, rY);
-  rY += 14;
+  // FedEx Tracking removed per user request
 
   doc.font('Helvetica-Bold').text('Status:', rightX, rY);
   doc.font('Helvetica').text(data.transaction.status.toUpperCase(), rightX + 90, rY);
@@ -253,11 +253,11 @@ export async function generateManifestPdf(data: ManifestData): Promise<Buffer> {
   doc.rect(40, sumY, pageWidth, 20).fillAndStroke('#f0f4f8', '#cccccc');
   doc.fillColor('#000000').fontSize(9).font('Helvetica-Bold');
 
-  const colW = pageWidth / 4;
+  const colW = pageWidth / 2; // Adjusted for 2 columns instead of 4
   doc.text(`Total Items: ${data.summary.totalItems}`, 50, sumY + 8, { width: colW });
-  doc.text(`Returnable: ${data.summary.returnableCount}`, 50 + colW, sumY + 8, { width: colW });
-  doc.text(`Non-Returnable: ${data.summary.nonReturnableCount}`, 50 + colW * 2, sumY + 8, { width: colW });
-  doc.text(`CII Items: ${data.summary.hasCiiItems ? 'Yes' : 'No'}`, 50 + colW * 3, sumY + 8, { width: colW });
+  // doc.text(`Returnable: ${data.summary.returnableCount}`, 50 + colW, sumY + 8, { width: colW });
+  // doc.text(`Non-Returnable: ${data.summary.nonReturnableCount}`, 50 + colW * 2, sumY + 8, { width: colW });
+  doc.text(`CII Items: ${data.summary.hasCiiItems ? 'Yes' : 'No'}`, 50 + colW, sumY + 8, { width: colW });
 
   // doc.text(`Returnable Value: ${fmt$(data.summary.totalReturnableValue)}`, 50, sumY + 22, { width: colW * 2 });
   // doc.text(`Non-Ret. Value: ${fmt$(data.summary.totalNonReturnableValue)}`, 50 + colW * 2, sumY + 22, { width: colW });
@@ -267,7 +267,14 @@ export async function generateManifestPdf(data: ManifestData): Promise<Buffer> {
 
   // ── Returnable Items Table ──
   if (data.returnableItems.length > 0) {
-    drawItemsTable(doc, 'RETURNABLE ITEMS', data.returnableItems, pageWidth, true);
+    drawItemsTable(doc, 'RETURNABLE ITEMS', data.returnableItems, pageWidth, false);
+  }
+
+  // ── Non-Returnable Items Table ──
+  // FCR-52: Non-returnable items must now appear in manifests/PDFs
+  // so warehouse and pharmacies have full visibility.
+  if (data.nonReturnableItems.length > 0) {
+    drawItemsTable(doc, 'NON-RETURNABLE ITEMS', data.nonReturnableItems, pageWidth, true);
   }
 
   // ── Notes ──
@@ -299,39 +306,52 @@ export async function generateManifestPdf(data: ManifestData): Promise<Buffer> {
 function manifestItemsTableHtml(
   title: string,
   items: ManifestItem[],
-  showDestination: boolean
+  showReason: boolean
 ): string {
   if (items.length === 0) return '';
-  const th = showDestination
-    ? '<th>NDC</th><th>Product</th><th>Lot</th><th>Exp</th><th class="num">Qty</th><!-- <th class="num">Price</th><th class="num">Value</th> --><th>Dest</th>'
-    : '<th>NDC</th><th>Product</th><th>Lot</th><th>Exp</th><th class="num">Qty</th><!-- <th class="num">Price</th><th class="num">Value</th> --><th>Reason</th>';
+  
+  // For ALL ITEMS, show status column. For specific categories, show reason if requested
+  const showStatus = false; // title === 'ALL ITEMS';  // COMMENTED OUT: Remove status column
+  
+  let th = '<th>NDC</th><th>Product</th><th>Lot</th><th>Exp</th><th class="num">Qty</th>';
+  // if (showStatus) {
+  //   th += '<th>Status</th><th>Reason</th>';
+  // } else if (showReason) {
+  //   th += '<th>Reason</th>';
+  // }
+  
   const rows = items
     .map((item, idx) => {
       const namePlain = productName(item) + (item.isPartial ? ` (${item.partialPercentage || 0}%)` : '');
-      const destOrReason = showDestination
-        ? (item.destination || '—').toUpperCase()
-        : (item.nonReturnableReason || '—').toUpperCase();
+      const reason = formatNonReturnableReason(item.nonReturnableReason).toUpperCase();
+      const status = ((item as any).returnStatus || 'TBD').toUpperCase();
       const bg = idx % 2 === 0 ? ' class="alt"' : '';
+      
+      let statusCell = '';
+      // if (showStatus) {
+      //   statusCell = `<td>${escapeHtml(status)}</td><td>${escapeHtml(reason || '—')}</td>`;
+      // } else if (showReason) {
+      //   statusCell = `<td>${escapeHtml(reason)}</td>`;
+      // }
+      
       return `<tr${bg}>
         <td class="mono">${escapeHtml(item.ndc || '—')}</td>
         <td>${escapeHtml(namePlain)}</td>
         <td>${escapeHtml(item.lotNumber || '—')}</td>
         <td>${escapeHtml(fmtDate(item.expirationDate))}</td>
         <td class="num">${item.quantity}</td>
-        <!-- <td class="num">${escapeHtml(fmt$(item.standardPrice))}</td> -->
-        <!-- <td class="num">${escapeHtml(fmt$(item.estimatedValue))}</td> -->
-        <td>${escapeHtml(destOrReason)}</td>
+        ${statusCell}
       </tr>`;
     })
     .join('');
-  const total = items.reduce((sum, i) => sum + (i.estimatedValue || 0), 0);
+    
   return `
     <h2 class="section-title">${escapeHtml(title)}</h2>
     <table class="items">
       <thead><tr>${th}</tr></thead>
       <tbody>${rows}</tbody>
     </table>
-    <!-- <p class="subtotal"><strong>${escapeHtml(title)} total:</strong> ${items.length} items — ${escapeHtml(fmt$(total))}</p> -->
+    <p class="subtotal"><strong>${escapeHtml(title)} total:</strong> ${items.length} items</p>
   `;
 }
 
@@ -341,8 +361,26 @@ export function generateManifestHtml(data: ManifestData): string {
   const s = data.summary;
   const proc = data.processor;
   const dateStr = fmtDate(t.finalizedAt || t.createdAt);
-  const returnableBlock = manifestItemsTableHtml('RETURNABLE ITEMS', data.returnableItems, true);
-  const nonRetBlock = '';
+  
+  // Show all items if specific categories are empty
+  let returnableBlock = '';
+  let nonRetBlock = '';
+  
+  if (data.returnableItems.length > 0) {
+    returnableBlock = manifestItemsTableHtml('RETURNABLE ITEMS', data.returnableItems, false);
+  } else if (data.nonReturnableItems.length > 0) {
+    nonRetBlock = manifestItemsTableHtml('NON-RETURNABLE ITEMS', data.nonReturnableItems, true);
+  } else if ((data as any).allItems && (data as any).allItems.length > 0) {
+    // Fallback: show all items if returnable/non-returnable are empty
+    returnableBlock = manifestItemsTableHtml('ALL ITEMS', (data as any).allItems, true);
+  } else {
+    // Show message if no items found
+    returnableBlock = `
+      <h2 class="section-title">NO ITEMS FOUND</h2>
+      <p>This return transaction appears to have no items or the items have not been classified yet.</p>
+    `;
+  }
+  
   const notesBlock = t.notes
     ? `<div class="notes"><strong>Notes:</strong> ${escapeHtml(t.notes)}</div>`
     : '';
@@ -395,7 +433,6 @@ export function generateManifestHtml(data: ManifestData): string {
     </dl>
     <dl style="margin:0;">
       <dt>License Plate</dt><dd>${escapeHtml(t.licensePlate)}</dd>
-      <dt>FedEx Tracking</dt><dd>${escapeHtml(t.fedexTracking || '—')}</dd>
       <dt>Status</dt><dd>${escapeHtml(String(t.status).toUpperCase())}</dd>
       ${t.boxCount != null ? `<dt>Box Count</dt><dd>${escapeHtml(String(t.boxCount))}</dd>` : ''}
       <dt>Date</dt><dd>${escapeHtml(dateStr)}</dd>
@@ -404,8 +441,8 @@ export function generateManifestHtml(data: ManifestData): string {
   </div>
   <div class="summary">
     <div>Total Items: <strong>${s.totalItems}</strong></div>
-    <div>Returnable: <strong>${s.returnableCount}</strong></div>
-    <div>Non-Returnable: <strong>${s.nonReturnableCount}</strong></div>
+    <!-- <div>Returnable: <strong>${s.returnableCount}</strong></div>
+    <div>Non-Returnable: <strong>${s.nonReturnableCount}</strong></div> -->
     <div>CII Items: <strong>${s.hasCiiItems ? 'Yes' : 'No'}</strong></div>
     <!-- <div class="wide">Returnable Value: <strong>${escapeHtml(fmt$(s.totalReturnableValue))}</strong></div>
     <div class="wide">Non-Ret. Value: <strong>${escapeHtml(fmt$(s.totalNonReturnableValue))}</strong> &nbsp; Total: <strong>${escapeHtml(fmt$(s.totalValue))}</strong></div> -->
@@ -428,16 +465,16 @@ function drawItemsTable(
   title: string,
   items: ManifestItem[],
   pageWidth: number,
-  showDestination: boolean
+  showReason: boolean
 ): void {
   doc.moveDown(0.3);
   doc.fontSize(11).font('Helvetica-Bold').fillColor('#000000').text(title);
   doc.moveDown(0.3);
 
-  // Column widths
-  const cols = showDestination
-    ? { ndc: 75, name: 145, lot: 55, exp: 55, qty: 30, price: 0, value: 0, dest: 62 }
-    : { ndc: 80, name: 165, lot: 60, exp: 60, qty: 35, price: 0, value: 0, reason: 62 };
+  // Column widths - destination removed per user request, only show reason for non-returnable
+  const cols = showReason
+    ? { ndc: 80, name: 165, lot: 60, exp: 60, qty: 35, price: 0, value: 0, reason: 62 }
+    : { ndc: 85, name: 200, lot: 70, exp: 70, qty: 40, price: 0, value: 0 };
 
   const headerY = doc.y;
 
@@ -454,9 +491,7 @@ function drawItemsTable(
   doc.text('QTY', x, headerY, { width: cols.qty }); x += cols.qty;
   // doc.text('PRICE', x, headerY, { width: cols.price }); x += cols.price;
   // doc.text('VALUE', x, headerY, { width: cols.value }); x += cols.value;
-  if (showDestination) {
-    doc.text('DEST', x, headerY, { width: (cols as any).dest });
-  } else {
+  if (showReason) {
     doc.text('REASON', x, headerY, { width: (cols as any).reason });
   }
 
@@ -487,10 +522,9 @@ function drawItemsTable(
     doc.text(String(item.quantity), cx, rowY, { width: cols.qty }); cx += cols.qty;
     // doc.text(fmt$(item.standardPrice), cx, rowY, { width: cols.price }); cx += cols.price;
     // doc.text(fmt$(item.estimatedValue), cx, rowY, { width: cols.value }); cx += cols.value;
-    if (showDestination) {
-      doc.text((item.destination || '—').toUpperCase(), cx, rowY, { width: (cols as any).dest });
-    } else {
-      doc.text((item.nonReturnableReason || '—').toUpperCase(), cx, rowY, { width: (cols as any).reason });
+    if (showReason) {
+      const reasonLabel = formatNonReturnableReason(item.nonReturnableReason);
+      doc.text(reasonLabel.toUpperCase(), cx, rowY, { width: (cols as any).reason });
     }
 
     doc.y = rowY + 13;
@@ -547,6 +581,7 @@ export async function generateDeaForm222Pdf(data: DeaFormData): Promise<Buffer> 
   const fields: [string, string][] = [
     ['Pharmacy Name:', data.pharmacy.name],
     ['DEA Number:', data.pharmacy.deaNumber || 'NOT ON FILE'],
+    ['DEA Expiration:', data.pharmacy.deaExpiration ? fmtDate(data.pharmacy.deaExpiration) : 'NOT ON FILE'],
     ['NPI Number:', data.pharmacy.npiNumber || '—'],
     ['Phone:', data.pharmacy.phone || '—'],
     ['Email:', data.pharmacy.email || '—'],
@@ -562,8 +597,7 @@ export async function generateDeaForm222Pdf(data: DeaFormData): Promise<Buffer> 
   // ── Return Info ──
   doc.font('Helvetica-Bold').text('License Plate:', 40, doc.y, { continued: true, width: labelWidth });
   doc.font('Helvetica').text(`  ${data.transaction.licensePlate}`);
-  doc.font('Helvetica-Bold').text('FedEx Tracking:', 40, doc.y, { continued: true, width: labelWidth });
-  doc.font('Helvetica').text(`  ${data.transaction.fedexTracking || '—'}`);
+  // FedEx Tracking removed per user request
   doc.font('Helvetica-Bold').text('Date:', 40, doc.y, { continued: true, width: labelWidth });
   doc.font('Helvetica').text(`  ${fmtDate(data.transaction.finalizedAt || data.transaction.createdAt)}`);
 
@@ -581,6 +615,13 @@ export async function generateDeaForm222Pdf(data: DeaFormData): Promise<Buffer> 
     doc.moveDown(0.5);
     doc.fillColor('#000000');
   }
+  
+  if (!data.pharmacy.deaExpiration) {
+    doc.fontSize(9).fillColor('#cc0000').font('Helvetica-Bold')
+      .text('⚠ WARNING: No DEA expiration date on file for this pharmacy. Please verify DEA registration status.', 40, doc.y, { width: pageWidth });
+    doc.moveDown(0.5);
+    doc.fillColor('#000000');
+  }
 
   // ── Schedule II Items Table ──
   doc.fontSize(11).font('Helvetica-Bold').fillColor('#000000')
@@ -591,7 +632,7 @@ export async function generateDeaForm222Pdf(data: DeaFormData): Promise<Buffer> 
   const headerY = doc.y;
   doc.rect(40, headerY - 2, pageWidth, 14).fill('#fde8e8');
 
-  const colDef = { line: 25, ndc: 80, name: 130, strength: 60, lot: 55, exp: 55, qty: 30, price: 50, value: 50 };
+  const colDef = { line: 20, ndc: 70, name: 100, strength: 50, lot: 45, exp: 45, pkgSize: 45, fullQty: 40, partialQty: 50 };
 
   doc.fillColor('#000000').fontSize(7).font('Helvetica-Bold');
   let hx = 42;
@@ -601,9 +642,9 @@ export async function generateDeaForm222Pdf(data: DeaFormData): Promise<Buffer> 
   doc.text('STRENGTH', hx, headerY, { width: colDef.strength }); hx += colDef.strength;
   doc.text('LOT', hx, headerY, { width: colDef.lot }); hx += colDef.lot;
   doc.text('EXP', hx, headerY, { width: colDef.exp }); hx += colDef.exp;
-  doc.text('QTY', hx, headerY, { width: colDef.qty }); hx += colDef.qty;
-  doc.text('PRICE', hx, headerY, { width: colDef.price }); hx += colDef.price;
-  doc.text('VALUE', hx, headerY, { width: colDef.value });
+  doc.text('PKG SIZE', hx, headerY, { width: colDef.pkgSize }); hx += colDef.pkgSize;
+  doc.text('FULL QTY', hx, headerY, { width: colDef.fullQty }); hx += colDef.fullQty;
+  doc.text('PARTIAL QTY', hx, headerY, { width: colDef.partialQty });
 
   doc.y = headerY + 16;
 
@@ -624,13 +665,23 @@ export async function generateDeaForm222Pdf(data: DeaFormData): Promise<Buffer> 
     let rx = 42;
     doc.text(String(idx + 1), rx, rowY, { width: colDef.line }); rx += colDef.line;
     doc.text(item.ndc || '—', rx, rowY, { width: colDef.ndc }); rx += colDef.ndc;
-    doc.text(productName(item).substring(0, 30), rx, rowY, { width: colDef.name }); rx += colDef.name;
+    doc.text(productName(item).substring(0, 20), rx, rowY, { width: colDef.name }); rx += colDef.name;
     doc.text(item.strength || '—', rx, rowY, { width: colDef.strength }); rx += colDef.strength;
     doc.text(item.lotNumber || '—', rx, rowY, { width: colDef.lot }); rx += colDef.lot;
     doc.text(fmtDate(item.expirationDate), rx, rowY, { width: colDef.exp }); rx += colDef.exp;
-    doc.text(String(item.quantity), rx, rowY, { width: colDef.qty }); rx += colDef.qty;
-    doc.text(fmt$(item.standardPrice), rx, rowY, { width: colDef.price }); rx += colDef.price;
-    doc.text(fmt$(item.estimatedValue), rx, rowY, { width: colDef.value });
+    
+    // Package Size
+    doc.text(item.fullPackageSize ? `${item.fullPackageSize}` : '—', rx, rowY, { width: colDef.pkgSize }); rx += colDef.pkgSize;
+    
+    // Full Qty (show only if not partial)
+    const fullQty = item.isPartial ? '—' : (item.fullPackageQtyReturned ?? item.quantity ?? '—');
+    doc.text(String(fullQty), rx, rowY, { width: colDef.fullQty }); rx += colDef.fullQty;
+    
+    // Partial Qty (show only if partial)
+    const partialQty = item.isPartial 
+      ? (item.partialPercentage ? `${item.quantity || 0} (${item.partialPercentage}%)` : (item.quantity ?? '—'))
+      : '—';
+    doc.text(String(partialQty), rx, rowY, { width: colDef.partialQty });
 
     doc.y = rowY + 13;
   });
@@ -640,9 +691,9 @@ export async function generateDeaForm222Pdf(data: DeaFormData): Promise<Buffer> 
     .moveTo(40, doc.y).lineTo(572, doc.y).stroke();
   doc.moveDown(0.3);
 
-  // Total
+  // Total (removed value since we don't show prices anymore)
   doc.font('Helvetica-Bold').fontSize(9)
-    .text(`TOTAL: ${data.summary.totalCiiItems} Schedule II Items — ${fmt$(data.summary.totalValue)}`, { align: 'right' });
+    .text(`TOTAL: ${data.summary.totalCiiItems} Schedule II Items`, { align: 'right' });
 
   doc.moveDown(1);
 

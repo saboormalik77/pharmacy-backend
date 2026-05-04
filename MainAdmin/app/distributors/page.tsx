@@ -194,7 +194,7 @@ export default function DistributorsPage() {
         <PermissionGate permission="distributors">
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold text-gray-900">Distributors</h1>
+                <h1 className="text-lg font-bold text-gray-900">Distributors</h1>
                 <p className="text-gray-600 mt-1">Manage reverse distributors and their deals</p>
             </div>
 
@@ -256,33 +256,33 @@ export default function DistributorsPage() {
                     </div>
                 ) : (
                     <>
-                        <div className="overflow-x-auto lg:overflow-x-visible">
-                            <table className="w-full table-auto">
-                                <thead className="bg-gray-50 border-b border-gray-200">
+                        <div>
+                            <table className="w-full table-fixed">
+                                <thead className="bg-gradient-to-r from-indigo-500 to-indigo-400">
                                     <tr>
-                                        {/* <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th> */}
-                                        <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[20%]">Company Name</th>
-                                        <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Contact Person</th>
-                                        <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[20%]">Contact Info</th>
-                                        <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[12%]">Location</th>
-                                        <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">Products</th>
-                                        <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Total Deals</th>
-                                        <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Status</th>
-                                        <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[13%]">Actions</th>
+                                        {/* <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider">ID</th> */}
+                                        <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap w-[20%]">Company Name</th>
+                                        <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap w-[13%]">Contact</th>
+                                        <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap w-[20%]">Contact Info</th>
+                                        <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap w-[11%]">Location</th>
+                                        <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap w-[13%]">Products</th>
+                                        <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap w-[9%]">Deals</th>
+                                        <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap w-[7%]">Status</th>
+                                        <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap w-[7%]">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     {distributors.map((distributor) => (
                                         <tr key={distributor.id} className="hover:bg-gray-50 transition-colors">
-                                            {/* <td className="px-2 py-1.5 whitespace-nowrap text-xs font-medium text-gray-900">{distributor.id}</td> */}
-                                            <td className="px-2 py-1.5 text-xs text-gray-900 truncate max-w-[200px]" title={distributor.companyName}>{distributor.companyName}</td>
-                                            <td className="px-2 py-1.5 whitespace-nowrap text-xs text-gray-600 truncate max-w-[150px]" title={distributor.contactPerson}>{distributor.contactPerson}</td>
-                                            <td className="px-2 py-1.5 text-xs text-gray-600">
+                                            {/* <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{distributor.id}</td> */}
+                                            <td className="px-4 py-3 text-sm text-gray-900 truncate max-w-[200px]" title={distributor.companyName}>{distributor.companyName}</td>
+                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 truncate max-w-[150px]" title={distributor.contactPerson}>{distributor.contactPerson}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-600">
                                                 <div className="leading-tight truncate max-w-[200px]" title={distributor.email}>{distributor.email}</div>
                                                 <div className="text-gray-500 text-xs leading-tight truncate max-w-[200px]" title={distributor.phone}>{distributor.phone}</div>
                                             </td>
-                                            <td className="px-2 py-1.5 whitespace-nowrap text-xs text-gray-600">{distributor.city}, {distributor.state}</td>
-                                            <td className="px-2 py-1.5 text-xs text-gray-600">
+                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{distributor.city}, {distributor.state}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-600">
                                                 <button
                                                     onClick={() => router.push(`/distributors/${distributor.id}/products`)}
                                                     className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-medium"
@@ -290,11 +290,11 @@ export default function DistributorsPage() {
                                                     {distributor?.uniqueProductsCount ?? 0}
                                                 </button>
                                             </td> 
-                                            <td className="px-2 py-1.5 whitespace-nowrap text-xs text-gray-900 text-center">{distributor.totalDeals ?? 0}</td>
-                                            <td className="px-2 py-1.5 whitespace-nowrap">
+                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-center">{distributor.totalDeals ?? 0}</td>
+                                            <td className="px-4 py-3 whitespace-nowrap">
                                                 <Badge variant={getStatusVariant(distributor.status)}>{distributor.status}</Badge>
                                             </td>
-                                            <td className="px-2 py-1.5 whitespace-nowrap text-xs">
+                                            <td className="px-4 py-3 whitespace-nowrap text-sm">
                                                 <div className="flex items-center gap-1 justify-center">
                                                     <button
                                                         onClick={() => setViewModal(distributor)}

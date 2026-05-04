@@ -1,0 +1,36 @@
+# Backend src-specific ignores
+
+# Logs
+*.log
+
+# Environment files
+.env*
+!.env.example
+
+# TypeScript build info
+*.tsbuildinfo
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Media files (not needed for code context)
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+*.webp
+*.pdf
+*.mp4
+*.avi
+*.mov
+
+# Temporary files
+*.tmp
+*.temp

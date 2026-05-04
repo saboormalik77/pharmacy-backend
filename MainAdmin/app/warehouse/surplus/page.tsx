@@ -140,37 +140,37 @@ export default function WarehouseSurplusPage() {
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
-                                        <tr className="bg-gray-50 border-b border-gray-200">
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Product</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">NDC</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Lot</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Qty</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Location</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Condition</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Status</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">From Return</th>
-                                            <th className="text-left text-[10px] font-semibold text-gray-500 uppercase px-3 py-1.5">Added</th>
+                                        <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Product</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">NDC</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Lot</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Qty</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Location</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Condition</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Status</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">From Return</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Added</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
                                         {allSurplus.map(item => (
-                                            <tr key={item.id} className="hover:bg-gray-50">
-                                                <td className="px-3 py-2 text-xs font-medium text-gray-900">{item.productName || '—'}</td>
-                                                <td className="px-3 py-2 text-[11px] font-mono text-gray-600">{item.ndc || '—'}</td>
-                                                <td className="px-3 py-2 text-[11px] text-gray-600">{item.lotNumber || '—'}</td>
-                                                <td className="px-3 py-2 text-xs font-medium">{item.quantity}</td>
-                                                <td className="px-3 py-2 text-[11px] text-gray-600">{item.warehouseLocation}</td>
-                                                <td className="px-3 py-2">
+                                            <tr key={item.id} className="odd:bg-white even:bg-gray-50/40 hover:bg-gray-50">
+                                                <td className="px-4 py-3 text-sm font-medium text-gray-900">{item.productName || '—'}</td>
+                                                <td className="px-4 py-3 text-sm font-mono text-gray-600">{item.ndc || '—'}</td>
+                                                <td className="px-4 py-3 text-sm text-gray-600">{item.lotNumber || '—'}</td>
+                                                <td className="px-4 py-3 text-sm font-medium">{item.quantity}</td>
+                                                <td className="px-4 py-3 text-sm text-gray-600">{item.warehouseLocation}</td>
+                                                <td className="px-4 py-3">
                                                     <Badge className={`text-[10px] ${conditionBadge(item.condition)}`}>{item.condition}</Badge>
                                                 </td>
-                                                <td className="px-3 py-2">
+                                                <td className="px-4 py-3">
                                                     <Badge className={`text-[10px] border ${statusBadge(item.status)}`}>{item.status?.replace(/_/g, ' ')}</Badge>
                                                 </td>
-                                                <td className="px-3 py-2">
-                                                    <div className="text-[11px] text-gray-700">{item.licensePlate || '—'}</div>
+                                                <td className="px-4 py-3">
+                                                    <div className="text-sm text-gray-700">{item.licensePlate || '—'}</div>
                                                     {item.pharmacyName && <div className="text-[10px] text-gray-400">{item.pharmacyName}</div>}
                                                 </td>
-                                                <td className="px-3 py-2 text-[11px] text-gray-500">{item.createdAt ? formatDate(item.createdAt) : '—'}</td>
+                                                <td className="px-4 py-3 text-sm text-gray-500">{item.createdAt ? formatDate(item.createdAt) : '—'}</td>
                                             </tr>
                                         ))}
                                     </tbody>

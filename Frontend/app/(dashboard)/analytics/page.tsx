@@ -711,26 +711,26 @@ export default function AnalyticsPage() {
 
                         {/* Products Table */}
                         <div className="mt-6 overflow-x-auto">
-                          <table className="w-full">
-                            <thead className="bg-gray-50 border-b">
-                              <tr>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">NDC</th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Manufacturer</th>
-                                <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Qty</th>
-                                <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Value</th>
-                                <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Returns</th>
+                          <table className="w-full table-auto">
+                            <thead>
+                              <tr className="bg-gradient-to-r from-teal-600 to-teal-700 border-b-2 border-teal-800">
+                                <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Product</th>
+                                <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">NDC</th>
+                                <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Manufacturer</th>
+                                <th className="text-right px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Qty</th>
+                                <th className="text-right px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Value</th>
+                                <th className="text-right px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Returns</th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y">
+                            <tbody>
                               {data.topProducts.map((product, idx) => (
-                                <tr key={idx} className="hover:bg-gray-50">
-                                  <td className="px-4 py-3 text-sm font-medium">{product.productName}</td>
-                                  <td className="px-4 py-3 text-sm font-mono text-gray-600">{product.ndc}</td>
-                                  <td className="px-4 py-3 text-sm text-gray-600">{product.manufacturer}</td>
-                                  <td className="px-4 py-3 text-sm text-right">{product.totalQuantity}</td>
-                                  <td className="px-4 py-3 text-sm text-right font-semibold text-green-600">{formatCurrency(product.totalValue)}</td>
-                                  <td className="px-4 py-3 text-sm text-right">{product.returnCount}</td>
+                                <tr key={idx} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-teal-50/40'} hover:bg-teal-50 transition-colors border-b border-gray-100`}>
+                                  <td className="px-4 py-3"><span className="text-sm text-gray-900 font-medium">{product.productName}</span></td>
+                                  <td className="px-4 py-3"><span className="text-sm text-gray-600 font-mono">{product.ndc}</span></td>
+                                  <td className="px-4 py-3"><span className="text-sm text-gray-600">{product.manufacturer}</span></td>
+                                  <td className="px-4 py-3 text-right"><span className="text-sm text-gray-900">{product.totalQuantity}</span></td>
+                                  <td className="px-4 py-3 text-right"><span className="text-sm text-gray-900 font-semibold text-green-600">{formatCurrency(product.totalValue)}</span></td>
+                                  <td className="px-4 py-3 text-right"><span className="text-sm text-gray-900">{product.returnCount}</span></td>
                                 </tr>
                               ))}
                             </tbody>

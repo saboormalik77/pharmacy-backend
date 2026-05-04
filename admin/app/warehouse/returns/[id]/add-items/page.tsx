@@ -16,13 +16,15 @@ import {
     fetchReturnTransactionById,
     scanBarcode,
     addTransactionItem,
-    addToWineCellarDirect,
     deleteTransactionItem,
     fetchTransactionItems,
 } from '@/lib/store/returnTransactionsSlice';
-import { checkReturnability } from '@/lib/store/policiesSlice';
 import { BarcodeScanResponse, ReturnabilityCheckResult, ReturnTransactionItem } from '@/lib/types';
 import { apiClient } from '@/lib/api/apiClient';
+import {
+    NON_RETURNABLE_REASONS,
+    isValidNonReturnableReason,
+} from '@/lib/constants/nonReturnableReasons';
 
 // Dynamically imported so it only loads in the browser (uses WebRTC APIs)
 const QrScannerModal = dynamic(() => import('@/components/scanner/QrScannerModal'), { ssr: false });
@@ -34,6 +36,10 @@ const RETURN_REASONS = [
     'Discontinued', 'Wrong product', 'Formulary change', 'Other',
 ];
 
+const DEA_SCHEDULE_OPTIONS = [
+    '', 'CI', 'CII', 'CIII', 'CIV', 'CV', 'Non-Controlled'
+];
+
 const EMPTY_FORM = {
     ndc: '', ndc10: '', gtin: '', proprietaryName: '', genericName: '',
     manufacturer: '', packageDescription: '', dosageForm: '',
@@ -42,6 +48,7 @@ const EMPTY_FORM = {
     standardPrice: '', fullPackageSize: '',
     fullPackageQtyReturned: '', qtyMode: 'units' as 'units' | 'percent',
     returnStatus: 'tbd' as 'returnable' | 'non_returnable' | 'tbd',
+    nonReturnableReason: '',
     deaSchedule: '', productType: '',
     returnReason: '', memo: '',
     scanSource: 'manual' as string,
@@ -102,6 +109,8 @@ export default function AddItemsPage() {
     const [policyModalOpen, setPolicyModalOpen] = useState(false);
     // Field-level validation errors
     const [formErrors, setFormErrors] = useState<Set<string>>(new Set());
+    // Track which fields came from QR scan (these should be uneditable)
+    const [scannedFields, setScannedFields] = useState<Set<string>>(new Set());
     // Expected returnable date for manual wine cellar move
     const [wineCellarDate, setWineCellarDate] = useState('');
     const [nonReturnableRoute, setNonReturnableRoute] = useState<'wine_cellar' | 'destruction'>('destruction');
@@ -196,101 +205,17 @@ export default function AddItemsPage() {
         return units < pkgSize;
     }, [form.fullPackageSize, form.fullPackageQtyReturned, form.qtyMode]);
 
-    const performPolicyCheck = useCallback(
-        async (ndc: string, expirationDate: string, dosageForm?: string, isPartial?: boolean) => {
-            // Debug logging for processor side
-            console.log('🔍 Processor Policy Check:', {
-                ndc,
-                expirationDate,
-                dosageForm,
-                isPartial,
-                formState: {
-                    fullPackageSize: form.fullPackageSize,
-                    fullPackageQtyReturned: form.fullPackageQtyReturned,
-                    qtyMode: form.qtyMode
-                }
-            });
-            
-            const checkResult = await dispatch(checkReturnability({ ndc, expirationDate, dosageForm, isPartial }));
-            if (checkReturnability.fulfilled.match(checkResult) && checkResult.payload) {
-                const policy = checkResult.payload;
-                setPolicyAutoCheck(policy);
-                if (policy.status === 'returnable' || policy.status === 'non_returnable') {
-                    setForm(prev => ({ ...prev, returnStatus: policy.status as 'returnable' | 'non_returnable' }));
-                }
-                if (policy.expectedReturnableDate) {
-                    setPreCheckResult(policy);
-                } else {
-                    setPreCheckResult(null);
-                }
-                return policy;
-            }
-            setPreCheckResult(null);
-            return null;
-        },
-        [dispatch]
-    );
-
-    /** Re-run policy (manual button / save path). Clears sync key so next effect run can still dedupe. */
-    const runPolicyCheck = async (ndc: string, expirationDate: string, dosageForm?: string) => {
+    /*
+     * Policy checks are intentionally disabled on processor add-items flow.
+     * Warehouse verification in MainAdmin now owns policy/wine-cellar/destruction routing.
+     */
+    const runPolicyCheck = async (_ndc: string, _expirationDate: string, _dosageForm?: string) => {
+        setIsPolicyChecking(false);
+        setPolicyAutoCheck(null);
+        setPreCheckResult(null);
         policySyncKeyRef.current = '';
-        setIsPolicyChecking(true);
-        setPolicyAutoCheck(null);
-        setPreCheckResult(null);
-        const partial = deriveIsPartial();
-        const reqId = ++policyCheckRequestIdRef.current;
-        try {
-            const policy = await performPolicyCheck(ndc, expirationDate, dosageForm, partial);
-            if (reqId !== policyCheckRequestIdRef.current) return policy;
-            if (policy) {
-                policySyncKeyRef.current = `${ndc}|${expirationDate}|${dosageForm || ''}|${partial}`;
-            }
-            return policy;
-        } finally {
-            if (reqId === policyCheckRequestIdRef.current) {
-                setIsPolicyChecking(false);
-            }
-        }
+        return null;
     };
-
-    // When NDC, expiration, or dosage form changes (e.g. user edits expiry after scan), re-check policy
-    useEffect(() => {
-        const ndc = form.ndc.trim();
-        const exp = form.expirationDate.trim();
-        const dosage = (form.dosageForm || '').trim();
-        const partial = deriveIsPartial();
-        if (!ndc || !exp) {
-            policySyncKeyRef.current = '';
-            setPolicyAutoCheck(null);
-            setPreCheckResult(null);
-            return;
-        }
-        const key = `${ndc}|${exp}|${dosage}|${partial}`;
-        if (key === policySyncKeyRef.current) {
-            return;
-        }
-
-        const reqId = ++policyCheckRequestIdRef.current;
-        setIsPolicyChecking(true);
-        setPolicyAutoCheck(null);
-        setPreCheckResult(null);
-
-        (async () => {
-            try {
-                const policy = await performPolicyCheck(ndc, exp, dosage || undefined, partial);
-                if (reqId !== policyCheckRequestIdRef.current) return;
-                if (policy) {
-                    policySyncKeyRef.current = key;
-                } else {
-                    policySyncKeyRef.current = '';
-                }
-            } finally {
-                if (reqId === policyCheckRequestIdRef.current) {
-                    setIsPolicyChecking(false);
-                }
-            }
-        })();
-    }, [form.ndc, form.expirationDate, form.dosageForm, form.fullPackageQtyReturned, form.fullPackageSize, form.qtyMode, deriveIsPartial, performPolicyCheck]);
 
     const handleScan = async (raw: string) => {
         if (!raw.trim()) return;
@@ -344,6 +269,7 @@ export default function AddItemsPage() {
                 fullPackageQtyReturned: '',
                 qtyMode: 'units',
                 returnStatus: 'tbd',
+                nonReturnableReason: '',
                 deaSchedule: af.deaSchedule || '',
                 productType: af.productType || '',
                 returnReason: '',
@@ -368,6 +294,26 @@ export default function AddItemsPage() {
             }
 
             setForm(newForm);
+
+            // Track which fields came from QR scan to make them uneditable
+            const fieldsFromScan = new Set<string>();
+            if (af.ndc) fieldsFromScan.add('ndc');
+            if (af.ndc10) fieldsFromScan.add('ndc10');
+            if (af.gtin) fieldsFromScan.add('gtin');
+            if (af.proprietaryName) fieldsFromScan.add('proprietaryName');
+            if (af.genericName) fieldsFromScan.add('genericName');
+            if (af.manufacturer) fieldsFromScan.add('manufacturer');
+            if (af.packageDescription) fieldsFromScan.add('packageDescription');
+            if (af.dosageForm) fieldsFromScan.add('dosageForm');
+            if (af.strength) { fieldsFromScan.add('strengthValue'); fieldsFromScan.add('strengthUnit'); }
+            if (af.route) fieldsFromScan.add('route');
+            if (af.lotNumber) fieldsFromScan.add('lotNumber');
+            if (af.serialNumber) fieldsFromScan.add('serialNumber');
+            if (af.expirationDate) fieldsFromScan.add('expirationDate');
+            if (af.fullPackageSize) fieldsFromScan.add('fullPackageSize');
+            if (af.deaSchedule) fieldsFromScan.add('deaSchedule');
+            if (af.productType) fieldsFromScan.add('productType');
+            setScannedFields(fieldsFromScan);
 
             if (!data.product) {
                 setScanError('Barcode parsed but product not found in database. Fields partially filled — please complete manually.');
@@ -451,7 +397,7 @@ export default function AddItemsPage() {
 
     // ── Save item ──────────────────────────────────────────────
 
-    const handleSave = async (skipWineCellarCheck = false) => {
+    const handleSave = async (_skipWineCellarCheck = false) => {
         if (!validateForm()) return;
         
         // Check if return is locked
@@ -459,28 +405,27 @@ export default function AddItemsPage() {
             return;
         }
 
-        // Before saving: check if the product is too early to return (wine cellar).
-        // If so, intercept and show wine cellar confirmation buttons.
-        if (!skipWineCellarCheck) {
-            // If wine cellar was already detected at scan time, just show buttons
-            if (preCheckResult?.expectedReturnableDate) {
-                return;
-            }
-            // If policy check ran but didn't flag wine cellar, skip re-check
-            // If not yet checked (manual entry without scan), run now
-            if (!policyAutoCheck && form.ndc && form.expirationDate) {
-                setIsPreChecking(true);
-                const policy = await runPolicyCheck(form.ndc, form.expirationDate, form.dosageForm || undefined);
-                setIsPreChecking(false);
-                if (policy?.expectedReturnableDate) {
-                    return; // runPolicyCheck already set preCheckResult
-                }
-            }
+        // FCR-52: Reason is required when explicitly adding as non_returnable
+        if (form.returnStatus === 'non_returnable' && !isValidNonReturnableReason(form.nonReturnableReason)) {
+            showToast('Please select a non-returnable reason for this item.', 'error');
+            return;
         }
 
         // ── Compute quantity / partial from the new Qty Returned field ──
         const pkgSize = parseFloat(form.fullPackageSize) || 0;
         const qtyInput = parseFloat(form.fullPackageQtyReturned) || 0;
+
+        // Validate quantity does not exceed full package size
+        if (pkgSize > 0 && form.fullPackageQtyReturned.trim() && qtyInput > 0) {
+            if (form.qtyMode === 'units' && qtyInput > pkgSize) {
+                showToast(`Quantity returned (${qtyInput}) cannot exceed full package size (${pkgSize})`, 'error');
+                return;
+            }
+            if (form.qtyMode === 'percent' && qtyInput > 100) {
+                showToast('Percentage returned cannot exceed 100%', 'error');
+                return;
+            }
+        }
 
         let payloadQuantity = 1;
         let payloadIsPartial = false;
@@ -534,40 +479,28 @@ export default function AddItemsPage() {
         payload.isPartial = payloadIsPartial;
         if (payloadIsPartial && payloadPartialPercentage != null) payload.partialPercentage = payloadPartialPercentage;
         payload.returnStatus = form.returnStatus;
+        if (form.returnStatus === 'non_returnable' && form.nonReturnableReason) {
+            payload.nonReturnableReason = form.nonReturnableReason;
+        }
         if (form.returnReason) payload.returnReason = form.returnReason;
         if (form.deaSchedule) payload.deaSchedule = form.deaSchedule;
+        // Automatically set deaForm222Required for Schedule II items
+        if (form.deaSchedule === 'CII') payload.deaForm222Required = true;
         if (form.productType) payload.productType = form.productType;
         if (form.memo) payload.memo = form.memo;
         payload.scanSource = form.scanSource;
         if (form.rawScanData) payload.rawScanData = form.rawScanData;
-        const destinationToUse = policyAutoCheck?.destination || manualDestination;
-        if (form.returnStatus === 'returnable' && destinationToUse) {
-            payload.destination = destinationToUse;
-        }
-        if (form.returnStatus === 'non_returnable' && nonReturnableRoute === 'destruction') {
-            payload.destination = 'destruction';
-        }
 
         const result = await dispatch(addTransactionItem({ transactionId, payload }));
 
         if (addTransactionItem.fulfilled.match(result)) {
             const name = form.proprietaryName || form.ndc || 'Item';
             const savedItem = result.payload.item;
-            const pc = result.payload.policyCheck;
-            const wcItem = result.payload.wineCellarItem;
-            const wcOnly = result.payload.wineCellarOnly === true;
-
             if (savedItem) {
                 setActiveTab('list');
             }
 
-            if (wcOnly && wcItem) {
-                showToast(`${name} shelved in Wine Cellar only (not on this return). Eligible ${pc?.expectedReturnableDate || 'later'}.`);
-            } else if (wcItem) {
-                showToast(`${name} saved & moved to Wine Cellar! Will be returnable ${pc?.expectedReturnableDate || 'later'}.`);
-            } else {
-                showToast(`${name} saved! Ready for next scan.`);
-            }
+            showToast(`${name} saved! Ready for next scan.`);
 
             if (result.payload.warning) {
                 setLastWarning(result.payload.warning);
@@ -578,12 +511,13 @@ export default function AddItemsPage() {
             setLastClassification({
                 item: name,
                 status: savedItem?.returnStatus || form.returnStatus,
-                policyCheck: pc,
-                wineCellarItem: wcItem ?? undefined,
+                policyCheck: undefined,
+                wineCellarItem: undefined,
             });
 
             setForm({ ...EMPTY_FORM });
             setFormErrors(new Set());
+            setScannedFields(new Set());
             setManualDestination('');
             setNonReturnableRoute('destruction');
             setScannedPrices(null);
@@ -603,73 +537,13 @@ export default function AddItemsPage() {
     // Calls POST /api/admin/wine-cellar directly — does NOT touch return items table.
 
     const handleMoveToWineCellarManual = async () => {
-        if (!validateForm()) return;
-        if (!wineCellarDate) {
-            showToast('Please enter the Expected Returnable Date before moving to Wine Cellar.', 'error');
-            return;
-        }
-
-        const pkgSize = parseFloat(form.fullPackageSize) || 0;
-        const qtyInput = parseFloat(form.fullPackageQtyReturned) || 0;
-        let wcQty = 1;
-        let wcIsPartial = false;
-        let wcPartialPct: number | null = null;
-        if (form.fullPackageQtyReturned.trim() && qtyInput > 0 && pkgSize > 0) {
-            const units = form.qtyMode === 'units' ? qtyInput : (qtyInput / 100) * pkgSize;
-            const pct = form.qtyMode === 'units' ? (qtyInput / pkgSize) * 100 : qtyInput;
-            if (units < pkgSize && pct < 100) { wcIsPartial = true; wcPartialPct = Math.min(100, Math.max(1, pct)); }
-        } else if (form.fullPackageQtyReturned.trim() && qtyInput > 0) {
-            wcQty = Math.round(qtyInput) || 1;
-        }
-
-        const payload: Record<string, any> = {
-            pharmacyId: tx!.pharmacyId,
-            expectedReturnableDate: wineCellarDate,
-            notes: form.memo || 'Manually moved — no return policy found',
-            quantity: wcQty,
-            isPartial: wcIsPartial,
-        };
-        if (form.ndc) payload.ndc = form.ndc;
-        if (form.ndc10) payload.ndc10 = form.ndc10;
-        if (form.proprietaryName || form.genericName)
-            payload.productName = form.proprietaryName || form.genericName;
-        if (form.manufacturer) payload.manufacturer = form.manufacturer;
-        if (form.lotNumber) payload.lotNumber = form.lotNumber;
-        if (form.serialNumber) payload.serialNumber = form.serialNumber;
-        if (form.expirationDate) payload.expirationDate = form.expirationDate;
-        if (form.standardPrice) payload.standardPrice = parseFloat(form.standardPrice);
-        if (form.fullPackageSize) payload.fullPackageSize = parseInt(form.fullPackageSize);
-        if (wcIsPartial && wcPartialPct != null) payload.partialPercentage = wcPartialPct;
-
-        const result = await dispatch(addToWineCellarDirect(payload));
-        const name = form.proprietaryName || form.ndc || 'Item';
-
-        if (addToWineCellarDirect.fulfilled.match(result)) {
-            showToast(`${name} moved to Wine Cellar. Expected return: ${wineCellarDate}.`);
-            setLastClassification({ item: name, status: 'non_returnable', policyCheck: undefined, wineCellarItem: result.payload });
-        } else {
-            showToast(friendlyError(result.payload as string), 'error');
-            return;
-        }
-
-        setForm({ ...EMPTY_FORM });
-        setFormErrors(new Set());
-        setWineCellarDate('');
-        setManualDestination('');
-        setNonReturnableRoute('destruction');
-        setScannedPrices(null);
-        setScanError('');
-        setScanInput('');
-        setPreCheckResult(null);
-        setPolicyAutoCheck(null);
-        setIsPolicyChecking(false);
-        setPolicyModalOpen(false);
-        if (mode === 'usb') scanInputRef.current?.focus();
+        showToast('Wine cellar routing is now handled by warehouse verification.', 'warning');
     };
 
     const handleClearForm = () => {
         setForm({ ...EMPTY_FORM });
         setFormErrors(new Set());
+        setScannedFields(new Set());
         setWineCellarDate('');
         setManualDestination('');
         setNonReturnableRoute('destruction');
@@ -928,7 +802,7 @@ export default function AddItemsPage() {
                                 className={`w-full pl-8 pr-8 py-2 text-xs border-2 rounded focus:outline-none focus:ring-2 ${
                                     !canEdit 
                                         ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed' 
-                                        : 'border-primary-300 bg-primary-50 focus:ring-primary-500 focus:border-primary-500'
+                                        : 'border-primary-300 bg-primary-50 focus:ring-slate-500 focus:border-primary-500'
                                 }`}
                                 autoFocus={canEdit}
                             />
@@ -956,7 +830,7 @@ export default function AddItemsPage() {
                                 className={`flex-1 px-2.5 py-1.5 text-xs border rounded focus:outline-none focus:ring-1 ${
                                     !canEdit 
                                         ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed' 
-                                        : 'border-gray-300 focus:ring-primary-500'
+                                        : 'border-gray-300 focus:ring-slate-500'
                                 }`}
                                 autoFocus={canEdit}
                             />
@@ -964,7 +838,7 @@ export default function AddItemsPage() {
                                 if (checkActionAllowed('lookup NDC')) {
                                     handleManualLookup();
                                 }
-                            }} disabled={isScanLoading || !manualNdc.trim() || !canEdit} className="px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                            }} disabled={isScanLoading || !manualNdc.trim() || !canEdit} className="px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">
                                 {isScanLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Lookup'}
                             </button>
                         </div>
@@ -1022,30 +896,7 @@ export default function AddItemsPage() {
                                 {lastClassification.wineCellarItem && (
                                     <div className="mt-0.5 text-[10px] space-y-0.5 text-purple-700">
                                         <p className="font-medium">✓ Shelved in Wine Cellar</p>
-                                        {lastClassification.policyCheck?.expectedReturnableDate && (
-                                            <p>Returnable from: <span className="font-semibold">{lastClassification.policyCheck.expectedReturnableDate}</span></p>
-                                        )}
                                     </div>
-                                )}
-                                {!lastClassification.wineCellarItem && lastClassification.policyCheck && (
-                                    <div className="mt-0.5 text-[10px] space-y-0.5">
-                                        {lastClassification.policyCheck.destination && (
-                                            <p className={lastClassification.status === 'returnable' ? 'text-green-700' : 'text-gray-600'}>
-                                                Destination: <span className="font-semibold capitalize">{lastClassification.policyCheck.destination}</span>
-                                            </p>
-                                        )}
-                                        {lastClassification.policyCheck.reason && lastClassification.status !== 'returnable' && (
-                                            <p className={lastClassification.status === 'non_returnable' ? 'text-red-700' : 'text-yellow-700'}>
-                                                Reason: {lastClassification.policyCheck.reason.replace(/_/g, ' ')}
-                                            </p>
-                                        )}
-                                        {lastClassification.policyCheck.manufacturerName && (
-                                            <p className="text-gray-500">Policy: {lastClassification.policyCheck.manufacturerName}</p>
-                                        )}
-                                    </div>
-                                )}
-                                {!lastClassification.policyCheck && lastClassification.status === 'tbd' && (
-                                    <p className="text-[10px] text-yellow-700 mt-0.5">No policy data. Needs manual research.</p>
                                 )}
                             </div>
                         </div>
@@ -1061,38 +912,88 @@ export default function AddItemsPage() {
                 <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Product Information</h2>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-                    <Field label="NDC" value={form.ndc} onChange={v => updateField('ndc', v)} placeholder="e.g. 43547-3250-06" required hasError={formErrors.has('ndc')} />
-                    <Field label="Proprietary Name" value={form.proprietaryName} onChange={v => updateField('proprietaryName', v)} placeholder="Brand name" required hasError={formErrors.has('proprietaryName')} />
-                    <Field label="Generic Name" value={form.genericName} onChange={v => updateField('genericName', v)} placeholder="Generic name" hasError={formErrors.has('genericName')} />
-                    <Field label="Manufacturer" value={form.manufacturer} onChange={v => updateField('manufacturer', v)} placeholder="Manufacturer" required hasError={formErrors.has('manufacturer')} />
-                    <Field label="Package Description" value={form.packageDescription} onChange={v => updateField('packageDescription', v)} placeholder="e.g. 60 TABLET in BOTTLE" />
-                    <Field label="Dosage Form" value={form.dosageForm} onChange={v => updateField('dosageForm', v)} placeholder="e.g. TABLET" />
+                    <Field label="NDC" value={form.ndc} onChange={v => updateField('ndc', v)} placeholder="e.g. 43547-3250-06" required hasError={formErrors.has('ndc')} readOnly={scannedFields.has('ndc')} />
+                    <Field label="Proprietary Name" value={form.proprietaryName} onChange={v => updateField('proprietaryName', v)} placeholder="Brand name" required hasError={formErrors.has('proprietaryName')} readOnly={scannedFields.has('proprietaryName')} />
+                    <Field label="Generic Name" value={form.genericName} onChange={v => updateField('genericName', v)} placeholder="Generic name" hasError={formErrors.has('genericName')} readOnly={scannedFields.has('genericName')} />
+                    <Field label="Manufacturer" value={form.manufacturer} onChange={v => updateField('manufacturer', v)} placeholder="Manufacturer" required hasError={formErrors.has('manufacturer')} readOnly={scannedFields.has('manufacturer')} />
+                    <Field label="Package Description" value={form.packageDescription} onChange={v => updateField('packageDescription', v)} placeholder="e.g. 60 TABLET in BOTTLE" readOnly={scannedFields.has('packageDescription')} />
+                    <Field label="Dosage Form" value={form.dosageForm} onChange={v => updateField('dosageForm', v)} placeholder="e.g. TABLET" readOnly={scannedFields.has('dosageForm')} />
 
                     {/* Strength */}
                     <div>
-                        <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Strength</label>
+                        <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
+                            Strength
+                            {(scannedFields.has('strengthValue') || scannedFields.has('strengthUnit')) && <span className="text-gray-400 ml-1 text-[9px]">(scanned)</span>}
+                        </label>
                         <div className="flex gap-1">
-                            <input type="text" value={form.strengthValue} onChange={e => updateField('strengthValue', e.target.value)} placeholder="500" className="w-1/2 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
-                            <input type="text" value={form.strengthUnit} onChange={e => updateField('strengthUnit', e.target.value)} placeholder="mg" className="w-1/2 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                            <input 
+                                type="text" 
+                                value={form.strengthValue} 
+                                onChange={e => !scannedFields.has('strengthValue') && updateField('strengthValue', e.target.value)} 
+                                placeholder="500" 
+                                readOnly={scannedFields.has('strengthValue')}
+                                className={`w-1/2 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
+                                    scannedFields.has('strengthValue') 
+                                        ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed' 
+                                        : 'border-gray-300 focus:ring-slate-500'
+                                }`} 
+                            />
+                            <input 
+                                type="text" 
+                                value={form.strengthUnit} 
+                                onChange={e => !scannedFields.has('strengthUnit') && updateField('strengthUnit', e.target.value)} 
+                                placeholder="mg" 
+                                readOnly={scannedFields.has('strengthUnit')}
+                                className={`w-1/2 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
+                                    scannedFields.has('strengthUnit') 
+                                        ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed' 
+                                        : 'border-gray-300 focus:ring-slate-500'
+                                }`} 
+                            />
                         </div>
                     </div>
 
-                    <Field label="Route" value={form.route} onChange={v => updateField('route', v)} placeholder="e.g. ORAL" />
-                    <Field label="DEA Schedule" value={form.deaSchedule} onChange={v => updateField('deaSchedule', v)} placeholder="e.g. CII" />
-                    <Field label="Lot Number" value={form.lotNumber} onChange={v => updateField('lotNumber', v)} placeholder="Lot #" required hasError={formErrors.has('lotNumber')} />
-                    <Field label="Serial Number" value={form.serialNumber} onChange={v => updateField('serialNumber', v)} placeholder="Serial #" />
+                    <Field label="Route" value={form.route} onChange={v => updateField('route', v)} placeholder="e.g. ORAL" readOnly={scannedFields.has('route')} />
+                            <div>
+                                <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
+                                    DEA Schedule
+                                    {scannedFields.has('deaSchedule') && <span className="text-gray-400 ml-1 text-[9px]">(scanned)</span>}
+                                </label>
+                                <select
+                                    value={form.deaSchedule}
+                                    onChange={e => !scannedFields.has('deaSchedule') && updateField('deaSchedule', e.target.value)}
+                                    disabled={scannedFields.has('deaSchedule')}
+                                    className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
+                                        scannedFields.has('deaSchedule')
+                                            ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed'
+                                            : 'border-gray-300 focus:ring-slate-500'
+                                    }`}
+                                >
+                                    {DEA_SCHEDULE_OPTIONS.map(option => (
+                                        <option key={option} value={option}>
+                                            {option || '— Select DEA Schedule —'}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                    <Field label="Lot Number" value={form.lotNumber} onChange={v => updateField('lotNumber', v)} placeholder="Lot #" required hasError={formErrors.has('lotNumber')} readOnly={scannedFields.has('lotNumber')} />
+                    <Field label="Serial Number" value={form.serialNumber} onChange={v => updateField('serialNumber', v)} placeholder="Serial #" readOnly={scannedFields.has('serialNumber')} />
                     <div>
                         <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
                             Expiration Date<span className="text-red-500 ml-0.5">*</span>
+                            {scannedFields.has('expirationDate') && <span className="text-gray-400 ml-1 text-[9px]">(scanned)</span>}
                         </label>
                         <input
                             type="date"
                             value={form.expirationDate}
-                            onChange={e => { updateField('expirationDate', e.target.value); }}
+                            onChange={e => { if (!scannedFields.has('expirationDate')) updateField('expirationDate', e.target.value); }}
+                            readOnly={scannedFields.has('expirationDate')}
                             className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
                                 formErrors.has('expirationDate')
                                     ? 'border-red-400 bg-red-50 focus:ring-red-400'
-                                    : 'border-gray-300 focus:ring-primary-500'
+                                    : scannedFields.has('expirationDate')
+                                    ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed'
+                                    : 'border-gray-300 focus:ring-slate-500'
                             }`}
                         />
                         {formErrors.has('expirationDate') && <p className="text-[10px] text-red-500 mt-0.5">Required</p>}
@@ -1118,26 +1019,70 @@ export default function AddItemsPage() {
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                             {/* <div>
                                 <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Price ($)</label>
-                                <input type="number" step="0.01" min="0" value={form.standardPrice} onChange={e => updateField('standardPrice', e.target.value)} placeholder="0.00" className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                <input type="number" step="0.01" min="0" value={form.standardPrice} onChange={e => updateField('standardPrice', e.target.value)} placeholder="0.00" className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500" />
                             </div> */}
                             <div>
-                                <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Pkg Size</label>
-                                <input type="number" min="1" value={form.fullPackageSize} onChange={e => updateField('fullPackageSize', e.target.value)} placeholder="e.g. 60" className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
+                                    Pkg Size
+                                    {scannedFields.has('fullPackageSize') && <span className="text-gray-400 ml-1 text-[9px]">(scanned)</span>}
+                                </label>
+                                <input 
+                                    type="number" 
+                                    min="1" 
+                                    value={form.fullPackageSize} 
+                                    onChange={e => !scannedFields.has('fullPackageSize') && updateField('fullPackageSize', e.target.value)} 
+                                    placeholder="e.g. 60" 
+                                    readOnly={scannedFields.has('fullPackageSize')}
+                                    className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
+                                        scannedFields.has('fullPackageSize')
+                                            ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed'
+                                            : 'border-gray-300 focus:ring-slate-500'
+                                    }`} 
+                                />
                             </div>
                             <div>
                                 <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
                                     Qty Returned <span className="text-gray-400">({form.qtyMode === 'units' ? 'units' : '%'})</span>
                                 </label>
                                 <div className="flex gap-1">
-                                    <input type="number" min="0" step="any" value={form.fullPackageQtyReturned} onChange={e => updateField('fullPackageQtyReturned', e.target.value)} placeholder={form.qtyMode === 'units' ? '45' : '75'} className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                    <input 
+                                        type="number" 
+                                        min="0" 
+                                        step="any" 
+                                        value={form.fullPackageQtyReturned} 
+                                        onChange={e => {
+                                            const value = e.target.value;
+                                            const numValue = parseFloat(value);
+                                            const maxAllowed = form.qtyMode === 'units' ? pkgSize : 100;
+                                            
+                                            // Allow empty value or values within limits
+                                            if (value === '' || (numValue >= 0 && numValue <= maxAllowed)) {
+                                                updateField('fullPackageQtyReturned', value);
+                                            }
+                                        }}
+                                        placeholder={form.qtyMode === 'units' ? '45' : '75'} 
+                                        className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500" 
+                                    />
                                     <button type="button" onClick={() => updateField('qtyMode', form.qtyMode === 'units' ? 'percent' : 'units')} className="px-1.5 text-[10px] font-semibold rounded border border-gray-300 bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors" title="Toggle units/percent">
                                         {form.qtyMode === 'units' ? '#' : '%'}
                                     </button>
                                 </div>
                                 {form.fullPackageQtyReturned.trim() && qtyNum > 0 && pkgSize > 0 && (
-                                    <p className="text-[10px] mt-0.5 font-medium text-green-600">
-                                        {isPartialDerived ? `Partial — ${pctDerived.toFixed(1)}% (${unitsDerived.toFixed(1)} units)` : 'Full bottle'}
-                                    </p>
+                                    <>
+                                        {form.qtyMode === 'units' && qtyNum > pkgSize ? (
+                                            <p className="text-[10px] mt-0.5 font-medium text-red-600">
+                                                Quantity cannot exceed package size ({pkgSize})
+                                            </p>
+                                        ) : form.qtyMode === 'percent' && qtyNum > 100 ? (
+                                            <p className="text-[10px] mt-0.5 font-medium text-red-600">
+                                                Percentage cannot exceed 100%
+                                            </p>
+                                        ) : (
+                                            <p className="text-[10px] mt-0.5 font-medium text-green-600">
+                                                {isPartialDerived ? `Partial — ${pctDerived.toFixed(1)}% (${unitsDerived.toFixed(1)} units)` : 'Full bottle'}
+                                            </p>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         </div>
@@ -1156,381 +1101,75 @@ export default function AddItemsPage() {
                 })()}
 
                 <hr className="my-3 border-gray-100" />
-                <div className="flex items-center justify-between mb-2">
-                    <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Classification</h2>
-                    <button
-                        type="button"
-                        onClick={async () => {
-                            if (policyAutoCheck) { setPolicyModalOpen(true); }
-                            else if (form.ndc && form.expirationDate) { await runPolicyCheck(form.ndc, form.expirationDate, form.dosageForm || undefined); setPolicyModalOpen(true); }
-                            else { setPolicyModalOpen(true); }
-                        }}
-                        disabled={isPolicyChecking || (!form.ndc && !form.manufacturer)}
-                        className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium rounded border border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                        {isPolicyChecking ? <><Loader2 className="w-3 h-3 animate-spin" /> Checking...</> : <><ShieldCheck className="w-3 h-3" /> View Policy</>}
-                    </button>
-                </div>
-
-                {/* Policy banner */}
-                {isPolicyChecking && (
-                    <div className="mb-2 flex items-center gap-1.5 text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded px-2.5 py-1.5">
-                        <Loader2 className="w-3 h-3 animate-spin flex-shrink-0" /> Running policy check...
-                    </div>
-                )}
-                {!isPolicyChecking && policyAutoCheck && (
-                    <div className={`mb-2 flex items-start gap-1.5 text-xs rounded px-2.5 py-1.5 border ${
-                        policyAutoCheck.status === 'returnable' ? 'bg-green-50 border-green-200 text-green-800' :
-                        policyAutoCheck.status === 'non_returnable' ? 'bg-red-50 border-red-200 text-red-800' :
-                        'bg-yellow-50 border-yellow-200 text-yellow-800'
-                    }`}>
-                        {policyAutoCheck.status === 'returnable' ? <CheckCircle className="w-3 h-3 mt-0.5 flex-shrink-0" /> :
-                         policyAutoCheck.status === 'non_returnable' ? <Ban className="w-3 h-3 mt-0.5 flex-shrink-0" /> :
-                         <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />}
-                        <div>
-                            <span className="font-semibold">{policyAutoCheck.manufacturerName ? `${policyAutoCheck.manufacturerName}: ` : 'Policy: '}</span>
-                            {policyAutoCheck.status === 'returnable' && 'Auto-classified as Returnable — locked.'}
-                            {policyAutoCheck.status === 'non_returnable' && `Non-Returnable — locked. ${policyAutoCheck.reason ? `(${policyAutoCheck.reason.replace(/_/g, ' ')})` : ''}`}
-                            {policyAutoCheck.status === 'tbd' && 'No policy found — select status manually.'}
-                        </div>
-                    </div>
-                )}
-
-                <div className="flex flex-wrap gap-3 mb-2">
-                    {(['tbd', 'returnable', 'non_returnable'] as const).map((status) => {
-                        const isLocked = !isPolicyChecking && !!policyAutoCheck && policyAutoCheck.status !== 'tbd';
-                        return (
-                            <label key={status} className={`flex items-center gap-1.5 text-xs ${isLocked ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}>
-                                <input type="radio" name="returnStatus" value={status} checked={form.returnStatus === status} onChange={() => { if (!isLocked) updateField('returnStatus', status); }} disabled={isLocked} className="text-primary-600 focus:ring-primary-500" />
-                                <span className={`font-medium ${status === 'returnable' ? 'text-green-700' : status === 'non_returnable' ? 'text-red-700' : 'text-yellow-700'}`}>
-                                    {status === 'tbd' ? 'TBD' : status === 'returnable' ? 'Returnable' : 'Non-Returnable'}
-                                </span>
-                                {isLocked && form.returnStatus === status && <ShieldCheck className="w-3 h-3 text-blue-500" />}
-                            </label>
-                        );
-                    })}
-                </div>
 
                 <div className="grid grid-cols-2 gap-2">
                     <div>
                         <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Return Reason</label>
-                        <select value={form.returnReason} onChange={e => updateField('returnReason', e.target.value)} className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500">
+                        <select value={form.returnReason} onChange={e => updateField('returnReason', e.target.value)} className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500">
                             {RETURN_REASONS.map(r => <option key={r} value={r}>{r || '— Select reason —'}</option>)}
                         </select>
                     </div>
                     <div>
                         <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Memo</label>
-                        <input type="text" value={form.memo} onChange={e => updateField('memo', e.target.value)} placeholder="Optional memo" className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                        <input type="text" value={form.memo} onChange={e => updateField('memo', e.target.value)} placeholder="Optional memo" className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500" />
                     </div>
                 </div>
 
-                {/* Manual Destination — shown only when item is returnable and no policy destination is available */}
-                {(!policyAutoCheck || policyAutoCheck.status === 'tbd') && form.returnStatus === 'returnable' && (
-                    <div className="mt-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg">
-                        <div className="flex items-center gap-1.5 mb-1.5">
-                            <AlertTriangle className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
-                            <p className="text-[10px] font-semibold text-amber-800">No return policy found — select return destination manually</p>
-                        </div>
-                        <div>
-                            <label className="block text-[10px] font-medium text-amber-700 mb-0.5">
-                                Destination <span className="text-gray-500 font-normal">(optional)</span>
-                            </label>
-                            <select
-                                value={manualDestination}
-                                onChange={e => setManualDestination(e.target.value)}
-                                className="w-full px-2 py-1 text-xs border border-amber-300 rounded focus:outline-none focus:ring-1 focus:ring-amber-400 bg-white"
-                            >
-                                <option value="">— Select destination —</option>
-                                {reverseDistributors.map(d => (
-                                    <option key={d.id} value={d.name}>{d.name}</option>
-                                ))}
-                            </select>
-                            {manualDestination && (
-                                <p className="text-[10px] text-amber-700 mt-0.5">
-                                    Selected: <span className="font-semibold">{manualDestination}</span>
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                )}
-
-                {/* Non-returnable route selector */}
-                {form.returnStatus === 'non_returnable' && (
-                    <div className="mt-2 p-2.5 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="text-[10px] font-semibold text-red-800 mb-1.5">Non-Returnable Route</p>
-                        <div className="grid grid-cols-2 gap-2">
-                            <label className={`flex items-center gap-2 px-2 py-1.5 border rounded cursor-pointer ${nonReturnableRoute === 'wine_cellar' ? 'border-purple-400 bg-purple-50' : 'border-gray-300 bg-white'}`}>
-                                <input
-                                    type="radio"
-                                    checked={nonReturnableRoute === 'wine_cellar'}
-                                    onChange={() => setNonReturnableRoute('wine_cellar')}
-                                />
-                                <Archive className="w-3.5 h-3.5 text-purple-600" />
-                                <span className="text-xs font-medium text-purple-800">Wine Cellar</span>
-                            </label>
-                            <label className={`flex items-center gap-2 px-2 py-1.5 border rounded cursor-pointer ${nonReturnableRoute === 'destruction' ? 'border-red-400 bg-red-50' : 'border-gray-300 bg-white'}`}>
-                                <input
-                                    type="radio"
-                                    checked={nonReturnableRoute === 'destruction'}
-                                    onChange={() => setNonReturnableRoute('destruction')}
-                                />
-                                <Ban className="w-3.5 h-3.5 text-red-600" />
-                                <span className="text-xs font-medium text-red-800">Destruction</span>
-                            </label>
-                        </div>
-                    </div>
-                )}
+                {/* Destination and non-returnable routing are handled in warehouse verification. */}
 
                 {/* Action Buttons */}
                 <div className="mt-3 pt-3 border-t border-gray-100">
-                    {isPreChecking ? (
-                        <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Checking return policy...
-                        </div>
-                    ) : preCheckResult?.expectedReturnableDate ? (
-                        <>
-                            <div className="mb-2 bg-purple-50 border border-purple-200 rounded px-3 py-2 flex items-start gap-1.5">
-                                <Archive className="w-3.5 h-3.5 text-purple-600 mt-0.5 flex-shrink-0" />
-                                <div>
-                                    <p className="text-xs font-semibold text-purple-800">
-                                        {preCheckResult.reason === 'deferred_inside_policy_period'
-                                            ? 'Hold in Wine Cellar until after the policy window'
-                                            : 'This product is too early to return'}
-                                    </p>
-                                    <p className="text-[10px] text-purple-700 mt-0.5">
-                                        Shelve in Wine Cellar. Eligible from: <span className="font-semibold">{preCheckResult.expectedReturnableDate}</span>
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="flex gap-1.5">
-                                <button onClick={() => handleSave(true)} disabled={isItemActionLoading || !canEdit} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
-                                    {isItemActionLoading ? <><Loader2 className="w-3 h-3 animate-spin" />Moving...</> : <><Archive className="w-3 h-3" />Move to Wine Cellar</>}
-                                </button>
-                                <button onClick={handleClearForm} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
-                                    <X className="w-3 h-3" /> Cancel
-                                </button>
-                            </div>
-                        </>
-                    ) : (() => {
-                        // No policy found + user manually selected Non-Returnable → route choice
-                        const noPolicy = !policyAutoCheck || policyAutoCheck.status === 'tbd';
-                        const isManualNonReturnable = noPolicy && form.returnStatus === 'non_returnable';
-                        return isManualNonReturnable ? (
-                            <>
-                                {nonReturnableRoute === 'wine_cellar' && (
-                                    <div className="mb-2 bg-purple-50 border border-purple-200 rounded px-3 py-2 space-y-2">
-                                        <div className="flex items-start gap-1.5">
-                                            <Archive className="w-3.5 h-3.5 text-purple-600 mt-0.5 flex-shrink-0" />
-                                            <div>
-                                                <p className="text-xs font-semibold text-purple-800">Wine Cellar route selected</p>
-                                                <p className="text-[10px] text-purple-700 mt-0.5">
-                                                    Enter expected returnable date, then move item to Wine Cellar.
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label className="block text-[10px] font-medium text-purple-700 mb-0.5">
-                                                Expected Returnable Date <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="date"
-                                                value={wineCellarDate}
-                                                onChange={e => setWineCellarDate(e.target.value)}
-                                                className={`w-44 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-purple-400 ${
-                                                    !wineCellarDate ? 'border-red-300 bg-red-50' : 'border-purple-300 bg-white'
-                                                }`}
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-                                {nonReturnableRoute === 'destruction' && (
-                                    <div className="mb-2 bg-red-50 border border-red-200 rounded px-3 py-2">
-                                        <div className="flex items-start gap-1.5">
-                                            <Ban className="w-3.5 h-3.5 text-red-600 mt-0.5 flex-shrink-0" />
-                                            <div>
-                                                <p className="text-xs font-semibold text-red-800">Destruction route selected</p>
-                                                <p className="text-[10px] text-red-700 mt-0.5">
-                                                    Item will be saved as non-returnable and routed to destruction workflow.
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                                <div className="flex flex-wrap gap-1.5">
-                                    {nonReturnableRoute === 'wine_cellar' ? (
-                                        <button
-                                            onClick={handleMoveToWineCellarManual}
-                                            disabled={isItemActionLoading || !wineCellarDate}
-                                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 transition-colors"
-                                        >
-                                            {isItemActionLoading
-                                                ? <><Loader2 className="w-3 h-3 animate-spin" />Moving...</>
-                                                : <><Archive className="w-3 h-3" />Move to Wine Cellar</>}
-                                        </button>
-                                    ) : (
-                                        <button
-                                            onClick={() => handleSave()}
-                                            disabled={isItemActionLoading || isPreChecking || !canEdit}
-                                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
-                                        >
-                                            {isItemActionLoading || isPreChecking
-                                                ? <><Loader2 className="w-3 h-3 animate-spin" />Saving...</>
-                                                : <><Ban className="w-3 h-3" />Save to Destruction</>}
-                                        </button>
-                                    )}
-                                    <button onClick={handleClearForm} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
-                                        <X className="w-3 h-3" /> Clear
-                                    </button>
-                                </div>
-                            </>
-                        ) : (
-                            <div className="flex flex-wrap gap-1.5">
-                                <button onClick={() => handleSave()} disabled={isItemActionLoading || isPreChecking || (!form.ndc && !form.proprietaryName) || !canEdit} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
-                                    {isItemActionLoading || isPreChecking
-                                        ? <><Loader2 className="w-3 h-3 animate-spin" />{isPreChecking ? 'Checking...' : 'Saving...'}</>
-                                        : <><CheckCircle className="w-3 h-3" />Save &amp; Scan Next</>}
-                                </button>
-                                <button onClick={handleClearForm} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
-                                    <RotateCcw className="w-3 h-3" /> Clear
-                                </button>
-                                <button onClick={() => router.push(`/warehouse/returns/${transactionId}`)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded text-gray-500 hover:bg-gray-100 transition-colors">
-                                    <X className="w-3 h-3" /> Cancel
-                                </button>
-                            </div>
-                        );
-                    })()}
+                    <div className="flex flex-wrap gap-1.5">
+                        <button onClick={() => handleSave()} disabled={isItemActionLoading || (!form.ndc && !form.proprietaryName) || !canEdit} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">
+                            {isItemActionLoading
+                                ? <><Loader2 className="w-3 h-3 animate-spin" />Saving...</>
+                                : <><CheckCircle className="w-3 h-3" />Save &amp; Scan Next</>}
+                        </button>
+                        <button onClick={handleClearForm} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                            <RotateCcw className="w-3 h-3" /> Clear
+                        </button>
+                        <button onClick={() => router.push(`/warehouse/returns/${transactionId}`)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded text-gray-500 hover:bg-gray-100 transition-colors">
+                            <X className="w-3 h-3" /> Cancel
+                        </button>
+                    </div>
                 </div>
             </div>
             </>
             )}
 
-            {/* ── Policy Modal ─────────────────────────────── */}
-            {policyModalOpen && (
-                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setPolicyModalOpen(false)}>
-                    <div className="bg-white rounded-lg max-w-md w-full shadow-2xl" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50 rounded-t-lg">
-                            <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-1.5">
-                                <ShieldCheck className="w-4 h-4 text-blue-600" /> Manufacturer Return Policy
-                            </h2>
-                            <button onClick={() => setPolicyModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
-                        </div>
-
-                        <div className="px-4 py-3">
-                            {isPolicyChecking ? (
-                                <div className="flex flex-col items-center py-8 gap-2 text-gray-500">
-                                    <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
-                                    <p className="text-xs">Checking manufacturer policy...</p>
-                                </div>
-                            ) : !policyAutoCheck ? (
-                                <div className="text-center py-6 text-gray-500">
-                                    <Info className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                                    <p className="text-sm font-medium">No policy data available</p>
-                                    <p className="text-xs text-gray-400 mt-1">
-                                        {form.ndc || form.manufacturer ? 'No matching policy found in the system.' : 'Scan or enter a product first.'}
-                                    </p>
-                                    {(form.ndc && form.expirationDate) && (
-                                        <button onClick={async () => { await runPolicyCheck(form.ndc, form.expirationDate, form.dosageForm || undefined); }} className="mt-3 px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 inline-flex items-center gap-1 mx-auto">
-                                            <ShieldCheck className="w-3.5 h-3.5" /> Check Now
-                                        </button>
-                                    )}
-                                </div>
-                            ) : (
-                                <div className="space-y-3">
-                                    <div className={`flex items-center gap-2 rounded px-3 py-2 ${
-                                        policyAutoCheck.status === 'returnable' ? 'bg-green-100 border border-green-300' :
-                                        policyAutoCheck.status === 'non_returnable' ? 'bg-red-100 border border-red-300' :
-                                        'bg-yellow-100 border border-yellow-300'
-                                    }`}>
-                                        <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                            policyAutoCheck.status === 'returnable' ? 'bg-green-200' :
-                                            policyAutoCheck.status === 'non_returnable' ? 'bg-red-200' : 'bg-yellow-200'
-                                        }`}>
-                                            {policyAutoCheck.status === 'returnable' ? <CheckCircle className="w-4 h-4 text-green-700" /> :
-                                             policyAutoCheck.status === 'non_returnable' ? <Ban className="w-4 h-4 text-red-700" /> :
-                                             <AlertTriangle className="w-4 h-4 text-yellow-700" />}
-                                        </div>
-                                        <div>
-                                            <p className={`text-xs font-bold ${
-                                                policyAutoCheck.status === 'returnable' ? 'text-green-800' :
-                                                policyAutoCheck.status === 'non_returnable' ? 'text-red-800' : 'text-yellow-800'
-                                            }`}>
-                                                {policyAutoCheck.status === 'returnable' ? 'RETURNABLE' : policyAutoCheck.status === 'non_returnable' ? 'NON-RETURNABLE' : 'TBD — No Policy Found'}
-                                            </p>
-                                            {policyAutoCheck.reason && <p className="text-[10px] text-gray-600 mt-0.5 capitalize">{policyAutoCheck.reason.replace(/_/g, ' ')}</p>}
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-2">
-                                        {policyAutoCheck.manufacturerName && <PolicyDetail label="Manufacturer" value={policyAutoCheck.manufacturerName} />}
-                                        {policyAutoCheck.destination && <PolicyDetail label="Destination" value={policyAutoCheck.destination} capitalize />}
-                                        {policyAutoCheck.windowStart && <PolicyDetail label="Window Start" value={policyAutoCheck.windowStart} />}
-                                        {policyAutoCheck.windowEnd && <PolicyDetail label="Window End" value={policyAutoCheck.windowEnd} />}
-                                        {policyAutoCheck.expectedReturnableDate && <PolicyDetail label="Returnable From" value={policyAutoCheck.expectedReturnableDate} highlight="purple" />}
-                                        {policyAutoCheck.discountRate != null && <PolicyDetail label="Discount Rate" value={`${policyAutoCheck.discountRate}%`} />}
-                                        {policyAutoCheck.reimbursementType && <PolicyDetail label="Reimbursement" value={policyAutoCheck.reimbursementType} capitalize />}
-                                        {policyAutoCheck.partialsAccepted != null && <PolicyDetail label="Partials" value={policyAutoCheck.partialsAccepted ? 'Yes' : 'No'} highlight={policyAutoCheck.partialsAccepted ? 'green' : 'red'} />}
-                                        {policyAutoCheck.returnableWithinPolicyPeriod != null && (
-                                            <PolicyDetail
-                                                label="Returnable in window"
-                                                value={policyAutoCheck.returnableWithinPolicyPeriod ? 'Yes' : 'No'}
-                                                highlight={policyAutoCheck.returnableWithinPolicyPeriod ? 'green' : 'red'}
-                                            />
-                                        )}
-                                        {policyAutoCheck.policyNumber != null && <PolicyDetail label="Policy #" value={String(policyAutoCheck.policyNumber)} />}
-                                        {policyAutoCheck.autoRaEmail && <PolicyDetail label="RA Email" value={policyAutoCheck.autoRaEmail} />}
-                                    </div>
-
-                                    {policyAutoCheck.policyDescription && (
-                                        <div>
-                                            <p className="text-[10px] font-medium text-gray-500 mb-1">Policy Notes</p>
-                                            <p className="text-[11px] text-gray-700 bg-gray-50 rounded p-2 border leading-relaxed">{policyAutoCheck.policyDescription}</p>
-                                        </div>
-                                    )}
-
-                                    {policyAutoCheck.status === 'tbd' && (
-                                        <div className="flex items-start gap-1.5 bg-yellow-50 border border-yellow-200 rounded p-2 text-[11px] text-yellow-800">
-                                            <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
-                                            No policy matched. Set the return status manually using the radio buttons.
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="flex justify-end px-4 py-3 border-t bg-gray-50 rounded-b-lg">
-                            <button onClick={() => setPolicyModalOpen(false)} className="px-3 py-1.5 text-xs font-medium bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors">Close</button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
 
 // ── Reusable field component ───────────────────────────────────
 
-function Field({ label, value, onChange, placeholder, required, hasError }: {
+function Field({ label, value, onChange, placeholder, required, hasError, readOnly }: {
     label: string;
     value: string;
     onChange: (v: string) => void;
     placeholder?: string;
     required?: boolean;
     hasError?: boolean;
+    readOnly?: boolean;
 }) {
     return (
         <div>
             <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
                 {label}{required && <span className="text-red-500 ml-0.5">*</span>}
+                {readOnly && <span className="text-gray-400 ml-1 text-[9px]">(scanned)</span>}
             </label>
             <input
                 type="text"
                 value={value}
-                onChange={e => onChange(e.target.value)}
+                onChange={e => !readOnly && onChange(e.target.value)}
                 placeholder={placeholder}
+                readOnly={readOnly}
                 className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
                     hasError
                         ? 'border-red-400 bg-red-50 focus:ring-red-400'
-                        : 'border-gray-300 focus:ring-primary-500'
+                        : readOnly
+                        ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed'
+                        : 'border-gray-300 focus:ring-slate-500'
                 }`}
             />
             {hasError && <p className="text-[10px] text-red-500 mt-0.5">Required</p>}

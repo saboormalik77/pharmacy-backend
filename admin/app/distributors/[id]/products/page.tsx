@@ -60,7 +60,7 @@ export default function DistributorProductsPage() {
                     <ArrowLeft className="w-5 h-5 text-gray-600" />
                 </button>
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Products</h1>
+                    <h1 className="text-lg font-bold text-gray-900">Products</h1>
                     {distributorName && (
                         <p className="text-gray-600 mt-1">{distributorName}</p>
                     )}

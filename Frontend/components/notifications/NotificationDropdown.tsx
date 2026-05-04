@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Bell, DollarSign, Package, AlertTriangle, Calendar } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Bell, DollarSign, Package, AlertTriangle, Calendar, User, CheckCircle, XCircle } from 'lucide-react';
 import { apiClient } from '@/lib/api/client';
+import { pharmacyNotificationService, PharmacyServiceNotification } from '@/lib/api/services/pharmacyNotificationService';
 
 // Types based on API response
 interface Notification {
@@ -30,24 +32,112 @@ interface Notification {
   updated_at: string;
 }
 
+// Unified notification interface combining inventory + service notifications
+interface UnifiedNotification {
+  id: string;
+  type: 'inventory' | 'service_request';
+  title: string;
+  message: string;
+  created_at: string;
+  status: 'unread' | 'read' | 'dismissed';
+  // For inventory notifications
+  notification_type?: 'expiring_product' | 'order_status' | 'credit_received' | 'system';
+  total_potential_value?: number;
+  days_until_expiration?: number;
+  recommended_distributor_name?: string;
+  // For service request notifications 
+  service_type?: string;
+  metadata?: Record<string, any>;
+}
+
 export function NotificationDropdown() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<UnifiedNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [hasFetched, setHasFetched] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Fetch notifications
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleNotificationClick = (notification: UnifiedNotification) => {
+    // For service request notifications, navigate to on-site-service page and open details
+    if (notification.type === 'service_request') {
+      const serviceRequestId = notification.metadata?.entity_id;
+      
+      if (serviceRequestId) {
+        router.push(`/on-site-service?open=${serviceRequestId}`);
+      } else {
+        // Fallback - just navigate to the page without auto-opening
+        router.push('/on-site-service');
+      }
+      setIsOpen(false); // Close the dropdown
+    }
+    // For inventory notifications, could add navigation to returns page in the future
+    // For now, just close the dropdown
+    else {
+      setIsOpen(false);
+    }
+  };
+
+  // Fetch both inventory and service request notifications
   const fetchNotifications = useCallback(async () => {
     try {
-      const response = await apiClient.get<Notification[]>('/notifications');
-      if (response.status === 'success' && response.data) {
-        setNotifications(response.data);
-        // Update unread count from data
-        const unread = response.data.filter(n => n.status === 'unread').length;
-        setUnreadCount(unread);
-        setHasFetched(true);
+      const [inventoryResponse, serviceResponse] = await Promise.allSettled([
+        apiClient.get<Notification[]>('/notifications'),
+        pharmacyNotificationService.listNotifications({ limit: 20 })
+      ]);
+
+      const allNotifications: UnifiedNotification[] = [];
+      let totalUnread = 0;
+
+      // Process inventory notifications
+      if (inventoryResponse.status === 'fulfilled' && inventoryResponse.value.status === 'success') {
+        const inventoryItems = inventoryResponse.value.data ?? [];
+        const inventoryNotifs = inventoryItems.map((n): UnifiedNotification => ({
+          id: `inv_${n.id}`,
+          type: 'inventory',
+          title: n.title,
+          message: n.message,
+          created_at: n.created_at,
+          status: n.status,
+          notification_type: n.notification_type,
+          total_potential_value: n.total_potential_value,
+          days_until_expiration: n.days_until_expiration,
+          recommended_distributor_name: n.recommended_distributor_name,
+        }));
+        allNotifications.push(...inventoryNotifs);
+        totalUnread += inventoryNotifs.filter(n => n.status === 'unread').length;
       }
+
+      // Process service request notifications
+      if (serviceResponse.status === 'fulfilled') {
+        const serviceNotifs = serviceResponse.value.notifications.map((n): UnifiedNotification => ({
+          id: `svc_${n.id}`,
+          type: 'service_request',
+          title: n.title,
+          message: n.message,
+          created_at: n.created_at,
+          status: n.is_read ? 'read' : 'unread',
+          service_type: n.type,
+          metadata: {
+            ...n.metadata,
+            entity_id: n.entity_id, // Include entity_id in metadata for easier access
+          },
+        }));
+        allNotifications.push(...serviceNotifs);
+        totalUnread += serviceNotifs.filter(n => n.status === 'unread').length;
+      }
+
+      // Sort by created_at DESC
+      allNotifications.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+      setNotifications(allNotifications);
+      setUnreadCount(totalUnread);
+      setHasFetched(true);
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
       setHasFetched(true);
@@ -55,35 +145,56 @@ export function NotificationDropdown() {
   }, []);
 
   // Mark all notifications as read (called when dropdown opens)
-  const markAllAsReadOnOpen = useCallback(async (notificationsList: Notification[]) => {
+  const markAllAsReadOnOpen = useCallback(async (notificationsList: UnifiedNotification[]) => {
     const unreadNotifications = notificationsList.filter(n => n.status === 'unread');
     if (unreadNotifications.length === 0) return;
 
-    // Mark all as read in parallel
-    const promises = unreadNotifications.map(notification => 
-      apiClient.put(`/notifications/${notification.id}/read`).catch(err => {
-        console.error('Failed to mark notification as read:', err);
-      })
-    );
+    // Separate inventory and service notifications for different APIs
+    const inventoryUnread = unreadNotifications.filter(n => n.type === 'inventory');
+    const serviceUnread = unreadNotifications.filter(n => n.type === 'service_request');
+
+    const promises: Promise<any>[] = [];
+
+    // Mark inventory notifications as read
+    inventoryUnread.forEach(notification => {
+      const realId = notification.id.replace('inv_', '');
+      promises.push(
+        apiClient.put(`/notifications/${realId}/read`).catch(err => {
+          console.error('Failed to mark inventory notification as read:', err);
+        })
+      );
+    });
+
+    // Mark service notifications as read
+    serviceUnread.forEach(notification => {
+      const realId = notification.id.replace('svc_', '');
+      promises.push(
+        pharmacyNotificationService.markNotificationRead(realId).catch(err => {
+          console.error('Failed to mark service notification as read:', err);
+        })
+      );
+    });
 
     await Promise.all(promises);
 
     // Update local state
     setNotifications(prev =>
-      prev.map(notif => ({ ...notif, status: 'read' as const, read_at: new Date().toISOString() }))
+      prev.map(notif => ({ ...notif, status: 'read' as const }))
     );
     setUnreadCount(0);
   }, []);
 
-  // Fetch notifications on mount (once only)
+  // Fetch notifications on mount (once only) - wait for mounted to prevent hydration issues
   useEffect(() => {
-    if (!hasFetched) {
+    if (mounted && !hasFetched) {
       fetchNotifications();
     }
-  }, [fetchNotifications, hasFetched]);
+  }, [mounted, fetchNotifications, hasFetched]);
 
   // Listen for custom event to refresh notifications (e.g., after inventory upload)
   useEffect(() => {
+    if (!mounted) return;
+    
     const handleRefreshNotifications = () => {
       fetchNotifications();
     };
@@ -92,7 +203,7 @@ export function NotificationDropdown() {
     return () => {
       window.removeEventListener('refreshNotifications', handleRefreshNotifications);
     };
-  }, [fetchNotifications]);
+  }, [mounted, fetchNotifications]);
 
   // Auto mark all as read when dropdown opens
   useEffect(() => {
@@ -122,34 +233,62 @@ export function NotificationDropdown() {
   }, [isOpen]);
 
   // Get notification icon based on type
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case 'expiring_product':
-        return <Calendar className="h-4 w-4 text-orange-600" />;
-      case 'credit_received':
-        return <DollarSign className="h-4 w-4 text-green-600" />;
-      case 'order_status':
-        return <Package className="h-4 w-4 text-blue-600" />;
-      case 'system':
-        return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
-      default:
-        return <Bell className="h-4 w-4 text-gray-600" />;
+  const getNotificationIcon = (notification: UnifiedNotification) => {
+    if (notification.type === 'inventory') {
+      switch (notification.notification_type) {
+        case 'expiring_product':
+          return <Calendar className="h-4 w-4 text-orange-600" />;
+        case 'credit_received':
+          return <DollarSign className="h-4 w-4 text-green-600" />;
+        case 'order_status':
+          return <Package className="h-4 w-4 text-blue-600" />;
+        case 'system':
+          return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
+        default:
+          return <Bell className="h-4 w-4 text-gray-600" />;
+      }
+    } else {
+      // Service request notifications
+      switch (notification.service_type) {
+        case 'service_request_scheduled':
+          return <Calendar className="h-4 w-4 text-blue-600" />;
+        case 'service_request_completed':
+          return <CheckCircle className="h-4 w-4 text-green-600" />;
+        case 'service_request_cancelled':
+          return <XCircle className="h-4 w-4 text-red-600" />;
+        default:
+          return <User className="h-4 w-4 text-indigo-600" />;
+      }
     }
   };
 
   // Get notification background color based on type
-  const getNotificationBgColor = (type: string) => {
-    switch (type) {
-      case 'expiring_product':
-        return 'bg-orange-100';
-      case 'credit_received':
-        return 'bg-green-100';
-      case 'order_status':
-        return 'bg-blue-100';
-      case 'system':
-        return 'bg-yellow-100';
-      default:
-        return 'bg-gray-100';
+  const getNotificationBgColor = (notification: UnifiedNotification) => {
+    if (notification.type === 'inventory') {
+      switch (notification.notification_type) {
+        case 'expiring_product':
+          return 'bg-orange-100';
+        case 'credit_received':
+          return 'bg-green-100';
+        case 'order_status':
+          return 'bg-blue-100';
+        case 'system':
+          return 'bg-yellow-100';
+        default:
+          return 'bg-gray-100';
+      }
+    } else {
+      // Service request notifications
+      switch (notification.service_type) {
+        case 'service_request_scheduled':
+          return 'bg-blue-100';
+        case 'service_request_completed':
+          return 'bg-green-100';
+        case 'service_request_cancelled':
+          return 'bg-red-100';
+        default:
+          return 'bg-indigo-100';
+      }
     }
   };
 
@@ -205,7 +344,7 @@ export function NotificationDropdown() {
         aria-label="Notifications"
       >
         <Bell className="h-5 w-5 text-gray-600" />
-        {unreadCount > 0 && (
+        {mounted && unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-gradient-to-br from-red-500 to-orange-500 text-white text-[10px] font-bold flex items-center justify-center shadow-sm">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
@@ -242,14 +381,15 @@ export function NotificationDropdown() {
                 {recentNotifications.map((notification, index) => (
                   <div
                     key={notification.id}
-                    className={`px-4 py-3 hover:bg-gray-50 transition-colors ${
+                    onClick={() => handleNotificationClick(notification)}
+                    className={`px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer ${
                       index !== recentNotifications.length - 1 ? 'border-b border-gray-100' : ''
                     }`}
                   >
                     <div className="flex gap-3">
                       {/* Icon */}
-                      <div className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${getNotificationBgColor(notification.notification_type)}`}>
-                        {getNotificationIcon(notification.notification_type)}
+                      <div className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${getNotificationBgColor(notification)}`}>
+                        {getNotificationIcon(notification)}
                       </div>
                       
                       {/* Content */}
@@ -265,7 +405,7 @@ export function NotificationDropdown() {
                         </p>
                         
                         {/* Potential value for expiring products */}
-                        {notification.notification_type === 'expiring_product' && notification.total_potential_value && notification.total_potential_value > 0 && (
+                        {notification.type === 'inventory' && notification.notification_type === 'expiring_product' && notification.total_potential_value && notification.total_potential_value > 0 && (
                           <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-1 bg-emerald-50 rounded-md border border-emerald-200">
                             <DollarSign className="h-3.5 w-3.5 text-emerald-600" />
                             <span className="text-xs font-semibold text-emerald-700">
@@ -279,23 +419,43 @@ export function NotificationDropdown() {
                           </div>
                         )}
 
+                        {/* Service request metadata (processor name, scheduled date, etc.) */}
+                        {notification.type === 'service_request' && notification.metadata && (
+                          <div className="mt-1.5 text-xs text-gray-500 space-y-0.5">
+                            {notification.metadata.processor_name && (
+                              <div>Rep: {notification.metadata.processor_name}</div>
+                            )}
+                            {notification.metadata.scheduled_date && (
+                              <div>Date: {new Date(notification.metadata.scheduled_date).toLocaleDateString()}</div>
+                            )}
+                          </div>
+                        )}
+
                         {/* Footer: time and expiration badge */}
                         <div className="flex items-center gap-2 mt-2">
                           <span className="text-xs text-gray-400">
                             {formatDate(notification.created_at)}
                           </span>
-                          {notification.days_until_expiration !== undefined && (
-                            <span className={`px-2 py-0.5 text-[10px] rounded-full font-medium ${
-                              notification.days_until_expiration < 0 
-                                ? 'bg-red-100 text-red-700' 
-                                : notification.days_until_expiration <= 30 
-                                ? 'bg-orange-100 text-orange-700'
-                                : 'bg-green-100 text-green-700'
-                            }`}>
-                              {notification.days_until_expiration < 0 
-                                ? `Expired ${Math.abs(notification.days_until_expiration)}d ago`
-                                : `${notification.days_until_expiration}d left`
-                              }
+                          {notification.type === 'inventory' &&
+                            notification.days_until_expiration !== undefined &&
+                            notification.days_until_expiration !== null &&
+                            Number.isFinite(notification.days_until_expiration) && (
+                              <span className={`px-2 py-0.5 text-[10px] rounded-full font-medium ${
+                                notification.days_until_expiration < 0
+                                  ? 'bg-red-100 text-red-700'
+                                  : notification.days_until_expiration <= 30
+                                  ? 'bg-orange-100 text-orange-700'
+                                  : 'bg-green-100 text-green-700'
+                              }`}>
+                                {notification.days_until_expiration < 0
+                                  ? `Expired ${Math.abs(notification.days_until_expiration)}d ago`
+                                  : `${notification.days_until_expiration}d left`
+                                }
+                              </span>
+                            )}
+                          {notification.type === 'service_request' && (
+                            <span className="px-2 py-0.5 text-[10px] rounded-full font-medium bg-indigo-100 text-indigo-700">
+                              Service Request
                             </span>
                           )}
                         </div>

@@ -234,12 +234,17 @@ function PharmaciesPageContent() {
         }
     };
 
-    // Fetch invites when showInvites is toggled
+    // Fetch invites on mount so the badge count is correct immediately
     useEffect(() => {
-        if (showInvites && pendingInvites.length === 0 && !invitesLoading) {
+        dispatch(fetchPendingInvites());
+    }, [dispatch]);
+
+    // Always re-fetch fresh data from the server when the panel is opened
+    useEffect(() => {
+        if (showInvites) {
             dispatch(fetchPendingInvites());
         }
-    }, [showInvites, dispatch, pendingInvites.length, invitesLoading]);
+    }, [showInvites, dispatch]);
 
     const handleSuspend = (pharmacy: Pharmacy) => {
         setSuspendModal(pharmacy);
@@ -299,10 +304,10 @@ function PharmaciesPageContent() {
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-xl font-bold text-gray-900">Pharmacies</h1>
+                    <h1 className="text-lg font-bold text-gray-900">Pharmacies</h1>
                     <p className="text-xs text-gray-500 mt-0.5">Manage registered pharmacies</p>
                 </div>
-                <button onClick={() => { setCreateModal(true); setCreateError(null); setCreateSuccess(null); setCreateForm({ ...INITIAL_CREATE_FORM }); }} className="flex items-center gap-1 px-3 py-1.5 bg-primary-500 hover:bg-primary-600 text-white text-xs font-medium rounded-md transition-colors">
+                <button onClick={() => { setCreateModal(true); setCreateError(null); setCreateSuccess(null); setCreateForm({ ...INITIAL_CREATE_FORM }); }} className="inline-flex items-center gap-1 px-3 py-1.5 rounded text-xs font-medium bg-[#1e293b] text-white hover:bg-[#334155] transition-colors">
                     <Plus className="w-3.5 h-3.5" /> Add Pharmacy
                 </button>
             </div>
@@ -322,7 +327,7 @@ function PharmaciesPageContent() {
                         <Badge variant="secondary" className="ml-1 text-xs">{pendingInvites.length}</Badge>
                     </div>
                     <button
-                        onClick={() => { setShowInvites(!showInvites); if (!showInvites) dispatch(fetchPendingInvites()); }}
+                        onClick={() => setShowInvites(!showInvites)}
                         className="px-2.5 py-1 text-xs border border-gray-300 rounded hover:bg-gray-50 text-gray-600 transition-colors"
                     >
                         {showInvites ? 'Hide' : 'Show'} Invites
@@ -335,49 +340,51 @@ function PharmaciesPageContent() {
                             <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-xs">{invitesError}</div>
                         )}
 
-                        {pendingInvites.length === 0 && (
-                            <div className="text-center py-6 text-gray-500">
-                                <Mail className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                                <p className="text-xs font-medium">0 invites</p>
-                                <p className="text-xs mt-0.5 text-gray-400">No pending invitations</p>
-                                {invitesLoading && (
-                                    <p className="text-xs text-gray-400 mt-1 flex items-center justify-center gap-1">
-                                        <Loader2 className="w-3 h-3 animate-spin" /> Checking...
-                                    </p>
-                                )}
+                        {invitesLoading && (
+                            <div className="text-center py-6 text-gray-400">
+                                <Loader2 className="w-6 h-6 mx-auto mb-2 animate-spin text-gray-300" />
+                                <p className="text-xs">Loading invitations...</p>
                             </div>
                         )}
 
-                        {pendingInvites.length > 0 && (
+                        {!invitesLoading && pendingInvites.length === 0 && (
+                            <div className="text-center py-6 text-gray-500">
+                                <Mail className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                                <p className="text-xs font-medium">No pending invitations</p>
+                                <p className="text-xs mt-0.5 text-gray-400">Invitations sent to pharmacies will appear here</p>
+                            </div>
+                        )}
+
+                        {!invitesLoading && pendingInvites.length > 0 && (
                             <div className="overflow-x-auto">
-                                <table className="w-full">
+                                <table className="w-full table-auto">
                                     <thead>
-                                        <tr className="border-b border-gray-200 bg-gray-50">
-                                            <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-600">Pharmacy</th>
-                                            <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-600">Email</th>
-                                            <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-600">Contact</th>
-                                            <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-600">Sent</th>
-                                            <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-600">Expires</th>
-                                            <th className="text-left py-1.5 px-2 text-xs font-medium text-gray-600">Actions</th>
+                                        <tr className="bg-gradient-to-r from-[#1e293b] to-[#334155] border-b-2 border-slate-700">
+                                            <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Pharmacy</th>
+                                            <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Email</th>
+                                            <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Contact</th>
+                                            <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Sent</th>
+                                            <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Expires</th>
+                                            <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {pendingInvites.map((invite) => {
+                                        {pendingInvites.map((invite, index) => {
                                             const expiresAt = new Date(invite.expires_at);
                                             const isExpiringSoon = expiresAt.getTime() - Date.now() < 24 * 60 * 60 * 1000;
                                             return (
-                                                <tr key={invite.id} className="border-b border-gray-100 hover:bg-gray-50">
-                                                    <td className="py-1.5 px-2 text-xs font-medium text-gray-900">{invite.pharmacy_name}</td>
-                                                    <td className="py-1.5 px-2 text-xs text-gray-600">{invite.email}</td>
-                                                    <td className="py-1.5 px-2 text-xs text-gray-600">{invite.contact_name || '—'}</td>
-                                                    <td className="py-1.5 px-2 text-xs text-gray-500">{new Date(invite.created_at).toLocaleDateString()}</td>
-                                                    <td className="py-1.5 px-2">
-                                                        <span className={`text-xs flex items-center gap-1 ${isExpiringSoon ? 'text-orange-600' : 'text-gray-500'}`}>
+                                                <tr key={invite.id} className={`${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'} hover:bg-slate-50 transition-colors border-b border-gray-100`}>
+                                                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{invite.pharmacy_name}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">{invite.email}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">{invite.contact_name || '—'}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">{new Date(invite.created_at).toLocaleDateString()}</td>
+                                                    <td className="px-4 py-3">
+                                                        <span className={`text-sm flex items-center gap-1 ${isExpiringSoon ? 'text-orange-600' : 'text-gray-600'}`}>
                                                             <Clock className="w-3 h-3" />{expiresAt.toLocaleDateString()}
                                                         </span>
                                                     </td>
-                                                    <td className="py-1.5 px-2">
-                                                        <button onClick={() => setCancelInviteModal(invite)} className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors" title="Cancel Invite">
+                                                    <td className="px-4 py-3">
+                                                        <button onClick={() => setCancelInviteModal(invite)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" title="Cancel Invite">
                                                             <Trash2 className="w-3.5 h-3.5" />
                                                         </button>
                                                     </td>
@@ -425,45 +432,45 @@ function PharmaciesPageContent() {
                     <>
                         <div className="overflow-x-auto lg:overflow-x-visible">
                             <table className="w-full table-auto">
-                                <thead className="bg-gray-50 border-b border-gray-200">
-                                    <tr>
+                                <thead>
+                                    <tr className="bg-gradient-to-r from-[#1e293b] to-[#334155] border-b-2 border-slate-700">
                                         {/* <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th> */}
-                                        <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Business Name</th>
-                                        <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
-                                        <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                                        <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                                        <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Returns</th>
-                                        <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Business Name</th>
+                                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Owner</th>
+                                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Contact</th>
+                                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Location</th>
+                                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Status</th>
+                                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Total Returns</th>
+                                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {pharmacies.map((pharmacy) => (
-                                        <tr key={pharmacy.id} className="hover:bg-gray-50 transition-colors">
+                                <tbody>
+                                    {pharmacies.map((pharmacy, index) => (
+                                        <tr key={pharmacy.id} className={`${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'} hover:bg-slate-50 transition-colors border-b border-gray-100`}>
                                             {/* <td className="px-2 py-1.5 whitespace-nowrap text-xs font-medium text-gray-900">{pharmacy.id}</td> */}
-                                            <td className="px-2 py-1.5 whitespace-nowrap text-xs text-gray-900">{pharmacy.businessName}</td>
-                                            <td className="px-2 py-1.5 whitespace-nowrap text-xs text-gray-600">{pharmacy.owner}</td>
-                                            <td className="px-2 py-1.5 text-xs text-gray-600">
+                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{pharmacy.businessName}</td>
+                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{pharmacy.owner}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-600">
                                                 <div className="leading-tight">{pharmacy.email}</div>
-                                                <div className="text-gray-500 text-xs leading-tight">{pharmacy.phone}</div>
+                                                <div className="text-gray-500 text-sm leading-tight">{pharmacy.phone}</div>
                                             </td>
-                                            <td className="px-2 py-1.5 whitespace-nowrap text-xs text-gray-600">{pharmacy.city}, {pharmacy.state}</td>
-                                            <td className="px-2 py-1.5 whitespace-nowrap">
+                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{pharmacy.city}, {pharmacy.state}</td>
+                                            <td className="px-4 py-3 whitespace-nowrap">
                                                 <Badge variant={getStatusVariant(pharmacy.status)}>{pharmacy.status}</Badge>
                                             </td>
-                                            <td className="px-2 py-1.5 whitespace-nowrap text-xs text-gray-900">{pharmacy.totalReturns}</td>
-                                            <td className="px-2 py-1.5 whitespace-nowrap text-xs">
+                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{pharmacy.totalReturns}</td>
+                                            <td className="px-4 py-3 whitespace-nowrap text-sm">
                                                 <div className="flex items-center gap-1">
                                                     <button
                                                         onClick={() => setViewModal(pharmacy)}
-                                                        className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                                        className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors"
                                                         title="View"
                                                     >
                                                         <Eye className="w-3.5 h-3.5" />
                                                     </button>
                                                     <button
                                                         onClick={() => setEditModal(pharmacy)}
-                                                        className="p-1 text-green-600 hover:bg-green-50 rounded transition-colors"
+                                                        className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors"
                                                         title="Edit"
                                                     >
                                                         <Edit className="w-3.5 h-3.5" />
@@ -472,14 +479,14 @@ function PharmaciesPageContent() {
                                                         <>
                                                             <button
                                                                 onClick={() => handleSuspend(pharmacy)}
-                                                                className="p-1 text-yellow-600 hover:bg-yellow-50 rounded transition-colors"
+                                                                className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors"
                                                                 title="Suspend"
                                                             >
                                                                 <Ban className="w-3.5 h-3.5" />
                                                             </button>
                                                             <button
                                                                 onClick={() => setBlacklistModal(pharmacy)}
-                                                                className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+                                                                className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors"
                                                                 title="Blacklist"
                                                             >
                                                                 <Ban className="w-3.5 h-3.5" />
@@ -489,7 +496,7 @@ function PharmaciesPageContent() {
                                                     {pharmacy.status === 'suspended' && (
                                                         <button
                                                             onClick={() => setRestoreModal(pharmacy)}
-                                                            className="p-1 text-green-600 hover:bg-green-50 rounded transition-colors"
+                                                            className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors"
                                                             title="Restore"
                                                         >
                                                             <CheckCircle className="w-3.5 h-3.5" />
@@ -511,18 +518,18 @@ function PharmaciesPageContent() {
 
                         {/* Pagination */}
                         {pagination && pagination.totalPages > 1 && (
-                            <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200">
-                                <div className="text-xs text-gray-500">
+                            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50">
+                                <div className="text-sm text-gray-600 font-medium">
                                     Showing {((pagination.page - 1) * pagination.limit) + 1}–{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} pharmacies
                                 </div>
                                 <div className="flex items-center gap-1">
-                                    <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="p-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50">
+                                    <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="p-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50">
                                         <ChevronLeft className="w-4 h-4" />
                                     </button>
-                                    <span className="px-3 py-1 text-xs text-gray-600">
+                                    <span className="px-3 py-1 text-sm text-gray-600 font-medium">
                                         Page {pagination.page} of {pagination.totalPages}
                                     </span>
-                                    <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === pagination.totalPages} className="p-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50">
+                                    <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === pagination.totalPages} className="p-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50">
                                         <ChevronRight className="w-4 h-4" />
                                     </button>
                                 </div>
@@ -534,13 +541,13 @@ function PharmaciesPageContent() {
 
             {/* View Modal */}
             {viewModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setViewModal(null)}>
-                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-xl" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-200 flex-shrink-0">
+                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setViewModal(null)}>
+                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">Pharmacy Details</h2>
                             <button onClick={() => setViewModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
                         </div>
-                        <div className="px-4 py-3 overflow-y-auto flex-1">
+                        <div className="px-4 py-3 space-y-3">
                             <div className="space-y-3">
                                 {/* Store Info */}
                                 <div>
@@ -651,8 +658,8 @@ function PharmaciesPageContent() {
                                 </div>
                             </div>
                         </div>
-                        <div className="flex justify-end gap-2 px-4 py-2.5 border-t border-gray-200 flex-shrink-0">
-                            <button onClick={() => setViewModal(null)} className="px-3 py-1.5 text-xs border border-gray-300 rounded hover:bg-gray-50 text-gray-600 transition-colors">Close</button>
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
+                            <button onClick={() => setViewModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Close</button>
                         </div>
                     </div>
                 </div>
@@ -660,15 +667,15 @@ function PharmaciesPageContent() {
 
             {/* Edit Modal */}
             {editModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => { setEditModal(null); setEditFormData({}); }}>
-                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-xl" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-200 flex-shrink-0">
+                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => { setEditModal(null); setEditFormData({}); }}>
+                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">Edit Pharmacy</h2>
                             <button onClick={() => { setEditModal(null); setEditFormData({}); }} className="text-gray-400 hover:text-gray-600">
                                 <X className="w-4 h-4" />
                             </button>
                         </div>
-                        <div className="px-4 py-3 overflow-y-auto flex-1 space-y-4">
+                        <div className="px-4 py-3 space-y-3">
                             {/* Store Information */}
                             <div>
                                 <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Store Information</h3>
@@ -774,9 +781,9 @@ function PharmaciesPageContent() {
                                 </div>
                             </div>
                         </div>
-                        <div className="flex justify-end gap-2 px-4 py-2.5 border-t border-gray-200 flex-shrink-0">
-                            <button onClick={() => { setEditModal(null); setEditFormData({}); }} className="px-3 py-1.5 text-xs border border-gray-300 rounded hover:bg-gray-50 text-gray-600 transition-colors">Cancel</button>
-                            <button onClick={handleEdit} disabled={isLoading} className="px-3 py-1.5 text-xs bg-primary-500 hover:bg-primary-600 disabled:opacity-50 text-white rounded transition-colors">
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
+                            <button onClick={() => { setEditModal(null); setEditFormData({}); }} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button onClick={handleEdit} disabled={isLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">
                                 {isLoading ? 'Saving...' : 'Save Changes'}
                             </button>
                         </div>
@@ -786,18 +793,18 @@ function PharmaciesPageContent() {
 
             {/* Blacklist Confirmation Modal */}
             {blacklistModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setBlacklistModal(null)}>
-                    <div className="bg-white rounded-lg max-w-sm w-full shadow-xl" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-200">
+                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setBlacklistModal(null)}>
+                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">Blacklist Pharmacy</h2>
                             <button onClick={() => setBlacklistModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
                         </div>
-                        <div className="px-4 py-3">
+                        <div className="px-4 py-3 space-y-3">
                             <p className="text-xs text-gray-600">Are you sure you want to blacklist <strong>{blacklistModal.businessName}</strong>? This will prevent them from accessing the platform.</p>
                         </div>
-                        <div className="flex justify-end gap-2 px-4 py-2.5 border-t border-gray-200">
-                            <button onClick={() => setBlacklistModal(null)} className="px-3 py-1.5 text-xs border border-gray-300 rounded hover:bg-gray-50 text-gray-600 transition-colors">Cancel</button>
-                            <button onClick={handleBlacklist} disabled={isLoading} className="px-3 py-1.5 text-xs bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded transition-colors">{isLoading ? 'Processing...' : 'Blacklist'}</button>
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
+                            <button onClick={() => setBlacklistModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button onClick={handleBlacklist} disabled={isLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors">{isLoading ? 'Processing...' : 'Blacklist'}</button>
                         </div>
                     </div>
                 </div>
@@ -805,18 +812,18 @@ function PharmaciesPageContent() {
 
             {/* Restore Confirmation Modal */}
             {restoreModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setRestoreModal(null)}>
-                    <div className="bg-white rounded-lg max-w-sm w-full shadow-xl" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-200">
+                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setRestoreModal(null)}>
+                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">Restore Pharmacy</h2>
                             <button onClick={() => setRestoreModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
                         </div>
-                        <div className="px-4 py-3">
+                        <div className="px-4 py-3 space-y-3">
                             <p className="text-xs text-gray-600">Are you sure you want to restore <strong>{restoreModal.businessName}</strong>? This will reactivate their access to the platform.</p>
                         </div>
-                        <div className="flex justify-end gap-2 px-4 py-2.5 border-t border-gray-200">
-                            <button onClick={() => setRestoreModal(null)} className="px-3 py-1.5 text-xs border border-gray-300 rounded hover:bg-gray-50 text-gray-600 transition-colors">Cancel</button>
-                            <button onClick={handleRestore} disabled={isLoading} className="px-3 py-1.5 text-xs bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white rounded transition-colors">{isLoading ? 'Processing...' : 'Restore'}</button>
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
+                            <button onClick={() => setRestoreModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button onClick={handleRestore} disabled={isLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">{isLoading ? 'Processing...' : 'Restore'}</button>
                         </div>
                     </div>
                 </div>
@@ -824,18 +831,18 @@ function PharmaciesPageContent() {
 
             {/* Suspend Confirmation Modal */}
             {suspendModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setSuspendModal(null)}>
-                    <div className="bg-white rounded-lg max-w-sm w-full shadow-xl" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-200">
+                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setSuspendModal(null)}>
+                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">Suspend Pharmacy</h2>
                             <button onClick={() => setSuspendModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
                         </div>
-                        <div className="px-4 py-3">
+                        <div className="px-4 py-3 space-y-3">
                             <p className="text-xs text-gray-600">Are you sure you want to suspend <strong>{suspendModal.businessName}</strong>? This will temporarily restrict their access to the platform.</p>
                         </div>
-                        <div className="flex justify-end gap-2 px-4 py-2.5 border-t border-gray-200">
-                            <button onClick={() => setSuspendModal(null)} className="px-3 py-1.5 text-xs border border-gray-300 rounded hover:bg-gray-50 text-gray-600 transition-colors">Cancel</button>
-                            <button onClick={confirmSuspend} disabled={isLoading} className="px-3 py-1.5 text-xs bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50 text-white rounded transition-colors">{isLoading ? 'Processing...' : 'Suspend'}</button>
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
+                            <button onClick={() => setSuspendModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button onClick={confirmSuspend} disabled={isLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">{isLoading ? 'Processing...' : 'Suspend'}</button>
                         </div>
                     </div>
                 </div>
@@ -843,14 +850,14 @@ function PharmaciesPageContent() {
 
             {/* Create Pharmacy Modal */}
             {createModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => !isCreating && setCreateModal(false)}>
-                    <div className="bg-white rounded-lg max-w-2xl w-full shadow-xl max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => !isCreating && setCreateModal(false)}>
+                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">Add New Pharmacy</h2>
                             <button onClick={() => !isCreating && setCreateModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
                         </div>
 
-                        <div className="px-4 py-3 flex-1 overflow-y-auto space-y-4">
+                        <div className="px-4 py-3 space-y-3">
                             {createError && <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-xs">{createError}</div>}
                             {createSuccess && <div className="bg-green-50 border border-green-200 text-green-700 px-3 py-2 rounded text-xs">{createSuccess}</div>}
 
@@ -959,9 +966,9 @@ function PharmaciesPageContent() {
                             </div>
                         </div>
 
-                        <div className="flex justify-end gap-2 px-4 py-2.5 border-t border-gray-200 bg-gray-50 flex-shrink-0">
-                            <button onClick={() => setCreateModal(false)} disabled={isCreating} className="px-3 py-1.5 text-xs border border-gray-300 rounded hover:bg-gray-100 text-gray-600 disabled:opacity-50 transition-colors">Cancel</button>
-                            <button onClick={handleCreatePharmacy} disabled={isCreating || !createForm.pharmacyName.trim() || !createForm.email.trim()} className="flex items-center gap-1 px-3 py-1.5 text-xs bg-primary-500 hover:bg-primary-600 disabled:opacity-50 text-white rounded transition-colors">
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
+                            <button onClick={() => setCreateModal(false)} disabled={isCreating} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button onClick={handleCreatePharmacy} disabled={isCreating || !createForm.pharmacyName.trim() || !createForm.email.trim()} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">
                                 {isCreating ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Creating...</> : 'Create & Send Invite'}
                             </button>
                         </div>
@@ -971,9 +978,9 @@ function PharmaciesPageContent() {
 
             {/* Cancel Invite Confirmation Modal */}
             {cancelInviteModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-lg max-w-sm w-full shadow-xl">
-                        <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-200">
+                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto">
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                             <div className="flex items-center gap-2">
                                 <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
                                     <Trash2 className="w-3.5 h-3.5 text-red-600" />
@@ -984,16 +991,16 @@ function PharmaciesPageContent() {
                                 </div>
                             </div>
                         </div>
-                        <div className="px-4 py-3">
+                        <div className="px-4 py-3 space-y-3">
                             <p className="text-xs text-gray-600 mb-2">Are you sure you want to cancel the invitation for:</p>
                             <div className="bg-gray-50 px-3 py-2 rounded border">
                                 <div className="text-xs font-medium text-gray-900">{cancelInviteModal.pharmacy_name}</div>
                                 <div className="text-xs text-gray-500">{cancelInviteModal.email}</div>
                             </div>
                         </div>
-                        <div className="flex justify-end gap-2 px-4 py-2.5 border-t border-gray-200 bg-gray-50">
-                            <button onClick={() => setCancelInviteModal(null)} disabled={invitesLoading} className="px-3 py-1.5 text-xs border border-gray-300 rounded hover:bg-gray-100 text-gray-600 disabled:opacity-50 transition-colors">Keep Invite</button>
-                            <button onClick={handleCancelInvite} disabled={invitesLoading} className="flex items-center gap-1 px-3 py-1.5 text-xs bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded transition-colors">
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
+                            <button onClick={() => setCancelInviteModal(null)} disabled={invitesLoading} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Keep Invite</button>
+                            <button onClick={handleCancelInvite} disabled={invitesLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors">
                                 {invitesLoading ? <><Loader2 className="w-3 h-3 animate-spin" />Cancelling...</> : 'Cancel Invite'}
                             </button>
                         </div>

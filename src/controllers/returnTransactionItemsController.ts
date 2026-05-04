@@ -4,12 +4,12 @@ import { AppError } from '../utils/appError';
 import * as itemsService from '../services/returnTransactionItemsService';
 import { parseGS1 } from '../services/gs1ParserService';
 import { lookupNDC, lookupNDCFromCandidates, extractPackageSizeFromDescription } from '../services/ndcLookupService';
-import { checkReturnability, ReturnabilityResult } from '../services/policyEngineService';
 import { getPricingForSingleNDC } from '../services/pricingService';
 import { resolveNDCPrice } from '../services/ndcPricingBookService';
 import * as wcService from '../services/wineCellarService';
 import * as destructionService from '../services/destructionService';
 import { getReturnTransactionById } from '../services/returnTransactionService';
+import { isValidNonReturnableReason } from '../constants/nonReturnableReasons';
 
 const parseBooleanInput = (value: unknown): boolean => value === true || value === 'true';
 
@@ -24,15 +24,15 @@ const parsePartialPercentage = (value: unknown): number | undefined => {
   return parsed;
 };
 
-const POLICY_REASON_TO_DB: Record<string, string> = {
-  too_early: 'date',
-  too_late: 'date',
-  deferred_inside_policy_period: 'date',
-  policy_exception: 'policy',
-  no_partials: 'policy',
-  dosage_form_not_accepted: 'policy',
-  not_returnable_in_policy_window: 'policy',
-};
+// const POLICY_REASON_TO_DB: Record<string, string> = {
+//   too_early: 'date',
+//   too_late: 'date',
+//   deferred_inside_policy_period: 'date',
+//   policy_exception: 'policy',
+//   no_partials: 'policy',
+//   dosage_form_not_accepted: 'policy',
+//   not_returnable_in_policy_window: 'policy',
+// };
 
 // ============================================================
 // POST /api/return-transactions/:id/items — Add scanned item
@@ -68,96 +68,108 @@ export const addItemHandler = catchAsync(
     let returnStatus = body.returnStatus;
     let nonReturnableReason = body.nonReturnableReason;
     let destination = body.destination;
-    let policyResult: ReturnabilityResult | null = null;
+    const policyResult = null;
 
-    // Auto-classify via policy engine when:
-    // - returnStatus is not set, OR
-    // - returnStatus is "tbd" (default from frontend — means "please classify for me")
-    // Only skip when processor explicitly chose "returnable" or "non_returnable"
-    const shouldAutoClassify =
-      (!returnStatus || returnStatus === 'tbd') && body.ndc && body.expirationDate;
+    // if (returnStatus === 'non_returnable') {
+    //   if (!nonReturnableReason || !isValidNonReturnableReason(nonReturnableReason)) {
+    //     throw new AppError(
+    //       'A valid nonReturnableReason is required when adding an item as non-returnable',
+    //       400
+    //     );
+    //   }
+    // }
 
-    // Always run policy when we have NDC + expiration so Wine Cellar auto-add works even when the
-    // UI pre-locks returnStatus to non_returnable (shouldAutoClassify false).
-    if (body.ndc && body.expirationDate) {
-      try {
-        policyResult = await checkReturnability({
-          ndc: body.ndc,
-          expirationDate: body.expirationDate,
-          isPartial,
-          dosageForm: body.dosageForm,
-        });
+    /*
+     * Policy auto-classification for add-item is intentionally disabled.
+     * Pharmacy and processor portals should only add items, and warehouse
+     * verification is now responsible for policy, wine cellar, and destruction.
+     */
+    // const shouldAutoClassify =
+    //   (!returnStatus || returnStatus === 'tbd') && body.ndc && body.expirationDate;
+    //
+    // if (body.ndc && body.expirationDate) {
+    //   try {
+    //     policyResult = await checkReturnability({
+    //       ndc: body.ndc,
+    //       expirationDate: body.expirationDate,
+    //       isPartial,
+    //       dosageForm: body.dosageForm,
+    //     });
+    //
+    //     if (shouldAutoClassify) {
+    //       returnStatus = policyResult.status;
+    //       destination = policyResult.destination || destination;
+    //
+    //       if (policyResult.status === 'non_returnable' && policyResult.reason) {
+    //         nonReturnableReason = POLICY_REASON_TO_DB[policyResult.reason] || 'policy';
+    //       }
+    //     } else if (
+    //       returnStatus === 'non_returnable' &&
+    //       !nonReturnableReason &&
+    //       policyResult.status === 'non_returnable' &&
+    //       policyResult.reason
+    //     ) {
+    //       nonReturnableReason = POLICY_REASON_TO_DB[policyResult.reason] || 'policy';
+    //     }
+    //   } catch (err: any) {
+    //     console.error('Policy engine check failed (add item):', err.message);
+    //     policyResult = null;
+    //     if (shouldAutoClassify) {
+    //       returnStatus = 'tbd';
+    //     }
+    //   }
+    // }
 
-        if (shouldAutoClassify) {
-          returnStatus = policyResult.status;
-          destination = policyResult.destination || destination;
-
-          if (policyResult.status === 'non_returnable' && policyResult.reason) {
-            nonReturnableReason = POLICY_REASON_TO_DB[policyResult.reason] || 'policy';
-          }
-        } else if (
-          returnStatus === 'non_returnable' &&
-          !nonReturnableReason &&
-          policyResult.status === 'non_returnable' &&
-          policyResult.reason
-        ) {
-          nonReturnableReason = POLICY_REASON_TO_DB[policyResult.reason] || 'policy';
-        }
-      } catch (err: any) {
-        console.error('Policy engine check failed (add item):', err.message);
-        policyResult = null;
-        if (shouldAutoClassify) {
-          returnStatus = 'tbd';
-        }
-      }
-    }
-
-    const wcAutoReason =
-      policyResult?.reason === 'too_early' || policyResult?.reason === 'deferred_inside_policy_period';
-    const shouldShelveWineCellarOnly =
-      policyResult &&
-      wcAutoReason &&
-      policyResult.expectedReturnableDate &&
-      returnStatus === 'non_returnable' &&
-      body.ndc &&
-      body.expirationDate;
-
-    // Too early / inverted-window hold: shelf in Wine Cellar only — no return_transaction_items row
-    if (shouldShelveWineCellarOnly && policyResult) {
-      const expectedDate = policyResult.expectedReturnableDate;
-      if (!expectedDate) {
-        throw new AppError('Policy check did not provide expectedReturnableDate for wine cellar', 500);
-      }
-      const transaction = await getReturnTransactionById(transactionId);
-      const wineCellarItem = await wcService.addToWineCellar({
-        pharmacyId: transaction.pharmacyId,
-        sourceReturnTransactionId: transactionId,
-        ndc: body.ndc,
-        ndc10: body.ndc10,
-        productName: body.proprietaryName || body.genericName,
-        manufacturer: body.manufacturer,
-        lotNumber: body.lotNumber,
-        serialNumber: body.serialNumber,
-        expirationDate: body.expirationDate,
-        quantity: body.quantity != null ? Number(body.quantity) : 1,
-        standardPrice: body.standardPrice != null ? Number(body.standardPrice) : undefined,
-        isPartial,
-        partialPercentage,
-        expectedReturnableDate: expectedDate,
-        notes:
-          body.memo ||
-          `Shelved from return ${transactionId} (${policyResult.reason?.replace(/_/g, ' ') || 'policy'})`,
-        createdBy: (req as any).adminId || (req as any).processorId,
-      });
-
-      return res.status(201).json({
-        status: 'success',
-        data: null,
-        wineCellarOnly: true,
-        wineCellarItem,
-        policyCheck: policyResult,
-      });
-    }
+    /*
+     * Wine cellar auto-shelving during add-item is intentionally disabled.
+     * Warehouse verification now decides this route and calls the existing
+     * move-to-wine-cellar APIs when needed.
+     */
+    // const wcAutoReason =
+    //   policyResult?.reason === 'too_early' || policyResult?.reason === 'deferred_inside_policy_period';
+    // const shouldShelveWineCellarOnly =
+    //   policyResult &&
+    //   wcAutoReason &&
+    //   policyResult.expectedReturnableDate &&
+    //   returnStatus === 'non_returnable' &&
+    //   body.ndc &&
+    //   body.expirationDate;
+    //
+    // if (shouldShelveWineCellarOnly && policyResult) {
+    //   const expectedDate = policyResult.expectedReturnableDate;
+    //   if (!expectedDate) {
+    //     throw new AppError('Policy check did not provide expectedReturnableDate for wine cellar', 500);
+    //   }
+    //   const transaction = await getReturnTransactionById(transactionId);
+    //   const wineCellarItem = await wcService.addToWineCellar({
+    //     pharmacyId: transaction.pharmacyId,
+    //     sourceReturnTransactionId: transactionId,
+    //     ndc: body.ndc,
+    //     ndc10: body.ndc10,
+    //     productName: body.proprietaryName || body.genericName,
+    //     manufacturer: body.manufacturer,
+    //     lotNumber: body.lotNumber,
+    //     serialNumber: body.serialNumber,
+    //     expirationDate: body.expirationDate,
+    //     quantity: body.quantity != null ? Number(body.quantity) : 1,
+    //     standardPrice: body.standardPrice != null ? Number(body.standardPrice) : undefined,
+    //     isPartial,
+    //     partialPercentage,
+    //     expectedReturnableDate: expectedDate,
+    //     notes:
+    //       body.memo ||
+    //       `Shelved from return ${transactionId} (${policyResult.reason?.replace(/_/g, ' ') || 'policy'})`,
+    //     createdBy: (req as any).adminId || (req as any).processorId,
+    //   });
+    //
+    //   return res.status(201).json({
+    //     status: 'success',
+    //     data: null,
+    //     wineCellarOnly: true,
+    //     wineCellarItem,
+    //     policyCheck: policyResult,
+    //   });
+    // }
 
     // Extract fullPackageSize from packageDescription if not explicitly provided
     let fullPackageSize: number | undefined;
@@ -203,23 +215,27 @@ export const addItemHandler = catchAsync(
       rawScanData: body.rawScanData,
     });
 
-    // Create destruction record if item is marked for destruction
-    const normalizedDestination = String(result.item.destination || '').trim().toLowerCase();
-    console.log('🔍 [Add Item] Status:', result.item.returnStatus, 'Destination:', normalizedDestination, 'Item ID:', result.item.id);
-    if (result.item.returnStatus === 'non_returnable' && normalizedDestination === 'destruction') {
-      console.log('💥 [Add Item] Creating destruction record for item:', result.item.id);
-      try {
-        await destructionService.createDestructionRecordForTransactionItem(
-          result.item.id,
-          (req as any).adminId || (req as any).processorId || (req as any).pharmacyId,
-          body.memo
-        );
-        console.log('✅ [Add Item] Destruction record created successfully');
-      } catch (err: any) {
-        console.error('❌ [Add Item] Failed to create destruction record:', err.message);
-        // Don't fail the item creation if destruction record fails
-      }
-    }
+    /*
+     * Auto-creating destruction records during add-item is intentionally disabled.
+     * Warehouse verification now routes non-returnables to destruction via
+     * the existing resolve endpoint.
+     */
+    // const normalizedDestination = String(result.item.destination || '').trim().toLowerCase();
+    // console.log('🔍 [Add Item] Status:', result.item.returnStatus, 'Destination:', normalizedDestination, 'Item ID:', result.item.id);
+    // if (result.item.returnStatus === 'non_returnable' && normalizedDestination === 'destruction') {
+    //   console.log('💥 [Add Item] Creating destruction record for item:', result.item.id);
+    //   try {
+    //     await destructionService.createDestructionRecordForTransactionItem(
+    //       result.item.id,
+    //       (req as any).adminId || (req as any).processorId || (req as any).pharmacyId,
+    //       body.memo
+    //     );
+    //     console.log('✅ [Add Item] Destruction record created successfully');
+    //   } catch (err: any) {
+    //     console.error('❌ [Add Item] Failed to create destruction record:', err.message);
+    //     // Don't fail the item creation if destruction record fails
+    //   }
+    // }
 
     const response: any = {
       status: 'success',
@@ -237,6 +253,23 @@ export const addItemHandler = catchAsync(
 // ============================================================
 // GET /api/return-transactions/:id/items — List items
 // ============================================================
+//
+// FCR-52: Non-returnable items must appear alongside returnable items
+// in every return-detail list (pharmacy + admin warehouse). The legacy
+// destruction filter was overly aggressive — it hid both:
+//   • Returnable items that somehow ended up with destination='destruction'
+//   • Non-returnable items routed to destruction
+//
+// We keep the filter for returnable rows only (defensive; that scenario
+// is unexpected and would likely be a bug) but always show
+// non-returnable rows so admins / warehouse / pharmacies have full
+// visibility.
+//
+// Pricing in the summary still uses the historical rule:
+//   totalReturnableValue → returnable rows only
+//   totalNonReturnableValue → non_returnable rows only
+//   totalValue → returnable rows only (unchanged for back-compat)
+// ============================================================
 export const listItemsHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const transactionId = req.params.id;
@@ -248,12 +281,23 @@ export const listItemsHandler = catchAsync(
       search,
     );
 
-    // Destruction-routed items belong to the destruction workflow and should
-    // not appear in return item lists across any portal.
     const filteredItems = (result.items || []).filter((item: any) => {
       const normalizedDestination = String(item?.destination || '').trim().toLowerCase();
-      return normalizedDestination !== 'destruction';
+      const normalizedStatus = String(item?.returnStatus || '').trim().toLowerCase();
+      // Only hide returnable rows accidentally routed to destruction.
+      // Non-returnable items routed to destruction must still be visible.
+      if (normalizedStatus === 'returnable' && normalizedDestination === 'destruction') {
+        return false;
+      }
+      return true;
     });
+
+    const totalReturnableValue = filteredItems
+      .filter((item: any) => item.returnStatus === 'returnable')
+      .reduce((sum: number, item: any) => sum + (Number(item.estimatedValue) || 0), 0);
+    const totalNonReturnableValue = filteredItems
+      .filter((item: any) => item.returnStatus === 'non_returnable')
+      .reduce((sum: number, item: any) => sum + (Number(item.estimatedValue) || 0), 0);
 
     res.status(200).json({
       status: 'success',
@@ -262,16 +306,11 @@ export const listItemsHandler = catchAsync(
         items: filteredItems,
         summary: {
           totalItems: filteredItems.length,
-          totalReturnableValue: filteredItems
-            .filter((item: any) => item.returnStatus === 'returnable')
-            .reduce((sum: number, item: any) => sum + (Number(item.estimatedValue) || 0), 0),
-          totalNonReturnableValue: filteredItems
-            .filter((item: any) => item.returnStatus === 'non_returnable')
-            .reduce((sum: number, item: any) => sum + (Number(item.estimatedValue) || 0), 0),
-          totalValue: filteredItems.reduce(
-            (sum: number, item: any) => sum + (Number(item.estimatedValue) || 0),
-            0
-          ),
+          totalReturnableValue,
+          totalNonReturnableValue,
+          totalValue: totalReturnableValue,
+          returnableCount: filteredItems.filter((item: any) => item.returnStatus === 'returnable').length,
+          nonReturnableCount: filteredItems.filter((item: any) => item.returnStatus === 'non_returnable').length,
         },
       },
     });
@@ -290,6 +329,10 @@ export const getItemHandler = catchAsync(
 
 // ============================================================
 // PATCH /api/return-transactions/:id/items/:itemId — Update item
+// ============================================================
+// FCR-52: If returnStatus is being set to 'non_returnable', a valid
+// nonReturnableReason must be supplied (either in this request or
+// already present on the row).
 // ============================================================
 export const updateItemHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
@@ -313,11 +356,32 @@ export const updateItemHandler = catchAsync(
       partialPercentage = null;
     }
 
-    const normalizedUpdates = {
-      ...body,
-      ...(hasIsPartial ? { isPartial } : {}),
-      ...(partialPercentage !== undefined ? { partialPercentage } : {}),
-    };
+    if (body.returnStatus === 'non_returnable') {
+      // const incomingReason = body.nonReturnableReason;
+      // const effectiveReason =
+      //   (incomingReason && String(incomingReason).trim()) ||
+      //   (existingItem.nonReturnableReason || '').trim();
+      // if (!effectiveReason || !isValidNonReturnableReason(effectiveReason)) {
+      //   throw new AppError(
+      //     'A valid nonReturnableReason is required when marking an item as non-returnable',
+      //     400
+      //   );
+      // }
+    }
+
+    // Only include isPartial/partialPercentage in the update if they were explicitly provided in the request
+    // This prevents the RPC from thinking we're trying to update core fields when we're just updating classification fields
+    const normalizedUpdates: Record<string, any> = { ...body };
+    
+    // Only add isPartial if it was explicitly provided in the request
+    if (hasIsPartial) {
+      normalizedUpdates.isPartial = isPartial;
+    }
+    
+    // Only add partialPercentage if it was explicitly provided in the request
+    if (hasPartialPercentage) {
+      normalizedUpdates.partialPercentage = partialPercentage;
+    }
 
     const item = await itemsService.updateItem(req.params.itemId, normalizedUpdates);
     res.status(200).json({ status: 'success', data: item });
@@ -397,6 +461,11 @@ export const moveToWineCellarHandler = catchAsync(
 // ============================================================
 // PATCH /api/return-transactions/:id/items/:itemId/resolve — Resolve TBD item
 // ============================================================
+// FCR-52: When `new_status` is `non_returnable`, a `reason` from the
+// canonical RSI list (or a legacy value) is REQUIRED — except for the
+// wine cellar route where the reason is implicitly 'date' (item is
+// being shelved because it's too early).
+// ============================================================
 export const resolveItemHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const { id: transactionId, itemId } = req.params;
@@ -443,7 +512,7 @@ export const resolveItemHandler = catchAsync(
       const updated = await itemsService.updateItem(itemId, {
         wineCellarId: wineCellarItem.id,
         returnStatus: 'non_returnable',
-        nonReturnableReason: 'date',
+        nonReturnableReason: reason && isValidNonReturnableReason(reason) ? reason : 'date',
         memo: memo || undefined,
       } as any);
 
@@ -452,6 +521,15 @@ export const resolveItemHandler = catchAsync(
         data: updated,
         message: `Item moved to wine cellar (eligible ${expected_returnable_date})`,
       });
+    }
+
+    if (new_status === 'non_returnable') {
+      if (!reason || !isValidNonReturnableReason(reason)) {
+        throw new AppError(
+          'A valid non-returnable reason is required when marking an item as non-returnable',
+          400
+        );
+      }
     }
 
     const destinationForResolve =
@@ -525,6 +603,8 @@ export const scanBarcodeHandler = catchAsync(
       suggestedPrice: number | null;
       bestFullPrice: number | null;
       bestPartialPrice: number | null;
+      fullQuantity: number | null;
+      partialQuantity: number | null;
       priceSource: string | null;
       distributorPricing: any[] | null;
       estimatedStorePrice: number | null;
@@ -533,6 +613,8 @@ export const scanBarcodeHandler = catchAsync(
       suggestedPrice: null,
       bestFullPrice: null,
       bestPartialPrice: null,
+      fullQuantity: null,
+      partialQuantity: null,
       priceSource: null,
       distributorPricing: null,
       estimatedStorePrice: null,
@@ -545,25 +627,31 @@ export const scanBarcodeHandler = catchAsync(
         const ndcPricing = await resolveNDCPrice(resolvedNdc);
         
         if (ndcPricing.found && ndcPricing.currentPrice && ndcPricing.currentPrice > 0) {
+          // Also fetch return_reports quantities even when NDC pricing book has a price
+          const pricingResult = await getPricingForSingleNDC(resolvedNdc);
           pricing = {
             suggestedPrice: ndcPricing.currentPrice,
             bestFullPrice: ndcPricing.currentPrice,
             bestPartialPrice: ndcPricing.currentPrice,
+            fullQuantity: pricingResult?.totalFullQuantity || null,
+            partialQuantity: pricingResult?.totalPartialQuantity || null,
             priceSource: ndcPricing.priceSource || 'NDC Pricing Book',
-            distributorPricing: null, // NDC pricing book doesn't have distributor breakdown
+            distributorPricing: null,
             estimatedStorePrice: ndcPricing.estimatedStorePrice,
             closeOutDestination: ndcPricing.closeOutDestination,
           };
         } else {
           // Fallback to return_reports if not found in pricing book
           const pricingResult = await getPricingForSingleNDC(resolvedNdc);
-          if (pricingResult && (pricingResult.bestFullPrice > 0 || pricingResult.bestPartialPrice > 0)) {
+          if (pricingResult && (pricingResult.bestFullPrice > 0 || pricingResult.bestPartialPrice > 0 || pricingResult.totalFullQuantity > 0 || pricingResult.totalPartialQuantity > 0)) {
             pricing = {
               suggestedPrice: pricingResult.bestFullPrice > 0
                 ? pricingResult.bestFullPrice
                 : pricingResult.bestPartialPrice,
               bestFullPrice: pricingResult.bestFullPrice || null,
               bestPartialPrice: pricingResult.bestPartialPrice || null,
+              fullQuantity: pricingResult.totalFullQuantity || null,
+              partialQuantity: pricingResult.totalPartialQuantity || null,
               priceSource: pricingResult.recommendedDistributor?.distributorName || 'return_reports',
               distributorPricing: pricingResult.distributors.map(d => ({
                 distributorName: d.distributorName,

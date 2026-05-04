@@ -11,6 +11,7 @@ import {
     UserCog,
     ClipboardList,
     Scan,
+    Truck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppSelector } from '@/lib/store/hooks';
@@ -48,6 +49,7 @@ const adminSidebarLinks = [
     { href: '/settings', icon: Settings, label: 'Settings', permission: 'settings' },
     // { href: '/admins', icon: Users, label: 'Admins', permission: 'admins' },
     { href: '/processors', icon: UserCog, label: 'Processors', permission: 'processors' },
+    { href: '/service-requests', icon: Truck, label: 'Service Requests', permission: 'service_requests' },
     // { href: '/policies', icon: Shield, label: 'Labeler Info', permission: 'policies' },
     // { href: '/ndc-pricing', icon: DollarSign, label: 'NDC Pricing', permission: 'ndc_pricing' },
     // { href: '/warehouse/tbd-items', icon: AlertTriangle, label: 'TBD Items', permission: 'tbd_items' },
@@ -60,6 +62,7 @@ const processorSidebarLinks = [
     { href: '/', icon: LayoutDashboard, label: 'Dashboard' },
     { href: '/warehouse/returns', icon: ClipboardList, label: 'Returns' },
     { href: '/warehouse/returns/create', icon: Scan, label: 'Create Return' },
+    { href: '/service-requests', icon: Truck, label: 'Service Requests' },
     // { href: '/ndc-pricing', icon: DollarSign, label: 'NDC Pricing' },
     // { href: '/warehouse/tbd-items', icon: AlertTriangle, label: 'TBD Items' },
     // { href: '/warehouse/destruction', icon: Trash2, label: 'Destruction' },
@@ -81,6 +84,11 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose }: SidebarProps) 
     // Choose navigation links based on user role, filtered by permissions
     const rawLinks = user?.role === 'processor' ? processorSidebarLinks : adminSidebarLinks;
     const sidebarLinks = rawLinks.filter((link) => {
+        // Hide service requests for buying group users, but allow processors to see them
+        if (link.href === '/service-requests' && user?.buying_group_id && user?.role !== 'processor') {
+            return false;
+        }
+        
         const perm = (link as any).permission as string | undefined;
         if (!perm) return true;
         if (perm === 'admins' && !isSuperAdmin) return false;
@@ -97,13 +105,9 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose }: SidebarProps) 
     return (
         <aside
             className={cn(
-                'bg-[#1e293b] text-[#cbd5e1] h-screen fixed left-0 top-16 transition-all duration-300 z-40',
-                // Mobile: hidden by default, show as overlay when open
-                // Desktop: always visible (sm:translate-x-0 overrides the transform)
+                'bg-[#1e293b] text-slate-400 h-screen fixed left-0 top-16 transition-all duration-300 z-40',
                 isOpen ? 'translate-x-0' : '-translate-x-full',
                 'sm:translate-x-0',
-                // Desktop: adjust width based on collapsed state
-                // Mobile: fixed width
                 'w-64 sm:w-auto',
                 isCollapsed ? 'sm:w-16' : 'sm:w-64'
             )}
@@ -128,15 +132,19 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose }: SidebarProps) 
                                 href={link.href}
                                 onClick={handleLinkClick}
                                 className={cn(
-                                    'flex items-center gap-2.5 px-3 py-1.5 rounded-lg transition-all',
-                                    'hover:bg-[#334155]',
-                                    isActive && 'bg-[#334155] text-[#4CAF50]',
+                                    'flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all',
+                                    'hover:bg-[#334155] hover:text-white',
+                                    isActive
+                                        ? 'bg-[#334155] text-[#4CAF50]'
+                                        : 'text-slate-400',
                                     isCollapsed && 'justify-center'
                                 )}
                             >
                                 <Icon className="w-4 h-4 flex-shrink-0" />
                                 {!isCollapsed && (
-                                    <span className="text-xs font-medium">{link.label}</span>
+                                    <span className={cn('text-sm', isActive ? 'font-semibold' : 'font-medium')}>
+                                        {link.label}
+                                    </span>
                                 )}
                             </Link>
                         );

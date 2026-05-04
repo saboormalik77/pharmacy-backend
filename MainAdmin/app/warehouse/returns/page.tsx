@@ -317,34 +317,34 @@ export default function ReturnsPage() {
                     <div className="overflow-x-auto">
                         <table className="w-full table-auto">
                             <thead>
-                                <tr className="bg-gray-50 border-b border-gray-200">
-                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">License Plate</th>
-                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Store</th>
-                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
-                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Items</th>
-                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Value</th>
-                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Date</th>
-                                    <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
+                                <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">License Plate</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Store</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Status</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Items</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Value</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Date</th>
+                                    <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {transactions.map((tx) => {
                                     const badge = getStatusBadge(tx.status);
                                     return (
-                                        <tr key={tx.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => router.push(`/warehouse/returns/${tx.id}`)}>
-                                            <td className="px-3 py-1.5">
-                                                <span className="text-xs font-mono font-semibold text-gray-900">{tx.licensePlate}</span>
+                                        <tr key={tx.id} className="odd:bg-white even:bg-gray-50/40 hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => router.push(`/warehouse/returns/${tx.id}`)}>
+                                            <td className="px-4 py-3">
+                                                <span className="text-sm font-mono font-semibold text-gray-900">{tx.licensePlate}</span>
                                             </td>
-                                            <td className="px-3 py-1.5">
-                                                <p className="text-xs font-medium text-gray-900 truncate max-w-[140px]">{tx.pharmacyName || '—'}</p>
+                                            <td className="px-4 py-3">
+                                                <p className="text-sm font-medium text-gray-900 truncate max-w-[140px]">{tx.pharmacyName || '—'}</p>
                                             </td>
-                                            <td className="px-3 py-1.5">
+                                            <td className="px-4 py-3">
                                                 <Badge variant={badge.variant}><span className="text-[10px]">{badge.label}</span></Badge>
                                             </td>
-                                            <td className="px-3 py-1.5 text-xs text-gray-600">{tx.totalItems}</td>
-                                            <td className="px-3 py-1.5 text-xs text-gray-900 font-medium">{formatCurrency(tx.totalReturnableValue)}</td>
-                                            <td className="px-3 py-1.5 text-xs text-gray-500">{formatDate(tx.createdAt)}</td>
-                                            <td className="px-3 py-1.5" onClick={e => e.stopPropagation()}>
+                                            <td className="px-4 py-3 text-sm text-gray-600">{tx.totalItems}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-900 font-medium">{formatCurrency(tx.totalReturnableValue)}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-500">{formatDate(tx.createdAt)}</td>
+                                            <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
                                                 <div className="flex items-center justify-end gap-0.5">
                                                     <button onClick={() => setViewModal(tx)} className="p-1 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded" title="View Details">
                                                         <Eye className="w-3.5 h-3.5" />

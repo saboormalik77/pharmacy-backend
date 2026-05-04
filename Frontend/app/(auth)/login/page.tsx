@@ -256,7 +256,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-teal-50 to-emerald-100 p-4">
       <Suspense fallback={<TenantInfoLoadingScreen />}>
         <LoginForm />
       </Suspense>

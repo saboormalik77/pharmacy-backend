@@ -155,7 +155,7 @@ export default function WineCellarPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
-                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
+                    <h1 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                         <Archive className="w-6 h-6 text-purple-600" /> Wine Cellar
                     </h1>
                     <p className="text-sm text-gray-500 mt-1">Products stored for future return processing</p>
@@ -174,29 +174,29 @@ export default function WineCellarPage() {
             {/* Stats Cards */}
             {stats && (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                    <div className="bg-white rounded-lg shadow-md p-4 text-center">
-                        <p className="text-xs text-gray-500">Total Items</p>
-                        <p className="text-xl font-bold text-gray-900">{stats.totalItems}</p>
+                    <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                        <p className="text-xs font-medium text-gray-500 mb-1">Total Items</p>
+                        <p className="text-lg font-bold text-gray-900">{stats.totalItems}</p>
                     </div>
-                    <div className="bg-blue-50 rounded-lg shadow-md p-4 text-center">
-                        <p className="text-xs text-blue-600">Shelved</p>
-                        <p className="text-xl font-bold text-blue-800">{stats.shelved}</p>
+                    <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                        <p className="text-xs font-medium text-blue-600 mb-1">Shelved</p>
+                        <p className="text-lg font-bold text-blue-700">{stats.shelved}</p>
                     </div>
-                    <div className="bg-yellow-50 rounded-lg shadow-md p-4 text-center">
-                        <p className="text-xs text-yellow-600">Ready to Return</p>
-                        <p className="text-xl font-bold text-yellow-800">{stats.readyToReturn}</p>
+                    <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                        <p className="text-xs font-medium text-yellow-600 mb-1">Ready to Return</p>
+                        <p className="text-lg font-bold text-yellow-700">{stats.readyToReturn}</p>
                     </div>
-                    <div className="bg-green-50 rounded-lg shadow-md p-4 text-center">
-                        <p className="text-xs text-green-600">Returned</p>
-                        <p className="text-xl font-bold text-green-800">{stats.returned}</p>
+                    <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                        <p className="text-xs font-medium text-green-600 mb-1">Returned</p>
+                        <p className="text-lg font-bold text-green-700">{stats.returned}</p>
                     </div>
-                    <div className="bg-red-50 rounded-lg shadow-md p-4 text-center">
-                        <p className="text-xs text-red-600">Destroyed</p>
-                        <p className="text-xl font-bold text-red-800">{stats.destroyed}</p>
+                    <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                        <p className="text-xs font-medium text-red-600 mb-1">Destroyed</p>
+                        <p className="text-lg font-bold text-red-700">{stats.destroyed}</p>
                     </div>
-                    <div className="bg-purple-50 rounded-lg shadow-md p-4 text-center">
-                        <p className="text-xs text-purple-600">Total Value</p>
-                        <p className="text-lg font-bold text-purple-800">{formatCurrency(stats.totalValue)}</p>
+                    <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                        <p className="text-xs font-medium text-purple-600 mb-1">Total Value</p>
+                        <p className="text-lg font-bold text-purple-700">{formatCurrency(stats.totalValue)}</p>
                     </div>
                 </div>
             )}
@@ -283,18 +283,18 @@ export default function WineCellarPage() {
                         <div className="overflow-x-auto">
                             <table className="w-full table-auto text-xs">
                                 <thead>
-                                    <tr className="bg-gray-50 border-b border-gray-200">
-                                        <th className="text-left px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">NDC</th>
-                                        <th className="text-left px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                                        <th className="text-left px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">Pharmacy</th>
-                                        <th className="text-center px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">QTY</th>
-                                        <th className="text-right px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                                        <th className="text-right px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">Est. Store Price</th>
-                                        <th className="text-left px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">Shelved</th>
-                                        <th className="text-left px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">Expected Return</th>
-                                        <th className="text-left px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                                        <th className="text-left px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th className="text-right px-3 py-2 font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                        <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
+                                        <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product</th>
+                                        <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Pharmacy</th>
+                                        <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">QTY</th>
+                                        <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Price</th>
+                                        <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Est. Store Price</th>
+                                        <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Shelved</th>
+                                        <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Expected Return</th>
+                                        <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Location</th>
+                                        <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Status</th>
+                                        <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -302,8 +302,8 @@ export default function WineCellarPage() {
                                         const sBadge = getStatusBadge(item.status);
                                         return (
                                             <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
-                                                <td className="px-3 py-2 font-mono text-gray-900">{item.ndc || '—'}</td>
-                                                <td className="px-3 py-2 text-gray-900 max-w-[160px] truncate" title={item.productName || ''}>
+                                                <td className="px-4 py-3 text-sm font-mono text-gray-900">{item.ndc || '—'}</td>
+                                                <td className="px-4 py-3 text-sm text-gray-900 max-w-[160px] truncate" title={item.productName || ''}>
                                                     <div>
                                                         <p className="truncate">{item.productName || '—'}</p>
                                                         {item.manufacturer && (
@@ -311,32 +311,32 @@ export default function WineCellarPage() {
                                                         )}
                                                     </div>
                                                 </td>
-                                                <td className="px-3 py-2 text-gray-600 max-w-[120px] truncate" title={item.pharmacyName || ''}>
+                                                <td className="px-4 py-3 text-sm text-gray-600 max-w-[120px] truncate" title={item.pharmacyName || ''}>
                                                     {item.pharmacyName || '—'}
                                                 </td>
-                                                <td className="px-3 py-2 text-center text-gray-900">
+                                                <td className="px-4 py-3 text-sm text-center text-gray-900">
                                                     {item.quantity}{item.isPartial && <span className="text-yellow-600 ml-0.5">P</span>}
                                                 </td>
-                                                <td className="px-3 py-2 text-right text-gray-900">
+                                                <td className="px-4 py-3 text-sm text-right text-gray-900">
                                                     {item.standardPrice != null ? formatCurrency(item.standardPrice) : '—'}
                                                 </td>
-                                                <td className="px-3 py-2 text-right text-gray-900">
+                                                <td className="px-4 py-3 text-sm text-right text-gray-900">
                                                     {item.estimatedStorePrice != null ? formatCurrency(item.estimatedStorePrice) : '—'}
                                                 </td>
-                                                <td className="px-3 py-2 text-gray-600">{formatDate(item.dateShelved)}</td>
-                                                <td className="px-3 py-2 text-gray-600">
+                                                <td className="px-4 py-3 text-sm text-gray-600">{formatDate(item.dateShelved)}</td>
+                                                <td className="px-4 py-3 text-sm text-gray-600">
                                                     {item.expectedReturnableDate ? formatDate(item.expectedReturnableDate) : '—'}
                                                 </td>
-                                                <td className="px-3 py-2 text-gray-600">
+                                                <td className="px-4 py-3 text-sm text-gray-600">
                                                     {item.physicalLocation || '—'}
                                                     {item.baggieBarcode && (
                                                         <p className="text-[10px] text-gray-400 font-mono">{item.baggieBarcode}</p>
                                                     )}
                                                 </td>
-                                                <td className="px-3 py-2">
+                                                <td className="px-4 py-3 text-sm">
                                                     <Badge variant={sBadge.variant}>{sBadge.label}</Badge>
                                                 </td>
-                                                <td className="px-3 py-2">
+                                                <td className="px-4 py-3 text-sm">
                                                     <div className="flex items-center justify-end gap-1">
                                                         {(item.status === 'shelved' || item.status === 'ready_to_return') && (
                                                             <button

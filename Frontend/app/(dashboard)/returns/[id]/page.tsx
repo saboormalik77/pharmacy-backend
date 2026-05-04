@@ -15,6 +15,7 @@ import { formatDate, formatCurrency } from '@/lib/utils/format';
 import { useDebounce } from '@/hooks/useDebounce';
 import { apiClient } from '@/lib/api/client';
 import { getToken } from '@/lib/utils/cookies';
+import { NON_RETURNABLE_REASONS, formatNonReturnableReason } from '@/lib/constants/nonReturnableReasons';
 
 // ── Types ──────────────────────────────────────────────────────
 
@@ -23,6 +24,10 @@ interface ReturnTransaction {
     licensePlate: string;
     pharmacyId: string;
     pharmacyName?: string;
+    storeNumber?: string | null;
+    pharmacyStreetAddress?: string | null;
+    pharmacyCity?: string | null;
+    pharmacyState?: string | null;
     processorId?: string;
     processorName?: string;
     serviceType: string;
@@ -30,6 +35,7 @@ interface ReturnTransaction {
     totalItems: number;
     totalReturnableValue: number;
     totalNonReturnableValue: number;
+    hasCiiItems?: boolean; // For DEA Form 222 availability
     fedexTracking?: string;
     fedexPickupConfirmation?: string;
     notes?: string;
@@ -43,6 +49,7 @@ interface ReturnTransaction {
     fedexLabels?: Record<string, string>;
     manifestGeneratedAt?: string;
     receivedInWarehouseDate?: string;
+    createdByProcessor?: boolean;
 }
 
 interface ReturnTransactionItem {
@@ -60,7 +67,7 @@ interface ReturnTransactionItem {
     expirationDate?: string;
     standardPrice?: number;
     quantity: number;
-    quantityReturned: number;
+    quantityReturned?: number;
     isPartial?: boolean;
     partialPercentage?: number;
     fullPackageSize?: number;
@@ -89,6 +96,11 @@ interface ReverseDistributor {
 // ── Helpers ────────────────────────────────────────────────────
 
 function canDoAction(tx: ReturnTransaction, action: string): boolean {
+    // If return was created by processor, pharmacy can only view - no actions allowed
+    if (tx.processorId) {
+        return false;
+    }
+    
     switch (action) {
         case 'pause': return tx.status === 'in_progress';
         case 'resume': return tx.status === 'paused';
@@ -175,6 +187,7 @@ export default function ReturnDetailPage() {
         returnStatus: '',
         destination: '',
         memo: '',
+        nonReturnableReason: '',
     });
     const [editPolicyCheck, setEditPolicyCheck] = useState<{
         status: 'returnable' | 'non_returnable' | 'tbd';
@@ -262,48 +275,53 @@ export default function ReturnDetailPage() {
         if (editItemModal) {
             setEditItemForm({
                 fullPackageSize: editItemModal.fullPackageSize ? String(editItemModal.fullPackageSize) : '',
-                fullPackageQtyReturned: editItemModal.fullPackageQtyReturned ? String(editItemModal.fullPackageQtyReturned) : (editItemModal.quantity ? String(editItemModal.quantity) : ''),
+                fullPackageQtyReturned: (editItemModal.fullPackageQtyReturned ?? editItemModal.quantityReturned)
+                    ? String(editItemModal.fullPackageQtyReturned ?? editItemModal.quantityReturned)
+                    : (editItemModal.quantity ? String(editItemModal.quantity) : ''),
                 standardPrice: editItemModal.standardPrice || 0,
                 returnStatus: editItemModal.returnStatus,
                 destination: editItemModal.destination || '',
                 memo: editItemModal.memo || '',
+                nonReturnableReason: editItemModal.nonReturnableReason || '',
             });
             setEditPolicyCheck(null);
         }
     }, [editItemModal]);
 
     const runEditPolicyCheck = useCallback(async () => {
-        if (!editItemModal) return;
-        const ndc = editItemModal.ndc;
-        const expDate = editItemModal.expirationDate;
-        if (!ndc || !expDate) return;
+        // Policy check disabled
+        return;
+        // if (!editItemModal) return;
+        // const ndc = editItemModal.ndc;
+        // const expDate = editItemModal.expirationDate;
+        // if (!ndc || !expDate) return;
 
-        const pkgSize = parseInt(editItemForm.fullPackageSize) || 0;
-        const qtyReturned = parseInt(editItemForm.fullPackageQtyReturned) || 0;
-        const isPartial = pkgSize > 0 && qtyReturned > 0 && qtyReturned < pkgSize;
+        // const pkgSize = parseInt(editItemForm.fullPackageSize) || 0;
+        // const qtyReturned = parseInt(editItemForm.fullPackageQtyReturned) || 0;
+        // const isPartial = pkgSize > 0 && qtyReturned > 0 && qtyReturned < pkgSize;
 
-        setIsEditPolicyChecking(true);
-        setEditPolicyCheck(null);
-        try {
-            const res = await apiClient.post<any>('/policies/check', {
-                ndc,
-                expirationDate: expDate,
-                dosageForm: editItemModal.dosageForm || undefined,
-                isPartial,
-            }, true);
-            if (res.status === 'success' && res.data) {
-                const policy = res.data;
-                setEditPolicyCheck(policy);
-                if (policy.status === 'returnable' || policy.status === 'non_returnable') {
-                    setEditItemForm(prev => ({
-                        ...prev,
-                        returnStatus: policy.status,
-                        destination: policy.destination || prev.destination,
-                    }));
-                }
-            }
-        } catch { /* non-critical */ }
-        setIsEditPolicyChecking(false);
+        // setIsEditPolicyChecking(true);
+        // setEditPolicyCheck(null);
+        // try {
+        //     const res = await apiClient.post<any>('/policies/check', {
+        //         ndc,
+        //         expirationDate: expDate,
+        //         dosageForm: editItemModal.dosageForm || undefined,
+        //         isPartial,
+        //     }, true);
+        //     if (res.status === 'success' && res.data) {
+        //         const policy = res.data;
+        //         setEditPolicyCheck(policy);
+        //         if (policy.status === 'returnable' || policy.status === 'non_returnable') {
+        //             setEditItemForm(prev => ({
+        //                 ...prev,
+        //                 returnStatus: policy.status,
+        //                 destination: policy.destination || prev.destination,
+        //             }));
+        //         }
+        //     }
+        // } catch { /* non-critical */ }
+        // setIsEditPolicyChecking(false);
     }, [editItemModal, editItemForm.fullPackageSize, editItemForm.fullPackageQtyReturned]);
 
     const editPolicyModalIdRef = useRef<string | null>(null);
@@ -492,12 +510,22 @@ export default function ReturnDetailPage() {
 
     const handleUpdateItem = async () => {
         if (!editItemModal) return;
+
+        // FCR-52: Require a reason whenever the row ends up non_returnable.
+        // if (editItemForm.returnStatus === 'non_returnable') {
+        //     const { isValidNonReturnableReason } = await import('@/lib/constants/nonReturnableReasons');
+        //     if (!isValidNonReturnableReason(editItemForm.nonReturnableReason)) {
+        //         showToast('Please select a non-returnable reason for this item.', 'error');
+        //         return;
+        //     }
+        // }
+
         setIsActionLoading(true);
         try {
             const payload: Record<string, any> = {
                 returnStatus: editItemForm.returnStatus,
             };
-            
+
             const pkgSize = editItemForm.fullPackageSize ? parseInt(editItemForm.fullPackageSize) : 0;
             const qtyReturned = editItemForm.fullPackageQtyReturned ? parseInt(editItemForm.fullPackageQtyReturned) : 0;
             if (pkgSize > 0) payload.fullPackageSize = pkgSize;
@@ -516,6 +544,9 @@ export default function ReturnDetailPage() {
             if (editItemForm.standardPrice) payload.standardPrice = editItemForm.standardPrice;
             if (editItemForm.destination) payload.destination = editItemForm.destination;
             if (editItemForm.memo) payload.memo = editItemForm.memo;
+            if (editItemForm.returnStatus === 'non_returnable') {
+                payload.nonReturnableReason = editItemForm.nonReturnableReason;
+            }
 
             const res = await apiClient.patch(
                 `/return-transactions/${id}/items/${editItemModal.id}`,
@@ -633,15 +664,22 @@ export default function ReturnDetailPage() {
                         {canDoAction(tx, 'resume') && (
                             <button
                                 onClick={() => setActionModal({ action: 'resume' })}
-                                className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
                             >
                                 <Play className="w-3 h-3" /> Resume
                             </button>
                         )}
                         {canDoAction(tx, 'complete') && (
                             <button
-                                onClick={() => setActionModal({ action: 'complete' })}
-                                className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                onClick={() => {
+                                    // Require at least 1 item to complete a return
+                                    if (!items || items.length === 0) {
+                                        showToast('Cannot complete return: At least 1 item is required', 'error');
+                                        return;
+                                    }
+                                    setActionModal({ action: 'complete' });
+                                }}
+                                className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded bg-green-600 text-white hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
                             >
                                 <CheckCircle className="w-3 h-3" /> Complete
                             </button>
@@ -654,31 +692,20 @@ export default function ReturnDetailPage() {
                                 <Lock className="w-3 h-3" /> Finalize
                             </button>
                         )}
-                        {/* Print Job Sheet - Available for completed/finalized transactions with tracking */}
-                        {(tx.status === 'completed' || tx.status === 'finalized') && (tx.fedexTracking || (tx.packageTracking && Object.keys(tx.packageTracking).length > 0)) && (
-                            <button
-                                onClick={printJobSheet}
-                                disabled={pdfLoading === 'job-sheet'}
-                                className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors disabled:opacity-50"
-                                title="Print job sheet with addresses and barcodes"
-                            >
-                                {pdfLoading === 'job-sheet' ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <FileText className="w-4 h-4 mr-1" />}
-                                Print Job Sheet
-                            </button>
-                        )}
-                        {canDoAction(tx, 'edit') && (
+                        {/* Print Job Sheet - Moved to Documents section */}
+                        {/* {canDoAction(tx, 'edit') && (
                             <button
                                 onClick={() => setEditModal(true)}
-                                className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
                                 title="Edit"
                             >
                                 <Edit className="w-4 h-4" />
                             </button>
-                        )}
+                        )} */}
                         {canDoAction(tx, 'delete') && (
                             <button
                                 onClick={() => setDeleteModal(true)}
-                                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
                                 title="Delete"
                             >
                                 <Trash2 className="w-4 h-4" />
@@ -740,10 +767,125 @@ export default function ReturnDetailPage() {
                                 <dt className="text-xs text-gray-500">Store Name</dt>
                                 <dd className="text-xs font-medium text-gray-900">{tx.pharmacyName || '—'}</dd>
                             </div>
+                            
+                            {/* Store Address */}
+                            {tx.pharmacyStreetAddress && (
+                                <div className="flex justify-between">
+                                    <dt className="text-xs text-gray-500">Address</dt>
+                                    <dd className="text-xs font-medium text-gray-900">{tx.pharmacyStreetAddress}</dd>
+                                </div>
+                            )}
+                            
+                            {/* City / State */}
+                            {(tx.pharmacyCity || tx.pharmacyState) && (
+                                <div className="flex justify-between">
+                                    <dt className="text-xs text-gray-500">City / State</dt>
+                                    <dd className="text-xs font-medium text-gray-900">
+                                        {[tx.pharmacyCity, tx.pharmacyState].filter(Boolean).join(', ') || '—'}
+                                    </dd>
+                                </div>
+                            )}
+                            
+                            <div className="flex justify-between">
+                                <dt className="text-xs text-gray-500">Service Type</dt>
+                                <dd className="text-xs font-medium text-gray-900">
+                                    {tx.serviceType ? tx.serviceType.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : '—'}
+                                </dd>
+                            </div>
+                            
                             <div className="flex justify-between">
                                 <dt className="text-xs text-gray-500">Processor</dt>
                                 <dd className="text-xs font-medium text-gray-900">{tx.processorName || '—'}</dd>
                             </div>
+                            
+                            {/* Shipping Details Section */}
+                            {(tx.fedexTracking || tx.fedexPickupConfirmation) && (
+                                <>
+                                    <div className="pt-2 border-t border-gray-100" />
+                                    {tx.fedexTracking && (
+                                        <div className="flex justify-between">
+                                            <dt className="text-xs text-gray-500">FedEx Tracking</dt>
+                                            <dd className="text-xs font-medium text-gray-900 font-mono">{tx.fedexTracking}</dd>
+                                        </div>
+                                    )}
+                                    {tx.fedexPickupConfirmation && (
+                                        <div className="flex justify-between">
+                                            <dt className="text-xs text-gray-500">Pickup Confirmation</dt>
+                                            <dd className="text-xs font-medium text-gray-900 font-mono">{tx.fedexPickupConfirmation}</dd>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                            
+                            {/* Package Tracking with Print Labels */}
+                            {tx.packageTracking && Object.keys(tx.packageTracking).length > 0 && (
+                                <div className="pt-2 border-t border-gray-100">
+                                    <dt className="text-xs text-gray-500 mb-2 flex items-center justify-between">
+                                        <span>Package Tracking</span>
+                                        <div className="flex items-center gap-1">
+                                            <button
+                                                onClick={printShippingLabels}
+                                                disabled={pdfLoading === 'shipping-labels'}
+                                                className="flex items-center gap-1 px-2 py-1 bg-green-100 hover:bg-green-200 text-xs text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
+                                                title="Print all shipping labels with addresses and barcodes"
+                                            >
+                                                {pdfLoading === 'shipping-labels' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
+                                                Print All Labels
+                                            </button>
+                                        </div>
+                                    </dt>
+                                    <dd className="space-y-1.5 mt-1">
+                                        {Object.entries(tx.packageTracking)
+                                            .filter(([, v]) => v)
+                                            .map(([key, val], idx) => {
+                                                // Handle both formats: "package1" and "1"
+                                                const displayKey = key.startsWith('package') 
+                                                    ? key.replace(/([0-9]+)/, ' $1')
+                                                    : `Package ${key}`;
+                                                return (
+                                                    <div key={key} className="flex justify-between items-center text-xs">
+                                                        <span className="text-gray-500 capitalize">{displayKey}</span>
+                                                        <div className="flex items-center gap-1.5">
+                                                            <span className="font-mono text-gray-900">{val}</span>
+                                                            <button
+                                                                onClick={() => printSingleLabel(idx + 1)}
+                                                                disabled={pdfLoading === `shipping-label-${idx + 1}`}
+                                                                className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
+                                                                title={`Print shipping label for ${val}`}
+                                                            >
+                                                                {pdfLoading === `shipping-label-${idx + 1}` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })
+                                        }
+                                    </dd>
+                                </div>
+                            )}
+
+                            {/* FedEx Labels */}
+                            {tx.fedexLabels && Object.keys(tx.fedexLabels).length > 0 && (
+                                <div className="pt-2 border-t border-gray-100">
+                                    <dt className="text-xs text-gray-500 mb-1 flex items-center gap-1"><Printer className="w-3.5 h-3.5" /> Shipping Labels</dt>
+                                    <dd className="flex flex-wrap gap-2">
+                                        {Object.keys(tx.fedexLabels).map((key) => {
+                                            const num = key.replace('package', '');
+                                            return (
+                                                <a
+                                                    key={key}
+                                                    href={`${process.env.NEXT_PUBLIC_API_URL}/return-transactions/${tx.id}/labels/${num}/download`}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="flex items-center gap-1 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-xs text-gray-700 rounded border border-gray-200 transition-colors"
+                                                >
+                                                    <Download className="w-3 h-3" /> Label {num}
+                                                </a>
+                                            );
+                                        })}
+                                    </dd>
+                                </div>
+                            )}
                         </dl>
                     </div>
 
@@ -775,93 +917,7 @@ export default function ReturnDetailPage() {
                         </dl>
                     </div> */}
 
-                    {/* Shipping (conditional) */}
-                    {showShipping && (
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                <Truck className="w-4 h-4 text-gray-500" />
-                                Shipping
-                            </h2>
-                            <dl className="space-y-2">
-                                {tx.fedexTracking && (
-                                    <div className="flex justify-between">
-                                        <dt className="text-xs text-gray-500">FedEx Tracking</dt>
-                                        <dd className="text-xs font-medium text-gray-900 font-mono">{tx.fedexTracking}</dd>
-                                    </div>
-                                )}
-                                {tx.fedexPickupConfirmation && (
-                                    <div className="flex justify-between">
-                                        <dt className="text-xs text-gray-500">Pickup Confirmation</dt>
-                                        <dd className="text-xs font-medium text-gray-900 font-mono">{tx.fedexPickupConfirmation}</dd>
-                                    </div>
-                                )}
-                                
-                                {/* Package Tracking with Print Labels */}
-                                {tx.packageTracking && Object.keys(tx.packageTracking).length > 0 && (
-                                    <div className="pt-2 border-t border-gray-100">
-                                        <dt className="text-xs text-gray-500 mb-2 flex items-center justify-between">
-                                            <span>Package Tracking</span>
-                                            <div className="flex items-center gap-1">
-                                                <button
-                                                    onClick={printShippingLabels}
-                                                    disabled={pdfLoading === 'shipping-labels'}
-                                                    className="flex items-center gap-1 px-2 py-1 bg-green-100 hover:bg-green-200 text-xs text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
-                                                    title="Print all shipping labels with addresses and barcodes"
-                                                >
-                                                    {pdfLoading === 'shipping-labels' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
-                                                    Print All Labels
-                                                </button>
-                                            </div>
-                                        </dt>
-                                        <dd className="space-y-1.5 mt-1">
-                                            {Object.entries(tx.packageTracking)
-                                                .filter(([, v]) => v)
-                                                .map(([key, val], idx) => (
-                                                    <div key={key} className="flex justify-between items-center text-xs">
-                                                        <span className="text-gray-500 capitalize">{key.replace(/([0-9]+)/, ' $1')}</span>
-                                                        <div className="flex items-center gap-1.5">
-                                                            <span className="font-mono text-gray-900">{val}</span>
-                                                            <button
-                                                                onClick={() => printSingleLabel(idx + 1)}
-                                                                disabled={pdfLoading === `shipping-label-${idx + 1}`}
-                                                                className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
-                                                                title={`Print shipping label for ${val}`}
-                                                            >
-                                                                {pdfLoading === `shipping-label-${idx + 1}` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                ))
-                                            }
-                                        </dd>
-                                    </div>
-                                )}
-                                
-                                {/* FedEx Labels */}
-                                {tx.fedexLabels && Object.keys(tx.fedexLabels).length > 0 && (
-                                    <div className="pt-2 border-t border-gray-100">
-                                        <dt className="text-gray-500 mb-1 flex items-center gap-1"><Printer className="w-3.5 h-3.5" /> Shipping Labels</dt>
-                                        <dd className="flex flex-wrap gap-2">
-                                            {Object.keys(tx.fedexLabels).map((key) => {
-                                                const num = key.replace('package', '');
-                                                return (
-                                                    <a
-                                                        key={key}
-                                                        href={`${process.env.NEXT_PUBLIC_API_URL}/return-transactions/${tx.id}/labels/${num}/download`}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        className="flex items-center gap-1 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-xs text-gray-700 rounded border border-gray-200 transition-colors"
-                                                    >
-                                                        <Download className="w-3 h-3" /> Label {num}
-                                                    </a>
-                                                );
-                                            })}
-                                        </dd>
-                                    </div>
-                                )}
-                            </dl>
-                        </div>
-                    )}
+                    {/* Shipping section completely commented out - moved to Store & Processor section */}
                 </div>
 
                 {/* ── Documents Section ───────────────────────────── */}
@@ -874,10 +930,34 @@ export default function ReturnDetailPage() {
                         <div className="flex flex-wrap gap-2">
                             <button
                                 onClick={() => downloadPdf('manifest', `manifest-${tx.licensePlate}.pdf`)}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
                             >
                                 <Download className="w-3.5 h-3.5" /> Download Manifest
                             </button>
+                            {/* DEA Form 222 - Available when there are CII items */}
+                            {tx.hasCiiItems && (
+                                <button
+                                    onClick={() => downloadPdf('dea-form-222', `dea-form-222-${tx.licensePlate}.pdf`)}
+                                    disabled={pdfLoading === 'dea-form-222'}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded bg-orange-600 text-white hover:bg-orange-700 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
+                                    title="Download DEA Form 222 for Schedule II items"
+                                >
+                                    {pdfLoading === 'dea-form-222' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
+                                    DEA Form 222
+                                </button>
+                            )}
+                            {/* Print Job Sheet - Available for completed/finalized transactions with tracking */}
+                            {(tx.status === 'completed' || tx.status === 'finalized') && (tx.fedexTracking || (tx.packageTracking && Object.keys(tx.packageTracking).length > 0)) && (
+                                <button
+                                    onClick={printJobSheet}
+                                    disabled={pdfLoading === 'job-sheet'}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded bg-green-600 text-white hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
+                                    title="Print job sheet with addresses and barcodes"
+                                >
+                                    {pdfLoading === 'job-sheet' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
+                                    Print Job Sheet
+                                </button>
+                            )}
                         </div>
                     </div>
                 )}
@@ -912,7 +992,7 @@ export default function ReturnDetailPage() {
                         {canDoAction(tx, 'add_items') && (
                             <button
                                 onClick={() => router.push(`/returns/${tx.id}/add-items`)}
-                                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
                             >
                                 <Plus className="w-3 h-3" /> Add Items
                             </button>
@@ -928,13 +1008,13 @@ export default function ReturnDetailPage() {
                                 placeholder="Search by NDC, name, or manufacturer..."
                                 value={itemSearch}
                                 onChange={e => setItemSearch(e.target.value)}
-                                className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500"
                             />
                         </div>
                         <select
                             value={itemStatusFilter}
                             onChange={e => setItemStatusFilter(e.target.value)}
-                            className="px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                            className="px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500"
                         >
                             <option value="">All Statuses</option>
                             <option value="returnable">Returnable</option>
@@ -958,7 +1038,7 @@ export default function ReturnDetailPage() {
                             {canDoAction(tx, 'add_items') && !itemSearch && !itemStatusFilter && (
                                 <button
                                     onClick={() => router.push(`/returns/${tx.id}/add-items`)}
-                                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
                                 >
                                     <ScanLine className="w-3 h-3" /> Start Scanning
                                 </button>
@@ -968,27 +1048,27 @@ export default function ReturnDetailPage() {
                         <div className="overflow-x-auto">
                             <table className="w-full table-auto">
                                 <thead>
-                                    <tr className="bg-gray-50 border-b border-gray-200">
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">NDC</th>
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Name</th>
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Manufacturer</th>
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Pkg Size</th>
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Qty Returned</th>
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Serial#</th>
-                                        {/* <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Price</th>
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Est. Value</th>
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Est. Store Value</th> */}
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Expires</th>
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
-                                        <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Destination</th>
-                                        <th className="text-right px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
+                                    <tr className="bg-gradient-to-r from-teal-600 to-teal-700 border-b-2 border-teal-800">
+                                        <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">NDC</th>
+                                        <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Name</th>
+                                        <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Manufacturer</th>
+                                        <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Pkg Size</th>
+                                        <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Qty Returned</th>
+                                        <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Serial#</th>
+                                        {/* <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Price</th>
+                                        <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Est. Value</th>
+                                        <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Est. Store Value</th> */}
+                                        <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Expires</th>
+                                        <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Status</th>
+                                        <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Destination</th>
+                                        <th className="text-right px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {items.map((item) => {
                                         const itemBadge = getItemStatusBadge(item.returnStatus);
                                         return (
-                                            <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                            <tr key={item.id} className="border-b border-gray-100 hover:bg-teal-50 transition-colors">
                                                 <td className="px-3 py-2">
                                                     <span className="text-xs font-mono text-gray-900">{item.ndc}</span>
                                                 </td>
@@ -1006,8 +1086,9 @@ export default function ReturnDetailPage() {
                                                 <td className="px-3 py-2">
                                                     <span className="text-xs text-gray-900">
                                                         {(() => {
-                                                            const qtyReturned = item.fullPackageQtyReturned ?? item.quantity;
-                                                            const displayQty = (item.fullPackageQtyReturned && item.fullPackageSize && item.fullPackageQtyReturned === item.fullPackageSize) ? 1 : qtyReturned;
+                                                            const qtyReturned = item.fullPackageQtyReturned ?? item.quantityReturned ?? item.quantity;
+                                                            const fullPkgQty = item.fullPackageQtyReturned ?? item.quantityReturned;
+                                                            const displayQty = (fullPkgQty && item.fullPackageSize && fullPkgQty === item.fullPackageSize) ? 1 : qtyReturned;
                                                             return <>{displayQty}{item.isPartial && <span className="text-orange-500 font-semibold ml-0.5">P</span>}</>;
                                                         })()}
                                                     </span>
@@ -1028,14 +1109,25 @@ export default function ReturnDetailPage() {
                                                     <span className="text-xs text-gray-700">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</span>
                                                 </td>
                                                 <td className="px-3 py-2">
-                                                    <div className="flex items-center gap-1">
-                                                        <Badge variant={itemBadge.variant}>
-                                                            <span className="text-[10px]">{itemBadge.label}</span>
-                                                        </Badge>
-                                                        {item.wineCellarId && (
-                                                            <Badge variant="info">
-                                                                <span className="text-[10px]">WC</span>
+                                                    <div className="flex flex-col gap-0.5">
+                                                        <div className="flex items-center gap-1">
+                                                            <Badge variant={itemBadge.variant}>
+                                                                <span className="text-[10px]">{itemBadge.label}</span>
                                                             </Badge>
+                                                            {item.wineCellarId && (
+                                                                <Badge variant="info">
+                                                                    <span className="text-[10px]">WC</span>
+                                                                </Badge>
+                                                            )}
+                                                        </div>
+                                                        {/* FCR-52: Show reason for non-returnable items */}
+                                                        {item.returnStatus === 'non_returnable' && item.nonReturnableReason && (
+                                                            <span
+                                                                className="text-[10px] text-red-700 italic"
+                                                                title={formatNonReturnableReason(item.nonReturnableReason)}
+                                                            >
+                                                                {formatNonReturnableReason(item.nonReturnableReason)}
+                                                            </span>
                                                         )}
                                                     </div>
                                                 </td>
@@ -1057,7 +1149,7 @@ export default function ReturnDetailPage() {
                                                         {canDoAction(tx, 'edit') && (
                                                             <button
                                                                 onClick={() => setEditItemModal(item)}
-                                                                className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                                className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded transition-colors"
                                                                 title="Edit Item"
                                                             >
                                                                 <Edit className="w-3.5 h-3.5" />
@@ -1066,7 +1158,7 @@ export default function ReturnDetailPage() {
                                                         {canDoAction(tx, 'delete') && (
                                                             <button
                                                                 onClick={() => setDeleteItemModal(item)}
-                                                                className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                                className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-teal-500"
                                                                 title="Delete Item"
                                                             >
                                                                 <Trash2 className="w-3.5 h-3.5" />
@@ -1092,23 +1184,23 @@ export default function ReturnDetailPage() {
                                 <button onClick={() => setEditModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
                             </div>
                             <div className="px-4 py-3 space-y-2.5">
-                                <div>
+                                {/* <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-0.5">FedEx Tracking Number</label>
                                     <input
                                         type="text"
                                         value={editForm.fedexTracking}
                                         onChange={e => setEditForm({ ...editForm, fedexTracking: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500"
                                         placeholder="Enter tracking number"
                                     />
-                                </div>
+                                </div> */}
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-0.5">FedEx Pickup Confirmation</label>
                                     <input
                                         type="text"
                                         value={editForm.fedexPickupConfirmation}
                                         onChange={e => setEditForm({ ...editForm, fedexPickupConfirmation: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500"
                                         placeholder="Enter pickup confirmation"
                                     />
                                 </div>
@@ -1118,14 +1210,14 @@ export default function ReturnDetailPage() {
                                         value={editForm.notes}
                                         onChange={e => setEditForm({ ...editForm, notes: e.target.value })}
                                         rows={2}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none"
+                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500 resize-none"
                                         placeholder="Optional notes"
                                     />
                                 </div>
                             </div>
                             <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
                                 <button onClick={() => setEditModal(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                                <button onClick={handleUpdate} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <button onClick={handleUpdate} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500">
                                     {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Saving...</> : 'Save Changes'}
                                 </button>
                             </div>
@@ -1152,7 +1244,7 @@ export default function ReturnDetailPage() {
                             </div>
                             <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
                                 <button onClick={() => setActionModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                                <button onClick={handleStatusAction} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <button onClick={handleStatusAction} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500">
                                     {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Processing...</> : 'Confirm'}
                                 </button>
                             </div>
@@ -1175,7 +1267,7 @@ export default function ReturnDetailPage() {
                             </div>
                             <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
                                 <button onClick={() => setDeleteModal(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                                <button onClick={handleDelete} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <button onClick={handleDelete} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500">
                                     {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Deleting...</> : 'Delete'}
                                 </button>
                             </div>
@@ -1192,87 +1284,34 @@ export default function ReturnDetailPage() {
                                 <button onClick={() => setEditItemModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
                             </div>
                             <div className="px-4 py-3 space-y-2.5">
-                                <div className="grid grid-cols-2 gap-2">
-                                    <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-0.5">Pkg Size</label>
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            value={editItemForm.fullPackageSize}
-                                            onChange={e => setEditItemForm({ ...editItemForm, fullPackageSize: e.target.value })}
-                                            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
-                                            placeholder="e.g. 60"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-0.5">Qty Returned</label>
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            value={editItemForm.fullPackageQtyReturned}
-                                            onChange={e => setEditItemForm({ ...editItemForm, fullPackageQtyReturned: e.target.value })}
-                                            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
-                                            placeholder="e.g. 45"
-                                        />
-                                    </div>
-                                </div>
-                                {isEditPolicyChecking && (
-                                    <div className="flex items-center gap-2 text-xs text-gray-600 px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded">
-                                        <Loader2 className="w-3 h-3 animate-spin" /> Checking policy...
-                                    </div>
-                                )}
-                                {editPolicyCheck && (
-                                    <div className={`flex items-start gap-1.5 text-xs rounded px-2.5 py-1.5 border ${
-                                        editPolicyCheck.status === 'returnable' ? 'bg-green-50 border-green-200 text-green-800' :
-                                        editPolicyCheck.status === 'non_returnable' ? 'bg-red-50 border-red-200 text-red-800' :
-                                        'bg-yellow-50 border-yellow-200 text-yellow-800'
-                                    }`}>
-                                        {editPolicyCheck.status === 'returnable' ? <CheckCircle className="w-3 h-3 mt-0.5 flex-shrink-0" /> :
-                                         editPolicyCheck.status === 'non_returnable' ? <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" /> :
-                                         <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />}
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-0.5">Quantity</label>
+                                    <div className="grid grid-cols-2 gap-2 text-xs">
                                         <div>
-                                            <span className="font-semibold">{editPolicyCheck.manufacturerName ? `${editPolicyCheck.manufacturerName}: ` : 'Policy: '}</span>
-                                            {editPolicyCheck.status === 'returnable' && 'Returnable — status & destination updated.'}
-                                            {editPolicyCheck.status === 'non_returnable' && `Non-Returnable${editPolicyCheck.reason ? ` — ${editPolicyCheck.reason.replace(/_/g, ' ')}` : ''}`}
-                                            {editPolicyCheck.status === 'tbd' && 'No policy found — set status manually.'}
+                                            <label className="block text-[10px] text-gray-500 mb-0.5">Pkg Size</label>
+                                            <div className="text-center py-1.5 bg-gray-50 border border-gray-200 rounded">
+                                                {editItemForm.fullPackageSize || '—'}
+                                            </div>
                                         </div>
+                                        <div>
+                                            <label className="block text-[10px] text-gray-500 mb-0.5">Qty Returned (units)</label>
+                                            <input 
+                                                type="number" 
+                                                min="0" 
+                                                max={editItemForm.fullPackageSize || undefined}
+                                                value={editItemForm.fullPackageQtyReturned || ''} 
+                                                onChange={e => setEditItemForm({ ...editItemForm, fullPackageQtyReturned: e.target.value })} 
+                                                className="w-full px-2 py-1.5 text-center text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500" 
+                                            />
+                                        </div>
+                                        {/* <div>
+                                            <label className="block text-[10px] text-gray-500 mb-0.5">#</label>
+                                            <div className="text-center py-1.5 bg-gray-50 border border-gray-200 rounded">
+                                                {editItemForm.fullPackageQtyReturned && editItemForm.fullPackageSize ? 
+                                                    Math.ceil(Number(editItemForm.fullPackageQtyReturned) / Number(editItemForm.fullPackageSize)) : '—'}
+                                            </div>
+                                        </div> */}
                                     </div>
-                                )}
-                                {/* <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-0.5">Price</label>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        value={editItemForm.standardPrice}
-                                        onChange={e => setEditItemForm({ ...editItemForm, standardPrice: Number(e.target.value) })}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
-                                        min="0"
-                                    />
-                                </div> */}
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-0.5">Return Status</label>
-                                    <select
-                                        value={editItemForm.returnStatus}
-                                        onChange={e => setEditItemForm({ ...editItemForm, returnStatus: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
-                                    >
-                                        <option value="tbd">TBD</option>
-                                        <option value="returnable">Returnable</option>
-                                        <option value="non_returnable">Non-Returnable</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-0.5">Destination</label>
-                                    <select
-                                        value={editItemForm.destination}
-                                        onChange={e => setEditItemForm({ ...editItemForm, destination: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
-                                    >
-                                        <option value="">— Select Destination —</option>
-                                        {reverseDistributors.map(rd => (
-                                            <option key={rd.id} value={rd.name}>{rd.name}</option>
-                                        ))}
-                                    </select>
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-0.5">Memo</label>
@@ -1280,14 +1319,14 @@ export default function ReturnDetailPage() {
                                         value={editItemForm.memo}
                                         onChange={e => setEditItemForm({ ...editItemForm, memo: e.target.value })}
                                         rows={2}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none"
+                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500 resize-none"
                                         placeholder="Optional memo"
                                     />
                                 </div>
                             </div>
                             <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
                                 <button onClick={() => setEditItemModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                                <button onClick={handleUpdateItem} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <button onClick={handleUpdateItem} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500">
                                     {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Saving...</> : 'Save Changes'}
                                 </button>
                             </div>
@@ -1311,7 +1350,7 @@ export default function ReturnDetailPage() {
                             </div>
                             <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
                                 <button onClick={() => setDeleteItemModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                                <button onClick={handleDeleteItem} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <button onClick={handleDeleteItem} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500">
                                     {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Deleting...</> : 'Delete'}
                                 </button>
                             </div>

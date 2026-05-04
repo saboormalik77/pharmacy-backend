@@ -81,26 +81,26 @@ export default function ShipmentsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold text-gray-900">Shipments</h1>
+                <h1 className="text-lg font-bold text-gray-900">Shipments</h1>
                 <p className="text-gray-600 mt-1">Track and manage pharmaceutical return shipments</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-white rounded-lg shadow-md p-4">
-                    <p className="text-sm text-gray-600">Total Shipments</p>
-                    <p className="text-2xl font-bold text-gray-900 mt-1">{shipments.length}</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                    <p className="text-xs font-medium text-gray-500 mb-1">Total Shipments</p>
+                    <p className="text-lg font-bold text-gray-900">{shipments.length}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow-md p-4">
-                    <p className="text-sm text-gray-600">In Transit</p>
-                    <p className="text-2xl font-bold text-blue-600 mt-1">{shipments.filter(s => s.status === 'in_transit').length}</p>
+                <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                    <p className="text-xs font-medium text-gray-500 mb-1">In Transit</p>
+                    <p className="text-lg font-bold text-blue-700">{shipments.filter(s => s.status === 'in_transit').length}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow-md p-4">
-                    <p className="text-sm text-gray-600">Delivered</p>
-                    <p className="text-2xl font-bold text-green-600 mt-1">{shipments.filter(s => s.status === 'delivered').length}</p>
+                <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                    <p className="text-xs font-medium text-gray-500 mb-1">Delivered</p>
+                    <p className="text-lg font-bold text-green-700">{shipments.filter(s => s.status === 'delivered').length}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow-md p-4">
-                    <p className="text-sm text-gray-600">Total Value</p>
-                    <p className="text-2xl font-bold text-gray-900 mt-1">{formatCurrency(shipments.reduce((sum, s) => sum + s.value, 0))}</p>
+                <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                    <p className="text-xs font-medium text-gray-500 mb-1">Total Value</p>
+                    <p className="text-lg font-bold text-gray-900">{formatCurrency(shipments.reduce((sum, s) => sum + s.value, 0))}</p>
                 </div>
             </div>
 

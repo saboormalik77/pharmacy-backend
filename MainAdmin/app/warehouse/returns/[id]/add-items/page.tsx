@@ -23,6 +23,10 @@ import {
 import { checkReturnability } from '@/lib/store/policiesSlice';
 import { BarcodeScanResponse, ReturnabilityCheckResult, ReturnTransactionItem } from '@/lib/types';
 import { apiClient } from '@/lib/api/apiClient';
+import {
+    NON_RETURNABLE_REASONS,
+    isValidNonReturnableReason,
+} from '@/lib/constants/nonReturnableReasons';
 
 // Dynamically imported so it only loads in the browser (uses WebRTC APIs)
 const QrScannerModal = dynamic(() => import('@/components/scanner/QrScannerModal'), { ssr: false });
@@ -32,6 +36,10 @@ const QrScannerModal = dynamic(() => import('@/components/scanner/QrScannerModal
 const RETURN_REASONS = [
     '', 'Expired', 'Short-dated', 'Damaged', 'Recalled', 'Overstock',
     'Discontinued', 'Wrong product', 'Formulary change', 'Other',
+];
+
+const DEA_SCHEDULE_OPTIONS = [
+    '', 'CI', 'CII', 'CIII', 'CIV', 'CV', 'Non-Controlled'
 ];
 
 const EMPTY_FORM = {
@@ -520,6 +528,8 @@ export default function AddItemsPage() {
         payload.returnStatus = form.returnStatus;
         if (form.returnReason) payload.returnReason = form.returnReason;
         if (form.deaSchedule) payload.deaSchedule = form.deaSchedule;
+        // Automatically set deaForm222Required for Schedule II items
+        if (form.deaSchedule === 'CII') payload.deaForm222Required = true;
         if (form.productType) payload.productType = form.productType;
         if (form.memo) payload.memo = form.memo;
         payload.scanSource = form.scanSource;
@@ -810,7 +820,7 @@ export default function AddItemsPage() {
                                             </span>
                                         )}
                                     </div>
-                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-1 text-[11px]">
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-1 text-sm">
                                         <div><span className="text-gray-500">NDC:</span> <span className="font-semibold text-gray-900 font-mono">{item.ndc || '—'}</span></div>
                                         <div><span className="text-gray-500">Lot:</span> <span className="font-medium text-gray-800">{item.lotNumber || '—'}</span></div>
                                         <div><span className="text-gray-500">Exp:</span> <span className="font-medium text-gray-800">{item.expirationDate ? new Date(item.expirationDate).toLocaleDateString() : '—'}</span></div>
@@ -1062,7 +1072,22 @@ export default function AddItemsPage() {
                     </div>
 
                     <Field label="Route" value={form.route} onChange={v => updateField('route', v)} placeholder="e.g. ORAL" />
-                    <Field label="DEA Schedule" value={form.deaSchedule} onChange={v => updateField('deaSchedule', v)} placeholder="e.g. CII" />
+                    <div>
+                        <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
+                            DEA Schedule
+                        </label>
+                        <select
+                            value={form.deaSchedule}
+                            onChange={e => updateField('deaSchedule', e.target.value)}
+                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                        >
+                            {DEA_SCHEDULE_OPTIONS.map(option => (
+                                <option key={option} value={option}>
+                                    {option || '— Select DEA Schedule —'}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                     <Field label="Lot Number" value={form.lotNumber} onChange={v => updateField('lotNumber', v)} placeholder="Lot #" required hasError={formErrors.has('lotNumber')} />
                     <Field label="Serial Number" value={form.serialNumber} onChange={v => updateField('serialNumber', v)} placeholder="Serial #" />
                     <div>
@@ -1467,12 +1492,12 @@ export default function AddItemsPage() {
                                     {policyAutoCheck.policyDescription && (
                                         <div>
                                             <p className="text-[10px] font-medium text-gray-500 mb-1">Policy Notes</p>
-                                            <p className="text-[11px] text-gray-700 bg-gray-50 rounded p-2 border leading-relaxed">{policyAutoCheck.policyDescription}</p>
+                                            <p className="text-sm text-gray-700 bg-gray-50 rounded p-2 border leading-relaxed">{policyAutoCheck.policyDescription}</p>
                                         </div>
                                     )}
 
                                     {policyAutoCheck.status === 'tbd' && (
-                                        <div className="flex items-start gap-1.5 bg-yellow-50 border border-yellow-200 rounded p-2 text-[11px] text-yellow-800">
+                                        <div className="flex items-start gap-1.5 bg-yellow-50 border border-yellow-200 rounded p-2 text-sm text-yellow-800">
                                             <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
                                             No policy matched. Set the return status manually using the radio buttons.
                                         </div>
@@ -1537,7 +1562,7 @@ function PolicyDetail({ label, value, capitalize, highlight }: {
     return (
         <div className="bg-gray-50 rounded p-2 border border-gray-100">
             <p className="text-[10px] text-gray-500 mb-0.5">{label}</p>
-            <p className={`text-xs ${valueClass} ${capitalize ? 'capitalize' : ''}`}>{value}</p>
+            <p className={`text-sm ${valueClass} ${capitalize ? 'capitalize' : ''}`}>{value}</p>
         </div>
     );
 }

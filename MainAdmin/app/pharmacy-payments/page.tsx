@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { Search, DollarSign, Calculator, ChevronLeft, ChevronRight, Clock, CheckCircle, AlertTriangle, Plus } from 'lucide-react';
+import { Search, DollarSign, Calculator, ChevronLeft, ChevronRight, Clock, CheckCircle, AlertTriangle, Plus, FileText, CreditCard, ExternalLink, Banknote } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { 
@@ -12,8 +12,11 @@ import {
   calculatePayout,
   createPharmacyPayment,
   updatePharmacyPayment,
+  generateCheckNumber,
+  issueCheck,
   clearCalculation,
   clearBatchPharmacies,
+  clearGeneratedCheckNumber,
   setFilters,
   PharmacyPayment,
   BatchPharmacy,
@@ -239,6 +242,203 @@ function CalculatePayoutModal({
   );
 }
 
+// Issue Check Modal
+interface IssueCheckModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  payment: PharmacyPayment | null;
+  onIssueCheck: (checkData: { checkNumber: string; paymentType: 'ocs' | 'por' | 'direct'; returnReferenceNumber?: string; notes?: string }) => void;
+  onGenerateCheckNumber: () => void;
+  generatedCheckNumber: string | null;
+  isGenerating: boolean;
+  isIssuing: boolean;
+}
+
+function IssueCheckModal({
+  isOpen,
+  onClose,
+  payment,
+  onIssueCheck,
+  onGenerateCheckNumber,
+  generatedCheckNumber,
+  isGenerating,
+  isIssuing,
+}: IssueCheckModalProps) {
+  const [checkNumber, setCheckNumber] = useState('');
+  const [paymentType, setPaymentType] = useState<'ocs' | 'por' | 'direct'>('ocs');
+  const [returnReferenceNumber, setReturnReferenceNumber] = useState('');
+  const [notes, setNotes] = useState('');
+
+  useEffect(() => {
+    if (generatedCheckNumber) {
+      setCheckNumber(generatedCheckNumber);
+    }
+  }, [generatedCheckNumber]);
+
+  const handleClose = () => {
+    setCheckNumber('');
+    setPaymentType('ocs');
+    setReturnReferenceNumber('');
+    setNotes('');
+    onClose();
+  };
+
+  const handleSubmit = () => {
+    if (!checkNumber.trim()) return;
+    onIssueCheck({
+      checkNumber: checkNumber.trim(),
+      paymentType,
+      returnReferenceNumber: returnReferenceNumber.trim() || undefined,
+      notes: notes.trim() || undefined,
+    });
+  };
+
+  if (!isOpen || !payment) return null;
+
+  return (
+    <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg max-w-lg w-full shadow-xl flex flex-col max-h-[90vh]">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+          <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+            <Banknote className="w-4 h-4 text-green-600" />
+            Issue Check Payment
+          </h2>
+          <button onClick={handleClose} className="text-gray-400 hover:text-gray-600 p-0.5">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="px-4 py-3 flex-1 overflow-y-auto space-y-4">
+          {/* Payment Summary */}
+          <div className="bg-blue-50 border border-blue-200 rounded p-3">
+            <p className="text-xs font-semibold text-blue-800 mb-2">Payment Summary</p>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <span className="text-blue-600">Pharmacy:</span>
+                <p className="font-medium text-blue-900">{payment.pharmacyName}</p>
+              </div>
+              <div>
+                <span className="text-blue-600">Batch:</span>
+                <p className="font-medium text-blue-900">{payment.batchName || 'N/A'}</p>
+              </div>
+              <div>
+                <span className="text-blue-600">Total Credit:</span>
+                <p className="font-medium text-blue-900">${payment.totalCreditReceived?.toFixed(2) || '0.00'}</p>
+              </div>
+              <div>
+                <span className="text-blue-600">Payout Amount:</span>
+                <p className="font-bold text-green-700">${payment.pharmacyPayout?.toFixed(2) || '0.00'}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Check Number */}
+          <div>
+            <label className="block text-[11px] font-medium text-gray-600 mb-1">
+              Check Number <span className="text-red-500">*</span>
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={checkNumber}
+                onChange={(e) => setCheckNumber(e.target.value)}
+                placeholder="e.g., 216461"
+                className="flex-1 px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+              />
+              <button
+                onClick={onGenerateCheckNumber}
+                disabled={isGenerating}
+                className="px-3 py-1.5 text-xs bg-gray-100 text-gray-700 border border-gray-300 rounded hover:bg-gray-200 disabled:opacity-50 transition-colors whitespace-nowrap"
+              >
+                {isGenerating ? 'Generating...' : 'Auto-Generate'}
+              </button>
+            </div>
+          </div>
+
+          {/* Payment Type */}
+          <div>
+            <label className="block text-[11px] font-medium text-gray-600 mb-1">
+              Payment Type <span className="text-red-500">*</span>
+            </label>
+            <div className="flex gap-3">
+              {[
+                { value: 'ocs', label: 'OCS', desc: 'On-Credit Settlement' },
+                { value: 'por', label: 'POR', desc: 'Pay-On-Receipt' },
+                { value: 'direct', label: 'Direct', desc: 'Direct Credit' },
+              ].map((opt) => (
+                <label key={opt.value} className="flex items-center gap-1.5 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="paymentType"
+                    value={opt.value}
+                    checked={paymentType === opt.value}
+                    onChange={(e) => setPaymentType(e.target.value as 'ocs' | 'por' | 'direct')}
+                    className="text-primary-500 focus:ring-primary-500"
+                  />
+                  <span className="text-xs text-gray-700">
+                    <span className="font-medium">{opt.label}</span>
+                    <span className="text-gray-400 ml-1">({opt.desc})</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Return Reference Number */}
+          <div>
+            <label className="block text-[11px] font-medium text-gray-600 mb-1">
+              Return Reference Number
+            </label>
+            <input
+              type="text"
+              value={returnReferenceNumber}
+              onChange={(e) => setReturnReferenceNumber(e.target.value)}
+              placeholder="e.g., 3S15L"
+              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+            />
+          </div>
+
+          {/* Notes */}
+          <div>
+            <label className="block text-[11px] font-medium text-gray-600 mb-1">
+              Notes (optional)
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Any additional notes..."
+              rows={2}
+              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none"
+            />
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200">
+          <button
+            onClick={handleClose}
+            className="px-3 py-1.5 text-xs border border-gray-300 rounded text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={!checkNumber.trim() || isIssuing}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <CheckCircle className={`w-3.5 h-3.5 ${isIssuing ? 'animate-spin' : ''}`} />
+            {isIssuing ? 'Issuing Check...' : 'Issue Check & Mark Paid'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function PharmacyPaymentsPageContent() {
   const dispatch = useAppDispatch();
   const { 
@@ -252,6 +452,9 @@ function PharmacyPaymentsPageContent() {
     isLoading, 
     isCalculating,
     isCreating,
+    isIssuingCheck,
+    generatedCheckNumber,
+    isGeneratingCheckNumber,
     error 
   } = useAppSelector((state) => state.pharmacyPayments);
 
@@ -261,6 +464,7 @@ function PharmacyPaymentsPageContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [viewModal, setViewModal] = useState<PharmacyPayment | null>(null);
   const [calculateModal, setCalculateModal] = useState(false);
+  const [issueCheckModal, setIssueCheckModal] = useState<PharmacyPayment | null>(null);
 
   const debouncedSearch = useDebounce(searchTerm, 500);
   const debouncedPharmacyFilter = useDebounce(pharmacyFilter, 500);
@@ -354,6 +558,42 @@ function PharmacyPaymentsPageContent() {
     dispatch(fetchBatchPharmacies(batchId));
   };
 
+  // Issue Check handlers
+  const handleOpenIssueCheckModal = (payment: PharmacyPayment) => {
+    setIssueCheckModal(payment);
+  };
+
+  const handleCloseIssueCheckModal = () => {
+    setIssueCheckModal(null);
+    dispatch(clearGeneratedCheckNumber());
+  };
+
+  const handleGenerateCheckNumber = () => {
+    dispatch(generateCheckNumber());
+  };
+
+  const handleIssueCheck = async (checkData: { checkNumber: string; paymentType: 'ocs' | 'por' | 'direct'; returnReferenceNumber?: string; notes?: string }) => {
+    if (!issueCheckModal) return;
+    const result = await dispatch(issueCheck({ id: issueCheckModal.id, checkData }));
+    if (issueCheck.fulfilled.match(result)) {
+      setIssueCheckModal(null);
+      dispatch(clearGeneratedCheckNumber());
+      dispatch(fetchPharmacyPayments({
+        page: currentPage,
+        limit: 20,
+        search: debouncedSearch || undefined,
+        status: statusFilter === 'all' ? undefined : statusFilter,
+        pharmacy: debouncedPharmacyFilter || undefined,
+      }));
+    }
+  };
+
+  // Open Check PDF in new tab
+  const handleViewCheckPdf = (checkNumber: string) => {
+    const pdfUrl = `${process.env.NEXT_PUBLIC_API_URL || ''}/api/pharmacy-payments/check-pdf/${checkNumber}`;
+    window.open(pdfUrl, '_blank');
+  };
+
   const getStatusVariant = (status: PharmacyPaymentStatus) => {
     switch (status) {
       case 'paid': return 'success';
@@ -442,34 +682,58 @@ function PharmacyPaymentsPageContent() {
           <>
             <div className="overflow-x-auto">
               <table className="w-full table-auto">
-                <thead className="bg-gray-50 border-b border-gray-100">
-                  <tr>
-                    {['Payment ID', 'Pharmacy', 'Batch', 'Total Credit', 'Payout Amount', 'Status', 'Created', 'Actions'].map(h => (
-                      <th key={h} className="px-3 py-1.5 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider">{h}</th>
+                <thead>
+                  <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                    {['Payment ID', 'Check #', 'Pharmacy', 'Batch', 'Total Credit', 'Payout Amount', 'Type', 'Status', 'Created', 'Actions'].map(h => (
+                      <th key={h} className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-100">
                   {payments.map((payment) => (
                     <tr key={payment.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-3 py-1.5 whitespace-nowrap text-xs font-mono text-gray-500">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm font-mono text-gray-500">
                         #{payment.id.slice(0, 8)}…
                       </td>
-                      <td className="px-3 py-1.5 whitespace-nowrap">
-                        <div className="text-xs font-medium text-gray-900">{payment.pharmacyName || 'N/A'}</div>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {payment.checkNumber ? (
+                          <button
+                            onClick={() => handleViewCheckPdf(payment.checkNumber!)}
+                            className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                            title="View Check PDF"
+                          >
+                            <FileText className="w-3 h-3" />
+                            {payment.checkNumber}
+                            <ExternalLink className="w-2.5 h-2.5" />
+                          </button>
+                        ) : (
+                          <span className="text-sm text-gray-400">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">{payment.pharmacyName || 'N/A'}</div>
                         <div className="text-[10px] text-gray-400">{payment.pharmacyId.slice(0, 8)}…</div>
                       </td>
-                      <td className="px-3 py-1.5 whitespace-nowrap">
-                        <div className="text-xs text-gray-900">{payment.batchName || 'N/A'}</div>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{payment.batchName || 'N/A'}</div>
                         <div className="text-[10px] text-gray-400">{payment.batchId ? payment.batchId.slice(0, 8) + '…' : 'None'}</div>
                       </td>
-                      <td className="px-3 py-1.5 whitespace-nowrap text-xs font-medium text-gray-900">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
                         ${payment.totalCreditReceived?.toFixed(2) || '0.00'}
                       </td>
-                      <td className="px-3 py-1.5 whitespace-nowrap text-xs font-semibold text-green-600">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold text-green-600">
                         ${payment.pharmacyPayout?.toFixed(2) || '0.00'}
                       </td>
-                      <td className="px-3 py-1.5 whitespace-nowrap">
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {payment.paymentType ? (
+                          <Badge variant={payment.paymentType === 'ocs' ? 'default' : payment.paymentType === 'por' ? 'warning' : 'secondary'}>
+                            {payment.paymentType.toUpperCase()}
+                          </Badge>
+                        ) : (
+                          <span className="text-sm text-gray-400">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
                         <div className="flex items-center gap-1">
                           {getStatusIcon(payment.status)}
                           <Badge variant={getStatusVariant(payment.status)}>
@@ -477,10 +741,10 @@ function PharmacyPaymentsPageContent() {
                           </Badge>
                         </div>
                       </td>
-                      <td className="px-3 py-1.5 whitespace-nowrap text-xs text-gray-500">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                         {payment.createdAt ? new Date(payment.createdAt).toLocaleDateString() : 'N/A'}
                       </td>
-                      <td className="px-3 py-1.5">
+                      <td className="px-4 py-3">
                         <div className="flex flex-wrap items-center gap-1">
                           <button
                             type="button"
@@ -498,13 +762,33 @@ function PharmacyPaymentsPageContent() {
                              Mark as Processing
                             </button>
                           )}
-                          {payment.status === 'processing' && (
+                          {payment.status === 'processing' && !payment.checkNumber && (
+                            <button
+                              type="button"
+                              onClick={() => handleOpenIssueCheckModal(payment)}
+                              className="px-2 py-1 text-[10px] font-medium text-green-900 bg-green-50 border border-green-200 rounded hover:bg-green-100 transition-colors inline-flex items-center gap-1"
+                            >
+                              <Banknote className="w-3 h-3" />
+                              Issue Check
+                            </button>
+                          )}
+                          {payment.status === 'processing' && payment.checkNumber && (
                             <button
                               type="button"
                               onClick={() => handleStatusUpdate(payment.id, 'paid')}
                               className="px-2 py-1 text-[10px] font-medium text-green-900 bg-green-50 border border-green-200 rounded hover:bg-green-100 transition-colors"
                             >
-                              Mark paid
+                              Mark Paid
+                            </button>
+                          )}
+                          {payment.checkNumber && (
+                            <button
+                              type="button"
+                              onClick={() => handleViewCheckPdf(payment.checkNumber!)}
+                              className="px-2 py-1 text-[10px] font-medium text-purple-900 bg-purple-50 border border-purple-200 rounded hover:bg-purple-100 transition-colors inline-flex items-center gap-1"
+                            >
+                              <FileText className="w-3 h-3" />
+                              PDF
                             </button>
                           )}
                         </div>
@@ -570,6 +854,18 @@ function PharmacyPaymentsPageContent() {
         isLoadingBatchPharmacies={isLoadingBatchPharmacies}
       />
 
+      {/* Issue Check Modal */}
+      <IssueCheckModal
+        isOpen={!!issueCheckModal}
+        onClose={handleCloseIssueCheckModal}
+        payment={issueCheckModal}
+        onIssueCheck={handleIssueCheck}
+        onGenerateCheckNumber={handleGenerateCheckNumber}
+        generatedCheckNumber={generatedCheckNumber}
+        isGenerating={isGeneratingCheckNumber}
+        isIssuing={isIssuingCheck}
+      />
+
       {/* View Payment Details Modal */}
       {viewModal && (
         <div
@@ -577,7 +873,7 @@ function PharmacyPaymentsPageContent() {
           onClick={() => setViewModal(null)}
         >
           <div
-            className="bg-white rounded-lg max-w-lg w-full shadow-xl flex flex-col max-h-[90vh]"
+            className="bg-white rounded-lg max-w-xl w-full shadow-xl flex flex-col max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
@@ -616,37 +912,151 @@ function PharmacyPaymentsPageContent() {
                     )}
                   </div>
                 ))}
-                {viewModal.notes && (
-                  <div className="col-span-2">
-                    <span className="text-[10px] font-medium text-gray-400 uppercase">Notes</span>
-                    <p className="text-xs text-gray-700 mt-0.5 px-2 py-1.5 bg-gray-50 rounded border border-gray-100">{viewModal.notes}</p>
+              </div>
+
+              {/* Check Details Section */}
+              {(viewModal.checkNumber || viewModal.paymentType) && (
+                <div className="mt-4 pt-3 border-t border-gray-100">
+                  <h3 className="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1">
+                    <Banknote className="w-3.5 h-3.5 text-green-600" />
+                    Check Information
+                  </h3>
+                  <div className="grid grid-cols-2 gap-3 bg-green-50 rounded-lg p-3 border border-green-100">
+                    {viewModal.checkNumber && (
+                      <div>
+                        <span className="text-[10px] font-medium text-green-700 uppercase">Check Number</span>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <p className="text-xs font-bold text-green-800">{viewModal.checkNumber}</p>
+                          <button
+                            onClick={() => handleViewCheckPdf(viewModal.checkNumber!)}
+                            className="text-green-600 hover:text-green-800"
+                            title="View Check PDF"
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {viewModal.paymentType && (
+                      <div>
+                        <span className="text-[10px] font-medium text-green-700 uppercase">Payment Type</span>
+                        <p className="text-xs font-medium text-green-800 mt-0.5">
+                          <Badge variant={viewModal.paymentType === 'ocs' ? 'success' : viewModal.paymentType === 'por' ? 'warning' : 'default'}>
+                            {viewModal.paymentType.toUpperCase()}
+                          </Badge>
+                        </p>
+                      </div>
+                    )}
+                    {viewModal.checkDate && (
+                      <div>
+                        <span className="text-[10px] font-medium text-green-700 uppercase">Check Date</span>
+                        <p className="text-xs text-green-800 mt-0.5">{new Date(viewModal.checkDate).toLocaleDateString()}</p>
+                      </div>
+                    )}
+                    {viewModal.returnReferenceNumber && (
+                      <div>
+                        <span className="text-[10px] font-medium text-green-700 uppercase">Return Reference #</span>
+                        <p className="text-xs font-mono text-green-800 mt-0.5">{viewModal.returnReferenceNumber}</p>
+                      </div>
+                    )}
+                    {viewModal.paidAt && (
+                      <div>
+                        <span className="text-[10px] font-medium text-green-700 uppercase">Paid At</span>
+                        <p className="text-xs text-green-800 mt-0.5">{new Date(viewModal.paidAt).toLocaleString()}</p>
+                      </div>
+                    )}
+                    {viewModal.pharmacyAccountNumber && (
+                      <div>
+                        <span className="text-[10px] font-medium text-green-700 uppercase">Account Number</span>
+                        <p className="text-xs font-mono text-green-800 mt-0.5">{viewModal.pharmacyAccountNumber}</p>
+                      </div>
+                    )}
                   </div>
+                </div>
+              )}
+
+              {/* Credit Breakdown Section */}
+              {(viewModal.includedCreditAmount || viewModal.directCreditAmount || viewModal.porCreditAmount) && (
+                <div className="mt-4 pt-3 border-t border-gray-100">
+                  <h3 className="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1">
+                    <CreditCard className="w-3.5 h-3.5 text-blue-600" />
+                    Credit Breakdown
+                  </h3>
+                  <div className="grid grid-cols-3 gap-2 bg-blue-50 rounded-lg p-3 border border-blue-100">
+                    <div>
+                      <span className="text-[10px] font-medium text-blue-700 uppercase">Included Credit</span>
+                      <p className="text-xs font-medium text-blue-800 mt-0.5">${viewModal.includedCreditAmount?.toFixed(2) || '0.00'}</p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-medium text-blue-700 uppercase">Direct Credit</span>
+                      <p className="text-xs font-medium text-blue-800 mt-0.5">${viewModal.directCreditAmount?.toFixed(2) || '0.00'}</p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-medium text-blue-700 uppercase">POR Credit</span>
+                      <p className="text-xs font-medium text-blue-800 mt-0.5">${viewModal.porCreditAmount?.toFixed(2) || '0.00'}</p>
+                    </div>
+                    {viewModal.grossCreditAmount && (
+                      <div className="col-span-3 pt-2 border-t border-blue-200">
+                        <span className="text-[10px] font-medium text-blue-700 uppercase">Gross Credit</span>
+                        <p className="text-xs font-bold text-blue-800 mt-0.5">${viewModal.grossCreditAmount.toFixed(2)}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {viewModal.notes && (
+                <div className="mt-4 pt-3 border-t border-gray-100">
+                  <span className="text-[10px] font-medium text-gray-400 uppercase">Notes</span>
+                  <p className="text-xs text-gray-700 mt-0.5 px-2 py-1.5 bg-gray-50 rounded border border-gray-100">{viewModal.notes}</p>
+                </div>
+              )}
+            </div>
+            <div className="flex justify-between gap-2 px-4 py-3 border-t border-gray-200">
+              <div>
+                {viewModal.checkNumber && (
+                  <button
+                    onClick={() => handleViewCheckPdf(viewModal.checkNumber!)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-purple-50 text-purple-700 border border-purple-200 rounded hover:bg-purple-100 transition-colors"
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    View Check PDF
+                  </button>
                 )}
               </div>
-            </div>
-            <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200">
-              <button
-                onClick={() => setViewModal(null)}
-                className="px-3 py-1.5 text-xs border border-gray-300 rounded text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                Close
-              </button>
-              {viewModal.status === 'pending' && (
+              <div className="flex gap-2">
                 <button
-                  onClick={() => { handleStatusUpdate(viewModal.id, 'processing'); setViewModal(null); }}
-                  className="px-3 py-1.5 text-xs bg-primary-500 text-white rounded hover:bg-primary-600 transition-colors"
+                  onClick={() => setViewModal(null)}
+                  className="px-3 py-1.5 text-xs border border-gray-300 rounded text-gray-700 hover:bg-gray-50 transition-colors"
                 >
-                  Mark as Processing
+                  Close
                 </button>
-              )}
-              {viewModal.status === 'processing' && (
-                <button
-                  onClick={() => { handleStatusUpdate(viewModal.id, 'paid'); setViewModal(null); }}
-                  className="px-3 py-1.5 text-xs bg-primary-500 text-white rounded hover:bg-primary-600 transition-colors"
-                >
-                  Mark as Paid
-                </button>
-              )}
+                {viewModal.status === 'pending' && (
+                  <button
+                    onClick={() => { handleStatusUpdate(viewModal.id, 'processing'); setViewModal(null); }}
+                    className="px-3 py-1.5 text-xs bg-primary-500 text-white rounded hover:bg-primary-600 transition-colors"
+                  >
+                    Mark as Processing
+                  </button>
+                )}
+                {viewModal.status === 'processing' && !viewModal.checkNumber && (
+                  <button
+                    onClick={() => { setViewModal(null); handleOpenIssueCheckModal(viewModal); }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                  >
+                    <Banknote className="w-3.5 h-3.5" />
+                    Issue Check
+                  </button>
+                )}
+                {viewModal.status === 'processing' && viewModal.checkNumber && (
+                  <button
+                    onClick={() => { handleStatusUpdate(viewModal.id, 'paid'); setViewModal(null); }}
+                    className="px-3 py-1.5 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                  >
+                    Mark as Paid
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>

@@ -204,6 +204,11 @@ export interface DashboardStatsData {
         change: number;
         changeLabel: string;
     };
+    totalReturns: {
+        value: number;
+        change: number;
+        changeLabel: string;
+    };
 }
 
 export interface DashboardResponse {
@@ -635,6 +640,7 @@ export interface ReturnTransaction {
     fedexShipmentId: string | null;
     fedexLabels: Record<string, string> | null;
     finalizeSteps: { printManifest: boolean; fedexEntered: boolean; printJobSheets: boolean } | null;
+    hasCiiItems?: boolean; // For DEA Form 222 availability
     verifiedAt: string | null;
     verifiedBy: string | null;
     /** Set when v2 start-verification runs (box count) or legacy verify */
@@ -710,6 +716,7 @@ export interface ReturnTransactionItem {
     expirationDate: string | null;
     standardPrice: number | null;
     quantity: number;
+    quantityReturned?: number | null;
     fullPackageSize: number | null;
     fullPackageQtyReturned: number | null;
     isPartial: boolean;
@@ -1164,6 +1171,11 @@ export interface VerificationV2Item {
     verificationStatus: 'correct' | 'damaged' | 'missing' | 'wrong_item' | null;
     conditionNotes: string | null;
     returnStatus: string;
+    destination?: string | null;
+    wineCellarId?: string | null;
+    nonReturnableReason?: string | null;
+    dosageForm?: string | null;
+    isPartial?: boolean;
     estimatedValue: number;
 }
 

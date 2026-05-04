@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { catchAsync } from '../utils/catchAsync';
 import { AppError } from '../utils/appError';
 import * as pharmacyPaymentService from '../services/pharmacyPaymentService';
+import { generateCheckPdf } from '../services/checkPdfService';
 
 // ============================================================
 // POST /api/admin/pharmacy-payments/calculate — Calculate payout
@@ -47,6 +48,33 @@ export const listPaymentsHandler = catchAsync(
       pagination: result.pagination,
       summary: result.summary,
     });
+  }
+);
+
+// ============================================================
+// GET /api/pharmacy-payments/check-pdf/:checkNumber — Generate check PDF
+// ============================================================
+export const checkPdfHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { checkNumber } = req.params;
+    
+    if (!checkNumber) {
+      throw new AppError('Check number is required', 400);
+    }
+
+    // Get check data
+    const checkData = await pharmacyPaymentService.getCheckPdfData(checkNumber);
+    
+    // Generate PDF
+    const pdfBuffer = await generateCheckPdf(checkData);
+    
+    // Set headers for PDF response
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="RSI_Check_${checkNumber}.pdf"`);
+    res.setHeader('Content-Length', pdfBuffer.length);
+    
+    // Send PDF
+    res.end(pdfBuffer);
   }
 );
 
@@ -122,6 +150,7 @@ export const updatePaymentHandler = catchAsync(
       status, paymentMethod, paymentReference, paidAt,
       notes, companyFee, companyFeePercent, gpoShare,
       pharmacyPayout, totalCreditReceived,
+      checkNumber, checkDate, paymentType, returnReferenceNumber,
     } = req.body;
 
     const result = await pharmacyPaymentService.updatePaymentRecord(
@@ -137,10 +166,28 @@ export const updatePaymentHandler = catchAsync(
         gpoShare: gpoShare != null ? Number(gpoShare) : undefined,
         pharmacyPayout: pharmacyPayout != null ? Number(pharmacyPayout) : undefined,
         totalCreditReceived: totalCreditReceived != null ? Number(totalCreditReceived) : undefined,
+        checkNumber,
+        checkDate,
+        paymentType,
+        returnReferenceNumber,
       }
     );
 
     res.status(200).json({ status: 'success', data: result });
+  }
+);
+
+// ============================================================
+// POST /api/admin/pharmacy-payments/generate-check-number — Generate unique check number
+// ============================================================
+export const generateCheckNumberHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const checkNumber = await pharmacyPaymentService.generateCheckNumber();
+
+    res.status(200).json({ 
+      status: 'success', 
+      data: { checkNumber } 
+    });
   }
 );
 
@@ -152,10 +199,13 @@ export const myPaymentsHandler = catchAsync(
     const pharmacyId = req.pharmacyId;
     if (!pharmacyId) throw new AppError('Authentication required', 401);
 
-    const { status, page, limit } = req.query as Record<string, string>;
+    const { status, dateRange, startDate, endDate, page, limit } = req.query as Record<string, string>;
 
     const result = await pharmacyPaymentService.myPayments(pharmacyId, {
       status,
+      dateRange,
+      startDate,
+      endDate,
       page: page ? Number(page) : undefined,
       limit: limit ? Number(limit) : undefined,
     });

@@ -1,0 +1,1486 @@
+<div class="content">
+               
+    <style>
+.select2-container .select2-selection {
+min-height: 46px;
+border-radius: 5px;
+border-style: solid;
+border-width: 1px;
+font-size: 14px;
+color: var(--input-color);
+background: var(--white);
+font-family: 'Outfit-Regular';
+border: 1px solid var(--Medium-Light);
+padding: 8px 12px;
+display: flex;
+align-items: center;
+}
+.select2-container--default .select2-selection--single .select2-selection__arrow{
+height:100% !important;
+}
+.select2-container--default .select2-results__option--highlighted.select2-results__option--selectable{
+background-color: #1c4975 !important;
+}
+
+.progress {
+height: 20px;
+background-color: #f1f1f1;
+border-radius: 5px;
+overflow: hidden;
+}
+.progress-bar {
+height: 100%;
+background-color: #007bff;
+color: white;
+text-align: center;
+transition: width 0.4s;
+}
+</style>
+
+<meta name="csrf-token" content="q2yTn37GQJArL7xUYxDYZaRb7HOTyAPW9KNuViNT">
+<div class="section-top">
+<h1 class="section-title"><i class="fa-solid fa-arrow-right"></i>My Profile</h1>
+</div> 
+
+<div class="container py-5">
+<div class="row">
+<div class="col-md-9">
+   <h2 class="section-sub-title">Account Information - Verify Profile Information</h2>
+   <p>Please verify the information below and fill in and missing fields. The RA and shipping label will be send to the email entered here, so please ensure it is entered correctly.</p>
+</div>
+</div>
+
+<div class="card shadow-sm p-3 border-0 mb-3">
+<h5 class="section-sub-title">License Info</h5>
+<div class="row">
+   <div class="col-md-6 mb-3">
+       <label class="input-label">DEA Number</label>
+       <div class="input-group input-container">
+           <span class="input-group-text"><i class="fa fa-lock"></i></span>
+           <input type="text" class="form-control" placeholder="Enter your DEA Number" value="FP0166517" readonly="">
+       </div>
+   </div>
+   <div class="col-md-6 mb-3">
+       <label class="input-label">DEA Expiration</label>
+       <div class="input-container">
+           <input type="text" class="form-control" placeholder="Enter your DEA Expiration" value="2027-03-31" readonly="">
+       </div>
+   </div>
+
+   <div class="col-md-6 mb-3">
+       <label class="input-label">State Pharmacy License Number</label>
+       <div class="input-group input-container">
+           <span class="input-group-text"><i class="fa fa-lock"></i></span>
+           <input type="text" class="form-control" placeholder="Enter your DEA Number" value="28RS00783100" readonly="">
+       </div>
+   </div>
+   <div class="col-md-6 mb-3">
+       <label class="input-label">State Pharmacy License Expiration</label>
+       <div class="input-container">
+           <input type="text" class="form-control" placeholder="Enter your DEA Expiration" value="2026-06-30" readonly="">
+       </div>
+   </div>
+</div>
+</div>
+
+<form action="https://portal.drugreturns.com/customer/save/profile/data" method="POST" enctype="multipart/form-data" id="profileForm"> 
+<input type="hidden" name="_token" value="q2yTn37GQJArL7xUYxDYZaRb7HOTyAPW9KNuViNT" autocomplete="off">        
+<div id="FormMessage"></div>
+<div class="card shadow-sm p-3 border-0 mb-3">
+    <h5 class="section-sub-title">Pharmacy / Facility Information</h5>
+   <div class="row">
+       <div class="col-md-6 mb-3">
+           <label class="input-label">Pharmacy / Facility Name</label>
+           <div class="input-container">
+               <input type="text" class="form-control" name="" placeholder="Enter your Pharmacy / Facility Name" value="">
+           </div>
+       </div>
+       <div class="col-md-6 mb-3">
+           <label class="input-label">Pharmacy Physical Address</label>
+           <div class="input-container">
+               <input type="text" class="form-control" name="" placeholder="Enter your Pharmacy Physical Address" value="">
+           </div>
+       </div>
+       
+       <div class="col-md-6 mb-3">
+           <label class="input-label">Pharmacy / Facility Name</label>
+           <div class="input-container">
+               <input type="text" class="form-control" name="PhysicalCity" placeholder="Enter  Pharmacy / Facility Name" value="Carteret">
+           </div>
+       </div>
+       <div class="col-md-6 mb-3">
+           <label class="input-label">Pharmacy Physical Address</label>
+           <div class="input-container">
+               <input type="text" class="form-control" name="PhysicalAddress" placeholder="Enter  Enter Pharmacy Physical Address" value="125 Washington Ave Floor 2 Ste B">
+           </div>
+       </div>
+       
+       <div class="col-md-4 mb-3">
+           <label class="input-label">City</label>
+           <div class="input-container">
+               <input type="text" class="form-control" name="PhysicalCity" placeholder="Enter City" value="Carteret">
+           </div>
+       </div>
+       <div class="col-md-4 mb-3">
+           <label class="input-label">State</label>
+           <div class="input-container">
+               <input type="text" class="form-control" name="PhysicalState" placeholder="Enter State" value="NJ">
+           </div>
+       </div>
+       
+       <div class="col-md-4 mb-3">
+           <label class="input-label">Zip</label>
+           <div class="input-container">
+               <input type="text" class="form-control" name="PhysicalZip" placeholder="Enter Zip" value="07008">
+           </div>
+       </div>
+       <div class="col-md-12 mb-3">
+           <label class="input-label">Corporate Name (If different than Pharmacy / Facility Name</label>
+           <div class="input-container">
+               <input type="text" class="form-control" name="CorpName" placeholder="Enter Corporate Name (If different than Pharmacy / Facility Name" value="">
+           </div>
+       </div>
+       
+       <div class="col-md-12 mb-3">
+           <label class="input-label">Mailing Address (If different than Pharmacy Address)</label>
+           <div class="input-container">
+               <input type="text" class="form-control" name="MailingAddress" placeholder="Enter Mailing Address (If different than Pharmacy Address)" value="">
+           </div>
+       </div>
+       
+       <div class="col-md-6 mb-3">
+           <label class="input-label">Wholesaler</label>
+           <div class="input-container">
+               <select name="WholesalerID" class="form-control">
+                   <option value="">-- Select Wholesaler --</option>
+                                                   <option value="446">
+                           A-S Medication Solutions - Libertyville, IL
+                       </option>
+                                                   <option value="1">
+                           A.S.D. - Carrollton, TX
+                       </option>
+                                                   <option value="455">
+                           Ace Southern - Brockton, MA
+                       </option>
+                                                   <option value="368">
+                           Ace Southern  - West Columbia, SC
+                       </option>
+                                                   <option value="337">
+                           Alpine - Secaucus, NJ
+                       </option>
+                                                   <option value="367">
+                           Amatheon, Inc. - Miami, FL
+                       </option>
+                                                   <option value="319">
+                           American Associated Pharmacies -AAP - Scottsboro, AL
+                       </option>
+                                                   <option value="333">
+                           Anda, Inc. - Grand Island, NY
+                       </option>
+                                                   <option value="313">
+                           Anda, Inc. - Olive Branch, MS
+                       </option>
+                                                   <option value="226">
+                           Anda, Inc. - Weston, FL
+                       </option>
+                                                   <option value="374">
+                           Animal Health International - Greeley, CO
+                       </option>
+                                                   <option value="334">
+                           API - Associated Pharmacies Inc - Memphis, TN
+                       </option>
+                                                   <option value="362">
+                           API - Associated Pharmacies Inc - Scottsboro, AL
+                       </option>
+                                                   <option value="431">
+                           Auburn Pharmaceutical - Rochester Hills, MI
+                       </option>
+                                                   <option value="314">
+                           Auburn Pharmaceutical - Salt Lake City, UT
+                       </option>
+                                                   <option value="277">
+                           Auburn Pharmaceutical - Troy, MI
+                       </option>
+                                                   <option value="350">
+                           B &amp; B Pharmaceuticals - Englewood, CO
+                       </option>
+                                                   <option value="325">
+                           Bellco Generics - N Amityville, NY
+                       </option>
+                                                   <option value="341">
+                           Bloodworth Wholesale - Tifton, GA
+                       </option>
+                                                   <option value="372">
+                           Bonita Pharmaceuticals - Westland, MI
+                       </option>
+                                                   <option value="355">
+                           Bound Tree Medical LLC - Chicago, IL
+                       </option>
+                                                   <option value="360">
+                           Bryant Ranch Prepack - Burbank, CA
+                       </option>
+                                                   <option value="265">
+                           Butler Animal Health Supply - Dublin, OH
+                       </option>
+                                                   <option value="327">
+                           Capital Wholesale Drug - Columbus, OH
+                       </option>
+                                                   <option value="163">
+                           Cardinal Dist. - Albuquerque, NM
+                       </option>
+                                                   <option value="159">
+                           Cardinal Dist. - Allentown, PA
+                       </option>
+                                                   <option value="166">
+                           Cardinal Dist. - Auburn, WA
+                       </option>
+                                                   <option value="154">
+                           Cardinal Dist. - Aurora, IL
+                       </option>
+                                                   <option value="278">
+                           Cardinal Dist. - Beltsville, MD
+                       </option>
+                                                   <option value="173">
+                           Cardinal Dist. - Birmingham, AL
+                       </option>
+                                                   <option value="31">
+                           Cardinal Dist. - Dallas, TX
+                       </option>
+                                                   <option value="165">
+                           Cardinal Dist. - Denver, CO
+                       </option>
+                                                   <option value="285">
+                           Cardinal Dist. - Dublin, OH
+                       </option>
+                                                   <option value="155">
+                           Cardinal Dist. - Eagan, MN
+                       </option>
+                                                   <option value="267">
+                           Cardinal Dist. - Earth City, MO
+                       </option>
+                                                   <option value="158">
+                           Cardinal Dist. - Elk Grove, CA
+                       </option>
+                                                   <option value="227">
+                           Cardinal Dist. - Findlay, OH
+                       </option>
+                                                   <option value="188">
+                           Cardinal Dist. - Greensboro, NC
+                       </option>
+                                                   <option value="210">
+                           Cardinal Dist. - Groveport, OH
+                       </option>
+                                                   <option value="77">
+                           Cardinal Dist. - Harahan, LA
+                       </option>
+                                                   <option value="32">
+                           Cardinal Dist. - Houston, TX
+                       </option>
+                                                   <option value="254">
+                           Cardinal Dist. - Hudson, WI
+                       </option>
+                                                   <option value="160">
+                           Cardinal Dist. - Kansas City, MO
+                       </option>
+                                                   <option value="33">
+                           Cardinal Dist. - Kingsport, TN
+                       </option>
+                                                   <option value="34">
+                           Cardinal Dist. - Knoxville, TN
+                       </option>
+                                                   <option value="167">
+                           Cardinal Dist. - Lakeland, FL
+                       </option>
+                                                   <option value="168">
+                           Cardinal Dist. - Lombard, IL
+                       </option>
+                                                   <option value="433">
+                           Cardinal Dist. - Louisville, KY
+                       </option>
+                                                   <option value="78">
+                           Cardinal Dist. - Madison, MS
+                       </option>
+                                                   <option value="200">
+                           Cardinal Dist. - McDonough, GA
+                       </option>
+                                                   <option value="171">
+                           Cardinal Dist. - Milwaukee, WI
+                       </option>
+                                                   <option value="156">
+                           Cardinal Dist. - Ontario, CA
+                       </option>
+                                                   <option value="157">
+                           Cardinal Dist. - Peabody, MA
+                       </option>
+                                                   <option value="164">
+                           Cardinal Dist. - Phoenix, AZ
+                       </option>
+                                                   <option value="35">
+                           Cardinal Dist. - Richland, MS
+                       </option>
+                                                   <option value="218">
+                           Cardinal Dist. - Roanoke, TX
+                       </option>
+                                                   <option value="161">
+                           Cardinal Dist. - S. Salt Lake City, UT
+                       </option>
+                                                   <option value="298">
+                           Cardinal Dist. - Sacramento, CA
+                       </option>
+                                                   <option value="30">
+                           Cardinal Dist. - Savannah, GA
+                       </option>
+                                                   <option value="389">
+                           Cardinal Dist. - St. Charles, MO
+                       </option>
+                                                   <option value="249">
+                           Cardinal Dist. - Stafford, TX
+                       </option>
+                                                   <option value="206">
+                           Cardinal Dist. - Swedesboro, NJ
+                       </option>
+                                                   <option value="151">
+                           Cardinal Dist. - Syracuse, NY
+                       </option>
+                                                   <option value="248">
+                           Cardinal Dist. - Tolleson, AZ
+                       </option>
+                                                   <option value="169">
+                           Cardinal Dist. - Union City, CA
+                       </option>
+                                                   <option value="172">
+                           Cardinal Dist. - Valencia, CA
+                       </option>
+                                                   <option value="28">
+                           Cardinal Dist. - Waco, TX
+                       </option>
+                                                   <option value="29">
+                           Cardinal Dist. - Wheeling, WV
+                       </option>
+                                                   <option value="170">
+                           Cardinal Dist. - Zanesville, OH
+                       </option>
+                                                   <option value="454">
+                           Cardinal Health Specialty Pharm Div. - La Vergne, TN
+                       </option>
+                                                   <option value="240">
+                           Cencora - AmerisourceBergen - Bethlehem, PA
+                       </option>
+                                                   <option value="354">
+                           Cencora - AmerisourceBergen - Buford, GA
+                       </option>
+                                                   <option value="381">
+                           Cencora - AmerisourceBergen - Chesterbrook, PA
+                       </option>
+                                                   <option value="117">
+                           Cencora - AmerisourceBergen - Corona, CA
+                       </option>
+                                                   <option value="127">
+                           Cencora - AmerisourceBergen - Denver, CO
+                       </option>
+                                                   <option value="145">
+                           Cencora - AmerisourceBergen - Eden Prarie, MN
+                       </option>
+                                                   <option value="21">
+                           Cencora - AmerisourceBergen - Glen Allen, VA
+                       </option>
+                                                   <option value="121">
+                           Cencora - AmerisourceBergen - Honolulu, HI
+                       </option>
+                                                   <option value="128">
+                           Cencora - AmerisourceBergen - Kansas City, MO
+                       </option>
+                                                   <option value="423">
+                           Cencora - AmerisourceBergen - Kearny, NJ
+                       </option>
+                                                   <option value="198">
+                           Cencora - AmerisourceBergen - Kent, WA
+                       </option>
+                                                   <option value="230">
+                           Cencora - AmerisourceBergen - Lockbourne, OH
+                       </option>
+                                                   <option value="131">
+                           Cencora - AmerisourceBergen - Mansfield, MA
+                       </option>
+                                                   <option value="20">
+                           Cencora - AmerisourceBergen - Morrisville, NC
+                       </option>
+                                                   <option value="343">
+                           Cencora - AmerisourceBergen - Newburgh, NY
+                       </option>
+                                                   <option value="152">
+                           Cencora - AmerisourceBergen - North Amityville, NY
+                       </option>
+                                                   <option value="311">
+                           Cencora - AmerisourceBergen - Olive Branch, MS
+                       </option>
+                                                   <option value="8">
+                           Cencora - AmerisourceBergen - Orlando, FL
+                       </option>
+                                                   <option value="9">
+                           Cencora - AmerisourceBergen - Paducah, KY
+                       </option>
+                                                   <option value="73">
+                           Cencora - AmerisourceBergen - Pelham, AL
+                       </option>
+                                                   <option value="196">
+                           Cencora - AmerisourceBergen - Phoenix, AZ
+                       </option>
+                                                   <option value="234">
+                           Cencora - AmerisourceBergen - Roanoke, TX
+                       </option>
+                                                   <option value="250">
+                           Cencora - AmerisourceBergen - Romeoville, IL
+                       </option>
+                                                   <option value="308">
+                           Cencora - AmerisourceBergen - Sacramento, CA
+                       </option>
+                                                   <option value="119">
+                           Cencora - AmerisourceBergen - Salt Lake City, UT
+                       </option>
+                                                   <option value="323">
+                           Cencora - AmerisourceBergen - San Antonio, TX
+                       </option>
+                                                   <option value="310">
+                           Cencora - AmerisourceBergen - Shakopee, MN
+                       </option>
+                                                   <option value="15">
+                           Cencora - AmerisourceBergen - Sugarland, TX
+                       </option>
+                                                   <option value="22">
+                           Cencora - AmerisourceBergen - Suwanee, GA
+                       </option>
+                                                   <option value="382">
+                           Cencora - AmerisourceBergen - Thorofare, NJ
+                       </option>
+                                                   <option value="309">
+                           Cencora - AmerisourceBergen - Valencia, CA
+                       </option>
+                                                   <option value="363">
+                           Cencora - AmerisourceBergen - Whitestown, IN
+                       </option>
+                                                   <option value="130">
+                           Cencora - AmerisourceBergen - Williamston, MI
+                       </option>
+                                                   <option value="258">
+                           Cencora - ASD Specialty Health - AmerisourceBergen - Brooks, KY
+                       </option>
+                                                   <option value="466">
+                           Cencora - MWI Animal Health - Ameriscource - Boise, ID
+                       </option>
+                                                   <option value="410">
+                           Cencora-MWI Animal Health - AmerisourceBergen - Aurora, CO
+                       </option>
+                                                   <option value="414">
+                           Cencora-MWI Animal Health - AmerisourceBergen - Browns Summit, NC
+                       </option>
+                                                   <option value="413">
+                           Cencora-MWI Animal Health - AmerisourceBergen - Edwardsville, KS
+                       </option>
+                                                   <option value="416">
+                           Cencora-MWI Animal Health - AmerisourceBergen - Elizabethtown, PA
+                       </option>
+                                                   <option value="405">
+                           Cencora-MWI Animal Health - AmerisourceBergen - Fife, WA
+                       </option>
+                                                   <option value="409">
+                           Cencora-MWI Animal Health - AmerisourceBergen - Fiskdale, MA
+                       </option>
+                                                   <option value="408">
+                           Cencora-MWI Animal Health - AmerisourceBergen - Gainesville, GA
+                       </option>
+                                                   <option value="411">
+                           Cencora-MWI Animal Health - AmerisourceBergen - Grand Prairie, TX
+                       </option>
+                                                   <option value="407">
+                           Cencora-MWI Animal Health - AmerisourceBergen - Lebanon, IN
+                       </option>
+                                                   <option value="415">
+                           Cencora-MWI Animal Health - AmerisourceBergen - Mankato, MN
+                       </option>
+                                                   <option value="417">
+                           Cencora-MWI Animal Health - AmerisourceBergen - Nacogdoches, TX
+                       </option>
+                                                   <option value="406">
+                           Cencora-MWI Animal Health - AmerisourceBergen - Orlando, FL
+                       </option>
+                                                   <option value="404">
+                           Cencora-MWI Animal Health - AmerisourceBergen - Pelham, AL
+                       </option>
+                                                   <option value="412">
+                           Cencora-MWI Animal Health - AmerisourceBergen - Shakopee, MN
+                       </option>
+                                                   <option value="418">
+                           Cencora-MWI Animal Health - AmerisourceBergen - Springdale, AR
+                       </option>
+                                                   <option value="419">
+                           Cencora-MWI Animal Health - AmerisourceBergen - Visalia, CA
+                       </option>
+                                                   <option value="387">
+                           CityMedRx, LLC - Rego Park, NY
+                       </option>
+                                                   <option value="332">
+                           Cochran Wholesale - Monroe, GA
+                       </option>
+                                                   <option value="438">
+                           Covetrus - Albany, NY
+                       </option>
+                                                   <option value="439">
+                           Covetrus - Aurora, CO
+                       </option>
+                                                   <option value="441">
+                           Covetrus - Colonial Heights, VA
+                       </option>
+                                                   <option value="403">
+                           Covetrus - Columbus, OH
+                       </option>
+                                                   <option value="424">
+                           Covetrus - Duluth , GA
+                       </option>
+                                                   <option value="402">
+                           Covetrus - Elizabethtown, PA
+                       </option>
+                                                   <option value="422">
+                           Covetrus  - Fort Worth, TX
+                       </option>
+                                                   <option value="392">
+                           Covetrus - Lexington, KY
+                       </option>
+                                                   <option value="435">
+                           Covetrus - Ocala, FL
+                       </option>
+                                                   <option value="370">
+                           Covetrus - Portland, ME
+                       </option>
+                                                   <option value="442">
+                           Covetrus - Southhaven, MS
+                       </option>
+                                                   <option value="443">
+                           Covetrus - Tualatin, OR
+                       </option>
+                                                   <option value="440">
+                           Covetrus - Urbandale, IA
+                       </option>
+                                                   <option value="444">
+                           Covetrus - Visalia, CA
+                       </option>
+                                                   <option value="202">
+                           CuraScript - Grove City, OH
+                       </option>
+                                                   <option value="270">
+                           CuraScript - Orlando, FL
+                       </option>
+                                                   <option value="377">
+                           Dakota Drug - Anoka, MN
+                       </option>
+                                                   <option value="215">
+                           Dakota Drug - Fargo, ND
+                       </option>
+                                                   <option value="246">
+                           Dakota Drug - Minot, ND
+                       </option>
+                                                   <option value="345">
+                           DDP Medical Supply - St. Petersburg, FL
+                       </option>
+                                                   <option value="212">
+                           DMS - Parkridge, IL
+                       </option>
+                                                   <option value="181">
+                           Dohmen Life Science Services - Memphis, TN
+                       </option>
+                                                   <option value="331">
+                           DV Medical Supply - Gardena, CA
+                       </option>
+                                                   <option value="456">
+                           Dynasty Pharmaceuticals Inc. - Lynwood, WA
+                       </option>
+                                                   <option value="76">
+                           E-Med Medical Company - Bridgeton, MO
+                       </option>
+                                                   <option value="460">
+                           FFF Enterprises, Inc - Temecula, CA
+                       </option>
+                                                   <option value="375">
+                           First Veterinary Supply - Memphis, TN
+                       </option>
+                                                   <option value="326">
+                           Genetco - Ronkonkoma, NY
+                       </option>
+                                                   <option value="400">
+                           H and H Wholesale Services, Inc. - Troy, MI
+                       </option>
+                                                   <option value="318">
+                           H.D. Smith Drug Company - Carol Sream, IL
+                       </option>
+                                                   <option value="255">
+                           H.D. Smith Drug Company - Carson, CA
+                       </option>
+                                                   <option value="301">
+                           H.D. Smith Drug Company - Flower Mound, TX
+                       </option>
+                                                   <option value="340">
+                           H.D. Smith Drug Company - Fort Worth, TX
+                       </option>
+                                                   <option value="207">
+                           H.D. Smith Drug Company - Kearny, NJ
+                       </option>
+                                                   <option value="247">
+                           H.D. Smith Drug Company - Louisville, KY
+                       </option>
+                                                   <option value="241">
+                           H.D. Smith Drug Company - Pompano Beach, Fl
+                       </option>
+                                                   <option value="180">
+                           H.D. Smith Drug Company - Springfield, IL
+                       </option>
+                                                   <option value="244">
+                           H.D. Smith Drug Company - Stratham, NH
+                       </option>
+                                                   <option value="83">
+                           Harvard Drug Group - Livonia, MI
+                       </option>
+                                                   <option value="271">
+                           Healthfirst Co. - Mountlake Terrace, WA
+                       </option>
+                                                   <option value="373">
+                           HealthSource Distributors, LLC - Baltimore, MD
+                       </option>
+                                                   <option value="388">
+                           Henry Schein - Indianapolis, IN
+                       </option>
+                                                   <option value="88">
+                           Henry Schein - Pittsburgh, PA
+                       </option>
+                                                   <option value="378">
+                           HSB Veterinary Supply - Medford, NY
+                       </option>
+                                                   <option value="216">
+                           I.P.C. - Sun Praire, WI
+                       </option>
+                                                   <option value="462">
+                           Incyte - ICS - Brooks, KY
+                       </option>
+                                                   <option value="432">
+                           Independent Pharmacy Distributor - High Point, NC
+                       </option>
+                                                   <option value="351">
+                           Independent Pharmacy Distributor - Lexington, NC
+                       </option>
+                                                   <option value="458">
+                           Integra Pharma Solutions, LLC - Tampa, FL
+                       </option>
+                                                   <option value="447">
+                           Jams Rx - Coconut Creek, FL
+                       </option>
+                                                   <option value="448">
+                           JAMs RX-Coconut Creek - Stewartstown, PA
+                       </option>
+                                                   <option value="380">
+                           JM Smith Corporation - Spartanburg, SC
+                       </option>
+                                                   <option value="280">
+                           Johnson Rx - Cedar Bluff, AL
+                       </option>
+                                                   <option value="465">
+                           Journey Medical - Scottsdale, AZ
+                       </option>
+                                                   <option value="399">
+                           KeySource USA - Cincinnati, OH
+                       </option>
+                                                   <option value="134" selected="">
+                           Kinray-Cardinal Dist. - Whitestone, NY
+                       </option>
+                                                   <option value="85">
+                           Lifeline Pharmaceuticals - Miami, FL
+                       </option>
+                                                   <option value="50">
+                           Louisiana Wholesale Drug - Sunset, LA
+                       </option>
+                                                   <option value="457">
+                           Martek Pharmacal Co. - Manasquan, NJ
+                       </option>
+                                                   <option value="286">
+                           Masters Pharmaceutical - Cincinnati, OH
+                       </option>
+                                                   <option value="437">
+                           Matrix Distributors, Inc. - Cranford, NJ
+                       </option>
+                                                   <option value="104">
+                           McKesson Drug - Anchorage, AK
+                       </option>
+                                                   <option value="51">
+                           McKesson Drug - Arlington, TX
+                       </option>
+                                                   <option value="41">
+                           McKesson Drug - Atlanta, GA
+                       </option>
+                                                   <option value="106">
+                           McKesson Drug - Aurora, CO
+                       </option>
+                                                   <option value="261">
+                           McKesson Drug - Aurora, IL
+                       </option>
+                                                   <option value="105">
+                           McKesson Drug - Billings, MT
+                       </option>
+                                                   <option value="82">
+                           McKesson Drug - Cape Girardeau, MO
+                       </option>
+                                                   <option value="95">
+                           McKesson Drug - Carol Stream, IL
+                       </option>
+                                                   <option value="303">
+                           McKesson Drug - Carrollton, TX
+                       </option>
+                                                   <option value="52">
+                           McKesson Drug - Cayce, SC
+                       </option>
+                                                   <option value="91">
+                           McKesson Drug - Cheektowaga, NY
+                       </option>
+                                                   <option value="321">
+                           McKesson Drug - Clear Lake, IA
+                       </option>
+                                                   <option value="237">
+                           McKesson Drug - Conroe, TX
+                       </option>
+                                                   <option value="89">
+                           McKesson Drug - Delran, NJ
+                       </option>
+                                                   <option value="53">
+                           McKesson Drug - Duluth, GA
+                       </option>
+                                                   <option value="98">
+                           McKesson Drug - Eagan, MN
+                       </option>
+                                                   <option value="107">
+                           McKesson Drug - Everett, WA
+                       </option>
+                                                   <option value="54">
+                           McKesson Drug - Fairfield, OH
+                       </option>
+                                                   <option value="289">
+                           McKesson Drug - Franklin, MA
+                       </option>
+                                                   <option value="320">
+                           McKesson Drug - Fredericksburg, VA
+                       </option>
+                                                   <option value="300">
+                           McKesson Drug - Grapevine, TX
+                       </option>
+                                                   <option value="451">
+                           McKesson Drug - Holt, MI
+                       </option>
+                                                   <option value="108">
+                           McKesson Drug - Honolulu, HI
+                       </option>
+                                                   <option value="55">
+                           McKesson Drug - Jackson, MS
+                       </option>
+                                                   <option value="42">
+                           McKesson Drug - Jacksonville, FL
+                       </option>
+                                                   <option value="434">
+                           McKesson Drug - Jeffersonville, OH
+                       </option>
+                                                   <option value="99">
+                           McKesson Drug - Kansas City, MO
+                       </option>
+                                                   <option value="102">
+                           McKesson Drug - La Vista, NE
+                       </option>
+                                                   <option value="100">
+                           McKesson Drug - LaCrosse, WI
+                       </option>
+                                                   <option value="94">
+                           McKesson Drug - Lakeland, FL
+                       </option>
+                                                   <option value="275">
+                           McKesson Drug - Little Canada, MN
+                       </option>
+                                                   <option value="43">
+                           McKesson Drug - Little Rock, AR
+                       </option>
+                                                   <option value="97">
+                           McKesson Drug - Livonia, MI
+                       </option>
+                                                   <option value="312">
+                           McKesson Drug - Livonia, MI
+                       </option>
+                                                   <option value="239">
+                           McKesson Drug - McCalla, AL
+                       </option>
+                                                   <option value="57">
+                           McKesson Drug - Memphis, TN
+                       </option>
+                                                   <option value="90">
+                           McKesson Drug - Methuen, MA
+                       </option>
+                                                   <option value="346">
+                           McKesson Drug - Montgomery, NY
+                       </option>
+                                                   <option value="86">
+                           McKesson Drug - N. Canton, OH
+                       </option>
+                                                   <option value="214">
+                           McKesson Drug - New Castle, PA
+                       </option>
+                                                   <option value="219">
+                           McKesson Drug - OFallon, MO
+                       </option>
+                                                   <option value="44">
+                           McKesson Drug - Oklahoma City, OK
+                       </option>
+                                                   <option value="109">
+                           McKesson Drug - Phoenix, AZ
+                       </option>
+                                                   <option value="45">
+                           McKesson Drug - Richmond, VA
+                       </option>
+                                                   <option value="58">
+                           McKesson Drug - Roanoke, VA
+                       </option>
+                                                   <option value="132">
+                           McKesson Drug - Robbinsville, NJ
+                       </option>
+                                                   <option value="93">
+                           McKesson Drug - Rocky Hill, CT
+                       </option>
+                                                   <option value="96">
+                           McKesson Drug - Romeoville, IL
+                       </option>
+                                                   <option value="56">
+                           McKesson Drug - Ruther Glen, VA
+                       </option>
+                                                   <option value="113">
+                           McKesson Drug - Salt Lake City, UT
+                       </option>
+                                                   <option value="46">
+                           McKesson Drug - San Antonio, TX
+                       </option>
+                                                   <option value="114">
+                           McKesson Drug - Santa Fe Springs, CA
+                       </option>
+                                                   <option value="243">
+                           McKesson Drug - Santa Fe Springs, CA
+                       </option>
+                                                   <option value="92">
+                           McKesson Drug - Sewickley, PA
+                       </option>
+                                                   <option value="47">
+                           McKesson Drug - Slidell, LA
+                       </option>
+                                                   <option value="115">
+                           McKesson Drug - Spokane, WA
+                       </option>
+                                                   <option value="101">
+                           McKesson Drug - St. Paul, MN
+                       </option>
+                                                   <option value="279">
+                           McKesson Drug - Tolleson, AZ
+                       </option>
+                                                   <option value="353">
+                           McKesson Drug - Urbancrest, OH
+                       </option>
+                                                   <option value="111">
+                           McKesson Drug - W. Sacramento, CA
+                       </option>
+                                                   <option value="48">
+                           McKesson Drug - Washington Ct House, OH
+                       </option>
+                                                   <option value="283">
+                           McKesson Drug - West Paducah, KY
+                       </option>
+                                                   <option value="252">
+                           McKesson Drug - West Seneca, NY
+                       </option>
+                                                   <option value="60">
+                           McKesson Drug - Westlake, TX
+                       </option>
+                                                   <option value="110">
+                           McKesson Drug - Wilsonville, OR
+                       </option>
+                                                   <option value="464">
+                           McKesson Medical Surgical - Bethlehem, PA
+                       </option>
+                                                   <option value="386">
+                           McKesson Medical Surgical - Chino, CA
+                       </option>
+                                                   <option value="282">
+                           McKesson Medical Surgical - Grapevine, TX
+                       </option>
+                                                   <option value="336">
+                           McKesson Medical Surgical - Grove City, OH
+                       </option>
+                                                   <option value="294">
+                           McKesson Medical Surgical - Houston, TX
+                       </option>
+                                                   <option value="467">
+                           McKesson Medical Surgical - Orlando, FL
+                       </option>
+                                                   <option value="383">
+                           McKesson Medical Surgical - Richmond, VA
+                       </option>
+                                                   <option value="369">
+                           McKesson Medical Surgical - Roseville, CA
+                       </option>
+                                                   <option value="329">
+                           McKesson Medical Surgical - Suwanee, GA
+                       </option>
+                                                   <option value="228">
+                           McKesson Medical Surgical - Swedesboro, NJ
+                       </option>
+                                                   <option value="295">
+                           McKesson Pharmacy Systems - Livonia, MI
+                       </option>
+                                                   <option value="461">
+                           Mckesson Specialty Care Distribution - Memphis, TN
+                       </option>
+                                                   <option value="268">
+                           McKesson Specialty Care Solutions - La Vergne, TN
+                       </option>
+                                                   <option value="449">
+                           Medical Purchasing Solutions - Scottsdale, AZ
+                       </option>
+                                                   <option value="316">
+                           Medisca - Irving, TX
+                       </option>
+                                                   <option value="315">
+                           Medisca - Las Vegas, NV
+                       </option>
+                                                   <option value="281">
+                           Medisca - Plattsburgh, NY
+                       </option>
+                                                   <option value="452">
+                           Medivant Healthcare - Chandler, AZ
+                       </option>
+                                                   <option value="401">
+                           Medline - Northfield, IL
+                       </option>
+                                                   <option value="273">
+                           Merit Pharmaceutical - Los Angeles, CA
+                       </option>
+                                                   <option value="317">
+                           Miami Luken - Springboro, OH
+                       </option>
+                                                   <option value="421">
+                           Midwest Veterinary Supply - Lakeville, MN
+                       </option>
+                                                   <option value="450">
+                           Midwest Veterinary Supply - Sun Prairie, WI
+                       </option>
+                                                   <option value="342">
+                           Moore Medical - South Hamilton, MA
+                       </option>
+                                                   <option value="62">
+                           Morris and Dickson - Shreveport, LA
+                       </option>
+                                                   <option value="358">
+                           National Apothecary Solutions - Miami, FL
+                       </option>
+                                                   <option value="0">
+                           None - , 
+                       </option>
+                                                   <option value="65">
+                           North Carolina Mutual - Durham, NC
+                       </option>
+                                                   <option value="222">
+                           NuCare Pharmaceuticals - Orange, CA
+                       </option>
+                                                   <option value="390">
+                           Numed Pharma - Springboro, OH
+                       </option>
+                                                   <option value="344">
+                           Oncology Supply - Dothan, AL
+                       </option>
+                                                   <option value="384">
+                           Orion Medical Supply, Inc. - Vancouver, WA
+                       </option>
+                                                   <option value="396">
+                           ParMed Pharmaceuticals - Memphis, TN
+                       </option>
+                                                   <option value="328">
+                           ParMed Pharmaceuticals - Niagara Falls, NY
+                       </option>
+                                                   <option value="395">
+                           Patterson Logistics Service Inc - Blythewood, SC
+                       </option>
+                                                   <option value="445">
+                           Patterson Veterinary Supply - Charlotte, NC
+                       </option>
+                                                   <option value="306">
+                           Patterson Veterinary Supply - Columbus, OH
+                       </option>
+                                                   <option value="425">
+                           Patterson Veterinary Supply - Devens, MA
+                       </option>
+                                                   <option value="428">
+                           Patterson Veterinary Supply - Mt. Joy, PA
+                       </option>
+                                                   <option value="427">
+                           Patterson Veterinary Supply - Phoenix, AZ
+                       </option>
+                                                   <option value="339">
+                           PBA Health - Kansas City, MO
+                       </option>
+                                                   <option value="276">
+                           PCCA - Houston, TX
+                       </option>
+                                                   <option value="263">
+                           Penn Veterinary Supply, Inc - Lancaster, PA
+                       </option>
+                                                   <option value="59">
+                           Pharmacy Buying Association - Riverside, MO
+                       </option>
+                                                   <option value="361">
+                           Pharmacy Provider Services Corp. - Tallahassee, FL
+                       </option>
+                                                   <option value="357">
+                           PharmaGenetico - San Antonio, TX
+                       </option>
+                                                   <option value="366">
+                           Pharmedix - Union City, CA
+                       </option>
+                                                   <option value="347">
+                           Pharmsource - Brunswick, GA
+                       </option>
+                                                   <option value="274">
+                           Physician Supply Company - Pasadena, TX
+                       </option>
+                                                   <option value="262">
+                           Physicians Pharmaceutical Corp - Knoxville, TN
+                       </option>
+                                                   <option value="365">
+                           Plenty Rx - Tampa, FL
+                       </option>
+                                                   <option value="224">
+                           Prescription Supply - Northwood, OH
+                       </option>
+                                                   <option value="420">
+                           Proficient Rx - Newbury Park, CA
+                       </option>
+                                                   <option value="468">
+                           ProPharma Distribution LLC - Westminster, CO
+                       </option>
+                                                   <option value="305">
+                           QK Healthcare, Inc - Bellport, NY
+                       </option>
+                                                   <option value="364">
+                           Quality Care Products, LLC - Holland, OH
+                       </option>
+                                                   <option value="324">
+                           Quantam Rx - Redford, MI
+                       </option>
+                                                   <option value="359">
+                           Quest Pharmaceuticals, Inc. - Murray, KY
+                       </option>
+                                                   <option value="304">
+                           R &amp; S Northeast Pharmaceutical Wholeslaer - Philadelphia, PA
+                       </option>
+                                                   <option value="391">
+                           Real Value Products - San Antonio , TX
+                       </option>
+                                                   <option value="287">
+                           Red Parrot - Tampa, FL
+                       </option>
+                                                   <option value="394">
+                           Republic Pharmaceuticals - Ann Arbor, MI
+                       </option>
+                                                   <option value="335">
+                           Richie Pharmacal - Glasgow, KY
+                       </option>
+                                                   <option value="385">
+                           RLC Labs, Inc. - Cave Creek, AZ
+                       </option>
+                                                   <option value="322">
+                           RMC Pharma Inc - Munford, TN
+                       </option>
+                                                   <option value="348">
+                           Rochester Drug Co-Op - Fairfield, NJ
+                       </option>
+                                                   <option value="140">
+                           Rochester Drug Co-Op - Rochester, NY
+                       </option>
+                                                   <option value="426">
+                           Safe Chain Solutions, LLC - Cambridge, MD
+                       </option>
+                                                   <option value="397">
+                           Salus Medical - Phoenix, AZ
+                       </option>
+                                                   <option value="459">
+                           Second Source Rx - Earth City, MO
+                       </option>
+                                                   <option value="429">
+                           SmartSource - Conshohocken, PA
+                       </option>
+                                                   <option value="371">
+                           SmartSource - Louisville, KY
+                       </option>
+                                                   <option value="352">
+                           Smith Drug Company - Carey, OH
+                       </option>
+                                                   <option value="338">
+                           Smith Drug Company - Charlotte, NC
+                       </option>
+                                                   <option value="376">
+                           Smith Drug Company - Milton, VT
+                       </option>
+                                                   <option value="229">
+                           Smith Drug Company - Paragould, AR
+                       </option>
+                                                   <option value="69">
+                           Smith Drug Company - Spartanburg, SC
+                       </option>
+                                                   <option value="272">
+                           Smith Drug Company - Valdosta, GA
+                       </option>
+                                                   <option value="302">
+                           Smith Medical Partners - Wood Dale, IL
+                       </option>
+                                                   <option value="453">
+                           South Pointe - Glasgow, KY
+                       </option>
+                                                   <option value="269">
+                           Southeastern Emergency Equipment - Youngsville, NC
+                       </option>
+                                                   <option value="436">
+                           Spectrum Pharmaceutical Distributors - Troy, MI
+                       </option>
+                                                   <option value="257">
+                           Top RX Inc - Memphis, TN
+                       </option>
+                                                   <option value="356">
+                           Unit Dose Solutions - Morrisville, NC
+                       </option>
+                                                   <option value="63">
+                           Valley Wholesale Drug - Stockton, CA
+                       </option>
+                                                   <option value="153">
+                           Value Drug Co. - Duncansville, PA
+                       </option>
+                                                   <option value="349">
+                           Victor Medical Company - Irvine, CA
+                       </option>
+                                                   <option value="463">
+                           VistaPharm - Greenville, SC
+                       </option>
+                                                   <option value="430">
+                           VistaPharm - Largo, FL
+                       </option>
+                                                   <option value="379">
+                           Vortech Pharmaceuticals - Dearborn, MI
+                       </option>
+                                                   <option value="393">
+                           Wellgistics - Lakeland, FL
+                       </option>
+                                                   <option value="203">
+                           Wellness Pharmacy - Hickson, TN
+                       </option>
+                                                   <option value="264">
+                           ZooPharm - Fort Collins, CO
+                       </option>
+                                           </select>
+           </div>
+       </div>
+      
+       <div class="col-md-6 mb-3">
+           <label class="input-label">Wholesale Account Number</label>
+           <div class="input-container">
+               <input type="text" class="form-control" placeholder="Enter Wholesale Account Number" value="2052049602">
+           </div>
+       </div>
+       
+       <div class="col-md-6 mb-3">
+           <label class="input-label">Buying Group</label>
+           <div class="input-container">
+               <select name="OrgID" class="form-select select2 select2-hidden-accessible" data-select2-id="select2-data-1-sjq0" tabindex="-1" aria-hidden="true">
+                   <option value="" data-select2-id="select2-data-3-7huw">-- Select Buying Group --</option>
+                                                   <option value="4">
+                           Independent Pharmacy Alliance, Inc.
+                       </option>
+                                                   <option value="5">
+                           Independent Pharmacy Cooperative
+                       </option>
+                                                   <option value="6">
+                           Pharmacy Group of New England
+                       </option>
+                                                   <option value="10">
+                           Associated Pharmacies, Inc.
+                       </option>
+                                                   <option value="13">
+                           Keystone Pharmacy Purchasing Alliance, Inc.
+                       </option>
+                                                   <option value="16">
+                           American Pharmacy Services Corp.
+                       </option>
+                                                   <option value="17">
+                           EPIC Pharmacies
+                       </option>
+                                                   <option value="27">
+                           PBA Health
+                       </option>
+                                                   <option value="28">
+                           Pharmacy Services Inc.
+                       </option>
+                                                   <option value="29">
+                           RxPlus Pharmacies, Inc.
+                       </option>
+                                                   <option value="30">
+                           Pace Alliance, Inc.
+                       </option>
+                                                   <option value="31">
+                           Pharmacy Provider Services Corp.
+                       </option>
+                                                   <option value="32">
+                           Pharmacy Providers of Oklahoma, Inc.
+                       </option>
+                                                   <option value="33">
+                           Independent Pharmacy Buying Group, Inc.
+                       </option>
+                                                   <option value="40">
+                           Association of Northwest Pharmacies
+                       </option>
+                                                   <option value="41">
+                           Pharmacy Owners Alliance
+                       </option>
+                                                   <option value="42">
+                           American Pharmacies
+                       </option>
+                                                   <option value="43">
+                           Southern Pharmacy Cooperative
+                       </option>
+                                                   <option value="46">
+                           United Drugs
+                       </option>
+                                                   <option value="47">
+                           Partners In Pharmacy Cooperative
+                       </option>
+                                                   <option value="48">
+                           Quality Care Pharmacies
+                       </option>
+                                                   <option value="54">
+                           (AAP) American Associated Pharmacies
+                       </option>
+                                                   <option value="51">
+                           United Pharmacists Network, Inc.
+                       </option>
+                                                   <option value="70">
+                           Compliant Pharmacy Alliance
+                       </option>
+                                                   <option value="73">
+                           Western States Pharmacy Coalition
+                       </option>
+                                                   <option value="77">
+                           Pharmacy Management Partners
+                       </option>
+                                                   <option value="72">
+                           Smart-Fill Management Group
+                       </option>
+                                                   <option value="80">
+                           Sav-Mor Pharmacy Services
+                       </option>
+                                                   <option value="89">
+                           The Pharmacist Choice
+                       </option>
+                                                   <option value="99">
+                           Montana Family Pharmacies
+                       </option>
+                                           </select><span class="select2 select2-container select2-container--default" dir="ltr" data-select2-id="select2-data-2-y5xm" style="width: 320px;"><span class="selection"><span class="select2-selection select2-selection--single" role="combobox" aria-haspopup="true" aria-expanded="false" tabindex="0" aria-disabled="false" aria-labelledby="select2-OrgID-tr-container" aria-controls="select2-OrgID-tr-container"><span class="select2-selection__rendered" id="select2-OrgID-tr-container" role="textbox" aria-readonly="true" title="Select Buying Group"><span class="select2-selection__placeholder">Select Buying Group</span></span><span class="select2-selection__arrow" role="presentation"><b role="presentation"></b></span></span></span><span class="dropdown-wrapper" aria-hidden="true"></span></span>
+           </div>
+       </div>
+       
+       <div class="col-md-6 mb-3">
+           <label class="input-label">Store Hours</label>
+           <div class="input-container">
+               <input type="text" name="StoreHours" class="form-control" placeholder="Enter Store Hours" value="M-F 9-7 Sat 10-3">
+           </div>
+       </div>
+   </div>
+</div>
+
+<div class="card shadow-sm p-3 border-0 mb-3">
+  <h5 class="section-sub-title">Contact Information</h5>
+   <div class="row">
+       <div class="col-md-6 mb-3">
+           <label class="input-label">Contact 1</label>
+           <div class="input-container">
+               <input type="text" class="form-control" name="Contact1" placeholder="Enter Contacy 1" value="Dave Watts">
+           </div>
+       </div>
+       
+       <div class="col-md-6 mb-3">
+           <label class="input-label">Contact 2</label>
+           <div class="input-container">
+               <input type="text" class="form-control" name="Contact2" placeholder="Enter Contact 2" value="">
+           </div>
+       </div>
+       
+       <div class="col-md-6 mb-3">
+           <label class="input-label">Email</label>
+           <div class="input-container">
+               <input type="text" class="form-control" name="Email1" placeholder="Enter Email" value="dave@primepharmacy.co">
+           </div>
+       </div>
+       
+       <div class="col-md-6 mb-3">
+           <label class="input-label">Phone Number</label>
+           <div class="input-container">
+               <input type="text" class="form-control" name="Phone1" placeholder="Enter Phone Number" value="732-366-2656">
+           </div>
+       </div>
+       
+       <div class="col-md-6 mb-3">
+           <label class="input-label">Fax</label>
+           <div class="input-container">
+               <input type="text" class="form-control" name="Fax1" placeholder="Enter Phone Number" value="732-352-0951">
+           </div>
+       </div>
+   </div>
+</div>
+
+<div class="card shadow-sm p-3 border-0 mb-3">
+    <h5 class="section-sub-title">My Documents</h5>
+   <div class="row">
+       <!-- DEA Upload -->
+      <div class="col-md-6 mb-3">
+           <label class="input-label">Upload DEA</label>
+           <label for="DEA" class="file-upload-button">
+               <img src="https://portal.drugreturns.com/assets/icons/cloud-upload.svg" alt=""> Choose DEA File
+           </label>
+           <input type="file" id="DEA" name="DEA" accept=".html,.pdf,.txt">
+           <div id="dea-file-preview" class="mt-2 text-primary small"></div>
+       </div>
+
+       <!-- License Upload -->
+       <div class="col-md-6 mb-3">
+           <label class="input-label">State Pharmacy License</label>
+           <label for="licenseFile" class="file-upload-button">
+               <img src="https://portal.drugreturns.com/assets/icons/cloud-upload.svg" alt=""> Choose License File
+           </label>
+           <input type="file" id="licenseFile" name="licenseFile" accept=".html,.pdf,.txt">
+           <div id="license-file-preview" class="mt-2 text-primary small"></div>
+       </div>
+   </div>
+</div>
+
+<div class="col-md-3">
+   
+   <button type="button" id="submitBtn" class="primary-btn" disabled="" style="opacity: 0.5; cursor: not-allowed;">Save</button>
+</div>
+</form>
+</div>
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+$(document).ready(function() {
+$('.select2').select2({
+   placeholder: 'Select Buying Group',
+   allowClear: true
+});
+});
+</script>
+
+<script>
+document.getElementById('DEA').addEventListener('change', function () {
+const file = this.files[0];
+if (file) {
+   document.getElementById('dea-file-preview').innerText = `Selected File: ${file.name}`;
+}
+});
+
+document.getElementById('licenseFile').addEventListener('change', function () {
+const file = this.files[0];
+if (file) {
+   document.getElementById('license-file-preview').innerText = `Selected File: ${file.name}`;
+}
+});
+
+$(document).ready(function () {
+$('#submitBtn').click(function() {
+   const form = $('#profileForm');
+   const url = form.attr('action');
+   const $submitBtn = $('#submitBtn');
+
+   $.ajax({
+       type: 'POST',
+       url: url,
+       data: new FormData(form[0]),
+       processData: false,
+       contentType: false,
+       success: function(response) {
+           if (response.success) {
+               $('#FormMessage').html(`
+                   <div class="alert alert-success alert-dismissible fade show" role="alert">
+                       ${response.message}
+                       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                   </div>
+               `);
+   
+               $('html, body').animate({
+                   scrollTop: $('#FormMessage').offset().top - 100
+               }, 500);
+               
+               $submitBtn.prop('disabled', true).css({ opacity: 0.5, cursor: 'not-allowed' });
+
+               setTimeout(() => {
+                   $('#FormMessage .alert').fadeOut('slow', function () {
+                       $(this).remove();
+                        location.reload();
+                   });
+               }, 3000);
+           } else {
+               $('#FormMessage').html(`
+                   <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                       ${response.message}
+                       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                   </div>
+               `);
+   
+               $('html, body').animate({
+                   scrollTop: $('#FormMessage').offset().top - 100
+               }, 500);
+   
+               setTimeout(() => {
+                   $('#FormMessage .alert').fadeOut('slow', function () {
+                       $(this).remove();
+                   });
+               }, 3000);
+           }
+       }
+   });
+});
+});
+</script>
+
+<script>
+$(document).ready(function () {
+const $form = $('#profileForm');
+const $submitBtn = $('#submitBtn');
+
+function getFormSnapshot() {
+   const formData = new FormData($form[0]);
+   const snapshot = {};
+   formData.forEach((value, key) => {
+       snapshot[key] = value instanceof File ? value.name : value;
+   });
+   return JSON.stringify(snapshot);
+}
+
+const initialSnapshot = getFormSnapshot();
+
+function checkFormChanges() {
+   const currentSnapshot = getFormSnapshot();
+   if (currentSnapshot !== initialSnapshot) {
+       $submitBtn.prop('disabled', false).css({ opacity: 1, cursor: 'pointer' });
+   } else {
+       $submitBtn.prop('disabled', true).css({ opacity: 0.5, cursor: 'not-allowed' });
+   }
+}
+
+$form.on('input change', 'input, select, textarea', checkFormChanges);
+});
+</script>
+
+ </div>

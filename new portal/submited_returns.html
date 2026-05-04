@@ -1,0 +1,475 @@
+<div class="content">
+               
+    <style>
+.modal-content{
+width: 150%;
+}
+.dt-button {
+background: var(--btn-color) !important;
+color: var(--white) !important;
+font-family: 'Outfit-Bold' !important;
+text-transform: uppercase !important;
+min-height: 49px !important;
+font-size: 13px !important;
+padding: 0 40px !important;
+border-radius: 5px !important;
+border-style: solid !important;
+border-width: 1px !important;
+border-color: var(--btn-color) !important;
+}
+
+@media (max-width: 992px) {
+.dt-button{
+   padding: 5px 10px !important;
+   min-height: 35px !important;
+}
+}
+</style>
+
+<meta name="csrf-token" content="q2yTn37GQJArL7xUYxDYZaRb7HOTyAPW9KNuViNT">
+<div class="section-top">
+<h1 class="section-title"><i class="fa-solid fa-arrow-right"></i>Submitted Returns</h1>
+</div>
+
+<div class="container-fluid py-5 vh-100">
+  
+<div class="row">
+   
+
+   <div class="col-md-12">
+       <div class="card shadow-sm p-3 border-0">
+           <div class="row">
+               <div class="col-md-4 mb-3">
+                  <div class="custom-select-container">
+                       <select name="refnumSelect" id="refnumSelect" class="form-select custom-select select2 select2-hidden-accessible" tabindex="-1" aria-hidden="true" data-select2-id="select2-data-refnumSelect">
+                                                                   <option value="3S38J" data-select2-id="select2-data-21-6pof">
+                                   03/17/2026 - 3S38J
+                               </option>
+                                                                   <option value="3S15L">
+                                   01/15/2026 - 3S15L
+                               </option>
+                                                                   <option value="3RC56">
+                                   12/03/2025 - 3RC56
+                               </option>
+                                                                   <option value="3R9DK">
+                                   09/30/2025 - 3R9DK
+                               </option>
+                                                                   <option value="3R8B9">
+                                   08/29/2025 - 3R8B9
+                               </option>
+                                                                   <option value="3R70Y">
+                                   07/10/2025 - 3R70Y
+                               </option>
+                                                                   <option value="3R626">
+                                   06/03/2025 - 3R626
+                               </option>
+                                                                   <option value="3R526">
+                                   05/01/2025 - 3R526
+                               </option>
+                                                                   <option value="3R38R">
+                                   03/20/2025 - 3R38R
+                               </option>
+                                                                   <option value="3R22Y">
+                                   02/13/2025 - 3R22Y
+                               </option>
+                                                                   <option value="3QB6P">
+                                   11/19/2024 - 3QB6P
+                               </option>
+                                                                   <option value="3Q970">
+                                   09/10/2024 - 3Q970
+                               </option>
+                                                                   <option value="3Q70T">
+                                   07/10/2024 - 3Q70T
+                               </option>
+                                                                   <option value="3Q41Z">
+                                   04/10/2024 - 3Q41Z
+                               </option>
+                                                                   <option value="3Q1DM">
+                                   01/31/2024 - 3Q1DM
+                               </option>
+                                                                   <option value="3PAAB">
+                                   10/24/2023 - 3PAAB
+                               </option>
+                                                                   <option value="3P5BX">
+                                   05/24/2023 - 3P5BX
+                               </option>
+                                                                   <option value="3P3C2">
+                                   03/28/2023 - 3P3C2
+                               </option>
+                                                           </select><span class="select2 select2-container select2-container--default" dir="ltr" data-select2-id="select2-data-20-9qhq" style="width: 100%;"><span class="selection"><span class="select2-selection select2-selection--single select2-selection--clearable" role="combobox" aria-haspopup="true" aria-expanded="false" tabindex="0" aria-disabled="false" aria-labelledby="select2-refnumSelect-container" aria-controls="select2-refnumSelect-container"><button type="button" class="select2-selection__clear" tabindex="-1" title="Remove all items" aria-label="Remove all items" aria-describedby="select2-refnumSelect-container" data-select2-id="select2-data-22-4y0b"><span aria-hidden="true">×</span></button><span class="select2-selection__rendered" id="select2-refnumSelect-container" role="textbox" aria-readonly="true" title="
+                                   03/17/2026 - 3S38J
+                               ">
+                                   03/17/2026 - 3S38J
+                               </span><span class="select2-selection__arrow" role="presentation"><b role="presentation"></b></span></span></span><span class="dropdown-wrapper" aria-hidden="true"></span></span>
+                   </div>
+               </div>
+                <!-- Trigger Button id="printLabelsBtn"-->
+               <div class="col-md-8 mb-3 text-end">
+                   
+                   <button class="primary-btn btn-check-box" data-bs-toggle="modal" data-bs-target="#printLabelsModal">Print Labels</button>
+
+                   <button class="secondary-btn" data-bs-toggle="modal" data-bs-target="#raFormsModal">Print RA Forms</button>
+               </div>
+           </div>
+           
+           <div class="theme-table">
+               <div id="data-table_wrapper" class="dataTables_wrapper no-footer"><div class="dataTables_length" id="data-table_length"><label>Show <select name="data-table_length" aria-controls="data-table" class=""><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select> entries</label></div><table class="table no-footer dataTable" id="data-table" aria-describedby="data-table_info" style="">
+                   <thead class="table-light">
+                       <tr><th class="sorting sorting_asc" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" aria-label="NDC: activate to sort column descending: activate to sort column descending" style="width: 93.1797px;" aria-sort="ascending">NDC</th><th class="sorting" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" aria-label="Label Name: activate to sort column ascending: activate to sort column ascending" style="width: 270.43px;">Label Name</th><th class="sorting" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" aria-label="Package: activate to sort column ascending: activate to sort column ascending" style="width: 55.5156px;">Package</th><th class="sorting" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" aria-label="Cases: activate to sort column ascending: activate to sort column ascending" style="width: 38.5781px;">Cases</th><th class="sorting" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" aria-label="Full: activate to sort column ascending: activate to sort column ascending" style="width: 23.2031px;">Full</th><th class="sorting" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" aria-label="Partials: activate to sort column ascending: activate to sort column ascending" style="width: 50.7188px;">Partials</th><th class="sorting" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" aria-label="DEA: activate to sort column ascending: activate to sort column ascending" style="width: 31.2969px;">DEA</th><th class="sorting" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" aria-label="Lot Number: activate to sort column ascending: activate to sort column ascending" style="width: 97.9453px;">Lot Number</th><th class="sorting" tabindex="0" aria-controls="data-table" rowspan="1" colspan="1" aria-label="Exp Date: activate to sort column ascending: activate to sort column ascending" style="width: 63.3984px;">Exp Date</th></tr>
+                   </thead>
+                   <tbody id="table-body"><tr class="odd">
+                       <td class="sorting_1">00009001201</td>
+                       <td>Cortef 5mg Tablet</td>
+                       <td>50</td>
+                       <td>1</td>
+                       <td>1</td>
+                       <td>0</td>
+                       <td>RX</td>
+                       <td>CHVSX</td>
+                       <td>7/1/2025</td>
+                   </tr><tr class="even">
+                       <td class="sorting_1">00054327099</td>
+                       <td>Fluticasone 50mcg/act Spray</td>
+                       <td>16</td>
+                       <td>1</td>
+                       <td>2</td>
+                       <td>0</td>
+                       <td>RX</td>
+                       <td>AC2511A</td>
+                       <td>4/1/2026</td>
+                   </tr><tr class="odd">
+                       <td class="sorting_1">00088222033</td>
+                       <td>Lantus 100units/mL for Inj</td>
+                       <td>10</td>
+                       <td>1</td>
+                       <td>1</td>
+                       <td>0</td>
+                       <td>RX</td>
+                       <td>3F064F</td>
+                       <td>6/1/2026</td>
+                   </tr><tr class="even">
+                       <td class="sorting_1">00093201312</td>
+                       <td>Sumatriptan 4mg Soln for Inj</td>
+                       <td>0.5</td>
+                       <td>2</td>
+                       <td>1</td>
+                       <td>0</td>
+                       <td>RX</td>
+                       <td>2741320</td>
+                       <td>5/1/2024</td>
+                   </tr><tr class="odd">
+                       <td class="sorting_1">00096070760</td>
+                       <td>Drysol 20% Topical Soln</td>
+                       <td>60</td>
+                       <td>1</td>
+                       <td>1</td>
+                       <td>0</td>
+                       <td>Rx</td>
+                       <td>I566</td>
+                       <td>4/1/2026</td>
+                   </tr><tr class="even">
+                       <td class="sorting_1">00168034720</td>
+                       <td>Terconazole 0.8% Vaginal Cream</td>
+                       <td>20</td>
+                       <td>1</td>
+                       <td>2</td>
+                       <td>0</td>
+                       <td>RX</td>
+                       <td>NT0603</td>
+                       <td>5/1/2026</td>
+                   </tr><tr class="odd">
+                       <td class="sorting_1">00169183711</td>
+                       <td>Novolin 70/30 Susp for Inj</td>
+                       <td>10</td>
+                       <td>1</td>
+                       <td>1</td>
+                       <td>0</td>
+                       <td>OTC</td>
+                       <td>NZF7H84</td>
+                       <td>12/1/2025</td>
+                   </tr><tr class="even">
+                       <td class="sorting_1">00480366722</td>
+                       <td>Liraglutide 18mg/3mL (6mg/mL) Injection</td>
+                       <td>3</td>
+                       <td>1</td>
+                       <td>2</td>
+                       <td>0</td>
+                       <td>RX</td>
+                       <td>PS6LK14</td>
+                       <td>5/1/2026</td>
+                   </tr><tr class="odd">
+                       <td class="sorting_1">00555007102</td>
+                       <td>Isoniazid 300mg Tablet</td>
+                       <td>100</td>
+                       <td>1</td>
+                       <td>0</td>
+                       <td>26</td>
+                       <td>RX</td>
+                       <td>CNYBM</td>
+                       <td>5/1/2026</td>
+                   </tr><tr class="even">
+                       <td class="sorting_1">00713063215</td>
+                       <td>Fluticasone 0.005% Oint</td>
+                       <td>15</td>
+                       <td>1</td>
+                       <td>1</td>
+                       <td>0</td>
+                       <td>RX</td>
+                       <td>L403042</td>
+                       <td>3/1/2026</td>
+                   </tr></tbody>
+               </table><div class="dataTables_info" id="data-table_info" role="status" aria-live="polite">Showing 1 to 10 of 57 entries</div><div class="dataTables_paginate paging_simple_numbers" id="data-table_paginate"><a class="paginate_button previous disabled" aria-controls="data-table" aria-disabled="true" role="link" data-dt-idx="previous" tabindex="-1" id="data-table_previous">Previous</a><span><a class="paginate_button current" aria-controls="data-table" role="link" aria-current="page" data-dt-idx="0" tabindex="0">1</a><a class="paginate_button " aria-controls="data-table" role="link" data-dt-idx="1" tabindex="0">2</a><a class="paginate_button " aria-controls="data-table" role="link" data-dt-idx="2" tabindex="0">3</a><a class="paginate_button " aria-controls="data-table" role="link" data-dt-idx="3" tabindex="0">4</a><a class="paginate_button " aria-controls="data-table" role="link" data-dt-idx="4" tabindex="0">5</a><a class="paginate_button " aria-controls="data-table" role="link" data-dt-idx="5" tabindex="0">6</a></span><a class="paginate_button next" aria-controls="data-table" role="link" data-dt-idx="next" tabindex="0" id="data-table_next">Next</a></div></div>
+           </div>
+       </div>
+   </div>
+</div>
+</div>
+
+<!--Last Date Check-->
+<div class="modal fade" id="return" tabindex="-1" aria-labelledby="returnLabel" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered">
+   <div class="modal-content">
+       <div class="p-5">
+           <h4>We allow a maximum of one return in a 30-day period.</h4>
+           <p>As your last return was submitted on <strong>4/22/2025</strong>, you may not create another return until <strong>5/22/2025</strong>.</p>
+           <p>If extenuating circumstances require that you create another return before this date, please call us at <strong>1.800.579.4804</strong> or chat with us using the button in the lower right corner and we will review your request.</p>
+       
+           <button type="button" class="primary-btn w-100" data-bs-dismiss="modal">OK</button>
+       </div>
+   </div>
+</div>
+</div>
+
+<!--RA Form-->
+<div class="modal fade" id="raFormsModal" tabindex="-1" aria-labelledby="raFormsModalLabel" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered">
+   <div class="modal-content">
+     <div class="modal-header">
+       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+     </div>
+     <div class="modal-body text-center">
+       <h5>Reprint this Return Authorization form for this Return.</h5>
+       <div style="margin-top: 20px">
+           <button id="printRaBtn" class="btn btn-success m-2">Print RA Form</button>
+           <button class="btn btn-secondary m-2" data-bs-dismiss="modal">Cancel</button>
+       </div>
+     </div>
+   </div>
+</div>
+</div>
+
+<!--PrintLabels-->
+<div class="modal fade" id="printLabelsModal" tabindex="-1" aria-labelledby="printLabelsModalLabel" aria-hidden="true">
+<div class="modal-dialog modal-lg modal-dialog-centered">
+   <div class="modal-content rounded-3 shadow">
+     
+     <div class="modal-header">
+       <h5 class="modal-title" id="printLabelsModalLabel">Return Shipping Labels</h5>
+       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+     </div>
+
+    <div class="modal-body">
+       <h5 class="mb-3">You have already printed <span id="boxCount"></span> shipping label(s).</h5>
+       <br>
+       <h5>You may print <span id="maxBoxesText"></span> more label(s).</h5>
+
+       <p style="font-size:15px">
+         If you need to reprint more labels, please contact customer service at
+         <a href="tel:18005794804">1-800-579-4804</a>.
+       </p>
+   </div>
+   
+   <div class="modal-footer d-flex gap-2">
+       <button class="btn btn-success d-none" id="printAllBtn">Print Labels</button>
+       <button type="button" class="btn btn-secondary m-2" data-bs-dismiss="modal">Close</button>
+   </div>
+ </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+<script>
+$(document).ready(function () {
+   $('#data-table').DataTable();
+   
+   $('#refnumSelect').select2({
+       width: '100%', 
+       placeholder: "Select RefNum", 
+       allowClear: true 
+   });
+   
+   $("#refnumSelect").on("change", function () {
+       const refnum = $(this).val();
+   });
+   
+   //Check Box Print Limit 
+   $(document).on("click", ".btn-check-box", function () {
+       const refnum = $("#refnumSelect").val();
+       if (!refnum) return;
+       
+       $("#boxCount").text("...");
+       $("#maxBoxesText").text("...");
+   
+       $.ajax({
+           url: "https://portal.drugreturns.com/customer/checkBoxCount",
+           type: "POST",
+           data: {
+               refnum: refnum,
+               _token: "q2yTn37GQJArL7xUYxDYZaRb7HOTyAPW9KNuViNT"
+           },
+           success: function (res) {
+               $("#boxCount").text(res.data.numboxes);
+               $("#maxBoxesText").text(res.data.maxnumboxes);
+
+               if (res.data.oktoprintsl == 1) {
+                   $("#printAllBtn").removeClass("d-none").data("ra-num", res.refnum);
+               } else {
+                   $("#printAllBtn").addClass("d-none"); 
+               }
+           },
+           error: function (xhr) {
+               alert("Error: " + (xhr.responseJSON?.error || "Something went wrong"));
+           }
+       });
+   });
+   
+   $('#printAllBtn').on('click', function () {
+       // const raNum = $(this).data('ra-num');
+       const raNum = $("#refnumSelect").val();
+       const boxCount = $('#maxBoxesText').text(); 
+       const comments = $('#comments').val();
+       const customerId = "13846";
+
+       if (!raNum) {
+           alert('Missing RA Number.');
+           return;
+       }
+       
+       const modalEl = document.getElementById('printLabelsModal');
+       const modal = bootstrap.Modal.getInstance(modalEl);
+       modal.hide();
+   
+       const baseUrl = `https://portal.drugreturns.com`;
+       const printUrl = `${baseUrl}/customer/generateLabels/${encodeURIComponent(raNum)}/${encodeURIComponent(boxCount)}`;
+
+       window.open(printUrl, '_blank');
+   });
+});
+
+setTimeout(() => {
+   let alertEl = document.getElementById('successAlert');
+   if (alertEl) {
+       let bsAlert = bootstrap.Alert.getOrCreateInstance(alertEl);
+       bsAlert.close();
+   }
+}, 1000);
+
+if (window.history.replaceState) {
+   const url = new URL(window.location);
+   url.searchParams.delete('success');
+   window.history.replaceState({}, document.title, url);
+}
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+   $('#refnumSelect').select2(); // initialize Select2
+
+   const tableBody = document.getElementById('table-body');
+   let dataTableInstance;
+
+   function fetchAndRenderData(refnum) {
+       if (!refnum) {
+           tableBody.innerHTML = '';
+           return;
+       }
+
+       fetch(`/customer/get-submitted-returns?refnum=${refnum}`)
+           .then(res => res.json())
+           .then(data => {
+               if ($.fn.DataTable.isDataTable('#data-table')) {
+                   $('#data-table').DataTable().clear().destroy();
+               }
+
+               tableBody.innerHTML = '';
+
+               if (data.length === 0) {
+                   tableBody.innerHTML = '<tr><td colspan="10" class="text-center">No data found</td></tr>';
+                   return;
+               }
+
+               data.forEach(row => {
+                   const tr = document.createElement('tr');
+                   tr.innerHTML = `
+                       <td>${row.NDC ?? ''}</td>
+                       <td>${row.LabelName ?? ''}</td>
+                       <td>${row.Package ?? ''}</td>
+                       <td>${row.Cases ?? ''}</td>
+                       <td>${row.Full ?? ''}</td>
+                       <td>${row.Partials ?? ''}</td>
+                       <td>${row.DEA ?? ''}</td>
+                       <td>${row.LotNumber ?? ''}</td>
+                       <td>${row.ExpDate ? new Date(row.ExpDate).toLocaleDateString('en-US') : ''}</td>
+                   `;
+                   tableBody.appendChild(tr);
+               });
+
+               dataTableInstance = $('#data-table').DataTable({
+                   searching: false,
+                   pageLength: 10,
+                   responsive: true
+               });
+           });
+   }
+
+   fetchAndRenderData($('#refnumSelect').val());
+
+   $('#refnumSelect').on('select2:select', function (e) {
+       fetchAndRenderData(e.params.data.id);
+   });
+});
+
+function openModal() {
+ document.getElementById('returnModal').style.display = 'block';
+}
+
+function closeModal() {
+ document.getElementById('returnModal').style.display = 'none';
+}
+
+window.onclick = function(event) {
+ const modal = document.getElementById('returnModal');
+ if (event.target === modal) {
+   closeModal();
+ }
+}
+
+document.getElementById('printRaBtn').addEventListener('click', function () {
+   const customerId = 13846;
+   const refnumSelect = document.getElementById('refnumSelect');
+   const refnum = refnumSelect.value; 
+   if (!refnum) {
+       alert('Please select a Refnum');
+       return;
+   }
+   
+   window.open(`https://portal.drugreturns.com/customer/generateRa?refnum=${encodeURIComponent(refnum)}&customerID=${encodeURIComponent(customerId)}`, '_blank');
+   // window.open(`https://portal.drugreturns.com/customer/generateRa?refnum=${encodeURIComponent(refnum)}`, '_blank');
+});
+</script>
+
+ </div>
+</div>

@@ -29,9 +29,13 @@ import {
     clearItems,
 } from '@/lib/store/returnTransactionsSlice';
 import { unassignSingleReturn } from '@/lib/store/batchSlice';
-import { checkReturnability } from '@/lib/store/policiesSlice';
 import { ReturnTransaction, ReturnTransactionItem, WineCellarItem } from '@/lib/types';
 import { apiClient } from '@/lib/api/apiClient';
+import {
+    NON_RETURNABLE_REASONS,
+    formatNonReturnableReason,
+    isValidNonReturnableReason,
+} from '@/lib/constants/nonReturnableReasons';
 
 // ── Helpers ────────────────────────────────────────────────────
 
@@ -55,9 +59,13 @@ function formatCurrency(value: number): string {
 function ReturnTransactionStoreAndProcessorDl({
     tx,
     variant,
+    onPrintAllShippingLabels,
+    onPrintShippingLabel,
 }: {
     tx: ReturnTransaction;
     variant: 'plain' | 'emerald';
+    onPrintAllShippingLabels?: () => void;
+    onPrintShippingLabel?: (packageNumber: number) => void;
 }) {
     const emerald = variant === 'emerald';
     const dlCls = emerald ? 'space-y-2.5' : 'space-y-1.5';
@@ -114,6 +122,104 @@ function ReturnTransactionStoreAndProcessorDl({
                     {tx.processorName || '—'}
                 </dd>
             </div>
+            
+            {/* Shipping Details */}
+            {(tx.fedexTracking || tx.fedexPickupConfirmation || tx.fedexShipmentId) && (
+                <>
+                    <div className={`pt-2 border-t ${emerald ? 'border-emerald-200' : 'border-gray-100'}`} />
+                    {/* {tx.fedexTracking && (
+                        <div className={rowCls}>
+                            <dt className={`${labelCls} shrink-0`}>FedEx Tracking</dt>
+                            <dd className={`${valueCls} text-right font-mono`}>{tx.fedexTracking}</dd>
+                        </div>
+                    )} */}
+                    {tx.fedexPickupConfirmation && (
+                        <div className={rowCls}>
+                            <dt className={`${labelCls} shrink-0`}>Pickup Confirmation</dt>
+                            <dd className={`${valueCls} text-right font-mono`}>{tx.fedexPickupConfirmation}</dd>
+                        </div>
+                    )}
+                    {/* {tx.fedexShipmentId && (
+                        <div className={rowCls}>
+                            <dt className={`${labelCls} shrink-0`}>Shipment ID</dt>
+                            <dd className={`${valueCls} text-right font-mono`}>{tx.fedexShipmentId}</dd>
+                        </div>
+                    )} */}
+                </>
+            )}
+            
+            {/* Package Tracking with Print Labels */}
+            {tx.packageTracking && Object.keys(tx.packageTracking).length > 0 && (
+                <div className="pt-2 border-t border-gray-100">
+                    <dt className={`${labelCls} mb-1 flex items-center justify-between`}>
+                        <span>Package Tracking</span>
+                        {onPrintAllShippingLabels ? (
+                            <div className="flex items-center gap-1">
+                                <button
+                                    type="button"
+                                    onClick={() => onPrintAllShippingLabels()}
+                                    className="flex items-center gap-1 px-2 py-1 bg-green-100 hover:bg-green-200 text-xs text-green-700 rounded border border-green-200 transition-colors"
+                                    title="Print all shipping labels"
+                                >
+                                    <Printer className="w-3 h-3" />
+                                    Print All Labels
+                                </button>
+                            </div>
+                        ) : null}
+                    </dt>
+                    <dd className="space-y-1.5 mt-1">
+                        {Object.entries(tx.packageTracking)
+                            .filter(([, v]) => v)
+                            .map(([key, val], idx) => {
+                                const displayKey = key.startsWith('package')
+                                    ? key.replace(/([0-9]+)/, ' $1')
+                                    : `Package ${key}`;
+                                return (
+                                    <div key={key} className="flex justify-between items-center text-xs">
+                                        <span className="text-gray-500 capitalize">{displayKey}</span>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="font-mono text-gray-900">{val}</span>
+                                            {onPrintShippingLabel ? (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => onPrintShippingLabel(idx + 1)}
+                                                    className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors"
+                                                    title={`Print shipping label for ${val}`}
+                                                >
+                                                    <Printer className="w-3 h-3" />
+                                                </button>
+                                            ) : null}
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        }
+                    </dd>
+                </div>
+            )}
+
+            {/* FedEx Labels */}
+            {tx.fedexLabels && Object.keys(tx.fedexLabels).length > 0 && (
+                <div className="pt-2 border-t border-gray-100">
+                    <dt className={`${labelCls} mb-1 flex items-center gap-1`}><Printer className="w-3.5 h-3.5" /> Shipping Labels</dt>
+                    <dd className="flex flex-wrap gap-2">
+                        {Object.keys(tx.fedexLabels).map((key) => {
+                            const num = key.replace('package', '');
+                            return (
+                                <a
+                                    key={key}
+                                    href={`${process.env.NEXT_PUBLIC_API_URL}/return-transactions/${tx.id}/labels/${num}/download`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="flex items-center gap-1 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-xs text-gray-700 rounded border border-gray-200 transition-colors"
+                                >
+                                    <Download className="w-3 h-3" /> Label {num}
+                                </a>
+                            );
+                        })}
+                    </dd>
+                </div>
+            )}
         </dl>
     );
 }
@@ -204,14 +310,7 @@ export default function ReturnDetailPage() {
     const [itemStatusFilter, setItemStatusFilter] = useState('');
     const [deleteItemModal, setDeleteItemModal] = useState<ReturnTransactionItem | null>(null);
     const [editItemModal, setEditItemModal] = useState<ReturnTransactionItem | null>(null);
-    const [editItemForm, setEditItemForm] = useState({ fullPackageSize: '', fullPackageQtyReturned: '', standardPrice: '', returnStatus: 'tbd', destination: '', memo: '' });
-    const [editPolicyCheck, setEditPolicyCheck] = useState<{
-        status: 'returnable' | 'non_returnable' | 'tbd';
-        reason: string | null;
-        destination: string | null;
-        manufacturerName: string | null;
-    } | null>(null);
-    const [isEditPolicyChecking, setIsEditPolicyChecking] = useState(false);
+    const [editItemForm, setEditItemForm] = useState({ fullPackageSize: '', fullPackageQtyReturned: '', standardPrice: '', returnStatus: 'tbd', destination: '', memo: '', nonReturnableReason: '' });
     const debouncedItemSearch = useDebounce(itemSearch, 500);
 
     // Reverse distributors for Destination select in edit item modal
@@ -344,66 +443,17 @@ export default function ReturnDetailPage() {
         if (editItemModal) {
             setEditItemForm({
                 fullPackageSize: editItemModal.fullPackageSize ? String(editItemModal.fullPackageSize) : '',
-                fullPackageQtyReturned: editItemModal.fullPackageQtyReturned ? String(editItemModal.fullPackageQtyReturned) : (editItemModal.quantity ? String(editItemModal.quantity) : ''),
+                fullPackageQtyReturned: (editItemModal.fullPackageQtyReturned ?? editItemModal.quantityReturned)
+                    ? String(editItemModal.fullPackageQtyReturned ?? editItemModal.quantityReturned)
+                    : (editItemModal.quantity ? String(editItemModal.quantity) : ''),
                 standardPrice: editItemModal.standardPrice != null ? String(editItemModal.standardPrice) : '',
                 returnStatus: editItemModal.returnStatus,
                 destination: editItemModal.destination || '',
                 memo: editItemModal.memo || '',
+                nonReturnableReason: (editItemModal as any).nonReturnableReason || '',
             });
-            setEditPolicyCheck(null);
         }
     }, [editItemModal]);
-
-    const runEditPolicyCheck = useCallback(async () => {
-        if (!editItemModal) return;
-        const ndc = editItemModal.ndc;
-        const expDate = editItemModal.expirationDate;
-        if (!ndc || !expDate) return;
-
-        const pkgSize = parseInt(editItemForm.fullPackageSize) || 0;
-        const qtyReturned = parseInt(editItemForm.fullPackageQtyReturned) || 0;
-        const isPartial = pkgSize > 0 && qtyReturned > 0 && qtyReturned < pkgSize;
-
-        setIsEditPolicyChecking(true);
-        setEditPolicyCheck(null);
-        try {
-            const result = await dispatch(checkReturnability({
-                ndc,
-                expirationDate: expDate,
-                dosageForm: editItemModal.dosageForm || undefined,
-                isPartial,
-            }));
-            if (checkReturnability.fulfilled.match(result) && result.payload) {
-                const policy = result.payload;
-                setEditPolicyCheck(policy);
-                if (policy.status === 'returnable' || policy.status === 'non_returnable') {
-                    setEditItemForm(prev => ({
-                        ...prev,
-                        returnStatus: policy.status,
-                        destination: policy.destination || prev.destination,
-                    }));
-                }
-            }
-        } catch { /* non-critical */ }
-        setIsEditPolicyChecking(false);
-    }, [editItemModal, editItemForm.fullPackageSize, editItemForm.fullPackageQtyReturned, dispatch]);
-
-    /** Debounce policy check when Qty Returned / package size change in edit modal (avoids a request per keystroke). */
-    const editPolicyTriggerKey =
-        editItemModal && !isLocked
-            ? `${editItemForm.fullPackageSize}|${editItemForm.fullPackageQtyReturned}`
-            : '';
-    const debouncedEditPolicyKey = useDebounce(editPolicyTriggerKey, 600);
-
-    useEffect(() => {
-        if (!editItemModal || isLocked) return;
-        if (!debouncedEditPolicyKey) return;
-        const pkgSize = parseInt(editItemForm.fullPackageSize) || 0;
-        const qtyReturned = parseInt(editItemForm.fullPackageQtyReturned) || 0;
-        if (pkgSize <= 0 || qtyReturned <= 0) return;
-
-        runEditPolicyCheck();
-    }, [debouncedEditPolicyKey, editItemModal, isLocked, runEditPolicyCheck]);
 
     const handleDeleteItem = async () => {
         if (!deleteItemModal) return;
@@ -422,7 +472,7 @@ export default function ReturnDetailPage() {
     const handleUpdateItem = async () => {
         if (!editItemModal) return;
         const payload: Record<string, any> = {};
-        
+
         // Core data fields — only include if not locked
         if (!isLocked) {
             const pkgSize = editItemForm.fullPackageSize ? parseInt(editItemForm.fullPackageSize) : 0;
@@ -442,11 +492,23 @@ export default function ReturnDetailPage() {
             }
             if (editItemForm.standardPrice) payload.standardPrice = parseFloat(editItemForm.standardPrice);
         }
-        
+
         // Classification fields — always allowed
         payload.returnStatus = editItemForm.returnStatus;
         if (editItemForm.destination) payload.destination = editItemForm.destination;
         if (editItemForm.memo) payload.memo = editItemForm.memo;
+
+        // FCR-52: A non-returnable reason is required whenever the row ends
+        // up non_returnable. The dropdown is shown in the modal in that case.
+        if (editItemForm.returnStatus === 'non_returnable') {
+            // if (!isValidNonReturnableReason(editItemForm.nonReturnableReason)) {
+            //     showToast('Please select a non-returnable reason for this item.', 'error');
+            //     return;
+            // }
+            if (editItemForm.nonReturnableReason) {
+                payload.nonReturnableReason = editItemForm.nonReturnableReason;
+            }
+        }
 
         const result = await dispatch(updateTransactionItem({ transactionId: id, itemId: editItemModal.id, payload }));
         if (updateTransactionItem.fulfilled.match(result)) {
@@ -707,7 +769,14 @@ export default function ReturnDetailPage() {
                             </button>
                         )}
                         {canDoAction(tx, 'complete') && canEdit && (
-                            <button onClick={() => checkActionWithToast('complete return', () => setActionModal('complete'))} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors">
+                            <button onClick={() => {
+                                // Require at least 1 item to complete a return
+                                if (!items || items.length === 0) {
+                                    showToast('Cannot complete return: At least 1 item is required', 'error');
+                                    return;
+                                }
+                                checkActionWithToast('complete return', () => setActionModal('complete'));
+                            }} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-[#1e293b] text-white hover:bg-[#334155] transition-colors">
                                 <CheckCircle className="w-3 h-3" /> Complete
                             </button>
                         )}
@@ -716,18 +785,7 @@ export default function ReturnDetailPage() {
                                 <Lock className="w-3 h-3" /> Finalize
                             </button>
                         )}
-                        {/* Print Job Sheet - Available for completed/finalized transactions with tracking */}
-                        {(tx.status === 'completed' || tx.status === 'finalized') && (tx.fedexTracking || (tx.packageTracking && Object.keys(tx.packageTracking).length > 0)) && (
-                            <button
-                                onClick={printJobSheet}
-                                disabled={pdfLoading === 'job-sheet'}
-                                className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors disabled:opacity-50"
-                                title="Print job sheet with addresses and barcodes"
-                            >
-                                {pdfLoading === 'job-sheet' ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <FileText className="w-4 h-4 mr-1" />}
-                                Print Job Sheet
-                            </button>
-                        )}
+                        {/* Print Job Sheet - Moved to Documents section */}
                         {canDoAction(tx, 'delete') && canEdit && (
                             <button onClick={() => checkActionWithToast('delete return', () => setDeleteModal(true))} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-red-100 text-red-800 border border-red-300 hover:bg-red-200 transition-colors">
                                 <Trash2 className="w-3 h-3" /> Delete
@@ -793,127 +851,14 @@ export default function ReturnDetailPage() {
                     <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                         <Building2 className="w-3.5 h-3.5" /> Store & Processor
                     </h2>
-                    <ReturnTransactionStoreAndProcessorDl tx={tx} variant="plain" />
+                    <ReturnTransactionStoreAndProcessorDl
+                        tx={tx}
+                        variant="plain"
+                        onPrintAllShippingLabels={printShippingLabels}
+                        onPrintShippingLabel={printSingleLabel}
+                    />
                 </div>
 
-                    {/* Shipping & Processing */}
-                    <div className="bg-white rounded-lg shadow px-4 py-3">
-                        <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                            <Truck className="w-3.5 h-3.5" /> Shipping & Processing
-                        </h2>
-                        <dl className="space-y-1.5">
-                            <div className="flex justify-between">
-                                <dt className="text-[11px] text-gray-500">FedEx Tracking</dt>
-                                <dd className="text-[11px] text-gray-900 font-mono">{tx.fedexTracking || '—'}</dd>
-                            </div>
-                            <div className="flex justify-between">
-                                <dt className="text-[11px] text-gray-500">Pickup Confirmation</dt>
-                                <dd className="text-[11px] text-gray-900">{tx.fedexPickupConfirmation || '—'}</dd>
-                            </div>
-                            {/* Commented out as requested:
-                            <div className="flex justify-between">
-                                <dt className="text-[11px] text-gray-500 flex items-center gap-1"><Clock className="w-3 h-3" /> Time In</dt>
-                                <dd className="text-[11px] text-gray-900">{tx.timeIn ? formatDate(tx.timeIn) : '—'}</dd>
-                            </div>
-                            <div className="flex justify-between">
-                                <dt className="text-[11px] text-gray-500 flex items-center gap-1"><Clock className="w-3 h-3" /> Time Out</dt>
-                                <dd className="text-[11px] text-gray-900">{tx.timeOut ? formatDate(tx.timeOut) : '—'}</dd>
-                            </div>
-                            */}
-                            {tx.receivedInWarehouseDate && (
-                                <div className="flex justify-between">
-                                    <dt className="text-[11px] text-gray-500">Received in Warehouse</dt>
-                                    <dd className="text-[11px] text-gray-900">{formatDate(tx.receivedInWarehouseDate)}</dd>
-                                </div>
-                            )}
-                            {/* Commented out as requested:
-                            <div className="flex justify-between">
-                                <dt className="text-[11px] text-gray-500">Verified Integrity</dt>
-                                <dd className="text-[11px] text-gray-900">{tx.verifiedIntegrity ? 'Yes' : 'No'}</dd>
-                            </div>
-                            */}
-                        {tx.boxCount != null && (
-                            <div className="flex justify-between">
-                                <dt className="text-[11px] text-gray-500">Box Count</dt>
-                                <dd className="text-[11px] text-gray-900 font-semibold">{tx.boxCount}</dd>
-                            </div>
-                        )}
-                        {tx.prpNumber && (
-                            <div className="flex justify-between">
-                                <dt className="text-gray-500">PRP Number</dt>
-                                <dd className="text-gray-900 font-mono text-xs">{tx.prpNumber}</dd>
-                            </div>
-                        )}
-                        {tx.fedexShipmentId && (
-                            <div className="flex justify-between">
-                                <dt className="text-gray-500">Shipment ID</dt>
-                                <dd className="text-gray-900 font-mono text-xs">{tx.fedexShipmentId}</dd>
-                            </div>
-                        )}
-                        {tx.packageTracking && Object.keys(tx.packageTracking).length > 0 && (
-                            <div className="pt-2 border-t border-gray-100">
-                                <dt className="text-gray-500 mb-1 flex items-center justify-between">
-                                    <span>Package Tracking</span>
-                                    <div className="flex items-center gap-1">
-                                        <button
-                                            onClick={printShippingLabels}
-                                            disabled={pdfLoading === 'shipping-labels'}
-                                            className="flex items-center gap-1 px-2 py-1 bg-green-100 hover:bg-green-200 text-xs text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
-                                            title="Print all shipping labels with addresses and barcodes"
-                                        >
-                                            {pdfLoading === 'shipping-labels' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
-                                            Print All Labels
-                                        </button>
-
-                                    </div>
-                                </dt>
-                                <dd className="space-y-1.5 mt-1">
-                                    {Object.entries(tx.packageTracking)
-                                        .filter(([, v]) => v)
-                                        .map(([key, val], idx) => (
-                                            <div key={key} className="flex justify-between items-center text-xs">
-                                                <span className="text-gray-500 capitalize">{key.replace(/([0-9]+)/, ' $1')}</span>
-                                                <div className="flex items-center gap-1.5">
-                                                    <span className="font-mono text-gray-900">{val}</span>
-                                                    <button
-                                                        onClick={() => printSingleLabel(idx + 1)}
-                                                        disabled={pdfLoading === `shipping-label-${idx + 1}`}
-                                                        className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
-                                                        title={`Print shipping label for ${val}`}
-                                                    >
-                                                        {pdfLoading === `shipping-label-${idx + 1}` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
-                                                    </button>
-
-                                                </div>
-                                            </div>
-                                        ))
-                                    }
-                                </dd>
-                            </div>
-                        )}
-                        {tx.fedexLabels && Object.keys(tx.fedexLabels).length > 0 && (
-                            <div className="pt-2 border-t border-gray-100">
-                                <dt className="text-gray-500 mb-1 flex items-center gap-1"><Printer className="w-3.5 h-3.5" /> Shipping Labels</dt>
-                                <dd className="flex flex-wrap gap-2">
-                                    {Object.keys(tx.fedexLabels).map((key) => {
-                                        const num = key.replace('package', '');
-                                        return (
-                                            <a
-                                                key={key}
-                                                href={`${process.env.NEXT_PUBLIC_API_URL}/return-transactions/${tx.id}/labels/${num}/download`}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="flex items-center gap-1 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-xs text-gray-700 rounded border border-gray-200 transition-colors"
-                                            >
-                                                <Download className="w-3 h-3" /> Label {num}
-                                            </a>
-                                        );
-                                    })}
-                                </dd>
-                            </div>
-                        )}
-                        </dl>
-                    </div>
                 </div>
             ) : (
                 /* Layout without Shipping & Processing: 3 cards in one row */
@@ -971,7 +916,12 @@ export default function ReturnDetailPage() {
                             </div>
                             Store & Processor
                         </h2>
-                        <ReturnTransactionStoreAndProcessorDl tx={tx} variant="emerald" />
+                        <ReturnTransactionStoreAndProcessorDl
+                            tx={tx}
+                            variant="emerald"
+                            onPrintAllShippingLabels={printShippingLabels}
+                            onPrintShippingLabel={printSingleLabel}
+                        />
                     </div>
 
                     {/* Items & Values */}
@@ -1019,14 +969,30 @@ export default function ReturnDetailPage() {
                             {pdfLoading === 'manifest' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
                             Download Manifest
                         </button>
-                        {/* <button
-                            onClick={() => downloadPdf('dea-form-222', `dea-form-222-${tx.licensePlate}.pdf`)}
-                            disabled={pdfLoading === 'dea-form-222'}
-                            className="flex items-center gap-2 px-4 py-2.5 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg text-sm text-orange-700 font-medium transition-colors disabled:opacity-50"
-                        >
-                            {pdfLoading === 'dea-form-222' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
-                            DEA Form 222
-                        </button> */}
+                        {/* DEA Form 222 - Available when there are CII items */}
+                        {tx.hasCiiItems && (
+                            <button
+                                onClick={() => downloadPdf('dea-form-222', `dea-form-222-${tx.licensePlate}.pdf`)}
+                                disabled={pdfLoading === 'dea-form-222'}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded text-xs text-orange-700 font-medium transition-colors disabled:opacity-50"
+                                title="Download DEA Form 222 for Schedule II items"
+                            >
+                                {pdfLoading === 'dea-form-222' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
+                                DEA Form 222
+                            </button>
+                        )}
+                        {/* Print Job Sheet - Available for completed/finalized transactions with tracking */}
+                        {(tx.status === 'completed' || tx.status === 'finalized') && (tx.fedexTracking || (tx.packageTracking && Object.keys(tx.packageTracking).length > 0)) && (
+                            <button
+                                onClick={printJobSheet}
+                                disabled={pdfLoading === 'job-sheet'}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 hover:bg-green-100 border border-green-200 rounded text-xs text-green-700 font-medium transition-colors disabled:opacity-50"
+                                title="Print job sheet with addresses and barcodes"
+                            >
+                                {pdfLoading === 'job-sheet' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
+                                Print Job Sheet
+                            </button>
+                        )}
                     </div>
                     {tx.manifestGeneratedAt && (
                         <p className="text-[10px] text-gray-400 mt-2">Manifest last generated: {formatDate(tx.manifestGeneratedAt)}</p>
@@ -1042,12 +1008,13 @@ export default function ReturnDetailPage() {
                     </h2>
                     {isProcessor && canAddDeleteItems && (
                         <div className="flex gap-1.5">
-                            <button onClick={() => router.push(`/warehouse/returns/${id}/add-items`)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors">
+                            <button onClick={() => router.push(`/warehouse/returns/${id}/add-items`)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-[#1e293b] text-white hover:bg-[#334155] transition-colors">
                                 <Plus className="w-3 h-3" /> Add Items
                             </button>
-                            <button onClick={() => openWcModal()} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors">
+                            {/* Wine Cellar Items functionality moved to MainAdmin warehouse verification */}
+                            {/* <button onClick={() => openWcModal()} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors">
                                 <Archive className="w-3 h-3" /> Wine Cellar Items
-                            </button>
+                            </button> */}
                         </div>
                     )}
                     {isProcessor && canDoAction(tx, 'edit') && !canEdit && (
@@ -1090,13 +1057,13 @@ export default function ReturnDetailPage() {
                             value={itemSearch}
                             onChange={e => setItemSearch(e.target.value)}
                             placeholder="Search by NDC, name, manufacturer, lot..."
-                            className="w-full pl-8 pr-3 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                            className="w-full pl-8 pr-3 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500"
                         />
                     </div>
                     <select
                         value={itemStatusFilter}
                         onChange={e => setItemStatusFilter(e.target.value)}
-                        className="px-2.5 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                        className="px-2.5 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500"
                     >
                         <option value="">All Statuses</option>
                         <option value="returnable">Returnable</option>
@@ -1115,7 +1082,7 @@ export default function ReturnDetailPage() {
                         <Package className="w-10 h-10 text-gray-300 mx-auto mb-2" />
                         <p className="text-gray-500 text-xs font-medium">No items yet</p>
                         {isProcessor && canAddDeleteItems && (
-                            <button onClick={() => router.push(`/warehouse/returns/${id}/add-items`)} className="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors">
+                            <button onClick={() => router.push(`/warehouse/returns/${id}/add-items`)} className="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-[#1e293b] text-white hover:bg-[#334155] transition-colors">
                                 <Plus className="w-3 h-3" /> Start Scanning
                             </button>
                         )}
@@ -1129,45 +1096,46 @@ export default function ReturnDetailPage() {
                     <div className="overflow-x-auto">
                         <table className="w-full table-auto">
                             <thead>
-                                <tr className="bg-gray-50 border-b border-gray-200">
-                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">NDC</th>
-                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Name</th>
-                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Manufacturer</th>
-                                    <th className="text-center px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Pkg Size</th>
-                                    <th className="text-center px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Qty Returned</th>
-                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Serial#</th>
+                                <tr className="bg-gradient-to-r from-[#1e293b] to-[#334155] border-b-2 border-slate-700">
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">NDC</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Name</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Manufacturer</th>
+                                    <th className="text-center px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Pkg Size</th>
+                                    <th className="text-center px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Qty Returned</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Serial#</th>
                                     {/* <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Price</th>
                                     <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Est. Value</th> */}
                                     {/* <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Est. Store Value</th> */}
-                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Expires</th>
-                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
-                                    <th className="text-left px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Destination</th>
-                                    <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Expires</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Status</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Destination</th>
+                                    <th className="text-right px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {nonWcItems.map((item) => {
+                            <tbody>
+                                {nonWcItems.map((item, idx) => {
                                     const sBadge = getItemStatusBadge(item.returnStatus);
                                     return (
-                                        <tr key={item.id} className="hover:bg-gray-50">
-                                            <td className="px-2 py-1.5 text-[11px] font-mono text-gray-900">{item.ndc || '—'}</td>
-                                            <td className="px-2 py-1.5 text-[11px] text-gray-900 max-w-[130px] truncate" title={item.proprietaryName || ''}>
+                                        <tr key={item.id} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'} hover:bg-slate-50 transition-colors border-b border-gray-100`}>
+                                            <td className="px-4 py-3 text-sm font-mono text-gray-900">{item.ndc || '—'}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-900 max-w-[130px] truncate" title={item.proprietaryName || ''}>
                                                 {item.proprietaryName || item.genericName || '—'}
                                             </td>
-                                            <td className="px-2 py-1.5 text-[11px] text-gray-600 max-w-[110px] truncate" title={item.manufacturer || ''}>
+                                            <td className="px-4 py-3 text-sm text-gray-600 max-w-[110px] truncate" title={item.manufacturer || ''}>
                                                 {item.manufacturer || '—'}
                                             </td>
-                                            <td className="px-2 py-1.5 text-[11px] text-center text-gray-900">
+                                            <td className="px-4 py-3 text-sm text-center text-gray-900">
                                                 {item.fullPackageSize || '—'}
                                             </td>
-                                            <td className="px-2 py-1.5 text-[11px] text-center text-gray-900">
+                                            <td className="px-4 py-3 text-sm text-center text-gray-900">
                                                 {(() => {
-                                                    const qtyReturned = item.fullPackageQtyReturned ?? item.quantity;
-                                                    const displayQty = (item.fullPackageQtyReturned && item.fullPackageSize && item.fullPackageQtyReturned === item.fullPackageSize) ? 1 : qtyReturned;
+                                                    const qtyReturned = item.fullPackageQtyReturned ?? item.quantityReturned ?? item.quantity;
+                                                    const fullPkgQty = item.fullPackageQtyReturned ?? item.quantityReturned;
+                                                    const displayQty = (fullPkgQty && item.fullPackageSize && fullPkgQty === item.fullPackageSize) ? 1 : qtyReturned;
                                                     return <>{displayQty}{item.isPartial && <span className="text-yellow-600 ml-0.5">P</span>}</>;
                                                 })()}
                                             </td>
-                                            <td className="px-2 py-1.5 text-[11px] text-gray-600 font-mono whitespace-nowrap">
+                                            <td className="px-4 py-3 text-sm text-gray-600 font-mono whitespace-nowrap">
                                                 {item.serialNumber || '—'}
                                             </td>
                                             {/* <td className="px-2 py-1.5 text-[11px] text-right text-gray-900">
@@ -1179,18 +1147,26 @@ export default function ReturnDetailPage() {
                                             {/* <td className="px-2 py-1.5 text-[11px] text-right font-medium text-gray-900">
                                                 {item.estimatedStoreValue != null ? formatCurrency(item.estimatedStoreValue) : '—'}
                                             </td> */}
-                                            <td className="px-2 py-1.5 text-[11px] text-gray-600 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
                                                 {item.expirationDate ? formatDate(item.expirationDate) : '—'}
                                             </td>
-                                            <td className="px-2 py-1.5">
-                                                <div className="flex items-center gap-1">
-                                                    <Badge variant={sBadge.variant}><span className="text-[10px]">{sBadge.label}</span></Badge>
-                                                    {item.wineCellarId && (
-                                                        <Badge variant="info"><span className="text-[10px]"><Archive className="w-2.5 h-2.5 mr-0.5 inline" />WC</span></Badge>
+                                            <td className="px-4 py-3">
+                                                <div className="flex flex-col gap-0.5">
+                                                    <div className="flex items-center gap-1">
+                                                        <Badge variant={sBadge.variant}><span className="text-[10px]">{sBadge.label}</span></Badge>
+                                                        {item.wineCellarId && (
+                                                            <Badge variant="info"><span className="text-[10px]"><Archive className="w-2.5 h-2.5 mr-0.5 inline" />WC</span></Badge>
+                                                        )}
+                                                    </div>
+                                                    {/* FCR-52: Show reason for non-returnable items */}
+                                                    {item.returnStatus === 'non_returnable' && item.nonReturnableReason && (
+                                                        <span className="text-[10px] text-red-700 italic" title={formatNonReturnableReason(item.nonReturnableReason)}>
+                                                            {formatNonReturnableReason(item.nonReturnableReason)}
+                                                        </span>
                                                     )}
                                                 </div>
                                             </td>
-                                            <td className="px-2 py-1.5 text-[11px] text-gray-600">
+                                            <td className="px-4 py-3 text-sm text-gray-600">
                                                 {item.returnStatus === 'returnable' ? (
                                                     item.destination ? (
                                                         <span className="capitalize font-medium text-gray-900">{item.destination}</span>
@@ -1199,20 +1175,20 @@ export default function ReturnDetailPage() {
                                                     )
                                                 ) : '—'}
                                             </td>
-                                            <td className="px-2 py-1.5">
+                                            <td className="px-4 py-3">
                                                 <div className="flex items-center justify-end gap-0.5">
                                                     {canAddDeleteItems && item.nonReturnableReason === 'date' && !item.wineCellarId && (
-                                                        <button onClick={() => handleMoveToWineCellar(item)} className="p-1 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded" title="Move to Wine Cellar">
+                                                        <button onClick={() => handleMoveToWineCellar(item)} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title="Move to Wine Cellar">
                                                             <Archive className="w-3 h-3" />
                                                         </button>
                                                     )}
                                                     {canAddDeleteItems && (
-                                                        <button onClick={() => setEditItemModal(item)} className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title={isLocked ? 'Edit classification' : 'Edit item'}>
+                                                        <button onClick={() => setEditItemModal(item)} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title={isLocked ? 'Edit classification' : 'Edit item'}>
                                                             <Edit className="w-3 h-3" />
                                                         </button>
                                                     )}
                                                     {canAddDeleteItems && (
-                                                        <button onClick={() => setDeleteItemModal(item)} className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded" title="Delete item">
+                                                        <button onClick={() => setDeleteItemModal(item)} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title="Delete item">
                                                             <Trash2 className="w-3 h-3" />
                                                         </button>
                                                     )}
@@ -1229,8 +1205,8 @@ export default function ReturnDetailPage() {
 
             {/* ── Edit Item Modal ───────────────────────────── */}
             {editItemModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setEditItemModal(null)}>
-                    <div className="bg-white rounded-lg max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setEditItemModal(null)}>
+                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">Edit Item</h2>
                             <button onClick={() => setEditItemModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
@@ -1243,75 +1219,45 @@ export default function ReturnDetailPage() {
                                 </div>
                             )}
                             <div className="space-y-2">
-                                <div className="grid grid-cols-2 gap-2">
-                                    <div>
-                                        <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Pkg Size</label>
-                                        <input type="number" min="1" value={editItemForm.fullPackageSize} onChange={e => setEditItemForm({ ...editItemForm, fullPackageSize: e.target.value })} disabled={isLocked} placeholder="e.g. 60" className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Qty Returned</label>
-                                        <input type="number" min="0" value={editItemForm.fullPackageQtyReturned} onChange={e => setEditItemForm({ ...editItemForm, fullPackageQtyReturned: e.target.value })} disabled={isLocked} placeholder="e.g. 45" className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} />
-                                    </div>
-                                </div>
-                                {isEditPolicyChecking && (
-                                    <div className="flex items-center gap-2 text-[11px] text-gray-600 px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded">
-                                        <Loader2 className="w-3 h-3 animate-spin" /> Checking policy...
-                                    </div>
-                                )}
-                                {editPolicyCheck && (
-                                    <div className={`flex items-start gap-1.5 text-[11px] rounded px-2.5 py-1.5 border ${
-                                        editPolicyCheck.status === 'returnable' ? 'bg-green-50 border-green-200 text-green-800' :
-                                        editPolicyCheck.status === 'non_returnable' ? 'bg-red-50 border-red-200 text-red-800' :
-                                        'bg-yellow-50 border-yellow-200 text-yellow-800'
-                                    }`}>
-                                        {editPolicyCheck.status === 'returnable' ? <CheckCircle className="w-3 h-3 mt-0.5 flex-shrink-0" /> :
-                                         editPolicyCheck.status === 'non_returnable' ? <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" /> :
-                                         <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />}
+                                <div>
+                                    <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Quantity</label>
+                                    <div className="grid grid-cols-2 gap-2 text-xs">
                                         <div>
-                                            <span className="font-semibold">{editPolicyCheck.manufacturerName ? `${editPolicyCheck.manufacturerName}: ` : 'Policy: '}</span>
-                                            {editPolicyCheck.status === 'returnable' && 'Returnable — status & destination updated.'}
-                                            {editPolicyCheck.status === 'non_returnable' && `Non-Returnable${editPolicyCheck.reason ? ` — ${editPolicyCheck.reason.replace(/_/g, ' ')}` : ''}`}
-                                            {editPolicyCheck.status === 'tbd' && 'No policy found — set status manually.'}
+                                            <label className="block text-[10px] text-gray-500 mb-0.5">Pkg Size</label>
+                                            <div className="text-center py-1.5 bg-gray-50 border border-gray-200 rounded">
+                                                {editItemForm.fullPackageSize || '—'}
+                                            </div>
                                         </div>
+                                        <div>
+                                            <label className="block text-[10px] text-gray-500 mb-0.5">Qty Returned (units)</label>
+                                            <input 
+                                                type="number" 
+                                                min="0" 
+                                                max={editItemForm.fullPackageSize || undefined}
+                                                value={editItemForm.fullPackageQtyReturned || ''} 
+                                                onChange={e => setEditItemForm({ ...editItemForm, fullPackageQtyReturned: e.target.value })} 
+                                                disabled={isLocked} 
+                                                className={`w-full px-2 py-1.5 text-center text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} 
+                                            />
+                                        </div>
+                                        {/* <div>
+                                            <label className="block text-[10px] text-gray-500 mb-0.5">#</label>
+                                            <div className="text-center py-1.5 bg-gray-50 border border-gray-200 rounded">
+                                                {editItemForm.fullPackageQtyReturned && editItemForm.fullPackageSize ? 
+                                                    Math.ceil(Number(editItemForm.fullPackageQtyReturned) / Number(editItemForm.fullPackageSize)) : '—'}
+                                            </div>
+                                        </div> */}
                                     </div>
-                                )}
-                                {/* <div>
-                                    <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Price ($)</label>
-                                    <input type="number" step="0.01" min="0" value={editItemForm.standardPrice} onChange={e => setEditItemForm({ ...editItemForm, standardPrice: e.target.value })} disabled={isLocked} className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} />
-                                </div> */}
-                                <div>
-                                    <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Return Status</label>
-                                    <select value={editItemForm.returnStatus} onChange={e => setEditItemForm({ ...editItemForm, returnStatus: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500">
-                                        <option value="tbd">TBD</option>
-                                        <option value="returnable">Returnable</option>
-                                        <option value="non_returnable">Non-Returnable</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-[11px] font-medium text-gray-700 mb-0.5">
-                                        Destination
-                                        <span className="text-gray-400 font-normal ml-1">(auto-assigned if empty)</span>
-                                    </label>
-                                    <select
-                                        value={editItemForm.destination}
-                                        onChange={e => setEditItemForm({ ...editItemForm, destination: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
-                                    >
-                                        <option value="">— Auto-assign —</option>
-                                        {reverseDistributors.map(d => (
-                                            <option key={d.id} value={d.name}>{d.name}</option>
-                                        ))}
-                                    </select>
                                 </div>
                                 <div>
                                     <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Memo</label>
-                                    <input type="text" value={editItemForm.memo} onChange={e => setEditItemForm({ ...editItemForm, memo: e.target.value })} placeholder="Optional memo" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                    <input type="text" value={editItemForm.memo} onChange={e => setEditItemForm({ ...editItemForm, memo: e.target.value })} placeholder="Optional memo" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500" />
                                 </div>
                             </div>
                         </div>
                         <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
                             <button onClick={() => setEditItemModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleUpdateItem} disabled={isItemActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                            <button onClick={handleUpdateItem} disabled={isItemActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">
                                 {isItemActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Saving...</> : 'Save'}
                             </button>
                         </div>
@@ -1321,8 +1267,8 @@ export default function ReturnDetailPage() {
 
             {/* ── Delete Item Modal ────────────────────────── */}
             {deleteItemModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setDeleteItemModal(null)}>
-                    <div className="bg-white rounded-lg max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setDeleteItemModal(null)}>
+                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">Delete Item</h2>
                             <button onClick={() => setDeleteItemModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
@@ -1345,8 +1291,8 @@ export default function ReturnDetailPage() {
 
             {/* ── Edit Modal ────────────────────────────────── */}
             {editModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setEditModal(false)}>
-                    <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setEditModal(false)}>
+                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">Edit Return — {tx.licensePlate}</h2>
                             <button onClick={() => setEditModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
@@ -1357,22 +1303,22 @@ export default function ReturnDetailPage() {
                                     <p className="text-[10px] text-yellow-800">Return is locked. Only notes can be updated.</p>
                                 </div>
                             )}
-                            <div>
+                            {/* <div>
                                 <label className="block text-[11px] font-medium text-gray-700 mb-0.5">FedEx Tracking Number</label>
-                                <input type="text" value={editForm.fedexTracking} onChange={e => setEditForm({ ...editForm, fedexTracking: e.target.value })} disabled={isLocked} className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} placeholder="Enter tracking number" />
-                            </div>
+                                <input type="text" value={editForm.fedexTracking} onChange={e => setEditForm({ ...editForm, fedexTracking: e.target.value })} disabled={isLocked} className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} placeholder="Enter tracking number" />
+                            </div> */}
                             <div>
                                 <label className="block text-[11px] font-medium text-gray-700 mb-0.5">FedEx Pickup Confirmation</label>
-                                <input type="text" value={editForm.fedexPickupConfirmation} onChange={e => setEditForm({ ...editForm, fedexPickupConfirmation: e.target.value })} disabled={isLocked} className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} placeholder="Enter pickup confirmation" />
+                                <input type="text" value={editForm.fedexPickupConfirmation} onChange={e => setEditForm({ ...editForm, fedexPickupConfirmation: e.target.value })} disabled={isLocked} className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} placeholder="Enter pickup confirmation" />
                             </div>
                             <div>
                                 <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Notes</label>
-                                <textarea value={editForm.notes} onChange={e => setEditForm({ ...editForm, notes: e.target.value })} rows={3} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none" placeholder="Optional notes" />
+                                <textarea value={editForm.notes} onChange={e => setEditForm({ ...editForm, notes: e.target.value })} rows={3} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500 resize-none" placeholder="Optional notes" />
                             </div>
                         </div>
                         <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
                             <button onClick={() => setEditModal(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleUpdate} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                            <button onClick={handleUpdate} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">
                                 {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Saving...</> : 'Save Changes'}
                             </button>
                         </div>
@@ -1382,8 +1328,8 @@ export default function ReturnDetailPage() {
 
             {/* ── Status Action Modal ──────────────────────── */}
             {actionModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setActionModal(null)}>
-                    <div className="bg-white rounded-lg max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setActionModal(null)}>
+                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">
                                 {actionModal === 'pause' && 'Pause Return'}
@@ -1399,7 +1345,7 @@ export default function ReturnDetailPage() {
                         </div>
                         <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
                             <button onClick={() => setActionModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleStatusAction} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                            <button onClick={handleStatusAction} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">
                                 {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Processing...</> : 'Confirm'}
                             </button>
                         </div>
@@ -1409,8 +1355,8 @@ export default function ReturnDetailPage() {
 
             {/* ── Delete Modal ─────────────────────────────── */}
             {deleteModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setDeleteModal(false)}>
-                    <div className="bg-white rounded-lg max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setDeleteModal(false)}>
+                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">Delete Return</h2>
                             <button onClick={() => setDeleteModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
@@ -1432,7 +1378,7 @@ export default function ReturnDetailPage() {
 
             {/* ── Wine Cellar Items Modal ─────────────────────── */}
             {wcModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setWcModal(false)}>
+                <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setWcModal(false)}>
                     <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col shadow-xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50 flex-shrink-0">
                             <div>
@@ -1478,7 +1424,7 @@ export default function ReturnDetailPage() {
                                                                 setWcSelected(new Set());
                                                             }
                                                         }}
-                                                        className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                                                        className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-slate-500"
                                                     />
                                                 </th>
                                                 <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase">NDC</th>
@@ -1510,7 +1456,7 @@ export default function ReturnDetailPage() {
                                                             type="checkbox"
                                                             checked={wcSelected.has(item.id)}
                                                             onChange={() => {}} // Handled by row click
-                                                            className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                                                            className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-slate-500"
                                                         />
                                                     </td>
                                                     <td className="px-3 py-2 text-xs font-mono text-gray-900">{item.ndc}</td>
@@ -1570,7 +1516,7 @@ export default function ReturnDetailPage() {
                                         setWcAdding(false);
                                     }}
                                     disabled={wcSelected.size === 0 || wcAdding}
-                                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors"
+                                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors"
                                 >
                                     {wcAdding ? (
                                         <>

@@ -2,6 +2,25 @@
 
 A Node.js TypeScript backend API for pharmacy management with Supabase integration.
 
+## Railway Deployment Fix for Canvas g_memdup2 Error
+
+If you encounter `undefined symbol: g_memdup2` errors during Railway deployment, this project includes the necessary fixes:
+
+### The Issue
+The error occurs when the prebuilt `canvas` npm package binary is incompatible with the nixpacks runtime environment's glib/pango versions.
+
+### Solution Applied
+1. **Build from Source**: Canvas is configured to compile from source instead of using prebuilt binaries
+2. **Library Compatibility**: Updated nixpacks.toml with compatible glib and pango versions  
+3. **Runtime Libraries**: Added necessary build dependencies (gcc, make, python) for node-gyp
+4. **Environment Variables**: Set `CANVAS_PREBUILT=false` and proper library paths
+
+### Files Modified
+- `nixpacks.toml`: Updated with build dependencies and runtime libraries
+- `package.json`: Moved canvas to `optionalDependencies`
+- `.npmrc`: Added canvas build configuration
+- `railway.json`: Updated build command to use `--build-from-source`
+
 ## Features
 
 - User authentication (Signup & Signin)

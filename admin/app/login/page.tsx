@@ -202,7 +202,7 @@ export default function LoginPage() {
               className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-contain mx-auto mb-4 block"
             />
           ) : (
-            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-primary-500 rounded-lg mb-4 mx-auto">
+            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-[#1e293b] rounded-lg mb-4 mx-auto">
               <Shield className="w-8 h-8 text-white" />
             </div>
           )}
@@ -234,7 +234,7 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                   placeholder="admin@buyinggroup.com"
                   required
                   autoComplete="email"
@@ -254,7 +254,7 @@ export default function LoginPage() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                   placeholder="Enter your password"
                   required
                   autoComplete="current-password"
@@ -279,13 +279,13 @@ export default function LoginPage() {
               <label className="flex items-center">
                 <input
                   type="checkbox"
-                  className="w-4 h-4 text-primary-500 border-gray-300 rounded focus:ring-primary-500"
+                  className="w-4 h-4 text-[#1e293b] border-gray-300 rounded focus:ring-slate-500"
                 />
                 <span className="ml-2 text-sm text-gray-600">Remember me</span>
               </label>
               <Link
                 href="/forgot-password"
-                className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                className="text-sm text-[#1e293b] hover:text-[#334155] font-medium"
               >
                 Forgot password?
               </Link>

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon",
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "node dist/src/server.js",
     "migrate": "ts-node scripts/migrate.ts",
     "import-excel": "node scripts/import_excel_to_supabase.js",
     "create-admin": "ts-node scripts/create_admin_account.ts",
@@ -28,6 +28,7 @@
     "node": ">=20.0.0"
   },
   "dependencies": {
+    "@napi-rs/canvas": "^0.1.56",
     "@react-email/components": "^1.0.9",
     "@react-email/render": "^2.0.4",
     "@supabase/supabase-js": "^2.39.0",
@@ -35,7 +36,7 @@
     "@types/pdfkit": "^0.17.5",
     "archiver": "^7.0.1",
     "bcryptjs": "^2.4.3",
-    "canvas": "^3.2.1",
+    "bwip-js": "^4.10.1",
     "cors": "^2.8.5",
     "csv-parse": "^6.1.0",
     "dotenv": "^16.3.1",
@@ -69,6 +70,7 @@
     "@types/node": "^20.10.5",
     "@types/nodemailer": "^7.0.11",
     "@types/pdf-parse": "^1.1.4",
+    "@types/puppeteer": "^7.0.4",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@types/swagger-jsdoc": "^6.0.1",
@@ -78,6 +80,5 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3",
     "xlsx": "^0.18.5"
-  },
-  "packageManager": "yarn@4.9.2+sha512.1fc009bc09d13cfd0e19efa44cbfc2b9cf6ca61482725eb35bbc5e257e093ebf4130db6dfe15d604ff4b79efd8e1e8e99b25fa7d0a6197c9f9826358d4d65c3c"
+  }
 }

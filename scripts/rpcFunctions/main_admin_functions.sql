@@ -137,10 +137,10 @@ BEGIN
       'id', a.id,
       'name', a.name,
       'contactEmail', a.email,
-      'contactPhone', NULL,
-      'address', NULL,
+      'contactPhone', a.contact_phone,
+      'address', a.address,
       'status', CASE WHEN a.is_active THEN 'active' ELSE 'inactive' END,
-      'notes', NULL,
+      'notes', a.notes,
       'createdAt', a.created_at,
       'updatedAt', a.updated_at,
       'adminCount', 1,
@@ -205,10 +205,10 @@ BEGIN
     'id', a.id,
     'name', a.name,
     'contactEmail', a.email,
-    'contactPhone', NULL,
-    'address', NULL,
+    'contactPhone', a.contact_phone,
+    'address', a.address,
     'status', CASE WHEN a.is_active THEN 'active' ELSE 'inactive' END,
-    'notes', NULL,
+    'notes', a.notes,
     'createdAt', a.created_at,
     'updatedAt', a.updated_at,
     'role', a.role,
@@ -368,10 +368,13 @@ BEGIN
 
   UPDATE admin
   SET
-    name = COALESCE(p_name, name),
-    email = COALESCE(p_contact_email, email),
-    is_active = COALESCE(v_is_active, is_active),
-    updated_at = NOW()
+    name          = COALESCE(p_name, name),
+    email         = COALESCE(p_contact_email, email),
+    contact_phone = CASE WHEN p_contact_phone IS NOT NULL THEN p_contact_phone ELSE contact_phone END,
+    address       = CASE WHEN p_address IS NOT NULL THEN p_address ELSE address END,
+    notes         = CASE WHEN p_notes IS NOT NULL THEN p_notes ELSE notes END,
+    is_active     = COALESCE(v_is_active, is_active),
+    updated_at    = NOW()
   WHERE id = p_group_id AND role = 'super_admin';
 
   -- Also update business_name in admin_settings if name is being updated
@@ -386,10 +389,10 @@ BEGIN
     'id', a.id,
     'name', a.name,
     'contactEmail', a.email,
-    'contactPhone', NULL,
-    'address', NULL,
+    'contactPhone', a.contact_phone,
+    'address', a.address,
     'status', CASE WHEN a.is_active THEN 'active' ELSE 'inactive' END,
-    'notes', NULL,
+    'notes', a.notes,
     'createdAt', a.created_at,
     'updatedAt', a.updated_at,
     'role', a.role

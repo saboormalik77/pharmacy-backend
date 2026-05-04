@@ -89,13 +89,13 @@ export default function PerformancePage() {
             <div className="flex gap-2">
                 <button
                     onClick={() => setActiveSection('pharmacy')}
-                    className={`px-3 py-1.5 text-xs font-medium rounded ${activeSection === 'pharmacy' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                    className={`px-3 py-1.5 text-xs font-medium rounded ${activeSection === 'pharmacy' ? 'bg-[#1e293b] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                 >
                     Pharmacy Performance
                 </button>
                 <button
                     onClick={() => setActiveSection('gpo')}
-                    className={`px-3 py-1.5 text-xs font-medium rounded ${activeSection === 'gpo' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                    className={`px-3 py-1.5 text-xs font-medium rounded ${activeSection === 'gpo' ? 'bg-[#1e293b] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                 >
                     GPO Summary
                 </button>
@@ -128,7 +128,7 @@ export default function PerformancePage() {
                         </select>
                         <button
                             onClick={() => { setPharmPage(1); fetchPharmacy(); }}
-                            className="px-3 py-1.5 text-xs bg-primary-600 text-white rounded hover:bg-primary-700"
+                            className="px-3 py-1.5 text-xs bg-[#1e293b] text-white rounded hover:bg-[#334155]"
                         >
                             Search
                         </button>
@@ -200,29 +200,29 @@ export default function PerformancePage() {
                                 <h2 className="text-sm font-semibold text-gray-900 mb-3">Pharmacy Details</h2>
                                 <div className="overflow-x-auto">
                                     <table className="w-full table-auto">
-                                        <thead className="bg-gray-50 border-b border-gray-200">
+                                        <thead className="bg-gradient-to-r from-[#1e293b] to-[#334155] border-b-2 border-slate-700">
                                             <tr>
-                                                <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Pharmacy</th>
-                                                <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">GPO</th>
-                                                <th className="px-2 py-1.5 text-right text-xs font-medium text-gray-500 uppercase">Returns</th>
-                                                <th className="px-2 py-1.5 text-right text-xs font-medium text-gray-500 uppercase">Items</th>
-                                                <th className="px-2 py-1.5 text-right text-xs font-medium text-gray-500 uppercase">Total Value</th>
-                                                <th className="px-2 py-1.5 text-right text-xs font-medium text-gray-500 uppercase">Avg Value</th>
-                                                <th className="px-2 py-1.5 text-right text-xs font-medium text-gray-500 uppercase">Payout</th>
-                                                <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">Last Return</th>
+                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider">Pharmacy</th>
+                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider">GPO</th>
+                                                <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">Returns</th>
+                                                <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">Items</th>
+                                                <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">Total Value</th>
+                                                <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">Avg Value</th>
+                                                <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">Payout</th>
+                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider">Last Return</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-gray-200">
-                                            {pharmData.data.map((item) => (
-                                                <tr key={item.pharmacyId} className="hover:bg-gray-50">
-                                                    <td className="px-2 py-1.5 text-xs font-medium text-gray-900">{item.pharmacyName}</td>
-                                                    <td className="px-2 py-1.5 text-xs text-gray-600">{item.gpoAffiliation || '—'}</td>
-                                                    <td className="px-2 py-1.5 text-xs text-right">{formatNumber(item.totalReturns)}</td>
-                                                    <td className="px-2 py-1.5 text-xs text-right">{formatNumber(item.totalItems)}</td>
-                                                    <td className="px-2 py-1.5 text-xs text-right font-medium">{formatCurrency(item.totalReturnableValue)}</td>
-                                                    <td className="px-2 py-1.5 text-xs text-right">{formatCurrency(item.avgReturnValue)}</td>
-                                                    <td className="px-2 py-1.5 text-xs text-right text-green-600">{formatCurrency(item.totalPayout)}</td>
-                                                    <td className="px-2 py-1.5 text-xs text-gray-600">
+                                        <tbody className="divide-y divide-gray-100">
+                                            {pharmData.data.map((item, idx) => (
+                                                <tr key={item.pharmacyId} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'} hover:bg-slate-50`}>
+                                                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{item.pharmacyName}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">{item.gpoAffiliation || '—'}</td>
+                                                    <td className="px-4 py-3 text-sm text-right">{formatNumber(item.totalReturns)}</td>
+                                                    <td className="px-4 py-3 text-sm text-right">{formatNumber(item.totalItems)}</td>
+                                                    <td className="px-4 py-3 text-sm text-right font-medium">{formatCurrency(item.totalReturnableValue)}</td>
+                                                    <td className="px-4 py-3 text-sm text-right">{formatCurrency(item.avgReturnValue)}</td>
+                                                    <td className="px-4 py-3 text-sm text-right text-green-600">{formatCurrency(item.totalPayout)}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">
                                                         {item.lastReturnDate ? formatDate(item.lastReturnDate) : '—'}
                                                     </td>
                                                 </tr>
@@ -310,29 +310,29 @@ export default function PerformancePage() {
                                 <h2 className="text-sm font-semibold text-gray-900 mb-3">GPO Details</h2>
                                 <div className="overflow-x-auto">
                                     <table className="w-full table-auto">
-                                        <thead className="bg-gray-50 border-b border-gray-200">
+                                        <thead className="bg-gradient-to-r from-[#1e293b] to-[#334155] border-b-2 border-slate-700">
                                             <tr>
-                                                <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">GPO</th>
-                                                <th className="px-2 py-1.5 text-right text-xs font-medium text-gray-500 uppercase">Pharmacies</th>
-                                                <th className="px-2 py-1.5 text-right text-xs font-medium text-gray-500 uppercase">Returns</th>
-                                                <th className="px-2 py-1.5 text-right text-xs font-medium text-gray-500 uppercase">Items</th>
-                                                <th className="px-2 py-1.5 text-right text-xs font-medium text-gray-500 uppercase">Total Value</th>
-                                                <th className="px-2 py-1.5 text-right text-xs font-medium text-gray-500 uppercase">Avg Value</th>
-                                                <th className="px-2 py-1.5 text-right text-xs font-medium text-gray-500 uppercase">Payout</th>
-                                                <th className="px-2 py-1.5 text-right text-xs font-medium text-gray-500 uppercase">GPO Share</th>
+                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider">GPO</th>
+                                                <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">Pharmacies</th>
+                                                <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">Returns</th>
+                                                <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">Items</th>
+                                                <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">Total Value</th>
+                                                <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">Avg Value</th>
+                                                <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">Payout</th>
+                                                <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">GPO Share</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-gray-200">
+                                        <tbody className="divide-y divide-gray-100">
                                             {gpoData.data.map((item, idx) => (
-                                                <tr key={idx} className="hover:bg-gray-50">
-                                                    <td className="px-2 py-1.5 text-xs font-medium text-gray-900">{item.gpoName}</td>
-                                                    <td className="px-2 py-1.5 text-xs text-right">{item.pharmacyCount}</td>
-                                                    <td className="px-2 py-1.5 text-xs text-right">{formatNumber(item.totalReturns)}</td>
-                                                    <td className="px-2 py-1.5 text-xs text-right">{formatNumber(item.totalItems)}</td>
-                                                    <td className="px-2 py-1.5 text-xs text-right font-medium">{formatCurrency(item.totalReturnableValue)}</td>
-                                                    <td className="px-2 py-1.5 text-xs text-right">{formatCurrency(item.avgReturnValue)}</td>
-                                                    <td className="px-2 py-1.5 text-xs text-right text-green-600">{formatCurrency(item.totalPayout)}</td>
-                                                    <td className="px-2 py-1.5 text-xs text-right text-purple-600 font-medium">{formatCurrency(item.totalGpoShare)}</td>
+                                                <tr key={idx} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'} hover:bg-slate-50`}>
+                                                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{item.gpoName}</td>
+                                                    <td className="px-4 py-3 text-sm text-right">{item.pharmacyCount}</td>
+                                                    <td className="px-4 py-3 text-sm text-right">{formatNumber(item.totalReturns)}</td>
+                                                    <td className="px-4 py-3 text-sm text-right">{formatNumber(item.totalItems)}</td>
+                                                    <td className="px-4 py-3 text-sm text-right font-medium">{formatCurrency(item.totalReturnableValue)}</td>
+                                                    <td className="px-4 py-3 text-sm text-right">{formatCurrency(item.avgReturnValue)}</td>
+                                                    <td className="px-4 py-3 text-sm text-right text-green-600">{formatCurrency(item.totalPayout)}</td>
+                                                    <td className="px-4 py-3 text-sm text-right text-purple-600 font-medium">{formatCurrency(item.totalGpoShare)}</td>
                                                 </tr>
                                             ))}
                                         </tbody>

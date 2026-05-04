@@ -40,6 +40,8 @@ export default function BuyingGroupsPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [formError, setFormError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -266,6 +268,7 @@ export default function BuyingGroupsPage() {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       const result = await dispatch(createBuyingGroup({
         name: formData.name.trim(),
@@ -303,6 +306,8 @@ export default function BuyingGroupsPage() {
       loadGroups();
     } catch (err: any) {
       setFormError(err || 'Failed to create buying group');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -314,6 +319,7 @@ export default function BuyingGroupsPage() {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       await dispatch(updateBuyingGroup({
         id: editingGroup.id,
@@ -330,10 +336,13 @@ export default function BuyingGroupsPage() {
       loadGroups();
     } catch (err: any) {
       setFormError(err || 'Failed to update buying group');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
+    setIsDeleting(true);
     try {
       await dispatch(deleteBuyingGroup(id)).unwrap();
       setSuccessMsg('Buying group deleted successfully');
@@ -341,6 +350,8 @@ export default function BuyingGroupsPage() {
       loadGroups();
     } catch (err: any) {
       setFormError(err || 'Failed to delete buying group');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -368,7 +379,7 @@ export default function BuyingGroupsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Buying Groups</h1>
+          <h1 className="text-lg font-bold text-gray-900">Buying Groups</h1>
           <p className="text-gray-600 mt-1">Manage your buying groups and their admin accounts</p>
         </div>
         <Button variant="primary" onClick={openCreateModal} className="flex items-center gap-2">
@@ -445,27 +456,27 @@ export default function BuyingGroupsPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-gradient-to-r from-indigo-500 to-indigo-400 text-white">
                 <tr>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Name</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 hidden md:table-cell">Contact Email</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 hidden lg:table-cell">Phone</th>
-                  <th className="text-center px-4 py-3 font-medium text-gray-600">Admins</th>
-                  <th className="text-center px-4 py-3 font-medium text-gray-600">Status</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 hidden sm:table-cell">Created</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-600">Actions</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Name</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden md:table-cell">Contact Email</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">Phone</th>
+                  <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Admins</th>
+                  <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Status</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">Created</th>
+                  <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {buyingGroups.map((group) => (
-                  <tr key={group.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 font-medium text-gray-900">{group.name}</td>
-                    <td className="px-4 py-3 text-gray-600 hidden md:table-cell">{group.contactEmail || '-'}</td>
-                    <td className="px-4 py-3 text-gray-600 hidden lg:table-cell">{group.contactPhone || '-'}</td>
-                    <td className="px-4 py-3 text-center text-gray-600">{group.adminCount}</td>
-                    <td className="px-4 py-3 text-center">{statusBadge(group.status)}</td>
-                    <td className="px-4 py-3 text-gray-500 hidden sm:table-cell">{formatDate(group.createdAt)}</td>
-                    <td className="px-4 py-3">
+                  <tr key={group.id} className="odd:bg-white even:bg-gray-50/40 hover:bg-gray-50 transition-colors">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{group.name}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600 hidden md:table-cell">{group.contactEmail || '-'}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600 hidden lg:table-cell">{group.contactPhone || '-'}</td>
+                    <td className="px-4 py-3 text-sm text-center text-gray-600">{group.adminCount}</td>
+                    <td className="px-4 py-3 text-sm text-center">{statusBadge(group.status)}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500 hidden sm:table-cell">{formatDate(group.createdAt)}</td>
+                    <td className="px-4 py-3 text-sm">
                       <div className="flex items-center justify-end gap-1">
                         <button onClick={() => openViewModal(group)} className="p-1.5 rounded hover:bg-gray-100 text-gray-500 hover:text-indigo-600" title="View">
                           <Eye className="w-4 h-4" />
@@ -520,8 +531,12 @@ export default function BuyingGroupsPage() {
               Are you sure you want to delete this buying group? Associated admin accounts will be deactivated.
             </p>
             <div className="flex justify-end gap-3">
-              <Button variant="outline" size="sm" onClick={() => setDeleteConfirm(null)}>Cancel</Button>
-              <Button variant="danger" size="sm" onClick={() => handleDelete(deleteConfirm)}>Delete</Button>
+              <Button variant="outline" size="sm" onClick={() => setDeleteConfirm(null)} disabled={isDeleting}>Cancel</Button>
+              <Button variant="danger" size="sm" onClick={() => handleDelete(deleteConfirm)} disabled={isDeleting}>
+                {isDeleting ? (
+                  <span className="flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Deleting...</span>
+                ) : 'Delete'}
+              </Button>
             </div>
           </div>
         </div>
@@ -850,12 +865,20 @@ export default function BuyingGroupsPage() {
             </div>
 
             <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 sticky bottom-0 bg-white">
-              <Button variant="outline" onClick={closeModal}>Cancel</Button>
+              <Button variant="outline" onClick={closeModal} disabled={isSubmitting}>Cancel</Button>
               <Button
                 variant="primary"
                 onClick={modalMode === 'create' ? handleSubmitCreate : handleSubmitEdit}
+                disabled={isSubmitting}
               >
-                {modalMode === 'create' ? 'Add Buying Group' : 'Save Changes'}
+                {isSubmitting ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    {modalMode === 'create' ? 'Adding...' : 'Saving...'}
+                  </span>
+                ) : (
+                  modalMode === 'create' ? 'Add Buying Group' : 'Save Changes'
+                )}
               </Button>
             </div>
           </div>

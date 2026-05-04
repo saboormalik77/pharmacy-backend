@@ -37,6 +37,7 @@ export interface AdminDashboardResponse {
     totalPharmacies: StatWithChange;
     activeDistributors: StatWithChange;
     returnsValue: StatWithChange;
+    totalReturns: StatWithChange;
   };
   pharmacies: PharmacyListItem[];
   returnsValueTrend: ReturnsTrendDataPoint[];
@@ -89,6 +90,7 @@ export const getAdminDashboardStats = async (
       totalPharmacies: data.stats.totalPharmacies,
       activeDistributors: data.stats.activeDistributors,
       returnsValue: data.stats.returnsValue,
+      totalReturns: data.stats.totalReturns,
     },
     pharmacies: data.pharmacies || [],
     returnsValueTrend: data.returnsValueTrend || [],

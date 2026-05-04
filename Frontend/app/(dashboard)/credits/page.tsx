@@ -28,6 +28,8 @@ import { formatCurrency, formatDate } from '@/lib/utils/format'
 import Link from 'next/link'
 import { pharmacyPaymentService } from '@/lib/api/services'
 import type { PharmacyPayment, PharmacyPaymentSummary } from '@/types'
+import { DateRangeFilter } from '@/components/checks/DateRangeFilter'
+import { ChecksTable } from '@/components/checks/ChecksTable'
 
 export default function CreditsPage() {
   const [payments, setPayments] = useState<PharmacyPayment[]>([]);
@@ -38,16 +40,39 @@ export default function CreditsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+  
+  // Tab state for Credits vs Checks
+  const [activeTab, setActiveTab] = useState<'credits' | 'checks'>('credits');
+  
+  // Date range filters for checks
+  const [dateFilters, setDateFilters] = useState<{
+    dateRange?: string;
+    startDate?: string;
+    endDate?: string;
+  }>({});
 
   const loadPayments = async () => {
     try {
       setLoading(true);
       setError(null);
-      const result = await pharmacyPaymentService.getMyPayments({
-        status: filterStatus || undefined,
+      
+      // Build parameters based on active tab
+      const params: any = {
         page,
         limit: 20,
-      });
+      };
+      
+      // Add filters based on active tab
+      if (activeTab === 'credits') {
+        if (filterStatus) params.status = filterStatus;
+      } else {
+        // For checks tab, include date filters
+        if (dateFilters.dateRange) params.dateRange = dateFilters.dateRange;
+        if (dateFilters.startDate) params.startDate = dateFilters.startDate;
+        if (dateFilters.endDate) params.endDate = dateFilters.endDate;
+      }
+      
+      const result = await pharmacyPaymentService.getMyPayments(params);
       setPayments(result.data);
       setSummary(result.summary);
       setTotalPages(result.pagination.totalPages);
@@ -61,12 +86,26 @@ export default function CreditsPage() {
 
   useEffect(() => {
     loadPayments();
-  }, [filterStatus, page]);
+  }, [filterStatus, page, activeTab, dateFilters]);
 
-  // Reset page when filter changes
+  // Reset page when filters change
   useEffect(() => {
     setPage(1);
-  }, [filterStatus]);
+  }, [filterStatus, activeTab, dateFilters]);
+
+  // Handle date range filter changes
+  const handleDateFilter = (filters: {
+    dateRange?: string;
+    startDate?: string;
+    endDate?: string;
+  }) => {
+    setDateFilters(filters);
+  };
+
+  // Handle page changes for checks table
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
 
   const getStatusVariant = (status: string) => {
     switch (status) {
@@ -108,14 +147,42 @@ export default function CreditsPage() {
             </p>
           </div>
           <Link href="/credits/statement">
-            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white border-0">
+            <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white border-0">
               <FileText className="mr-1 h-3 w-3" />
               View Statements
             </Button>
           </Link>
         </div>
 
-        {/* Summary Stats */}
+        {/* Tabs */}
+        <div className="flex gap-2 border-b-2 border-gray-200 bg-white rounded-t-lg p-1">
+          <button 
+            onClick={() => setActiveTab('credits')}
+            className={`px-4 py-2 text-sm font-medium rounded-lg border-2 transition-all ${
+              activeTab === 'credits' 
+                ? 'bg-teal-100 text-teal-700 border-teal-300 shadow-md scale-105' 
+                : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+            }`}
+          >
+            Credits ({summary?.totalPayments || 0})
+          </button>
+          <button 
+            onClick={() => setActiveTab('checks')}
+            className={`px-4 py-2 text-sm font-medium rounded-lg border-2 transition-all ${
+              activeTab === 'checks' 
+                ? 'bg-cyan-100 text-cyan-700 border-cyan-300 shadow-md scale-105' 
+                : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+            }`}
+          >
+            Checks ({summary?.totalPayments || 0})
+          </button>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === 'credits' ? (
+          /* Credits Tab Content */
+          <>
+            {/* Summary Stats */}
         {loading && !summary ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
@@ -269,47 +336,49 @@ export default function CreditsPage() {
             ) : (
               <>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-xs">
-                    <thead className="bg-gradient-to-r from-teal-100 to-cyan-100 border-b-2 border-teal-200">
-                      <tr>
-                        <th className="text-left p-2 font-bold text-teal-900">Date</th>
-                        <th className="text-left p-2 font-bold text-teal-900">Batch</th>
-                        <th className="text-left p-2 font-bold text-teal-900">Credit Received</th>
-                        <th className="text-left p-2 font-bold text-teal-900">Company Fee</th>
-                        <th className="text-left p-2 font-bold text-teal-900">GPO Share</th>
-                        <th className="text-left p-2 font-bold text-teal-900">Your Payout</th>
-                        <th className="text-left p-2 font-bold text-teal-900">Method</th>
-                        <th className="text-left p-2 font-bold text-teal-900">Reference</th>
-                        <th className="text-left p-2 font-bold text-teal-900">Paid At</th>
-                        <th className="text-left p-2 font-bold text-teal-900">Status</th>
+                  <table className="w-full table-auto">
+                    <thead>
+                      <tr className="bg-gradient-to-r from-teal-600 to-teal-700 border-b-2 border-teal-800">
+                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Date</th>
+                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Batch</th>
+                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Credit Received</th>
+                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Company Fee</th>
+                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">GPO Share</th>
+                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Your Payout</th>
+                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Method</th>
+                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Reference</th>
+                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Paid At</th>
+                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Status</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {payments.map((payment, idx) => (
+                      {payments.map((payment, idx) => {
+                        const isEven = idx % 2 === 0;
+                        return (
                         <tr
                           key={payment.id}
-                          className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-teal-50 transition-colors`}
+                          className={`border-b border-gray-100 hover:bg-teal-50 transition-colors ${isEven ? 'bg-white' : 'bg-teal-50/40'}`}
                         >
-                          <td className="p-2">{formatDate(payment.createdAt)}</td>
-                          <td className="p-2 font-medium">{payment.batchName || '—'}</td>
-                          <td className="p-2 font-bold text-teal-700">{formatCurrency(payment.totalCreditReceived)}</td>
-                          <td className="p-2 text-amber-700">
-                            {formatCurrency(payment.companyFee)}
-                            <span className="text-gray-400 ml-1">({payment.companyFeePercent}%)</span>
+                          <td className="px-4 py-3"><span className="text-sm text-gray-900">{formatDate(payment.createdAt)}</span></td>
+                          <td className="px-4 py-3"><span className="text-sm font-medium text-gray-900">{payment.batchName || '—'}</span></td>
+                          <td className="px-4 py-3"><span className="text-sm font-bold text-teal-700">{formatCurrency(payment.totalCreditReceived)}</span></td>
+                          <td className="px-4 py-3">
+                            <span className="text-sm text-amber-700">{formatCurrency(payment.companyFee)}</span>
+                            <span className="text-sm text-gray-400 ml-1">({payment.companyFeePercent}%)</span>
                           </td>
-                          <td className="p-2 text-gray-600">
-                            {payment.gpoShare > 0 ? (
+                          <td className="px-4 py-3">
+                            <span className="text-sm text-gray-600">{payment.gpoShare > 0 ? (
                               <>
                                 {formatCurrency(payment.gpoShare)}
-                                {payment.gpoName && <span className="text-gray-400 ml-1">({payment.gpoName})</span>}
+                                {payment.gpoName && <span className="text-sm text-gray-400 ml-1">({payment.gpoName})</span>}
                               </>
-                            ) : '—'}
+                            ) : '—'}</span>
                           </td>
-                          <td className="p-2 font-bold text-emerald-700">{formatCurrency(payment.pharmacyPayout)}</td>
-                          <td className="p-2">{getMethodLabel(payment.paymentMethod)}</td>
-                          <td className="p-2 font-mono text-gray-500">{payment.paymentReference || '—'}</td>
-                          <td className="p-2">{payment.paidAt ? formatDate(payment.paidAt) : '—'}</td>
-                          <td className="p-2">
+                          <td className="px-4 py-3"><span className="text-sm font-bold text-emerald-700">{formatCurrency(payment.pharmacyPayout)}</span></td>
+                          <td className="px-4 py-3"><span className="text-sm text-gray-700">{getMethodLabel(payment.paymentMethod)}</span></td>
+                          <td className="px-4 py-3"><span className="text-sm font-mono text-gray-600">{payment.paymentReference || '—'}</span></td>
+                          <td className="px-4 py-3"><span className="text-sm text-gray-700">{payment.paidAt ? formatDate(payment.paidAt) : '—'}</span></td>
+                          <td className="px-4 py-3">
                             <Badge
                               variant={getStatusVariant(payment.status)}
                               className={`text-xs border-2 ${getStatusColor(payment.status)}`}
@@ -318,22 +387,23 @@ export default function CreditsPage() {
                             </Badge>
                           </td>
                         </tr>
-                      ))}
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-between mt-4">
-                    <p className="text-xs text-gray-500">
+                  <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50">
+                    <p className="text-sm text-gray-600 font-medium">
                       Page {page} of {totalPages} ({total} total)
                     </p>
                     <div className="flex gap-1">
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-7 text-xs"
+                        className="h-7 text-xs hover:bg-teal-50"
                         disabled={page <= 1}
                         onClick={() => setPage(p => Math.max(1, p - 1))}
                       >
@@ -342,7 +412,7 @@ export default function CreditsPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-7 text-xs"
+                        className="h-7 text-xs hover:bg-teal-50"
                         disabled={page >= totalPages}
                         onClick={() => setPage(p => p + 1)}
                       >
@@ -355,6 +425,30 @@ export default function CreditsPage() {
             )}
           </CardContent>
         </Card>
+          </>
+        ) : (
+          /* Checks Tab Content */
+          <>
+            {/* Date Range Filter for Checks */}
+            <DateRangeFilter 
+              onFilter={handleDateFilter}
+              loading={loading}
+            />
+
+            {/* Checks Table */}
+            <ChecksTable
+              payments={payments}
+              loading={loading}
+              error={error}
+              pagination={totalPages > 1 ? {
+                page,
+                totalPages,
+                total
+              } : undefined}
+              onPageChange={handlePageChange}
+            />
+          </>
+        )}
       </div>
       </PermissionGuard>
     </DashboardLayout>

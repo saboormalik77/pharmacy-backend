@@ -57,6 +57,12 @@ import pharmacyBranchRoutes from './routes/pharmacyBranchRoutes';
 import pharmacyRoleRoutes from './routes/pharmacyRoleRoutes';
 import mainAdminRoutes from './routes/mainAdminRoutes';
 import pharmacyAdminBrandingRoutes from './routes/pharmacyAdminBrandingRoutes';
+import pharmacyServiceRequestRoutes from './routes/pharmacyServiceRequestRoutes';
+import processorServiceRequestRoutes from './routes/processorServiceRequestRoutes';
+import processorNotificationRoutes from './routes/processorNotificationRoutes';
+import pharmacyNotificationRoutes from './routes/pharmacyNotificationRoutes';
+import adminServiceRequestRoutes from './routes/adminServiceRequestRoutes';
+import pharmacyReportsRoutes from './routes/pharmacyReportsRoutes';
 import { globalErrorHandler } from './controllers/errorController';
 import { checkExpiringProductsAndNotify } from './services/notificationCronService';
 import { surfaceReadyWineCellarItems } from './services/wineCellarCronService';
@@ -101,11 +107,6 @@ app.use(cors({
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
   maxAge: 86400,
 }));
-
-// Root: Azure startup/warmup probe hits GET / — must return 2xx on the container port
-app.get('/', (_req, res) => {
-  res.status(200).json({ status: 'ok', service: 'pharmacy-backend' });
-});
 
 // Swagger (dynamic base URL for HTTPS behind Azure)
 app.use('/api-docs', swaggerUi.serve, (req: Request, res: Response, next: NextFunction) => {
@@ -183,6 +184,12 @@ app.use('/api/pharmacy-branches', pharmacyBranchRoutes);
 app.use('/api/pharmacy-roles', pharmacyRoleRoutes);
 app.use('/api/main-admin', mainAdminRoutes);
 app.use('/api/pharmacy', pharmacyAdminBrandingRoutes);
+app.use('/api/on-site-service', pharmacyServiceRequestRoutes);
+app.use('/api/processors/service-requests', processorServiceRequestRoutes);
+app.use('/api/processors/notifications', processorNotificationRoutes);
+app.use('/api/pharmacy/notifications', pharmacyNotificationRoutes);
+app.use('/api/admin/service-requests', adminServiceRequestRoutes);
+app.use('/api/pharmacy-reports', pharmacyReportsRoutes);
 
 // Root route: serves an HTML page that detects Supabase recovery hash redirects.
 // Supabase redirects to the backend base URL with #access_token=...&type=recovery.

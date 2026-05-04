@@ -40,6 +40,10 @@ DECLARE
     v_returns_value_this_month      NUMERIC;
     v_returns_value_last_month      NUMERIC;
     v_returns_change                NUMERIC;
+    v_total_returns                 INTEGER;
+    v_returns_this_month            INTEGER;
+    v_returns_last_month            INTEGER;
+    v_total_returns_change          NUMERIC;
     v_pharmacies_list               JSONB;
     v_returns_trend                 JSONB;
     v_start_date                    TIMESTAMP WITH TIME ZONE;
@@ -186,7 +190,39 @@ BEGIN
     END IF;
 
     -- ============================================================
-    -- STAT 4: Pharmacies List (scoped to buying group)
+    -- STAT 4: Total Returns (count of uploaded documents, scoped to buying group)
+    -- ============================================================
+
+    SELECT COUNT(*)::INTEGER
+    INTO v_total_returns
+    FROM uploaded_documents ud
+    JOIN pharmacy p ON p.id = ud.pharmacy_id
+    WHERE (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
+
+    SELECT COUNT(*)::INTEGER
+    INTO v_returns_this_month
+    FROM uploaded_documents ud
+    JOIN pharmacy p ON p.id = ud.pharmacy_id
+    WHERE ud.report_date >= v_current_month_start
+      AND ud.report_date <  v_next_month_start
+      AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
+
+    SELECT COUNT(*)::INTEGER
+    INTO v_returns_last_month
+    FROM uploaded_documents ud
+    JOIN pharmacy p ON p.id = ud.pharmacy_id
+    WHERE ud.report_date >= v_last_month_start
+      AND ud.report_date <  v_current_month_start
+      AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
+
+    IF v_returns_last_month > 0 THEN
+        v_total_returns_change := ROUND(((v_returns_this_month - v_returns_last_month)::NUMERIC / v_returns_last_month * 100)::NUMERIC, 1);
+    ELSE
+        v_total_returns_change := CASE WHEN v_returns_this_month > 0 THEN 100.0 ELSE 0.0 END;
+    END IF;
+
+    -- ============================================================
+    -- STAT 5: Pharmacies List (scoped to buying group)
     -- ============================================================
 
     SELECT COALESCE(jsonb_agg(
@@ -198,7 +234,7 @@ BEGIN
     WHERE (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
     -- ============================================================
-    -- STAT 5: Returns Value Trend (scoped to buying group + optional pharmacy)
+    -- STAT 6: Returns Value Trend (scoped to buying group + optional pharmacy)
     -- ============================================================
 
     IF p_period_type = 'yearly' THEN
@@ -291,6 +327,11 @@ BEGIN
             'returnsValue', jsonb_build_object(
                 'value',       ROUND(v_returns_value, 2),
                 'change',      v_returns_change,
+                'changeLabel', 'vs last month'
+            ),
+            'totalReturns', jsonb_build_object(
+                'value',       v_total_returns,
+                'change',      v_total_returns_change,
                 'changeLabel', 'vs last month'
             )
         ),

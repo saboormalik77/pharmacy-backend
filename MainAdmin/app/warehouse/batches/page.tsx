@@ -178,17 +178,17 @@ export default function BatchesPage() {
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="min-w-full">
-                            <thead className="bg-gray-50 border-b border-gray-200">
-                                <tr>
-                                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Batch Month</th>
-                                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Name</th>
-                                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Status</th>
-                                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Returns</th>
-                                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Debit Memos</th>
-                                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Total Value</th>
-                                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Cardinal</th>
-                                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Created</th>
-                                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
+                            <thead>
+                                <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Batch Month</th>
+                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Name</th>
+                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Status</th>
+                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Returns</th>
+                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Debit Memos</th>
+                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Total Value</th>
+                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Cardinal</th>
+                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Created</th>
+                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
@@ -198,27 +198,27 @@ export default function BatchesPage() {
                                         <tr
                                             key={batch.id}
                                             onClick={() => router.push(`/warehouse/batches/${batch.id}`)}
-                                            className="hover:bg-gray-50 cursor-pointer transition-colors"
+                                            className="odd:bg-white even:bg-gray-50/40 hover:bg-gray-50 cursor-pointer transition-colors"
                                         >
-                                            <td className="px-3 py-1.5 text-xs font-medium text-gray-900 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">
                                                 {formatBatchMonth(batch.batchMonth)}
                                             </td>
-                                            <td className="px-3 py-1.5 text-xs text-gray-700 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">
                                                 {batch.batchName}
                                             </td>
-                                            <td className="px-3 py-1.5 whitespace-nowrap">
+                                            <td className="px-4 py-3 whitespace-nowrap">
                                                 <Badge variant={sb.variant}><span className="text-[10px]">{sb.label}</span></Badge>
                                             </td>
-                                            <td className="px-3 py-1.5 text-xs text-gray-700 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">
                                                 {batch.totalReturns}
                                             </td>
-                                            <td className="px-3 py-1.5 text-xs text-gray-700 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">
                                                 {batch.totalDebitMemos}
                                             </td>
-                                            <td className="px-3 py-1.5 text-xs font-medium text-gray-900 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">
                                                 {formatCurrency(batch.totalValue)}
                                             </td>
-                                            <td className="px-3 py-1.5 whitespace-nowrap">
+                                            <td className="px-4 py-3 whitespace-nowrap">
                                                 {batch.cardinalSubmittedAt ? (
                                                     <Badge variant="success"><span className="text-[10px]">Submitted</span></Badge>
                                                 ) : batch.cardinalFileGenerated ? (
@@ -227,10 +227,10 @@ export default function BatchesPage() {
                                                     <Badge variant="default"><span className="text-[10px]">Pending</span></Badge>
                                                 )}
                                             </td>
-                                            <td className="px-3 py-1.5 text-[11px] text-gray-500 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
                                                 {formatDate(batch.createdAt)}
                                             </td>
-                                            <td className="px-3 py-1.5 whitespace-nowrap" onClick={e => e.stopPropagation()}>
+                                            <td className="px-4 py-3 whitespace-nowrap" onClick={e => e.stopPropagation()}>
                                                 {batch.status === 'open' && (
                                                     <button
                                                         onClick={() => router.push(`/warehouse/batches/${batch.id}?action=closeout`)}

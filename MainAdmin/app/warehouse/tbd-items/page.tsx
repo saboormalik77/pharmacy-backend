@@ -256,28 +256,28 @@ export default function TbdItemsPage() {
                                             <div className="overflow-x-auto">
                                                 <table className="w-full">
                                                     <thead>
-                                                        <tr className="bg-yellow-100 border-b border-yellow-200">
-                                                            <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-yellow-800 uppercase">NDC</th>
-                                                            <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-yellow-800 uppercase">Product</th>
-                                                            <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-yellow-800 uppercase">Manufacturer</th>
-                                                            <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-yellow-800 uppercase">Lot</th>
-                                                            <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-yellow-800 uppercase">Expires</th>
-                                                            <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-yellow-800 uppercase">Qty</th>
-                                                            <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-yellow-800 uppercase">Actions</th>
+                                                        <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                                            <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
+                                                            <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product</th>
+                                                            <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Manufacturer</th>
+                                                            <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Lot</th>
+                                                            <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Expires</th>
+                                                            <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Qty</th>
+                                                            <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
                                                         </tr>
                                                     </thead>
-                                                    <tbody className="divide-y divide-yellow-100">
+                                                    <tbody className="divide-y divide-gray-100">
                                                         {items.map(item => (
-                                                            <tr key={item.id} className="hover:bg-yellow-50">
-                                                                <td className="px-3 py-1.5 text-xs font-mono text-gray-900 whitespace-nowrap">{item.ndc || '—'}</td>
-                                                                <td className="px-3 py-1.5 text-xs text-gray-900 max-w-[140px] truncate" title={item.proprietaryName || ''}>
+                                                            <tr key={item.id} className="hover:bg-gray-50">
+                                                                <td className="px-4 py-3 text-sm font-mono text-gray-900 whitespace-nowrap">{item.ndc || '—'}</td>
+                                                                <td className="px-4 py-3 text-sm text-gray-900 max-w-[140px] truncate" title={item.proprietaryName || ''}>
                                                                     {item.proprietaryName || item.genericName || '—'}
                                                                 </td>
-                                                                <td className="px-3 py-1.5 text-xs text-gray-600 max-w-[100px] truncate">{item.manufacturer || '—'}</td>
-                                                                <td className="px-3 py-1.5 text-xs text-gray-600 font-mono whitespace-nowrap">{item.lotNumber || '—'}</td>
-                                                                <td className="px-3 py-1.5 text-xs text-gray-600 whitespace-nowrap">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
-                                                                <td className="px-3 py-1.5 text-xs text-center text-gray-900 font-semibold">{item.quantity}</td>
-                                                                <td className="px-3 py-1.5 text-right">
+                                                                <td className="px-4 py-3 text-sm text-gray-600 max-w-[100px] truncate">{item.manufacturer || '—'}</td>
+                                                                <td className="px-4 py-3 text-sm text-gray-600 font-mono whitespace-nowrap">{item.lotNumber || '—'}</td>
+                                                                <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
+                                                                <td className="px-4 py-3 text-sm text-center text-gray-900 font-semibold">{item.quantity}</td>
+                                                                <td className="px-4 py-3 text-sm text-right">
                                                                     <button
                                                                         onClick={() => {
                                                                             setResolveModal({ item, txId: tx.id });

@@ -242,10 +242,41 @@ BEGIN
     RETURN jsonb_build_object('error', true, 'message', 'Domain is required');
   END IF;
 
+  -- Check if domain is already used by a different buying group
+  DECLARE
+    existing_group_name TEXT;
+    conflict_type TEXT;
+  BEGIN
+    SELECT 
+      a.name,
+      CASE 
+        WHEN bgd.domain = v_domain THEN 'main domain'
+        WHEN bgd.admin_hostname = v_domain THEN 'admin subdomain'
+        WHEN bgd.pharmacy_hostname = v_domain THEN 'pharmacy subdomain'
+        ELSE 'domain'
+      END
+    INTO existing_group_name, conflict_type
+    FROM buying_group_domains bgd
+    JOIN admin a ON bgd.buying_group_id = a.id
+    WHERE (
+      bgd.domain = v_domain 
+      OR bgd.admin_hostname = v_domain 
+      OR bgd.pharmacy_hostname = v_domain
+    )
+    AND bgd.buying_group_id != p_buying_group_id
+    LIMIT 1;
+    
+    IF existing_group_name IS NOT NULL THEN
+      RETURN jsonb_build_object(
+        'error', true, 
+        'message', 'Domain "' || v_domain || '" is already used as ' || conflict_type || ' by buying group "' || existing_group_name || '"'
+      );
+    END IF;
+  END;
+
   INSERT INTO buying_group_domains (buying_group_id, domain, admin_hostname, pharmacy_hostname)
   VALUES (p_buying_group_id, v_domain, v_admin_host, v_pharmacy_host)
   ON CONFLICT (domain) DO UPDATE SET
-    buying_group_id   = EXCLUDED.buying_group_id,
     admin_hostname    = COALESCE(EXCLUDED.admin_hostname, buying_group_domains.admin_hostname),
     pharmacy_hostname = COALESCE(EXCLUDED.pharmacy_hostname, buying_group_domains.pharmacy_hostname),
     updated_at        = NOW()

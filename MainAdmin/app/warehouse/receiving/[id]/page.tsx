@@ -471,22 +471,22 @@ export default function WarehouseVerificationPage() {
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
-                                <tr className="bg-gray-50 border-b border-gray-200">
-                                    <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 w-10">✓</th>
-                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">NDC</th>
-                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Product</th>
-                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Manufacturer</th>
-                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Lot</th>
-                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Expires</th>
-                                    <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Qty</th>
-                                    <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
-                                    <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Destination</th>
+                                <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap w-10">✓</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Manufacturer</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Lot</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Expires</th>
+                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Qty</th>
+                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Status</th>
+                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Destination</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {filteredItems.map(item => (
                                     <tr key={item.id} className={`${item.verified ? 'bg-green-50/50' : 'hover:bg-gray-50'}`}>
-                                        <td className="px-3 py-1.5 text-center">
+                                        <td className="px-4 py-3 text-center">
                                             <input
                                                 type="checkbox"
                                                 checked={item.verified}
@@ -495,18 +495,18 @@ export default function WarehouseVerificationPage() {
                                                 disabled={isActionLoading}
                                             />
                                         </td>
-                                        <td className="px-3 py-1.5 text-[11px] font-mono text-gray-900 whitespace-nowrap">{item.ndc || '—'}</td>
-                                        <td className="px-3 py-1.5 text-[11px] text-gray-900 max-w-[140px] truncate" title={item.proprietaryName || ''}>{item.proprietaryName || item.genericName || '—'}</td>
-                                        <td className="px-3 py-1.5 text-[11px] text-gray-600 max-w-[110px] truncate">{item.manufacturer || '—'}</td>
-                                        <td className="px-3 py-1.5 text-[11px] text-gray-600 font-mono whitespace-nowrap">{item.lotNumber || '—'}</td>
-                                        <td className="px-3 py-1.5 text-[11px] text-gray-600 whitespace-nowrap">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
-                                        <td className="px-3 py-1.5 text-[11px] text-center text-gray-900 font-semibold">{item.quantity}</td>
-                                        <td className="px-3 py-1.5 text-center">
+                                        <td className="px-4 py-3 text-sm font-mono text-gray-900 whitespace-nowrap">{item.ndc || '—'}</td>
+                                        <td className="px-4 py-3 text-sm text-gray-900 max-w-[140px] truncate" title={item.proprietaryName || ''}>{item.proprietaryName || item.genericName || '—'}</td>
+                                        <td className="px-4 py-3 text-sm text-gray-600 max-w-[110px] truncate">{item.manufacturer || '—'}</td>
+                                        <td className="px-4 py-3 text-sm text-gray-600 font-mono whitespace-nowrap">{item.lotNumber || '—'}</td>
+                                        <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
+                                        <td className="px-4 py-3 text-sm text-center text-gray-900 font-semibold">{item.quantity}</td>
+                                        <td className="px-4 py-3 text-center">
                                             <Badge variant={item.returnStatus === 'returnable' ? 'success' : item.returnStatus === 'non_returnable' ? 'danger' : 'warning'}>
                                                 <span className="text-[10px]">{item.returnStatus === 'non_returnable' ? 'non-ret' : item.returnStatus}</span>
                                             </Badge>
                                         </td>
-                                        <td className="px-3 py-1.5 text-[11px] text-center capitalize text-gray-600">{item.destination || '—'}</td>
+                                        <td className="px-4 py-3 text-sm text-center capitalize text-gray-600">{item.destination || '—'}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -526,32 +526,32 @@ export default function WarehouseVerificationPage() {
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
-                                <tr className="bg-gray-50 border-b border-gray-200">
-                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Type</th>
-                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Product</th>
-                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">NDC</th>
-                                    <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Expected</th>
-                                    <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Actual</th>
-                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Notes</th>
-                                    <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
-                                    <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Reported</th>
+                                <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Type</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
+                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Expected</th>
+                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actual</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Notes</th>
+                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Status</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Reported</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {discrepancies.map(d => (
                                     <tr key={d.id} className="hover:bg-gray-50">
-                                        <td className="px-3 py-1.5">{discTypeBadge(d.type)}</td>
-                                        <td className="px-3 py-1.5 text-[11px] text-gray-900 max-w-[130px] truncate">{d.productName || '—'}</td>
-                                        <td className="px-3 py-1.5 text-[11px] font-mono text-gray-600">{d.ndc || '—'}</td>
-                                        <td className="px-3 py-1.5 text-[11px] text-center text-gray-900">{d.expectedQuantity ?? '—'}</td>
-                                        <td className="px-3 py-1.5 text-[11px] text-center text-gray-900">{d.actualQuantity ?? '—'}</td>
-                                        <td className="px-3 py-1.5 text-[11px] text-gray-600 max-w-[150px] truncate">{d.notes || '—'}</td>
-                                        <td className="px-3 py-1.5 text-center">
+                                        <td className="px-4 py-3">{discTypeBadge(d.type)}</td>
+                                        <td className="px-4 py-3 text-sm text-gray-900 max-w-[130px] truncate">{d.productName || '—'}</td>
+                                        <td className="px-4 py-3 text-sm font-mono text-gray-600">{d.ndc || '—'}</td>
+                                        <td className="px-4 py-3 text-sm text-center text-gray-900">{d.expectedQuantity ?? '—'}</td>
+                                        <td className="px-4 py-3 text-sm text-center text-gray-900">{d.actualQuantity ?? '—'}</td>
+                                        <td className="px-4 py-3 text-sm text-gray-600 max-w-[150px] truncate">{d.notes || '—'}</td>
+                                        <td className="px-4 py-3 text-center">
                                             <Badge variant={d.status === 'open' ? 'warning' : d.status === 'resolved' ? 'success' : 'secondary'}>
                                                 <span className="text-[10px]">{d.status}</span>
                                             </Badge>
                                         </td>
-                                        <td className="px-3 py-1.5 text-[11px] text-gray-500">{formatDate(d.createdAt)}</td>
+                                        <td className="px-4 py-3 text-sm text-gray-500">{formatDate(d.createdAt)}</td>
                                     </tr>
                                 ))}
                             </tbody>

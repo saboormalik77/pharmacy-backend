@@ -5,12 +5,13 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import {
     ArrowLeft, Loader2, AlertCircle, Layers, Lock, Send,
     Plus, ChevronDown, ChevronUp, Package,
-    CheckCircle, X, Search, ExternalLink, Trash2, UserX,
+    CheckCircle, X, Search, ExternalLink, Trash2, UserX, Download,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
 import { formatDate, formatDateTime } from '@/lib/utils';
+import { cookieUtils } from '@/lib/utils/cookies';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import {
     fetchBatchDetail, assignReturnsToBatch, closeBatch, submitCardinal,
@@ -81,6 +82,7 @@ export default function BatchDetailPage() {
     const [selectedReturnIds, setSelectedReturnIds] = useState<string[]>([]);
     const [assignSearch, setAssignSearch] = useState('');
     const [returnsExpanded, setReturnsExpanded] = useState(true);
+    const [downloadingReturnId, setDownloadingReturnId] = useState<string | null>(null);
 
     const addToast = useCallback((msg: string, type: Toast['type']) => {
         setToasts(prev => [...prev, { id: Date.now().toString(), message: msg, type }]);
@@ -195,6 +197,38 @@ export default function BatchDetailPage() {
             r.fedexTracking?.toLowerCase().includes(s)
         );
     });
+
+    const handleDownloadSummary = async (returnId: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setDownloadingReturnId(returnId);
+        try {
+            const token = cookieUtils.getAuthToken();
+            if (!token) { addToast('Not authenticated', 'error'); setDownloadingReturnId(null); return; }
+
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+            const response = await fetch(`${apiUrl}/admin/debit-memos/summary/${returnId}/${batchId}`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+
+            if (!response.ok) throw new Error('Failed to download debit memo summary');
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `DM_Summary_${returnId.substring(0, 8)}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            addToast('Debit memo summary downloaded', 'success');
+        } catch {
+            addToast('Failed to download debit memo summary', 'error');
+        } finally {
+            setDownloadingReturnId(null);
+        }
+    };
 
     // ─────────────────────────────────────────────────────────
 
@@ -355,26 +389,40 @@ export default function BatchDetailPage() {
                         ) : (
                             <div className="overflow-x-auto">
                                 <table className="min-w-full">
-                                    <thead className="bg-gray-50 border-b border-gray-200">
-                                        <tr>
-                                            <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">License Plate</th>
-                                            <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Pharmacy</th>
-                                            <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Status</th>
-                                            <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Items</th>
-                                            <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Value</th>
-                                            <th className="px-3 py-1.5 text-left text-[10px] font-semibold text-gray-500 uppercase">Tracking</th>
+                                    <thead>
+                                        <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">License Plate</th>
+                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Pharmacy</th>
+                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Status</th>
+                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Items</th>
+                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Value</th>
+                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Tracking</th>
+                                            <th className="px-4 py-3.5 text-center text-xs font-semibold uppercase tracking-wider text-white">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
                                         {batchReturns.map((rt: ReturnTransaction) => (
                                             <tr key={rt.id} className="hover:bg-gray-50 cursor-pointer"
                                                 onClick={() => router.push(`/warehouse/returns/${rt.id}`)}>
-                                                <td className="px-3 py-1.5 text-xs font-medium text-gray-900">{rt.licensePlate}</td>
-                                                <td className="px-3 py-1.5 text-xs text-gray-700">{rt.pharmacyName}</td>
-                                                <td className="px-3 py-1.5"><Badge variant="default"><span className="text-[10px]">{rt.status?.replace(/_/g, ' ')}</span></Badge></td>
-                                                <td className="px-3 py-1.5 text-xs text-gray-700">{rt.totalItems}</td>
-                                                <td className="px-3 py-1.5 text-xs font-medium">{formatCurrency(rt.totalReturnableValue || 0)}</td>
-                                                <td className="px-3 py-1.5 text-[11px] text-gray-500">{rt.fedexTracking || '—'}</td>
+                                                <td className="px-4 py-3 text-sm font-medium text-gray-900">{rt.licensePlate}</td>
+                                                <td className="px-4 py-3 text-sm text-gray-700">{rt.pharmacyName}</td>
+                                                <td className="px-4 py-3"><Badge variant="default"><span className="text-[10px]">{rt.status?.replace(/_/g, ' ')}</span></Badge></td>
+                                                <td className="px-4 py-3 text-sm text-gray-700">{rt.totalItems}</td>
+                                                <td className="px-4 py-3 text-sm font-medium">{formatCurrency(rt.totalReturnableValue || 0)}</td>
+                                                <td className="px-4 py-3 text-sm text-gray-500">{rt.fedexTracking || '—'}</td>
+                                                <td className="px-4 py-3 text-center">
+                                                    <button
+                                                        onClick={(e) => handleDownloadSummary(rt.id, e)}
+                                                        disabled={downloadingReturnId === rt.id}
+                                                        className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        {downloadingReturnId === rt.id ? (
+                                                            <><Loader2 className="w-3 h-3 animate-spin" /> Downloading...</>
+                                                        ) : (
+                                                            <><Download className="w-3 h-3" /> DM Summary</>
+                                                        )}
+                                                    </button>
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>

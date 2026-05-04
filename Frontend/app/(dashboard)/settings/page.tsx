@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PermissionGuard } from '@/components/shared/PermissionGuard';
 import { Card, CardContent } from '@/components/ui/Card';
@@ -29,8 +29,9 @@ import {
   Store,
   Calendar,
   Truck,
-  FileText,
-  AlertTriangle
+  AlertTriangle,
+  Lock,
+  Upload
 } from 'lucide-react';
 import { settingsService, fcrStoreSettingsService } from '@/lib/api/services';
 import type { FcrStoreSettings, UpdateFcrStoreSettings } from '@/lib/api/services';
@@ -49,10 +50,16 @@ export default function SettingsPage() {
     name: '',
     email: '',
     phone: '',
-    title: '',
     pharmacyName: '',
     npiNumber: '',
     deaNumber: '',
+    stateLicenseNumber: '',
+    licenseExpiryDate: '',
+    corporateName: '',
+    mailingAddress: '',
+    storeHours: '',
+    deaFileUrl: '',
+    licenseFileUrl: '',
     physicalAddress: {
       street: '',
       city: '',
@@ -63,6 +70,12 @@ export default function SettingsPage() {
 
   const [originalProfile, setOriginalProfile] = useState(profile);
 
+  // Document upload state
+  const [uploadingDea, setUploadingDea] = useState(false);
+  const [uploadingLicense, setUploadingLicense] = useState(false);
+  const deaFileRef = useRef<HTMLInputElement>(null);
+  const licenseFileRef = useRef<HTMLInputElement>(null);
+
   // Password change form
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
@@ -72,7 +85,6 @@ export default function SettingsPage() {
 
   const [passwordError, setPasswordError] = useState<string | null>(null);
   
-  // Password visibility states
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -129,15 +141,20 @@ export default function SettingsPage() {
         setLoadingSettings(true);
         const settings = await settingsService.getSettings();
         
-        // Transform API response to match our profile structure
         const transformedProfile = {
           name: settings.name || '',
           email: settings.email || '',
           phone: settings.phone || '',
-          title: settings.title || '',
           pharmacyName: settings.pharmacyName || '',
           npiNumber: settings.npiNumber || '',
           deaNumber: settings.deaNumber || '',
+          stateLicenseNumber: settings.stateLicenseNumber || '',
+          licenseExpiryDate: settings.licenseExpiryDate || '',
+          corporateName: settings.corporateName || '',
+          mailingAddress: settings.mailingAddress || '',
+          storeHours: settings.storeHours || '',
+          deaFileUrl: settings.deaFileUrl || '',
+          licenseFileUrl: settings.licenseFileUrl || '',
           physicalAddress: {
             street: settings.physicalAddress?.street || '',
             city: settings.physicalAddress?.city || '',
@@ -158,19 +175,42 @@ export default function SettingsPage() {
     fetchSettings();
   }, []);
 
-  // Get only changed fields
+  // Also fetch store settings on mount for profile tab display
+  useEffect(() => {
+    if (storeSettings) return;
+
+    const fetchStoreSettings = async () => {
+      try {
+        setLoadingStoreSettings(true);
+        setStoreError(null);
+        const settings = await fcrStoreSettingsService.getStoreSettings();
+        setStoreSettings(settings);
+        setOriginalStoreSettings(settings);
+      } catch (err: any) {
+        setStoreError(err.message || 'Failed to load store settings');
+      } finally {
+        setLoadingStoreSettings(false);
+      }
+    };
+
+    fetchStoreSettings();
+  }, [storeSettings]);
+
   const getChangedFields = () => {
     const changes: any = {};
     
     if (profile.name !== originalProfile.name) changes.name = profile.name;
     if (profile.email !== originalProfile.email) changes.email = profile.email;
     if (profile.phone !== originalProfile.phone) changes.phone = profile.phone;
-    if (profile.title !== originalProfile.title) changes.title = profile.title;
     if (profile.pharmacyName !== originalProfile.pharmacyName) changes.pharmacyName = profile.pharmacyName;
     if (profile.npiNumber !== originalProfile.npiNumber) changes.npiNumber = profile.npiNumber;
     if (profile.deaNumber !== originalProfile.deaNumber) changes.deaNumber = profile.deaNumber;
+    if (profile.stateLicenseNumber !== originalProfile.stateLicenseNumber) changes.stateLicenseNumber = profile.stateLicenseNumber;
+    if (profile.licenseExpiryDate !== originalProfile.licenseExpiryDate) changes.licenseExpiryDate = profile.licenseExpiryDate;
+    if (profile.corporateName !== originalProfile.corporateName) changes.corporateName = profile.corporateName;
+    if (profile.mailingAddress !== originalProfile.mailingAddress) changes.mailingAddress = profile.mailingAddress;
+    if (profile.storeHours !== originalProfile.storeHours) changes.storeHours = profile.storeHours;
     
-    // Check physical address changes
     const physicalAddressChanges: any = {};
     if (profile.physicalAddress.street !== originalProfile.physicalAddress.street) physicalAddressChanges.street = profile.physicalAddress.street;
     if (profile.physicalAddress.city !== originalProfile.physicalAddress.city) physicalAddressChanges.city = profile.physicalAddress.city;
@@ -198,15 +238,20 @@ export default function SettingsPage() {
       
       const updatedSettings = await settingsService.updateProfile(changedFields);
       
-      // Update profile with response
       const transformedProfile = {
         name: updatedSettings.name || profile.name,
         email: updatedSettings.email || profile.email,
         phone: updatedSettings.phone || profile.phone,
-        title: updatedSettings.title || profile.title,
         pharmacyName: updatedSettings.pharmacyName || profile.pharmacyName,
         npiNumber: updatedSettings.npiNumber || profile.npiNumber,
         deaNumber: updatedSettings.deaNumber || profile.deaNumber,
+        stateLicenseNumber: updatedSettings.stateLicenseNumber || profile.stateLicenseNumber,
+        licenseExpiryDate: updatedSettings.licenseExpiryDate || profile.licenseExpiryDate,
+        corporateName: updatedSettings.corporateName || profile.corporateName,
+        mailingAddress: updatedSettings.mailingAddress || profile.mailingAddress,
+        storeHours: updatedSettings.storeHours || profile.storeHours,
+        deaFileUrl: updatedSettings.deaFileUrl || profile.deaFileUrl,
+        licenseFileUrl: updatedSettings.licenseFileUrl || profile.licenseFileUrl,
         physicalAddress: {
           street: updatedSettings.physicalAddress?.street || profile.physicalAddress.street,
           city: updatedSettings.physicalAddress?.city || profile.physicalAddress.city,
@@ -221,7 +266,6 @@ export default function SettingsPage() {
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
 
-      // Update cookies if name or pharmacyName changed
       const currentUserData = getUserData();
       if (currentUserData?.user) {
         const updatedUserData = {
@@ -234,8 +278,6 @@ export default function SettingsPage() {
           },
         };
         setUserData(updatedUserData);
-        
-        // Dispatch custom event to notify UserDropdown
         window.dispatchEvent(new CustomEvent('userDataUpdated', { detail: updatedUserData }));
       }
     } catch (err: any) {
@@ -251,40 +293,56 @@ export default function SettingsPage() {
     setError(null);
   };
 
-  // Validate password requirements
+  // Document upload handlers
+  const handleDocumentUpload = async (type: 'dea' | 'license', file: File) => {
+    const setUploading = type === 'dea' ? setUploadingDea : setUploadingLicense;
+    try {
+      setUploading(true);
+      setError(null);
+      const result = await settingsService.uploadDocument(type, file);
+      setProfile(prev => ({
+        ...prev,
+        [type === 'dea' ? 'deaFileUrl' : 'licenseFileUrl']: result.url,
+      }));
+      setOriginalProfile(prev => ({
+        ...prev,
+        [type === 'dea' ? 'deaFileUrl' : 'licenseFileUrl']: result.url,
+      }));
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err: any) {
+      setError(err.message || `Failed to upload ${type === 'dea' ? 'DEA' : 'license'} document`);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const validatePassword = (password: string): string | null => {
     if (password.length < 8) {
       return 'Password must be at least 8 characters long';
     }
-    
     if (!/[A-Z]/.test(password)) {
       return 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
     }
-    
     if (!/[a-z]/.test(password)) {
       return 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
     }
-    
     if (!/[0-9]/.test(password)) {
       return 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
     }
-    
     return null;
   };
 
   const handleChangePassword = async () => {
     try {
-      // Clear previous errors
       setError(null);
       setPasswordError(null);
 
-      // Validate current password
       if (!passwordData.currentPassword) {
         setError('Please enter your current password');
         return;
       }
 
-      // Validate new password
       if (!passwordData.newPassword) {
         setError('Please enter a new password');
         return;
@@ -297,7 +355,6 @@ export default function SettingsPage() {
         return;
       }
 
-      // Validate password confirmation
       if (passwordData.newPassword !== passwordData.confirmPassword) {
         setError('New passwords do not match');
         setPasswordError('New passwords do not match');
@@ -314,7 +371,6 @@ export default function SettingsPage() {
         confirmPassword: passwordData.confirmPassword,
       });
       
-      // Reset password form
       setPasswordData({
         currentPassword: '',
         newPassword: '',
@@ -332,17 +388,14 @@ export default function SettingsPage() {
     }
   };
 
-  // Handle password input change with real-time validation
   const handlePasswordChange = (field: 'newPassword' | 'confirmPassword', value: string) => {
     const updatedData = { ...passwordData, [field]: value };
     setPasswordData(updatedData);
     
-    // Clear general error when user starts typing
     if (error && !passwordError) {
       setError(null);
     }
 
-    // Real-time validation for new password
     if (field === 'newPassword') {
       if (value) {
         const validationError = validatePassword(value);
@@ -358,7 +411,6 @@ export default function SettingsPage() {
       }
     }
 
-    // Check password match when confirming
     if (field === 'confirmPassword') {
       if (value && updatedData.newPassword) {
         if (value !== updatedData.newPassword) {
@@ -368,7 +420,6 @@ export default function SettingsPage() {
           setPasswordError(validationError);
         }
       } else if (!value) {
-        // If confirm password is cleared, check if new password is valid
         if (updatedData.newPassword) {
           const validationError = validatePassword(updatedData.newPassword);
           setPasswordError(validationError);
@@ -378,28 +429,6 @@ export default function SettingsPage() {
       }
     }
   };
-
-  // Fetch FCR store settings when the store tab is active
-  useEffect(() => {
-    if (activeTab !== 'store') return;
-    if (storeSettings) return;
-
-    const fetchStoreSettings = async () => {
-      try {
-        setLoadingStoreSettings(true);
-        setStoreError(null);
-        const settings = await fcrStoreSettingsService.getStoreSettings();
-        setStoreSettings(settings);
-        setOriginalStoreSettings(settings);
-      } catch (err: any) {
-        setStoreError(err.message || 'Failed to load store settings');
-      } finally {
-        setLoadingStoreSettings(false);
-      }
-    };
-
-    fetchStoreSettings();
-  }, [activeTab, storeSettings]);
 
   const handleStoreSettingsSave = async () => {
     if (!storeSettings || !originalStoreSettings) return;
@@ -413,8 +442,6 @@ export default function SettingsPage() {
       updates.wholesalerAccountNumber = storeSettings.wholesalerAccountNumber || '';
     if (storeSettings.secondaryWholesaler !== originalStoreSettings.secondaryWholesaler)
       updates.secondaryWholesaler = storeSettings.secondaryWholesaler || '';
-    if (storeSettings.gpoAffiliation !== originalStoreSettings.gpoAffiliation)
-      updates.gpoAffiliation = storeSettings.gpoAffiliation || '';
     if (storeSettings.serviceType !== originalStoreSettings.serviceType)
       updates.serviceType = storeSettings.serviceType;
     if (storeSettings.deaExpirationDate !== originalStoreSettings.deaExpirationDate)
@@ -478,8 +505,6 @@ export default function SettingsPage() {
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User, color: 'bg-teal-600 text-white border-teal-600' },
     { id: 'store', label: 'Store Settings', icon: Store, color: 'bg-teal-600 text-white border-teal-600' },
-    // { id: 'notifications', label: 'Notifications', icon: Bell, color: 'bg-purple-100 text-purple-700 border-purple-300' },
-    // { id: 'billing', label: 'Billing', icon: CreditCard, color: 'bg-green-100 text-green-700 border-green-300' },
     { id: 'security', label: 'Security', icon: Shield, color: 'bg-teal-600 text-white border-teal-600' },
   ];
 
@@ -487,20 +512,20 @@ export default function SettingsPage() {
     <DashboardLayout>
       <PermissionGuard permission="settings:view">
       <div className="space-y-3">
-        {/* Colorful Header */}
+        {/* Header */}
         <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-slate-50 via-gray-50 to-zinc-50 border-2 border-slate-200">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-slate-100">
               <SettingsIcon className="h-5 w-5 text-slate-600" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Settings</h1>
-              <p className="text-xs text-gray-600 mt-0.5">Manage your account settings and preferences</p>
+              <h1 className="text-xl font-bold text-gray-900">My Profile</h1>
+              <p className="text-xs text-gray-600 mt-0.5">Please verify the information below and fill in any missing fields. The RA and shipping label will be sent to the email entered here, so please ensure it is entered correctly.</p>
             </div>
           </div>
         </div>
 
-        {/* Colorful Tabs */}
+        {/* Tabs */}
         <div className="flex gap-2 border-b-2 border-gray-200 bg-white rounded-t-lg p-1">
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -529,52 +554,216 @@ export default function SettingsPage() {
 
         {/* Profile Tab */}
         {activeTab === 'profile' && (
-          <Card className="border-2 border-blue-200 bg-gradient-to-br from-white to-blue-50/30">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-blue-100">
-                    <User className="h-4 w-4 text-blue-600" />
-                  </div>
-                  <h3 className="font-bold text-base text-gray-900">Profile Information</h3>
-                </div>
-                {!isEditing ? (
-                  <Button variant="outline" size="sm" onClick={() => setIsEditing(true)} className="bg-teal-600 hover:bg-teal-700 text-white border-teal-600 rounded-lg">
-                    <Edit className="mr-1 h-3 w-3" />
-                    Edit
-                  </Button>
-                ) : (
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={handleCancel} disabled={loading} className="rounded-lg">
-                      Cancel
-                    </Button>
-                    <Button size="sm" onClick={handleSave} disabled={loading} className="bg-teal-600 hover:bg-teal-700 text-white border-0 rounded-lg">
-                      <Save className="mr-1 h-3 w-3" />
-                      {loading ? 'Saving...' : 'Save'}
-                    </Button>
-                  </div>
-                )}
-              </div>
-
-              {error && (
-                <div className="p-2 mb-3 bg-red-50 border-2 border-red-200 rounded-lg flex items-center gap-2 text-red-800 text-xs">
-                  <AlertCircle className="h-4 w-4" />
-                  <span>{error}</span>
-                </div>
-              )}
-
-              {saved && (
-                <div className="p-2 mb-3 bg-green-50 border-2 border-green-200 rounded-lg flex items-center gap-2 text-green-800 text-xs">
-                  <CheckCircle className="h-4 w-4" />
-                  <span>Settings saved successfully!</span>
-                </div>
-              )}
-
-              {loadingSettings ? (
-                <div className="p-4 text-center text-sm text-gray-600">Loading settings...</div>
+          <div className="space-y-4">
+            {/* Edit / Save controls */}
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-gray-900">Account Information - Verify Profile Information</h2>
+              {!isEditing ? (
+                <Button variant="outline" size="sm" onClick={() => setIsEditing(true)} className="bg-teal-600 hover:bg-teal-700 text-white border-teal-600 rounded-lg">
+                  <Edit className="mr-1 h-3 w-3" />
+                  Edit
+                </Button>
               ) : (
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={handleCancel} disabled={loading} className="rounded-lg">
+                    Cancel
+                  </Button>
+                  <Button size="sm" onClick={handleSave} disabled={loading} className="bg-teal-600 hover:bg-teal-700 text-white border-0 rounded-lg">
+                    <Save className="mr-1 h-3 w-3" />
+                    {loading ? 'Saving...' : 'Save'}
+                  </Button>
+                </div>
+              )}
+            </div>
 
-              <div className="space-y-4">
+            {error && (
+              <div className="p-2 bg-red-50 border-2 border-red-200 rounded-lg flex items-center gap-2 text-red-800 text-xs">
+                <AlertCircle className="h-4 w-4" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            {saved && (
+              <div className="p-2 bg-green-50 border-2 border-green-200 rounded-lg flex items-center gap-2 text-green-800 text-xs">
+                <CheckCircle className="h-4 w-4" />
+                <span>Settings saved successfully!</span>
+              </div>
+            )}
+
+            {loadingSettings ? (
+              <div className="p-4 text-center text-sm text-gray-600">Loading settings...</div>
+            ) : (
+            <>
+            {/* LICENSE INFO */}
+            <Card className="border-2 border-slate-200">
+              <CardContent className="p-4">
+                <h3 className="font-bold text-base text-gray-900 mb-3">LICENSE INFO</h3>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-900 mb-1">DEA Number</label>
+                    <div className="relative">
+                      {!isEditing && <Lock className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />}
+                      <Input
+                        value={profile.deaNumber}
+                        onChange={(e) => setProfile({ ...profile, deaNumber: e.target.value })}
+                        disabled={!isEditing}
+                        className={`text-xs h-8 ${!isEditing ? 'pl-7 bg-gray-100' : ''}`}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-900 mb-1">DEA Expiration</label>
+                    <Input
+                      value={storeSettings?.deaExpirationDate || ''}
+                      disabled
+                      className="text-xs h-8 bg-gray-100"
+                    />
+                    <p className="text-xs text-gray-500 mt-0.5">Edit in Store Settings tab</p>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-900 mb-1">State Pharmacy License Number</label>
+                    <div className="relative">
+                      {!isEditing && <Lock className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />}
+                      <Input
+                        value={profile.stateLicenseNumber}
+                        onChange={(e) => setProfile({ ...profile, stateLicenseNumber: e.target.value })}
+                        disabled={!isEditing}
+                        className={`text-xs h-8 ${!isEditing ? 'pl-7 bg-gray-100' : ''}`}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-900 mb-1">State Pharmacy License Expiration</label>
+                    <Input
+                      type={isEditing ? 'date' : 'text'}
+                      value={profile.licenseExpiryDate}
+                      onChange={(e) => setProfile({ ...profile, licenseExpiryDate: e.target.value })}
+                      disabled={!isEditing}
+                      className={`text-xs h-8 ${!isEditing ? 'bg-gray-100' : ''}`}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* PHARMACY / FACILITY INFORMATION */}
+            <Card className="border-2 border-slate-200">
+              <CardContent className="p-4">
+                <h3 className="font-bold text-base text-gray-900 mb-3">PHARMACY / FACILITY INFORMATION</h3>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-900 mb-1">Pharmacy / Facility Name</label>
+                    <Input
+                      value={profile.pharmacyName}
+                      onChange={(e) => setProfile({ ...profile, pharmacyName: e.target.value })}
+                      disabled={!isEditing}
+                      className="text-xs h-8"
+                      placeholder="Enter your Pharmacy / Facility Name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-900 mb-1">Pharmacy Physical Address</label>
+                    <Input
+                      value={profile.physicalAddress.street}
+                      onChange={(e) => setProfile({
+                        ...profile,
+                        physicalAddress: { ...profile.physicalAddress, street: e.target.value }
+                      })}
+                      disabled={!isEditing}
+                      className="text-xs h-8"
+                      placeholder="Enter your Pharmacy Physical Address"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-900 mb-1">City</label>
+                    <Input
+                      value={profile.physicalAddress.city}
+                      onChange={(e) => setProfile({
+                        ...profile,
+                        physicalAddress: { ...profile.physicalAddress, city: e.target.value }
+                      })}
+                      disabled={!isEditing}
+                      className="text-xs h-8"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-900 mb-1">State</label>
+                    <select
+                      value={profile.physicalAddress.state}
+                      onChange={(e) => setProfile({
+                        ...profile,
+                        physicalAddress: { ...profile.physicalAddress, state: e.target.value }
+                      })}
+                      disabled={!isEditing}
+                      className="w-full h-8 px-2 py-1 text-xs border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <option value="">Select a state</option>
+                      {US_STATES.map((state) => (
+                        <option key={state.value} value={state.value}>
+                          {state.label} ({state.value})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-900 mb-1">Zip</label>
+                    <Input
+                      value={profile.physicalAddress.zip}
+                      onChange={(e) => setProfile({
+                        ...profile,
+                        physicalAddress: { ...profile.physicalAddress, zip: e.target.value }
+                      })}
+                      disabled={!isEditing}
+                      className="text-xs h-8"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold text-gray-900 mb-1">Corporate Name (If different than Pharmacy / Facility Name)</label>
+                    <Input
+                      value={profile.corporateName}
+                      onChange={(e) => setProfile({ ...profile, corporateName: e.target.value })}
+                      disabled={!isEditing}
+                      className="text-xs h-8"
+                      placeholder="Enter Corporate Name (If different than Pharmacy / Facility Name)"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold text-gray-900 mb-1">Mailing Address (If different than Pharmacy Address)</label>
+                    <Input
+                      value={profile.mailingAddress}
+                      onChange={(e) => setProfile({ ...profile, mailingAddress: e.target.value })}
+                      disabled={!isEditing}
+                      className="text-xs h-8"
+                      placeholder="Enter Mailing Address (If different than Pharmacy Address)"
+                    />
+                  </div>
+                  {/* <div>
+                    <label className="block text-xs font-bold text-gray-900 mb-1">Buying Group</label>
+                    <Input
+                      value={storeSettings?.gpoAffiliation || ''}
+                      disabled
+                      className="text-xs h-8 bg-gray-50"
+                    />
+                    <p className="text-xs text-gray-500 mt-0.5">Edit in Store Settings tab</p>
+                  </div> */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-900 mb-1">Store Hours</label>
+                    <Input
+                      value={profile.storeHours}
+                      onChange={(e) => setProfile({ ...profile, storeHours: e.target.value })}
+                      disabled={!isEditing}
+                      className="text-xs h-8"
+                      placeholder="e.g. M-F 9-7 Sat 10-3"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* CONTACT INFORMATION */}
+            <Card className="border-2 border-slate-200">
+              <CardContent className="p-4">
+                <h3 className="font-bold text-base text-gray-900 mb-3">CONTACT INFORMATION</h3>
                 <div className="grid gap-3 md:grid-cols-2">
                   <div>
                     <label className="block text-xs font-bold text-gray-900 mb-1">Full Name</label>
@@ -582,7 +771,7 @@ export default function SettingsPage() {
                       value={profile.name}
                       onChange={(e) => setProfile({ ...profile, name: e.target.value })}
                       disabled={!isEditing}
-                      className="text-xs h-7"
+                      className="text-xs h-8"
                     />
                   </div>
                   <div>
@@ -592,359 +781,116 @@ export default function SettingsPage() {
                       value={profile.email}
                       onChange={(e) => setProfile({ ...profile, email: e.target.value })}
                       disabled={!isEditing}
-                      className="text-xs h-7"
+                      className="text-xs h-8"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">Phone</label>
+                    <label className="block text-xs font-bold text-gray-900 mb-1">Phone Number</label>
                     <Input
                       type="tel"
                       value={profile.phone}
                       onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
                       disabled={!isEditing}
-                      className="text-xs h-7"
+                      className="text-xs h-8"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">Title</label>
+                    <label className="block text-xs font-bold text-gray-900 mb-1">Fax</label>
                     <Input
-                      value={profile.title}
-                      onChange={(e) => setProfile({ ...profile, title: e.target.value })}
-                      disabled={!isEditing}
-                      className="text-xs h-7"
+                      value={storeSettings?.faxNumber || ''}
+                      disabled
+                      className="text-xs h-8 bg-gray-50"
                     />
+                    <p className="text-xs text-gray-500 mt-0.5">Edit in Store Settings tab</p>
                   </div>
-                </div>
-
-                <div className="pt-3 border-t-2 border-blue-200">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Building className="h-4 w-4 text-blue-600" />
-                    <h4 className="font-bold text-sm text-gray-900">Pharmacy Information</h4>
-                  </div>
-                  <div className="grid gap-3 md:grid-cols-2">
-                    <div>
-                      <label className="block text-xs font-bold text-gray-900 mb-1">Pharmacy Name</label>
-                      <Input
-                        value={profile.pharmacyName}
-                        onChange={(e) => setProfile({ ...profile, pharmacyName: e.target.value })}
-                        disabled={!isEditing}
-                        className="text-xs h-7"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-gray-900 mb-1">NPI Number</label>
-                      <Input
-                        value={profile.npiNumber}
-                        onChange={(e) => setProfile({ ...profile, npiNumber: e.target.value })}
-                        disabled={!isEditing}
-                        className="text-xs h-7"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-gray-900 mb-1">DEA Number</label>
-                      <Input
-                        value={profile.deaNumber}
-                        onChange={(e) => setProfile({ ...profile, deaNumber: e.target.value })}
-                        disabled={!isEditing}
-                        className="text-xs h-7"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t-2 border-blue-200">
-                  <div className="flex items-center gap-2 mb-3">
-                    <MapPin className="h-4 w-4 text-blue-600" />
-                    <h4 className="font-bold text-sm text-gray-900">Physical Address</h4>
-                  </div>
-                  <div className="grid gap-3 md:grid-cols-2">
-                    <div className="md:col-span-2">
-                      <label className="block text-xs font-bold text-gray-900 mb-1">Street Address</label>
-                      <Input
-                        value={profile.physicalAddress.street}
-                        onChange={(e) => setProfile({
-                          ...profile,
-                          physicalAddress: { ...profile.physicalAddress, street: e.target.value }
-                        })}
-                        disabled={!isEditing}
-                        className="text-xs h-7"
-                        placeholder="Optional"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-gray-900 mb-1">City</label>
-                      <Input
-                        value={profile.physicalAddress.city}
-                        onChange={(e) => setProfile({
-                          ...profile,
-                          physicalAddress: { ...profile.physicalAddress, city: e.target.value }
-                        })}
-                        disabled={!isEditing}
-                        className="text-xs h-7"
-                        placeholder="Optional"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-gray-900 mb-1">State</label>
-                      <select
-                        value={profile.physicalAddress.state}
-                        onChange={(e) => setProfile({
-                          ...profile,
-                          physicalAddress: { ...profile.physicalAddress, state: e.target.value }
-                        })}
-                        disabled={!isEditing}
-                        className="w-full h-7 px-2 py-1 text-xs border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <option value="">Select a state</option>
-                        {US_STATES.map((state) => (
-                          <option key={state.value} value={state.value}>
-                            {state.label} ({state.value})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-gray-900 mb-1">ZIP Code</label>
-                      <Input
-                        value={profile.physicalAddress.zip}
-                        onChange={(e) => setProfile({
-                          ...profile,
-                          physicalAddress: { ...profile.physicalAddress, zip: e.target.value }
-                        })}
-                        disabled={!isEditing}
-                        className="text-xs h-7"
-                        placeholder="Optional"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Notifications Tab */}
-        {activeTab === 'notifications' && (
-          <div className="space-y-3">
-            <Card className="border-2 border-purple-200 bg-gradient-to-br from-white to-purple-50/30">
-              <CardContent className="p-3">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="p-1.5 rounded-lg bg-purple-100">
-                    <Mail className="h-4 w-4 text-purple-600" />
-                  </div>
-                  <h3 className="font-bold text-base text-gray-900">Email Notifications</h3>
-                </div>
-                <div className="space-y-2">
-                  {Object.entries(notifications.email).map(([key, value]) => (
-                    <div key={key} className="flex items-center justify-between p-2 rounded-lg bg-white/50 border border-purple-200">
-                      <div>
-                        <p className="font-medium text-xs text-gray-900">
-                          {key.split(/(?=[A-Z])/).join(' ').replace(/^\w/, c => c.toUpperCase())}
-                        </p>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={value}
-                          onChange={(e) => setNotifications({
-                            ...notifications,
-                            email: { ...notifications.email, [key]: e.target.checked }
-                          })}
-                          className="sr-only peer"
-                        />
-                        <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
-                      </label>
-                    </div>
-                  ))}
-                  <Button onClick={handleSave} size="sm" className="bg-teal-600 hover:bg-teal-700 text-white border-0 rounded-lg mt-2">
-                    <Save className="mr-1 h-3 w-3" />
-                    Save Preferences
-                  </Button>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-2 border-indigo-200 bg-gradient-to-br from-white to-indigo-50/30">
-              <CardContent className="p-3">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="p-1.5 rounded-lg bg-indigo-100">
-                    <Bell className="h-4 w-4 text-indigo-600" />
-                  </div>
-                  <h3 className="font-bold text-base text-gray-900">In-App Notifications</h3>
-                </div>
-                <div className="space-y-2">
-                  {Object.entries(notifications.inApp).map(([key, value]) => (
-                    <div key={key} className="flex items-center justify-between p-2 rounded-lg bg-white/50 border border-indigo-200">
-                      <div>
-                        <p className="font-medium text-xs text-gray-900">
-                          {key.split(/(?=[A-Z])/).join(' ').replace(/^\w/, c => c.toUpperCase())}
-                        </p>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={value}
-                          onChange={(e) => setNotifications({
-                            ...notifications,
-                            inApp: { ...notifications.inApp, [key]: e.target.checked }
-                          })}
-                          className="sr-only peer"
-                        />
-                        <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
-                      </label>
-                    </div>
-                  ))}
-                  <Button onClick={handleSave} size="sm" className="bg-teal-600 hover:bg-teal-700 text-white border-0 rounded-lg mt-2">
-                    <Save className="mr-1 h-3 w-3" />
-                    Save Preferences
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-2 border-blue-200 bg-gradient-to-br from-white to-blue-50/30">
-              <CardContent className="p-3">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="p-1.5 rounded-lg bg-blue-100">
-                    <Phone className="h-4 w-4 text-blue-600" />
-                  </div>
-                  <h3 className="font-bold text-base text-gray-900">SMS Notifications</h3>
-                </div>
-                <div className="space-y-2">
-                  {Object.entries(notifications.sms).map(([key, value]) => (
-                    <div key={key} className="flex items-center justify-between p-2 rounded-lg bg-white/50 border border-blue-200">
-                      <div>
-                        <p className="font-medium text-xs text-gray-900">
-                          {key.split(/(?=[A-Z])/).join(' ').replace(/^\w/, c => c.toUpperCase())}
-                        </p>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={value}
-                          onChange={(e) => setNotifications({
-                            ...notifications,
-                            sms: { ...notifications.sms, [key]: e.target.checked }
-                          })}
-                          className="sr-only peer"
-                        />
-                        <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-                      </label>
-                    </div>
-                  ))}
-                  <div className="p-2 bg-blue-50 border-2 border-blue-200 rounded-lg mt-2">
-                    <p className="text-xs text-blue-800">
-                      <AlertCircle className="inline h-3 w-3 mr-1" />
-                      SMS notifications may incur charges from your carrier.
-                    </p>
-                  </div>
-                  <Button onClick={handleSave} size="sm" className="bg-teal-600 hover:bg-teal-700 text-white border-0 rounded-lg mt-2">
-                    <Save className="mr-1 h-3 w-3" />
-                    Save Preferences
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Billing Tab */}
-        {activeTab === 'billing' && (
-          <div className="space-y-3">
-            <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
+            {/* MY DOCUMENTS */}
+            <Card className="border-2 border-slate-200">
               <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="p-1.5 rounded-lg bg-green-100">
-                    <DollarSign className="h-4 w-4 text-green-600" />
-                  </div>
-                  <h3 className="font-bold text-base text-green-900">Platform Commission Structure</h3>
-                </div>
-                <div className="p-3 bg-white rounded-lg border-2 border-green-200 mb-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
-                      <p className="font-bold text-sm text-green-900">Commission Rate</p>
-                      <p className="text-2xl font-bold text-green-600">5%</p>
-                    </div>
-                    <Info className="h-6 w-6 text-green-600" />
-                  </div>
-                  <p className="text-xs text-gray-700 mt-2">
-                    We charge a 5% commission on each payment you receive from suppliers. 
-                    This commission is automatically calculated and deducted from the gross payment amount.
-                  </p>
-                </div>
-
-                <div className="space-y-2 text-xs">
-                  <div className="flex items-start gap-2 p-2 rounded bg-white/50">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-bold text-gray-900">No Subscription Fees</p>
-                      <p className="text-gray-600">The platform is completely free to use. No monthly or annual fees.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2 p-2 rounded bg-white/50">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-bold text-gray-900">Pay Only When You Get Paid</p>
-                      <p className="text-gray-600">Commission is only charged when you receive payments from suppliers.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2 p-2 rounded bg-white/50">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-bold text-gray-900">Full Transparency</p>
-                      <p className="text-gray-600">Every payment shows the gross amount, commission, and net amount you receive.</p>
+                <h3 className="font-bold text-base text-gray-900 mb-3">MY DOCUMENTS</h3>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-900 mb-2">Upload DEA</label>
+                    <div
+                      className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-teal-400 transition-colors"
+                      onClick={() => deaFileRef.current?.click()}
+                    >
+                      <input
+                        ref={deaFileRef}
+                        type="file"
+                        accept=".pdf,.html,.txt,.jpg,.jpeg,.png"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleDocumentUpload('dea', file);
+                          e.target.value = '';
+                        }}
+                      />
+                      <Upload className="h-8 w-8 mx-auto text-teal-600 mb-2" />
+                      <p className="text-xs text-gray-600">
+                        {uploadingDea ? 'Uploading...' : profile.deaFileUrl ? 'File uploaded - Click to replace' : 'Choose DEA File'}
+                      </p>
+                      {profile.deaFileUrl && (
+                        <a
+                          href={profile.deaFileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-teal-600 underline mt-1 inline-block"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          View current file
+                        </a>
+                      )}
                     </div>
                   </div>
-                </div>
-
-                <div className="p-2 bg-yellow-50 border-2 border-yellow-200 rounded-lg mt-3">
-                  <p className="text-xs text-yellow-800">
-                    <strong>Example:</strong> If you receive a payment of $1,000 from a supplier, 
-                    the platform commission is $50 (5%), and you receive $950 net.
-                  </p>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-900 mb-2">State Pharmacy License</label>
+                    <div
+                      className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-teal-400 transition-colors"
+                      onClick={() => licenseFileRef.current?.click()}
+                    >
+                      <input
+                        ref={licenseFileRef}
+                        type="file"
+                        accept=".pdf,.html,.txt,.jpg,.jpeg,.png"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleDocumentUpload('license', file);
+                          e.target.value = '';
+                        }}
+                      />
+                      <Upload className="h-8 w-8 mx-auto text-teal-600 mb-2" />
+                      <p className="text-xs text-gray-600">
+                        {uploadingLicense ? 'Uploading...' : profile.licenseFileUrl ? 'File uploaded - Click to replace' : 'Choose License File'}
+                      </p>
+                      {profile.licenseFileUrl && (
+                        <a
+                          href={profile.licenseFileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-teal-600 underline mt-1 inline-block"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          View current file
+                        </a>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-
-            <Card className="border-2 border-green-200 bg-gradient-to-br from-white to-green-50/30">
-              <CardContent className="p-3">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="p-1.5 rounded-lg bg-green-100">
-                    <CreditCard className="h-4 w-4 text-green-600" />
-                  </div>
-                  <h3 className="font-bold text-base text-gray-900">Payment Receipt Information</h3>
-                </div>
-                <div className="space-y-2">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">Bank Account (for ACH transfers)</label>
-                    <Input placeholder="Enter bank account details" disabled className="text-xs h-7" />
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      Contact support to update your payment information
-                    </p>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">Payment Method Preference</label>
-                    <select className="w-full px-2 py-1.5 border rounded text-xs h-7" disabled>
-                      <option>Wire Transfer</option>
-                      <option>ACH</option>
-                      <option>Check</option>
-                    </select>
-                  </div>
-                  <Button variant="outline" size="sm" disabled className="border-gray-300 rounded-lg">
-                    <Edit className="mr-1 h-3 w-3" />
-                    Update Payment Information
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            </>
+            )}
           </div>
         )}
 
         {/* Store Settings Tab (FCR) */}
         {activeTab === 'store' && (
           <div className="space-y-3">
-            {/* DEA Expiration Warning Banner (Task 1.7) */}
             {storeSettings?.deaExpirationWarning && (() => {
               const style = getDeaWarningStyle(storeSettings.deaExpirationWarning);
               if (!style) return null;
@@ -1006,7 +952,6 @@ export default function SettingsPage() {
                   <div className="p-4 text-center text-sm text-gray-500">Unable to load store settings. Please try again.</div>
                 ) : (
                   <div className="space-y-4">
-                    {/* Store Identification */}
                     <div className="grid gap-3 md:grid-cols-2">
                       <div>
                         <label className="block text-xs font-bold text-gray-900 mb-1">Store Number</label>
@@ -1037,7 +982,6 @@ export default function SettingsPage() {
                       </div>
                     </div>
 
-                    {/* Wholesaler Information */}
                     <div className="pt-3 border-t-2 border-indigo-200">
                       <div className="flex items-center gap-2 mb-3">
                         <Truck className="h-4 w-4 text-indigo-600" />
@@ -1081,37 +1025,6 @@ export default function SettingsPage() {
                       </div>
                     </div>
 
-                    {/* GPO & Compliance */}
-                    <div className="pt-3 border-t-2 border-indigo-200">
-                      <div className="flex items-center gap-2 mb-3">
-                        <FileText className="h-4 w-4 text-indigo-600" />
-                        <h4 className="font-bold text-sm text-gray-900">GPO & Compliance</h4>
-                      </div>
-                      <div className="grid gap-3 md:grid-cols-2">
-                        <div>
-                          <label className="block text-xs font-bold text-gray-900 mb-1">GPO Affiliation</label>
-                          <Input
-                            value={storeSettings.gpoAffiliation || ''}
-                            onChange={(e) => updateStoreField('gpoAffiliation', e.target.value)}
-                            disabled={!isEditingStore}
-                            className="text-xs h-7"
-                            placeholder="e.g. BuyLine"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-gray-900 mb-1">DEA Expiration Date</label>
-                          <Input
-                            type="date"
-                            value={storeSettings.deaExpirationDate || ''}
-                            onChange={(e) => updateStoreField('deaExpirationDate', e.target.value)}
-                            disabled={!isEditingStore}
-                            className="text-xs h-7"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Visit Schedule & Contact */}
                     <div className="pt-3 border-t-2 border-indigo-200">
                       <div className="flex items-center gap-2 mb-3">
                         <Calendar className="h-4 w-4 text-indigo-600" />
@@ -1169,33 +1082,6 @@ export default function SettingsPage() {
                       </div>
                     </div>
 
-                    {/* Assigned Staff (Read-Only) */}
-                    {(storeSettings.assignedProcessorName || storeSettings.assignedProcessorId || storeSettings.assignedSalesPersonId) && (
-                      <div className="pt-3 border-t-2 border-indigo-200">
-                        <div className="flex items-center gap-2 mb-3">
-                          <User className="h-4 w-4 text-indigo-600" />
-                          <h4 className="font-bold text-sm text-gray-900">Assigned Staff</h4>
-                        </div>
-                        <div className="grid gap-3 md:grid-cols-2">
-                          <div>
-                            <label className="block text-xs font-bold text-gray-900 mb-1">Assigned Processor</label>
-                            <Input
-                              value={storeSettings.assignedProcessorName || 'Not assigned'}
-                              disabled
-                              className="text-xs h-7 bg-gray-50"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-bold text-gray-900 mb-1">Assigned Sales Person</label>
-                            <Input
-                              value={storeSettings.assignedSalesPersonId ? storeSettings.assignedSalesPersonId : 'Not assigned'}
-                              disabled
-                              className="text-xs h-7 bg-gray-50"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 )}
               </CardContent>
@@ -1342,67 +1228,6 @@ export default function SettingsPage() {
                 </div>
               </CardContent>
             </Card>
-
-            {/* <Card className="border-2 border-orange-200 bg-gradient-to-br from-white to-orange-50/30">
-              <CardContent className="p-3">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="p-1.5 rounded-lg bg-orange-100">
-                    <Shield className="h-4 w-4 text-orange-600" />
-                  </div>
-                  <h3 className="font-bold text-base text-gray-900">Two-Factor Authentication</h3>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-white/50 border border-orange-200">
-                    <div>
-                      <p className="font-medium text-xs text-gray-900">SMS Authentication</p>
-                      <p className="text-xs text-gray-600">Receive verification codes via SMS</p>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" />
-                      <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-orange-600"></div>
-                    </label>
-                  </div>
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-white/50 border border-orange-200">
-                    <div>
-                      <p className="font-medium text-xs text-gray-900">Authenticator App</p>
-                      <p className="text-xs text-gray-600">Use an authenticator app like Google Authenticator</p>
-                    </div>
-                    <Button variant="outline" size="sm" className="border-orange-300 text-orange-700 hover:bg-orange-50">
-                      Setup
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-2 border-gray-200 bg-gradient-to-br from-white to-gray-50/30">
-              <CardContent className="p-3">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="p-1.5 rounded-lg bg-gray-100">
-                    <User className="h-4 w-4 text-gray-600" />
-                  </div>
-                  <h3 className="font-bold text-base text-gray-900">Active Sessions</h3>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-white/50 border border-gray-200">
-                    <div>
-                      <p className="font-medium text-xs text-gray-900">Chrome on Windows</p>
-                      <p className="text-xs text-gray-600">Last active: 2 hours ago • IP: 192.168.1.100</p>
-                    </div>
-                    <Badge variant="success" className="text-xs">Current Session</Badge>
-                  </div>
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-white/50 border border-gray-200">
-                    <div>
-                      <p className="font-medium text-xs text-gray-900">Safari on macOS</p>
-                      <p className="text-xs text-gray-600">Last active: 5 days ago • IP: 192.168.1.101</p>
-                    </div>
-                    <Button variant="outline" size="sm" className="border-red-300 text-red-700 hover:bg-red-50">
-                      Revoke
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card> */}
           </div>
         )}
       </div>

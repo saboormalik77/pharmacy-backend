@@ -37,6 +37,34 @@ export interface PharmacyPayment {
   createdBy: string | null;
   createdAt: string;
   updatedAt: string;
+  // New check-specific fields
+  paymentType?: 'ocs' | 'por' | 'direct';
+  checkNumber?: string | null;
+  returnReferenceNumber?: string | null;
+  pharmacyAccountNumber?: string | null;
+  serviceDate?: string | null;
+  checkDate?: string | null;
+  grossCreditAmount?: number;
+  includedCreditAmount?: number;
+  directCreditAmount?: number;
+  porCreditAmount?: number;
+  rsiFeeIncludedPercent?: number;
+  rsiFeeDirectPercent?: number;
+  isLegacy?: boolean;
+  manufacturerCredits?: ManufacturerCredits;
+}
+
+export interface ManufacturerCredit {
+  manufacturerName: string;
+  creditAmount: number;
+  isControlledSubstance: boolean;
+  notes?: string | null;
+}
+
+export interface ManufacturerCredits {
+  included: ManufacturerCredit[];
+  direct: ManufacturerCredit[];
+  por: ManufacturerCredit[];
 }
 
 export interface PayoutCalculation {
@@ -142,6 +170,10 @@ export const updatePaymentRecord = async (
     gpoShare?: number;
     pharmacyPayout?: number;
     totalCreditReceived?: number;
+    checkNumber?: string;
+    checkDate?: string;
+    paymentType?: string;
+    returnReferenceNumber?: string;
   }
 ): Promise<PharmacyPayment> => {
   const sb = ensureAdmin();
@@ -157,6 +189,10 @@ export const updatePaymentRecord = async (
     p_gpo_share: params.gpoShare ?? null,
     p_pharmacy_payout: params.pharmacyPayout ?? null,
     p_total_credit: params.totalCreditReceived ?? null,
+    p_check_number: params.checkNumber || null,
+    p_check_date: params.checkDate || null,
+    p_payment_type: params.paymentType || null,
+    p_return_reference_number: params.returnReferenceNumber || null,
   });
   handleRpcError(data, error, 'Failed to update payment record');
   return data.data as PharmacyPayment;
@@ -234,6 +270,9 @@ export const myPayments = async (
   pharmacyId: string,
   filters: {
     status?: string;
+    dateRange?: string;
+    startDate?: string;
+    endDate?: string;
     page?: number;
     limit?: number;
   }
@@ -242,6 +281,9 @@ export const myPayments = async (
   const { data, error } = await sb.rpc('pharmacy_payment_my_payments', {
     p_pharmacy_id: pharmacyId,
     p_status: filters.status || null,
+    p_date_range: filters.dateRange || null,
+    p_start_date: filters.startDate || null,
+    p_end_date: filters.endDate || null,
     p_page: filters.page || 1,
     p_limit: filters.limit || 20,
   });
@@ -251,4 +293,47 @@ export const myPayments = async (
     pagination: data.pagination,
     summary: data.summary,
   };
+};
+
+// ============================================================
+// Check PDF data (for PDF generation)
+// ============================================================
+
+export interface CheckPdfData {
+  payment: PharmacyPayment;
+  pharmacy: {
+    pharmacyName: string;
+    address: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    storeNumber: string;
+  };
+  manufacturerCredits: ManufacturerCredits;
+  rsiAddress: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  };
+}
+
+export const getCheckPdfData = async (checkNumber: string): Promise<CheckPdfData> => {
+  const sb = ensureAdmin();
+  const { data, error } = await sb.rpc('pharmacy_payment_check_pdf_data', {
+    p_check_number: checkNumber,
+  });
+  handleRpcError(data, error, 'Failed to get check PDF data');
+  return data.data as CheckPdfData;
+};
+
+// ============================================================
+// Generate check number
+// ============================================================
+
+export const generateCheckNumber = async (): Promise<string> => {
+  const sb = ensureAdmin();
+  const { data, error } = await sb.rpc('pharmacy_payment_generate_check_number');
+  if (error) throw new AppError(`Failed to generate check number: ${error.message}`, 500);
+  return data as string;
 };

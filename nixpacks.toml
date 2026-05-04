@@ -1,17 +1,13 @@
 # Nixpacks configuration for Railway deployment
+#
+# Using @napi-rs/canvas instead of node-canvas means we no longer need:
+# - cairo, pango, libpng, libjpeg, giflib, librsvg, pixman, libuuid, freetype, fontconfig
+# - gcc, gnumake for compilation
+# @napi-rs/canvas ships with prebuilt self-contained binaries for all platforms.
 
 [phases.setup]
 nixPkgs = [
   "nodejs_20",
-  "python311",
-  "pkg-config",
-  "cairo",
-  "pango",
-  "libpng",
-  "libjpeg",
-  "giflib",
-  "librsvg",
-  "pixman",
   "chromium"
 ]
 
@@ -22,7 +18,7 @@ cmds = ["npm install --legacy-peer-deps --include=dev"]
 cmds = ["npx tsc"]
 
 [start]
-cmd = "node dist/server.js"
+cmd = "node dist/src/server.js"
 
 [variables]
 PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "true"

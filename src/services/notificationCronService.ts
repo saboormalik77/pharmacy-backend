@@ -92,7 +92,7 @@ export const checkExpiringProductsAndNotify = async (): Promise<{
     const { data: processedItems } = await supabaseAdmin
       .from('pharmacy_notifications')
       .select('inventory_item_id')
-      .eq('notification_type', 'expiring_product')
+      .eq('type', 'expiring_product')
       .not('inventory_item_id', 'is', null);
 
     const processedItemIds = processedItems?.map(item => item.inventory_item_id) || [];
@@ -226,7 +226,7 @@ export const checkExpiringProductsAndNotify = async (): Promise<{
             message: `Hey! If you still have ${item.product_name || `product ${item.ndc_code}`}, ` +
                      `return it now! You can earn $${totalPotentialValue.toFixed(2)}. ` +
                      `${expirationMessage}`,
-            notification_type: 'expiring_product',
+            type: 'expiring_product',
             ndc_code: item.ndc_code,
             product_name: item.product_name,
             expiration_date: item.expiration_date,
@@ -509,17 +509,29 @@ export const getPharmacyNotifications = async (
     throw new Error('Supabase admin client not configured');
   }
 
+  // Only return inventory-style notifications from this endpoint.
+  // Service-request notifications live in the same table but are served by
+  // /api/pharmacy/notifications — we exclude them here so they don't leak
+  // into the inventory feed (which would render them as `${null}d left`).
+  const INVENTORY_TYPES = [
+    'expiring_product',
+    'monthly_reminder',
+    'price_update',
+    'return_opportunity',
+  ];
+
   let query = supabaseAdmin
     .from('pharmacy_notifications')
     .select('*', { count: 'exact' })
     .eq('pharmacy_id', pharmacyId)
+    .in('type', INVENTORY_TYPES)
     .order('created_at', { ascending: false });
 
   if (options.status) {
     query = query.eq('status', options.status);
   }
   if (options.type) {
-    query = query.eq('notification_type', options.type);
+    query = query.eq('type', options.type);
   }
   
   const limit = options.limit || 50;
@@ -600,7 +612,13 @@ export const getUnreadNotificationCount = async (pharmacyId: string): Promise<nu
     .from('pharmacy_notifications')
     .select('id', { count: 'exact', head: true })
     .eq('pharmacy_id', pharmacyId)
-    .eq('status', 'unread');
+    .eq('status', 'unread')
+    .in('type', [
+      'expiring_product',
+      'monthly_reminder',
+      'price_update',
+      'return_opportunity',
+    ]);
 
   if (error) {
     throw new Error(`Failed to get unread count: ${error.message}`);

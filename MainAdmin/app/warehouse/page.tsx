@@ -10,6 +10,9 @@ import {
     MailCheck,
     ArrowRight,
     Package,
+    Archive,
+    Ban,
+    Clock,
 } from 'lucide-react';
 
 const warehouseSections = [
@@ -67,6 +70,33 @@ const warehouseSections = [
         bg: 'bg-green-50',
         border: 'border-green-100',
     },
+    {
+        href: '/warehouse/wine-cellar',
+        icon: Archive,
+        label: 'Wine Cellar',
+        description: 'Products stored for future return processing. Monitor shelved items and ready-to-return inventory.',
+        color: 'text-purple-600',
+        bg: 'bg-purple-50',
+        border: 'border-purple-100',
+    },
+    {
+        href: '/warehouse/tbd-items',
+        icon: Clock,
+        label: 'TBD Items',
+        description: 'Items pending disposition decisions. Review and resolve items awaiting classification.',
+        color: 'text-yellow-600',
+        bg: 'bg-yellow-50',
+        border: 'border-yellow-100',
+    },
+    {
+        href: '/warehouse/destruction',
+        icon: Ban,
+        label: 'Destruction',
+        description: 'Items scheduled for destruction. Track destruction records and compliance documentation.',
+        color: 'text-red-600',
+        bg: 'bg-red-50',
+        border: 'border-red-100',
+    },
 ];
 
 export default function WarehouseHubPage() {
@@ -94,7 +124,7 @@ export default function WarehouseHubPage() {
             </div>
 
             {/* Cards grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                 {warehouseSections.map((section) => {
                     const Icon = section.icon;
                     return (

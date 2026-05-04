@@ -334,6 +334,7 @@ export default function SettingsPage() {
                                     <input
                                         type={showPasswords[key] ? 'text' : 'password'}
                                         value={passwordForm[key]}
+                                        autoComplete="new-password"
                                         onChange={(e) => {
                                             setPasswordForm({ ...passwordForm, [key]: e.target.value });
                                             if (passwordErrors[key]) setPasswordErrors({ ...passwordErrors, [key]: '' });

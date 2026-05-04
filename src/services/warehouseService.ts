@@ -54,6 +54,9 @@ export interface VerifiedItem {
   conditionNotes: string | null;
   returnStatus: string;
   destination: string | null;
+  wineCellarId?: string | null;
+  dosageForm?: string | null;
+  isPartial?: boolean;
   estimatedValue: number | null;
   discrepancyId?: string | null;
 }
@@ -328,7 +331,10 @@ export const verifyItemV2 = async (
   verificationStatus: string,
   actualQuantity?: number,
   conditionNotes?: string,
-  reportedBy?: string
+  reportedBy?: string,
+  nonReturnableReason?: string,
+  serialNumber?: string,
+  lotNumber?: string
 ): Promise<VerifiedItem> => {
   const sb = ensureAdmin();
 
@@ -339,6 +345,9 @@ export const verifyItemV2 = async (
     p_actual_quantity: actualQuantity ?? null,
     p_condition_notes: conditionNotes || null,
     p_reported_by: reportedBy || null,
+    p_non_returnable_reason: nonReturnableReason || null,
+    p_serial_number: serialNumber || null,
+    p_lot_number: lotNumber || null,
   });
 
   handleRpcError(data, error, 'Failed to verify item');
@@ -499,21 +508,50 @@ export const getVerificationSummary = async (
 
   const summary = data.data as VerificationSummary;
 
-  // Fetch serial numbers from return_transaction_items and merge into items
+  // Enrich summary items with fields not currently returned by the RPC payload.
   if (summary.items && summary.items.length > 0) {
     const itemIds = summary.items.map((item: VerifiedItem) => item.id);
     const { data: rawItems } = await sb
       .from('return_transaction_items')
-      .select('id, serial_number')
+      .select('id, serial_number, destination, wine_cellar_id, dosage_form, is_partial, full_package_size, full_package_qty_returned, partial_percentage')
       .in('id', itemIds);
 
     if (rawItems && rawItems.length > 0) {
-      const serialMap: Record<string, string | null> = {};
+      const itemMap: Record<string, {
+        serialNumber: string | null;
+        destination: string | null;
+        wineCellarId: string | null;
+        dosageForm: string | null;
+        isPartial: boolean;
+        fullPackageSize: number | null;
+        fullPackageQtyReturned: number | null;
+        partialPercentage: number | null;
+      }> = {};
+
       for (const row of rawItems) {
-        serialMap[row.id] = row.serial_number ?? null;
+        itemMap[row.id] = {
+          serialNumber: row.serial_number ?? null,
+          destination: row.destination ?? null,
+          wineCellarId: row.wine_cellar_id ?? null,
+          dosageForm: row.dosage_form ?? null,
+          isPartial: Boolean(row.is_partial),
+          fullPackageSize: row.full_package_size != null ? Number(row.full_package_size) : null,
+          fullPackageQtyReturned: row.full_package_qty_returned != null ? Number(row.full_package_qty_returned) : null,
+          partialPercentage: row.partial_percentage != null ? Number(row.partial_percentage) : null,
+        };
       }
+
       for (const item of summary.items) {
-        (item as VerifiedItem).serialNumber = serialMap[item.id] ?? null;
+        const merged = itemMap[item.id];
+        if (!merged) continue;
+        (item as VerifiedItem).serialNumber = merged.serialNumber;
+        (item as VerifiedItem).destination = merged.destination;
+        (item as VerifiedItem).wineCellarId = merged.wineCellarId;
+        (item as VerifiedItem).dosageForm = merged.dosageForm;
+        (item as VerifiedItem).isPartial = merged.isPartial;
+        (item as any).fullPackageSize = merged.fullPackageSize;
+        (item as any).fullPackageQtyReturned = merged.fullPackageQtyReturned;
+        (item as any).partialPercentage = merged.partialPercentage;
       }
     }
   }

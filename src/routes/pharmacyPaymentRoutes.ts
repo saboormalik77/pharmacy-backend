@@ -9,6 +9,8 @@ import {
   getPaymentHandler,
   updatePaymentHandler,
   myPaymentsHandler,
+  checkPdfHandler,
+  generateCheckNumberHandler,
 } from '../controllers/pharmacyPaymentController';
 
 // ============================================================
@@ -74,6 +76,30 @@ adminRouter.get('/summary', authenticateAdmin, paymentSummaryHandler);
  *         description: Calculated payout breakdown
  */
 adminRouter.post('/calculate', authenticateAdmin, calculatePayoutHandler);
+
+/**
+ * @swagger
+ * /api/admin/pharmacy-payments/generate-check-number:
+ *   post:
+ *     summary: Generate a unique check number
+ *     tags: [Pharmacy Payments]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Generated check number
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status: { type: string, example: success }
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     checkNumber: { type: string, example: "216461" }
+ */
+adminRouter.post('/generate-check-number', authenticateAdmin, generateCheckNumberHandler);
 
 /**
  * @swagger
@@ -222,6 +248,15 @@ const pharmacyRouter = Router();
  *         name: status
  *         schema: { type: string, enum: [pending, processing, paid, failed, disputed] }
  *       - in: query
+ *         name: dateRange
+ *         schema: { type: string, enum: [this_month, last_month, this_quarter, last_quarter, this_year, last_12_months, custom] }
+ *       - in: query
+ *         name: startDate
+ *         schema: { type: string, format: date }
+ *       - in: query
+ *         name: endDate
+ *         schema: { type: string, format: date }
+ *       - in: query
  *         name: page
  *         schema: { type: integer, default: 1 }
  *       - in: query
@@ -232,5 +267,32 @@ const pharmacyRouter = Router();
  *         description: Pharmacy's payment history with summary totals
  */
 pharmacyRouter.get('/my-payments', authenticate, myPaymentsHandler);
+
+/**
+ * @swagger
+ * /api/pharmacy-payments/check-pdf/{checkNumber}:
+ *   get:
+ *     summary: Generate and download check PDF
+ *     tags: [Pharmacy Payments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: checkNumber
+ *         required: true
+ *         schema: { type: string }
+ *         description: The check number to generate PDF for
+ *     responses:
+ *       200:
+ *         description: Check PDF file
+ *         content:
+ *           application/pdf:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       404:
+ *         description: Check not found
+ */
+pharmacyRouter.get('/check-pdf/:checkNumber', authenticate, checkPdfHandler);
 
 export { adminRouter as pharmacyPaymentAdminRouter, pharmacyRouter as pharmacyPaymentRouter };

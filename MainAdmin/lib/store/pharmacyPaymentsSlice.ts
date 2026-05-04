@@ -25,6 +25,36 @@ export interface PharmacyPayment {
     createdAt: string;
     updatedAt: string;
     debitMemos?: DebitMemo[];
+    // Check-related fields
+    paymentType: 'ocs' | 'por' | 'direct' | null;
+    checkNumber: string | null;
+    checkDate: string | null;
+    returnReferenceNumber: string | null;
+    pharmacyAccountNumber: string | null;
+    serviceDate: string | null;
+    grossCreditAmount: number | null;
+    includedCreditAmount: number | null;
+    directCreditAmount: number | null;
+    porCreditAmount: number | null;
+    rsiFeeIncludedPercent: number | null;
+    rsiFeeDirectPercent: number | null;
+    isLegacy: boolean;
+    manufacturerCredits?: ManufacturerCredits | null;
+}
+
+export interface ManufacturerCredit {
+    id: string;
+    manufacturerName: string;
+    creditAmount: number;
+    creditType: 'included' | 'direct' | 'por';
+    isControlledSubstance: boolean;
+    notes: string | null;
+}
+
+export interface ManufacturerCredits {
+    included: ManufacturerCredit[];
+    direct: ManufacturerCredit[];
+    por: ManufacturerCredit[];
 }
 
 export interface DebitMemo {
@@ -101,6 +131,9 @@ export interface PharmacyPaymentsState {
     isCalculating: boolean;
     isCreating: boolean;
     isUpdating: boolean;
+    isIssuingCheck: boolean;
+    generatedCheckNumber: string | null;
+    isGeneratingCheckNumber: boolean;
     error: string | null;
 }
 
@@ -130,6 +163,9 @@ const initialState: PharmacyPaymentsState = {
     isCalculating: false,
     isCreating: false,
     isUpdating: false,
+    isIssuingCheck: false,
+    generatedCheckNumber: null,
+    isGeneratingCheckNumber: false,
     error: null,
 };
 
@@ -291,9 +327,44 @@ export const updatePharmacyPayment = createAsyncThunk(
             companyFee?: number;
             gpoShare?: number;
             pharmacyPayout?: number;
+            checkNumber?: string;
+            checkDate?: string;
+            paymentType?: 'ocs' | 'por' | 'direct';
+            returnReferenceNumber?: string;
+            paidAt?: string;
         };
     }) => {
         return apiClient.patch<{ data: PharmacyPayment }>(`/admin/pharmacy-payments/${id}`, updates);
+    }
+);
+
+// Generate a new check number
+export const generateCheckNumber = createAsyncThunk(
+    'pharmacyPayments/generateCheckNumber',
+    async () => {
+        return apiClient.post<{ data: { checkNumber: string } }>('/admin/pharmacy-payments/generate-check-number', {});
+    }
+);
+
+// Issue check for a payment (update with check details and mark as paid)
+export const issueCheck = createAsyncThunk(
+    'pharmacyPayments/issueCheck',
+    async ({ id, checkData }: {
+        id: string;
+        checkData: {
+            checkNumber: string;
+            paymentType: 'ocs' | 'por' | 'direct';
+            returnReferenceNumber?: string;
+            notes?: string;
+        };
+    }) => {
+        return apiClient.patch<{ data: PharmacyPayment }>(`/admin/pharmacy-payments/${id}`, {
+            ...checkData,
+            paymentMethod: 'check',
+            status: 'paid',
+            checkDate: new Date().toISOString(),
+            paidAt: new Date().toISOString(),
+        });
     }
 );
 
@@ -315,6 +386,9 @@ const pharmacyPaymentsSlice = createSlice({
         },
         clearError: (state) => {
             state.error = null;
+        },
+        clearGeneratedCheckNumber: (state) => {
+            state.generatedCheckNumber = null;
         },
     },
     extraReducers: (builder) => {
@@ -419,8 +493,45 @@ const pharmacyPaymentsSlice = createSlice({
                 state.batchPharmacies = action.payload;
             })
             .addCase(fetchBatchPharmacies.rejected, (state) => { state.isLoadingBatchPharmacies = false; });
+
+        // Generate check number
+        builder
+            .addCase(generateCheckNumber.pending, (state) => {
+                state.isGeneratingCheckNumber = true;
+                state.error = null;
+            })
+            .addCase(generateCheckNumber.fulfilled, (state, action) => {
+                state.isGeneratingCheckNumber = false;
+                state.generatedCheckNumber = action.payload.data.checkNumber;
+            })
+            .addCase(generateCheckNumber.rejected, (state, action) => {
+                state.isGeneratingCheckNumber = false;
+                state.error = action.error.message || 'Failed to generate check number';
+            });
+
+        // Issue check
+        builder
+            .addCase(issueCheck.pending, (state) => {
+                state.isIssuingCheck = true;
+                state.error = null;
+            })
+            .addCase(issueCheck.fulfilled, (state, action) => {
+                state.isIssuingCheck = false;
+                const index = state.payments.findIndex(p => p.id === action.payload.data.id);
+                if (index !== -1) {
+                    state.payments[index] = action.payload.data;
+                }
+                if (state.currentPayment?.id === action.payload.data.id) {
+                    state.currentPayment = action.payload.data;
+                }
+                state.generatedCheckNumber = null;
+            })
+            .addCase(issueCheck.rejected, (state, action) => {
+                state.isIssuingCheck = false;
+                state.error = action.error.message || 'Failed to issue check';
+            });
     },
 });
 
-export const { setFilters, clearCurrentPayment, clearCalculation, clearBatchPharmacies, clearError } = pharmacyPaymentsSlice.actions;
+export const { setFilters, clearCurrentPayment, clearCalculation, clearBatchPharmacies, clearError, clearGeneratedCheckNumber } = pharmacyPaymentsSlice.actions;
 export default pharmacyPaymentsSlice.reducer;

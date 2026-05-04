@@ -279,15 +279,15 @@ export default function PoliciesPage() {
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
-                                <tr className="bg-gray-50 border-b border-gray-200">
-                                    <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Labeler ID</th>
-                                    <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Manufacturer</th>
-                                    <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Type</th>
-                                    <th className="text-left px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Destinations</th>
-                                    <th className="text-center px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Partials</th>
-                                    <th className="text-right px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Avg Pay %</th>
-                                    <th className="text-right px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Avg Days</th>
-                                    <th className="text-right px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                                <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Labeler ID</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Manufacturer</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Type</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Destinations</th>
+                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Partials</th>
+                                    <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Avg Pay %</th>
+                                    <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Avg Days</th>
+                                    <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
@@ -300,32 +300,32 @@ export default function PoliciesPage() {
                                             onClick={() => router.push(`/policies/${p.id}`)}
                                             className="hover:bg-gray-50 cursor-pointer transition-colors"
                                         >
-                                            <td className="px-3 py-1.5 text-xs font-mono text-gray-900 font-semibold whitespace-nowrap">{p.labelerId}</td>
-                                            <td className="px-3 py-1.5 text-xs text-gray-800 max-w-[180px] truncate" title={p.manufacturerName}>{p.manufacturerName}</td>
-                                            <td className="px-3 py-1.5">
+                                            <td className="px-4 py-3 text-sm font-mono text-gray-900 font-semibold whitespace-nowrap">{p.labelerId}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-800 max-w-[180px] truncate" title={p.manufacturerName}>{p.manufacturerName}</td>
+                                            <td className="px-4 py-3">
                                                 <Badge variant={p.labelerType === 'brand' ? 'info' : 'default'}>
                                                     <span className="text-[10px]">{p.labelerType === 'brand' ? 'Brand' : 'Generic'}</span>
                                                 </Badge>
                                             </td>
-                                            <td className="px-3 py-1.5">
+                                            <td className="px-4 py-3">
                                                 <div className="flex flex-wrap gap-1">
                                                     {dests.length > 0 ? dests.map(d => (
                                                         <Badge key={d} variant={getDestBadgeVariant(d)}><span className="text-[10px]">{d}</span></Badge>
-                                                    )) : <span className="text-gray-400 text-xs">—</span>}
+                                                    )) : <span className="text-gray-400 text-sm">—</span>}
                                                 </div>
                                             </td>
-                                            <td className="px-3 py-1.5 text-center">
+                                            <td className="px-4 py-3 text-center">
                                                 {hasPartials
                                                     ? <Badge variant="success"><span className="text-[10px]">Yes</span></Badge>
-                                                    : <span className="text-gray-400 text-xs">No</span>}
+                                                    : <span className="text-gray-400 text-sm">No</span>}
                                             </td>
-                                            <td className="px-3 py-1.5 text-right text-xs text-gray-700 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-right text-sm text-gray-700 whitespace-nowrap">
                                                 {p.averagePayPercent != null ? `${p.averagePayPercent}%` : '—'}
                                             </td>
-                                            <td className="px-3 py-1.5 text-right text-xs text-gray-700 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-right text-sm text-gray-700 whitespace-nowrap">
                                                 {p.averageDaysToPay != null ? p.averageDaysToPay : '—'}
                                             </td>
-                                            <td className="px-3 py-1.5 text-right">
+                                            <td className="px-4 py-3 text-right">
                                                 <button
                                                     onClick={e => { e.stopPropagation(); setDeleteModal(p); }}
                                                     className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"

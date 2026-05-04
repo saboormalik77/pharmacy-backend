@@ -285,7 +285,19 @@ interface ProcessedResult {
 
 // ── Main Processing Logic ────────────────────────────────────
 
-async function processEmails(maxEmails = 20, markAsRead = true): Promise<{
+async function processEmails(maxEmails = 10, markAsRead = true): Promise<{
+  processed: number;
+  updated: number;
+  results: ProcessedResult[];
+}> {
+  const timeout = 50000; // 50 seconds timeout for processing
+  return Promise.race([
+    processEmailsWithTimeout(maxEmails, markAsRead),
+    new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Processing timeout')), timeout))
+  ]);
+}
+
+async function processEmailsWithTimeout(maxEmails = 10, markAsRead = true): Promise<{
   processed: number;
   updated: number;
   results: ProcessedResult[];
@@ -314,7 +326,7 @@ async function processEmails(maxEmails = 20, markAsRead = true): Promise<{
       // mark no_memo_found as read, so the same messages are re-fetched every run.
       uids.sort((a, b) => Number(b) - Number(a));
 
-      const emailsToProcess = uids.slice(0, maxEmails);
+      const emailsToProcess = uids.slice(0, Math.min(maxEmails, 5)); // Limit to 5 emails per run to avoid timeout
       const sb = getSupabase();
       const myAddress = env('IMAP_USER').toLowerCase();
 
@@ -534,13 +546,13 @@ serve(async (req: Request) => {
   }
 
   try {
-    let maxEmails = 20;
+    let maxEmails = 5; // Reduced default to prevent CPU timeout
     let markAsRead = true;
 
     if (req.method === 'POST') {
       try {
         const body = await req.json();
-        maxEmails = body.maxEmails ?? 20;
+        maxEmails = body.maxEmails ?? 5; // Reduced default to prevent CPU timeout
         markAsRead = body.markAsRead ?? true;
       } catch {
         // Empty body is fine, use defaults

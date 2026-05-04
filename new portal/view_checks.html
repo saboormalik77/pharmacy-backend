@@ -1,0 +1,350 @@
+<div class="content">
+               
+    <style>
+.tooltip-inner {
+max-width: 750px !important; 
+background-color: #fff !important; 
+color: #000 !important; 
+border: 1px solid #ccc !important;
+text-align: left;
+font-size: 14px;
+padding: 10px;
+}
+.tooltip-arrow::before {
+border-top-color: #ccc !important; 
+border-bottom-color: #ccc !important;
+}
+
+#checkSummaryTable tfoot th {
+font-weight: normal !important;
+color: #757D8B  !important;
+border-top: 1px solid #dee2e6 !important; 
+border-bottom: 2px solid #dee2e6 !important;
+font-family: 'Outfit-Regular' !important;
+font-size: 15px !important;
+}
+
+</style>
+
+<div class="section-top">
+<h1 class="section-title"><i class="fa-solid fa-arrow-right"></i>View Checks</h1>
+</div>
+
+<div class="container-fluid py-5">
+<div class="row">
+<div class="col-md-12">
+   <div class="card p-4 mb-3">
+       <div class="row">
+           <div class="col-md-6">
+               <h4>RSI Check History</h4>
+               <span class="me-2 text-end mb-1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="You select the time-frame in which you want your credit due from RSI&lt;br&gt;
+                            to be issued in a single check. We offer time-frames of 10, 30, 60, and 90&lt;br&gt;
+                            days. Typically 80-90% of your credit will be included in this check with&lt;br&gt;
+                            the remainder being issued directly from certain manufacturers.&lt;br&gt;
+                            RSI fees are deducted from the check.">
+                   <b>OCS :</b> One-Check-Select
+               </span>
+           
+               <span class="me-2 text-end mb-1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="Certain characteristics of a return may cause drug manufacturers to require proof of where and for what price a product was purchased. If no invoices are provided product
+                            may be processed under our Pay-On-Receipt program whereby our customer is paid upon us receiving credit from the manufacturer. These checks are issued in addition to
+                            OCS checks, and fees for these credits are deducted from POR checks. An additional processing fee of 2-20% &lt;b&gt;&lt;u&gt;may&lt;/u&gt;&lt;/b&gt; apply.">
+                   <b>POR :</b> Pay-On-Receipt
+               </span>
+           </div>
+       </div>
+   
+       <div class="row align-items-end">
+           <div class="col-12 col-md-4 mb-3">
+               <div class="custom-select-container"> 
+               <select class="customs-select form-select" name="date_range" id="date_range">
+                   <option value="all">All Dates</option>
+                   <option value="this_month">This Month</option>
+                   <option value="last_month">Last Month</option>
+                   <option value="this_quarter">This Quarter</option>
+                   <option value="last_quarter">Last Quarter</option>
+                   <option value="this_year">This Year</option>
+                   <option value="last_12_months">Last 12 Months</option>
+                   <option value="custom">Custom</option>
+               </select>
+               </div>
+           </div>
+           
+           <div class="col-12 col-md-3 mb-3" id="customDateStart" style="display:none;">
+               <div class="input-container">
+               <input type="date" id="startdate1" class="form-control" disabled="">
+               </div>
+           </div>
+           
+           <div class="col-12 col-md-3 mb-3" id="customDateEnd" style="display:none;">
+               <div class="input-container">
+               <input type="date" id="enddate1" class="form-control" disabled="">
+                </div>
+           </div>
+           
+           <div class="col-12 col-md-auto mb-3">
+               <button type="button" class="primary-btn w-100" onclick="">Submit</button>
+           </div>
+       </div>
+       <div id="loader" style="text-align: center; padding: 10px; display: none;">
+           <div class="spinner-border text-primary" role="status">
+               <span class="visually-hidden">Loading...</span>
+           </div>
+       </div>
+
+       <div class="theme-table">
+           <div id="checkSummaryTable_wrapper" class="dataTables_wrapper"><div id="checkSummaryTable_filter" class="dataTables_filter"><label>Search:<input type="search" class="" placeholder="" aria-controls="checkSummaryTable"></label></div><table class="table table-bordered dataTable" id="checkSummaryTable" aria-describedby="checkSummaryTable_info">
+               <thead>
+                   <tr><th class="sorting" tabindex="0" aria-controls="checkSummaryTable" rowspan="1" colspan="1" aria-label="Return Date: activate to sort column ascending" style="width: 79.1172px;">Return Date</th><th class="sorting" tabindex="0" aria-controls="checkSummaryTable" rowspan="1" colspan="1" aria-label="Reference Number: activate to sort column ascending" style="width: 121.906px;">Reference Number</th><th class="sorting" tabindex="0" aria-controls="checkSummaryTable" rowspan="1" colspan="1" aria-label="Date Paid: activate to sort column ascending" style="width: 64.5547px;">Date Paid</th><th class="sorting" tabindex="0" aria-controls="checkSummaryTable" rowspan="1" colspan="1" aria-label="Check Number: activate to sort column ascending" style="width: 95.6875px;">Check Number</th><th class="sorting" tabindex="0" aria-controls="checkSummaryTable" rowspan="1" colspan="1" aria-label="Check Amount: activate to sort column ascending" style="width: 94.3516px;">Check Amount</th><th class="sorting" tabindex="0" aria-controls="checkSummaryTable" rowspan="1" colspan="1" aria-label="Credit Included: activate to sort column ascending" style="width: 100.031px;">Credit Included</th><th class="sorting" tabindex="0" aria-controls="checkSummaryTable" rowspan="1" colspan="1" aria-label="RSI Credit Fee: activate to sort column ascending" style="width: 92.7188px;">RSI Credit Fee</th><th class="sorting" tabindex="0" aria-controls="checkSummaryTable" rowspan="1" colspan="1" aria-label="Manufacturer Direct Credit Fee: activate to sort column ascending" style="width: 112.516px;">Manufacturer <br>Direct Credit Fee</th><th class="sorting" tabindex="0" aria-controls="checkSummaryTable" rowspan="1" colspan="1" aria-label="Credit Type: activate to sort column ascending" style="width: 75.5703px;">Credit Type</th></tr>
+               </thead>
+               <tbody><tr class="odd"><td>1/23/2026</td><td>3S15L</td><td>2/17/2026</td><td><a href="javascript:void(0);" class="open-check-report" data-checknum="216461" data-refnum="3S15L" data-type="OCS">
+                           216461
+                       </a></td><td>$2,889.06</td><td>$3,410.89</td><td>$508.22</td><td>$13.61</td><td>OCS</td></tr><tr class="even"><td>12/10/2025</td><td>3RC56</td><td>1/6/2026</td><td><a href="javascript:void(0);" class="open-check-report" data-checknum="214327" data-refnum="3RC56" data-type="OCS">
+                           214327
+                       </a></td><td>$5,465.08</td><td>$6,333.05</td><td>$848.62</td><td>$19.35</td><td>OCS</td></tr><tr class="odd"><td>10/9/2025</td><td>3R9DK</td><td>11/6/2025</td><td><a href="javascript:void(0);" class="open-check-report" data-checknum="212134" data-refnum="3R9DK" data-type="OCS">
+                           212134
+                       </a></td><td>$1,057.39</td><td>$1,262.98</td><td>$169.23</td><td>$36.36</td><td>OCS</td></tr><tr class="even"><td>9/4/2025</td><td>3R8B9</td><td>9/30/2025</td><td><a href="javascript:void(0);" class="open-check-report" data-checknum="211055" data-refnum="3R8B9" data-type="OCS">
+                           211055
+                       </a></td><td>$4,525.10</td><td>$5,268.92</td><td>$706.03</td><td>$37.79</td><td>OCS</td></tr><tr class="odd"><td>7/22/2025</td><td>3R70Y</td><td>8/6/2025</td><td><a href="javascript:void(0);" class="open-check-report" data-checknum="208960" data-refnum="3R70Y" data-type="OCS">
+                           208960
+                       </a></td><td>$1,526.76</td><td>$1,763.00</td><td>$236.24</td><td>$0.00</td><td>OCS</td></tr><tr class="even"><td>6/9/2025</td><td>3R626</td><td>7/8/2025</td><td><a href="javascript:void(0);" class="open-check-report" data-checknum="208015" data-refnum="3R626" data-type="OCS">
+                           208015
+                       </a></td><td>$153.48</td><td>$368.52</td><td>$49.38</td><td>$165.66</td><td>OCS</td></tr><tr class="odd"><td>5/12/2025</td><td>3R526</td><td>6/2/2025</td><td><a href="javascript:void(0);" class="open-check-report" data-checknum="206686" data-refnum="3R526" data-type="OCS">
+                           206686
+                       </a></td><td>$1,783.92</td><td>$2,163.90</td><td>$289.96</td><td>$90.02</td><td>OCS</td></tr><tr class="even"><td>5/12/2025</td><td>3R526</td><td>9/23/2025</td><td><a href="javascript:void(0);" class="open-check-report" data-checknum="210467" data-refnum="3R526" data-type="POR">
+                           210467
+                       </a></td><td>$662.28</td><td>$747.48</td><td>$85.20</td><td>$0.00</td><td>POR</td></tr><tr class="odd"><td>3/28/2025</td><td>3R38R</td><td>6/24/2025</td><td><a href="javascript:void(0);" class="open-check-report" data-checknum="207113" data-refnum="3R38R" data-type="OCS">
+                           207113
+                       </a></td><td>$4,086.35</td><td>$4,522.26</td><td>$425.09</td><td>$10.82</td><td>OCS</td></tr><tr class="even"><td>3/28/2025</td><td>3R38R</td><td>6/26/2025</td><td><a href="javascript:void(0);" class="open-check-report" data-checknum="207557" data-refnum="3R38R" data-type="POR">
+                           207557
+                       </a></td><td>$473.80</td><td>$528.90</td><td>$55.10</td><td>$0.00</td><td>POR</td></tr></tbody>
+               <tfoot>
+                   <tr class=""><th colspan="4" class="text-end" rowspan="1">TOTALS:</th><th style="text-align:center;" id="totalNetAmount" rowspan="1" colspan="1">$29,510.28</th><th style="text-align:center;" id="totalDueFromRSI" rowspan="1" colspan="1">$34,192.05</th><th style="text-align:center;" id="totalRSIFee" rowspan="1" colspan="1">$4,109.62</th><th style="text-align:center;" id="totalNonBatchFee" rowspan="1" colspan="1">$572.15</th><th rowspan="1" colspan="1"></th></tr>
+               </tfoot>
+           </table><div class="dataTables_info" id="checkSummaryTable_info" role="status" aria-live="polite">Showing 1 to 10 of 24 entries</div><div class="dataTables_paginate paging_simple_numbers" id="checkSummaryTable_paginate"><a class="paginate_button previous disabled" aria-controls="checkSummaryTable" aria-disabled="true" role="link" data-dt-idx="previous" tabindex="-1" id="checkSummaryTable_previous">Previous</a><span><a class="paginate_button current" aria-controls="checkSummaryTable" role="link" aria-current="page" data-dt-idx="0" tabindex="0">1</a><a class="paginate_button " aria-controls="checkSummaryTable" role="link" data-dt-idx="1" tabindex="0">2</a><a class="paginate_button " aria-controls="checkSummaryTable" role="link" data-dt-idx="2" tabindex="0">3</a></span><a class="paginate_button next" aria-controls="checkSummaryTable" role="link" data-dt-idx="next" tabindex="0" id="checkSummaryTable_next">Next</a></div></div>
+         </div>   
+   </div>
+</div>
+</div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>  
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+
+<!--<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">-->
+<!--<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>-->
+<!--<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>-->
+<!--<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>-->
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>-->
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>-->
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>-->
+
+
+<script>
+$(document).ready(function () {
+$('#data-table').DataTable();
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+flatpickr(".flatpickr", {
+   dateFormat: "Y-m-d"
+});
+
+const dateRangeSelect = document.getElementById("date_range");
+const customRange = document.getElementById("customDateStart");
+const customRangeTo = document.getElementById("customDateEnd");
+
+const startDateInput = document.getElementById("startdate1");
+const endDateInput = document.getElementById("enddate1");
+
+function toggleCustomDates() {
+   if (dateRangeSelect.value === 'custom') {
+       customRange.style.display = 'block';
+       customRangeTo.style.display = 'block';
+       startDateInput.disabled = false;
+       endDateInput.disabled = false;
+   } else {
+       customRange.style.display = 'none';
+       customRangeTo.style.display = 'none';
+       startDateInput.disabled = true;
+       endDateInput.disabled = true;
+   }
+}
+
+dateRangeSelect.addEventListener('change', toggleCustomDates);
+
+toggleCustomDates();
+});
+
+function rasOnchange() {
+let index = document.getElementById("ras").selectedIndex;
+$(".refnum-content").hide();
+$("#div" + index).show();
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+tooltipTriggerList.map(function (tooltipTriggerEl) {
+   return new bootstrap.Tooltip(tooltipTriggerEl)
+})
+});
+</script>
+
+
+<script>
+$(document).ready(function () {
+let table = $('#checkSummaryTable').DataTable({
+   footerCallback: function (row, data, start, end, display) {
+       let api = this.api();
+
+       let parseNum = val => typeof val === 'string'
+           ? parseFloat(val.replace(/[\$,]/g, '')) || 0
+           : (typeof val === 'number' ? val : 0);
+
+       let totalNetAmount = api.column(4, { page: 'all' }).data().reduce((a, b) => a + parseNum(b), 0);
+       let totalDueFromRSI = api.column(5, { page: 'all' }).data().reduce((a, b) => a + parseNum(b), 0);
+       let totalRSIFee = api.column(6, { page: 'all' }).data().reduce((a, b) => a + parseNum(b), 0);
+       let totalNonBatchFee = api.column(7, { page: 'all' }).data().reduce((a, b) => a + parseNum(b), 0);
+
+       // Update footer
+       $('#totalNetAmount').html(`$${totalNetAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`);
+       $('#totalDueFromRSI').html(`$${totalDueFromRSI.toLocaleString('en-US', { minimumFractionDigits: 2 })}`);
+       $('#totalRSIFee').html(`$${totalRSIFee.toLocaleString('en-US', { minimumFractionDigits: 2 })}`);
+       $('#totalNonBatchFee').html(`$${totalNonBatchFee.toLocaleString('en-US', { minimumFractionDigits: 2 })}`);
+   },
+   destroy: true,
+   paging: true,
+   searching: true,
+   sorting: false,
+   info: true,
+   responsive: true,
+   dom: 'Bfrtip',
+   // buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
+});
+
+function loadCheckSummary() {
+   let date_range = $('#date_range').val();
+   let start_date = $('#startdate1').val();
+   let end_date = $('#enddate1').val();
+
+   let requestData = {};
+   if (date_range || (start_date && end_date)) {
+       requestData = { date_range, start_date, end_date };
+   }
+   
+    $('#loader').show();
+
+   $.ajax({
+       url: 'https://portal.drugreturns.com/customer/checkSummary',
+       type: 'GET',
+       data: requestData,
+       success: function (response) {
+           $('#loader').hide();
+           const data = response.data || [];
+           table.clear();
+
+           if (data.length === 0) {
+               table.row.add([
+                   'No data found', '', '', '', '', '', '', '', ''
+               ]).draw();
+           } else {
+               data.forEach(row => {
+                   table.row.add([
+                       new Date(row.servicedate).toLocaleDateString('en-US'),
+                       row.refnum ?? '',
+                       new Date(row.PayDate).toLocaleDateString('en-US'),
+                       `<a href="javascript:void(0);" class="open-check-report"
+                           data-checknum="${row.CheckNumber2}"
+                           data-refnum="${row.refnum}"
+                           data-type="${row.type}">
+                           ${row.CheckNumber2}
+                       </a>`,
+                      (row.netAmount !== null && row.netAmount !== undefined
+                           ? `$${row.netAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                           : '$0.00'),
+                       
+                       (row.dueFromRSI !== null && row.dueFromRSI !== undefined
+                           ? `$${row.dueFromRSI.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                           : '$0.00'),
+                       
+                       (row.RSIfee !== null && row.RSIfee !== undefined
+                           ? `$${row.RSIfee.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                           : '$0.00'),
+                       
+                       (row.nonBatchFee !== null && row.nonBatchFee !== undefined
+                           ? `$${row.nonBatchFee.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                           : '$0.00'),
+
+                       row.type ?? ''
+                   ]);
+               });
+               table.draw();
+           }
+       },
+       error: function (err) {
+           console.error(err);
+           alert('Something went wrong.');
+       }
+   });
+}
+
+loadCheckSummary();
+
+$('.primary-btn').on('click', function () {
+   loadCheckSummary();
+});
+});
+
+$(document).on('click', '.open-check-report', function () {
+var check = $(this).data('checknum');
+var refnum = $(this).data('refnum');
+var type = $(this).data('type');
+console.log(type);
+
+if (check) {
+   let url = "";
+   // var url = "https://drugreturns.com/home/returnsnew/checkprintpdfDEV4.asp?cn=" + check;
+   if (type === 'OCS') {
+       url = `/customer/RSICheck?checknumber=${check}&refnum=${refnum}`;
+   } else if (type === 'POR') {
+       url = `/customer/checkPOR?check=${check}&refnum=${refnum}`;
+   }
+
+   window.open(url, '_blank');
+} else {
+   alert("Check number not found.");
+}
+});
+</script>
+
+
+<script>
+$(document).on('click', '.open-check-report11', function () {
+var check = $(this).data('checknum');
+var refnum = "";
+const roleRouteReports = "https://portal.drugreturns.com/customer/reports";
+
+if (check) {
+   const url = `${roleRouteReports}?check=${encodeURIComponent(check)}&refnum=${encodeURIComponent(refnum)}`;
+   window.open(url, '_blank');
+} else {
+   alert("Check number not found.");
+}
+});
+
+function viewCheck() {
+const selectedRefnum = document.getElementById('ras').value;
+
+fetch(`https://portal.drugreturns.com/customer/processReprint?refnum=${selectedRefnum}`)
+   .then(response => response.text())
+   .then(data => {
+       console.log(data);
+   })
+   .catch(error => console.error('Error:', error));
+}
+</script>
+ </div>

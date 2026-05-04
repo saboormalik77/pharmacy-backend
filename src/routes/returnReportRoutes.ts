@@ -95,7 +95,7 @@ const router = express.Router();
  *               status: error
  *               message: Failed to extract structured data from PDF
  */
-router.post('/process', upload.single('file'), processReturnReportHandler);
+router.post('/process', upload.single('file') as any, processReturnReportHandler);
 
 /**
  * @swagger

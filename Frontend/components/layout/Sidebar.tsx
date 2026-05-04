@@ -32,6 +32,7 @@ import {
   DollarSign,
   Trash2,
   ShieldCheck,
+  Truck,
 } from 'lucide-react'
 
 interface SidebarProps {
@@ -47,6 +48,11 @@ export function Sidebar({ onClose }: SidebarProps) {
   const pathname = usePathname()
   const { hasPermission, hasAnyPermission, isParent, isLoaded, isSigningOut } = usePharmacyPermissions()
   const [branding, setBranding] = useState<AdminBranding | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     const fetchBranding = async () => {
@@ -79,6 +85,12 @@ export function Sidebar({ onClose }: SidebarProps) {
 
   const navItems = [
     {
+      title: 'Dashboard',
+      href: '/dashboard',
+      icon: LayoutDashboard,
+      visible: hasPermission('dashboard:view'),
+    },
+    {
       title: 'Returns',
       href: '/returns',
       icon: ClipboardList,
@@ -90,23 +102,30 @@ export function Sidebar({ onClose }: SidebarProps) {
       icon: Scan,
       visible: hasPermission('returns:create'),
     },
+    // NOTE: TBD Items, Destruction, and Wine Cellar functionality moved to warehouse verification
+    // {
+    //   title: 'TBD Items',
+    //   href: '/returns/tbd-items',
+    //   icon: AlertTriangle,
+    //   visible: hasPermission('tbd_items:view'),
+    // },
+    // {
+    //   title: 'Destruction',
+    //   href: '/returns/destruction',
+    //   icon: Trash2,
+    //   visible: hasPermission('destruction:view'),
+    // },
+    // {
+    //   title: 'Wine Cellar',
+    //   href: '/wine-cellar',
+    //   icon: Archive,
+    //   visible: hasPermission('wine_cellar:view'),
+    // },
     {
-      title: 'TBD Items',
-      href: '/returns/tbd-items',
-      icon: AlertTriangle,
-      visible: hasPermission('tbd_items:view'),
-    },
-    {
-      title: 'Destruction',
-      href: '/returns/destruction',
-      icon: Trash2,
-      visible: hasPermission('destruction:view'),
-    },
-    {
-      title: 'Wine Cellar',
-      href: '/wine-cellar',
-      icon: Archive,
-      visible: hasPermission('wine_cellar:view'),
+      title: 'On-Site Service',
+      href: '/on-site-service',
+      icon: Truck,
+      visible: hasAnyPermission(['on_site_service:view', 'on_site_service:create']),
     },
     // {
     //   title: 'My Products',
@@ -149,6 +168,12 @@ export function Sidebar({ onClose }: SidebarProps) {
       href: '/analytics',
       icon: BarChart3,
       visible: hasPermission('analytics:view'),
+    },
+    {
+      title: 'Reports',
+      href: '/reports-hub',
+      icon: FileText,
+      visible: hasAnyPermission(['returns:view', 'analytics:view', 'documents:view']),
     },
     // {
     //   title: 'Upload Documents',
@@ -205,7 +230,7 @@ export function Sidebar({ onClose }: SidebarProps) {
             <img src={branding.logoUrl} alt="Logo" className="w-8 h-8 rounded-lg object-contain flex-shrink-0" />
           )}
           <div className="min-w-0 flex-1">
-            <h2 className="text-base sm:text-lg font-bold text-teal-600 truncate">{branding?.businessName || 'PharmAnalytics'}</h2>
+            <h2 className="text-base sm:text-lg font-bold text-primary truncate">{branding?.businessName || 'PharmAnalytics'}</h2>
             {/* <p className="text-xs text-muted-foreground">Data Analytics Platform</p> */}
           </div>
         </div>
@@ -218,8 +243,8 @@ export function Sidebar({ onClose }: SidebarProps) {
         </button>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3 overflow-y-auto">
-        {!isLoaded || isSigningOut ? (
+      <nav className="flex-1 space-y-1 px-3 overflow-y-auto" suppressHydrationWarning>
+        {!mounted || !isLoaded || isSigningOut ? (
           <div className="space-y-2 px-2">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="h-7 bg-muted/50 rounded-lg animate-pulse" />
@@ -236,10 +261,11 @@ export function Sidebar({ onClose }: SidebarProps) {
                 href={item.href}
                 onClick={onClose}
                 className={cn(
-                  'flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-medium transition-colors',
+                  'flex items-center gap-2 rounded-lg px-3 py-2 transition-colors',
                   isActive
-                    ? 'bg-teal-600 text-white'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                    ? 'bg-primary text-primary-foreground font-semibold'
+                    : 'text-muted-foreground font-medium hover:bg-accent hover:text-accent-foreground',
+                  'text-sm'
                 )}
               >
                 <Icon className="h-4 w-4 flex-shrink-0" />
@@ -250,8 +276,8 @@ export function Sidebar({ onClose }: SidebarProps) {
         )}
       </nav>
 
-      <div className="border-t p-3 space-y-1">
-        {!isLoaded || isSigningOut ? (
+      <div className="border-t p-3 space-y-1" suppressHydrationWarning>
+        {!mounted || !isLoaded || isSigningOut ? (
           <div className="space-y-2 px-2">
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="h-7 bg-muted/50 rounded-lg animate-pulse" />
@@ -268,10 +294,11 @@ export function Sidebar({ onClose }: SidebarProps) {
                 href={item.href}
                 onClick={onClose}
                 className={cn(
-                  'flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-medium transition-colors',
+                  'flex items-center gap-2 rounded-lg px-3 py-2 transition-colors',
                   isActive
-                    ? 'bg-teal-600 text-white'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                    ? 'bg-primary text-primary-foreground font-semibold'
+                    : 'text-muted-foreground font-medium hover:bg-accent hover:text-accent-foreground',
+                  'text-sm'
                 )}
               >
                 <Icon className="h-4 w-4 flex-shrink-0" />

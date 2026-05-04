@@ -141,7 +141,7 @@ export default function CreditStatementPage() {
           </div>
           <Button
             size="sm"
-            className="bg-emerald-600 hover:bg-emerald-700 text-white border-0"
+            className="bg-teal-600 hover:bg-teal-700 text-white border-0"
             onClick={handleDownload}
             disabled={payments.length === 0}
           >
@@ -257,39 +257,39 @@ export default function CreditStatementPage() {
             ) : (
               <>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-xs">
-                    <thead className="bg-gradient-to-r from-teal-100 to-cyan-100 border-b-2 border-teal-200">
-                      <tr>
-                        <th className="text-left p-2 font-bold text-teal-900">#</th>
-                        <th className="text-left p-2 font-bold text-teal-900">Date</th>
-                        <th className="text-left p-2 font-bold text-teal-900">Batch</th>
-                        <th className="text-left p-2 font-bold text-teal-900">Month</th>
-                        <th className="text-right p-2 font-bold text-teal-900">Credit Received</th>
-                        <th className="text-right p-2 font-bold text-teal-900">Company Fee</th>
-                        <th className="text-right p-2 font-bold text-teal-900">GPO Share</th>
-                        <th className="text-right p-2 font-bold text-teal-900">Your Payout</th>
-                        <th className="text-left p-2 font-bold text-teal-900">Method</th>
-                        <th className="text-left p-2 font-bold text-teal-900">Reference</th>
-                        <th className="text-left p-2 font-bold text-teal-900">Paid At</th>
-                        <th className="text-left p-2 font-bold text-teal-900">Status</th>
+                  <table className="w-full table-auto">
+                    <thead>
+                      <tr className="bg-gradient-to-r from-teal-600 to-teal-700 border-b-2 border-teal-800">
+                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">#</th>
+                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Date</th>
+                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Batch</th>
+                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Month</th>
+                        <th className="text-right px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Credit Received</th>
+                        <th className="text-right px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Company Fee</th>
+                        <th className="text-right px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">GPO Share</th>
+                        <th className="text-right px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Your Payout</th>
+                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Method</th>
+                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Reference</th>
+                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Paid At</th>
+                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Status</th>
                       </tr>
                     </thead>
                     <tbody>
                       {payments.map((payment, idx) => (
                         <tr
                           key={payment.id}
-                          className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-teal-50 transition-colors`}
+                          className={`border-b border-gray-100 ${idx % 2 === 0 ? 'bg-white' : 'bg-teal-50/40'} hover:bg-teal-50 transition-colors`}
                         >
-                          <td className="p-2 text-gray-400">{(page - 1) * 25 + idx + 1}</td>
-                          <td className="p-2">{formatDate(payment.createdAt)}</td>
-                          <td className="p-2 font-medium">{payment.batchName || '—'}</td>
-                          <td className="p-2">{payment.batchMonth || '—'}</td>
-                          <td className="p-2 text-right font-bold text-teal-700">{formatCurrency(payment.totalCreditReceived)}</td>
-                          <td className="p-2 text-right text-amber-700">
+                          <td className="px-4 py-3 text-sm text-gray-400">{(page - 1) * 25 + idx + 1}</td>
+                          <td className="px-4 py-3 text-sm">{formatDate(payment.createdAt)}</td>
+                          <td className="px-4 py-3 text-sm font-medium">{payment.batchName || '—'}</td>
+                          <td className="px-4 py-3 text-sm">{payment.batchMonth || '—'}</td>
+                          <td className="px-4 py-3 text-sm text-right font-bold text-teal-700">{formatCurrency(payment.totalCreditReceived)}</td>
+                          <td className="px-4 py-3 text-sm text-right text-amber-700">
                             {formatCurrency(payment.companyFee)}
                             <span className="text-gray-400 ml-1">({payment.companyFeePercent}%)</span>
                           </td>
-                          <td className="p-2 text-right text-gray-600">
+                          <td className="px-4 py-3 text-sm text-right text-gray-600">
                             {payment.gpoShare > 0 ? (
                               <>
                                 {formatCurrency(payment.gpoShare)}
@@ -297,11 +297,11 @@ export default function CreditStatementPage() {
                               </>
                             ) : '—'}
                           </td>
-                          <td className="p-2 text-right font-bold text-emerald-700">{formatCurrency(payment.pharmacyPayout)}</td>
-                          <td className="p-2 capitalize">{payment.paymentMethod || '—'}</td>
-                          <td className="p-2 font-mono text-gray-500">{payment.paymentReference || '—'}</td>
-                          <td className="p-2">{payment.paidAt ? formatDate(payment.paidAt) : '—'}</td>
-                          <td className="p-2">
+                          <td className="px-4 py-3 text-sm text-right font-bold text-emerald-700">{formatCurrency(payment.pharmacyPayout)}</td>
+                          <td className="px-4 py-3 text-sm capitalize">{payment.paymentMethod || '—'}</td>
+                          <td className="px-4 py-3 text-sm font-mono text-gray-500">{payment.paymentReference || '—'}</td>
+                          <td className="px-4 py-3 text-sm">{payment.paidAt ? formatDate(payment.paidAt) : '—'}</td>
+                          <td className="px-4 py-3 text-sm">
                             <Badge
                               variant={getStatusVariant(payment.status)}
                               className={`text-xs border-2 ${getStatusColor(payment.status)}`}
@@ -315,20 +315,20 @@ export default function CreditStatementPage() {
                     {/* Totals Row */}
                     <tfoot className="bg-gradient-to-r from-teal-50 to-cyan-50 border-t-2 border-teal-300">
                       <tr className="font-bold">
-                        <td className="p-2" colSpan={4}>Statement Total</td>
-                        <td className="p-2 text-right text-teal-800">
+                        <td className="px-4 py-3 text-sm" colSpan={4}>Statement Total</td>
+                        <td className="px-4 py-3 text-sm text-right text-teal-800">
                           {formatCurrency(payments.reduce((s, p) => s + p.totalCreditReceived, 0))}
                         </td>
-                        <td className="p-2 text-right text-amber-800">
+                        <td className="px-4 py-3 text-sm text-right text-amber-800">
                           {formatCurrency(payments.reduce((s, p) => s + p.companyFee, 0))}
                         </td>
-                        <td className="p-2 text-right text-gray-700">
+                        <td className="px-4 py-3 text-sm text-right text-gray-700">
                           {formatCurrency(payments.reduce((s, p) => s + p.gpoShare, 0))}
                         </td>
-                        <td className="p-2 text-right text-emerald-800">
+                        <td className="px-4 py-3 text-sm text-right text-emerald-800">
                           {formatCurrency(payments.reduce((s, p) => s + p.pharmacyPayout, 0))}
                         </td>
-                        <td className="p-2" colSpan={4}></td>
+                        <td className="px-4 py-3 text-sm" colSpan={4}></td>
                       </tr>
                     </tfoot>
                   </table>

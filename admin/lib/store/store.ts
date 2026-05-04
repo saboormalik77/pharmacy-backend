@@ -23,6 +23,8 @@ import paymentTrackingReducer from './paymentTrackingSlice';
 import ndcPricingReducer from './ndcPricingSlice';
 import shipmentGroupReducer from './shipmentGroupSlice';
 import destructionReducer from './destructionSlice';
+import serviceRequestsReducer from './serviceRequestsSlice';
+import processorNotificationsReducer from './processorNotificationsSlice';
 
 export const makeStore = () => {
   return configureStore({
@@ -51,6 +53,8 @@ export const makeStore = () => {
       ndcPricing: ndcPricingReducer,
       shipmentGroup: shipmentGroupReducer,
       destruction: destructionReducer,
+      serviceRequests: serviceRequestsReducer,
+      processorNotifications: processorNotificationsReducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({

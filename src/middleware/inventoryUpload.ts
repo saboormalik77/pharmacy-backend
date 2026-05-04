@@ -6,7 +6,6 @@
  */
 
 import multer from 'multer';
-import { Request } from 'express';
 
 // Configure multer to use memory storage
 const storage = multer.memoryStorage();
@@ -26,7 +25,7 @@ const ALLOWED_EXTENSIONS = ['.csv', '.txt', '.pdf', '.xlsx'];
 
 // File filter to only accept supported file types
 const fileFilter = (
-  req: Request,
+  req: any,
   file: Express.Multer.File,
   cb: multer.FileFilterCallback
 ) => {
@@ -47,7 +46,7 @@ const fileFilter = (
 // Configure multer
 export const inventoryUpload = multer({
   storage,
-  fileFilter,
+  fileFilter: fileFilter as any,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },

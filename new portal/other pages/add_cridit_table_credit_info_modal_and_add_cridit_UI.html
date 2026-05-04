@@ -1,0 +1,112 @@
+<div class="modal-content">
+    <div class="modal-header d-flex justify-content-between align-items-center">
+        <h5 class="modal-title mb-0" id="editModalLabel">Credit Information</h5>
+        <div>
+            <button class="btn btn-success btn-sm" onclick="openAddModal()">+ Add Credit</button>
+        </div>
+    </div>
+    <div id="responseMsg" class="mt-3"></div>
+    <div class="modal-body">
+        <div class="theme-table" id="show">
+            <table>
+                <thead>
+                  <tr>
+                    <th>Processor</th>
+                    <th>RSI Estimate</th>
+                    <th>RA Number</th>
+                    <th>Debit Memo</th>
+                    <th>Phone Number</th>
+                    <th>Tracking Number</th>
+                  </tr>
+                </thead>
+                <tbody>
+    <tr>
+        <td>INMAR- Texas</td>
+        <td>$13.20</td>
+        <td>-</td>
+        <td>TCX3S38J14511</td>
+        <td>888-831-2292</td>
+        <td>
+        <button class="btn btn-sm btn-outline-secondary" disabled="">
+            <i class="bi bi-exclamation-circle"></i> No Tracking
+        </button></td>
+    </tr>
+</tbody>
+            </table>
+        </div>
+        
+        <div id="editFormMessage" class="mt-2"></div>
+
+        <div id="creditFormContainer" style="display: none;" class="theme-table my-3">
+            <form id="editForm" method="POST" action="https://portal.drugreturns.com/customer/addCreditData">
+                <input type="hidden" name="_token" value="wjSMP9RealEt3cembKM4AidwiqmoxHDUDpdfLBNe" autocomplete="off">                            <input type="hidden" id="manID_hidden" name="primarykey" value="1451">  
+                <input type="hidden" id="editID" name="editID">  
+                <input type="hidden" id="unicode_hidden" name="unicode" value="TCX3S38J14511">
+                <input type="hidden" id="refnum" name="refnum">
+                <input type="hidden" id="actionType" name="actionType" value="1">
+
+                <table class="table table-bordered my-3">
+                    <tbody><tr>
+                        <td><label for="modalName" class="form-label" required="">Received Amount</label></td>
+                        <td><input type="text" class="form-control" id="modalName" name="received"></td>
+                    </tr>
+                    <tr>
+                        <td><label for="creditType" class="form-label">Credit Type</label></td>
+                        <td>
+                            <select id="creditType" name="credit_type" class="form-control" required="">
+                                <option value="">-- Select Credit Type --</option>
+                                <option value="1">Replacement Product</option>
+                                <option value="3">Manufacturer to wholesaler</option>
+                                <option value="4">Wholesaler to pharmacy</option>
+                                <option value="5">Credit to direct account</option>
+                                <option value="6">Manufacturer check</option>
+                                <option value="7">Pending/Other</option>
+                                <option value="8">No Credit Issued</option>
+                                <option value="9">Problem</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label for="modalUnicode" class="form-label">Credit Memo</label></td>
+                        <td><input type="text" class="form-control" id="modalUnicode" name="credit_memo" required=""></td>
+                    </tr>
+                    <tr>
+                        <td><label for="modalRSIestimate" class="form-label">Date Issued</label></td>
+                        <td><input type="date" class="form-control" id="modalRSIestimate" name="date_issued" required=""></td>
+                    </tr>
+                    <tr>
+                        <td><label for="modalCreditReceived" class="form-label">Notes</label></td>
+                        <td><input type="text" class="form-control" id="modalCreditReceived" name="notes"></td>
+                    </tr>
+                </tbody></table>
+            </form>
+        </div>
+
+        <div class="theme-table">
+            <table class="table table-bordered" id="credit-info-table">
+                <thead>
+                    <tr>
+                        <th>Amount</th>
+                        <th>Credit Type</th>
+                        <th>Credit Memo</th>
+                        <th>Date Issued</th>
+                        <th>Notes</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody><tr><td colspan="8" class="text-center">No credit records found.</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="modal-footer d-flex justify-content-between">
+        <div>
+            <button type="button" onclick="researchRequest()" class="primary-btn" style="background-color: #4A88C7">Request Research</button>
+        </div>
+        <div>
+            <button type="submit" form="editForm" class="primary-btn">Save</button>
+            <button type="button" class="secondary-btn" onclick="closeAllModals()">Close</button>
+        </div>
+    </div>
+
+</div>

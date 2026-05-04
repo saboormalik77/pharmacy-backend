@@ -128,6 +128,7 @@ SECURITY DEFINER
 AS $$
 DECLARE
   v_settings JSONB;
+  v_affected_rows INTEGER;
 BEGIN
   -- Validate timezone if provided
   IF p_timezone IS NOT NULL AND p_timezone NOT IN (
@@ -148,53 +149,9 @@ BEGIN
     );
   END IF;
   
-  -- Insert or update settings for this buying group using UPSERT
-  INSERT INTO admin_settings (
-    buying_group_id, site_name, site_email, timezone, language,
-    email_notifications, document_approval_notif, payment_notif, shipment_notif,
-    warehouse_name, warehouse_street, warehouse_city, warehouse_state, warehouse_zip,
-    warehouse_country, warehouse_phone, warehouse_contact_name, business_name, logo_url,
-    created_at, updated_at
-  )
-  VALUES (
-    p_buying_group_id,
-    COALESCE(p_site_name, 'PharmAdmin'),
-    COALESCE(p_site_email, 'admin@pharmadmin.com'),
-    COALESCE(p_timezone, 'America/New_York'),
-    COALESCE(p_language, 'en'),
-    COALESCE(p_email_notifications, true),
-    COALESCE(p_document_approval_notif, true),
-    COALESCE(p_payment_notif, true),
-    COALESCE(p_shipment_notif, true),
-    p_warehouse_name, p_warehouse_street, p_warehouse_city, p_warehouse_state, p_warehouse_zip,
-    p_warehouse_country, p_warehouse_phone, p_warehouse_contact_name, p_business_name, p_logo_url,
-    NOW(), NOW()
-  )
-  ON CONFLICT (buying_group_id) WHERE buying_group_id IS NOT NULL
-  DO UPDATE SET
-    site_name = COALESCE(p_site_name, admin_settings.site_name),
-    site_email = COALESCE(p_site_email, admin_settings.site_email),
-    timezone = COALESCE(p_timezone, admin_settings.timezone),
-    language = COALESCE(p_language, admin_settings.language),
-    email_notifications = COALESCE(p_email_notifications, admin_settings.email_notifications),
-    document_approval_notif = COALESCE(p_document_approval_notif, admin_settings.document_approval_notif),
-    payment_notif = COALESCE(p_payment_notif, admin_settings.payment_notif),
-    shipment_notif = COALESCE(p_shipment_notif, admin_settings.shipment_notif),
-    warehouse_name = COALESCE(p_warehouse_name, admin_settings.warehouse_name),
-    warehouse_street = COALESCE(p_warehouse_street, admin_settings.warehouse_street),
-    warehouse_city = COALESCE(p_warehouse_city, admin_settings.warehouse_city),
-    warehouse_state = COALESCE(p_warehouse_state, admin_settings.warehouse_state),
-    warehouse_zip = COALESCE(p_warehouse_zip, admin_settings.warehouse_zip),
-    warehouse_country = COALESCE(p_warehouse_country, admin_settings.warehouse_country),
-    warehouse_phone = COALESCE(p_warehouse_phone, admin_settings.warehouse_phone),
-    warehouse_contact_name = COALESCE(p_warehouse_contact_name, admin_settings.warehouse_contact_name),
-    business_name = COALESCE(p_business_name, admin_settings.business_name),
-    logo_url = COALESCE(p_logo_url, admin_settings.logo_url),
-    updated_at = NOW();
-  
-  -- Handle global settings (MainAdmin) separately due to different conflict condition
+  -- Handle MainAdmin (global settings) separately
   IF p_buying_group_id IS NULL THEN
-    -- For global settings, use a different approach since we can't use buying_group_id in ON CONFLICT
+    -- Try to update existing global settings first
     UPDATE admin_settings
     SET
       site_name = COALESCE(p_site_name, site_name),
@@ -218,8 +175,10 @@ BEGIN
       updated_at = NOW()
     WHERE buying_group_id IS NULL;
     
+    GET DIAGNOSTICS v_affected_rows = ROW_COUNT;
+    
     -- If no global settings row exists, create one
-    IF NOT FOUND THEN
+    IF v_affected_rows = 0 THEN
       INSERT INTO admin_settings (
         buying_group_id, site_name, site_email, timezone, language,
         email_notifications, document_approval_notif, payment_notif, shipment_notif,
@@ -242,6 +201,51 @@ BEGIN
         NOW(), NOW()
       );
     END IF;
+    
+  ELSE
+    -- Handle buying group settings with UPSERT
+    INSERT INTO admin_settings (
+      buying_group_id, site_name, site_email, timezone, language,
+      email_notifications, document_approval_notif, payment_notif, shipment_notif,
+      warehouse_name, warehouse_street, warehouse_city, warehouse_state, warehouse_zip,
+      warehouse_country, warehouse_phone, warehouse_contact_name, business_name, logo_url,
+      created_at, updated_at
+    )
+    VALUES (
+      p_buying_group_id,
+      COALESCE(p_site_name, 'PharmAdmin'),
+      COALESCE(p_site_email, 'admin@pharmadmin.com'),
+      COALESCE(p_timezone, 'America/New_York'),
+      COALESCE(p_language, 'en'),
+      COALESCE(p_email_notifications, true),
+      COALESCE(p_document_approval_notif, true),
+      COALESCE(p_payment_notif, true),
+      COALESCE(p_shipment_notif, true),
+      p_warehouse_name, p_warehouse_street, p_warehouse_city, p_warehouse_state, p_warehouse_zip,
+      p_warehouse_country, p_warehouse_phone, p_warehouse_contact_name, p_business_name, p_logo_url,
+      NOW(), NOW()
+    )
+    ON CONFLICT (buying_group_id) 
+    DO UPDATE SET
+      site_name = COALESCE(p_site_name, admin_settings.site_name),
+      site_email = COALESCE(p_site_email, admin_settings.site_email),
+      timezone = COALESCE(p_timezone, admin_settings.timezone),
+      language = COALESCE(p_language, admin_settings.language),
+      email_notifications = COALESCE(p_email_notifications, admin_settings.email_notifications),
+      document_approval_notif = COALESCE(p_document_approval_notif, admin_settings.document_approval_notif),
+      payment_notif = COALESCE(p_payment_notif, admin_settings.payment_notif),
+      shipment_notif = COALESCE(p_shipment_notif, admin_settings.shipment_notif),
+      warehouse_name = COALESCE(p_warehouse_name, admin_settings.warehouse_name),
+      warehouse_street = COALESCE(p_warehouse_street, admin_settings.warehouse_street),
+      warehouse_city = COALESCE(p_warehouse_city, admin_settings.warehouse_city),
+      warehouse_state = COALESCE(p_warehouse_state, admin_settings.warehouse_state),
+      warehouse_zip = COALESCE(p_warehouse_zip, admin_settings.warehouse_zip),
+      warehouse_country = COALESCE(p_warehouse_country, admin_settings.warehouse_country),
+      warehouse_phone = COALESCE(p_warehouse_phone, admin_settings.warehouse_phone),
+      warehouse_contact_name = COALESCE(p_warehouse_contact_name, admin_settings.warehouse_contact_name),
+      business_name = COALESCE(p_business_name, admin_settings.business_name),
+      logo_url = COALESCE(p_logo_url, admin_settings.logo_url),
+      updated_at = NOW();
   END IF;
   
   -- Fetch updated/created settings

@@ -111,7 +111,7 @@ function SetupAccountPageContent() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-xl mb-4">
               <AlertTriangle className="w-8 h-8 text-red-600" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Invalid Invitation</h1>
+            <h1 className="text-lg font-bold text-gray-900 mb-2">Invalid Invitation</h1>
           </div>
           <div className="bg-white rounded-lg shadow-md p-8 text-center">
             <p className="text-gray-600 mb-6">{error}</p>
@@ -132,7 +132,7 @@ function SetupAccountPageContent() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-xl mb-4">
               <CheckCircle className="w-8 h-8 text-green-600" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Account Setup Complete</h1>
+            <h1 className="text-lg font-bold text-gray-900 mb-2">Account Setup Complete</h1>
           </div>
           <div className="bg-white rounded-lg shadow-md p-8 text-center">
             <p className="text-gray-600 mb-6">
@@ -154,7 +154,7 @@ function SetupAccountPageContent() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-xl mb-4 shadow-lg">
             <Shield className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Set Up Your Account</h1>
+          <h1 className="text-lg font-bold text-gray-900 mb-2">Set Up Your Account</h1>
           <p className="text-gray-600">Admin Portal</p>
         </div>
 

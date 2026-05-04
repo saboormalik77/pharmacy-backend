@@ -590,18 +590,18 @@ export default function RATrackingPage() {
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Memo #</th>
-                                    <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Pharmacy</th>
-                                    <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Dest.</th>
-                                    <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Labeler</th>
-                                    <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Ask</th>
-                                    <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Requested</th>
-                                    <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Tickler</th>
-                                    <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">RA #</th>
-                                    <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th className="px-3 py-2 text-right text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                            <thead>
+                                <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Memo #</th>
+                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Pharmacy</th>
+                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Dest.</th>
+                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Labeler</th>
+                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Ask</th>
+                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Requested</th>
+                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Tickler</th>
+                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">RA #</th>
+                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Status</th>
+                                    <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
@@ -611,26 +611,26 @@ export default function RATrackingPage() {
                                     const overdue = isOverdue(memo);
                                     return (
                                         <tr key={memo.id} className={`hover:bg-gray-50 transition-colors ${overdue ? 'bg-red-50' : ''}`}>
-                                            <td className="px-3 py-1.5 text-xs font-semibold text-primary-600 whitespace-nowrap">{memo.memoNumber}</td>
-                                            <td className="px-3 py-1.5 text-xs text-gray-700 max-w-[130px] truncate">{memo.pharmacyName}</td>
-                                            <td className="px-3 py-1.5 text-xs text-gray-600 whitespace-nowrap">{memo.destination || '—'}</td>
-                                            <td className="px-3 py-1.5 text-xs text-gray-600 max-w-[120px] truncate">{memo.labelerName || '—'}</td>
-                                            <td className="px-3 py-1.5 text-xs font-medium whitespace-nowrap">{formatCurrency(memo.totalAskValue)}</td>
-                                            <td className="px-3 py-1.5 text-xs text-gray-500 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-sm font-semibold text-primary-600 whitespace-nowrap">{memo.memoNumber}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-700 max-w-[130px] truncate">{memo.pharmacyName}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">{memo.destination || '—'}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-600 max-w-[120px] truncate">{memo.labelerName || '—'}</td>
+                                            <td className="px-4 py-3 text-sm font-medium whitespace-nowrap">{formatCurrency(memo.totalAskValue)}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
                                                 {memo.raRequestedAt ? formatDate(memo.raRequestedAt) : '—'}
                                             </td>
-                                            <td className="px-3 py-1.5 text-xs whitespace-nowrap">
+                                            <td className="px-4 py-3 text-sm whitespace-nowrap">
                                                 {memo.ticklerDate ? (
                                                     <span className={overdue ? 'text-red-600 font-semibold' : 'text-gray-500'}>
                                                         {formatDate(memo.ticklerDate)}{overdue && ' ⚠'}
                                                     </span>
                                                 ) : '—'}
                                             </td>
-                                            <td className="px-3 py-1.5 text-xs font-medium text-gray-800 whitespace-nowrap">{memo.raNumber || '—'}</td>
-                                            <td className="px-3 py-1.5">
+                                            <td className="px-4 py-3 text-sm font-medium text-gray-800 whitespace-nowrap">{memo.raNumber || '—'}</td>
+                                            <td className="px-4 py-3">
                                                 <Badge variant={sb.variant}><span className="text-[10px]">{sb.label}</span></Badge>
                                             </td>
-                                            <td className="px-3 py-1.5 text-right">
+                                            <td className="px-4 py-3 text-right">
                                                 <div className="flex items-center justify-end gap-1">
                                                     {eff === 'pending' && (
                                                         <button
@@ -738,15 +738,15 @@ export default function RATrackingPage() {
                         ) : (
                             <div className="overflow-x-auto">
                                 <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="px-3 py-2 w-8" />
-                                            <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase">Shipped</th>
-                                            <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase">Destination</th>
-                                            <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase">Tracking</th>
-                                            <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase">Boxes</th>
-                                            <th className="px-3 py-2 text-left text-[10px] font-semibold text-gray-500 uppercase">Memos</th>
-                                            <th className="px-3 py-2 text-right text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
+                                    <thead>
+                                        <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                            <th className="px-4 py-3.5 w-8" />
+                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Shipped</th>
+                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Destination</th>
+                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Tracking</th>
+                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Boxes</th>
+                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Memos</th>
+                                            <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
@@ -756,7 +756,7 @@ export default function RATrackingPage() {
                                             return (
                                                 <React.Fragment key={g.id}>
                                                     <tr className="hover:bg-gray-50">
-                                                        <td className="px-3 py-1.5">
+                                                        <td className="px-4 py-3">
                                                             <button
                                                                 type="button"
                                                                 className="p-1 rounded hover:bg-gray-200 text-gray-600"
@@ -766,14 +766,14 @@ export default function RATrackingPage() {
                                                                 <ChevronRight className={`w-4 h-4 transition-transform ${open ? 'rotate-90' : ''}`} />
                                                             </button>
                                                         </td>
-                                                        <td className="px-3 py-1.5 text-xs text-gray-700 whitespace-nowrap">
+                                                        <td className="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">
                                                             {g.shippedAt ? formatDate(g.shippedAt) : '—'}
                                                         </td>
-                                                        <td className="px-3 py-1.5 text-xs font-medium capitalize">{g.destination || '—'}</td>
-                                                        <td className="px-3 py-1.5 text-xs font-mono text-gray-800">{g.outboundTracking || '—'}</td>
-                                                        <td className="px-3 py-1.5 text-xs text-gray-600">{g.boxCount ?? 1}</td>
-                                                        <td className="px-3 py-1.5 text-xs text-gray-700">{row.memos?.length ?? g.totalMemos ?? 0}</td>
-                                                        <td className="px-3 py-1.5 text-right">
+                                                        <td className="px-4 py-3 text-sm font-medium capitalize">{g.destination || '—'}</td>
+                                                        <td className="px-4 py-3 text-sm font-mono text-gray-800">{g.outboundTracking || '—'}</td>
+                                                        <td className="px-4 py-3 text-sm text-gray-600">{g.boxCount ?? 1}</td>
+                                                        <td className="px-4 py-3 text-sm text-gray-700">{row.memos?.length ?? g.totalMemos ?? 0}</td>
+                                                        <td className="px-4 py-3 text-right">
                                                             <button
                                                                 type="button"
                                                                 onClick={() => printShipmentGroupLabel(g.id)}
@@ -791,25 +791,25 @@ export default function RATrackingPage() {
                                                                 <p className="text-[10px] font-semibold text-gray-500 uppercase mb-2">Debit memos in this shipment</p>
                                                                 <div className="overflow-x-auto border border-gray-200 rounded-lg bg-white">
                                                                     <table className="min-w-full text-xs">
-                                                                        <thead className="bg-gray-50 border-b border-gray-200">
-                                                                            <tr>
-                                                                                <th className="px-2 py-1.5 text-left font-semibold text-gray-500">Memo #</th>
-                                                                                <th className="px-2 py-1.5 text-left font-semibold text-gray-500">Pharmacy</th>
-                                                                                <th className="px-2 py-1.5 text-left font-semibold text-gray-500">RA #</th>
-                                                                                <th className="px-2 py-1.5 text-left font-semibold text-gray-500">Labeler</th>
-                                                                                <th className="px-2 py-1.5 text-right font-semibold text-gray-500">Items</th>
-                                                                                <th className="px-2 py-1.5 text-right font-semibold text-gray-500">Ask</th>
+                                                                        <thead>
+                                                                            <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                                                                <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Memo #</th>
+                                                                                <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Pharmacy</th>
+                                                                                <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">RA #</th>
+                                                                                <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Labeler</th>
+                                                                                <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Items</th>
+                                                                                <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Ask</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody className="divide-y divide-gray-100">
                                                                             {(row.memos || []).map((m: DebitMemo) => (
                                                                                 <tr key={m.id}>
-                                                                                    <td className="px-2 py-1.5 font-medium text-primary-600">{m.memoNumber}</td>
-                                                                                    <td className="px-2 py-1.5 text-gray-700 max-w-[140px] truncate">{m.pharmacyName}</td>
-                                                                                    <td className="px-2 py-1.5 font-mono text-gray-800">{m.raNumber || '—'}</td>
-                                                                                    <td className="px-2 py-1.5 text-gray-600 max-w-[120px] truncate">{m.labelerName || '—'}</td>
-                                                                                    <td className="px-2 py-1.5 text-right">{m.totalItems}</td>
-                                                                                    <td className="px-2 py-1.5 text-right font-medium">{formatCurrency(m.totalAskValue)}</td>
+                                                                                    <td className="px-4 py-3 text-sm font-medium text-primary-600">{m.memoNumber}</td>
+                                                                                    <td className="px-4 py-3 text-sm text-gray-700 max-w-[140px] truncate">{m.pharmacyName}</td>
+                                                                                    <td className="px-4 py-3 text-sm font-mono text-gray-800">{m.raNumber || '—'}</td>
+                                                                                    <td className="px-4 py-3 text-sm text-gray-600 max-w-[120px] truncate">{m.labelerName || '—'}</td>
+                                                                                    <td className="px-4 py-3 text-sm text-right">{m.totalItems}</td>
+                                                                                    <td className="px-4 py-3 text-sm text-right font-medium">{formatCurrency(m.totalAskValue)}</td>
                                                                                 </tr>
                                                                             ))}
                                                                         </tbody>

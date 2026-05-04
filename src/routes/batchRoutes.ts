@@ -16,6 +16,8 @@ import {
   getBatchWorkflowHandler,
   completeBatchWorkflowStepHandler,
   listUsedBatchMonthsHandler,
+  downloadCardinalInvoiceHandler,
+  downloadAllPharmacyReturnsHandler,
 } from '../controllers/batchController';
 
 const router = Router();
@@ -358,5 +360,79 @@ router.get('/:id/workflow', getBatchWorkflowHandler);
  *         description: Step marked complete, returns updated workflow state
  */
 router.post('/:id/workflow/complete', completeBatchWorkflowStepHandler);
+
+// ============================================================
+// Cardinal Invoice & Pharmacy Itemized Return Routes
+// ============================================================
+
+/**
+ * @swagger
+ * /api/admin/batches/{id}/cardinal-invoice:
+ *   get:
+ *     summary: Download Cardinal Invoice as PDF file
+ *     tags: [Batches]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: PDF file with Cardinal Invoice (manufacturer transactions)
+ *         content:
+ *           application/pdf:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       400:
+ *         description: Batch must be closed first
+ *       404:
+ *         description: Batch not found
+ */
+router.get('/:id/cardinal-invoice', downloadCardinalInvoiceHandler);
+
+/**
+ * @swagger
+ * /api/admin/batches/{id}/pharmacy-returns:
+ *   get:
+ *     summary: Get all pharmacy itemized return XLSX files as base64 JSON
+ *     tags: [Batches]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: JSON with base64 encoded XLSX files (Cardinal Invoice format)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     files:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           filename:
+ *                             type: string
+ *                           base64:
+ *                             type: string
+ *       400:
+ *         description: No transactions found in batch
+ *       404:
+ *         description: Batch not found
+ */
+router.get('/:id/pharmacy-returns', downloadAllPharmacyReturnsHandler);
 
 export default router;

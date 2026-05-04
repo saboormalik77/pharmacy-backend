@@ -335,7 +335,7 @@ router.use(authenticate);
  *       401:
  *         description: Unauthorized
  */
-router.post('/upload', inventoryUpload.single('file'), uploadAndAnalyzeHandler);
+router.post('/upload', inventoryUpload.single('file') as any, uploadAndAnalyzeHandler);
 
 /**
  * @swagger

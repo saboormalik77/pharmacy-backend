@@ -1,5 +1,5 @@
 import JsBarcode from 'jsbarcode';
-import { createCanvas } from 'canvas';
+import { createCanvas } from '@napi-rs/canvas';
 import { AppError } from '../utils/appError';
 
 export interface BarcodeOptions {

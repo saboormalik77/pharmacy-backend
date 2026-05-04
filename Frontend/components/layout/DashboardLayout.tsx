@@ -5,17 +5,23 @@ import { Sidebar } from './Sidebar'
 import { TopBar } from './TopBar'
 import { BranchBanner } from './BranchBanner'
 import { CartDrawer } from '@/components/marketplace/CartDrawer'
+import { Chatbot } from '@/components/chatbot/Chatbot'
 import { usePharmacyContextStore } from '@/lib/store/pharmacyContextStore'
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const { isLoaded, fetchContext } = usePharmacyContextStore()
 
   useEffect(() => {
-    if (!isLoaded) {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (mounted && !isLoaded) {
       fetchContext()
     }
-  }, [isLoaded, fetchContext])
+  }, [mounted, isLoaded, fetchContext])
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -45,6 +51,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       </div>
 
       <CartDrawer />
+      <Chatbot />
     </div>
   )
 }

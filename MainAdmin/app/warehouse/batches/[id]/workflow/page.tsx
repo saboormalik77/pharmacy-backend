@@ -10,6 +10,7 @@ import {
 import { Badge } from '@/components/ui/Badge';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
 import { formatDate, formatDateTime } from '@/lib/utils';
+import { cookieUtils } from '@/lib/utils/cookies';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import {
     fetchBatchDetail, clearCurrentBatch, clearError,
@@ -40,7 +41,7 @@ const WORKFLOW_STEPS = [
         key: 'cardinal_generated',
         stateKey: 'cardinalGenerated' as const,
         label: 'Generate Cardinal Invoice',
-        description: 'Download the Cardinal CSV file for this batch.',
+        description: 'Download the Cardinal Invoice PDF for this batch.',
         icon: Download,
         color: 'blue',
     },
@@ -78,7 +79,6 @@ export default function BatchWorkflowPage() {
 
     const {
         currentBatch: batch,
-        batchReturns,
         batchMemos,
         isLoading,
         isActionLoading,
@@ -118,30 +118,86 @@ export default function BatchWorkflowPage() {
     const handleGenerateCardinal = async () => {
         if (!batch) return;
 
-        const rows: string[] = [
-            'License Plate,Pharmacy,Items,Returnable Value,Non-Returnable Value,Status',
-            ...batchReturns.map(r =>
-                [
-                    r.licensePlate || '',
-                    (r.pharmacyName || '').replace(/,/g, ' '),
-                    r.totalItems ?? 0,
-                    r.totalReturnableValue ?? 0,
-                    r.totalNonReturnableValue ?? 0,
-                    r.status || '',
-                ].join(',')
-            ),
-        ];
-        const csv = rows.join('\n');
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `cardinal_${batch.batchName.replace(/\s+/g, '_')}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
+        try {
+            const token = cookieUtils.getAuthToken();
+            if (!token) {
+                addToast('Not signed in. Please log in again.', 'error');
+                return;
+            }
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
-        await handleCompleteStep('cardinal_generated');
-        addToast('Cardinal file downloaded and step saved.', 'success');
+            // 1. Download Cardinal Invoice PDF
+            const pdfResponse = await fetch(`${apiUrl}/admin/batches/${batchId}/cardinal-invoice`, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'X-Tenant-Domain': typeof window !== 'undefined' ? window.location.hostname : '',
+                },
+            });
+
+            if (!pdfResponse.ok) {
+                const errorData = await pdfResponse.json().catch(() => ({ message: 'Failed to download' }));
+                throw new Error(errorData.message || 'Failed to download Cardinal Invoice');
+            }
+
+            const pdfBlob = await pdfResponse.blob();
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            const pdfLink = document.createElement('a');
+            pdfLink.href = pdfUrl;
+
+            const pdfContentDisposition = pdfResponse.headers.get('Content-Disposition');
+            let pdfFilename = `Cardinal_Invoice_${batch.batchName.replace(/\s+/g, '_')}.pdf`;
+            if (pdfContentDisposition) {
+                const filenameMatch = pdfContentDisposition.match(/filename="?([^";\n]+)"?/);
+                if (filenameMatch) pdfFilename = filenameMatch[1];
+            }
+
+            pdfLink.download = pdfFilename;
+            pdfLink.click();
+            URL.revokeObjectURL(pdfUrl);
+
+            // 2. Download Pharmacy Itemized Return XLSX files
+            const xlsxResponse = await fetch(`${apiUrl}/admin/batches/${batchId}/pharmacy-returns`, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'X-Tenant-Domain': typeof window !== 'undefined' ? window.location.hostname : '',
+                },
+            });
+
+            if (!xlsxResponse.ok) {
+                const errorData = await xlsxResponse.json().catch(() => ({ message: 'Failed to download' }));
+                throw new Error(errorData.message || 'Failed to download Pharmacy Returns');
+            }
+
+            const xlsxData = await xlsxResponse.json();
+            const files = xlsxData.data?.files || [];
+            
+            // Download each XLSX file
+            for (const file of files) {
+                const byteCharacters = atob(file.base64);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const fileBlob = new Blob([byteArray], { 
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                });
+                
+                const fileUrl = URL.createObjectURL(fileBlob);
+                const fileLink = document.createElement('a');
+                fileLink.href = fileUrl;
+                fileLink.download = file.filename;
+                fileLink.click();
+                URL.revokeObjectURL(fileUrl);
+            }
+
+            await handleCompleteStep('cardinal_generated');
+            addToast(`Cardinal Invoice (PDF) and ${files.length} Pharmacy Return (XLSX) file(s) downloaded. Step saved.`, 'success');
+        } catch (error: unknown) {
+            addToast(error instanceof Error ? error.message : 'Failed to generate Cardinal Invoice', 'error');
+        }
     };
 
     const handleSendCardinal = async () => {
@@ -287,7 +343,7 @@ export default function BatchWorkflowPage() {
                             <Layers className="w-4 h-4 text-blue-600" />
                             <h1 className="text-base font-bold text-gray-900">Post-Closeout Workflow</h1>
                         </div>
-                        <p className="text-[11px] text-gray-500 mt-0.5">{batch.batchName} · {formatBatchMonth(batch.batchMonth)}</p>
+                        <p className="text-sm text-gray-500 mt-0.5">{batch.batchName} · {formatBatchMonth(batch.batchMonth)}</p>
                     </div>
                 </div>
                 <Badge variant={sb.variant}><span className="text-[10px]">{sb.label}</span></Badge>
@@ -363,7 +419,7 @@ export default function BatchWorkflowPage() {
                                         {done && <span className="text-[10px] font-medium text-green-600 bg-green-100 px-1.5 py-0.5 rounded">Done</span>}
                                         {isLocked && !done && <span className="text-[10px] text-gray-400">Locked</span>}
                                     </div>
-                                    <p className="text-[11px] text-gray-500">{step.description}</p>
+                                    <p className="text-sm text-gray-500">{step.description}</p>
 
                                     {isActive && !done && (
                                         <div className="mt-2.5">
@@ -387,7 +443,7 @@ export default function BatchWorkflowPage() {
                                                         className="flex items-center gap-2 px-3 py-2 border-2 border-dashed border-blue-300 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors"
                                                     >
                                                         <Upload className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
-                                                        <span className="text-[11px] text-blue-600 truncate">
+                                                        <span className="text-sm text-blue-600 truncate">
                                                             {cardinalFile ? cardinalFile.name : 'Click to select file'}
                                                         </span>
                                                         <input
@@ -413,7 +469,7 @@ export default function BatchWorkflowPage() {
                                                 <div className="space-y-2.5">
                                                     {batchMemos.length === 0 ? (
                                                         <div className="space-y-1.5">
-                                                            <p className="text-[11px] text-gray-500">
+                                                            <p className="text-sm text-gray-500">
                                                                 No debit memos created yet. Click below to generate them grouped by pharmacy, destination and labeler.
                                                             </p>
                                                             <button
@@ -427,12 +483,12 @@ export default function BatchWorkflowPage() {
                                                         </div>
                                                     ) : (
                                                         <div className="space-y-2">
-                                                            <p className="text-[11px] text-gray-600">
+                                                            <p className="text-sm text-gray-600">
                                                                 <span className="font-semibold text-orange-600">{batchMemos.length}</span> debit memo{batchMemos.length !== 1 ? 's' : ''} created for this batch:
                                                             </p>
                                                             <div className="max-h-36 overflow-y-auto space-y-1 pr-1">
                                                                 {batchMemos.map(m => (
-                                                                    <div key={m.id} className="flex items-center justify-between bg-white border border-gray-200 rounded px-2.5 py-1.5 text-[11px]">
+                                                                    <div key={m.id} className="flex items-center justify-between bg-white border border-gray-200 rounded px-4 py-3 text-sm">
                                                                         <div className="flex items-center gap-2 min-w-0">
                                                                             <span className="font-semibold text-gray-900">{m.memoNumber}</span>
                                                                             <span className="text-gray-500 truncate">{m.pharmacyName}</span>
@@ -457,7 +513,7 @@ export default function BatchWorkflowPage() {
                                                                     href={`/warehouse/debit-memos?batchId=${batchId}`}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
-                                                                    className="inline-flex items-center gap-1 text-[11px] text-orange-600 hover:underline"
+                                                                    className="inline-flex items-center gap-1 text-sm text-orange-600 hover:underline"
                                                                 >
                                                                     View Details <ExternalLink className="w-3 h-3" />
                                                                 </a>
@@ -490,7 +546,7 @@ export default function BatchWorkflowPage() {
                                                         ).length;
                                                         return (
                                                             <div className="space-y-1.5">
-                                                                <p className="text-[11px] text-gray-600">
+                                                                <p className="text-sm text-gray-600">
                                                                     Send one RA request per reverse distributor ({distributorGroups.length} distributor{distributorGroups.length !== 1 ? 's' : ''}):
                                                                 </p>
                                                                 <div className="max-h-48 overflow-y-auto space-y-1 pr-1">
@@ -503,7 +559,7 @@ export default function BatchWorkflowPage() {
                                                                             m => m.raRequestedAt || m.raStatus === 'requested' || m.raStatus === 'received' || m.raStatus === 'shipped'
                                                                         ).length;
                                                                         return (
-                                                                            <div key={group.destination} className={`flex items-center justify-between rounded px-2.5 py-1.5 text-[11px] border ${allSent ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'}`}>
+                                                                            <div key={group.destination} className={`flex items-center justify-between rounded px-4 py-3 text-sm border ${allSent ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'}`}>
                                                                                 <div className="flex items-center gap-2 min-w-0">
                                                                                     {allSent ? (
                                                                                         <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
@@ -539,7 +595,7 @@ export default function BatchWorkflowPage() {
                                                             </div>
                                                         );
                                                     })() : (
-                                                        <p className="text-[11px] text-gray-500">No debit memos to send RA requests for.</p>
+                                                        <p className="text-sm text-gray-500">No debit memos to send RA requests for.</p>
                                                     )}
                                                     {(() => {
                                                         const anyRaSent = batchMemos.some(
@@ -578,7 +634,7 @@ export default function BatchWorkflowPage() {
                                                                     href="/warehouse/ra-tracking"
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
-                                                                    className="inline-flex items-center gap-1 text-[11px] text-green-700 hover:underline"
+                                                                    className="inline-flex items-center gap-1 text-sm text-green-700 hover:underline"
                                                                 >
                                                                     Open RA Tracking <ExternalLink className="w-3 h-3" />
                                                                 </a>
@@ -603,7 +659,7 @@ export default function BatchWorkflowPage() {
                         <CheckCircle className="w-4 h-4 text-green-500" /> All steps completed
                     </span>
                 ) : (
-                    <span className="text-[11px] text-gray-500">
+                    <span className="text-sm text-gray-500">
                         Step {Math.min(activeStepIndex + 1, WORKFLOW_STEPS.length)} of {WORKFLOW_STEPS.length}
                     </span>
                 )}

@@ -283,11 +283,11 @@ export default function PolicyDetailPage() {
                     <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> Metrics</h2>
                     <div className="grid grid-cols-2 gap-2 mb-3">
                         <div className="bg-green-50 rounded-lg px-3 py-2 text-center">
-                            <p className="text-[10px] text-green-600">Avg Pay %</p>
+                            <p className="text-xs font-medium text-green-600">Avg Pay %</p>
                             <p className="text-lg font-bold text-green-800">{policy.averagePayPercent != null ? `${policy.averagePayPercent}%` : '—'}</p>
                         </div>
                         <div className="bg-blue-50 rounded-lg px-3 py-2 text-center">
-                            <p className="text-[10px] text-blue-600">Avg Days to Pay</p>
+                            <p className="text-xs font-medium text-blue-600">Avg Days to Pay</p>
                             <p className="text-lg font-bold text-blue-800">{policy.averageDaysToPay ?? '—'}</p>
                         </div>
                     </div>
@@ -311,31 +311,31 @@ export default function PolicyDetailPage() {
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead><tr className="bg-gray-50 border-b border-gray-200">
-                                <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Destination</th>
-                                <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Window</th>
-                                <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Win. mode</th>
-                                <th className="text-center px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Partials</th>
-                                <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Discount</th>
-                                <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Description</th>
-                                <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
+                            <thead><tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Destination</th>
+                                <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Window</th>
+                                <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Win. mode</th>
+                                <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Partials</th>
+                                <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Discount</th>
+                                <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Description</th>
+                                <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
                             </tr></thead>
                             <tbody className="divide-y divide-gray-100">
                                 {rps.map(rp => (
                                     <tr key={rp.id} className="hover:bg-gray-50">
-                                        <td className="px-3 py-1.5"><Badge variant={destBadge(rp.destination)}><span className="text-[10px]">{rp.destination}</span></Badge></td>
-                                        <td className="px-3 py-1.5 text-xs text-gray-700 whitespace-nowrap">{rp.monthsBeforeExpiration ?? '?'}mo before – {rp.monthsAfterExpiration ?? '?'}mo after</td>
-                                        <td className="px-3 py-1.5 text-center">
+                                        <td className="px-4 py-3"><Badge variant={destBadge(rp.destination)}><span className="text-[10px]">{rp.destination}</span></Badge></td>
+                                        <td className="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">{rp.monthsBeforeExpiration ?? '?'}mo before – {rp.monthsAfterExpiration ?? '?'}mo after</td>
+                                        <td className="px-4 py-3 text-center">
                                             {rp.returnableWithinPolicyPeriod !== false ? (
                                                 <Badge variant="success"><span className="text-[10px]">Standard</span></Badge>
                                             ) : (
                                                 <Badge variant="warning"><span className="text-[10px]">Inverted</span></Badge>
                                             )}
                                         </td>
-                                        <td className="px-3 py-1.5 text-center">{rp.partialsAccepted ? <Badge variant="success"><span className="text-[10px]">Yes</span></Badge> : <span className="text-xs text-gray-400">No</span>}</td>
-                                        <td className="px-3 py-1.5 text-right text-xs text-gray-700">{rp.discountRate != null ? `${(rp.discountRate * 100).toFixed(0)}%` : '—'}</td>
-                                        <td className="px-3 py-1.5 text-xs text-gray-600 max-w-[160px] truncate" title={rp.policyDescription || ''}>{rp.policyDescription || '—'}</td>
-                                        <td className="px-3 py-1.5 text-right">
+                                        <td className="px-4 py-3 text-center">{rp.partialsAccepted ? <Badge variant="success"><span className="text-[10px]">Yes</span></Badge> : <span className="text-sm text-gray-400">No</span>}</td>
+                                        <td className="px-4 py-3 text-right text-sm text-gray-700">{rp.discountRate != null ? `${(rp.discountRate * 100).toFixed(0)}%` : '—'}</td>
+                                        <td className="px-4 py-3 text-sm text-gray-600 max-w-[160px] truncate" title={rp.policyDescription || ''}>{rp.policyDescription || '—'}</td>
+                                        <td className="px-4 py-3 text-right">
                                             <div className="flex justify-end gap-1">
                                                 <button onClick={() => setEditRPModal(rp)} className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"><Edit className="w-3 h-3" /></button>
                                                 <button onClick={() => setDeleteRPModal(rp)} className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded"><Trash2 className="w-3 h-3" /></button>
@@ -362,19 +362,19 @@ export default function PolicyDetailPage() {
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead><tr className="bg-gray-50 border-b border-gray-200">
-                                <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">NDC</th>
-                                <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Product Name</th>
-                                <th className="text-left px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Reason</th>
-                                <th className="text-right px-3 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Actions</th>
+                            <thead><tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
+                                <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product Name</th>
+                                <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Reason</th>
+                                <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
                             </tr></thead>
                             <tbody className="divide-y divide-gray-100">
                                 {excs.map(e => (
                                     <tr key={e.id} className="hover:bg-gray-50">
-                                        <td className="px-3 py-1.5 text-xs font-mono text-gray-900 whitespace-nowrap">{e.ndc}</td>
-                                        <td className="px-3 py-1.5 text-xs text-gray-700">{e.productName || '—'}</td>
-                                        <td className="px-3 py-1.5 text-xs text-gray-600">{e.reason || '—'}</td>
-                                        <td className="px-3 py-1.5 text-right">
+                                        <td className="px-4 py-3 text-sm font-mono text-gray-900 whitespace-nowrap">{e.ndc}</td>
+                                        <td className="px-4 py-3 text-sm text-gray-700">{e.productName || '—'}</td>
+                                        <td className="px-4 py-3 text-sm text-gray-600">{e.reason || '—'}</td>
+                                        <td className="px-4 py-3 text-right">
                                             <button onClick={() => setDeleteExcModal(e)} className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded"><Trash2 className="w-3 h-3" /></button>
                                         </td>
                                     </tr>

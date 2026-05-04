@@ -78,6 +78,7 @@ export interface ReturnTransaction {
   totalItems: number;
   totalReturnableValue: number;
   totalNonReturnableValue: number;
+  hasCiiItems?: boolean; // For DEA Form 222 availability
   batchId: string | null;
   timeIn: string | null;
   timeOut: string | null;
@@ -314,7 +315,68 @@ export const getManifestData = async (
   });
 
   handleRpcError(data, error, 'Failed to get manifest data');
-  return data.data;
+  
+  const manifestData = data.data;
+  
+  // TEMPORARY FIX: If no returnable/non-returnable items but totalItems > 0,
+  // fetch all items directly from return_transaction_items
+  if (manifestData && manifestData.summary.totalItems > 0 && 
+      manifestData.returnableItems.length === 0 && 
+      manifestData.nonReturnableItems.length === 0) {
+    
+    console.log('🔧 Fetching all items as fallback for manifest');
+    
+    // Fetch all items directly
+    const { data: allItemsData, error: itemsError } = await sb
+      .from('return_transaction_items')
+      .select(`
+        ndc, ndc_10, proprietary_name, generic_name, manufacturer,
+        lot_number, serial_number, expiration_date, quantity,
+        standard_price, estimated_value, destination, dea_schedule,
+        is_partial, partial_percentage, strength, dosage_form,
+        return_status, non_returnable_reason
+      `)
+      .eq('transaction_id', transactionId)
+      .order('proprietary_name');
+    
+    if (itemsError) {
+      console.error('❌ Error fetching all items:', itemsError);
+    } else if (allItemsData && allItemsData.length > 0) {
+      console.log(`✅ Found ${allItemsData.length} items to display`);
+      
+      // Convert to manifest format
+      const formattedItems = allItemsData.map(item => ({
+        ndc: item.ndc,
+        ndc10: item.ndc_10,
+        proprietaryName: item.proprietary_name,
+        genericName: item.generic_name,
+        manufacturer: item.manufacturer,
+        lotNumber: item.lot_number,
+        serialNumber: item.serial_number,
+        expirationDate: item.expiration_date,
+        quantity: item.quantity,
+        standardPrice: item.standard_price,
+        estimatedValue: item.estimated_value,
+        destination: item.destination,
+        deaSchedule: item.dea_schedule,
+        isPartial: item.is_partial,
+        partialPercentage: item.partial_percentage,
+        strength: item.strength,
+        dosageForm: item.dosage_form,
+        returnStatus: item.return_status,
+        nonReturnableReason: item.non_returnable_reason
+      }));
+      
+      // Add all items to manifest data
+      manifestData.allItems = formattedItems;
+      
+      // Also populate returnable/non-returnable based on status
+      manifestData.returnableItems = formattedItems.filter(item => item.returnStatus === 'returnable');
+      manifestData.nonReturnableItems = formattedItems.filter(item => item.returnStatus === 'non_returnable');
+    }
+  }
+  
+  return manifestData;
 };
 
 export const getDeaForm222Data = async (

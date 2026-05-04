@@ -25,6 +25,11 @@ export interface PharmacySettings {
   title?: string | null;
   state_license_number?: string | null;
   license_expiry_date?: string | null;
+  corporate_name?: string | null;
+  mailing_address?: string | null;
+  store_hours?: string | null;
+  dea_file_url?: string | null;
+  license_file_url?: string | null;
   status?: string | null;
   subscription_tier?: string | null;
   subscription_status?: string | null;
@@ -44,6 +49,11 @@ export interface UpdateSettingsData {
   title?: string;
   state_license_number?: string;
   license_expiry_date?: string;
+  corporate_name?: string;
+  mailing_address?: string;
+  store_hours?: string;
+  dea_file_url?: string;
+  license_file_url?: string;
   physical_address?: {
     street?: string;
     city?: string;
@@ -96,6 +106,11 @@ export const getPharmacySettings = async (pharmacyId: string): Promise<PharmacyS
     title: (data as any).title || null,
     state_license_number: (data as any).state_license_number || null,
     license_expiry_date: (data as any).license_expiry_date || null,
+    corporate_name: (data as any).corporate_name || null,
+    mailing_address: (data as any).mailing_address || null,
+    store_hours: (data as any).store_hours || null,
+    dea_file_url: (data as any).dea_file_url || null,
+    license_file_url: (data as any).license_file_url || null,
     status: (data as any).status || null,
     subscription_tier: (data as any).subscription_tier || null,
     subscription_status: (data as any).subscription_status || null,
@@ -116,11 +131,21 @@ export const updatePharmacySettings = async (
     throw new AppError('Supabase admin client not configured', 500);
   }
 
-  // Prepare update object
+  // Define allowed fields for update (exclude id, pharmacy_id, created_at)
+  const allowedFields = [
+    'name', 'email', 'phone', 'contact_phone', 'pharmacy_name', 
+    'npi_number', 'dea_number', 'title', 'state_license_number',
+    'license_expiry_date', 'corporate_name', 'mailing_address', 
+    'store_hours', 'dea_file_url', 'license_file_url',
+    'physical_address', 'billing_address'
+  ];
+
+  // Prepare update object - only include allowed fields
   const updateFields: any = {
     updated_at: new Date().toISOString(),
   };
 
+  // Filter and copy only allowed fields
   if (updateData.name !== undefined) updateFields.name = updateData.name;
   if (updateData.phone !== undefined) updateFields.phone = updateData.phone;
   if (updateData.contact_phone !== undefined) updateFields.contact_phone = updateData.contact_phone;
@@ -130,9 +155,30 @@ export const updatePharmacySettings = async (
   if (updateData.title !== undefined) updateFields.title = updateData.title;
   if (updateData.state_license_number !== undefined) updateFields.state_license_number = updateData.state_license_number;
   if (updateData.license_expiry_date !== undefined) updateFields.license_expiry_date = updateData.license_expiry_date;
+  if (updateData.corporate_name !== undefined) updateFields.corporate_name = updateData.corporate_name;
+  if (updateData.mailing_address !== undefined) updateFields.mailing_address = updateData.mailing_address;
+  if (updateData.store_hours !== undefined) updateFields.store_hours = updateData.store_hours;
+  if (updateData.dea_file_url !== undefined) updateFields.dea_file_url = updateData.dea_file_url;
+  if (updateData.license_file_url !== undefined) updateFields.license_file_url = updateData.license_file_url;
+  // Handle physical_address: merge with existing data instead of replacing
   if (updateData.physical_address !== undefined) {
-    updateFields.physical_address = updateData.physical_address;
+    // First, get the current physical_address from the database
+    const { data: currentData } = await supabaseAdmin
+      .from('pharmacy')
+      .select('physical_address')
+      .eq('id', pharmacyId)
+      .single();
+    
+    // Merge the new fields with existing physical_address data
+    const currentPhysicalAddress = currentData?.physical_address || {};
+    const updatedPhysicalAddress = {
+      ...currentPhysicalAddress,
+      ...updateData.physical_address, // This will only include the fields that were actually provided
+    };
+    
+    updateFields.physical_address = updatedPhysicalAddress;
   }
+  
   if (updateData.billing_address !== undefined) {
     updateFields.billing_address = updateData.billing_address;
   }
@@ -177,6 +223,11 @@ export const updatePharmacySettings = async (
     title: (data as any).title || null,
     state_license_number: (data as any).state_license_number || null,
     license_expiry_date: (data as any).license_expiry_date || null,
+    corporate_name: (data as any).corporate_name || null,
+    mailing_address: (data as any).mailing_address || null,
+    store_hours: (data as any).store_hours || null,
+    dea_file_url: (data as any).dea_file_url || null,
+    license_file_url: (data as any).license_file_url || null,
     status: (data as any).status || null,
     subscription_tier: (data as any).subscription_tier || null,
     subscription_status: (data as any).subscription_status || null,

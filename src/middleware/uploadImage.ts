@@ -1,11 +1,10 @@
 import multer from 'multer';
-import { Request } from 'express';
 
 // Configure multer to use memory storage
 const storage = multer.memoryStorage();
 
 // File filter to only accept image files
-const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   // Accept common image MIME types
   const allowedMimeTypes = [
     'image/jpeg',
@@ -25,7 +24,7 @@ const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilt
 // Configure multer for image uploads
 export const uploadImage = multer({
   storage,
-  fileFilter,
+  fileFilter: fileFilter as any,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB limit for images
   },

@@ -259,7 +259,7 @@ export default function SubAdminsPage() {
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Sub Admins</h1>
+          <h1 className="text-lg font-bold text-gray-900">Sub Admins</h1>
           <p className="text-gray-600 mt-1">Manage sub-administrators and their access permissions</p>
         </div>
         <Button variant="primary" onClick={openCreateModal} className="flex items-center gap-2">
@@ -309,27 +309,27 @@ export default function SubAdminsPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-gradient-to-r from-indigo-500 to-indigo-400 text-white">
                 <tr>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Name</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 hidden md:table-cell">Email</th>
-                  <th className="text-center px-4 py-3 font-medium text-gray-600">Invite</th>
-                  <th className="text-center px-4 py-3 font-medium text-gray-600 hidden sm:table-cell">Permissions</th>
-                  <th className="text-center px-4 py-3 font-medium text-gray-600">Status</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 hidden lg:table-cell">Created</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-600">Actions</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Name</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden md:table-cell">Email</th>
+                  <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Invite</th>
+                  <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">Permissions</th>
+                  <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Status</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">Created</th>
+                  <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {admins.map((admin) => (
-                  <tr key={admin.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 font-medium text-gray-900">{admin.name}</td>
-                    <td className="px-4 py-3 text-gray-600 hidden md:table-cell">{admin.email}</td>
-                    <td className="px-4 py-3 text-center">{inviteStatus(admin)}</td>
-                    <td className="px-4 py-3 text-center hidden sm:table-cell">
+                  <tr key={admin.id} className="odd:bg-white even:bg-gray-50/40 hover:bg-gray-50 transition-colors">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{admin.name}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600 hidden md:table-cell">{admin.email}</td>
+                    <td className="px-4 py-3 text-sm text-center">{inviteStatus(admin)}</td>
+                    <td className="px-4 py-3 text-sm text-center hidden sm:table-cell">
                       <span className="text-xs text-gray-500">{admin.permissions?.length || 0} tabs</span>
                     </td>
-                    <td className="px-4 py-3 text-center">
+                    <td className="px-4 py-3 text-sm text-center">
                       <span className={cn(
                         'px-2 py-0.5 rounded-full text-xs font-medium',
                         admin.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
@@ -337,8 +337,8 @@ export default function SubAdminsPage() {
                         {admin.is_active ? 'Active' : 'Inactive'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-500 hidden lg:table-cell">{formatDate(admin.created_at)}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 text-sm text-gray-500 hidden lg:table-cell">{formatDate(admin.created_at)}</td>
+                    <td className="px-4 py-3 text-sm">
                       <div className="flex items-center justify-end gap-1">
                         <button onClick={() => openViewModal(admin)} className="p-1.5 rounded hover:bg-gray-100 text-gray-500 hover:text-indigo-600" title="View">
                           <Eye className="w-4 h-4" />
