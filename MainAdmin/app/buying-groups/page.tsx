@@ -356,14 +356,16 @@ export default function BuyingGroupsPage() {
   };
 
   const statusBadge = (status: string) => {
+    const normalized = (status || 'active').toLowerCase().trim();
     const styles: Record<string, string> = {
-      active: 'bg-green-100 text-green-700',
-      inactive: 'bg-gray-100 text-gray-700',
-      suspended: 'bg-red-100 text-red-700',
+      active: 'bg-green-100 text-green-700 border border-green-200',
+      inactive: 'bg-gray-100 text-gray-600 border border-gray-200',
+      suspended: 'bg-red-100 text-red-700 border border-red-200',
     };
+    const label = normalized.charAt(0).toUpperCase() + normalized.slice(1);
     return (
-      <span className={cn('px-2 py-0.5 rounded-full text-xs font-medium', styles[status] || styles.inactive)}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
+      <span className={cn('px-2.5 py-0.5 rounded-full text-xs font-semibold', styles[normalized] || styles.active)}>
+        {label}
       </span>
     );
   };
@@ -544,119 +546,153 @@ export default function BuyingGroupsPage() {
 
       {/* Create / Edit Modal */}
       {(modalMode === 'create' || modalMode === 'edit') && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-y-auto py-8">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {modalMode === 'create' ? 'Add Buying Group' : 'Edit Buying Group'}
-              </h3>
-              <button onClick={closeModal} className="p-1 rounded hover:bg-gray-100">
-                <X className="w-5 h-5 text-gray-500" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-y-auto py-6 px-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-xl max-h-[92vh] flex flex-col">
+
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-t-xl px-6 py-4 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                  <Users className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-white">
+                    {modalMode === 'create' ? 'Add Buying Group' : 'Edit Buying Group'}
+                  </h3>
+                  <p className="text-indigo-200 text-xs mt-0.5">
+                    {modalMode === 'create' ? 'Fill in the details to create a new buying group' : 'Update the buying group information'}
+                  </p>
+                </div>
+              </div>
+              <button onClick={closeModal} className="p-1.5 rounded-lg hover:bg-white/20 text-white/80 hover:text-white transition-colors cursor-pointer">
+                <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="px-6 py-4 space-y-4">
+
+            {/* Scrollable Body */}
+            <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
               {formError && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm">{formError}</div>
-              )}
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Group Name *</label>
-                <input
-                  type="text" value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  autoComplete="off"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="Enter buying group name"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
-                  <input
-                    type="email" value={formData.contactEmail}
-                    onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
-                    autoComplete="off"
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholder="contact@example.com"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Contact Phone</label>
-                  <input
-                    type="text" value={formData.contactPhone}
-                    onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
-                    autoComplete="off"
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholder="+1 234 567 8900"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                <input
-                  type="text" value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  autoComplete="off"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="Street address, city, state"
-                />
-              </div>
-
-              {modalMode === 'edit' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  >
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                    <option value="suspended">Suspended</option>
-                  </select>
+                <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 px-3 py-2.5 rounded-lg text-sm">
+                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>{formError}</span>
                 </div>
               )}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                <textarea
-                  value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  rows={2}
-                  autoComplete="off"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
-                  placeholder="Optional notes"
-                />
+              {/* Section: Group Information */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="h-px flex-1 bg-gray-100" />
+                  <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wider px-2 bg-indigo-50 rounded-full py-0.5">Group Information</span>
+                  <div className="h-px flex-1 bg-gray-100" />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Group Name <span className="text-red-500">*</span></label>
+                  <input
+                    type="text" value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    autoComplete="off"
+                    className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
+                    placeholder="e.g. Northeast Pharmacy Alliance"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Contact Email</label>
+                    <input
+                      type="email" value={formData.contactEmail}
+                      onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
+                      autoComplete="off"
+                      className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
+                      placeholder="contact@example.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Contact Phone</label>
+                    <input
+                      type="text" value={formData.contactPhone}
+                      onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
+                      autoComplete="off"
+                      className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
+                      placeholder="+1 (234) 567-8900"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Address</label>
+                  <input
+                    type="text" value={formData.address}
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    autoComplete="off"
+                    className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
+                    placeholder="Street address, city, state"
+                  />
+                </div>
+
+                {modalMode === 'edit' && (
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Status</label>
+                    <select
+                      value={formData.status}
+                      onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                      className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
+                    >
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                      <option value="suspended">Suspended</option>
+                    </select>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Notes</label>
+                  <textarea
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    rows={2}
+                    autoComplete="off"
+                    className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors resize-none"
+                    placeholder="Optional internal notes..."
+                  />
+                </div>
               </div>
 
+              {/* Section: Domains (Edit mode) */}
               {modalMode === 'edit' && editingGroup && (
-                <div className="border-t border-gray-200 pt-4">
-                  <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                    <Globe className="w-4 h-4" />
-                    Domains
-                  </h4>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="h-px flex-1 bg-gray-100" />
+                    <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wider px-2 bg-indigo-50 rounded-full py-0.5 flex items-center gap-1">
+                      <Globe className="w-3 h-3" /> Domains
+                    </span>
+                    <div className="h-px flex-1 bg-gray-100" />
+                  </div>
 
                   {domainError && (
-                    <div className="mb-3 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-xs">
-                      {domainError}
+                    <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-xs">
+                      <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                      <span>{domainError}</span>
                     </div>
                   )}
 
                   {isLoadingDomains ? (
-                    <div className="flex items-center justify-center py-4">
-                      <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                    <div className="flex items-center justify-center py-6">
+                      <Loader2 className="w-5 h-5 animate-spin text-indigo-400" />
+                      <span className="ml-2 text-sm text-gray-500">Loading domains...</span>
                     </div>
                   ) : (
-                    <div className="space-y-2 mb-3">
+                    <div className="space-y-2">
                       {selectedGroupDomains.length === 0 ? (
-                        <p className="text-sm text-gray-500">No domains configured yet.</p>
+                        <div className="text-center py-4 text-sm text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                          No domains configured yet
+                        </div>
                       ) : (
                         selectedGroupDomains.map((d) => (
                           <div
                             key={d.id}
-                            className="p-3 bg-gray-50 rounded-lg text-xs space-y-1 cursor-pointer hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-colors"
+                            className="flex items-start justify-between p-3 bg-indigo-50/60 rounded-lg border border-indigo-100 cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition-colors"
                             onClick={() => setDomainForm({
                               domain: d.domain || '',
                               adminHostname: d.adminHostname || '',
@@ -664,40 +700,33 @@ export default function BuyingGroupsPage() {
                             })}
                             title="Click to edit this domain"
                           >
-                            <div className="flex items-center justify-between">
-                              <p className="text-sm font-medium text-gray-900">{d.domain}</p>
-                              <div className="flex items-center gap-1">
-                                {/* <span className="text-xs text-indigo-500 font-medium">Edit</span> */}
-                                <button
-                                  type="button"
-                                  onClick={(e) => { e.stopPropagation(); handleDeleteDomain(d.id, editingGroup.id); }}
-                                  disabled={domainSavingId === d.id}
-                                  className="p-1 rounded hover:bg-red-100 text-red-600 disabled:opacity-50"
-                                  title="Delete domain"
-                                >
-                                  {domainSavingId === d.id ? (
-                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                  ) : (
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  )}
-                                </button>
-                              </div>
+                            <div className="space-y-0.5 min-w-0">
+                              <p className="text-sm font-semibold text-indigo-800 truncate">{d.domain}</p>
+                              <p className="text-xs text-gray-500"><span className="font-medium text-gray-600">Admin Portal:</span> {d.adminHostname || '—'}</p>
+                              <p className="text-xs text-gray-500"><span className="font-medium text-gray-600">Pharmacy Portal:</span> {d.pharmacyHostname || '—'}</p>
                             </div>
-                            <p className="text-gray-600">
-                              <span className="font-medium">Admin:</span> {d.adminHostname || '-'}
-                            </p>
-                            <p className="text-gray-600">
-                              <span className="font-medium">Pharmacy:</span> {d.pharmacyHostname || '-'}
-                            </p>
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); handleDeleteDomain(d.id, editingGroup.id); }}
+                              disabled={domainSavingId === d.id}
+                              className="ml-3 p-1.5 rounded-lg hover:bg-red-100 text-red-500 hover:text-red-700 disabled:opacity-50 shrink-0 transition-colors cursor-pointer"
+                              title="Delete domain"
+                            >
+                              {domainSavingId === d.id ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <Trash2 className="w-3.5 h-3.5" />
+                              )}
+                            </button>
                           </div>
                         ))
                       )}
                     </div>
                   )}
 
-                  <div className="border border-dashed border-gray-300 rounded-lg p-3 space-y-2 bg-white">
-                    <p className="text-xs font-medium text-gray-700">
-                      {domainForm.domain ? 'Edit domain' : 'Add / update a domain'}
+                  <div className="bg-gray-50 border border-dashed border-gray-300 rounded-lg p-4 space-y-3">
+                    <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                      {domainForm.domain ? '✏️ Editing domain' : '+ Add / update domain'}
                     </p>
                     <input
                       type="text"
@@ -707,14 +736,14 @@ export default function BuyingGroupsPage() {
                         const value = e.target.value;
                         setDomainForm((f) => ({ ...f, adminHostname: value, domain: value }));
                       }}
-                      className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
                     />
                     <input
                       type="text"
                       placeholder="Pharmacy hostname (e.g. pharmacy.abc.com)"
                       value={domainForm.pharmacyHostname}
                       onChange={(e) => setDomainForm((f) => ({ ...f, pharmacyHostname: e.target.value }))}
-                      className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
                     />
                     <Button
                       variant="primary"
@@ -723,116 +752,117 @@ export default function BuyingGroupsPage() {
                       className="w-full flex items-center justify-center gap-2"
                     >
                       {domainSavingId === 'new' ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
                       ) : (
-                        <Plus className="w-4 h-4" />
+                        <><Plus className="w-4 h-4" /> Save Domain</>
                       )}
-                      Save Domain
                     </Button>
                   </div>
                 </div>
               )}
 
+              {/* Section: Admin Credentials + Domains (Create mode) */}
               {modalMode === 'create' && (
                 <>
-                  <div className="border-t border-gray-200 pt-4">
-                    <h4 className="text-sm font-semibold text-gray-900 mb-3">Admin Portal Credentials</h4>
-                    <p className="text-xs text-gray-500 mb-3">
-                      These credentials will be used by this buying group to log in to the Admin Portal.
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <div className="h-px flex-1 bg-gray-100" />
+                      <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wider px-2 bg-indigo-50 rounded-full py-0.5">Buying Group Admin Credentials</span>
+                      <div className="h-px flex-1 bg-gray-100" />
+                    </div>
+                    <p className="text-xs text-gray-600 -mt-1 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+                      These credentials will be used by the buying group admin to log in to the Buying Group Portal.
                     </p>
-                  </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Admin Name</label>
-                    <input
-                      type="text" value={formData.adminName}
-                      onChange={(e) => setFormData({ ...formData, adminName: e.target.value })}
-                      autoComplete="off"
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      placeholder="Admin user display name"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Admin Email</label>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Admin Name</label>
                       <input
-                        type="email" value={formData.adminEmail}
-                        onChange={(e) => setFormData({ ...formData, adminEmail: e.target.value })}
+                        type="text" value={formData.adminName}
+                        onChange={(e) => setFormData({ ...formData, adminName: e.target.value })}
                         autoComplete="off"
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        placeholder="admin@buyinggroup.com"
+                        className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
+                        placeholder="Admin user display name"
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Admin Password</label>
-                      <div className="relative">
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Admin Email</label>
                         <input
-                          type={showPassword ? "text" : "password"}
-                          value={formData.adminPassword}
-                          onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
-                          autoComplete="new-password"
-                          className="w-full px-3 py-2 pr-10 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                          placeholder="Min 8 characters"
+                          type="email" value={formData.adminEmail}
+                          onChange={(e) => setFormData({ ...formData, adminEmail: e.target.value })}
+                          autoComplete="off"
+                          className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
+                          placeholder="admin@buyinggroup.com"
                         />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </button>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Admin Password</label>
+                        <div className="relative">
+                          <input
+                            type={showPassword ? "text" : "password"}
+                            value={formData.adminPassword}
+                            onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
+                            autoComplete="new-password"
+                            className="w-full px-3 py-2.5 pr-10 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
+                            placeholder="Min 8 characters"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none cursor-pointer"
+                          >
+                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="border-t border-gray-200 pt-4">
-                    <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <Globe className="w-4 h-4" />
-                      Domains
-                    </h4>
-                    <p className="text-xs text-gray-500 mb-3">
+                  {/* Domains (Create) */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <div className="h-px flex-1 bg-gray-100" />
+                      <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wider px-2 bg-indigo-50 rounded-full py-0.5 flex items-center gap-1">
+                        <Globe className="w-3 h-3" /> Domains
+                      </span>
+                      <div className="h-px flex-1 bg-gray-100" />
+                    </div>
+                    <p className="text-xs text-gray-500 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">
                       You can add domains now or later from the edit view.
                     </p>
 
                     {localDomainError && (
-                      <div className="mb-3 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-xs">
-                        {localDomainError}
+                      <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-xs">
+                        <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                        <span>{localDomainError}</span>
                       </div>
                     )}
 
                     {localDomains.length > 0 && (
-                      <div className="space-y-2 mb-3">
+                      <div className="space-y-2">
                         {localDomains.map((ld, idx) => (
-                          <div key={idx} className="p-3 bg-gray-50 rounded-lg text-xs space-y-1">
-                            <div className="flex items-center justify-between">
-                              <p className="text-sm font-medium text-gray-900">{ld.domain}</p>
-                              <button
-                                type="button"
-                                onClick={() => handleLocalDomainRemove(idx)}
-                                className="p-1 rounded hover:bg-red-100 text-red-600"
-                                title="Remove domain"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
+                          <div key={idx} className="flex items-start justify-between p-3 bg-indigo-50/60 rounded-lg border border-indigo-100">
+                            <div className="space-y-0.5 min-w-0">
+                              <p className="text-sm font-semibold text-indigo-800 truncate">{ld.domain}</p>
+                              <p className="text-xs text-gray-500"><span className="font-medium text-gray-600">Admin Portal:</span> {ld.adminHostname || '—'}</p>
+                              <p className="text-xs text-gray-500"><span className="font-medium text-gray-600">Pharmacy Portal:</span> {ld.pharmacyHostname || '—'}</p>
                             </div>
-                            <p className="text-gray-600">
-                              <span className="font-medium">Admin:</span> {ld.adminHostname || '-'}
-                            </p>
-                            <p className="text-gray-600">
-                              <span className="font-medium">Pharmacy:</span> {ld.pharmacyHostname || '-'}
-                            </p>
+                            <button
+                              type="button"
+                              onClick={() => handleLocalDomainRemove(idx)}
+                              className="ml-3 p-1.5 rounded-lg hover:bg-red-100 text-red-500 hover:text-red-700 shrink-0 transition-colors cursor-pointer"
+                              title="Remove domain"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
                           </div>
                         ))}
                       </div>
                     )}
 
-                    <div className="border border-dashed border-gray-300 rounded-lg p-3 space-y-2 bg-white">
-                      <p className="text-xs font-medium text-gray-700">Add a domain</p>
+                    <div className="bg-gray-50 border border-dashed border-gray-300 rounded-lg p-4 space-y-3">
+                      <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">+ Add a domain</p>
                       <input
                         type="text"
                         placeholder="Admin hostname (e.g. admin.abc.com)"
@@ -841,14 +871,14 @@ export default function BuyingGroupsPage() {
                           const value = e.target.value;
                           setLocalDomainForm((f) => ({ ...f, adminHostname: value, domain: value }));
                         }}
-                        className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
                       />
                       <input
                         type="text"
                         placeholder="Pharmacy hostname (e.g. pharmacy.abc.com)"
                         value={localDomainForm.pharmacyHostname}
                         onChange={(e) => setLocalDomainForm((f) => ({ ...f, pharmacyHostname: e.target.value }))}
-                        className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
                       />
                       <Button
                         variant="outline"
@@ -864,12 +894,16 @@ export default function BuyingGroupsPage() {
               )}
             </div>
 
-            <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 sticky bottom-0 bg-white">
-              <Button variant="outline" onClick={closeModal} disabled={isSubmitting}>Cancel</Button>
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-xl shrink-0">
+              <Button variant="outline" onClick={closeModal} disabled={isSubmitting}>
+                Cancel
+              </Button>
               <Button
                 variant="primary"
                 onClick={modalMode === 'create' ? handleSubmitCreate : handleSubmitEdit}
                 disabled={isSubmitting}
+                className="min-w-[130px]"
               >
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">
@@ -887,113 +921,137 @@ export default function BuyingGroupsPage() {
 
       {/* View Modal */}
       {modalMode === 'view' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-y-auto py-8">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
-              <h3 className="text-lg font-semibold text-gray-900">Buying Group Details</h3>
-              <button onClick={closeModal} className="p-1 rounded hover:bg-gray-100">
-                <X className="w-5 h-5 text-gray-500" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-y-auto py-6 px-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-xl max-h-[92vh] flex flex-col">
+
+            {/* Header */}
+            <div className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-t-xl px-6 py-4 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                  <Eye className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-white">Buying Group Details</h3>
+                  <p className="text-indigo-200 text-xs mt-0.5">View group information and linked accounts</p>
+                </div>
+              </div>
+              <button onClick={closeModal} className="p-1.5 rounded-lg hover:bg-white/20 text-white/80 hover:text-white transition-colors cursor-pointer">
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {isLoadingDetail ? (
-              <div className="flex items-center justify-center py-16">
-                <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-6 h-6 animate-spin text-indigo-400" />
+                <span className="ml-2 text-sm text-gray-500">Loading...</span>
               </div>
             ) : selectedGroup ? (
-              <div className="px-6 py-4 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs text-gray-500">Name</p>
-                    <p className="text-sm font-medium text-gray-900">{selectedGroup.name}</p>
+              <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
+
+                {/* Group Name + Status Banner */}
+                <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl border border-indigo-100 p-4 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[10px] text-indigo-400 uppercase tracking-widest font-semibold mb-1">Buying Group</p>
+                    <p className="text-lg font-bold text-gray-900 leading-tight truncate">{selectedGroup.name}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">Created {formatDate(selectedGroup.createdAt)}</p>
                   </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Status</p>
-                    <div className="mt-0.5">{statusBadge(selectedGroup.status)}</div>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Contact Email</p>
-                    <p className="text-sm text-gray-900">{selectedGroup.contactEmail || '-'}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Contact Phone</p>
-                    <p className="text-sm text-gray-900">{selectedGroup.contactPhone || '-'}</p>
-                  </div>
-                  <div className="col-span-2">
-                    <p className="text-xs text-gray-500">Address</p>
-                    <p className="text-sm text-gray-900">{selectedGroup.address || '-'}</p>
-                  </div>
-                  {selectedGroup.notes && (
-                    <div className="col-span-2">
-                      <p className="text-xs text-gray-500">Notes</p>
-                      <p className="text-sm text-gray-900">{selectedGroup.notes}</p>
+                  <div className="shrink-0">{statusBadge(selectedGroup.status)}</div>
+                </div>
+
+                {/* Info fields */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {[
+                    { label: 'Contact Email', value: selectedGroup.contactEmail },
+                    { label: 'Contact Phone', value: selectedGroup.contactPhone },
+                    { label: 'Address', value: selectedGroup.address, full: true },
+                    ...(selectedGroup.notes ? [{ label: 'Notes', value: selectedGroup.notes, full: true }] : []),
+                    { label: 'Last Updated', value: formatDate(selectedGroup.updatedAt) },
+                    { label: 'Total Admins', value: String(selectedGroup.adminCount ?? selectedGroupAdmins.length) },
+                  ].map((field) => (
+                    <div
+                      key={field.label}
+                      className={cn(
+                        'bg-white rounded-lg border border-gray-100 px-3.5 py-3',
+                        field.full ? 'sm:col-span-2' : ''
+                      )}
+                    >
+                      <p className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold mb-1">{field.label}</p>
+                      <p className="text-sm font-medium text-gray-800">{field.value || '—'}</p>
                     </div>
-                  )}
-                  <div>
-                    <p className="text-xs text-gray-500">Created</p>
-                    <p className="text-sm text-gray-900">{formatDate(selectedGroup.createdAt)}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Updated</p>
-                    <p className="text-sm text-gray-900">{formatDate(selectedGroup.updatedAt)}</p>
-                  </div>
+                  ))}
                 </div>
 
                 {/* Domains */}
-                <div className="border-t border-gray-200 pt-4">
-                  <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                    <Globe className="w-4 h-4" />
-                    Domains ({selectedGroupDomains.length})
-                  </h4>
-
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="h-px flex-1 bg-gray-100" />
+                    <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wider px-2.5 bg-indigo-50 rounded-full py-1 flex items-center gap-1.5 border border-indigo-100">
+                      <Globe className="w-3 h-3" /> Portal Domains ({selectedGroupDomains.length})
+                    </span>
+                    <div className="h-px flex-1 bg-gray-100" />
+                  </div>
                   {isLoadingDomains ? (
                     <div className="flex items-center justify-center py-4">
-                      <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                      <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
+                    </div>
+                  ) : selectedGroupDomains.length === 0 ? (
+                    <div className="text-center py-5 text-sm text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                      No portal domains configured
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      {selectedGroupDomains.length === 0 ? (
-                        <p className="text-sm text-gray-500">No domains configured.</p>
-                      ) : (
-                        selectedGroupDomains.map((d) => (
-                          <div key={d.id} className="p-3 bg-gray-50 rounded-lg text-xs space-y-1">
-                            <p className="text-sm font-medium text-gray-900">{d.domain}</p>
-                            <p className="text-gray-600">
-                              <span className="font-medium">Admin:</span> {d.adminHostname || '-'}
-                            </p>
-                            <p className="text-gray-600">
-                              <span className="font-medium">Pharmacy:</span> {d.pharmacyHostname || '-'}
-                            </p>
+                      {selectedGroupDomains.map((d) => (
+                        <div key={d.id} className="bg-white rounded-lg border border-indigo-100 overflow-hidden">
+                          <div className="bg-indigo-50 px-3.5 py-2 border-b border-indigo-100">
+                            <p className="text-sm font-semibold text-indigo-800">{d.domain || d.adminHostname}</p>
                           </div>
-                        ))
-                      )}
+                          <div className="grid grid-cols-2 divide-x divide-gray-100">
+                            <div className="px-3.5 py-2.5">
+                              <p className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold mb-0.5">Admin Portal</p>
+                              <p className="text-xs font-medium text-gray-700 truncate">{d.adminHostname || '—'}</p>
+                            </div>
+                            <div className="px-3.5 py-2.5">
+                              <p className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold mb-0.5">Pharmacy Portal</p>
+                              <p className="text-xs font-medium text-gray-700 truncate">{d.pharmacyHostname || '—'}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
 
-                {/* Linked Admin Users */}
-                <div className="border-t border-gray-200 pt-4">
-                  <h4 className="text-sm font-semibold text-gray-900 mb-3">
-                    Admin Portal Users ({selectedGroupAdmins.length})
-                  </h4>
+                {/* Buying Group Admins */}
+                {/* <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="h-px flex-1 bg-gray-100" />
+                    <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wider px-2.5 bg-indigo-50 rounded-full py-1 border border-indigo-100">
+                      Buying Group Admins ({selectedGroupAdmins.length})
+                    </span>
+                    <div className="h-px flex-1 bg-gray-100" />
+                  </div>
                   {selectedGroupAdmins.length === 0 ? (
-                    <p className="text-sm text-gray-500">No admin users linked to this buying group.</p>
+                    <div className="text-center py-5 text-sm text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                      No admins linked to this buying group yet
+                    </div>
                   ) : (
                     <div className="space-y-2">
                       {selectedGroupAdmins.map((admin) => (
-                        <div key={admin.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">{admin.name}</p>
-                            <p className="text-xs text-gray-500">{admin.email}</p>
+                        <div key={admin.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-gray-900 truncate">{admin.name}</p>
+                            <p className="text-xs text-gray-500 truncate">{admin.email}</p>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1.5 shrink-0 ml-2">
                             <span className={cn(
-                              'px-2 py-0.5 rounded-full text-xs font-medium',
-                              admin.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                              'px-2 py-0.5 rounded-full text-xs font-semibold border',
+                              admin.isActive
+                                ? 'bg-green-50 text-green-700 border-green-200'
+                                : 'bg-red-50 text-red-700 border-red-200'
                             )}>
                               {admin.isActive ? 'Active' : 'Inactive'}
                             </span>
-                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
+                            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 capitalize">
                               {admin.role}
                             </span>
                           </div>
@@ -1001,13 +1059,13 @@ export default function BuyingGroupsPage() {
                       ))}
                     </div>
                   )}
-                </div>
+                </div> */}
               </div>
             ) : (
-              <div className="px-6 py-8 text-center text-gray-500">Group not found.</div>
+              <div className="px-6 py-8 text-center text-gray-500">Buying group not found.</div>
             )}
 
-            <div className="flex justify-end px-6 py-4 border-t border-gray-200 sticky bottom-0 bg-white">
+            <div className="flex justify-end px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-xl shrink-0">
               <Button variant="outline" onClick={closeModal}>Close</Button>
             </div>
           </div>

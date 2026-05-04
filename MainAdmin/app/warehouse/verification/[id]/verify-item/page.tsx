@@ -342,14 +342,16 @@ export default function VerifyItemPage() {
 
     if (!verifyingItem) {
         return (
-            <div className="min-h-screen bg-gray-50 p-4">
-                <div className="max-w-2xl mx-auto">
-                    <button onClick={handleBack} className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 mb-4">
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6 px-4">
+                <div className="max-w-4xl mx-auto">
+                    <button onClick={handleBack} className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-indigo-600 mb-4 transition-colors cursor-pointer font-medium">
                         <ArrowLeft className="w-4 h-4" />
                         Back to Verification
                     </button>
-                    <div className="bg-white rounded-lg shadow p-8 text-center">
-                        <p className="text-gray-500">Item not found</p>
+                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
+                        <AlertTriangle className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                        <p className="text-gray-600 font-medium">Item not found</p>
+                        <p className="text-sm text-gray-500 mt-1">The item you're looking for could not be found.</p>
                     </div>
                 </div>
             </div>
@@ -357,49 +359,65 @@ export default function VerifyItemPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 p-4">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6 px-4">
             <ToastContainer toasts={toasts} onClose={removeToast} />
             
-            <div className="max-w-2xl mx-auto">
+            <div className="max-w-4xl mx-auto">
                 {/* Header */}
-                <div className="mb-6">
-                    <button onClick={handleBack} className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 mb-4">
+                <div className="mb-5">
+                    <button onClick={handleBack} className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-indigo-600 mb-4 transition-colors cursor-pointer font-medium">
                         <ArrowLeft className="w-4 h-4" />
                         Back to Verification
                     </button>
                     
-                    <div className="flex items-center gap-3">
-                        <CheckCircle className="w-6 h-6 text-blue-600" />
-                        <div>
-                            <h1 className="text-lg font-bold text-gray-900">Verify Item</h1>
-                            <p className="text-sm text-gray-500 font-medium">
-                                {verifyingItem.proprietaryName || verifyingItem.genericName || 'Unknown Item'}
-                            </p>
+                    <div className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-xl p-3 shadow-lg">
+                        <div className="flex items-start gap-3">
+                            <div className="p-2 bg-white/20 rounded-lg">
+                                <CheckCircle className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <h1 className="text-lg font-bold text-white">Verify Item</h1>
+                                <p className="text-sm text-indigo-100 font-medium mt-1 truncate">
+                                    {verifyingItem.proprietaryName || verifyingItem.genericName || 'Unknown Item'}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Item Info */}
-                <div className="bg-white rounded-lg shadow mb-6">
-                    <div className="p-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                            <div><span className="font-medium text-gray-500">NDC:</span> <span className="font-mono text-gray-900">{verifyingItem.ndc || '—'}</span></div>
-                            <div><span className="font-medium text-gray-500">Lot:</span> <span className="text-gray-900">{verifyingItem.lotNumber || '—'}</span></div>
-                            <div><span className="font-medium text-gray-500">Expires:</span> <span className="text-gray-900">{verifyingItem.expirationDate || '—'}</span></div>
-                            <div>
-                                <span className="font-medium text-gray-500">Pkg Size:</span>{' '}
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm mb-5">
+                    <div className="px-5 py-4 border-b border-gray-100 bg-gray-50">
+                        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Product Information</h2>
+                    </div>
+                    <div className="p-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                            <div className="flex justify-between items-center py-1.5">
+                                <span className="text-gray-500 font-medium">NDC</span>
+                                <span className="font-mono text-gray-900 font-semibold">{verifyingItem.ndc || '—'}</span>
+                            </div>
+                            <div className="flex justify-between items-center py-1.5">
+                                <span className="text-gray-500 font-medium">Lot</span>
+                                <span className="text-gray-900 font-semibold">{verifyingItem.lotNumber || '—'}</span>
+                            </div>
+                            <div className="flex justify-between items-center py-1.5">
+                                <span className="text-gray-500 font-medium">Expires</span>
+                                <span className="text-gray-900 font-semibold">{verifyingItem.expirationDate || '—'}</span>
+                            </div>
+                            <div className="flex justify-between items-center py-1.5">
+                                <span className="text-gray-500 font-medium">Pkg Size</span>
                                 <span className="text-gray-900 font-semibold">
                                     {verifyingItem.fullPackageSize ? `${verifyingItem.fullPackageSize} units` : '—'}
                                 </span>
                             </div>
-                            <div>
-                                <span className="font-medium text-gray-500">Full Qty:</span>{' '}
+                            <div className="flex justify-between items-center py-1.5">
+                                <span className="text-gray-500 font-medium">Full Qty</span>
                                 <span className="text-gray-900 font-semibold">
                                     {verifyingItem.isPartial ? '—' : (verifyingItem.fullPackageQtyReturned ?? verifyingItem.quantity ?? '—')}
                                 </span>
                             </div>
-                            <div>
-                                <span className="font-medium text-gray-500">Partial Qty:</span>{' '}
+                            <div className="flex justify-between items-center py-1.5">
+                                <span className="text-gray-500 font-medium">Partial Qty</span>
                                 <span className="text-gray-900 font-semibold">
                                     {verifyingItem.isPartial ? (
                                         verifyingItem.partialPercentage 
@@ -408,79 +426,101 @@ export default function VerifyItemPage() {
                                     ) : '—'}
                                 </span>
                             </div>
-                            <div><span className="font-medium text-gray-500">Serial No:</span> <span className="font-mono text-gray-900">{verifyingItem.serialNumber || '—'}</span></div>
+                            <div className="flex justify-between items-center py-1.5">
+                                <span className="text-gray-500 font-medium">Serial No</span>
+                                <span className="font-mono text-gray-900 font-semibold">{verifyingItem.serialNumber || '—'}</span>
+                            </div>
                             {verifyingItem.manufacturer && (
-                                <div className="md:col-span-2"><span className="font-medium text-gray-500">Manufacturer:</span> <span className="text-gray-900">{verifyingItem.manufacturer}</span></div>
+                                <div className="flex justify-between items-center py-1.5">
+                                    <span className="text-gray-500 font-medium">Manufacturer</span>
+                                    <span className="text-gray-900 font-semibold">{verifyingItem.manufacturer}</span>
+                                </div>
                             )}
                         </div>
                     </div>
                 </div>
 
                 {/* Verification Form */}
-                <div className="bg-white rounded-lg shadow">
-                    <div className="p-6 space-y-6">
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+                    <div className="px-5 py-4 border-b border-gray-100 bg-gray-50">
+                        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Verification Details</h2>
+                    </div>
+                    <div className="p-5 space-y-5">
                         {/* Verification Status */}
                         <div>
-                            <label className="text-sm font-medium text-gray-900 mb-3 block">Verification Status</label>
+                            <label className="text-sm font-semibold text-gray-700 mb-2.5 block">Verification Status</label>
                             <div className="grid grid-cols-2 gap-3">
                                 {[
-                                    { value: 'correct', label: 'Correct', color: 'green' },
-                                    { value: 'damaged', label: 'Damaged', color: 'red' },
-                                    // { value: 'missing', label: 'Missing', color: 'gray' },
-                                    // { value: 'wrong_item', label: 'Wrong Item', color: 'orange' },
-                                ].map(status => (
-                                    <label key={status.value} className={`flex items-center gap-2 p-3 border-2 rounded-lg cursor-pointer transition-colors ${
-                                        verifyStatus === status.value 
-                                            ? `border-${status.color}-400 bg-${status.color}-50` 
-                                            : 'border-gray-200 hover:border-gray-300'
-                                    }`}>
-                                        <input 
-                                            type="radio" 
-                                            name="verify_status" 
-                                            value={status.value} 
-                                            checked={verifyStatus === status.value} 
-                                            onChange={() => setVerifyStatus(status.value)} 
-                                            className={`text-${status.color}-600`} 
-                                        />
-                                        <span className={`text-sm font-medium ${
-                                            verifyStatus === status.value ? `text-${status.color}-700` : 'text-gray-700'
+                                    { value: 'correct', label: 'Correct', color: 'green', icon: CheckCircle },
+                                    { value: 'damaged', label: 'Damaged', color: 'red', icon: XCircle },
+                                ].map(status => {
+                                    const Icon = status.icon;
+                                    return (
+                                        <label key={status.value} className={`flex items-center gap-3 p-3.5 border-2 rounded-lg cursor-pointer transition-all ${
+                                            verifyStatus === status.value 
+                                                ? status.color === 'green' 
+                                                    ? 'border-green-400 bg-green-50 shadow-sm' 
+                                                    : 'border-red-400 bg-red-50 shadow-sm'
+                                                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                                         }`}>
-                                            {status.label}
-                                        </span>
-                                    </label>
-                                ))}
+                                            <input 
+                                                type="radio" 
+                                                name="verify_status" 
+                                                value={status.value} 
+                                                checked={verifyStatus === status.value} 
+                                                onChange={() => setVerifyStatus(status.value)} 
+                                                className={status.color === 'green' ? 'text-green-600' : 'text-red-600'} 
+                                            />
+                                            <Icon className={`w-4 h-4 ${
+                                                verifyStatus === status.value 
+                                                    ? status.color === 'green' ? 'text-green-600' : 'text-red-600'
+                                                    : 'text-gray-400'
+                                            }`} />
+                                            <span className={`text-sm font-semibold ${
+                                                verifyStatus === status.value 
+                                                    ? status.color === 'green' ? 'text-green-700' : 'text-red-700'
+                                                    : 'text-gray-700'
+                                            }`}>
+                                                {status.label}
+                                            </span>
+                                        </label>
+                                    );
+                                })}
                             </div>
                         </div>
 
                         {/* Serial Number and Lot Number Verification */}
                         {verifyStatus === 'correct' && (
-                            <div className="space-y-4 p-4 rounded-lg border border-blue-200 bg-blue-50">
-                                <h3 className="text-sm font-semibold text-blue-800">Product Verification</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-3 p-4 rounded-lg border border-blue-300 bg-gradient-to-br from-blue-50 to-blue-100/50 shadow-sm">
+                                <div className="flex items-center gap-2">
+                                    <ShieldAlert className="w-4 h-4 text-blue-600" />
+                                    <h3 className="text-sm font-semibold text-blue-800">Product Verification</h3>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                                     <div>
-                                        <label className="text-sm font-medium text-gray-700">Serial Number</label>
+                                        <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1.5 block">Serial Number</label>
                                         <input
                                             type="text"
                                             value={verifySerialNumber}
                                             onChange={e => setVerifySerialNumber(e.target.value)}
                                             placeholder="Scan or enter serial number"
-                                            className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            className="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                                         />
                                         {verifyingItem?.serialNumber && (
-                                            <p className="text-xs text-gray-500 mt-1">Expected: {verifyingItem.serialNumber}</p>
+                                            <p className="text-xs text-blue-600 mt-1.5 font-medium">Expected: {verifyingItem.serialNumber}</p>
                                         )}
                                     </div>
                                     <div>
-                                        <label className="text-sm font-medium text-gray-700">Lot Number</label>
+                                        <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1.5 block">Lot Number</label>
                                         <input
                                             type="text"
                                             value={verifyLotNumber}
                                             onChange={e => setVerifyLotNumber(e.target.value)}
                                             placeholder="Scan or enter lot number"
-                                            className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            className="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                                         />
                                         {verifyingItem?.lotNumber && (
-                                            <p className="text-xs text-gray-500 mt-1">Expected: {verifyingItem.lotNumber}</p>
+                                            <p className="text-xs text-blue-600 mt-1.5 font-medium">Expected: {verifyingItem.lotNumber}</p>
                                         )}
                                     </div>
                                 </div>
@@ -490,13 +530,13 @@ export default function VerifyItemPage() {
                         {/* Quantity verification for damaged/wrong items */}
                         {(verifyStatus === 'damaged' || verifyStatus === 'wrong_item') && (
                             <div>
-                                <label className="text-sm font-medium text-gray-700">Actual Quantity</label>
+                                <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1.5 block">Actual Quantity</label>
                                 <input
                                     type="number"
                                     value={verifyActualQty}
                                     onChange={e => setVerifyActualQty(e.target.value)}
                                     placeholder={`Expected: ${verifyingItem.quantity}`}
-                                    className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                    className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white shadow-sm"
                                 />
                             </div>
                         )}
@@ -504,30 +544,33 @@ export default function VerifyItemPage() {
                         {/* Condition notes for damaged/wrong items */}
                         {(verifyStatus === 'damaged' || verifyStatus === 'wrong_item') && (
                             <div>
-                                <label className="text-sm font-medium text-gray-700">Condition Notes</label>
+                                <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1.5 block">Condition Notes</label>
                                 <textarea 
                                     rows={3} 
                                     placeholder="Describe the issue..." 
                                     value={verifyNotes} 
                                     onChange={e => setVerifyNotes(e.target.value)}
-                                    className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+                                    className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none bg-white shadow-sm"
                                 />
                             </div>
                         )}
 
                         {/* FCR-52: Non-returnable reason for damaged/missing/wrong_item — required */}
                         {(verifyStatus === 'damaged' || verifyStatus === 'missing' || verifyStatus === 'wrong_item') && (
-                            <div className="p-4 rounded-lg border border-red-200 bg-red-50">
-                                <label className="block text-sm font-semibold text-red-800 mb-2">
-                                    Non-Returnable Reason <span className="text-red-600">*</span>
-                                </label>
-                                <p className="text-xs text-red-700 mb-2">
+                            <div className="p-4 rounded-lg border border-red-300 bg-gradient-to-br from-red-50 to-red-100/50 shadow-sm">
+                                <div className="flex items-center gap-2 mb-2.5">
+                                    <AlertTriangle className="w-4 h-4 text-red-600" />
+                                    <label className="text-sm font-semibold text-red-800">
+                                        Non-Returnable Reason <span className="text-red-600">*</span>
+                                    </label>
+                                </div>
+                                <p className="text-xs text-red-700 mb-3 leading-relaxed">
                                     This item will be marked as non-returnable. Please choose the reason from the list below.
                                 </p>
                                 <select
                                     value={nonReturnableReason}
                                     onChange={e => setNonReturnableReason(e.target.value)}
-                                    className="w-full px-3 py-2 text-sm border border-red-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                                    className="w-full px-3 py-2.5 text-sm border border-red-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-red-500 shadow-sm cursor-pointer"
                                 >
                                     <option value="">— Select a reason —</option>
                                     {NON_RETURNABLE_REASONS.map(r => (
@@ -539,10 +582,13 @@ export default function VerifyItemPage() {
 
                         {/* Policy Check & Routing */}
                         {verifyStatus === 'correct' && (
-                            <div className="space-y-4 p-4 rounded-lg border border-primary-200 bg-primary-50">
+                            <div className="space-y-4 p-4 rounded-lg border border-indigo-300 bg-gradient-to-br from-indigo-50 to-indigo-100/50 shadow-sm">
                                 <div className="flex items-center justify-between">
-                                    <h3 className="text-lg font-semibold text-primary-800">Policy Check & Routing</h3>
-                                    {isPolicyChecking && <Loader2 className="w-5 h-5 animate-spin text-primary-600" />}
+                                    <div className="flex items-center gap-2">
+                                        <ShieldAlert className="w-5 h-5 text-indigo-600" />
+                                        <h3 className="text-sm font-semibold text-indigo-800 uppercase tracking-wide">Policy Check & Routing</h3>
+                                    </div>
+                                    {isPolicyChecking && <Loader2 className="w-5 h-5 animate-spin text-indigo-600" />}
                                 </div>
 
                                 {!verifyingItem.ndc || !verifyingItem.expirationDate ? (
@@ -815,24 +861,25 @@ export default function VerifyItemPage() {
                         )}
 
                         {/* Notes */}
-                        <div>
-                            <label className="text-sm font-medium text-gray-700">Notes (optional)</label>
+                        <div className="pt-1">
+                            <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1.5 block">Notes (optional)</label>
                             <textarea 
                                 rows={3} 
                                 value={verifyNotes} 
                                 onChange={e => setVerifyNotes(e.target.value)}
                                 placeholder="Any additional notes about this verification..."
-                                className="mt-2 w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+                                className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none bg-white shadow-sm"
                             />
                         </div>
                     </div>
 
                     {/* Footer */}
-                    <div className="border-t bg-gray-50 px-6 py-4 rounded-b-lg">
-                        <div className="flex justify-end gap-3">
+                    <div className="border-t bg-gray-50 px-5 py-4 rounded-b-xl flex items-center justify-between gap-3">
+                        <p className="text-xs text-gray-500">* indicates required field</p>
+                        <div className="flex gap-2.5">
                             <button 
                                 onClick={handleBack} 
-                                className="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50"
+                                className="px-4 py-2.5 text-sm font-semibold text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
                             >
                                 Cancel
                             </button>
@@ -847,9 +894,10 @@ export default function VerifyItemPage() {
                                     || (verifyStatus === 'correct' && returnStatus === 'returnable' && (!policyResult || policyResult.status === 'tbd') && !manualDestination.trim())
                                 }
                                 onClick={handleVerifyItem}
-                                className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg disabled:opacity-50 flex items-center gap-2 transition"
+                                className="px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors shadow-sm cursor-pointer"
                             >
                                 {isActionLoading && <Loader2 className="w-4 h-4 animate-spin" />} 
+                                <CheckCircle className="w-4 h-4" />
                                 Save & Return
                             </button>
                         </div>

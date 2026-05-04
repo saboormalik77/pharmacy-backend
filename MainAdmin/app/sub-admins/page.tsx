@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Plus, Search, UserCog, Eye, Pencil, Trash2, X, ChevronLeft, ChevronRight,
-  Loader2, Mail, CheckCircle, Clock, XCircle,
+  Loader2, Mail, CheckCircle, Clock, XCircle, Shield, UserCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn, formatDate } from '@/lib/utils';
@@ -406,118 +406,171 @@ export default function SubAdminsPage() {
 
       {/* Create / Edit Modal */}
       {(modalMode === 'create' || modalMode === 'edit') && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-y-auto py-8">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {modalMode === 'create' ? 'Add Sub Admin' : 'Edit Sub Admin'}
-              </h3>
-              <button onClick={closeModal} className="p-1 rounded hover:bg-gray-100" disabled={isSaving}>
-                <X className="w-5 h-5 text-gray-500" />
-              </button>
-            </div>
-            <div className="px-6 py-4 space-y-4">
-              {formError && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm">{formError}</div>
-              )}
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
-                <input
-                  type="text" value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="Sub admin name"
-                  disabled={isSaving}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                <input
-                  type="email" value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="subadmin@example.com"
-                  disabled={modalMode === 'edit' || isSaving}
-                />
-                {modalMode === 'create' && (
-                  <p className="text-xs text-gray-500 mt-1">An invitation email will be sent to this address</p>
-                )}
-              </div>
-
-              {modalMode === 'edit' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                  <select
-                    value={formData.isActive ? 'active' : 'inactive'}
-                    onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'active' })}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    disabled={isSaving}
-                  >
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                  </select>
-                </div>
-              )}
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-medium text-gray-700">Tab Permissions *</label>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={selectAllPermissions}
-                      className="text-xs text-indigo-600 hover:text-indigo-800 disabled:opacity-50"
-                      disabled={isSaving}
-                    >
-                      Select All
-                    </button>
-                    <span className="text-xs text-gray-300">|</span>
-                    <button
-                      type="button"
-                      onClick={clearAllPermissions}
-                      className="text-xs text-gray-500 hover:text-gray-700 disabled:opacity-50"
-                      disabled={isSaving}
-                    >
-                      Clear All
-                    </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-auto py-8 px-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full my-auto">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-t-xl px-5 py-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-white/20 rounded-lg">
+                    <UserCog className="w-4 h-4 text-white" />
                   </div>
+                  <h3 className="text-sm font-bold text-white">
+                    {modalMode === 'create' ? 'Add Sub Admin' : 'Edit Sub Admin'}
+                  </h3>
                 </div>
-                <p className="text-xs text-gray-500 mb-3">Select which tabs this sub admin can access</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {permissionsList.map((perm) => (
-                    <label
-                      key={perm}
-                      className={cn(
-                        'flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer transition-colors',
-                        formData.permissions.includes(perm)
-                          ? 'border-indigo-300 bg-indigo-50'
-                          : 'border-gray-200 hover:border-gray-300',
-                        isSaving && 'opacity-50 cursor-not-allowed'
-                      )}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={formData.permissions.includes(perm)}
-                        onChange={() => togglePermission(perm)}
-                        className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                        disabled={isSaving}
-                      />
-                      <span className="text-sm text-gray-700">
-                        {PERMISSION_LABELS[perm] || perm.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-                <p className="text-xs text-gray-500 mt-2">
-                  {formData.permissions.length} of {permissionsList.length} selected
-                </p>
+                <button 
+                  onClick={closeModal} 
+                  className="text-white/80 hover:text-white transition-colors cursor-pointer" 
+                  disabled={isSaving}
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 sticky bottom-0 bg-white">
-              <Button variant="outline" onClick={closeModal} disabled={isSaving}>Cancel</Button>
+            {/* Content */}
+            <div className="px-5 py-4 max-h-[calc(90vh-140px)] overflow-y-auto">
+              {formError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm mb-4">
+                  {formError}
+                </div>
+              )}
+
+              <div className="space-y-4">
+                {/* Basic Information */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <div className="w-1 h-4 bg-indigo-500 rounded-full"></div>
+                    <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wide">Basic Information</h4>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-semibold text-gray-600 uppercase tracking-wide mb-1.5">
+                      Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text" 
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      placeholder="Enter full name"
+                      disabled={isSaving}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-semibold text-gray-600 uppercase tracking-wide mb-1.5">
+                      Email <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email" 
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+                      placeholder="subadmin@example.com"
+                      disabled={modalMode === 'edit' || isSaving}
+                    />
+                    {modalMode === 'create' && (
+                      <div className="mt-1.5 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700 flex items-start gap-1.5">
+                        <Mail className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                        <span>An invitation email will be sent to this address</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {modalMode === 'edit' && (
+                    <div>
+                      <label className="block text-[10px] font-semibold text-gray-600 uppercase tracking-wide mb-1.5">
+                        Account Status
+                      </label>
+                      <select
+                        value={formData.isActive ? 'active' : 'inactive'}
+                        onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'active' })}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer"
+                        disabled={isSaving}
+                      >
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                {/* Permissions Section */}
+                <div className="pt-3 border-t border-gray-200">
+                  <div className="flex items-center gap-1.5 mb-3">
+                    <div className="w-1 h-4 bg-purple-500 rounded-full"></div>
+                    <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wide">Access Permissions</h4>
+                  </div>
+
+                  <div className="flex items-center justify-between mb-3 p-2 bg-purple-50 border border-purple-200 rounded-lg">
+                    <span className="text-xs text-purple-700 font-medium">
+                      {formData.permissions.length} of {permissionsList.length} tabs selected
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={selectAllPermissions}
+                        className="text-xs font-medium text-purple-600 hover:text-purple-800 disabled:opacity-50 cursor-pointer"
+                        disabled={isSaving}
+                      >
+                        Select All
+                      </button>
+                      <span className="text-xs text-purple-300">|</span>
+                      <button
+                        type="button"
+                        onClick={clearAllPermissions}
+                        className="text-xs font-medium text-gray-500 hover:text-gray-700 disabled:opacity-50 cursor-pointer"
+                        disabled={isSaving}
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-gray-500 mb-3">Select which tabs this sub admin can access in the system</p>
+                  
+                  <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto p-1">
+                    {permissionsList.map((perm) => (
+                      <label
+                        key={perm}
+                        className={cn(
+                          'flex items-center gap-2 p-2.5 rounded-lg border transition-all',
+                          formData.permissions.includes(perm)
+                            ? 'border-indigo-300 bg-indigo-50 shadow-sm'
+                            : 'border-gray-200 hover:border-indigo-200 hover:bg-gray-50',
+                          isSaving ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                        )}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={formData.permissions.includes(perm)}
+                          onChange={() => togglePermission(perm)}
+                          className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                          disabled={isSaving}
+                        />
+                        <span className="text-sm text-gray-700 font-medium">
+                          {PERMISSION_LABELS[perm] || perm.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+
+                  {formData.permissions.length === 0 && (
+                    <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-700">
+                      Please select at least one permission
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex justify-end gap-2 px-5 py-3 border-t bg-gray-50 rounded-b-xl">
+              <Button variant="outline" onClick={closeModal} disabled={isSaving}>
+                Cancel
+              </Button>
               <Button
                 variant="primary"
                 onClick={modalMode === 'create' ? handleSubmitCreate : handleSubmitEdit}
@@ -529,7 +582,16 @@ export default function SubAdminsPage() {
                     {modalMode === 'create' ? 'Creating...' : 'Saving...'}
                   </span>
                 ) : (
-                  modalMode === 'create' ? 'Create & Send Invite' : 'Save Changes'
+                  <>
+                    {modalMode === 'create' ? (
+                      <>
+                        <Mail className="w-3.5 h-3.5 mr-1.5" />
+                        Create & Send Invite
+                      </>
+                    ) : (
+                      'Save Changes'
+                    )}
+                  </>
                 )}
               </Button>
             </div>
@@ -539,88 +601,163 @@ export default function SubAdminsPage() {
 
       {/* View Modal */}
       {modalMode === 'view' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-y-auto py-8">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
-              <h3 className="text-lg font-semibold text-gray-900">Sub Admin Details</h3>
-              <button onClick={closeModal} className="p-1 rounded hover:bg-gray-100">
-                <X className="w-5 h-5 text-gray-500" />
-              </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-auto py-8 px-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full my-auto">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-t-xl px-5 py-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-white/20 rounded-lg">
+                    <UserCheck className="w-4 h-4 text-white" />
+                  </div>
+                  <h3 className="text-sm font-bold text-white">Sub Admin Details</h3>
+                </div>
+                <button 
+                  onClick={closeModal} 
+                  className="text-white/80 hover:text-white transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
+            {/* Content */}
             {isLoadingDetail ? (
-              <div className="flex items-center justify-center py-16">
-                <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+              <div className="flex flex-col items-center justify-center py-16">
+                <Loader2 className="w-6 h-6 animate-spin text-indigo-500 mb-2" />
+                <span className="text-sm text-gray-500">Loading details...</span>
               </div>
             ) : selectedAdmin ? (
-              <div className="px-6 py-4 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs text-gray-500">Name</p>
-                    <p className="text-sm font-medium text-gray-900">{selectedAdmin.name}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Role</p>
-                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
-                      {selectedAdmin.role === 'main_admin' ? 'Main Admin' : 'Sub Admin'}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Email</p>
-                    <p className="text-sm text-gray-900">{selectedAdmin.email}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Status</p>
+              <div className="px-5 py-4 space-y-4">
+                {/* Primary Info Banner */}
+                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg p-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <p className="text-[10px] font-semibold text-indigo-700 uppercase tracking-wide mb-0.5">Administrator</p>
+                      <p className="text-base font-bold text-indigo-900 mb-1">{selectedAdmin.name}</p>
+                      <div className="flex items-center gap-2 text-xs text-indigo-600">
+                        <Mail className="w-3 h-3" />
+                        <span>{selectedAdmin.email}</span>
+                      </div>
+                    </div>
                     <span className={cn(
-                      'px-2 py-0.5 rounded-full text-xs font-medium',
-                      selectedAdmin.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                      'px-2 py-1 rounded-lg text-xs font-bold border',
+                      selectedAdmin.is_active 
+                        ? 'bg-green-100 text-green-700 border-green-300' 
+                        : 'bg-red-100 text-red-700 border-red-300'
                     )}>
                       {selectedAdmin.is_active ? 'Active' : 'Inactive'}
                     </span>
                   </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Invite Status</p>
-                    <p className="text-sm text-gray-900">
-                      {selectedAdmin.invite_accepted_at
-                        ? `Accepted on ${formatDate(selectedAdmin.invite_accepted_at)}`
-                        : 'Pending'}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Last Login</p>
-                    <p className="text-sm text-gray-900">
-                      {selectedAdmin.last_login_at ? formatDate(selectedAdmin.last_login_at) : 'Never'}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Created</p>
-                    <p className="text-sm text-gray-900">{formatDate(selectedAdmin.created_at)}</p>
+                </div>
+
+                {/* Account Information */}
+                <div className="bg-white border border-gray-200 rounded-lg p-3">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                    {/* Role */}
+                    <div>
+                      <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide block mb-1">Role</span>
+                      <span className="px-2 py-0.5 rounded-lg text-xs font-bold bg-indigo-100 text-indigo-700 inline-block">
+                        {selectedAdmin.role === 'main_admin' ? 'Main Admin' : 'Sub Admin'}
+                      </span>
+                    </div>
+
+                    {/* Invite Status */}
+                    <div>
+                      <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide block mb-1">Invite Status</span>
+                      <div className="flex items-center gap-1.5">
+                        {selectedAdmin.invite_accepted_at ? (
+                          <>
+                            <CheckCircle className="w-3 h-3 text-green-600" />
+                            <span className="text-xs text-gray-900">Accepted</span>
+                          </>
+                        ) : (
+                          <>
+                            <Clock className="w-3 h-3 text-yellow-600" />
+                            <span className="text-xs text-gray-900">Pending</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Accepted On - only if accepted */}
+                    {selectedAdmin.invite_accepted_at && (
+                      <div>
+                        <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide block mb-1">Accepted On</span>
+                        <span className="text-xs text-gray-900">{formatDate(selectedAdmin.invite_accepted_at)}</span>
+                      </div>
+                    )}
+
+                    {/* Last Login */}
+                    <div>
+                      <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide block mb-1">Last Login</span>
+                      <span className="text-xs text-gray-900">
+                        {selectedAdmin.last_login_at ? formatDate(selectedAdmin.last_login_at) : 'Never'}
+                      </span>
+                    </div>
+
+                    {/* Created */}
+                    <div>
+                      <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide block mb-1">Created</span>
+                      <span className="text-xs text-gray-900">{formatDate(selectedAdmin.created_at)}</span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="border-t border-gray-200 pt-4">
-                  <h4 className="text-sm font-semibold text-gray-900 mb-3">
-                    Assigned Permissions ({Array.isArray(selectedAdmin.permissions) ? selectedAdmin.permissions.length : 0})
-                  </h4>
+                {/* Permissions Section */}
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-3">
+                  <div className="flex items-center gap-1.5 mb-3">
+                    <Shield className="w-3.5 h-3.5 text-purple-600" />
+                    <h4 className="text-xs font-bold text-purple-900 uppercase tracking-wide">
+                      Access Permissions ({Array.isArray(selectedAdmin.permissions) ? selectedAdmin.permissions.length : 0})
+                    </h4>
+                  </div>
+                  
                   {(!selectedAdmin.permissions || !Array.isArray(selectedAdmin.permissions) || selectedAdmin.permissions.length === 0) ? (
-                    <p className="text-sm text-gray-500">No permissions assigned</p>
+                    <div className="text-center py-4">
+                      <p className="text-sm text-purple-600">No permissions assigned</p>
+                    </div>
                   ) : (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                       {selectedAdmin.permissions.map((perm) => (
-                        <span key={perm} className="px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700">
-                          {PERMISSION_LABELS[perm] || perm.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
-                        </span>
+                        <div key={perm} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white border border-purple-200">
+                          <CheckCircle className="w-3 h-3 text-purple-600 flex-shrink-0" />
+                          <span className="text-xs font-medium text-purple-900 truncate">
+                            {PERMISSION_LABELS[perm] || perm.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                          </span>
+                        </div>
                       ))}
                     </div>
                   )}
                 </div>
               </div>
             ) : (
-              <div className="px-6 py-8 text-center text-gray-500">Sub admin not found.</div>
+              <div className="px-6 py-12 text-center">
+                <XCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <p className="text-sm text-gray-500">Sub admin not found</p>
+              </div>
             )}
 
-            <div className="flex justify-end px-6 py-4 border-t border-gray-200 sticky bottom-0 bg-white">
-              <Button variant="outline" onClick={closeModal}>Close</Button>
+            {/* Footer */}
+            <div className="flex justify-between gap-2 px-5 py-3 border-t bg-gray-50 rounded-b-xl">
+              <div>
+                {selectedAdmin && !selectedAdmin.invite_accepted_at && (
+                  <Button 
+                    variant="outline"
+                    onClick={() => {
+                      handleResendInvite(selectedAdmin.id);
+                      closeModal();
+                    }}
+                    className="text-xs"
+                  >
+                    <Mail className="w-3.5 h-3.5 mr-1.5" />
+                    Resend Invite
+                  </Button>
+                )}
+              </div>
+              <Button variant="outline" onClick={closeModal}>
+                Close
+              </Button>
             </div>
           </div>
         </div>

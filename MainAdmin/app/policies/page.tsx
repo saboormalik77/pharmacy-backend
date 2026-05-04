@@ -364,10 +364,22 @@ export default function PoliciesPage() {
             {/* ── Add Policy Modal ─────────────────────────── */}
             {addModal && (
                 <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setAddModal(false)}>
-                    <div className="bg-white rounded-lg max-w-3xl w-full shadow-xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-gray-50 flex-shrink-0">
-                            <h2 className="text-sm font-semibold text-gray-900">Master Labeler Information</h2>
-                            <button onClick={() => setAddModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                    <div className="bg-white rounded-xl max-w-3xl w-full shadow-2xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                        <div className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-t-xl px-5 py-3 flex-shrink-0">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <div className="p-1.5 bg-white/20 rounded-lg">
+                                        <Shield className="w-4 h-4 text-white" />
+                                    </div>
+                                    <h2 className="text-sm font-bold text-white">Master Labeler Information</h2>
+                                </div>
+                                <button 
+                                    onClick={() => setAddModal(false)} 
+                                    className="text-white/80 hover:text-white transition-colors cursor-pointer"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
                         </div>
                         <div className="px-5 py-4 overflow-y-auto flex-1 space-y-4">
 
