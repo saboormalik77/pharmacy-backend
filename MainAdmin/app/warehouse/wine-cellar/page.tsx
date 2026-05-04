@@ -2,9 +2,10 @@
 
 import { PermissionGate } from '@/components/auth/PermissionGate';
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import {
     Archive, Search, Loader2, X, Edit, CheckCircle, RefreshCw,
-    Calendar, MapPin, Package, BarChart3, Clock,
+    Calendar, MapPin, Package, BarChart3, Clock, ChevronLeft,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -155,6 +156,9 @@ export default function WineCellarPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
+                    <Link href="/warehouse" className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-primary-600 mb-1.5 transition-colors">
+                        <ChevronLeft className="w-3 h-3" /> Back to Warehouse
+                    </Link>
                     <h1 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                         <Archive className="w-6 h-6 text-purple-600" /> Wine Cellar
                     </h1>

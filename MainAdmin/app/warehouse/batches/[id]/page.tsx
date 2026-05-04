@@ -411,17 +411,19 @@ export default function BatchDetailPage() {
                                                 <td className="px-4 py-3 text-sm font-medium">{formatCurrency(rt.totalReturnableValue || 0)}</td>
                                                 <td className="px-4 py-3 text-sm text-gray-500">{rt.fedexTracking || '—'}</td>
                                                 <td className="px-4 py-3 text-center">
-                                                    <button
-                                                        onClick={(e) => handleDownloadSummary(rt.id, e)}
-                                                        disabled={downloadingReturnId === rt.id}
-                                                        className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                                                    >
-                                                        {downloadingReturnId === rt.id ? (
-                                                            <><Loader2 className="w-3 h-3 animate-spin" /> Downloading...</>
-                                                        ) : (
-                                                            <><Download className="w-3 h-3" /> DM Summary</>
-                                                        )}
-                                                    </button>
+                                                    {(batch.status === 'closed' || batch.status === 'submitted') && (
+                                                        <button
+                                                            onClick={(e) => handleDownloadSummary(rt.id, e)}
+                                                            disabled={downloadingReturnId === rt.id}
+                                                            className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        >
+                                                            {downloadingReturnId === rt.id ? (
+                                                                <><Loader2 className="w-3 h-3 animate-spin" /> Downloading...</>
+                                                            ) : (
+                                                                <><Download className="w-3 h-3" /> DM Summary</>
+                                                            )}
+                                                        </button>
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))}

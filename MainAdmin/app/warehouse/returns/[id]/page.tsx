@@ -1303,19 +1303,19 @@ export default function ReturnDetailPage() {
                         <table className="w-full table-auto">
                             <thead>
                                 <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Name</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Manufacturer</th>
-                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Pkg Size</th>
-                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Qty Returned</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Serial#</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-white w-28">NDC</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-white">Name</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-white">Manufacturer</th>
+                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-white w-16">Pkg Size</th>
+                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-white w-20">Qty Returned</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-white w-28">Serial#</th>
                                     {/* <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Price</th>
                                     <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Est. Value</th> */}
                                     {/* <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Est. Store Value</th> */}
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Expires</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Status</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Destination</th>
-                                    <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Expires</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Status</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Destination</th>
+                                    <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
@@ -1323,39 +1323,41 @@ export default function ReturnDetailPage() {
                                     const sBadge = getItemStatusBadge(item.returnStatus);
                                     return (
                                         <tr key={item.id} className="hover:bg-gray-50">
-                                            <td className="px-4 py-3 text-sm font-mono text-gray-900">{item.ndc || '—'}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-900 max-w-[130px] truncate" title={item.proprietaryName || ''}>
+                                            <td className="px-4 py-3 text-xs font-mono text-gray-900 w-28 whitespace-nowrap">{item.ndc || '—'}</td>
+                                            <td className="px-4 py-3 text-xs text-gray-900 max-w-[130px] truncate" title={item.proprietaryName || ''}>
                                                 {item.proprietaryName || item.genericName || '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-gray-600 max-w-[110px] truncate" title={item.manufacturer || ''}>
+                                            <td className="px-4 py-3 text-xs text-gray-600 max-w-[110px] truncate" title={item.manufacturer || ''}>
                                                 {item.manufacturer || '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-center text-gray-900">
+                                            <td className="px-4 py-3 text-xs text-center text-gray-900 w-16 whitespace-nowrap">
                                                 {item.fullPackageSize || '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-center text-gray-900">
+                                            <td className="px-4 py-3 text-xs text-center text-gray-900 w-20 whitespace-nowrap">
                                                 {(() => {
                                                     const qtyReturned = item.fullPackageQtyReturned ?? item.quantity;
                                                     const displayQty = (item.fullPackageQtyReturned && item.fullPackageSize && item.fullPackageQtyReturned === item.fullPackageSize) ? 1 : qtyReturned;
                                                     return <>{displayQty}{item.isPartial && <span className="text-yellow-600 ml-0.5">P</span>}</>;
                                                 })()}
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-gray-600 font-mono whitespace-nowrap">
-                                                {item.serialNumber || '—'}
+                                            <td className="px-4 py-3 text-xs text-gray-600 font-mono w-28 max-w-[7rem]">
+                                                <span className="block truncate" title={item.serialNumber || ''}>
+                                                    {item.serialNumber || '—'}
+                                                </span>
                                             </td>
-                                            {/* <td className="px-4 py-3 text-sm text-right text-gray-900">
+                                            {/* <td className="px-4 py-3 text-xs text-right text-gray-900">
                                                 {item.standardPrice != null ? formatCurrency(item.standardPrice) : '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-right font-medium text-gray-900">
+                                            <td className="px-4 py-3 text-xs text-right font-medium text-gray-900">
                                                 {item.estimatedValue != null ? formatCurrency(item.estimatedValue) : '—'}
                                             </td> */}
-                                            {/* <td className="px-4 py-3 text-sm text-right font-medium text-gray-900">
+                                            {/* <td className="px-4 py-3 text-xs text-right font-medium text-gray-900">
                                                 {item.estimatedStoreValue != null ? formatCurrency(item.estimatedStoreValue) : '—'}
                                             </td> */}
-                                            <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-xs text-gray-600 whitespace-nowrap">
                                                 {item.expirationDate ? formatDate(item.expirationDate) : '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-sm">
+                                            <td className="px-4 py-3 text-xs whitespace-nowrap">
                                                 <div className="flex items-center gap-1">
                                                     <Badge variant={sBadge.variant}><span className="text-[10px]">{sBadge.label}</span></Badge>
                                                     {item.wineCellarId && (
@@ -1363,7 +1365,7 @@ export default function ReturnDetailPage() {
                                                     )}
                                                 </div>
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-gray-600">
+                                            <td className="px-4 py-3 text-xs text-gray-600 whitespace-nowrap">
                                                 {item.returnStatus === 'returnable' ? (
                                                     item.destination ? (
                                                         <span className="capitalize font-medium text-gray-900">{item.destination}</span>
@@ -1372,7 +1374,7 @@ export default function ReturnDetailPage() {
                                                     )
                                                 ) : '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-sm">
+                                            <td className="px-4 py-3 text-xs whitespace-nowrap">
                                                 <div className="flex items-center justify-end gap-0.5">
                                                     {canAddDeleteItems && item.nonReturnableReason === 'date' && !item.wineCellarId && (
                                                         <button onClick={() => handleMoveToWineCellar(item)} className="p-1 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded" title="Move to Wine Cellar">

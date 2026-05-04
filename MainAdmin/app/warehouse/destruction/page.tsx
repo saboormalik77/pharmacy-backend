@@ -83,10 +83,10 @@ export default function DestructionPage() {
     load();
   }, [load]);
 
-  const openEdit = (r: DestructionRecord) => {
+  const openEdit = (r: DestructionRecord, presetStatus?: Status) => {
     setSelected(r);
     setForm({
-      status: r.status,
+      status: presetStatus || r.status,
       destructionCompany: r.destructionCompany || '',
       scheduledDate: r.scheduledDate || '',
       federalFormNumber: r.federalFormNumber || '',
@@ -139,17 +139,10 @@ export default function DestructionPage() {
   };
 
   const quickMove = async (r: DestructionRecord, next: Status) => {
-    // Validate required fields for status transitions
-    const missingFields: string[] = [];
-    
-    if (next === 'scheduled') {
-      if (!r.destructionCompany) missingFields.push('Company');
-      if (!r.scheduledDate) missingFields.push('Scheduled Date');
-    }
-    
-    if (missingFields.length > 0) {
-      toast(`Please fill required fields first: ${missingFields.join(', ')}`, 'error');
-      openEdit(r); // Open edit modal to fill missing fields
+    // For transitions to 'scheduled' that require additional data, open the modal
+    // Validation will occur when user clicks "Save Changes" in the modal
+    if (next === 'scheduled' && (!r.destructionCompany || !r.scheduledDate)) {
+      openEdit(r, next); // Open edit modal pre-filled with the target status
       return;
     }
     
@@ -287,18 +280,28 @@ export default function DestructionPage() {
 
       {selected && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setSelected(null)}>
-          <div className="bg-white rounded-lg w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
-            <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-              <h2 className="font-semibold text-gray-900">Update Destruction Record</h2>
-              <button className="text-gray-500 text-sm" onClick={() => setSelected(null)}>
-                Close
-              </button>
+          <div className="bg-white rounded-xl w-full max-w-lg shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-t-xl px-4 py-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-white/20 rounded-lg">
+                    <AlertTriangle className="w-4 h-4 text-white" />
+                  </div>
+                  <h2 className="text-sm font-bold text-white">Update Destruction Record</h2>
+                </div>
+                <button 
+                  className="text-white/80 hover:text-white transition-colors cursor-pointer" 
+                  onClick={() => setSelected(null)}
+                >
+                  <XCircle className="w-4 h-4" />
+                </button>
+              </div>
             </div>
             <div className="p-4 grid grid-cols-2 gap-3">
-              <label className="text-xs text-gray-700 col-span-1">
+              <label className="text-xs font-medium text-gray-700 col-span-1">
                 Status
                 <select
-                  className="mt-1 w-full border border-gray-300 rounded px-2 py-1.5"
+                  className="mt-1.5 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer"
                   value={form.status}
                   onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as Status }))}
                 >
@@ -309,10 +312,10 @@ export default function DestructionPage() {
                   ))}
                 </select>
               </label>
-              <label className="text-xs text-gray-700 col-span-1">
+              <label className="text-xs font-medium text-gray-700 col-span-1">
                 Company {form.status === 'scheduled' && <span className="text-red-500">*</span>}
                 <input
-                  className={`mt-1 w-full border rounded px-2 py-1.5 ${
+                  className={`mt-1.5 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
                     form.status === 'scheduled' && !form.destructionCompany.trim()
                       ? 'border-red-300 bg-red-50'
                       : 'border-gray-300'
@@ -322,11 +325,11 @@ export default function DestructionPage() {
                   placeholder="Enter destruction company"
                 />
               </label>
-              <label className="text-xs text-gray-700 col-span-1">
+              <label className="text-xs font-medium text-gray-700 col-span-1">
                 Scheduled date {form.status === 'scheduled' && <span className="text-red-500">*</span>}
                 <input
                   type="date"
-                  className={`mt-1 w-full border rounded px-2 py-1.5 ${
+                  className={`mt-1.5 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
                     form.status === 'scheduled' && !form.scheduledDate
                       ? 'border-red-300 bg-red-50'
                       : 'border-gray-300'
@@ -335,47 +338,53 @@ export default function DestructionPage() {
                   onChange={(e) => setForm((f) => ({ ...f, scheduledDate: e.target.value }))}
                 />
               </label>
-              <label className="text-xs text-gray-700 col-span-1">
+              <label className="text-xs font-medium text-gray-700 col-span-1">
                 Federal form #
                 <input
-                  className="mt-1 w-full border border-gray-300 rounded px-2 py-1.5"
+                  className="mt-1.5 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   value={form.federalFormNumber}
                   onChange={(e) => setForm((f) => ({ ...f, federalFormNumber: e.target.value }))}
+                  placeholder="e.g., 222-XXXXX"
                 />
               </label>
-              <label className="text-xs text-gray-700 col-span-1">
+              <label className="text-xs font-medium text-gray-700 col-span-1">
                 Form URL
                 <input
-                  className="mt-1 w-full border border-gray-300 rounded px-2 py-1.5"
+                  className="mt-1.5 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   value={form.formUrl}
                   onChange={(e) => setForm((f) => ({ ...f, formUrl: e.target.value }))}
+                  placeholder="https://..."
                 />
               </label>
-              <label className="text-xs text-gray-700 col-span-1">
+              <label className="text-xs font-medium text-gray-700 col-span-1">
                 Weight (lbs)
                 <input
-                  className="mt-1 w-full border border-gray-300 rounded px-2 py-1.5"
+                  type="number"
+                  step="0.01"
+                  className="mt-1.5 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   value={form.weightLbs}
                   onChange={(e) => setForm((f) => ({ ...f, weightLbs: e.target.value }))}
+                  placeholder="0.00"
                 />
               </label>
-              <label className="text-xs text-gray-700 col-span-2">
+              <label className="text-xs font-medium text-gray-700 col-span-2">
                 Notes
                 <textarea
-                  className="mt-1 w-full border border-gray-300 rounded px-2 py-1.5"
+                  className="mt-1.5 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
                   rows={3}
                   value={form.notes}
                   onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+                  placeholder="Additional notes..."
                 />
               </label>
             </div>
-            <div className="px-4 py-3 border-t border-gray-200 flex justify-end gap-2">
+            <div className="px-4 py-3 border-t bg-gray-50 rounded-b-xl flex justify-end gap-2">
               <Button variant="outline" onClick={() => setSelected(null)}>
                 Cancel
               </Button>
               <Button onClick={save} disabled={saving}>
                 {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
-                Save
+                Save Changes
               </Button>
             </div>
           </div>

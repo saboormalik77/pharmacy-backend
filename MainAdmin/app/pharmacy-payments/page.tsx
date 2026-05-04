@@ -869,67 +869,111 @@ function PharmacyPaymentsPageContent() {
       {/* View Payment Details Modal */}
       {viewModal && (
         <div
-          className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-auto"
           onClick={() => setViewModal(null)}
         >
           <div
-            className="bg-white rounded-lg max-w-xl w-full shadow-xl flex flex-col max-h-[90vh]"
+            className="bg-white rounded-xl shadow-2xl w-full max-w-lg my-auto flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-              <h2 className="text-sm font-semibold text-gray-900">Payment Details</h2>
-              <button onClick={() => setViewModal(null)} className="text-gray-400 hover:text-gray-600 p-0.5">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="px-4 py-3 overflow-y-auto flex-1">
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { label: 'Payment ID', value: `#${viewModal.id}`, mono: true },
-                  { label: 'Status', isStatus: true },
-                  { label: 'Pharmacy', value: viewModal.pharmacyName || 'N/A', sub: viewModal.pharmacyId.slice(0,8) + '…' },
-                  { label: 'Batch', value: viewModal.batchName || 'N/A', sub: viewModal.batchId ? viewModal.batchId.slice(0,8) + '…' : '—' },
-                  { label: 'Total Credit Received', value: `$${viewModal.totalCreditReceived?.toFixed(2) || '0.00'}`, bold: true },
-                  { label: 'Payout Amount', value: `$${viewModal.pharmacyPayout?.toFixed(2) || '0.00'}`, bold: true, green: true },
-                  { label: 'Created', value: viewModal.createdAt ? new Date(viewModal.createdAt).toLocaleString() : 'N/A' },
-                ].map((row) => (
-                  <div key={row.label}>
-                    <span className="text-[10px] font-medium text-gray-400 uppercase">{row.label}</span>
-                    {row.isStatus ? (
-                      <div className="mt-0.5 flex items-center gap-1">
-                        {getStatusIcon(viewModal.status)}
-                        <Badge variant={getStatusVariant(viewModal.status)}>{viewModal.status}</Badge>
-                      </div>
-                    ) : (
-                      <>
-                        <p className={`text-xs mt-0.5 ${row.green ? 'text-green-600 font-bold' : 'text-gray-900'} ${row.mono ? 'font-mono' : ''} ${row.bold ? 'font-semibold' : ''}`}>
-                          {row.value}
-                        </p>
-                        {row.sub && <p className="text-[10px] text-gray-400">{row.sub}</p>}
-                      </>
-                    )}
+            {/* Header */}
+            <div className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-t-xl px-5 py-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-white/20 rounded-lg">
+                    <DollarSign className="w-4 h-4 text-white" />
                   </div>
-                ))}
+                  <h2 className="text-sm font-bold text-white">Payment Details</h2>
+                </div>
+                <button 
+                  onClick={() => setViewModal(null)} 
+                  className="text-white/80 hover:text-white p-0.5 transition-colors cursor-pointer"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="px-5 py-4 overflow-y-auto flex-1 space-y-4">
+              {/* Primary Info Banner */}
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-lg p-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <p className="text-[10px] font-semibold text-green-700 uppercase mb-0.5">Pharmacy</p>
+                    <p className="text-base font-bold text-green-900 truncate">{viewModal.pharmacyName || 'N/A'}</p>
+                    <p className="text-[10px] text-green-600 font-mono mt-0.5">{viewModal.pharmacyId.slice(0, 8)}…</p>
+                  </div>
+                  <div className="text-right ml-3">
+                    <p className="text-[10px] font-semibold text-green-700 uppercase mb-0.5">Payout Amount</p>
+                    <p className="text-lg font-bold text-green-700">${viewModal.pharmacyPayout?.toFixed(2) || '0.00'}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 mt-2 pt-2 border-t border-green-200">
+                  <span className="text-[10px] font-semibold text-green-700 uppercase">Status:</span>
+                  <div className="flex items-center gap-1">
+                    {getStatusIcon(viewModal.status)}
+                    <Badge variant={getStatusVariant(viewModal.status)}>{viewModal.status}</Badge>
+                  </div>
+                </div>
               </div>
 
-              {/* Check Details Section */}
+              {/* Payment Information */}
+              <div className="space-y-2.5">
+                <div className="bg-white border border-gray-200 rounded-lg px-3 py-2">
+                  <div className="flex items-center justify-between py-1">
+                    <span className="text-[10px] font-semibold text-gray-500 uppercase">Payment ID</span>
+                    <span className="text-xs font-mono text-gray-900">#{viewModal.id.slice(0, 12)}…</span>
+                  </div>
+                </div>
+
+                <div className="bg-white border border-gray-200 rounded-lg px-3 py-2">
+                  <div className="flex items-center justify-between py-1">
+                    <span className="text-[10px] font-semibold text-gray-500 uppercase">Batch</span>
+                    <div className="text-right">
+                      <p className="text-xs font-medium text-gray-900">{viewModal.batchName || 'N/A'}</p>
+                      {viewModal.batchId && (
+                        <p className="text-[10px] text-gray-400 font-mono">{viewModal.batchId.slice(0, 8)}…</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white border border-gray-200 rounded-lg px-3 py-2">
+                  <div className="flex items-center justify-between py-1">
+                    <span className="text-[10px] font-semibold text-gray-500 uppercase">Total Credit Received</span>
+                    <span className="text-xs font-bold text-gray-900">${viewModal.totalCreditReceived?.toFixed(2) || '0.00'}</span>
+                  </div>
+                </div>
+
+                <div className="bg-white border border-gray-200 rounded-lg px-3 py-2">
+                  <div className="flex items-center justify-between py-1">
+                    <span className="text-[10px] font-semibold text-gray-500 uppercase">Created</span>
+                    <span className="text-xs text-gray-900">
+                      {viewModal.createdAt ? new Date(viewModal.createdAt).toLocaleString() : 'N/A'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Check Information */}
               {(viewModal.checkNumber || viewModal.paymentType) && (
-                <div className="mt-4 pt-3 border-t border-gray-100">
-                  <h3 className="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1">
-                    <Banknote className="w-3.5 h-3.5 text-green-600" />
-                    Check Information
-                  </h3>
-                  <div className="grid grid-cols-2 gap-3 bg-green-50 rounded-lg p-3 border border-green-100">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-3">
+                  <div className="flex items-center gap-1.5 mb-2.5">
+                    <Banknote className="w-3.5 h-3.5 text-blue-600" />
+                    <h3 className="text-xs font-bold text-blue-900 uppercase tracking-wide">Check Information</h3>
+                  </div>
+                  <div className="space-y-2">
                     {viewModal.checkNumber && (
-                      <div>
-                        <span className="text-[10px] font-medium text-green-700 uppercase">Check Number</span>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <p className="text-xs font-bold text-green-800">{viewModal.checkNumber}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-semibold text-blue-700 uppercase">Check Number</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold text-blue-900">{viewModal.checkNumber}</span>
                           <button
                             onClick={() => handleViewCheckPdf(viewModal.checkNumber!)}
-                            className="text-green-600 hover:text-green-800"
+                            className="text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
                             title="View Check PDF"
                           >
                             <ExternalLink className="w-3 h-3" />
@@ -938,86 +982,87 @@ function PharmacyPaymentsPageContent() {
                       </div>
                     )}
                     {viewModal.paymentType && (
-                      <div>
-                        <span className="text-[10px] font-medium text-green-700 uppercase">Payment Type</span>
-                        <p className="text-xs font-medium text-green-800 mt-0.5">
-                          <Badge variant={viewModal.paymentType === 'ocs' ? 'success' : viewModal.paymentType === 'por' ? 'warning' : 'default'}>
-                            {viewModal.paymentType.toUpperCase()}
-                          </Badge>
-                        </p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-semibold text-blue-700 uppercase">Payment Type</span>
+                        <Badge variant={viewModal.paymentType === 'ocs' ? 'success' : viewModal.paymentType === 'por' ? 'warning' : 'default'}>
+                          {viewModal.paymentType.toUpperCase()}
+                        </Badge>
                       </div>
                     )}
                     {viewModal.checkDate && (
-                      <div>
-                        <span className="text-[10px] font-medium text-green-700 uppercase">Check Date</span>
-                        <p className="text-xs text-green-800 mt-0.5">{new Date(viewModal.checkDate).toLocaleDateString()}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-semibold text-blue-700 uppercase">Check Date</span>
+                        <span className="text-xs text-blue-900">{new Date(viewModal.checkDate).toLocaleDateString()}</span>
                       </div>
                     )}
                     {viewModal.returnReferenceNumber && (
-                      <div>
-                        <span className="text-[10px] font-medium text-green-700 uppercase">Return Reference #</span>
-                        <p className="text-xs font-mono text-green-800 mt-0.5">{viewModal.returnReferenceNumber}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-semibold text-blue-700 uppercase">Return Reference #</span>
+                        <span className="text-xs font-mono text-blue-900">{viewModal.returnReferenceNumber}</span>
                       </div>
                     )}
                     {viewModal.paidAt && (
-                      <div>
-                        <span className="text-[10px] font-medium text-green-700 uppercase">Paid At</span>
-                        <p className="text-xs text-green-800 mt-0.5">{new Date(viewModal.paidAt).toLocaleString()}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-semibold text-blue-700 uppercase">Paid At</span>
+                        <span className="text-xs text-blue-900">{new Date(viewModal.paidAt).toLocaleString()}</span>
                       </div>
                     )}
                     {viewModal.pharmacyAccountNumber && (
-                      <div>
-                        <span className="text-[10px] font-medium text-green-700 uppercase">Account Number</span>
-                        <p className="text-xs font-mono text-green-800 mt-0.5">{viewModal.pharmacyAccountNumber}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-semibold text-blue-700 uppercase">Account Number</span>
+                        <span className="text-xs font-mono text-blue-900">{viewModal.pharmacyAccountNumber}</span>
                       </div>
                     )}
                   </div>
                 </div>
               )}
 
-              {/* Credit Breakdown Section */}
+              {/* Credit Breakdown */}
               {(viewModal.includedCreditAmount || viewModal.directCreditAmount || viewModal.porCreditAmount) && (
-                <div className="mt-4 pt-3 border-t border-gray-100">
-                  <h3 className="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1">
-                    <CreditCard className="w-3.5 h-3.5 text-blue-600" />
-                    Credit Breakdown
-                  </h3>
-                  <div className="grid grid-cols-3 gap-2 bg-blue-50 rounded-lg p-3 border border-blue-100">
-                    <div>
-                      <span className="text-[10px] font-medium text-blue-700 uppercase">Included Credit</span>
-                      <p className="text-xs font-medium text-blue-800 mt-0.5">${viewModal.includedCreditAmount?.toFixed(2) || '0.00'}</p>
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-3">
+                  <div className="flex items-center gap-1.5 mb-2.5">
+                    <CreditCard className="w-3.5 h-3.5 text-purple-600" />
+                    <h3 className="text-xs font-bold text-purple-900 uppercase tracking-wide">Credit Breakdown</h3>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-semibold text-purple-700 uppercase">Included Credit</span>
+                      <span className="text-xs font-medium text-purple-900">${viewModal.includedCreditAmount?.toFixed(2) || '0.00'}</span>
                     </div>
-                    <div>
-                      <span className="text-[10px] font-medium text-blue-700 uppercase">Direct Credit</span>
-                      <p className="text-xs font-medium text-blue-800 mt-0.5">${viewModal.directCreditAmount?.toFixed(2) || '0.00'}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-semibold text-purple-700 uppercase">Direct Credit</span>
+                      <span className="text-xs font-medium text-purple-900">${viewModal.directCreditAmount?.toFixed(2) || '0.00'}</span>
                     </div>
-                    <div>
-                      <span className="text-[10px] font-medium text-blue-700 uppercase">POR Credit</span>
-                      <p className="text-xs font-medium text-blue-800 mt-0.5">${viewModal.porCreditAmount?.toFixed(2) || '0.00'}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-semibold text-purple-700 uppercase">POR Credit</span>
+                      <span className="text-xs font-medium text-purple-900">${viewModal.porCreditAmount?.toFixed(2) || '0.00'}</span>
                     </div>
                     {viewModal.grossCreditAmount && (
-                      <div className="col-span-3 pt-2 border-t border-blue-200">
-                        <span className="text-[10px] font-medium text-blue-700 uppercase">Gross Credit</span>
-                        <p className="text-xs font-bold text-blue-800 mt-0.5">${viewModal.grossCreditAmount.toFixed(2)}</p>
+                      <div className="flex items-center justify-between pt-2 border-t border-purple-200">
+                        <span className="text-[10px] font-semibold text-purple-700 uppercase">Gross Credit</span>
+                        <span className="text-xs font-bold text-purple-900">${viewModal.grossCreditAmount.toFixed(2)}</span>
                       </div>
                     )}
                   </div>
                 </div>
               )}
 
+              {/* Notes */}
               {viewModal.notes && (
-                <div className="mt-4 pt-3 border-t border-gray-100">
-                  <span className="text-[10px] font-medium text-gray-400 uppercase">Notes</span>
-                  <p className="text-xs text-gray-700 mt-0.5 px-2 py-1.5 bg-gray-50 rounded border border-gray-100">{viewModal.notes}</p>
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                  <p className="text-[10px] font-semibold text-amber-700 uppercase mb-1.5">Notes</p>
+                  <p className="text-xs text-amber-900 leading-relaxed">{viewModal.notes}</p>
                 </div>
               )}
             </div>
-            <div className="flex justify-between gap-2 px-4 py-3 border-t border-gray-200">
+
+            {/* Footer */}
+            <div className="flex justify-between gap-2 px-5 py-3 border-t bg-gray-50 rounded-b-xl">
               <div>
                 {viewModal.checkNumber && (
                   <button
                     onClick={() => handleViewCheckPdf(viewModal.checkNumber!)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-purple-50 text-purple-700 border border-purple-200 rounded hover:bg-purple-100 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 text-xs bg-white text-purple-700 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors font-medium cursor-pointer"
                   >
                     <FileText className="w-3.5 h-3.5" />
                     View Check PDF
@@ -1027,14 +1072,14 @@ function PharmacyPaymentsPageContent() {
               <div className="flex gap-2">
                 <button
                   onClick={() => setViewModal(null)}
-                  className="px-3 py-1.5 text-xs border border-gray-300 rounded text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 text-xs border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors font-medium cursor-pointer"
                 >
                   Close
                 </button>
                 {viewModal.status === 'pending' && (
                   <button
                     onClick={() => { handleStatusUpdate(viewModal.id, 'processing'); setViewModal(null); }}
-                    className="px-3 py-1.5 text-xs bg-primary-500 text-white rounded hover:bg-primary-600 transition-colors"
+                    className="px-4 py-2 text-xs bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium cursor-pointer"
                   >
                     Mark as Processing
                   </button>
@@ -1042,7 +1087,7 @@ function PharmacyPaymentsPageContent() {
                 {viewModal.status === 'processing' && !viewModal.checkNumber && (
                   <button
                     onClick={() => { setViewModal(null); handleOpenIssueCheckModal(viewModal); }}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium cursor-pointer"
                   >
                     <Banknote className="w-3.5 h-3.5" />
                     Issue Check
@@ -1051,7 +1096,7 @@ function PharmacyPaymentsPageContent() {
                 {viewModal.status === 'processing' && viewModal.checkNumber && (
                   <button
                     onClick={() => { handleStatusUpdate(viewModal.id, 'paid'); setViewModal(null); }}
-                    className="px-3 py-1.5 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                    className="px-4 py-2 text-xs bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium cursor-pointer"
                   >
                     Mark as Paid
                   </button>

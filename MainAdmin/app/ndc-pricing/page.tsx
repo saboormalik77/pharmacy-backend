@@ -434,14 +434,24 @@ export default function NDCPricingPage() {
             {/* ── Add / Edit Modal ─────────────────────────── */}
             {formModal && (
                 <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setFormModal(false)}>
-                    <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50 rounded-t-lg">
-                            <h2 className="text-sm font-semibold text-gray-900">
-                                {editingRecord ? 'Edit NDC Pricing' : 'Add NDC Pricing'}
-                            </h2>
-                            <button onClick={() => setFormModal(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
-                                <X className="w-4 h-4" />
-                            </button>
+                    <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+                        <div className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-t-xl px-4 py-3">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <div className="p-1.5 bg-white/20 rounded-lg">
+                                        <DollarSign className="w-4 h-4 text-white" />
+                                    </div>
+                                    <h2 className="text-sm font-bold text-white">
+                                        {editingRecord ? 'Edit NDC Pricing' : 'Add NDC Pricing'}
+                                    </h2>
+                                </div>
+                                <button 
+                                    onClick={() => setFormModal(false)} 
+                                    className="text-white/80 hover:text-white transition-colors cursor-pointer"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
                         </div>
 
                         <div className="p-4 space-y-4">
