@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
+import BrandingHead from '@/components/layout/BrandingHead';
 import StoreProvider from '@/components/providers/StoreProvider';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import TenantGate from '@/components/auth/TenantGate';
@@ -37,6 +38,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
     return (
         <StoreProvider>
+            <BrandingHead />
             <TenantGate>
                 <ProtectedRoute>
                     {!isAuthPage && (

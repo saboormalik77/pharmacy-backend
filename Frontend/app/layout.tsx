@@ -4,6 +4,7 @@ import { ToastContainer } from 'react-toastify'
 import './globals.css'
 import 'react-toastify/dist/ReactToastify.css'
 import TenantGate from '@/components/auth/TenantGate'
+import BrandingHead from '@/components/layout/BrandingHead'
 
 export const metadata: Metadata = {
   title: 'PharmAnalytics',
@@ -29,6 +30,7 @@ export default function RootLayout({
       >
         <html lang="en">
           <body>
+            <BrandingHead />
             <TenantGate>{children}</TenantGate>
             <ToastContainer
               position="top-right"
@@ -51,6 +53,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <BrandingHead />
         <TenantGate>{children}</TenantGate>
         <ToastContainer
           position="top-right"
