@@ -225,10 +225,10 @@ export default function PolicyDetailPage() {
     if (isLoading) return <div className="flex justify-center py-24"><Loader2 className="w-10 h-10 animate-spin text-primary-600" /></div>;
     if (!policy) return (
         <div className="space-y-4">
-            <button onClick={() => router.push('/policies')} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"><ArrowLeft className="w-4 h-4" /> Back</button>
-            <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-                <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-3" />
-                <p className="text-red-800 font-medium">Policy not found.</p>
+            <button onClick={() => router.push('/policies')} className="flex items-center gap-2 text-sm hover:underline" style={{ color: 'var(--outline)' }}><ArrowLeft className="w-4 h-4" /> Back</button>
+            <div className="border rounded-[4px] p-6 text-center" style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
+                <AlertCircle className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--error)' }} />
+                <p className="font-medium" style={{ color: 'var(--on-error-container)' }}>Policy not found.</p>
                 <Button variant="outline" className="mt-4" onClick={() => router.push('/policies')}>Go Back</Button>
             </div>
         </div>
@@ -244,21 +244,21 @@ export default function PolicyDetailPage() {
 
             {/* Header */}
             <div>
-                <button onClick={() => router.push('/policies')} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-800 mb-2">
+                <button onClick={() => router.push('/policies')} className="flex items-center gap-1.5 text-xs mb-2 hover:underline" style={{ color: 'var(--outline)' }}>
                     <ArrowLeft className="w-3.5 h-3.5" /> Back to Policies
                 </button>
                 <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2 min-w-0">
-                        <h1 className="text-lg font-bold text-gray-900 truncate">{policy.manufacturerName}</h1>
+                        <h1 className="font-heading text-headline truncate" style={{ color: 'var(--foreground)' }}>{policy.manufacturerName}</h1>
                         <Badge variant={policy.labelerType === 'brand' ? 'info' : 'default'}>
                             <span className="text-[10px]">{policy.labelerType === 'brand' ? 'Brand' : 'Generic'}</span>
                         </Badge>
                     </div>
                     <div className="flex gap-1.5 flex-shrink-0">
-                        <button onClick={() => setEditInfoModal(true)} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded border border-gray-300 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
+                        <button onClick={() => setEditInfoModal(true)} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded border text-xs transition-colors hover:bg-primary-50/40" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}>
                             <Edit className="w-3 h-3" /> Edit
                         </button>
-                        <button onClick={() => setDeleteModal(true)} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded border border-red-200 text-xs text-red-600 hover:bg-red-50 transition-colors">
+                        <button onClick={() => setDeleteModal(true)} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded border text-xs transition-colors hover:bg-primary-50/40" style={{ borderColor: 'var(--outline-variant)', color: 'var(--error)' }}>
                             <Trash2 className="w-3 h-3" /> Delete
                         </button>
                     </div>
@@ -267,8 +267,8 @@ export default function PolicyDetailPage() {
 
             {/* ── Basic Info + Metrics ──────────────────────── */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                <div className="bg-white rounded-lg shadow p-4">
-                    <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5"><Shield className="w-3.5 h-3.5" /> Policy Info</h2>
+                <div className="rounded-[4px] shadow p-4 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                    <h2 className="text-[10px] font-semibold uppercase tracking-wider mb-3 flex items-center gap-1.5" style={{ color: 'var(--on-surface-variant)' }}><Shield className="w-3.5 h-3.5" /> Policy Info</h2>
                     <dl className="space-y-1.5 text-xs">
                         <Row label="Labeler ID" value={<span className="font-mono font-semibold">{policy.labelerId}</span>} />
                         <Row label="Type" value={policy.labelerType === 'brand' ? 'Brand' : 'Generic'} />
@@ -279,16 +279,16 @@ export default function PolicyDetailPage() {
                     </dl>
                 </div>
 
-                <div className="bg-white rounded-lg shadow p-4">
-                    <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> Metrics</h2>
+                <div className="rounded-[4px] shadow p-4 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                    <h2 className="text-[10px] font-semibold uppercase tracking-wider mb-3 flex items-center gap-1.5" style={{ color: 'var(--on-surface-variant)' }}><Clock className="w-3.5 h-3.5" /> Metrics</h2>
                     <div className="grid grid-cols-2 gap-2 mb-3">
-                        <div className="bg-green-50 rounded-lg px-3 py-2 text-center">
-                            <p className="text-xs font-medium text-green-600">Avg Pay %</p>
-                            <p className="text-lg font-bold text-green-800">{policy.averagePayPercent != null ? `${policy.averagePayPercent}%` : '—'}</p>
+                        <div className="rounded-[4px] px-3 py-2 text-center border" style={{ backgroundColor: 'var(--primary-fixed)', borderColor: 'var(--outline-variant)' }}>
+                            <p className="text-xs font-medium" style={{ color: 'var(--on-surface-variant)' }}>Avg Pay %</p>
+                            <p className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>{policy.averagePayPercent != null ? `${policy.averagePayPercent}%` : '—'}</p>
                         </div>
-                        <div className="bg-blue-50 rounded-lg px-3 py-2 text-center">
-                            <p className="text-xs font-medium text-blue-600">Avg Days to Pay</p>
-                            <p className="text-lg font-bold text-blue-800">{policy.averageDaysToPay ?? '—'}</p>
+                        <div className="rounded-[4px] px-3 py-2 text-center border" style={{ backgroundColor: 'var(--secondary-container)', borderColor: 'var(--outline-variant)' }}>
+                            <p className="text-xs font-medium" style={{ color: 'var(--on-secondary-container)' }}>Avg Days to Pay</p>
+                            <p className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>{policy.averageDaysToPay ?? '—'}</p>
                         </div>
                     </div>
                     <dl className="space-y-1.5 text-xs">
@@ -299,46 +299,47 @@ export default function PolicyDetailPage() {
             </div>
 
             {/* ── Return Policies ───────────────────────────── */}
-            <div className="bg-white rounded-lg shadow p-4">
+            <div className="rounded-[4px] shadow p-4 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5" /> Return Policies ({rps.length})</h2>
-                    <button onClick={() => { setRpForm({ destination: 'inmar', returnableWithinPolicyPeriod: true, partialsAccepted: false, reimbursementType: 'batch' }); setAddRPModal(true); }} className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-gray-300 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
+                    <h2 className="text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1.5" style={{ color: 'var(--on-surface-variant)' }}><CheckCircle className="w-3.5 h-3.5" /> Return Policies ({rps.length})</h2>
+                    <button onClick={() => { setRpForm({ destination: 'inmar', returnableWithinPolicyPeriod: true, partialsAccepted: false, reimbursementType: 'batch' }); setAddRPModal(true); }} className="inline-flex items-center gap-1 px-2.5 py-1 rounded border text-xs transition-colors hover:bg-primary-50/40" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}>
                         <Plus className="w-3 h-3" /> Add
                     </button>
                 </div>
                 {rps.length === 0 ? (
-                    <p className="text-gray-400 text-xs text-center py-4">No return policies defined yet.</p>
+                    <p className="text-xs text-center py-4" style={{ color: 'var(--on-surface-variant)' }}>No return policies defined yet.</p>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead><tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
-                                <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Destination</th>
-                                <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Window</th>
-                                <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Win. mode</th>
-                                <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Partials</th>
-                                <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Discount</th>
-                                <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Description</th>
-                                <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
+                            <thead className="text-white" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
+                                <tr>
+                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Destination</th>
+                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Window</th>
+                                <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Win. mode</th>
+                                <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Partials</th>
+                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Discount</th>
+                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Description</th>
+                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Actions</th>
                             </tr></thead>
-                            <tbody className="divide-y divide-gray-100">
+                            <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                 {rps.map(rp => (
-                                    <tr key={rp.id} className="hover:bg-gray-50">
-                                        <td className="px-4 py-3"><Badge variant={destBadge(rp.destination)}><span className="text-[10px]">{rp.destination}</span></Badge></td>
-                                        <td className="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">{rp.monthsBeforeExpiration ?? '?'}mo before – {rp.monthsAfterExpiration ?? '?'}mo after</td>
-                                        <td className="px-4 py-3 text-center">
+                                    <tr key={rp.id} className="transition-colors hover:bg-primary-50/40">
+                                        <td className="px-3 py-3"><Badge variant={destBadge(rp.destination)}><span className="text-[10px]">{rp.destination}</span></Badge></td>
+                                        <td className="px-3 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface)' }}>{rp.monthsBeforeExpiration ?? '?'}mo before – {rp.monthsAfterExpiration ?? '?'}mo after</td>
+                                        <td className="px-3 py-3 text-center">
                                             {rp.returnableWithinPolicyPeriod !== false ? (
                                                 <Badge variant="success"><span className="text-[10px]">Standard</span></Badge>
                                             ) : (
                                                 <Badge variant="warning"><span className="text-[10px]">Inverted</span></Badge>
                                             )}
                                         </td>
-                                        <td className="px-4 py-3 text-center">{rp.partialsAccepted ? <Badge variant="success"><span className="text-[10px]">Yes</span></Badge> : <span className="text-sm text-gray-400">No</span>}</td>
-                                        <td className="px-4 py-3 text-right text-sm text-gray-700">{rp.discountRate != null ? `${(rp.discountRate * 100).toFixed(0)}%` : '—'}</td>
-                                        <td className="px-4 py-3 text-sm text-gray-600 max-w-[160px] truncate" title={rp.policyDescription || ''}>{rp.policyDescription || '—'}</td>
-                                        <td className="px-4 py-3 text-right">
+                                        <td className="px-3 py-3 text-center">{rp.partialsAccepted ? <Badge variant="success"><span className="text-[10px]">Yes</span></Badge> : <span className="text-sm" style={{ color: 'var(--on-surface-variant)' }}>No</span>}</td>
+                                        <td className="px-3 py-3 text-right text-sm" style={{ color: 'var(--on-surface)' }}>{rp.discountRate != null ? `${(rp.discountRate * 100).toFixed(0)}%` : '—'}</td>
+                                        <td className="px-3 py-3 text-sm max-w-[160px] truncate" style={{ color: 'var(--on-surface-variant)' }} title={rp.policyDescription || ''}>{rp.policyDescription || '—'}</td>
+                                        <td className="px-3 py-3 text-right">
                                             <div className="flex justify-end gap-1">
-                                                <button onClick={() => setEditRPModal(rp)} className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"><Edit className="w-3 h-3" /></button>
-                                                <button onClick={() => setDeleteRPModal(rp)} className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded"><Trash2 className="w-3 h-3" /></button>
+                                                <button type="button" onClick={() => setEditRPModal(rp)} className="p-1 rounded transition-colors hover:bg-primary-50/40" style={{ color: 'var(--on-surface-variant)' }} title="Edit"><Edit className="w-3 h-3" /></button>
+                                                <button type="button" onClick={() => setDeleteRPModal(rp)} className="p-1 rounded transition-colors hover:bg-primary-50/40" style={{ color: 'var(--on-surface-variant)' }} title="Delete"><Trash2 className="w-3 h-3" /></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -350,32 +351,33 @@ export default function PolicyDetailPage() {
             </div>
 
             {/* ── Exceptions (Non-Returnable Products) ──────── */}
-            <div className="bg-white rounded-lg shadow p-4">
+            <div className="rounded-[4px] shadow p-4 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5"><Ban className="w-3.5 h-3.5" /> Non-Returnable Exceptions ({excs.length})</h2>
-                    <button onClick={() => setAddExcModal(true)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-gray-300 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
+                    <h2 className="text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1.5" style={{ color: 'var(--on-surface-variant)' }}><Ban className="w-3.5 h-3.5" /> Non-Returnable Exceptions ({excs.length})</h2>
+                    <button onClick={() => setAddExcModal(true)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded border text-xs transition-colors hover:bg-primary-50/40" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}>
                         <Plus className="w-3 h-3" /> Add
                     </button>
                 </div>
                 {excs.length === 0 ? (
-                    <p className="text-gray-400 text-xs text-center py-4">No exceptions defined.</p>
+                    <p className="text-xs text-center py-4" style={{ color: 'var(--on-surface-variant)' }}>No exceptions defined.</p>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead><tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
-                                <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
-                                <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product Name</th>
-                                <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Reason</th>
-                                <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
+                            <thead className="text-white" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
+                                <tr>
+                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">NDC</th>
+                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Product Name</th>
+                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Reason</th>
+                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Actions</th>
                             </tr></thead>
-                            <tbody className="divide-y divide-gray-100">
+                            <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                 {excs.map(e => (
-                                    <tr key={e.id} className="hover:bg-gray-50">
-                                        <td className="px-4 py-3 text-sm font-mono text-gray-900 whitespace-nowrap">{e.ndc}</td>
-                                        <td className="px-4 py-3 text-sm text-gray-700">{e.productName || '—'}</td>
-                                        <td className="px-4 py-3 text-sm text-gray-600">{e.reason || '—'}</td>
-                                        <td className="px-4 py-3 text-right">
-                                            <button onClick={() => setDeleteExcModal(e)} className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded"><Trash2 className="w-3 h-3" /></button>
+                                    <tr key={e.id} className="transition-colors hover:bg-primary-50/40">
+                                        <td className="px-3 py-3 text-sm font-mono whitespace-nowrap" style={{ color: 'var(--foreground)' }}>{e.ndc}</td>
+                                        <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{e.productName || '—'}</td>
+                                        <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{e.reason || '—'}</td>
+                                        <td className="px-3 py-3 text-right">
+                                            <button type="button" onClick={() => setDeleteExcModal(e)} className="p-1 rounded transition-colors hover:bg-primary-50/40 flex-shrink-0 inline-flex" style={{ color: 'var(--on-surface-variant)' }} title="Delete"><Trash2 className="w-3 h-3" /></button>
                                         </td>
                                     </tr>
                                 ))}
@@ -386,28 +388,28 @@ export default function PolicyDetailPage() {
             </div>
 
             {/* ── Notes ─────────────────────────────────────── */}
-            <div className="bg-white rounded-lg shadow p-4">
+            <div className="rounded-[4px] shadow p-4 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5"><FileText className="w-3.5 h-3.5" /> Notes ({notes.length})</h2>
-                    <button onClick={() => setAddNoteModal(true)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-gray-300 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
+                    <h2 className="text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1.5" style={{ color: 'var(--on-surface-variant)' }}><FileText className="w-3.5 h-3.5" /> Notes ({notes.length})</h2>
+                    <button onClick={() => setAddNoteModal(true)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded border text-xs transition-colors hover:bg-primary-50/40" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}>
                         <Plus className="w-3 h-3" /> Add
                     </button>
                 </div>
                 {notes.length === 0 ? (
-                    <p className="text-gray-400 text-xs text-center py-4">No notes yet.</p>
+                    <p className="text-xs text-center py-4" style={{ color: 'var(--on-surface-variant)' }}>No notes yet.</p>
                 ) : (
                     <div className="space-y-2">
                         {notes.map(n => (
-                            <div key={n.id} className="flex items-start gap-2 bg-gray-50 rounded-lg px-3 py-2">
+                            <div key={n.id} className="flex items-start gap-2 rounded-[4px] px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 text-[10px] text-gray-400 mb-0.5">
+                                    <div className="flex items-center gap-2 text-[10px] mb-0.5" style={{ color: 'var(--on-surface-variant)' }}>
                                         <CalendarDays className="w-3 h-3" />
                                         {n.noteDate ? formatDate(n.noteDate) : formatDate(n.createdAt)}
                                         {n.authorInitials && <Badge variant="default"><span className="text-[10px]">{n.authorInitials}</span></Badge>}
                                     </div>
-                                    <p className="text-xs text-gray-700">{n.noteText}</p>
+                                    <p className="text-xs" style={{ color: 'var(--on-surface)' }}>{n.noteText}</p>
                                 </div>
-                                <button onClick={() => setDeleteNoteModal(n)} className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded flex-shrink-0"><Trash2 className="w-3 h-3" /></button>
+                                <button type="button" onClick={() => setDeleteNoteModal(n)} className="p-1 rounded transition-colors hover:bg-primary-50/40 flex-shrink-0" style={{ color: 'var(--on-surface-variant)' }} title="Delete"><Trash2 className="w-3 h-3" /></button>
                             </div>
                         ))}
                     </div>
@@ -422,8 +424,8 @@ export default function PolicyDetailPage() {
                     <div className="grid grid-cols-2 gap-3">
                         <ModalField label="Labeler ID" value={editInfoForm.labelerId || ''} onChange={v => setEditInfoForm({ ...editInfoForm, labelerId: v })} />
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Type</label>
-                            <select value={editInfoForm.labelerType || 'generic'} onChange={e => setEditInfoForm({ ...editInfoForm, labelerType: e.target.value as 'generic' | 'brand' })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--on-surface)' }}>Type</label>
+                            <select value={editInfoForm.labelerType || 'generic'} onChange={e => setEditInfoForm({ ...editInfoForm, labelerType: e.target.value as 'generic' | 'brand' })} className="w-full px-3 py-2 text-sm rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}>
                                 <option value="generic">Generic</option><option value="brand">Brand</option>
                             </select>
                         </div>
@@ -435,11 +437,11 @@ export default function PolicyDetailPage() {
                     </div>
                     <ModalField label="Email" value={editInfoForm.creditRequestEmail || ''} onChange={v => setEditInfoForm({ ...editInfoForm, creditRequestEmail: v })} />
                     <div className="grid grid-cols-2 gap-3">
-                        <div><label className="block text-xs font-medium text-gray-700 mb-1">Avg Pay %</label>
-                            <input type="number" step="0.1" value={editInfoForm.averagePayPercent ?? ''} onChange={e => setEditInfoForm({ ...editInfoForm, averagePayPercent: e.target.value ? parseFloat(e.target.value) : undefined })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--on-surface)' }}>Avg Pay %</label>
+                            <input type="number" step="0.1" value={editInfoForm.averagePayPercent ?? ''} onChange={e => setEditInfoForm({ ...editInfoForm, averagePayPercent: e.target.value ? parseFloat(e.target.value) : undefined })} className="w-full px-3 py-2 text-sm rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }} />
                         </div>
-                        <div><label className="block text-xs font-medium text-gray-700 mb-1">Avg Days</label>
-                            <input type="number" value={editInfoForm.averageDaysToPay ?? ''} onChange={e => setEditInfoForm({ ...editInfoForm, averageDaysToPay: e.target.value ? parseInt(e.target.value) : undefined })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--on-surface)' }}>Avg Days</label>
+                            <input type="number" value={editInfoForm.averageDaysToPay ?? ''} onChange={e => setEditInfoForm({ ...editInfoForm, averageDaysToPay: e.target.value ? parseInt(e.target.value) : undefined })} className="w-full px-3 py-2 text-sm rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }} />
                         </div>
                     </div>
                 </div>
@@ -451,30 +453,30 @@ export default function PolicyDetailPage() {
                 <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-3">
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Destination <span className="text-red-500">*</span></label>
-                            <select value={rpForm.destination} onChange={e => setRpForm({ ...rpForm, destination: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--on-surface)' }}>Destination <span style={{ color: 'var(--error)' }}>*</span></label>
+                            <select value={rpForm.destination} onChange={e => setRpForm({ ...rpForm, destination: e.target.value })} className="w-full px-3 py-2 text-sm rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}>
                                 <option value="inmar">Inmar</option><option value="qualanex">Qualanex</option><option value="pharmalink">PharmaLink</option><option value="other">Other</option>
                             </select>
                         </div>
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Reimbursement Type</label>
-                            <select value={rpForm.reimbursementType || ''} onChange={e => setRpForm({ ...rpForm, reimbursementType: (e.target.value || undefined) as any })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--on-surface)' }}>Reimbursement Type</label>
+                            <select value={rpForm.reimbursementType || ''} onChange={e => setRpForm({ ...rpForm, reimbursementType: (e.target.value || undefined) as any })} className="w-full px-3 py-2 text-sm rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}>
                                 <option value="">—</option><option value="batch">Batch</option><option value="per_item">Per Item</option>
                             </select>
                         </div>
                     </div>
                     <ModalField label="Description" value={rpForm.policyDescription || ''} onChange={v => setRpForm({ ...rpForm, policyDescription: v })} placeholder="e.g. 6 Months Prior to 12 Months Post" />
                     <div className="grid grid-cols-3 gap-3">
-                        <div><label className="block text-xs font-medium text-gray-700 mb-1">Months Before Exp.</label>
-                            <input type="number" min="0" value={rpForm.monthsBeforeExpiration ?? ''} onChange={e => setRpForm({ ...rpForm, monthsBeforeExpiration: e.target.value ? parseInt(e.target.value) : undefined })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--on-surface)' }}>Months Before Exp.</label>
+                            <input type="number" min="0" value={rpForm.monthsBeforeExpiration ?? ''} onChange={e => setRpForm({ ...rpForm, monthsBeforeExpiration: e.target.value ? parseInt(e.target.value) : undefined })} className="w-full px-3 py-2 text-sm rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }} />
                         </div>
-                        <div><label className="block text-xs font-medium text-gray-700 mb-1">Months After Exp.</label>
-                            <input type="number" min="0" value={rpForm.monthsAfterExpiration ?? ''} onChange={e => setRpForm({ ...rpForm, monthsAfterExpiration: e.target.value ? parseInt(e.target.value) : undefined })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                        <div><label className="block text-xs font-medium mb-1" style={{ color: 'var(--on-surface)' }}>Months After Exp.</label>
+                            <input type="number" min="0" value={rpForm.monthsAfterExpiration ?? ''} onChange={e => setRpForm({ ...rpForm, monthsAfterExpiration: e.target.value ? parseInt(e.target.value) : undefined })} className="w-full px-3 py-2 text-sm rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }} />
                         </div>
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">
+                            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--on-surface)' }}>
                                 Discount Rate
-                                <span className="ml-1 text-[10px] text-gray-400 font-normal">0–1 fraction</span>
+                                <span className="ml-1 text-[10px] font-normal" style={{ color: 'var(--on-surface-variant)' }}>0–1 fraction</span>
                             </label>
                             <input
                                 type="number"
@@ -484,13 +486,14 @@ export default function PolicyDetailPage() {
                                 value={rpForm.discountRate ?? ''}
                                 onChange={e => setRpForm({ ...rpForm, discountRate: e.target.value ? parseFloat(e.target.value) : undefined })}
                                 placeholder="e.g. 0.30"
-                                className={`w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                                    rpForm.discountRate != null && (rpForm.discountRate < 0 || rpForm.discountRate > 1)
-                                        ? 'border-red-400 focus:ring-red-400'
-                                        : 'border-gray-300'
-                                }`}
+                                className="w-full px-3 py-2 text-sm rounded-[4px] focus:outline-none focus:ring-2 border focus:ring-primary-500"
+                                style={{
+                                    borderColor: rpForm.discountRate != null && (rpForm.discountRate < 0 || rpForm.discountRate > 1) ? 'var(--error)' : 'var(--outline-variant)',
+                                    backgroundColor: 'var(--surface-container-lowest)',
+                                    color: 'var(--on-surface)',
+                                }}
                             />
-                            <p className="text-[10px] text-gray-400 mt-0.5">
+                            <p className="text-[10px] mt-0.5" style={{ color: 'var(--on-surface-variant)' }}>
                                 {rpForm.discountRate != null && rpForm.discountRate >= 0 && rpForm.discountRate <= 1
                                     ? `= ${(rpForm.discountRate * 100).toFixed(0)}%`
                                     : rpForm.discountRate != null
@@ -500,21 +503,22 @@ export default function PolicyDetailPage() {
                         </div>
                     </div>
                     <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Return window mode</label>
-                        <p className="text-[10px] text-gray-500 mb-1.5">Standard: returnable inside the window. Inverted: returnable outside the window; dates inside the window go to Wine Cellar until the day after the window ends.</p>
+                        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--on-surface)' }}>Return window mode</label>
+                        <p className="text-[10px] mb-1.5" style={{ color: 'var(--on-surface-variant)' }}>Standard: returnable inside the window. Inverted: returnable outside the window; dates inside the window go to Wine Cellar until the day after the window ends.</p>
                         <select
                             value={rpForm.returnableWithinPolicyPeriod !== false ? 'yes' : 'no'}
                             onChange={e => setRpForm({ ...rpForm, returnableWithinPolicyPeriod: e.target.value === 'yes' })}
-                            className="w-full max-w-md px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            className="w-full max-w-md px-3 py-2 text-sm rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border"
+                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}
                         >
                             <option value="yes">Standard — returnable in window</option>
                             <option value="no">Inverted — Wine Cellar in window</option>
                         </select>
                     </div>
                     <div className="flex items-center gap-3">
-                        <label className="flex items-center gap-2 text-sm">
-                            <input type="checkbox" checked={rpForm.partialsAccepted ?? false} onChange={e => setRpForm({ ...rpForm, partialsAccepted: e.target.checked })} className="rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
-                            <span className="text-gray-700">Partials Accepted</span>
+                        <label className="flex items-center gap-2 text-sm" style={{ color: 'var(--on-surface)' }}>
+                            <input type="checkbox" checked={rpForm.partialsAccepted ?? false} onChange={e => setRpForm({ ...rpForm, partialsAccepted: e.target.checked })} className="rounded border text-primary-600 focus:ring-primary-500" style={{ borderColor: 'var(--outline-variant)' }} />
+                            <span>Partials Accepted</span>
                         </label>
                     </div>
                     <ModalField label="Auto RA Email" value={rpForm.autoRaEmail || ''} onChange={v => setRpForm({ ...rpForm, autoRaEmail: v })} placeholder="ra-returns@manufacturer.com" />
@@ -542,8 +546,8 @@ export default function PolicyDetailPage() {
             {addNoteModal && <Modal title="Add Note" onClose={() => setAddNoteModal(false)}>
                 <div className="space-y-3">
                     <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Note <span className="text-red-500">*</span></label>
-                        <textarea value={noteForm.noteText} onChange={e => setNoteForm({ ...noteForm, noteText: e.target.value })} rows={3} placeholder="Enter note..." className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none" />
+                        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--on-surface)' }}>Note <span style={{ color: 'var(--error)' }}>*</span></label>
+                        <textarea value={noteForm.noteText} onChange={e => setNoteForm({ ...noteForm, noteText: e.target.value })} rows={3} placeholder="Enter note..." className="w-full px-3 py-2 text-sm rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none border" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }} />
                     </div>
                     <ModalField label="Author Initials" value={noteForm.authorInitials} onChange={v => setNoteForm({ ...noteForm, authorInitials: v })} placeholder="e.g. JD" />
                 </div>
@@ -564,19 +568,19 @@ export default function PolicyDetailPage() {
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
     return (
         <div className="flex justify-between gap-4">
-            <dt className="text-gray-500 flex-shrink-0 text-xs">{label}</dt>
-            <dd className="text-gray-900 text-right text-xs">{value}</dd>
+            <dt className="flex-shrink-0 text-xs" style={{ color: 'var(--on-surface-variant)' }}>{label}</dt>
+            <dd className="text-right text-xs" style={{ color: 'var(--foreground)' }}>{value}</dd>
         </div>
     );
 }
 
 function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
     return (
-        <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={onClose}>
-            <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
-                    <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+        <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 50%, transparent)' }} onClick={onClose}>
+            <div className="rounded-[4px] max-w-lg w-full shadow-xl max-h-[90vh] overflow-y-auto border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                <div className="flex items-center justify-between p-5 border-b sticky top-0 z-10" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                    <h2 className="font-heading text-body font-semibold" style={{ color: 'var(--foreground)' }}>{title}</h2>
+                    <button type="button" onClick={onClose} className="rounded p-0.5 transition-colors hover:bg-primary-50/40" style={{ color: 'var(--on-surface-variant)' }} aria-label="Close"><X className="w-5 h-5" /></button>
                 </div>
                 <div className="p-5">{children}</div>
             </div>
@@ -587,15 +591,15 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
 function ModalField({ label, value, onChange, placeholder, required }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; required?: boolean }) {
     return (
         <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">{label} {required && <span className="text-red-500">*</span>}</label>
-            <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--on-surface)' }}>{label} {required && <span style={{ color: 'var(--error)' }}>*</span>}</label>
+            <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="w-full px-3 py-2 text-sm rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }} />
         </div>
     );
 }
 
 function ModalFooter({ onCancel, onConfirm, loading, label }: { onCancel: () => void; onConfirm: () => void; loading: boolean; label: string }) {
     return (
-        <div className="flex justify-end gap-2 mt-5 pt-4 border-t border-gray-200">
+        <div className="flex justify-end gap-2 mt-5 pt-4 border-t" style={{ borderColor: 'var(--outline-variant)' }}>
             <Button variant="outline" onClick={onCancel}>Cancel</Button>
             <Button variant="primary" onClick={onConfirm} disabled={loading}>
                 {loading ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Processing...</> : label}
@@ -606,14 +610,14 @@ function ModalFooter({ onCancel, onConfirm, loading, label }: { onCancel: () => 
 
 function ConfirmModal({ title, message, onCancel, onConfirm, loading }: { title: string; message: string; onCancel: () => void; onConfirm: () => void; loading: boolean }) {
     return (
-        <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={onCancel}>
-            <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
-                    <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-                    <button onClick={onCancel} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+        <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 50%, transparent)' }} onClick={onCancel}>
+            <div className="rounded-[4px] max-w-md w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                    <h2 className="font-heading text-body font-semibold" style={{ color: 'var(--foreground)' }}>{title}</h2>
+                    <button type="button" onClick={onCancel} className="rounded p-0.5 transition-colors hover:bg-primary-50/40" style={{ color: 'var(--on-surface-variant)' }} aria-label="Close"><X className="w-5 h-5" /></button>
                 </div>
-                <div className="p-6"><p className="text-gray-700">{message}</p></div>
-                <div className="flex justify-end gap-2 p-5 border-t border-gray-200 bg-gray-50">
+                <div className="p-6"><p style={{ color: 'var(--on-surface)' }}>{message}</p></div>
+                <div className="flex justify-end gap-2 p-5 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                     <Button variant="outline" onClick={onCancel}>Cancel</Button>
                     <Button variant="danger" onClick={onConfirm} disabled={loading}>
                         {loading ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Deleting...</> : 'Delete'}

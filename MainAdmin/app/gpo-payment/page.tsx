@@ -16,7 +16,7 @@ export default function GpoPaymentPage() {
 
             {/* Coming Soon card */}
             <div
-                className="flex flex-col items-center justify-center py-20 border rounded-lg shadow-sm"
+                className="flex flex-col items-center justify-center py-20 border rounded-[4px] shadow-sm"
                 style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
             >
                 <div className="p-4 rounded-full mb-4" style={{ backgroundColor: 'var(--tertiary-fixed)' }}>
@@ -26,7 +26,7 @@ export default function GpoPaymentPage() {
                     <Clock className="w-4 h-4" style={{ color: 'var(--tertiary)' }} />
                     <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--tertiary)' }}>Coming Soon</span>
                 </div>
-                <h1 className="text-lg font-bold mb-1" style={{ color: 'var(--foreground)' }}>GPO Payment</h1>
+                <h1 className="font-heading text-headline mb-1" style={{ color: 'var(--foreground)' }}>GPO Payment</h1>
                 <p className="text-xs text-center max-w-xs leading-relaxed" style={{ color: 'var(--on-surface-variant)' }}>
                     Group Purchasing Organization payment allocations and settlements will be available here soon.
                 </p>

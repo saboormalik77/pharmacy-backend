@@ -53,25 +53,25 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
             <div
-              className="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 shadow-md"
+              className="inline-flex items-center justify-center w-12 h-12 rounded-[4px] mb-4 shadow-md"
               style={{ backgroundColor: 'var(--primary)' }}
             >
             <Shield className="w-6 h-6 text-white" />
           </div>
-          <h1 className="text-lg font-bold mb-2" style={{ color: 'var(--foreground)' }}>Admin</h1>
+          <h1 className="font-heading text-headline mb-2" style={{ color: 'var(--foreground)' }}>Admin</h1>
           <p style={{ color: 'var(--on-surface-variant)' }}>Buying Group Management Portal</p>
         </div>
 
-        <div className="rounded-lg shadow-md p-6" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
+        <div className="rounded-[4px] shadow-md p-6" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
           <form onSubmit={handleSubmit} className="space-y-6" noValidate>
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[4px] text-sm">
                 {error}
               </div>
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium mb-2" style={{ color: 'var(--on-surface-variant)' }}>
+              <label htmlFor="email" className="font-body block text-sm font-medium mb-2" style={{ color: 'var(--on-surface-variant)' }}>
                 Email Address
               </label>
               <div className="relative">
@@ -81,7 +81,7 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2.5 border rounded-[4px] focus:outline-none focus:ring-2 focus:border-transparent"
                   style={{ borderColor: 'var(--outline-variant)' }}
                   placeholder="admin@example.com"
                   required
@@ -91,7 +91,7 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium mb-2" style={{ color: 'var(--on-surface-variant)' }}>
+              <label htmlFor="password" className="font-body block text-sm font-medium mb-2" style={{ color: 'var(--on-surface-variant)' }}>
                 Password
               </label>
               <div className="relative">
@@ -101,7 +101,7 @@ export default function LoginPage() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-12 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent"
+                  className="w-full pl-10 pr-12 py-2.5 border rounded-[4px] focus:outline-none focus:ring-2 focus:border-transparent"
                   style={{ borderColor: 'var(--outline-variant)' }}
                   placeholder="Enter your password"
                   required

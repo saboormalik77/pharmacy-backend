@@ -108,12 +108,12 @@ function SetupAccountPageContent() {
       <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-xl mb-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-[4px] mb-4">
               <AlertTriangle className="w-8 h-8 text-red-600" />
             </div>
-            <h1 className="text-lg font-bold text-gray-900 mb-2">Invalid Invitation</h1>
+            <h1 className="font-heading text-headline text-gray-900 mb-2">Invalid Invitation</h1>
           </div>
-          <div className="bg-white rounded-lg shadow-md p-8 text-center">
+          <div className="bg-white rounded-[4px] shadow-md p-8 text-center">
             <p className="text-gray-600 mb-6">{error}</p>
             <Button variant="primary" onClick={() => router.push('/login')}>
               Go to Login
@@ -129,12 +129,12 @@ function SetupAccountPageContent() {
       <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-xl mb-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-[4px] mb-4">
               <CheckCircle className="w-8 h-8 text-green-600" />
             </div>
-            <h1 className="text-lg font-bold text-gray-900 mb-2">Account Setup Complete</h1>
+            <h1 className="font-heading text-headline text-gray-900 mb-2">Account Setup Complete</h1>
           </div>
-          <div className="bg-white rounded-lg shadow-md p-8 text-center">
+          <div className="bg-white rounded-[4px] shadow-md p-8 text-center">
             <p className="text-gray-600 mb-6">
               Your account has been set up successfully. You can now log in with your email and the password you just created.
             </p>
@@ -151,16 +151,16 @@ function SetupAccountPageContent() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-xl mb-4 shadow-lg">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-[4px] mb-4 shadow-lg">
             <Shield className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-lg font-bold text-gray-900 mb-2">Set Up Your Account</h1>
+          <h1 className="font-heading text-headline text-gray-900 mb-2">Set Up Your Account</h1>
           <p className="text-gray-600">Admin Portal</p>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-8">
+        <div className="bg-white rounded-[4px] shadow-md p-8">
           {adminInfo && (
-            <div className="mb-6 p-3 bg-indigo-50 rounded-lg">
+            <div className="mb-6 p-3 bg-indigo-50 rounded-[4px]">
               <p className="text-sm text-gray-700">
                 Welcome, <strong>{adminInfo.name}</strong>
               </p>
@@ -170,7 +170,7 @@ function SetupAccountPageContent() {
 
           <form onSubmit={handleSubmit} className="space-y-5" noValidate>
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[4px] text-sm">
                 {error}
               </div>
             )}
@@ -186,7 +186,7 @@ function SetupAccountPageContent() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   placeholder="Min 8 characters"
                   required
                   minLength={8}
@@ -213,7 +213,7 @@ function SetupAccountPageContent() {
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   placeholder="Re-enter your password"
                   required
                   minLength={8}

@@ -183,7 +183,7 @@ export default function TbdItemsPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-lg font-bold flex items-center gap-1.5" style={{ color: 'var(--foreground)' }}>
+                    <h1 className="font-heading text-headline flex items-center gap-1.5" style={{ color: 'var(--foreground)' }}>
                         <AlertTriangle className="w-4 h-4" style={{ color: 'var(--tertiary)' }} /> TBD Items
                     </h1>
                     <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>Items requiring manual review — resolve as Returnable or Non-Returnable</p>
@@ -191,7 +191,7 @@ export default function TbdItemsPage() {
             </div>
 
             {/* Search */}
-            <div className="rounded-lg shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+            <div className="rounded-[4px] shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 <div className="relative">
                     <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
@@ -209,7 +209,7 @@ export default function TbdItemsPage() {
             {isLoading ? (
                 <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary-600" /></div>
             ) : groups.length === 0 ? (
-                <div className="rounded-lg shadow p-10 text-center border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                <div className="rounded-[4px] shadow p-10 text-center border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                     <CheckCircle className="w-10 h-10 mx-auto mb-2" style={{ color: 'var(--secondary)' }} />
                     <p className="text-sm font-medium" style={{ color: 'var(--on-surface-variant)' }}>No active returns found</p>
                 </div>
@@ -218,7 +218,7 @@ export default function TbdItemsPage() {
                     {groups.map(({ transaction: tx, items, loading, loaded }) => {
                         const isExpanded = expandedTx.has(tx.id);
                         return (
-                            <div key={tx.id} className="rounded-lg shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: isExpanded ? 'var(--tertiary)' : 'var(--outline-variant)' }}>
+                            <div key={tx.id} className="rounded-[4px] shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: isExpanded ? 'var(--tertiary)' : 'var(--outline-variant)' }}>
                                 {/* Transaction header — clickable to expand */}
                                 <button
                                     onClick={() => toggleExpand(tx.id)}
@@ -259,27 +259,27 @@ export default function TbdItemsPage() {
                                                 <table className="w-full">
                                                     <thead>
                                                         <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                                                            <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
-                                                            <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product</th>
-                                                            <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Manufacturer</th>
-                                                            <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Lot</th>
-                                                            <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Expires</th>
-                                                            <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Qty</th>
-                                                            <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
+                                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
+                                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product</th>
+                                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Manufacturer</th>
+                                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Lot</th>
+                                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Expires</th>
+                                                            <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Qty</th>
+                                                            <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                                         {items.map(item => (
                                                             <tr key={item.id} className="hover:bg-primary-50/40 transition-colors">
-                                                                <td className="px-4 py-3 text-sm font-mono whitespace-nowrap" style={{ color: 'var(--foreground)' }}>{item.ndc || '—'}</td>
-                                                                <td className="px-4 py-3 text-sm max-w-[140px] truncate" style={{ color: 'var(--foreground)' }} title={item.proprietaryName || ''}>
+                                                                <td className="px-3 py-3 text-sm font-mono whitespace-nowrap" style={{ color: 'var(--foreground)' }}>{item.ndc || '—'}</td>
+                                                                <td className="px-3 py-3 text-sm max-w-[140px] truncate" style={{ color: 'var(--foreground)' }} title={item.proprietaryName || ''}>
                                                                     {item.proprietaryName || item.genericName || '—'}
                                                                 </td>
-                                                                <td className="px-4 py-3 text-sm max-w-[100px] truncate" style={{ color: 'var(--on-surface-variant)' }}>{item.manufacturer || '—'}</td>
-                                                                <td className="px-4 py-3 text-sm font-mono whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>{item.lotNumber || '—'}</td>
-                                                                <td className="px-4 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
-                                                                <td className="px-4 py-3 text-sm text-center font-semibold" style={{ color: 'var(--foreground)' }}>{item.quantity}</td>
-                                                                <td className="px-4 py-3 text-sm text-right">
+                                                                <td className="px-3 py-3 text-sm max-w-[100px] truncate" style={{ color: 'var(--on-surface-variant)' }}>{item.manufacturer || '—'}</td>
+                                                                <td className="px-3 py-3 text-sm font-mono whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>{item.lotNumber || '—'}</td>
+                                                                <td className="px-3 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
+                                                                <td className="px-3 py-3 text-sm text-center font-semibold" style={{ color: 'var(--foreground)' }}>{item.quantity}</td>
+                                                                <td className="px-3 py-3 text-sm text-right">
                                                                     <button
                                                                         onClick={() => {
                                                                             setResolveModal({ item, txId: tx.id });
@@ -310,14 +310,14 @@ export default function TbdItemsPage() {
             {/* ── Resolve Modal ─────────────────────────────── */}
             {resolveModal && (
                 <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setResolveModal(null)}>
-                    <div className="rounded-lg max-w-md w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                    <div className="rounded-[4px] max-w-md w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
-                            <h2 className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>Resolve TBD Item</h2>
+                            <h2 className="font-heading text-body font-semibold" style={{ color: 'var(--foreground)' }}>Resolve TBD Item</h2>
                             <button onClick={() => setResolveModal(null)} style={{ color: 'var(--outline)' }}><X className="w-5 h-5" /></button>
                         </div>
                         <div className="p-5 space-y-4">
                             {/* Item info */}
-                            <div className="rounded-lg p-3 text-xs space-y-1 border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
+                            <div className="rounded-[4px] p-3 text-xs space-y-1 border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
                                 <p className="font-medium" style={{ color: 'var(--foreground)' }}>{resolveModal.item.proprietaryName || resolveModal.item.ndc || 'Unknown item'}</p>
                                 <p style={{ color: 'var(--on-surface-variant)' }}>
                                     NDC: <span className="font-mono">{resolveModal.item.ndc || '—'}</span> | Lot: {resolveModal.item.lotNumber || '—'} | Exp: {resolveModal.item.expirationDate ? formatDate(resolveModal.item.expirationDate) : '—'}
@@ -329,7 +329,7 @@ export default function TbdItemsPage() {
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-2">Resolve As <span className="text-red-500">*</span></label>
                                 <div className="flex gap-3">
-                                    <label className={`flex-1 flex items-center gap-2 p-3 border-2 rounded-lg cursor-pointer transition-colors ${
+                                    <label className={`flex-1 flex items-center gap-2 p-3 border-2 rounded-[4px] cursor-pointer transition-colors ${
                                         resolveForm.new_status === 'returnable' ? 'border-green-400 bg-green-50' : 'border-gray-200 hover:border-gray-300'
                                     }`}>
                                         <input type="radio" name="resolve_status" value="returnable" checked={resolveForm.new_status === 'returnable'} onChange={() => setResolveForm({ ...resolveForm, new_status: 'returnable' })} className="text-green-600 focus:ring-green-500" />
@@ -337,7 +337,7 @@ export default function TbdItemsPage() {
                                             <p className="text-sm font-medium text-green-700"><CheckCircle className="w-3.5 h-3.5 inline mr-1" />Returnable</p>
                                         </div>
                                     </label>
-                                    <label className={`flex-1 flex items-center gap-2 p-3 border-2 rounded-lg cursor-pointer transition-colors ${
+                                    <label className={`flex-1 flex items-center gap-2 p-3 border-2 rounded-[4px] cursor-pointer transition-colors ${
                                         resolveForm.new_status === 'non_returnable' ? 'border-red-400 bg-red-50' : 'border-gray-200 hover:border-gray-300'
                                     }`}>
                                         <input type="radio" name="resolve_status" value="non_returnable" checked={resolveForm.new_status === 'non_returnable'} onChange={() => setResolveForm({ ...resolveForm, new_status: 'non_returnable' })} className="text-red-600 focus:ring-red-500" />
@@ -352,7 +352,7 @@ export default function TbdItemsPage() {
                             {resolveForm.new_status === 'returnable' && (
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Destination</label>
-                                    <select value={resolveForm.destination} onChange={e => setResolveForm({ ...resolveForm, destination: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    <select value={resolveForm.destination} onChange={e => setResolveForm({ ...resolveForm, destination: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500">
                                         <option value="">— Select —</option>
                                         <option value="inmar">Inmar</option>
                                         <option value="qualanex">Qualanex</option>
@@ -387,13 +387,13 @@ export default function TbdItemsPage() {
                                                 type="date"
                                                 value={expectedReturnableDate}
                                                 onChange={e => setExpectedReturnableDate(e.target.value)}
-                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-purple-500"
                                             />
                                         </div>
                                     )}
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 mb-1">Reason</label>
-                                        <select value={resolveForm.reason} onChange={e => setResolveForm({ ...resolveForm, reason: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                        <select value={resolveForm.reason} onChange={e => setResolveForm({ ...resolveForm, reason: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500">
                                             <option value="">— Select Reason —</option>
                                             <option value="date">Date (expired/outside return window)</option>
                                             <option value="policy">Policy (manufacturer restriction)</option>
@@ -407,7 +407,7 @@ export default function TbdItemsPage() {
                             {/* Memo */}
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">Memo</label>
-                                <textarea value={resolveForm.memo} onChange={e => setResolveForm({ ...resolveForm, memo: e.target.value })} rows={2} placeholder="Optional notes about this resolution" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none" />
+                                <textarea value={resolveForm.memo} onChange={e => setResolveForm({ ...resolveForm, memo: e.target.value })} rows={2} placeholder="Optional notes about this resolution" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none" />
                             </div>
                         </div>
                         <div className="flex justify-end gap-2 p-5 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>

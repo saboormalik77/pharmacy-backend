@@ -198,19 +198,19 @@ export default function WarehouseReceivingPage() {
                 <Link href="/warehouse" className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-primary-600 mb-1.5 transition-colors">
                     <ChevronLeft className="w-3 h-3" /> Back to Warehouse
                 </Link>
-                <h1 className="text-lg font-bold flex items-center gap-1.5" style={{ color: 'var(--foreground)' }}>
+                <h1 className="font-heading text-headline flex items-center gap-1.5" style={{ color: 'var(--foreground)' }}>
                     <PackageCheck className="w-4 h-4 text-primary-600" /> Warehouse Receiving
                 </h1>
                 <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>Scan each box's tracking number. All boxes must be scanned before the return is marked as received.</p>
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-1 rounded-lg p-1 border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
+            <div className="flex gap-1 rounded-[4px] p-1 border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
                 {tabs.map(t => (
                     <button
                         key={t.key}
                         onClick={() => setTab(t.key)}
-                        className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                        className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-[4px] transition-colors ${
                             tab === t.key ? 'shadow-sm' : ''
                         }`}
                         style={tab === t.key ? { backgroundColor: 'var(--surface-container-lowest)', color: 'var(--primary)' } : { color: 'var(--on-surface-variant)' }}
@@ -224,7 +224,7 @@ export default function WarehouseReceivingPage() {
             {tab === 'scan' && (
                 <div className="space-y-3">
                     {/* Scanner: camera (same modal as return add-items) or USB / keyboard */}
-                    <div className="rounded-lg shadow px-4 py-3 space-y-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                    <div className="rounded-[4px] shadow px-4 py-3 space-y-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         <div className="flex items-center justify-between gap-2 flex-wrap">
                             <label className="block text-xs font-medium" style={{ color: 'var(--on-surface)' }}>
                                 <Truck className="w-3.5 h-3.5 inline mr-1" />
@@ -261,7 +261,7 @@ export default function WarehouseReceivingPage() {
                                     type="button"
                                     onClick={() => setCameraOpen(true)}
                                     disabled={isActionLoading || (scanProgress?.allScanned ?? false)}
-                                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-dashed rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-dashed rounded-[4px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                     style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface)' }}
                                 >
                                     {isActionLoading ? (
@@ -296,7 +296,7 @@ export default function WarehouseReceivingPage() {
                                             ? 'Scan next box tracking number…'
                                             : 'USB wedge: scan barcode — or type — then Enter'
                                         }
-                                        className="w-full pl-9 pr-3 py-2 text-sm border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-mono"
+                                        className="w-full pl-9 pr-3 py-2 text-sm border-2 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-mono"
                                         style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                                         autoFocus
                                         disabled={isActionLoading || (scanProgress?.allScanned ?? false)}
@@ -339,7 +339,7 @@ export default function WarehouseReceivingPage() {
 
                     {/* Error */}
                     {scanError && (
-                        <div className="border rounded-lg px-4 py-2.5 flex items-start gap-2.5" style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
+                        <div className="border rounded-[4px] px-4 py-2.5 flex items-start gap-2.5" style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
                             <XCircle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--error)' }} />
                             <div>
                                 <p className="text-xs font-medium" style={{ color: 'var(--on-error-container)' }}>Could not scan box</p>
@@ -351,7 +351,7 @@ export default function WarehouseReceivingPage() {
                     {/* Scan Progress Card */}
                     {scannedReturn && scanProgress && (
                         <div
-                            className="border-2 rounded-lg overflow-hidden"
+                            className="border-2 rounded-[4px] overflow-hidden"
                             style={{
                                 backgroundColor: scanProgress.allScanned ? 'var(--secondary-container)' : 'var(--primary-container)',
                                 borderColor: 'var(--outline-variant)',
@@ -364,7 +364,7 @@ export default function WarehouseReceivingPage() {
                                         ? <CheckCircle className="w-4 h-4" style={{ color: 'var(--secondary)' }} />
                                         : <Box className="w-4 h-4" style={{ color: 'var(--primary)' }} />
                                     }
-                                    <h3 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+                                    <h3 className="font-heading text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
                                         {scanProgress.allScanned
                                             ? 'All Boxes Scanned — Return Received!'
                                             : `Scanning in Progress — ${scanProgress.scannedCount} of ${scanProgress.totalPackages} boxes`
@@ -429,7 +429,7 @@ export default function WarehouseReceivingPage() {
                                                 return (
                                                     <div
                                                         key={idx}
-                                                        className="flex items-center justify-between px-3 py-1.5 rounded-md border"
+                                                        className="flex items-center justify-between px-3 py-1.5 rounded-[4px] border"
                                                         style={{
                                                             backgroundColor: isScanned ? 'var(--secondary-container)' : 'var(--surface-container-lowest)',
                                                             borderColor: 'var(--outline-variant)',
@@ -489,7 +489,7 @@ export default function WarehouseReceivingPage() {
             {/* ── Tab: Pending ────────────────────────────── */}
             {tab === 'pending' && (
                 <div className="space-y-2">
-                    <div className="rounded-lg shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                    <div className="rounded-[4px] shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         <div className="relative">
                             <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--outline)' }} />
                             <input
@@ -506,22 +506,22 @@ export default function WarehouseReceivingPage() {
                     {isLoading ? (
                         <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 animate-spin text-primary-600" /></div>
                     ) : pendingReturns.length === 0 ? (
-                        <div className="rounded-lg shadow p-10 text-center border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                        <div className="rounded-[4px] shadow p-10 text-center border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                             <Package className="w-10 h-10 mx-auto mb-2" style={{ color: 'var(--outline-variant)' }} />
                             <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>No finalized returns awaiting check-in</p>
                         </div>
                     ) : (
-                        <div className="rounded-lg shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                        <div className="rounded-[4px] shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                             <table className="w-full">
                                 <thead>
                                     <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                                        <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">License Plate</th>
-                                        <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Pharmacy</th>
-                                        <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">FedEx Tracking</th>
-                                        <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Items</th>
-                                        <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Boxes</th>
-                                        <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Scan Status</th>
-                                        <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Finalized</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">License Plate</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Pharmacy</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">FedEx Tracking</th>
+                                        <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Items</th>
+                                        <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Boxes</th>
+                                        <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Scan Status</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Finalized</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
@@ -536,9 +536,9 @@ export default function WarehouseReceivingPage() {
                                         const fedexJustCopied = copiedTrackingKey === fedexCopyKey;
                                         return (
                                             <tr key={r.id} className="hover:bg-primary-50/40" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
-                                                <td className="px-4 py-3 text-sm font-mono font-semibold" style={{ color: 'var(--foreground)' }}>{r.licensePlate}</td>
-                                                <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{r.pharmacyName}</td>
-                                                <td className="px-4 py-3">
+                                                <td className="px-3 py-3 text-sm font-mono font-semibold" style={{ color: 'var(--foreground)' }}>{r.licensePlate}</td>
+                                                <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{r.pharmacyName}</td>
+                                                <td className="px-3 py-3">
                                                     {r.packageTracking && Object.keys(r.packageTracking).length > 0 ? (
                                                         <div className="flex flex-col gap-0.5">
                                                             {Object.values(r.packageTracking).map((tn: any, i) => {
@@ -593,9 +593,9 @@ export default function WarehouseReceivingPage() {
                                                         </div>
                                                     )}
                                                 </td>
-                                                <td className="px-4 py-3 text-sm text-center" style={{ color: 'var(--foreground)' }}>{r.totalItems}</td>
-                                                <td className="px-4 py-3 text-sm text-center" style={{ color: 'var(--foreground)' }}>{r.boxCount ?? '—'}</td>
-                                                <td className="px-4 py-3 text-center">
+                                                <td className="px-3 py-3 text-sm text-center" style={{ color: 'var(--foreground)' }}>{r.totalItems}</td>
+                                                <td className="px-3 py-3 text-sm text-center" style={{ color: 'var(--foreground)' }}>{r.boxCount ?? '—'}</td>
+                                                <td className="px-3 py-3 text-center">
                                                     {scannedPkgs > 0 ? (
                                                         <Badge variant="warning">
                                                             <span className="text-[10px]">{scannedPkgs}/{totalPkgs} scanned</span>
@@ -606,7 +606,7 @@ export default function WarehouseReceivingPage() {
                                                         </Badge>
                                                     )}
                                                 </td>
-                                                <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{r.finalizedAt ? formatDate(r.finalizedAt) : '—'}</td>
+                                                <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{r.finalizedAt ? formatDate(r.finalizedAt) : '—'}</td>
                                             </tr>
                                         );
                                     })}
@@ -625,7 +625,7 @@ export default function WarehouseReceivingPage() {
             {/* ── Tab: Received ───────────────────────────── */}
             {tab === 'received' && (
                 <div className="space-y-2">
-                    <div className="rounded-lg shadow px-3 py-2 space-y-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                    <div className="rounded-[4px] shadow px-3 py-2 space-y-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         <div className="relative">
                             <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--outline)' }} />
                             <input
@@ -680,7 +680,7 @@ export default function WarehouseReceivingPage() {
                     {isLoading ? (
                         <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 animate-spin text-primary-600" /></div>
                     ) : receivedReturns.length === 0 ? (
-                        <div className="rounded-lg shadow p-10 text-center border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                        <div className="rounded-[4px] shadow p-10 text-center border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                             <CheckCircle className="w-10 h-10 mx-auto mb-2" style={{ color: 'var(--outline-variant)' }} />
                             <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>
                                 {verificationFilter === 'verified' ? 'No verified returns found' :
@@ -689,33 +689,33 @@ export default function WarehouseReceivingPage() {
                             </p>
                         </div>
                     ) : (
-                        <div className="rounded-lg shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                        <div className="rounded-[4px] shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                             <table className="w-full">
                                 <thead>
                                     <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                                        <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">License Plate</th>
-                                        <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Pharmacy</th>
-                                        <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Items</th>
-                                        <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Received</th>
-                                        <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Verified</th>
-                                        <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">License Plate</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Pharmacy</th>
+                                        <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Items</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Received</th>
+                                        <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Verified</th>
+                                        <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                     {receivedReturns.map(r => (
                                         <tr key={r.id} className="hover:bg-primary-50/40" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
-                                            <td className="px-4 py-3 text-sm font-mono font-semibold" style={{ color: 'var(--foreground)' }}>{r.licensePlate}</td>
-                                            <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{r.pharmacyName}</td>
-                                            <td className="px-4 py-3 text-sm text-center" style={{ color: 'var(--foreground)' }}>{r.totalItems}</td>
-                                            <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{r.receivedInWarehouseDate ? formatDateTime(r.receivedInWarehouseDate) : '—'}</td>
-                                            <td className="px-4 py-3 text-center">
+                                            <td className="px-3 py-3 text-sm font-mono font-semibold" style={{ color: 'var(--foreground)' }}>{r.licensePlate}</td>
+                                            <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{r.pharmacyName}</td>
+                                            <td className="px-3 py-3 text-sm text-center" style={{ color: 'var(--foreground)' }}>{r.totalItems}</td>
+                                            <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{r.receivedInWarehouseDate ? formatDateTime(r.receivedInWarehouseDate) : '—'}</td>
+                                            <td className="px-3 py-3 text-center">
                                                 {r.verifiedIntegrity ? (
                                                     <Badge variant="success"><span className="text-[10px]">Verified</span></Badge>
                                                 ) : (
                                                     <Badge variant="warning"><span className="text-[10px]">Pending</span></Badge>
                                                 )}
                                             </td>
-                                            <td className="px-4 py-3 text-right">
+                                            <td className="px-3 py-3 text-right">
                                                 {r.verifiedIntegrity ? (
                                                     <button
                                                         type="button"

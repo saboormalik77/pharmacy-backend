@@ -374,7 +374,7 @@ export default function BuyingGroupsPage() {
     <div>
       {successMsg && (
         <div
-          className="mb-4 px-4 py-3 rounded-lg text-sm border"
+          className="mb-4 px-4 py-3 rounded-[4px] text-sm border"
           style={{
             backgroundColor: 'var(--secondary-container)',
             borderColor: 'var(--secondary)',
@@ -388,7 +388,7 @@ export default function BuyingGroupsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>Buying Groups</h1>
+          <h1 className="font-heading text-headline" style={{ color: 'var(--foreground)' }}>Buying Groups</h1>
           <p className="mt-1" style={{ color: 'var(--on-surface-variant)' }}>
             Manage your buying groups and their admin accounts
           </p>
@@ -411,10 +411,10 @@ export default function BuyingGroupsPage() {
           return (
             <div
               key={s.label}
-              className="rounded-lg border p-3 flex items-center gap-3"
+              className="rounded-[4px] border p-6 flex items-center gap-3"
               style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
             >
-              <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center', s.color)}>
+              <div className={cn('w-9 h-9 rounded-[4px] flex items-center justify-center', s.color)}>
                 <Icon className="w-4 h-4" />
               </div>
               <div>
@@ -428,7 +428,7 @@ export default function BuyingGroupsPage() {
 
       {/* Filters */}
       <div
-        className="rounded-lg border p-4 mb-4"
+        className="rounded-[4px] border p-4 mb-4"
         style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
       >
         <div className="flex flex-col sm:flex-row gap-3">
@@ -440,14 +440,14 @@ export default function BuyingGroupsPage() {
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               autoComplete="off"
-              className="w-full pl-9 pr-4 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full pl-9 pr-4 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
               style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-            className="px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="px-3 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
           >
             <option value="all">All Statuses</option>
@@ -459,7 +459,7 @@ export default function BuyingGroupsPage() {
       </div>
 
       {/* Table */}
-      <div className="rounded-lg border overflow-hidden" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+      <div className="rounded-[4px] border overflow-hidden" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
         {isLoading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
@@ -478,25 +478,25 @@ export default function BuyingGroupsPage() {
             <table className="w-full text-sm">
               <thead className="text-white" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
                 <tr>
-                  <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Name</th>
-                  <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden md:table-cell">Contact Email</th>
-                  <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">Phone</th>
-                  <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Admins</th>
-                  <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Status</th>
-                  <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">Created</th>
-                  <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Actions</th>
+                  <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Name</th>
+                  <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden md:table-cell">Contact Email</th>
+                  <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">Phone</th>
+                  <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Admins</th>
+                  <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Status</th>
+                  <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">Created</th>
+                  <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                 {buyingGroups.map((group) => (
-                  <tr key={group.id} className="transition-colors hover:bg-primary-50/40">
-                    <td className="px-4 py-3 text-sm font-medium" style={{ color: 'var(--foreground)' }}>{group.name}</td>
-                    <td className="px-4 py-3 text-sm hidden md:table-cell" style={{ color: 'var(--on-surface-variant)' }}>{group.contactEmail || '-'}</td>
-                    <td className="px-4 py-3 text-sm hidden lg:table-cell" style={{ color: 'var(--on-surface-variant)' }}>{group.contactPhone || '-'}</td>
-                    <td className="px-4 py-3 text-sm text-center" style={{ color: 'var(--on-surface-variant)' }}>{group.adminCount}</td>
-                    <td className="px-4 py-3 text-sm text-center">{statusBadge(group.status)}</td>
-                    <td className="px-4 py-3 text-sm hidden sm:table-cell" style={{ color: 'var(--on-surface-variant)' }}>{formatDate(group.createdAt)}</td>
-                    <td className="px-4 py-3 text-sm">
+                  <tr key={group.id} className="transition-colors hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
+                    <td className="px-3 py-3 text-sm font-medium" style={{ color: 'var(--foreground)' }}>{group.name}</td>
+                    <td className="px-3 py-3 text-sm hidden md:table-cell" style={{ color: 'var(--on-surface-variant)' }}>{group.contactEmail || '-'}</td>
+                    <td className="px-3 py-3 text-sm hidden lg:table-cell" style={{ color: 'var(--on-surface-variant)' }}>{group.contactPhone || '-'}</td>
+                    <td className="px-3 py-3 text-sm text-center" style={{ color: 'var(--on-surface-variant)' }}>{group.adminCount}</td>
+                    <td className="px-3 py-3 text-sm text-center">{statusBadge(group.status)}</td>
+                    <td className="px-3 py-3 text-sm hidden sm:table-cell" style={{ color: 'var(--on-surface-variant)' }}>{formatDate(group.createdAt)}</td>
+                    <td className="px-3 py-3 text-sm">
                       <div className="flex items-center justify-end gap-1">
                         <button onClick={() => openViewModal(group)} className="p-1.5 rounded hover:bg-primary-50 transition-colors" style={{ color: 'var(--on-surface-variant)' }} title="View">
                           <Eye className="w-4 h-4" />
@@ -549,10 +549,10 @@ export default function BuyingGroupsPage() {
           style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 45%, transparent)' }}
         >
           <div
-            className="rounded-lg shadow-xl max-w-sm w-full mx-4 p-6 border"
+            className="rounded-[4px] shadow-xl max-w-sm w-full mx-4 p-6 border"
             style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
           >
-            <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--foreground)' }}>Delete Buying Group</h3>
+            <h3 className="font-heading text-body font-semibold mb-2" style={{ color: 'var(--foreground)' }}>Delete Buying Group</h3>
             <p className="text-sm mb-6" style={{ color: 'var(--on-surface-variant)' }}>
               Are you sure you want to delete this buying group? Associated admin accounts will be deactivated.
             </p>
@@ -575,7 +575,7 @@ export default function BuyingGroupsPage() {
           style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
         >
           <div
-            className="rounded-xl shadow-2xl w-full max-w-xl max-h-[92vh] flex flex-col border"
+            className="rounded-[4px] shadow-xl w-full max-w-xl max-h-[92vh] flex flex-col border"
             style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
           >
 
@@ -585,11 +585,11 @@ export default function BuyingGroupsPage() {
               style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}
             >
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-white/20 rounded-[4px] flex items-center justify-center">
                   <Users className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold text-white">
+                  <h3 className="font-heading text-body font-semibold text-white">
                     {modalMode === 'create' ? 'Add Buying Group' : 'Edit Buying Group'}
                   </h3>
                   <p className="text-xs mt-0.5" style={{ color: 'var(--inverse-on-surface)' }}>
@@ -597,7 +597,7 @@ export default function BuyingGroupsPage() {
                   </p>
                 </div>
               </div>
-              <button onClick={closeModal} className="p-1.5 rounded-lg hover:bg-white/20 text-white/80 hover:text-white transition-colors cursor-pointer">
+              <button onClick={closeModal} className="p-1.5 rounded-[4px] hover:bg-white/20 text-white/80 hover:text-white transition-colors cursor-pointer">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -605,7 +605,7 @@ export default function BuyingGroupsPage() {
             {/* Scrollable Body */}
             <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
               {formError && (
-                <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 px-3 py-2.5 rounded-lg text-sm">
+                <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 px-3 py-2.5 rounded-[4px] text-sm">
                   <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{formError}</span>
                 </div>
@@ -625,7 +625,7 @@ export default function BuyingGroupsPage() {
                     type="text" value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     autoComplete="off"
-                    className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
+                    className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
                     placeholder="e.g. Northeast Pharmacy Alliance"
                   />
                 </div>
@@ -637,7 +637,7 @@ export default function BuyingGroupsPage() {
                       type="email" value={formData.contactEmail}
                       onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
                       autoComplete="off"
-                      className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
+                      className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
                       placeholder="contact@example.com"
                     />
                   </div>
@@ -647,7 +647,7 @@ export default function BuyingGroupsPage() {
                       type="text" value={formData.contactPhone}
                       onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
                       autoComplete="off"
-                      className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
+                      className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
                       placeholder="+1 (234) 567-8900"
                     />
                   </div>
@@ -659,7 +659,7 @@ export default function BuyingGroupsPage() {
                     type="text" value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                     autoComplete="off"
-                    className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
+                    className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
                     placeholder="Street address, city, state"
                   />
                 </div>
@@ -670,7 +670,7 @@ export default function BuyingGroupsPage() {
                     <select
                       value={formData.status}
                       onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                      className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
+                      className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
                     >
                       <option value="active">Active</option>
                       <option value="inactive">Inactive</option>
@@ -686,7 +686,7 @@ export default function BuyingGroupsPage() {
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                     rows={2}
                     autoComplete="off"
-                    className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors resize-none"
+                    className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors resize-none"
                     placeholder="Optional internal notes..."
                   />
                 </div>
@@ -704,7 +704,7 @@ export default function BuyingGroupsPage() {
                   </div>
 
                   {domainError && (
-                    <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-xs">
+                    <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-[4px] text-xs">
                       <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                       <span>{domainError}</span>
                     </div>
@@ -718,14 +718,14 @@ export default function BuyingGroupsPage() {
                   ) : (
                     <div className="space-y-2">
                       {selectedGroupDomains.length === 0 ? (
-                        <div className="text-center py-4 text-sm text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                        <div className="text-center py-4 text-sm text-gray-400 bg-gray-50 rounded-[4px] border border-dashed border-gray-200">
                           No domains configured yet
                         </div>
                       ) : (
                         selectedGroupDomains.map((d) => (
                           <div
                             key={d.id}
-                            className="flex items-start justify-between p-3 bg-indigo-50/60 rounded-lg border border-indigo-100 cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition-colors"
+                            className="flex items-start justify-between p-3 bg-indigo-50/60 rounded-[4px] border border-indigo-100 cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition-colors"
                             onClick={() => setDomainForm({
                               domain: d.domain || '',
                               adminHostname: d.adminHostname || '',
@@ -742,7 +742,7 @@ export default function BuyingGroupsPage() {
                               type="button"
                               onClick={(e) => { e.stopPropagation(); handleDeleteDomain(d.id, editingGroup.id); }}
                               disabled={domainSavingId === d.id}
-                              className="ml-3 p-1.5 rounded-lg hover:bg-red-100 text-red-500 hover:text-red-700 disabled:opacity-50 shrink-0 transition-colors cursor-pointer"
+                              className="ml-3 p-1.5 rounded-[4px] hover:bg-red-100 text-red-500 hover:text-red-700 disabled:opacity-50 shrink-0 transition-colors cursor-pointer"
                               title="Delete domain"
                             >
                               {domainSavingId === d.id ? (
@@ -757,7 +757,7 @@ export default function BuyingGroupsPage() {
                     </div>
                   )}
 
-                  <div className="bg-gray-50 border border-dashed border-gray-300 rounded-lg p-4 space-y-3">
+                  <div className="bg-gray-50 border border-dashed border-gray-300 rounded-[4px] p-4 space-y-3">
                     <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
                       {domainForm.domain ? '✏️ Editing domain' : '+ Add / update domain'}
                     </p>
@@ -769,14 +769,14 @@ export default function BuyingGroupsPage() {
                         const value = e.target.value;
                         setDomainForm((f) => ({ ...f, adminHostname: value, domain: value }));
                       }}
-                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
                     />
                     <input
                       type="text"
                       placeholder="Pharmacy hostname (e.g. pharmacy.abc.com)"
                       value={domainForm.pharmacyHostname}
                       onChange={(e) => setDomainForm((f) => ({ ...f, pharmacyHostname: e.target.value }))}
-                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
                     />
                     <Button
                       variant="primary"
@@ -803,7 +803,7 @@ export default function BuyingGroupsPage() {
                       <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wider px-2 bg-indigo-50 rounded-full py-0.5">Buying Group Admin Credentials</span>
                       <div className="h-px flex-1 bg-gray-100" />
                     </div>
-                    <p className="text-xs text-gray-600 -mt-1 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+                    <p className="text-xs text-gray-600 -mt-1 bg-amber-50 border border-amber-100 rounded-[4px] px-3 py-2">
                       These credentials will be used by the buying group admin to log in to the Buying Group Portal.
                     </p>
 
@@ -813,7 +813,7 @@ export default function BuyingGroupsPage() {
                         type="text" value={formData.adminName}
                         onChange={(e) => setFormData({ ...formData, adminName: e.target.value })}
                         autoComplete="off"
-                        className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
+                        className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
                         placeholder="Admin user display name"
                       />
                     </div>
@@ -825,7 +825,7 @@ export default function BuyingGroupsPage() {
                           type="email" value={formData.adminEmail}
                           onChange={(e) => setFormData({ ...formData, adminEmail: e.target.value })}
                           autoComplete="off"
-                          className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
+                          className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
                           placeholder="admin@buyinggroup.com"
                         />
                       </div>
@@ -837,7 +837,7 @@ export default function BuyingGroupsPage() {
                             value={formData.adminPassword}
                             onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
                             autoComplete="new-password"
-                            className="w-full px-3 py-2.5 pr-10 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
+                            className="w-full px-3 py-2.5 pr-10 text-sm border border-gray-200 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
                             placeholder="Min 8 characters"
                           />
                           <button
@@ -861,12 +861,12 @@ export default function BuyingGroupsPage() {
                       </span>
                       <div className="h-px flex-1 bg-gray-100" />
                     </div>
-                    <p className="text-xs text-gray-500 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">
+                    <p className="text-xs text-gray-500 bg-blue-50 border border-blue-100 rounded-[4px] px-3 py-2">
                       You can add domains now or later from the edit view.
                     </p>
 
                     {localDomainError && (
-                      <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-xs">
+                      <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-[4px] text-xs">
                         <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                         <span>{localDomainError}</span>
                       </div>
@@ -875,7 +875,7 @@ export default function BuyingGroupsPage() {
                     {localDomains.length > 0 && (
                       <div className="space-y-2">
                         {localDomains.map((ld, idx) => (
-                          <div key={idx} className="flex items-start justify-between p-3 bg-indigo-50/60 rounded-lg border border-indigo-100">
+                          <div key={idx} className="flex items-start justify-between p-3 bg-indigo-50/60 rounded-[4px] border border-indigo-100">
                             <div className="space-y-0.5 min-w-0">
                               <p className="text-sm font-semibold text-indigo-800 truncate">{ld.domain}</p>
                               <p className="text-xs text-gray-500"><span className="font-medium text-gray-600">Admin Portal:</span> {ld.adminHostname || '—'}</p>
@@ -884,7 +884,7 @@ export default function BuyingGroupsPage() {
                             <button
                               type="button"
                               onClick={() => handleLocalDomainRemove(idx)}
-                              className="ml-3 p-1.5 rounded-lg hover:bg-red-100 text-red-500 hover:text-red-700 shrink-0 transition-colors cursor-pointer"
+                              className="ml-3 p-1.5 rounded-[4px] hover:bg-red-100 text-red-500 hover:text-red-700 shrink-0 transition-colors cursor-pointer"
                               title="Remove domain"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -894,7 +894,7 @@ export default function BuyingGroupsPage() {
                       </div>
                     )}
 
-                    <div className="bg-gray-50 border border-dashed border-gray-300 rounded-lg p-4 space-y-3">
+                    <div className="bg-gray-50 border border-dashed border-gray-300 rounded-[4px] p-4 space-y-3">
                       <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">+ Add a domain</p>
                       <input
                         type="text"
@@ -904,14 +904,14 @@ export default function BuyingGroupsPage() {
                           const value = e.target.value;
                           setLocalDomainForm((f) => ({ ...f, adminHostname: value, domain: value }));
                         }}
-                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
                       />
                       <input
                         type="text"
                         placeholder="Pharmacy hostname (e.g. pharmacy.abc.com)"
                         value={localDomainForm.pharmacyHostname}
                         onChange={(e) => setLocalDomainForm((f) => ({ ...f, pharmacyHostname: e.target.value }))}
-                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
                       />
                       <Button
                         variant="outline"
@@ -962,7 +962,7 @@ export default function BuyingGroupsPage() {
           style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
         >
           <div
-            className="rounded-xl shadow-2xl w-full max-w-xl max-h-[92vh] flex flex-col border"
+            className="rounded-[4px] shadow-xl w-full max-w-xl max-h-[92vh] flex flex-col border"
             style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
           >
 
@@ -972,15 +972,15 @@ export default function BuyingGroupsPage() {
               style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}
             >
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-white/20 rounded-[4px] flex items-center justify-center">
                   <Eye className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold text-white">Buying Group Details</h3>
+                  <h3 className="font-heading text-body font-semibold text-white">Buying Group Details</h3>
                   <p className="text-xs mt-0.5" style={{ color: 'var(--inverse-on-surface)' }}>View group information and linked accounts</p>
                 </div>
               </div>
-              <button onClick={closeModal} className="p-1.5 rounded-lg hover:bg-white/20 text-white/80 hover:text-white transition-colors cursor-pointer">
+              <button onClick={closeModal} className="p-1.5 rounded-[4px] hover:bg-white/20 text-white/80 hover:text-white transition-colors cursor-pointer">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -994,7 +994,7 @@ export default function BuyingGroupsPage() {
               <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
 
                 {/* Group Name + Status Banner */}
-                <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl border border-indigo-100 p-4 flex items-center justify-between gap-3">
+                <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-[4px] border border-indigo-100 p-4 flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-[10px] text-indigo-400 uppercase tracking-widest font-semibold mb-1">Buying Group</p>
                     <p className="text-lg font-bold text-gray-900 leading-tight truncate">{selectedGroup.name}</p>
@@ -1016,7 +1016,7 @@ export default function BuyingGroupsPage() {
                     <div
                       key={field.label}
                       className={cn(
-                        'bg-white rounded-lg border border-gray-100 px-3.5 py-3',
+                        'bg-white rounded-[4px] border border-gray-100 px-3.5 py-3',
                         field.full ? 'sm:col-span-2' : ''
                       )}
                     >
@@ -1040,13 +1040,13 @@ export default function BuyingGroupsPage() {
                       <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
                     </div>
                   ) : selectedGroupDomains.length === 0 ? (
-                    <div className="text-center py-5 text-sm text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                    <div className="text-center py-5 text-sm text-gray-400 bg-gray-50 rounded-[4px] border border-dashed border-gray-200">
                       No portal domains configured
                     </div>
                   ) : (
                     <div className="space-y-2">
                       {selectedGroupDomains.map((d) => (
-                        <div key={d.id} className="bg-white rounded-lg border border-indigo-100 overflow-hidden">
+                        <div key={d.id} className="bg-white rounded-[4px] border border-indigo-100 overflow-hidden">
                           <div className="bg-indigo-50 px-3.5 py-2 border-b border-indigo-100">
                             <p className="text-sm font-semibold text-indigo-800">{d.domain || d.adminHostname}</p>
                           </div>
@@ -1076,13 +1076,13 @@ export default function BuyingGroupsPage() {
                     <div className="h-px flex-1 bg-gray-100" />
                   </div>
                   {selectedGroupAdmins.length === 0 ? (
-                    <div className="text-center py-5 text-sm text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                    <div className="text-center py-5 text-sm text-gray-400 bg-gray-50 rounded-[4px] border border-dashed border-gray-200">
                       No admins linked to this buying group yet
                     </div>
                   ) : (
                     <div className="space-y-2">
                       {selectedGroupAdmins.map((admin) => (
-                        <div key={admin.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                        <div key={admin.id} className="flex items-center justify-between p-3 bg-white rounded-[4px] border border-gray-100">
                           <div className="min-w-0">
                             <p className="text-sm font-semibold text-gray-900 truncate">{admin.name}</p>
                             <p className="text-xs text-gray-500 truncate">{admin.email}</p>

@@ -87,7 +87,7 @@ function CalculatePayoutModal({
       className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50 p-4"
       style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
     >
-      <div className="rounded-lg max-w-lg w-full shadow-xl flex flex-col max-h-[90vh] border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+      <div className="rounded-[4px] max-w-lg w-full shadow-xl flex flex-col max-h-[90vh] border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)' }}>
           <h2 className="text-sm font-semibold flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
@@ -301,7 +301,7 @@ function IssueCheckModal({
 
   return (
     <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}>
-      <div className="rounded-lg max-w-lg w-full shadow-xl flex flex-col max-h-[90vh] border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+      <div className="rounded-[4px] max-w-lg w-full shadow-xl flex flex-col max-h-[90vh] border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)' }}>
           <h2 className="text-sm font-semibold flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
@@ -628,7 +628,7 @@ function PharmacyPaymentsPageContent() {
           <Link href="/payout-hub" className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-primary-600 mb-1.5 transition-colors">
             <ChevronLeft className="w-3 h-3" /> Back to Payout Management
           </Link>
-          <h1 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>Pharmacy Payments</h1>
+          <h1 className="font-heading text-headline" style={{ color: 'var(--foreground)' }}>Pharmacy Payments</h1>
           <p className="text-xs mt-0.5" style={{ color: 'var(--on-surface-variant)' }}>Manage pharmacy payouts and payments</p>
         </div>
         <button
@@ -646,7 +646,7 @@ function PharmacyPaymentsPageContent() {
         </div>
       )}
 
-      <div className="rounded-lg shadow-sm border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+      <div className="rounded-[4px] shadow-sm border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
         {/* Filters */}
         <div className="flex flex-col lg:flex-row gap-2 px-3 py-2 border-b" style={{ borderColor: 'var(--outline-variant)' }}>
           <div className="flex-1 relative">
@@ -694,17 +694,17 @@ function PharmacyPaymentsPageContent() {
                 <thead>
                   <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
                     {['Payment ID', 'Check #', 'Pharmacy', 'Batch', 'Total Credit', 'Payout Amount', 'Type', 'Status', 'Created', 'Actions'].map(h => (
-                      <th key={h} className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">{h}</th>
+                      <th key={h} className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-100">
                   {payments.map((payment) => (
                     <tr key={payment.id} className="hover:bg-primary-50/40 transition-colors">
-                      <td className="px-4 py-3 whitespace-nowrap text-sm font-mono text-gray-500">
+                      <td className="px-3 py-3 whitespace-nowrap text-sm font-mono text-gray-500">
                         #{payment.id.slice(0, 8)}…
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
+                      <td className="px-3 py-3 whitespace-nowrap">
                         {payment.checkNumber ? (
                           <button
                             onClick={() => handleViewCheckPdf(payment.checkNumber!)}
@@ -720,21 +720,21 @@ function PharmacyPaymentsPageContent() {
                           <span className="text-sm text-gray-400">—</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
+                      <td className="px-3 py-3 whitespace-nowrap">
                         <div className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>{payment.pharmacyName || 'N/A'}</div>
                         <div className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>{payment.pharmacyId.slice(0, 8)}…</div>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
+                      <td className="px-3 py-3 whitespace-nowrap">
                         <div className="text-sm" style={{ color: 'var(--foreground)' }}>{payment.batchName || 'N/A'}</div>
                         <div className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>{payment.batchId ? payment.batchId.slice(0, 8) + '…' : 'None'}</div>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+                      <td className="px-3 py-3 whitespace-nowrap text-sm font-medium" style={{ color: 'var(--foreground)' }}>
                         ${payment.totalCreditReceived?.toFixed(2) || '0.00'}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold" style={{ color: 'var(--secondary)' }}>
+                      <td className="px-3 py-3 whitespace-nowrap text-sm font-semibold" style={{ color: 'var(--secondary)' }}>
                         ${payment.pharmacyPayout?.toFixed(2) || '0.00'}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
+                      <td className="px-3 py-3 whitespace-nowrap">
                         {payment.paymentType ? (
                           <Badge variant={payment.paymentType === 'ocs' ? 'default' : payment.paymentType === 'por' ? 'warning' : 'secondary'}>
                             {payment.paymentType.toUpperCase()}
@@ -743,7 +743,7 @@ function PharmacyPaymentsPageContent() {
                           <span className="text-sm text-gray-400">—</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
+                      <td className="px-3 py-3 whitespace-nowrap">
                         <div className="flex items-center gap-1">
                           {getStatusIcon(payment.status)}
                           <Badge variant={getStatusVariant(payment.status)}>
@@ -751,10 +751,10 @@ function PharmacyPaymentsPageContent() {
                           </Badge>
                         </div>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm" style={{ color: 'var(--on-surface-variant)' }}>
+                      <td className="px-3 py-3 whitespace-nowrap text-sm" style={{ color: 'var(--on-surface-variant)' }}>
                         {payment.createdAt ? new Date(payment.createdAt).toLocaleDateString() : 'N/A'}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 py-3">
                         <div className="flex flex-wrap items-center gap-1">
                           <button
                             type="button"
@@ -891,7 +891,7 @@ function PharmacyPaymentsPageContent() {
           onClick={() => setViewModal(null)}
         >
           <div
-            className="rounded-xl shadow-2xl w-full max-w-lg my-auto flex flex-col border"
+            className="rounded-[4px] shadow-xl w-full max-w-lg my-auto flex flex-col border"
             style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -899,7 +899,7 @@ function PharmacyPaymentsPageContent() {
             <div className="rounded-t-xl px-5 py-3" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-white/20 rounded-lg">
+                  <div className="p-1.5 bg-white/20 rounded-[4px]">
                     <DollarSign className="w-4 h-4 text-white" />
                   </div>
                   <h2 className="text-sm font-bold text-white">Payment Details</h2>
@@ -918,7 +918,7 @@ function PharmacyPaymentsPageContent() {
             {/* Content */}
             <div className="px-5 py-4 overflow-y-auto flex-1 space-y-4">
               {/* Primary Info Banner */}
-              <div className="border rounded-lg p-3" style={{ background: 'linear-gradient(135deg, var(--surface-container-low) 0%, var(--secondary-container) 100%)', borderColor: 'var(--outline-variant)' }}>
+              <div className="border rounded-[4px] p-3" style={{ background: 'linear-gradient(135deg, var(--surface-container-low) 0%, var(--secondary-container) 100%)', borderColor: 'var(--outline-variant)' }}>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <p className="text-[10px] font-semibold uppercase mb-0.5" style={{ color: 'var(--on-surface-variant)' }}>Pharmacy</p>
@@ -941,14 +941,14 @@ function PharmacyPaymentsPageContent() {
 
               {/* Payment Information */}
               <div className="space-y-2.5">
-                <div className="bg-white border border-gray-200 rounded-lg px-3 py-2">
+                <div className="bg-white border border-gray-200 rounded-[4px] px-3 py-2">
                   <div className="flex items-center justify-between py-1">
                     <span className="text-[10px] font-semibold text-gray-500 uppercase">Payment ID</span>
                     <span className="text-xs font-mono text-gray-900">#{viewModal.id.slice(0, 12)}…</span>
                   </div>
                 </div>
 
-                <div className="bg-white border border-gray-200 rounded-lg px-3 py-2">
+                <div className="bg-white border border-gray-200 rounded-[4px] px-3 py-2">
                   <div className="flex items-center justify-between py-1">
                     <span className="text-[10px] font-semibold text-gray-500 uppercase">Batch</span>
                     <div className="text-right">
@@ -960,14 +960,14 @@ function PharmacyPaymentsPageContent() {
                   </div>
                 </div>
 
-                <div className="bg-white border border-gray-200 rounded-lg px-3 py-2">
+                <div className="bg-white border border-gray-200 rounded-[4px] px-3 py-2">
                   <div className="flex items-center justify-between py-1">
                     <span className="text-[10px] font-semibold text-gray-500 uppercase">Total Credit Received</span>
                     <span className="text-xs font-bold text-gray-900">${viewModal.totalCreditReceived?.toFixed(2) || '0.00'}</span>
                   </div>
                 </div>
 
-                <div className="bg-white border border-gray-200 rounded-lg px-3 py-2">
+                <div className="bg-white border border-gray-200 rounded-[4px] px-3 py-2">
                   <div className="flex items-center justify-between py-1">
                     <span className="text-[10px] font-semibold text-gray-500 uppercase">Created</span>
                     <span className="text-xs text-gray-900">
@@ -979,7 +979,7 @@ function PharmacyPaymentsPageContent() {
 
               {/* Check Information */}
               {(viewModal.checkNumber || viewModal.paymentType) && (
-                <div className="border rounded-lg p-3" style={{ background: 'linear-gradient(135deg, var(--primary-container) 0%, var(--surface-container-low) 100%)', borderColor: 'var(--outline-variant)' }}>
+                <div className="border rounded-[4px] p-3" style={{ background: 'linear-gradient(135deg, var(--primary-container) 0%, var(--surface-container-low) 100%)', borderColor: 'var(--outline-variant)' }}>
                   <div className="flex items-center gap-1.5 mb-2.5">
                     <Banknote className="w-3.5 h-3.5" style={{ color: 'var(--primary)' }} />
                     <h3 className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--on-primary-container)' }}>Check Information</h3>
@@ -1039,7 +1039,7 @@ function PharmacyPaymentsPageContent() {
 
               {/* Credit Breakdown */}
               {(viewModal.includedCreditAmount || viewModal.directCreditAmount || viewModal.porCreditAmount) && (
-                <div className="border rounded-lg p-3" style={{ background: 'linear-gradient(135deg, var(--tertiary-fixed) 0%, var(--surface-container-low) 100%)', borderColor: 'var(--outline-variant)' }}>
+                <div className="border rounded-[4px] p-3" style={{ background: 'linear-gradient(135deg, var(--tertiary-fixed) 0%, var(--surface-container-low) 100%)', borderColor: 'var(--outline-variant)' }}>
                   <div className="flex items-center gap-1.5 mb-2.5">
                     <CreditCard className="w-3.5 h-3.5" style={{ color: 'var(--tertiary)' }} />
                     <h3 className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--on-tertiary-container)' }}>Credit Breakdown</h3>
@@ -1069,7 +1069,7 @@ function PharmacyPaymentsPageContent() {
 
               {/* Notes */}
               {viewModal.notes && (
-                <div className="border rounded-lg p-3" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
+                <div className="border rounded-[4px] p-3" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
                   <p className="text-[10px] font-semibold uppercase mb-1.5" style={{ color: 'var(--on-surface-variant)' }}>Notes</p>
                   <p className="text-xs leading-relaxed" style={{ color: 'var(--on-surface)' }}>{viewModal.notes}</p>
                 </div>
@@ -1082,7 +1082,7 @@ function PharmacyPaymentsPageContent() {
                 {viewModal.checkNumber && (
                   <button
                     onClick={() => handleViewCheckPdf(viewModal.checkNumber!)}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 text-xs border rounded-lg transition-colors font-medium cursor-pointer hover:bg-primary-50/40"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 text-xs border rounded-[4px] transition-colors font-medium cursor-pointer hover:bg-primary-50/40"
                     style={{ backgroundColor: 'var(--surface-container-lowest)', color: 'var(--primary)', borderColor: 'var(--outline-variant)' }}
                   >
                     <FileText className="w-3.5 h-3.5" />
@@ -1093,14 +1093,14 @@ function PharmacyPaymentsPageContent() {
               <div className="flex gap-2">
                 <button
                   onClick={() => setViewModal(null)}
-                  className="px-4 py-2 text-xs border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors font-medium cursor-pointer"
+                  className="px-4 py-2 text-xs border border-gray-300 rounded-[4px] text-gray-700 hover:bg-gray-100 transition-colors font-medium cursor-pointer"
                 >
                   Close
                 </button>
                 {viewModal.status === 'pending' && (
                   <button
                     onClick={() => { handleStatusUpdate(viewModal.id, 'processing'); setViewModal(null); }}
-                    className="px-4 py-2 text-xs text-white rounded-lg transition-colors font-medium cursor-pointer"
+                    className="px-4 py-2 text-xs text-white rounded-[4px] transition-colors font-medium cursor-pointer"
                     style={{ backgroundColor: 'var(--primary)' }}
                   >
                     Mark as Processing
@@ -1109,7 +1109,7 @@ function PharmacyPaymentsPageContent() {
                 {viewModal.status === 'processing' && !viewModal.checkNumber && (
                   <button
                     onClick={() => { setViewModal(null); handleOpenIssueCheckModal(viewModal); }}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs text-white rounded-lg transition-colors font-medium cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs text-white rounded-[4px] transition-colors font-medium cursor-pointer"
                     style={{ backgroundColor: 'var(--secondary)' }}
                   >
                     <Banknote className="w-3.5 h-3.5" />
@@ -1119,7 +1119,7 @@ function PharmacyPaymentsPageContent() {
                 {viewModal.status === 'processing' && viewModal.checkNumber && (
                   <button
                     onClick={() => { handleStatusUpdate(viewModal.id, 'paid'); setViewModal(null); }}
-                    className="px-4 py-2 text-xs text-white rounded-lg transition-colors font-medium cursor-pointer"
+                    className="px-4 py-2 text-xs text-white rounded-[4px] transition-colors font-medium cursor-pointer"
                     style={{ backgroundColor: 'var(--secondary)' }}
                   >
                     Mark as Paid

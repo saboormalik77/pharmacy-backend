@@ -65,7 +65,7 @@ export default function CreateReturnPage() {
 
     if (user?.role !== 'processor') {
         return (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+            <div className="bg-red-50 border border-red-200 rounded-[4px] p-4 text-center">
                 <AlertCircle className="w-8 h-8 text-red-500 mx-auto mb-2" />
                 <p className="text-sm text-red-800 font-medium">Access denied. This page is for processors only.</p>
                 <button className="mt-3 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors" onClick={() => router.push('/')}>Go to Dashboard</button>
@@ -86,7 +86,7 @@ export default function CreateReturnPage() {
 
     if (error && myStores.length === 0) {
         return (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+            <div className="bg-red-50 border border-red-200 rounded-[4px] p-4 text-center">
                 <AlertCircle className="w-8 h-8 text-red-500 mx-auto mb-2" />
                 <p className="text-sm text-red-800">{error}</p>
                 <button className="mt-3 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors" onClick={() => dispatch(fetchMyStores())}>Retry</button>
@@ -100,13 +100,13 @@ export default function CreateReturnPage() {
 
             {/* Header */}
             <div>
-                <h1 className="text-lg font-bold text-gray-900">Create Return Transaction</h1>
+                <h1 className="font-heading text-headline text-gray-900">Create Return Transaction</h1>
                 <p className="text-xs text-gray-500">Select a store to create a new return transaction</p>
             </div>
 
             {/* Store Selection Card */}
-            <div className="bg-white rounded-lg shadow px-4 py-3">
-                <h2 className="text-sm font-semibold text-gray-900 mb-2">Select Store</h2>
+            <div className="bg-white rounded-[4px] shadow px-4 py-3">
+                <h2 className="font-heading text-sm font-semibold text-gray-900 mb-2">Select Store</h2>
 
                 {myStores.length === 0 ? (
                     <div className="text-center py-10">
@@ -165,14 +165,14 @@ export default function CreateReturnPage() {
             {/* Confirmation Modal */}
             {confirmModal && selectedStore && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setConfirmModal(false)}>
-                    <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-sm font-semibold text-gray-900">Confirm Return Creation</h2>
+                            <h2 className="font-heading text-sm font-semibold text-gray-900">Confirm Return Creation</h2>
                             <button onClick={() => setConfirmModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
                         </div>
                         <div className="px-4 py-3 space-y-3">
                             <p className="text-xs text-gray-600">You are about to create a new return transaction for:</p>
-                            <div className="bg-gray-50 rounded-lg border border-gray-100 px-3 py-2.5 space-y-2">
+                            <div className="bg-gray-50 rounded-[4px] border border-gray-100 px-3 py-2.5 space-y-2">
                                 <div className="flex items-start gap-2">
                                     <Building2 className="w-3.5 h-3.5 text-gray-500 mt-0.5 flex-shrink-0" />
                                     <div className="min-w-0 flex-1">

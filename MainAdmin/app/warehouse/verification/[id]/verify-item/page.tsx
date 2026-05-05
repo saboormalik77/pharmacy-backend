@@ -348,7 +348,7 @@ export default function VerifyItemPage() {
                         <ArrowLeft className="w-4 h-4" />
                         Back to Verification
                     </button>
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
+                    <div className="bg-white rounded-[4px] border border-gray-200 shadow-sm p-12 text-center">
                         <AlertTriangle className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                         <p className="text-gray-600 font-medium">Item not found</p>
                         <p className="text-sm text-gray-500 mt-1">The item you're looking for could not be found.</p>
@@ -370,13 +370,13 @@ export default function VerifyItemPage() {
                         Back to Verification
                     </button>
                     
-                    <div className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-xl p-3 shadow-lg">
+                    <div className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-[4px] p-3 shadow-lg">
                         <div className="flex items-start gap-3">
-                            <div className="p-2 bg-white/20 rounded-lg">
+                            <div className="p-2 bg-white/20 rounded-[4px]">
                                 <CheckCircle className="w-6 h-6 text-white" />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <h1 className="text-lg font-bold text-white">Verify Item</h1>
+                                <h1 className="font-heading text-headline font-bold text-white">Verify Item</h1>
                                 <p className="text-sm text-indigo-100 font-medium mt-1 truncate">
                                     {verifyingItem.proprietaryName || verifyingItem.genericName || 'Unknown Item'}
                                 </p>
@@ -386,7 +386,7 @@ export default function VerifyItemPage() {
                 </div>
 
                 {/* Item Info */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm mb-5">
+                <div className="bg-white rounded-[4px] border border-gray-200 shadow-sm mb-5">
                     <div className="px-5 py-4 border-b border-gray-100 bg-gray-50">
                         <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Product Information</h2>
                     </div>
@@ -441,7 +441,7 @@ export default function VerifyItemPage() {
                 </div>
 
                 {/* Verification Form */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+                <div className="bg-white rounded-[4px] border border-gray-200 shadow-sm">
                     <div className="px-5 py-4 border-b border-gray-100 bg-gray-50">
                         <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Verification Details</h2>
                     </div>
@@ -456,7 +456,7 @@ export default function VerifyItemPage() {
                                 ].map(status => {
                                     const Icon = status.icon;
                                     return (
-                                        <label key={status.value} className={`flex items-center gap-3 p-3.5 border-2 rounded-lg cursor-pointer transition-all ${
+                                        <label key={status.value} className={`flex items-center gap-3 p-3.5 border-2 rounded-[4px] cursor-pointer transition-all ${
                                             verifyStatus === status.value 
                                                 ? status.color === 'green' 
                                                     ? 'border-green-400 bg-green-50 shadow-sm' 
@@ -491,7 +491,7 @@ export default function VerifyItemPage() {
 
                         {/* Serial Number and Lot Number Verification */}
                         {verifyStatus === 'correct' && (
-                            <div className="space-y-3 p-4 rounded-lg border border-blue-300 bg-gradient-to-br from-blue-50 to-blue-100/50 shadow-sm">
+                            <div className="space-y-3 p-4 rounded-[4px] border border-blue-300 bg-gradient-to-br from-blue-50 to-blue-100/50 shadow-sm">
                                 <div className="flex items-center gap-2">
                                     <ShieldAlert className="w-4 h-4 text-blue-600" />
                                     <h3 className="text-sm font-semibold text-blue-800">Product Verification</h3>
@@ -504,7 +504,7 @@ export default function VerifyItemPage() {
                                             value={verifySerialNumber}
                                             onChange={e => setVerifySerialNumber(e.target.value)}
                                             placeholder="Scan or enter serial number"
-                                            className="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                                            className="w-full px-3 py-2 text-sm border border-blue-200 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                                         />
                                         {verifyingItem?.serialNumber && (
                                             <p className="text-xs text-blue-600 mt-1.5 font-medium">Expected: {verifyingItem.serialNumber}</p>
@@ -517,7 +517,7 @@ export default function VerifyItemPage() {
                                             value={verifyLotNumber}
                                             onChange={e => setVerifyLotNumber(e.target.value)}
                                             placeholder="Scan or enter lot number"
-                                            className="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                                            className="w-full px-3 py-2 text-sm border border-blue-200 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                                         />
                                         {verifyingItem?.lotNumber && (
                                             <p className="text-xs text-blue-600 mt-1.5 font-medium">Expected: {verifyingItem.lotNumber}</p>
@@ -536,7 +536,7 @@ export default function VerifyItemPage() {
                                     value={verifyActualQty}
                                     onChange={e => setVerifyActualQty(e.target.value)}
                                     placeholder={`Expected: ${verifyingItem.quantity}`}
-                                    className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white shadow-sm"
+                                    className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white shadow-sm"
                                 />
                             </div>
                         )}
@@ -550,14 +550,14 @@ export default function VerifyItemPage() {
                                     placeholder="Describe the issue..." 
                                     value={verifyNotes} 
                                     onChange={e => setVerifyNotes(e.target.value)}
-                                    className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none bg-white shadow-sm"
+                                    className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none bg-white shadow-sm"
                                 />
                             </div>
                         )}
 
                         {/* FCR-52: Non-returnable reason for damaged/missing/wrong_item — required */}
                         {(verifyStatus === 'damaged' || verifyStatus === 'missing' || verifyStatus === 'wrong_item') && (
-                            <div className="p-4 rounded-lg border border-red-300 bg-gradient-to-br from-red-50 to-red-100/50 shadow-sm">
+                            <div className="p-4 rounded-[4px] border border-red-300 bg-gradient-to-br from-red-50 to-red-100/50 shadow-sm">
                                 <div className="flex items-center gap-2 mb-2.5">
                                     <AlertTriangle className="w-4 h-4 text-red-600" />
                                     <label className="text-sm font-semibold text-red-800">
@@ -570,7 +570,7 @@ export default function VerifyItemPage() {
                                 <select
                                     value={nonReturnableReason}
                                     onChange={e => setNonReturnableReason(e.target.value)}
-                                    className="w-full px-3 py-2.5 text-sm border border-red-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-red-500 shadow-sm cursor-pointer"
+                                    className="w-full px-3 py-2.5 text-sm border border-red-300 rounded-[4px] bg-white focus:outline-none focus:ring-2 focus:ring-red-500 shadow-sm cursor-pointer"
                                 >
                                     <option value="">— Select a reason —</option>
                                     {NON_RETURNABLE_REASONS.map(r => (
@@ -582,7 +582,7 @@ export default function VerifyItemPage() {
 
                         {/* Policy Check & Routing */}
                         {verifyStatus === 'correct' && (
-                            <div className="space-y-4 p-4 rounded-lg border border-indigo-300 bg-gradient-to-br from-indigo-50 to-indigo-100/50 shadow-sm">
+                            <div className="space-y-4 p-4 rounded-[4px] border border-indigo-300 bg-gradient-to-br from-indigo-50 to-indigo-100/50 shadow-sm">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <ShieldAlert className="w-5 h-5 text-indigo-600" />
@@ -627,13 +627,13 @@ export default function VerifyItemPage() {
 
                                         {/* Policy-locked routing display */}
                                         <div className="grid grid-cols-2 gap-3">
-                                            <div className={`p-4 border-2 rounded-lg ${policyResult.status === 'returnable' ? 'border-green-400 bg-green-50' : 'border-gray-200 bg-gray-100'}`}>
+                                            <div className={`p-4 border-2 rounded-[4px] ${policyResult.status === 'returnable' ? 'border-green-400 bg-green-50' : 'border-gray-200 bg-gray-100'}`}>
                                                 <input type="radio" checked={policyResult.status === 'returnable'} disabled className="mr-2" />
                                                 <span className={`text-sm font-medium ${policyResult.status === 'returnable' ? 'text-green-700' : 'text-gray-500'}`}>
                                                     ✓ Returnable
                                                 </span>
                                             </div>
-                                            <div className={`p-4 border-2 rounded-lg ${policyResult.status === 'non_returnable' ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-100'}`}>
+                                            <div className={`p-4 border-2 rounded-[4px] ${policyResult.status === 'non_returnable' ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-100'}`}>
                                                 <input type="radio" checked={policyResult.status === 'non_returnable'} disabled className="mr-2" />
                                                 <span className={`text-sm font-medium ${policyResult.status === 'non_returnable' ? 'text-red-700' : 'text-gray-500'}`}>
                                                     ✗ Non-Returnable
@@ -648,7 +648,7 @@ export default function VerifyItemPage() {
                                                     type="text"
                                                     value={policyResult.destination}
                                                     disabled
-                                                    className="mt-2 w-full px-3 py-2 text-sm border border-gray-200 rounded-md bg-gray-100 text-gray-600"
+                                                    className="mt-2 w-full px-3 py-2 text-sm border border-gray-200 rounded-[4px] bg-gray-100 text-gray-600"
                                                 />
                                             </div>
                                         )}
@@ -664,7 +664,7 @@ export default function VerifyItemPage() {
                                         
                                         {/* Manual routing selection */}
                                         <div className="grid grid-cols-2 gap-3">
-                                            <label className={`flex items-center gap-2 p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                                            <label className={`flex items-center gap-2 p-4 border-2 rounded-[4px] cursor-pointer transition-colors ${
                                                 returnStatus === 'returnable' ? 'border-green-400 bg-green-50' : 'border-gray-200 hover:border-gray-300'
                                             }`}>
                                                 <input 
@@ -685,7 +685,7 @@ export default function VerifyItemPage() {
                                                     </p>
                                                 </div>
                                             </label>
-                                            <label className={`flex items-center gap-2 p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                                            <label className={`flex items-center gap-2 p-4 border-2 rounded-[4px] cursor-pointer transition-colors ${
                                                 returnStatus === 'non_returnable' ? 'border-red-400 bg-red-50' : 'border-gray-200 hover:border-gray-300'
                                             }`}>
                                                 <input 
@@ -715,7 +715,7 @@ export default function VerifyItemPage() {
                                                 <select 
                                                     value={manualDestination} 
                                                     onChange={e => setManualDestination(e.target.value)} 
-                                                    className={`w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                                                    className={`w-full px-3 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 ${
                                                         !manualDestination.trim() ? 'border-red-300 bg-red-50' : 'border-gray-300'
                                                     }`}
                                                     disabled={loadingDistributors}
@@ -740,7 +740,7 @@ export default function VerifyItemPage() {
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-700 mb-2">Non-Returnable Route</label>
                                                     <div className="grid grid-cols-2 gap-3">
-                                                        <label className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer ${
+                                                        <label className={`flex items-center gap-2 p-3 border rounded-[4px] cursor-pointer ${
                                                             nonReturnableRoute === 'wine_cellar' ? 'border-purple-400 bg-purple-50' : 'border-gray-300'
                                                         }`}>
                                                             <input 
@@ -756,7 +756,7 @@ export default function VerifyItemPage() {
                                                             <Archive className="w-4 h-4 text-purple-600" />
                                                             <span className="text-sm font-medium text-purple-800">Wine Cellar</span>
                                                         </label>
-                                                        <label className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer ${
+                                                        <label className={`flex items-center gap-2 p-3 border rounded-[4px] cursor-pointer ${
                                                             nonReturnableRoute === 'destruction' ? 'border-red-400 bg-red-50' : 'border-gray-300'
                                                         }`}>
                                                             <input 
@@ -783,7 +783,7 @@ export default function VerifyItemPage() {
                                                         Non-Returnable Reason <span className="text-red-600">*</span>
                                                     </label>
                                                     {nonReturnableRoute === 'wine_cellar' ? (
-                                                        <div className="p-3 rounded-md border border-purple-200 bg-purple-50">
+                                                        <div className="p-3 rounded-[4px] border border-purple-200 bg-purple-50">
                                                             <p className="text-sm font-medium text-purple-800">
                                                                 🍷 Wine Cellar items are automatically assigned reason: <strong>"Past Expiration Date"</strong>
                                                             </p>
@@ -795,7 +795,7 @@ export default function VerifyItemPage() {
                                                         <select
                                                             value={nonReturnableReason}
                                                             onChange={e => setNonReturnableReason(e.target.value)}
-                                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
                                                         >
                                                             <option value="">— Select a reason —</option>
                                                             {NON_RETURNABLE_REASONS.map(r => (
@@ -812,7 +812,7 @@ export default function VerifyItemPage() {
                                                             type="date"
                                                             value={wineCellarDate}
                                                             onChange={e => setWineCellarDate(e.target.value)}
-                                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-purple-500"
                                                         />
                                                     </div>
                                                 )}
@@ -830,7 +830,7 @@ export default function VerifyItemPage() {
                                             Non-Returnable Reason <span className="text-red-600">*</span>
                                         </label>
                                         {disposition === 'wine_cellar' ? (
-                                            <div className="p-3 rounded-md border border-purple-200 bg-purple-50">
+                                            <div className="p-3 rounded-[4px] border border-purple-200 bg-purple-50">
                                                 <p className="text-sm font-medium text-purple-800">
                                                     🍷 Wine Cellar routing uses reason: <strong>"Past Expiration Date"</strong>
                                                 </p>
@@ -843,7 +843,7 @@ export default function VerifyItemPage() {
                                                 <select
                                                     value={nonReturnableReason}
                                                     onChange={e => setNonReturnableReason(e.target.value)}
-                                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
                                                 >
                                                     <option value="">— Select a reason —</option>
                                                     {NON_RETURNABLE_REASONS.map(r => (
@@ -868,7 +868,7 @@ export default function VerifyItemPage() {
                                 value={verifyNotes} 
                                 onChange={e => setVerifyNotes(e.target.value)}
                                 placeholder="Any additional notes about this verification..."
-                                className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none bg-white shadow-sm"
+                                className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none bg-white shadow-sm"
                             />
                         </div>
                     </div>
@@ -879,7 +879,7 @@ export default function VerifyItemPage() {
                         <div className="flex gap-2.5">
                             <button 
                                 onClick={handleBack} 
-                                className="px-4 py-2.5 text-sm font-semibold text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                                className="px-4 py-2.5 text-sm font-semibold text-gray-600 border border-gray-300 rounded-[4px] hover:bg-gray-100 transition-colors cursor-pointer"
                             >
                                 Cancel
                             </button>
@@ -894,7 +894,7 @@ export default function VerifyItemPage() {
                                     || (verifyStatus === 'correct' && returnStatus === 'returnable' && (!policyResult || policyResult.status === 'tbd') && !manualDestination.trim())
                                 }
                                 onClick={handleVerifyItem}
-                                className="px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors shadow-sm cursor-pointer"
+                                className="px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-[4px] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors shadow-sm cursor-pointer"
                             >
                                 {isActionLoading && <Loader2 className="w-4 h-4 animate-spin" />} 
                                 <CheckCircle className="w-4 h-4" />

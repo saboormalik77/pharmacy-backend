@@ -54,13 +54,13 @@ export default function DistributorProductsPage() {
             <div className="flex items-center gap-4">
                 <button
                     onClick={() => router.back()}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+                    className="p-2 hover:bg-gray-100 rounded-[4px] transition-colors cursor-pointer"
                     title="Back to Distributors"
                 >
                     <ArrowLeft className="w-5 h-5 text-gray-600" />
                 </button>
                 <div>
-                    <h1 className="text-lg font-bold text-gray-900">Products</h1>
+                    <h1 className="font-heading text-headline text-gray-900">Products</h1>
                     {distributorName && (
                         <p className="text-gray-600 mt-1">{distributorName}</p>
                     )}
@@ -73,7 +73,7 @@ export default function DistributorProductsPage() {
                 </div>
             )}
 
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-[4px] shadow-md p-6">
                 {productsLoading ? (
                     <div className="text-center py-12">
                         <p className="text-gray-500">Loading products...</p>
@@ -90,31 +90,31 @@ export default function DistributorProductsPage() {
                                     <table className="w-full table-auto">
                                         <thead className="bg-gradient-to-r from-indigo-500 to-indigo-400">
                                             <tr>
-                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">NDC Code</th>
-                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Product Name</th>
-                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Manufacturer</th>
-                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Quantity</th>
-                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Price/Unit</th>
-                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Credit Amount</th>
-                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Lot Number</th>
-                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Expiration Date</th>
-                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Package Size</th>
-                                                <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Report Date</th>
+                                                <th className="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">NDC Code</th>
+                                                <th className="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Product Name</th>
+                                                <th className="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Manufacturer</th>
+                                                <th className="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Quantity</th>
+                                                <th className="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Price/Unit</th>
+                                                <th className="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Credit Amount</th>
+                                                <th className="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Lot Number</th>
+                                                <th className="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Expiration Date</th>
+                                                <th className="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Package Size</th>
+                                                <th className="px-3 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Report Date</th>
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white divide-y divide-gray-200">
                                             {products.map((product, index) => (
-                                                <tr key={`${product.reportId}-${index}`} className="hover:bg-gray-50 transition-colors">
-                                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{product.ndcCode}</td>
-                                                    <td className="px-4 py-3 text-sm text-gray-900 max-w-[200px] truncate" title={product.productName}>{product.productName}</td>
-                                                    <td className="px-4 py-3 text-sm text-gray-600 max-w-[150px] truncate" title={product.manufacturer}>{product.manufacturer}</td>
-                                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{product.quantity}</td>
-                                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">${product.pricePerUnit.toFixed(2)}</td>
-                                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">${product.creditAmount.toFixed(2)}</td>
-                                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{product.lotNumber}</td>
-                                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{new Date(product.expirationDate).toLocaleDateString()}</td>
-                                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{product.packageSize}</td>
-                                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{new Date(product.reportDate).toLocaleDateString()}</td>
+                                                <tr key={`${product.reportId}-${index}`} className="transition-colors hover:bg-[var(--surface-container)]">
+                                                    <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-900">{product.ndcCode}</td>
+                                                    <td className="px-3 py-3 text-sm text-gray-900 max-w-[200px] truncate" title={product.productName}>{product.productName}</td>
+                                                    <td className="px-3 py-3 text-sm text-gray-600 max-w-[150px] truncate" title={product.manufacturer}>{product.manufacturer}</td>
+                                                    <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-900">{product.quantity}</td>
+                                                    <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-900">${product.pricePerUnit.toFixed(2)}</td>
+                                                    <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">${product.creditAmount.toFixed(2)}</td>
+                                                    <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-600">{product.lotNumber}</td>
+                                                    <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-600">{new Date(product.expirationDate).toLocaleDateString()}</td>
+                                                    <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-600">{product.packageSize}</td>
+                                                    <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-600">{new Date(product.reportDate).toLocaleDateString()}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -131,7 +131,7 @@ export default function DistributorProductsPage() {
                                             <button
                                                 onClick={() => handlePageChange(productsPagination.page - 1)}
                                                 disabled={productsPagination.page === 1}
-                                                className="p-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                                                className="p-2 border border-gray-300 rounded-[4px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                                             >
                                                 <ChevronLeft className="w-5 h-5" />
                                             </button>
@@ -141,7 +141,7 @@ export default function DistributorProductsPage() {
                                             <button
                                                 onClick={() => handlePageChange(productsPagination.page + 1)}
                                                 disabled={productsPagination.page === productsPagination.totalPages}
-                                                className="p-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                                                className="p-2 border border-gray-300 rounded-[4px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                                             >
                                                 <ChevronRight className="w-5 h-5" />
                                             </button>

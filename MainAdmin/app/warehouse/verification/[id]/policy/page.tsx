@@ -51,7 +51,7 @@ export default function PolicyPage() {
                         Back to Verification
                     </button>
                     
-                    <div className="bg-white rounded-lg shadow p-8 text-center">
+                    <div className="bg-white rounded-[4px] shadow p-8 text-center">
                         <p className="text-gray-500">No policy data available</p>
                     </div>
                 </div>
@@ -75,17 +75,17 @@ export default function PolicyPage() {
                     <div className="flex items-center gap-3">
                         <ShieldAlert className="w-6 h-6 text-blue-600" />
                         <div>
-                            <h1 className="text-lg font-bold text-gray-900">Manufacturer Return Policy</h1>
+                            <h1 className="font-heading text-headline text-gray-900">Manufacturer Return Policy</h1>
                             <p className="text-sm text-gray-500">Policy details for this item</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Policy Content */}
-                <div className="bg-white rounded-lg shadow">
+                <div className="bg-white rounded-[4px] shadow">
                     <div className="p-6 space-y-6">
                         {/* Status Banner */}
-                        <div className={`flex items-center gap-3 rounded-lg px-4 py-3 ${
+                        <div className={`flex items-center gap-3 rounded-[4px] px-4 py-3 ${
                             policyResult.status === 'returnable' ? 'bg-green-100 border border-green-300' :
                             policyResult.status === 'non_returnable' ? 'bg-red-100 border border-red-300' :
                             'bg-yellow-100 border border-yellow-300'
@@ -139,7 +139,7 @@ export default function PolicyPage() {
                         {policyResult.policyDescription && (
                             <div>
                                 <h3 className="text-sm font-medium text-gray-900 mb-2">Policy Notes</h3>
-                                <div className="bg-gray-50 rounded-lg p-4 border">
+                                <div className="bg-gray-50 rounded-[4px] p-4 border">
                                     <p className="text-sm text-gray-700 leading-relaxed">
                                         {policyResult.policyDescription}
                                     </p>
@@ -156,7 +156,7 @@ export default function PolicyPage() {
                             </p>
                             <button 
                                 onClick={handleBack}
-                                className="px-4 py-2 text-sm font-medium bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                                className="px-4 py-2 text-sm font-medium bg-gray-600 text-white rounded-[4px] hover:bg-gray-700 transition-colors"
                             >
                                 Back to Verification
                             </button>

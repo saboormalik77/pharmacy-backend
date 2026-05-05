@@ -708,7 +708,7 @@ export default function AddItemsPage() {
 
             {/* Lock Status Warning */}
             {isLocked && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-[4px] p-3">
                     <div className="flex items-center gap-2">
                         <AlertTriangle className="w-4 h-4 text-yellow-600" />
                         <div>
@@ -736,7 +736,7 @@ export default function AddItemsPage() {
                     >
                         <ArrowLeft className="w-3.5 h-3.5" /> Back to Return
                     </button>
-                    <h1 className="text-base font-bold text-gray-900 flex items-center gap-1.5">
+                    <h1 className="font-heading text-headline text-gray-900 flex items-center gap-1.5">
                         <ScanLine className="w-4 h-4 text-primary-600" /> Adding Products
                     </h1>
                     <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-500">
@@ -790,14 +790,14 @@ export default function AddItemsPage() {
 
             {/* Tab Content: Product List */}
             {activeTab === 'list' && recentlyAddedItems.length > 0 && (
-                <div className="bg-white rounded-lg shadow px-4 py-3">
+                <div className="bg-white rounded-[4px] shadow px-4 py-3">
                     <div className="flex items-center justify-between mb-3">
                         <h2 className="text-xs font-semibold text-gray-700">Products Added in This Session</h2>
                         <p className="text-[10px] text-gray-500">{recentlyAddedItems.length} item{recentlyAddedItems.length !== 1 ? 's' : ''}</p>
                     </div>
                     <div className="space-y-2 max-h-[500px] overflow-y-auto">
                         {recentlyAddedItems.map((item) => (
-                            <div key={item.id} className="flex items-start gap-2 p-3 border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50/30 transition-all">
+                            <div key={item.id} className="flex items-start gap-2 p-3 border border-gray-200 rounded-[4px] hover:border-primary-300 hover:bg-primary-50/30 transition-all">
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1.5">
                                         <p className="text-sm font-bold text-gray-900 truncate">
@@ -851,7 +851,7 @@ export default function AddItemsPage() {
             {(activeTab === 'form' || recentlyAddedItems.length === 0) && (
                 <>
             {/* Scan / Manual Toggle */}
-            <div className="bg-white rounded-lg shadow px-4 py-3">
+            <div className="bg-white rounded-[4px] shadow px-4 py-3">
                 {/* Mode tabs */}
                 <div className="flex gap-1.5 mb-3">
                     {([
@@ -983,7 +983,7 @@ export default function AddItemsPage() {
 
             {/* Classification Result (after save) */}
             {lastClassification && (
-                <div className={`rounded-lg border px-3 py-2 ${
+                <div className={`rounded-[4px] border px-3 py-2 ${
                     lastClassification.wineCellarItem ? 'bg-purple-50 border-purple-300' :
                     lastClassification.status === 'returnable' ? 'bg-green-50 border-green-300' :
                     lastClassification.status === 'non_returnable' ? 'bg-red-50 border-red-300' :
@@ -1051,7 +1051,7 @@ export default function AddItemsPage() {
             )}
 
             {/* Product Form */}
-            <div className="bg-white rounded-lg shadow px-4 py-3">
+            <div className="bg-white rounded-[4px] shadow px-4 py-3">
                 <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Product Information</h2>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
@@ -1235,7 +1235,7 @@ export default function AddItemsPage() {
 
                 {/* Manual Destination — shown only when item is returnable and no policy destination is available */}
                 {(!policyAutoCheck || policyAutoCheck.status === 'tbd') && form.returnStatus === 'returnable' && (
-                    <div className="mt-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div className="mt-2 p-2.5 bg-amber-50 border border-amber-200 rounded-[4px]">
                         <div className="flex items-center gap-1.5 mb-1.5">
                             <AlertTriangle className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
                             <p className="text-[10px] font-semibold text-amber-800">No return policy found — select return destination manually</p>
@@ -1265,7 +1265,7 @@ export default function AddItemsPage() {
 
                 {/* Non-returnable route selector */}
                 {form.returnStatus === 'non_returnable' && (
-                    <div className="mt-2 p-2.5 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="mt-2 p-2.5 bg-red-50 border border-red-200 rounded-[4px]">
                         <p className="text-[10px] font-semibold text-red-800 mb-1.5">Non-Returnable Route</p>
                         <div className="grid grid-cols-2 gap-2">
                             <label className={`flex items-center gap-2 px-2 py-1.5 border rounded cursor-pointer ${nonReturnableRoute === 'wine_cellar' ? 'border-purple-400 bg-purple-50' : 'border-gray-300 bg-white'}`}>
@@ -1416,7 +1416,7 @@ export default function AddItemsPage() {
             {/* ── Policy Modal ─────────────────────────────── */}
             {policyModalOpen && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setPolicyModalOpen(false)}>
-                    <div className="bg-white rounded-lg max-w-md w-full shadow-2xl" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] max-w-md w-full shadow-2xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50 rounded-t-lg">
                             <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-1.5">
                                 <ShieldCheck className="w-4 h-4 text-blue-600" /> Manufacturer Return Policy

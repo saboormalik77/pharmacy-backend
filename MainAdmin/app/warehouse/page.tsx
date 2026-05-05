@@ -89,7 +89,7 @@ export default function WarehouseHubPage() {
         <div className="space-y-4">
             {/* Header */}
             <div>
-                <h1 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>Warehouse</h1>
+                <h1 className="font-heading text-headline" style={{ color: 'var(--foreground)' }}>Warehouse</h1>
                 <p className="text-xs mt-0.5" style={{ color: 'var(--on-surface-variant)' }}>
                     Manage the full return processing flow — from receiving to manufacturer payments.
                 </p>
@@ -97,7 +97,7 @@ export default function WarehouseHubPage() {
 
             {/* Flow indicator */}
             <div
-                className="flex items-center gap-1.5 px-3 py-2 border rounded-lg overflow-x-auto"
+                className="flex items-center gap-1.5 px-3 py-2 border rounded-[4px] overflow-x-auto"
                 style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}
             >
                 {warehouseSections.map((section, idx) => (
@@ -118,13 +118,13 @@ export default function WarehouseHubPage() {
                         <Link
                             key={section.href}
                             href={section.href}
-                            className="group flex flex-col gap-3 p-4 border rounded-lg hover:shadow-md transition-all duration-150"
+                            className="group flex flex-col gap-3 p-4 border rounded-[4px] hover:shadow-md transition-all duration-150"
                             style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                         >
                             {/* Icon + label */}
                             <div className="flex items-center justify-between">
                                 <div className={`flex items-center gap-2.5`}>
-                                    <div className="p-2 rounded-lg" style={{ backgroundColor: section.tone.chipBg }}>
+                                    <div className="p-2 rounded-[4px]" style={{ backgroundColor: section.tone.chipBg }}>
                                         <Icon className="w-4 h-4" style={{ color: section.tone.icon }} />
                                     </div>
                                     <span className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>{section.label}</span>

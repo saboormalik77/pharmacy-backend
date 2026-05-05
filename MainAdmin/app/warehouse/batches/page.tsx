@@ -140,7 +140,7 @@ export default function BatchesPage() {
                     <Link href="/warehouse" className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-primary-600 mb-1.5 transition-colors">
                         <ChevronLeft className="w-3 h-3" /> Back to Warehouse
                     </Link>
-                    <h1 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>Monthly Batches</h1>
+                    <h1 className="font-heading text-headline" style={{ color: 'var(--foreground)' }}>Monthly Batches</h1>
                     <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>Manage return batches and close-outs</p>
                 </div>
                 <button
@@ -161,8 +161,8 @@ export default function BatchesPage() {
                     { icon: Calendar, iconColor: 'var(--tertiary)', label: 'Open', value: stats.open, valueStyle: { color: 'var(--tertiary)' } as React.CSSProperties },
                     { icon: CheckCircle, iconColor: 'var(--primary)', label: 'Closed', value: stats.closed, valueStyle: { color: 'var(--primary)' } as React.CSSProperties },
                     { icon: Send, iconColor: 'var(--secondary)', label: 'Submitted', value: stats.submitted, valueStyle: { color: 'var(--secondary)' } as React.CSSProperties },
-                ].map(({ icon: Icon, chipBg, iconColor, label, value, valueStyle }) => (
-                    <div key={label} className="rounded-lg shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                ].map(({ icon: Icon, iconColor, label, value, valueStyle }) => (
+                    <div key={label} className="rounded-[4px] shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         <div className="flex items-center gap-2">
                             <div className="w-7 h-7 rounded flex items-center justify-center flex-shrink-0 border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}><Icon className="w-3.5 h-3.5" style={{ color: iconColor }} /></div>
                             <div><p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>{label}</p><p className="text-base font-bold" style={{ color: 'var(--foreground)', ...valueStyle }}>{value}</p></div>
@@ -172,7 +172,7 @@ export default function BatchesPage() {
             </div>
 
             {/* Filters */}
-            <div className="rounded-lg shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+            <div className="rounded-[4px] shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 <select
                     className="border rounded px-2.5 py-1 text-xs focus:ring-1 focus:ring-primary-500 focus:border-transparent"
                     style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
@@ -184,7 +184,7 @@ export default function BatchesPage() {
             </div>
 
             {/* Table */}
-            <div className="rounded-lg shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+            <div className="rounded-[4px] shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 {isLoading ? (
                     <div className="flex items-center justify-center py-14">
                         <Loader2 className="w-6 h-6 animate-spin text-primary-500" />
@@ -200,15 +200,15 @@ export default function BatchesPage() {
                         <table className="min-w-full">
                             <thead>
                                 <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Batch Month</th>
-                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Name</th>
-                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Status</th>
-                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Returns</th>
-                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Debit Memos</th>
-                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Total Value</th>
-                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Cardinal</th>
-                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Created</th>
-                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Actions</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Batch Month</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Name</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Status</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Returns</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Debit Memos</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Total Value</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Cardinal</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Created</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
@@ -221,27 +221,27 @@ export default function BatchesPage() {
                                             className="hover:bg-primary-50/40 cursor-pointer transition-colors"
                                             style={{ backgroundColor: 'var(--surface-container-lowest)' }}
                                         >
-                                            <td className="px-4 py-3 text-sm font-medium whitespace-nowrap" style={{ color: 'var(--foreground)' }}>
+                                            <td className="px-3 py-3 text-sm font-medium whitespace-nowrap" style={{ color: 'var(--foreground)' }}>
                                                 {formatBatchMonth(batch.batchMonth)}
                                             </td>
-                                            <td className="px-4 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface)' }}>
+                                            <td className="px-3 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface)' }}>
                                                 {batch.batchName}
                                             </td>
-                                            <td className="px-4 py-3 whitespace-nowrap">
+                                            <td className="px-3 py-3 whitespace-nowrap">
                                                 <span className="inline-flex items-center px-2 py-0.5 rounded border text-[10px] font-medium" style={statusPillStyle(batch.status)}>
                                                     {sb.label}
                                                 </span>
                                             </td>
-                                            <td className="px-4 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface)' }}>
+                                            <td className="px-3 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface)' }}>
                                                 {batch.totalReturns}
                                             </td>
-                                            <td className="px-4 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface)' }}>
+                                            <td className="px-3 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface)' }}>
                                                 {batch.totalDebitMemos}
                                             </td>
-                                            <td className="px-4 py-3 text-sm font-medium whitespace-nowrap" style={{ color: 'var(--foreground)' }}>
+                                            <td className="px-3 py-3 text-sm font-medium whitespace-nowrap" style={{ color: 'var(--foreground)' }}>
                                                 {formatCurrency(batch.totalValue)}
                                             </td>
-                                            <td className="px-4 py-3 whitespace-nowrap">
+                                            <td className="px-3 py-3 whitespace-nowrap">
                                                 {batch.cardinalSubmittedAt ? (
                                                     <span className="inline-flex items-center px-2 py-0.5 rounded border text-[10px] font-medium" style={cardinalPillStyle('submitted')}>
                                                         Submitted
@@ -256,10 +256,10 @@ export default function BatchesPage() {
                                                     </span>
                                                 )}
                                             </td>
-                                            <td className="px-4 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>
+                                            <td className="px-3 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>
                                                 {formatDate(batch.createdAt)}
                                             </td>
-                                            <td className="px-4 py-3 whitespace-nowrap" onClick={e => e.stopPropagation()}>
+                                            <td className="px-3 py-3 whitespace-nowrap" onClick={e => e.stopPropagation()}>
                                                 {batch.status === 'open' && (
                                                     <button
                                                         onClick={() => router.push(`/warehouse/batches/${batch.id}?action=closeout`)}
@@ -299,8 +299,8 @@ export default function BatchesPage() {
             {/* Create Batch Modal */}
             {showCreate && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setShowCreate(false)}>
-                    <div className="rounded-lg shadow-xl max-w-sm w-full mx-4 p-5 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
-                        <h2 className="text-sm font-bold mb-3" style={{ color: 'var(--foreground)' }}>Create New Batch</h2>
+                    <div className="rounded-[4px] shadow-xl max-w-sm w-full mx-4 p-5 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                        <h2 className="font-heading text-body font-bold mb-3" style={{ color: 'var(--foreground)' }}>Create New Batch</h2>
 
                         <div className="space-y-3">
                             <div>

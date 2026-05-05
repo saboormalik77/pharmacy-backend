@@ -23,7 +23,7 @@ import { Distributor, DistributorUpdatePayload, DistributorCreatePayload } from 
 import { useDebounce } from '@/lib/hooks/useDebounce';
 
 const inputCls =
-    'w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors';
+    'w-full px-3 py-2.5 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors';
 const labelCls = 'block text-xs font-semibold mb-1.5 uppercase tracking-wide';
 
 export default function DistributorsPage() {
@@ -146,15 +146,15 @@ export default function DistributorsPage() {
             style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}
         >
             <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-white/20 rounded-[4px] flex items-center justify-center">
                     <Building2 className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                    <h3 className="text-base font-semibold text-white">{title}</h3>
+                    <h3 className="font-heading text-body font-semibold text-white">{title}</h3>
                     {subtitle && <p className="text-xs mt-0.5" style={{ color: 'var(--inverse-on-surface)' }}>{subtitle}</p>}
                 </div>
             </div>
-            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/20 text-white/80 hover:text-white transition-colors cursor-pointer">
+            <button onClick={onClose} className="p-1.5 rounded-[4px] hover:bg-white/20 text-white/80 hover:text-white transition-colors cursor-pointer">
                 <X className="w-4 h-4" />
             </button>
         </div>
@@ -175,7 +175,7 @@ export default function DistributorsPage() {
 
     const InfoField = ({ label, value, full }: { label: string; value?: string | number | null; full?: boolean }) => (
         <div
-            className={cn('rounded-lg border px-3 py-2', full ? 'col-span-2' : '')}
+            className={cn('rounded-[4px] border px-3 py-2', full ? 'col-span-2' : '')}
             style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
         >
             <p className="text-[10px] uppercase tracking-widest font-semibold mb-0.5" style={{ color: 'var(--on-surface-variant)' }}>{label}</p>
@@ -194,7 +194,7 @@ export default function DistributorsPage() {
                 {/* Page Header */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div>
-                        <h1 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>Distributors</h1>
+                        <h1 className="font-heading text-headline" style={{ color: 'var(--foreground)' }}>Distributors</h1>
                         <p className="text-sm mt-0.5" style={{ color: 'var(--on-surface-variant)' }}>Manage reverse distributors and their deals</p>
                     </div>
                     <Button variant="primary" onClick={() => setAddModal(true)} className="flex items-center gap-2">
@@ -203,7 +203,7 @@ export default function DistributorsPage() {
                 </div>
 
                 {error && (
-                    <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 px-3 py-2.5 rounded-lg text-sm">
+                    <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 px-3 py-2.5 rounded-[4px] text-sm">
                         <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />{error}
                     </div>
                 )}
@@ -219,10 +219,10 @@ export default function DistributorsPage() {
                         return (
                             <div
                                 key={s.label}
-                                className="rounded-lg border p-3 flex items-center gap-3"
+                                className="rounded-[4px] border p-3 flex items-center gap-3"
                                 style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                             >
-                                <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center shrink-0', s.color)}>
+                                <div className={cn('w-9 h-9 rounded-[4px] flex items-center justify-center shrink-0', s.color)}>
                                     <Icon className="w-4 h-4" />
                                 </div>
                                 <div>
@@ -235,7 +235,7 @@ export default function DistributorsPage() {
                 </div>
 
                 {/* Filters + Table */}
-                <div className="rounded-lg border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                <div className="rounded-[4px] border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                     <div className="flex flex-col sm:flex-row gap-3 p-4 border-b" style={{ borderColor: 'var(--outline-variant)' }}>
                         <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -244,14 +244,14 @@ export default function DistributorsPage() {
                                 placeholder="Search distributors..."
                                 value={searchTerm}
                                 onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                                className="w-full pl-9 pr-4 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                className="w-full pl-9 pr-4 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                 style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                             />
                         </div>
                         <select
                             value={statusFilter}
                             onChange={(e) => { setStatusFilter(e.target.value as typeof statusFilter); setCurrentPage(1); }}
-                            className="px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer"
+                            className="px-3 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer"
                             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                         >
                             <option value="all">All Statuses</option>
@@ -279,27 +279,27 @@ export default function DistributorsPage() {
                                 <table className="w-full text-sm">
                                     <thead className="text-white" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
                                         <tr>
-                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Company Name</th>
-                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden md:table-cell">Contact</th>
-                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">Contact Info</th>
-                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">Location</th>
-                                            <th className="px-4 py-3.5 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Products</th>
-                                            <th className="px-4 py-3.5 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">Deals</th>
-                                            <th className="px-4 py-3.5 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Status</th>
-                                            <th className="px-4 py-3.5 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Actions</th>
+                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Company Name</th>
+                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden md:table-cell">Contact</th>
+                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">Contact Info</th>
+                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">Location</th>
+                                            <th className="px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Products</th>
+                                            <th className="px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">Deals</th>
+                                            <th className="px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Status</th>
+                                            <th className="px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                         {distributors.map((d) => (
-                                            <tr key={d.id} className="hover:bg-primary-50/40 transition-colors">
-                                                <td className="px-4 py-3 text-sm font-medium max-w-[180px] truncate" style={{ color: 'var(--foreground)' }} title={d.companyName}>{d.companyName}</td>
-                                                <td className="px-4 py-3 text-sm hidden md:table-cell max-w-[140px] truncate" style={{ color: 'var(--on-surface-variant)' }} title={d.contactPerson}>{d.contactPerson}</td>
-                                                <td className="px-4 py-3 text-sm hidden lg:table-cell" style={{ color: 'var(--on-surface-variant)' }}>
+                                            <tr key={d.id} className="transition-colors hover:bg-[var(--surface-container)]">
+                                                <td className="px-3 py-3 text-sm font-medium max-w-[180px] truncate" style={{ color: 'var(--foreground)' }} title={d.companyName}>{d.companyName}</td>
+                                                <td className="px-3 py-3 text-sm hidden md:table-cell max-w-[140px] truncate" style={{ color: 'var(--on-surface-variant)' }} title={d.contactPerson}>{d.contactPerson}</td>
+                                                <td className="px-3 py-3 text-sm hidden lg:table-cell" style={{ color: 'var(--on-surface-variant)' }}>
                                                     <div className="truncate max-w-[180px] text-xs" title={d.email}>{d.email}</div>
                                                     <div className="text-xs truncate max-w-[180px]" style={{ color: 'var(--on-surface-variant)' }}>{d.phone}</div>
                                                 </td>
-                                                <td className="px-4 py-3 text-sm hidden lg:table-cell whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>{d.city}, {d.state}</td>
-                                                <td className="px-4 py-3 text-center">
+                                                <td className="px-3 py-3 text-sm hidden lg:table-cell whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>{d.city}, {d.state}</td>
+                                                <td className="px-3 py-3 text-center">
                                                     <button
                                                         onClick={() => router.push(`/distributors/${d.id}/products`)}
                                                         className="hover:underline cursor-pointer text-sm font-semibold"
@@ -308,9 +308,9 @@ export default function DistributorsPage() {
                                                         {d?.uniqueProductsCount ?? 0}
                                                     </button>
                                                 </td>
-                                                <td className="px-4 py-3 text-sm text-center hidden sm:table-cell" style={{ color: 'var(--on-surface-variant)' }}>{d.totalDeals ?? 0}</td>
-                                                <td className="px-4 py-3 text-center">{statusPill(d.status)}</td>
-                                                <td className="px-4 py-3">
+                                                <td className="px-3 py-3 text-sm text-center hidden sm:table-cell" style={{ color: 'var(--on-surface-variant)' }}>{d.totalDeals ?? 0}</td>
+                                                <td className="px-3 py-3 text-center">{statusPill(d.status)}</td>
+                                                <td className="px-3 py-3">
                                                     <div className="flex items-center justify-center gap-1">
                                                         <button onClick={() => setViewModal(d)} className="p-1.5 rounded hover:bg-primary-50 cursor-pointer transition-colors" style={{ color: 'var(--on-surface-variant)' }} title="View">
                                                             <Eye className="w-3.5 h-3.5" />
@@ -364,7 +364,7 @@ export default function DistributorsPage() {
                         onClick={() => setViewModal(null)}
                     >
                         <div
-                            className="rounded-xl shadow-2xl w-full max-w-lg my-auto flex flex-col border"
+                            className="rounded-[4px] shadow-xl w-full max-w-lg my-auto flex flex-col border"
                             style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                             onClick={(e) => e.stopPropagation()}
                         >
@@ -372,7 +372,7 @@ export default function DistributorsPage() {
                             <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4">
                                 {/* Banner */}
                                 <div
-                                    className="rounded-lg border p-3 flex items-center justify-between gap-3"
+                                    className="rounded-[4px] border p-3 flex items-center justify-between gap-3"
                                     style={{ background: 'linear-gradient(90deg, var(--surface-container-low) 0%, var(--secondary-container) 100%)', borderColor: 'var(--outline-variant)' }}
                                 >
                                     <div className="min-w-0">
@@ -416,7 +416,7 @@ export default function DistributorsPage() {
                         onClick={() => setAddModal(false)}
                     >
                         <div
-                            className="rounded-xl shadow-2xl w-full max-w-xl my-auto flex flex-col border"
+                            className="rounded-[4px] shadow-xl w-full max-w-xl my-auto flex flex-col border"
                             style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                             onClick={(e) => e.stopPropagation()}
                         >
@@ -495,7 +495,7 @@ export default function DistributorsPage() {
                         onClick={() => { setEditModal(null); setEditFormData({}); }}
                     >
                         <div
-                            className="rounded-xl shadow-2xl w-full max-w-xl my-auto flex flex-col border"
+                            className="rounded-[4px] shadow-xl w-full max-w-xl my-auto flex flex-col border"
                             style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                             onClick={(e) => e.stopPropagation()}
                         >
@@ -567,15 +567,15 @@ export default function DistributorsPage() {
                         onClick={() => setDeactivateModal(null)}
                     >
                         <div
-                            className="rounded-xl shadow-2xl max-w-sm w-full border"
+                            className="rounded-[4px] shadow-xl max-w-sm w-full border"
                             style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className="px-6 pt-6 pb-4">
-                                <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3" style={{ backgroundColor: 'var(--error-container)' }}>
+                                <div className="w-10 h-10 rounded-[4px] flex items-center justify-center mb-3" style={{ backgroundColor: 'var(--error-container)' }}>
                                     <Ban className="w-5 h-5" style={{ color: 'var(--error)' }} />
                                 </div>
-                                <h3 className="text-base font-semibold mb-1" style={{ color: 'var(--foreground)' }}>Deactivate Distributor</h3>
+                                <h3 className="font-heading text-body font-semibold mb-1" style={{ color: 'var(--foreground)' }}>Deactivate Distributor</h3>
                                 <p className="text-sm" style={{ color: 'var(--on-surface-variant)' }}>
                                     Are you sure you want to deactivate <strong>{deactivateModal.companyName}</strong>? This will temporarily suspend their access and deals.
                                 </p>
@@ -598,15 +598,15 @@ export default function DistributorsPage() {
                         onClick={() => setActivateModal(null)}
                     >
                         <div
-                            className="rounded-xl shadow-2xl max-w-sm w-full border"
+                            className="rounded-[4px] shadow-xl max-w-sm w-full border"
                             style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className="px-6 pt-6 pb-4">
-                                <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3" style={{ backgroundColor: 'var(--secondary-container)' }}>
+                                <div className="w-10 h-10 rounded-[4px] flex items-center justify-center mb-3" style={{ backgroundColor: 'var(--secondary-container)' }}>
                                     <CheckCircle className="w-5 h-5" style={{ color: 'var(--secondary)' }} />
                                 </div>
-                                <h3 className="text-base font-semibold mb-1" style={{ color: 'var(--foreground)' }}>Activate Distributor</h3>
+                                <h3 className="font-heading text-body font-semibold mb-1" style={{ color: 'var(--foreground)' }}>Activate Distributor</h3>
                                 <p className="text-sm" style={{ color: 'var(--on-surface-variant)' }}>
                                     Are you sure you want to activate <strong>{activateModal.companyName}</strong>? This will restore their access and allow them to create deals.
                                 </p>

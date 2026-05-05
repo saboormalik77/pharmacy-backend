@@ -233,12 +233,12 @@ export default function DebitMemosPage() {
                 >
                     <ChevronLeft className="w-3 h-3" /> Back to Warehouse
                 </Link>
-                <h1 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>Debit Memos</h1>
+                <h1 className="font-heading text-headline" style={{ color: 'var(--foreground)' }}>Debit Memos</h1>
                 <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>View and manage debit memos generated from closed batches</p>
             </div>
 
             {/* Filters */}
-            <div className="rounded-lg shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+            <div className="rounded-[4px] shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 <div className="flex flex-wrap items-center gap-2">
                     <div className="relative flex-1 min-w-[180px]">
                         <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--outline)' }} />
@@ -271,7 +271,7 @@ export default function DebitMemosPage() {
             </div>
 
             {/* Table */}
-            <div className="rounded-lg shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+            <div className="rounded-[4px] shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 {isLoading ? (
                     <div className="flex items-center justify-center py-14">
                         <Loader2 className="w-6 h-6 animate-spin text-primary-500" />
@@ -398,7 +398,7 @@ export default function DebitMemosPage() {
                                                     {/* Detail Cards */}
                                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                                                         {/* RA Info */}
-                                                        <div className="rounded-lg shadow-sm px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                                                        <div className="rounded-[4px] shadow-sm px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                                                             <h4 className="text-[11px] font-semibold mb-2 flex items-center gap-1" style={{ color: 'var(--on-surface)' }}><FileText className="w-3.5 h-3.5" /> RA Info</h4>
                                                             {editing ? (
                                                                 <div className="space-y-2">
@@ -438,7 +438,7 @@ export default function DebitMemosPage() {
                                                         </div>
 
                                                         {/* Shipping */}
-                                                        <div className="rounded-lg shadow-sm px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                                                        <div className="rounded-[4px] shadow-sm px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                                                             <h4 className="text-[11px] font-semibold mb-2 flex items-center gap-1" style={{ color: 'var(--on-surface)' }}><Truck className="w-3.5 h-3.5" /> Shipping</h4>
                                                             {editing ? (
                                                                 <div className="space-y-2">
@@ -476,7 +476,7 @@ export default function DebitMemosPage() {
                                                         </div>
 
                                                         {/* Payment */}
-                                                        <div className="rounded-lg shadow-sm px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                                                        <div className="rounded-[4px] shadow-sm px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                                                             <h4 className="text-[11px] font-semibold mb-2 flex items-center gap-1" style={{ color: 'var(--on-surface)' }}><DollarSign className="w-3.5 h-3.5" /> Payment</h4>
                                                             {editing ? (
                                                                 <div className="space-y-2">
@@ -531,7 +531,7 @@ export default function DebitMemosPage() {
                                                     </div>
 
                                                     {/* Labeler + Destination Info */}
-                                                    <div className="rounded-lg shadow-sm px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                                                    <div className="rounded-[4px] shadow-sm px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                                                         <h4 className="text-[11px] font-semibold mb-2" style={{ color: 'var(--on-surface)' }}>Memo Details</h4>
                                                         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                                                             {[
@@ -561,7 +561,7 @@ export default function DebitMemosPage() {
                                                     </div>
 
                                                     {/* Line Items */}
-                                                    <div className="rounded-lg shadow-sm overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                                                    <div className="rounded-[4px] shadow-sm overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                                                         <div className="px-3 py-2 border-b" style={{ borderColor: 'var(--outline-variant)' }}>
                                                             <h4 className="text-[11px] font-semibold" style={{ color: 'var(--on-surface)' }}>Line Items ({memoItems.length})</h4>
                                                         </div>
@@ -572,25 +572,25 @@ export default function DebitMemosPage() {
                                                                 <table className="min-w-full">
                                                                     <thead>
                                                                         <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                                                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">NDC</th>
-                                                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Product</th>
-                                                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Lot #</th>
-                                                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Expires</th>
-                                                                            <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Qty</th>
-                                                                            <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Ask Price</th>
-                                                                            <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Received</th>
+                                                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">NDC</th>
+                                                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Product</th>
+                                                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Lot #</th>
+                                                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Expires</th>
+                                                                            <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Qty</th>
+                                                                            <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Ask Price</th>
+                                                                            <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Received</th>
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                                                         {memoItems.map((item: DebitMemoItem) => (
                                                                             <tr key={item.id} className="hover:bg-primary-50/40">
-                                                                                <td className="px-4 py-3 text-sm font-mono" style={{ color: 'var(--foreground)' }}>{item.ndc || '—'}</td>
-                                                                                <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{item.productName || '—'}</td>
-                                                                                <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{item.lotNumber || '—'}</td>
-                                                                                <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
-                                                                                <td className="px-4 py-3 text-sm text-right" style={{ color: 'var(--on-surface)' }}>{item.quantity}</td>
-                                                                                <td className="px-4 py-3 text-sm text-right font-medium">{item.askPrice != null ? formatCurrency(item.askPrice) : '—'}</td>
-                                                                                <td className="px-4 py-3 text-sm text-right font-medium">{item.receivedPrice != null ? formatCurrency(item.receivedPrice) : '—'}</td>
+                                                                                <td className="px-3 py-3 text-sm font-mono" style={{ color: 'var(--foreground)' }}>{item.ndc || '—'}</td>
+                                                                                <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{item.productName || '—'}</td>
+                                                                                <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{item.lotNumber || '—'}</td>
+                                                                                <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
+                                                                                <td className="px-3 py-3 text-sm text-right" style={{ color: 'var(--on-surface)' }}>{item.quantity}</td>
+                                                                                <td className="px-3 py-3 text-sm text-right font-medium">{item.askPrice != null ? formatCurrency(item.askPrice) : '—'}</td>
+                                                                                <td className="px-3 py-3 text-sm text-right font-medium">{item.receivedPrice != null ? formatCurrency(item.receivedPrice) : '—'}</td>
                                                                             </tr>
                                                                         ))}
                                                                     </tbody>

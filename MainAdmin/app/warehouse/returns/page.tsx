@@ -189,7 +189,7 @@ export default function ReturnsPage() {
     if (user?.role !== 'processor') {
         return (
             <PermissionGate permission="warehouse">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+            <div className="bg-red-50 border border-red-200 rounded-[4px] p-6 text-center">
                 <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-3" />
                 <p className="text-red-800 font-medium">Access denied. This page is for processors only.</p>
                 <Button variant="outline" className="mt-4" onClick={() => router.push('/')}>Go to Dashboard</Button>
@@ -206,7 +206,7 @@ export default function ReturnsPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-lg font-bold text-gray-900">Return Transactions</h1>
+                    <h1 className="font-heading text-headline text-gray-900">Return Transactions</h1>
                     <p className="text-xs text-gray-500">Manage and track return transactions for your assigned stores</p>
                 </div>
                 <button onClick={() => router.push('/warehouse/returns/create')} className="inline-flex items-center gap-1 px-3 py-1.5 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors">
@@ -224,28 +224,28 @@ export default function ReturnsPage() {
 
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                <div className="bg-white rounded-lg shadow px-3 py-2">
+                <div className="bg-white rounded-[4px] shadow px-3 py-2">
                     <div className="flex items-center gap-1.5 mb-0.5">
                         <ClipboardList className="w-3.5 h-3.5 text-gray-500" />
                         <span className="text-[10px] text-gray-500">Total Returns</span>
                     </div>
                     <p className="text-sm font-bold text-gray-900">{stats.total}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow px-3 py-2">
+                <div className="bg-white rounded-[4px] shadow px-3 py-2">
                     <div className="flex items-center gap-1.5 mb-0.5">
                         <Play className="w-3.5 h-3.5 text-blue-500" />
                         <span className="text-[10px] text-gray-500">In Progress</span>
                     </div>
                     <p className="text-sm font-bold text-gray-900">{stats.inProgress}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow px-3 py-2">
+                <div className="bg-white rounded-[4px] shadow px-3 py-2">
                     <div className="flex items-center gap-1.5 mb-0.5">
                         <CheckCircle className="w-3.5 h-3.5 text-green-500" />
                         <span className="text-[10px] text-gray-500">Completed</span>
                     </div>
                     <p className="text-sm font-bold text-gray-900">{stats.completed}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow px-3 py-2">
+                <div className="bg-white rounded-[4px] shadow px-3 py-2">
                     <div className="flex items-center gap-1.5 mb-0.5">
                         <DollarSign className="w-3.5 h-3.5 text-emerald-500" />
                         <span className="text-[10px] text-gray-500">Total Value</span>
@@ -255,7 +255,7 @@ export default function ReturnsPage() {
             </div>
 
             {/* Table Card */}
-            <div className="bg-white rounded-lg shadow">
+            <div className="bg-white rounded-[4px] shadow">
                 {/* Filters */}
                 <div className="flex flex-wrap gap-2 px-3 py-2 border-b border-gray-100">
                     <div className="relative flex-1 min-w-[160px]">
@@ -318,13 +318,13 @@ export default function ReturnsPage() {
                         <table className="w-full table-auto">
                             <thead>
                                 <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">License Plate</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Store</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Status</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Items</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Value</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Date</th>
-                                    <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">License Plate</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Store</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Status</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Items</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Value</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Date</th>
+                                    <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -332,19 +332,19 @@ export default function ReturnsPage() {
                                     const badge = getStatusBadge(tx.status);
                                     return (
                                         <tr key={tx.id} className="odd:bg-white even:bg-gray-50/40 hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => router.push(`/warehouse/returns/${tx.id}`)}>
-                                            <td className="px-4 py-3">
+                                            <td className="px-3 py-3">
                                                 <span className="text-sm font-mono font-semibold text-gray-900">{tx.licensePlate}</span>
                                             </td>
-                                            <td className="px-4 py-3">
+                                            <td className="px-3 py-3">
                                                 <p className="text-sm font-medium text-gray-900 truncate max-w-[140px]">{tx.pharmacyName || '—'}</p>
                                             </td>
-                                            <td className="px-4 py-3">
+                                            <td className="px-3 py-3">
                                                 <Badge variant={badge.variant}><span className="text-[10px]">{badge.label}</span></Badge>
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-gray-600">{tx.totalItems}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-900 font-medium">{formatCurrency(tx.totalReturnableValue)}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-500">{formatDate(tx.createdAt)}</td>
-                                            <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
+                                            <td className="px-3 py-3 text-sm text-gray-600">{tx.totalItems}</td>
+                                            <td className="px-3 py-3 text-sm text-gray-900 font-medium">{formatCurrency(tx.totalReturnableValue)}</td>
+                                            <td className="px-3 py-3 text-sm text-gray-500">{formatDate(tx.createdAt)}</td>
+                                            <td className="px-3 py-3" onClick={e => e.stopPropagation()}>
                                                 <div className="flex items-center justify-end gap-0.5">
                                                     <button onClick={() => setViewModal(tx)} className="p-1 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded" title="View Details">
                                                         <Eye className="w-3.5 h-3.5" />
@@ -411,7 +411,7 @@ export default function ReturnsPage() {
             {/* ── View Detail Modal ────────────────────────── */}
             {viewModal && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setViewModal(null)}>
-                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50 sticky top-0">
                             <h2 className="text-sm font-semibold text-gray-900">Return Details</h2>
                             <button onClick={() => setViewModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
@@ -469,7 +469,7 @@ export default function ReturnsPage() {
             {/* ── Edit Modal ────────────────────────────────── */}
             {editModal && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setEditModal(null)}>
-                    <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">Edit Return — {editModal.licensePlate}</h2>
                             <button onClick={() => setEditModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
@@ -501,7 +501,7 @@ export default function ReturnsPage() {
             {/* ── Status Action Modal ──────────── */}
             {actionModal && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setActionModal(null)}>
-                    <div className="bg-white rounded-lg max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">
                                 {actionModal.action === 'pause' && 'Pause Return'}
@@ -528,7 +528,7 @@ export default function ReturnsPage() {
             {/* ── Delete Modal ─────────────────── */}
             {deleteModal && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setDeleteModal(null)}>
-                    <div className="bg-white rounded-lg max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">Delete Return</h2>
                             <button onClick={() => setDeleteModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>

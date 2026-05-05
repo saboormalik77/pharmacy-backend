@@ -26,7 +26,7 @@ export default function DashboardPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>Admin Dashboard</h1>
+        <h1 className="font-heading text-headline" style={{ color: 'var(--foreground)' }}>Admin Dashboard</h1>
         <p className="text-xs mt-0.5" style={{ color: 'var(--on-surface-variant)' }}>
           Overview of buying groups, warehouse operations, and system metrics
         </p>
@@ -38,7 +38,7 @@ export default function DashboardPage() {
           return (
             <div
               key={card.label}
-              className="rounded-lg shadow px-4 py-3 border"
+              className="rounded-[4px] shadow-sm px-6 py-6 border"
               style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
             >
               <div className="flex items-center justify-between">
@@ -49,7 +49,7 @@ export default function DashboardPage() {
                   </p>
                 </div>
                 <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center"
+                  className="w-10 h-10 rounded-[4px] flex items-center justify-center"
                   style={{ backgroundColor: card.color as string }}
                 >
                   <Icon className="w-5 h-5 text-white" />
@@ -62,9 +62,9 @@ export default function DashboardPage() {
 
       {/* Active Batch Info */}
       {!warehouseStats.isLoading && !warehouseStats.error && (
-        <div className="rounded-lg shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+        <div className="rounded-[4px] shadow-sm px-6 py-6 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'var(--tertiary-container)' }}>
+            <div className="w-10 h-10 rounded-[4px] flex items-center justify-center" style={{ backgroundColor: 'var(--tertiary-container)' }}>
               <Calendar className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -79,7 +79,7 @@ export default function DashboardPage() {
 
       {/* Error handling for warehouse stats */}
       {warehouseStats.error && (
-        <div className="rounded-lg p-4 border" style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--error)' }}>
+        <div className="rounded-[4px] shadow-sm p-6 border" style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--error)' }}>
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-5 h-5" style={{ color: 'var(--error)' }} />
             <p className="text-sm" style={{ color: 'var(--on-error-container)' }}>
@@ -89,15 +89,15 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="rounded-lg shadow px-4 py-3 border mt-4" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
-        <h2 className="text-sm font-semibold mb-3" style={{ color: 'var(--foreground)' }}>Quick Actions</h2>
+      <div className="rounded-[4px] shadow-sm px-6 py-6 border mt-4" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+        <h2 className="font-heading text-body font-semibold mb-3" style={{ color: 'var(--foreground)' }}>Quick Actions</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <Link
             href="/buying-groups"
-            className="flex items-center gap-3 p-4 rounded-lg border transition-colors"
+            className="flex items-center gap-3 p-6 rounded-[4px] border transition-colors"
             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)' }}
           >
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'var(--primary-fixed)' }}>
+            <div className="w-10 h-10 rounded-[4px] flex items-center justify-center" style={{ backgroundColor: 'var(--primary-fixed)' }}>
               <Users className="w-5 h-5" style={{ color: 'var(--primary)' }} />
             </div>
             <div>
@@ -108,10 +108,10 @@ export default function DashboardPage() {
           
           <Link
             href="/warehouse"
-            className="flex items-center gap-3 p-4 rounded-lg border transition-colors"
+            className="flex items-center gap-3 p-6 rounded-[4px] border transition-colors"
             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)' }}
           >
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'var(--secondary-container)' }}>
+            <div className="w-10 h-10 rounded-[4px] flex items-center justify-center" style={{ backgroundColor: 'var(--secondary-container)' }}>
               <Package className="w-5 h-5" style={{ color: 'var(--secondary)' }} />
             </div>
             <div>
@@ -122,10 +122,10 @@ export default function DashboardPage() {
 
           <Link
             href="/warehouse/batches"
-            className="flex items-center gap-3 p-4 rounded-lg border transition-colors"
+            className="flex items-center gap-3 p-6 rounded-[4px] border transition-colors"
             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)' }}
           >
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'var(--tertiary-fixed)' }}>
+            <div className="w-10 h-10 rounded-[4px] flex items-center justify-center" style={{ backgroundColor: 'var(--tertiary-fixed)' }}>
               <Layers className="w-5 h-5" style={{ color: 'var(--tertiary)' }} />
             </div>
             <div>

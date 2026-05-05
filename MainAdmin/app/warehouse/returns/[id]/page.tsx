@@ -797,7 +797,7 @@ export default function ReturnDetailPage() {
                 <button onClick={handleBackNavigation} className="flex items-center gap-2 text-sm" style={{ color: 'var(--on-surface-variant)' }}>
                     <ArrowLeft className="w-4 h-4" /> Back
                 </button>
-                <div className="border rounded-lg p-6 text-center" style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
+                <div className="border rounded-[4px] p-6 text-center" style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
                     <AlertCircle className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--error)' }} />
                     <p className="font-medium" style={{ color: 'var(--on-error-container)' }}>{error || 'Return transaction not found.'}</p>
                     <Button variant="outline" className="mt-4" onClick={() => router.push('/warehouse/returns')}>Go Back</Button>
@@ -814,7 +814,7 @@ export default function ReturnDetailPage() {
 
             {/* Lock Status Warning */}
             {isLocked && (
-                <div className="border rounded-lg px-3 py-2" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}>
+                <div className="border rounded-[4px] px-3 py-2" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}>
                     <div className="flex items-center gap-2">
                         <Lock className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--tertiary)' }} />
                         <div>
@@ -873,7 +873,7 @@ export default function ReturnDetailPage() {
                             <button
                                 onClick={printJobSheet}
                                 disabled={pdfLoading === 'job-sheet'}
-                                className="inline-flex items-center px-3 py-1.5 text-sm font-medium border rounded-md shadow-sm transition-colors disabled:opacity-50 hover:bg-primary-50/40"
+                                className="inline-flex items-center px-3 py-1.5 text-sm font-medium border rounded-[4px] shadow-sm transition-colors disabled:opacity-50 hover:bg-primary-50/40"
                                 style={{ color: 'var(--on-surface)', backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                                 title="Print job sheet with addresses and barcodes"
                             >
@@ -900,7 +900,7 @@ export default function ReturnDetailPage() {
                 /* Layout with Shipping & Processing: 2x2 grid */
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 {/* General Info */}
-                <div className="rounded-lg shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                <div className="rounded-[4px] shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                     <h2 className="text-[10px] font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: 'var(--on-surface-variant)' }}>
                         <ClipboardList className="w-3.5 h-3.5" /> General Information
                     </h2>
@@ -943,7 +943,7 @@ export default function ReturnDetailPage() {
                 </div>
 
                 {/* Store & Processor */}
-                <div className="rounded-lg shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                <div className="rounded-[4px] shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                     <h2 className="text-[10px] font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: 'var(--on-surface-variant)' }}>
                         <Building2 className="w-3.5 h-3.5" /> Store & Processor
                     </h2>
@@ -951,7 +951,7 @@ export default function ReturnDetailPage() {
                 </div>
 
                 {/* Values */}
-                <div className="rounded-lg shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                <div className="rounded-[4px] shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                     <h2 className="text-[10px] font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: 'var(--on-surface-variant)' }}>
                         <Package className="w-3.5 h-3.5" /> Items & Values
                     </h2>
@@ -976,7 +976,7 @@ export default function ReturnDetailPage() {
                 </div>
 
                     {/* Shipping & Processing */}
-                    <div className="rounded-lg shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                    <div className="rounded-[4px] shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         <h2 className="text-[10px] font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: 'var(--on-surface-variant)' }}>
                             <Truck className="w-3.5 h-3.5" /> Shipping & Processing
                         </h2>
@@ -1101,9 +1101,9 @@ export default function ReturnDetailPage() {
                 /* Layout without Shipping & Processing: 3 cards in one row */
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                     {/* General Information */}
-                    <div className="rounded-xl shadow-sm border px-5 py-4 hover:shadow-md transition-shadow" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                    <div className="rounded-[4px] shadow-sm border px-5 py-4 hover:shadow-md transition-shadow" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         <h2 className="text-xs font-bold uppercase tracking-wider mb-3 flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
-                            <div className="p-1.5 rounded-lg" style={{ backgroundColor: 'var(--primary-container)' }}>
+                            <div className="p-1.5 rounded-[4px]" style={{ backgroundColor: 'var(--primary-container)' }}>
                                 <ClipboardList className="w-4 h-4" style={{ color: 'var(--primary)' }} />
                             </div>
                             General Information
@@ -1147,9 +1147,9 @@ export default function ReturnDetailPage() {
                     </div>
 
                     {/* Store & Processor */}
-                    <div className="rounded-xl shadow-sm border px-5 py-4 hover:shadow-md transition-shadow" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                    <div className="rounded-[4px] shadow-sm border px-5 py-4 hover:shadow-md transition-shadow" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         <h2 className="text-xs font-bold uppercase tracking-wider mb-3 flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
-                            <div className="p-1.5 rounded-lg" style={{ backgroundColor: 'var(--secondary-container)' }}>
+                            <div className="p-1.5 rounded-[4px]" style={{ backgroundColor: 'var(--secondary-container)' }}>
                                 <Building2 className="w-4 h-4" style={{ color: 'var(--secondary)' }} />
                             </div>
                             Store & Processor
@@ -1158,9 +1158,9 @@ export default function ReturnDetailPage() {
                     </div>
 
                     {/* Items & Values */}
-                    {/* <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl shadow-sm border border-amber-100 px-5 py-4 hover:shadow-md transition-shadow">
+                    {/* <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-[4px] shadow-sm border border-amber-100 px-5 py-4 hover:shadow-md transition-shadow">
                         <h2 className="text-xs font-bold text-amber-800 uppercase tracking-wider mb-3 flex items-center gap-2">
-                            <div className="p-1.5 bg-amber-100 rounded-lg">
+                            <div className="p-1.5 bg-amber-100 rounded-[4px]">
                                 <Package className="w-4 h-4 text-amber-600" />
                             </div>
                             Items & Values
@@ -1189,7 +1189,7 @@ export default function ReturnDetailPage() {
 
             {/* ── Documents Section (post-finalization) ──────── */}
             {isFinalized && (
-                <div className="rounded-lg shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                <div className="rounded-[4px] shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                     <h2 className="text-[10px] font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: 'var(--on-surface-variant)' }}>
                         <FileText className="w-3.5 h-3.5" /> Documents
                     </h2>
@@ -1206,7 +1206,7 @@ export default function ReturnDetailPage() {
                         {/* <button
                             onClick={() => downloadPdf('dea-form-222', `dea-form-222-${tx.licensePlate}.pdf`)}
                             disabled={pdfLoading === 'dea-form-222'}
-                            className="flex items-center gap-2 px-4 py-2.5 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg text-sm text-orange-700 font-medium transition-colors disabled:opacity-50"
+                            className="flex items-center gap-2 px-4 py-2.5 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-[4px] text-sm text-orange-700 font-medium transition-colors disabled:opacity-50"
                         >
                             {pdfLoading === 'dea-form-222' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
                             DEA Form 222
@@ -1219,7 +1219,7 @@ export default function ReturnDetailPage() {
             )}
 
             {/* ── Items Section ──────────────────────────────── */}
-            <div className="rounded-lg shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+            <div className="rounded-[4px] shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2">
                     <h2 className="text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1.5" style={{ color: 'var(--on-surface-variant)' }}>
                         <ScanLine className="w-3.5 h-3.5" /> Products ({nonWcItems.length})
@@ -1316,19 +1316,19 @@ export default function ReturnDetailPage() {
                         <table className="w-full table-auto">
                             <thead>
                                 <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-white w-28">NDC</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-white">Name</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-white">Manufacturer</th>
-                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-white w-16">Pkg Size</th>
-                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-white w-20">Qty Returned</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-white w-28">Serial#</th>
-                                    {/* <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Price</th>
-                                    <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Est. Value</th> */}
-                                    {/* <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Est. Store Value</th> */}
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Expires</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Status</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Destination</th>
-                                    <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Actions</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-white w-28">NDC</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-white">Name</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-white">Manufacturer</th>
+                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider text-white w-16">Pkg Size</th>
+                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider text-white w-20">Qty Returned</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-white w-28">Serial#</th>
+                                    {/* <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Price</th>
+                                    <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Est. Value</th> */}
+                                    {/* <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Est. Store Value</th> */}
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Expires</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Status</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Destination</th>
+                                    <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
@@ -1336,41 +1336,41 @@ export default function ReturnDetailPage() {
                                     const sBadge = getItemStatusBadge(item.returnStatus);
                                     return (
                                         <tr key={item.id} className="hover:bg-primary-50/40" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
-                                            <td className="px-4 py-3 text-xs font-mono w-28 whitespace-nowrap" style={{ color: 'var(--foreground)' }}>{item.ndc || '—'}</td>
-                                            <td className="px-4 py-3 text-xs max-w-[130px] truncate" style={{ color: 'var(--foreground)' }} title={item.proprietaryName || ''}>
+                                            <td className="px-3 py-3 text-xs font-mono w-28 whitespace-nowrap" style={{ color: 'var(--foreground)' }}>{item.ndc || '—'}</td>
+                                            <td className="px-3 py-3 text-xs max-w-[130px] truncate" style={{ color: 'var(--foreground)' }} title={item.proprietaryName || ''}>
                                                 {item.proprietaryName || item.genericName || '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-xs max-w-[110px] truncate" style={{ color: 'var(--on-surface-variant)' }} title={item.manufacturer || ''}>
+                                            <td className="px-3 py-3 text-xs max-w-[110px] truncate" style={{ color: 'var(--on-surface-variant)' }} title={item.manufacturer || ''}>
                                                 {item.manufacturer || '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-xs text-center w-16 whitespace-nowrap" style={{ color: 'var(--foreground)' }}>
+                                            <td className="px-3 py-3 text-xs text-center w-16 whitespace-nowrap" style={{ color: 'var(--foreground)' }}>
                                                 {item.fullPackageSize || '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-xs text-center w-20 whitespace-nowrap" style={{ color: 'var(--foreground)' }}>
+                                            <td className="px-3 py-3 text-xs text-center w-20 whitespace-nowrap" style={{ color: 'var(--foreground)' }}>
                                                 {(() => {
                                                     const qtyReturned = item.fullPackageQtyReturned ?? item.quantity;
                                                     const displayQty = (item.fullPackageQtyReturned && item.fullPackageSize && item.fullPackageQtyReturned === item.fullPackageSize) ? 1 : qtyReturned;
                                                     return <>{displayQty}{item.isPartial && <span className="ml-0.5" style={{ color: 'var(--tertiary)' }}>P</span>}</>;
                                                 })()}
                                             </td>
-                                            <td className="px-4 py-3 text-xs font-mono w-28 max-w-[7rem]" style={{ color: 'var(--on-surface-variant)' }}>
+                                            <td className="px-3 py-3 text-xs font-mono w-28 max-w-[7rem]" style={{ color: 'var(--on-surface-variant)' }}>
                                                 <span className="block truncate" title={item.serialNumber || ''}>
                                                     {item.serialNumber || '—'}
                                                 </span>
                                             </td>
-                                            {/* <td className="px-4 py-3 text-xs text-right text-gray-900">
+                                            {/* <td className="px-3 py-3 text-xs text-right text-gray-900">
                                                 {item.standardPrice != null ? formatCurrency(item.standardPrice) : '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-xs text-right font-medium text-gray-900">
+                                            <td className="px-3 py-3 text-xs text-right font-medium text-gray-900">
                                                 {item.estimatedValue != null ? formatCurrency(item.estimatedValue) : '—'}
                                             </td> */}
-                                            {/* <td className="px-4 py-3 text-xs text-right font-medium text-gray-900">
+                                            {/* <td className="px-3 py-3 text-xs text-right font-medium text-gray-900">
                                                 {item.estimatedStoreValue != null ? formatCurrency(item.estimatedStoreValue) : '—'}
                                             </td> */}
-                                            <td className="px-4 py-3 text-xs whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>
+                                            <td className="px-3 py-3 text-xs whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>
                                                 {item.expirationDate ? formatDate(item.expirationDate) : '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-xs whitespace-nowrap">
+                                            <td className="px-3 py-3 text-xs whitespace-nowrap">
                                                 <div className="flex items-center gap-1">
                                                     <Badge variant={sBadge.variant}><span className="text-[10px]">{sBadge.label}</span></Badge>
                                                     {item.wineCellarId && (
@@ -1378,7 +1378,7 @@ export default function ReturnDetailPage() {
                                                     )}
                                                 </div>
                                             </td>
-                                            <td className="px-4 py-3 text-xs whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>
+                                            <td className="px-3 py-3 text-xs whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>
                                                 {item.returnStatus === 'returnable' ? (
                                                     item.destination ? (
                                                         <span className="capitalize font-medium" style={{ color: 'var(--foreground)' }}>{item.destination}</span>
@@ -1387,7 +1387,7 @@ export default function ReturnDetailPage() {
                                                     )
                                                 ) : '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-xs whitespace-nowrap">
+                                            <td className="px-3 py-3 text-xs whitespace-nowrap">
                                                 <div className="flex items-center justify-end gap-0.5">
                                                     {canAddDeleteItems && item.nonReturnableReason === 'date' && !item.wineCellarId && (
                                                         <button onClick={() => handleMoveToWineCellar(item)} className="p-1 rounded" style={{ color: 'var(--outline)' }} title="Move to Wine Cellar">
@@ -1418,7 +1418,7 @@ export default function ReturnDetailPage() {
             {/* ── Edit Item Modal ───────────────────────────── */}
             {editItemModal && (
                 <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setEditItemModal(null)}>
-                    <div className="rounded-lg max-w-sm w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                    <div className="rounded-[4px] max-w-sm w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <h2 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Edit Item</h2>
                             <button onClick={() => setEditItemModal(null)} style={{ color: 'var(--outline)' }}><X className="w-4 h-4" /></button>
@@ -1489,7 +1489,7 @@ export default function ReturnDetailPage() {
             {/* ── Delete Item Modal ────────────────────────── */}
             {deleteItemModal && (
                 <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setDeleteItemModal(null)}>
-                    <div className="rounded-lg max-w-sm w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                    <div className="rounded-[4px] max-w-sm w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <h2 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Delete Item</h2>
                             <button onClick={() => setDeleteItemModal(null)} style={{ color: 'var(--outline)' }}><X className="w-4 h-4" /></button>
@@ -1513,7 +1513,7 @@ export default function ReturnDetailPage() {
             {/* ── Edit Modal ────────────────────────────────── */}
             {editModal && (
                 <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setEditModal(false)}>
-                    <div className="rounded-lg max-w-md w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                    <div className="rounded-[4px] max-w-md w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <h2 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Edit Return — {tx.licensePlate}</h2>
                             <button onClick={() => setEditModal(false)} style={{ color: 'var(--outline)' }}><X className="w-4 h-4" /></button>
@@ -1550,7 +1550,7 @@ export default function ReturnDetailPage() {
             {/* ── Status Action Modal ──────────────────────── */}
             {actionModal && (
                 <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setActionModal(null)}>
-                    <div className="rounded-lg max-w-sm w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                    <div className="rounded-[4px] max-w-sm w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <h2 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
                                 {actionModal === 'pause' && 'Pause Return'}
@@ -1577,7 +1577,7 @@ export default function ReturnDetailPage() {
             {/* ── Delete Modal ─────────────────────────────── */}
             {deleteModal && (
                 <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setDeleteModal(false)}>
-                    <div className="rounded-lg max-w-sm w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                    <div className="rounded-[4px] max-w-sm w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <h2 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Delete Return</h2>
                             <button onClick={() => setDeleteModal(false)} style={{ color: 'var(--outline)' }}><X className="w-4 h-4" /></button>
@@ -1600,11 +1600,11 @@ export default function ReturnDetailPage() {
             {/* ── Finalize Return Modal ──────────────────── */}
             {finalizeModal && (
                 <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setFinalizeModal(false)}>
-                    <div className="rounded-lg max-w-xl w-full shadow-xl max-h-[90vh] flex flex-col border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                    <div className="rounded-[4px] max-w-xl w-full shadow-xl max-h-[90vh] flex flex-col border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
 
                         {/* Header */}
                         <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
-                            <h2 className="text-lg font-semibold flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
+                            <h2 className="font-heading text-body font-semibold flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
                                 <Lock className="w-5 h-5" style={{ color: 'var(--error)' }} /> Finalize Return — {tx.licensePlate}
                             </h2>
                             <button onClick={() => setFinalizeModal(false)} style={{ color: 'var(--outline)' }}><X className="w-5 h-5" /></button>
@@ -1614,7 +1614,7 @@ export default function ReturnDetailPage() {
 
                             {/* TBD blocker */}
                             {hasTbdItems && (
-                                <div className="border rounded-lg p-3 flex items-start gap-2" style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
+                                <div className="border rounded-[4px] p-3 flex items-start gap-2" style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
                                     <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: 'var(--error)' }} />
                                     <div>
                                         <p className="text-sm font-medium" style={{ color: 'var(--on-error-container)' }}>
@@ -1629,7 +1629,7 @@ export default function ReturnDetailPage() {
 
                             {/* ── Step 1: Print Itemized Return ── */}
                             <div
-                                className={`border rounded-lg p-4 transition-all ${hasTbdItems ? 'opacity-50 pointer-events-none' : ''}`}
+                                className={`border rounded-[4px] p-4 transition-all ${hasTbdItems ? 'opacity-50 pointer-events-none' : ''}`}
                                 style={{
                                     borderColor: 'var(--outline-variant)',
                                     backgroundColor: finalizeStepsDone.printManifest ? 'var(--secondary-container)' : 'var(--surface-container-lowest)',
@@ -1651,7 +1651,7 @@ export default function ReturnDetailPage() {
                                                     markStep({ printManifest: true });
                                                 }}
                                                 disabled={pdfLoading === 'manifest'}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+                                                className="flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-[4px] transition-colors disabled:opacity-50"
                                                 style={{ backgroundColor: 'var(--primary)' }}
                                             >
                                                 {pdfLoading === 'manifest' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Printer className="w-3.5 h-3.5" />}
@@ -1669,7 +1669,7 @@ export default function ReturnDetailPage() {
 
                             {/* ── Step 2: Enter FedEx Tracking ── */}
                             <div
-                                className={`border rounded-lg p-4 transition-all ${hasTbdItems || !finalizeStepsDone.printManifest ? 'opacity-50 pointer-events-none' : ''}`}
+                                className={`border rounded-[4px] p-4 transition-all ${hasTbdItems || !finalizeStepsDone.printManifest ? 'opacity-50 pointer-events-none' : ''}`}
                                 style={{
                                     borderColor: 'var(--outline-variant)',
                                     backgroundColor: finalizeStepsDone.fedexEntered ? 'var(--secondary-container)' : 'var(--surface-container-lowest)',
@@ -1697,7 +1697,7 @@ export default function ReturnDetailPage() {
                                         <div className="flex items-center gap-2 mt-2 flex-wrap">
                                             <button
                                                 onClick={() => { setFedexMode('api'); setFedexSubModal(true); }}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-md transition-colors"
+                                                className="flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-[4px] transition-colors"
                                                 style={{ backgroundColor: 'var(--primary)' }}
                                             >
                                                 <Truck className="w-3.5 h-3.5" />
@@ -1705,7 +1705,7 @@ export default function ReturnDetailPage() {
                                             </button>
                                             <button
                                                 onClick={() => { setFedexMode('manual'); setFedexSubModal(true); }}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors border hover:bg-primary-50/40"
+                                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-[4px] transition-colors border hover:bg-primary-50/40"
                                                 style={{ backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface)', borderColor: 'var(--outline-variant)' }}
                                             >
                                                 <Edit className="w-3.5 h-3.5" />
@@ -1735,7 +1735,7 @@ export default function ReturnDetailPage() {
 
                             {/* ── Step 3: Print Job Sheets ── */}
                             <div
-                                className={`border rounded-lg p-4 transition-all ${hasTbdItems || !finalizeStepsDone.fedexEntered ? 'opacity-50 pointer-events-none' : ''}`}
+                                className={`border rounded-[4px] p-4 transition-all ${hasTbdItems || !finalizeStepsDone.fedexEntered ? 'opacity-50 pointer-events-none' : ''}`}
                                 style={{
                                     borderColor: 'var(--outline-variant)',
                                     backgroundColor: finalizeStepsDone.printJobSheets ? 'var(--secondary-container)' : 'var(--surface-container-lowest)',
@@ -1767,7 +1767,7 @@ export default function ReturnDetailPage() {
                                                     markStep({ printJobSheets: true });
                                                 }}
                                                 disabled={pdfLoading === 'job-sheet'}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+                                                className="flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-[4px] transition-colors disabled:opacity-50"
                                                 style={{ backgroundColor: 'var(--primary)' }}
                                             >
                                                 {pdfLoading === 'job-sheet' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
@@ -1781,7 +1781,7 @@ export default function ReturnDetailPage() {
                                                         markStep({ printJobSheets: true });
                                                     }}
                                                     disabled={pdfLoading === 'dea-form-222'}
-                                                    className="flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+                                                    className="flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-[4px] transition-colors disabled:opacity-50"
                                                     style={{ backgroundColor: 'var(--tertiary)' }}
                                                 >
                                                     {pdfLoading === 'dea-form-222' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
@@ -1801,7 +1801,7 @@ export default function ReturnDetailPage() {
 
                             {/* ── Step 4: Finalize Return ── */}
                             <div
-                                className={`border-2 rounded-lg p-4 transition-all ${hasTbdItems || !finalizeStepsDone.printJobSheets ? 'opacity-50 pointer-events-none' : ''}`}
+                                className={`border-2 rounded-[4px] p-4 transition-all ${hasTbdItems || !finalizeStepsDone.printJobSheets ? 'opacity-50 pointer-events-none' : ''}`}
                                 style={{
                                     borderStyle: canFinalize ? 'solid' : 'dashed',
                                     borderColor: 'var(--outline-variant)',
@@ -1835,14 +1835,14 @@ export default function ReturnDetailPage() {
                                         {allStepsDone && (
                                             <div className="mt-3">
                                                 {hasTbdItems && (
-                                                    <div className="border rounded-md p-2 flex items-start gap-1.5 mb-3" style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
+                                                    <div className="border rounded-[4px] p-2 flex items-start gap-1.5 mb-3" style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
                                                         <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--error)' }} />
                                                         <p className="text-xs" style={{ color: 'var(--on-error-container)' }}>
                                                             Resolve all TBD items before finalizing.
                                                         </p>
                                                     </div>
                                                 )}
-                                                <div className="border rounded-md p-2 flex items-start gap-1.5 mb-3" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}>
+                                                <div className="border rounded-[4px] p-2 flex items-start gap-1.5 mb-3" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}>
                                                     <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--tertiary)' }} />
                                                     <p className="text-xs" style={{ color: 'var(--on-tertiary-container)' }}>
                                                         Once finalized, items and shipping details can no longer be edited.
@@ -1872,9 +1872,9 @@ export default function ReturnDetailPage() {
             {/* ── Wine Cellar Modal ────────────────────────── */}
             {wcModal && (
                 <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setWcModal(false)}>
-                    <div className="rounded-lg max-w-2xl w-full shadow-xl max-h-[80vh] flex flex-col border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                    <div className="rounded-[4px] max-w-2xl w-full shadow-xl max-h-[80vh] flex flex-col border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
-                            <h2 className="text-lg font-semibold flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
+                            <h2 className="font-heading text-body font-semibold flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
                                 <Archive className="w-5 h-5" style={{ color: 'var(--tertiary)' }} /> Add Wine Cellar Items
                             </h2>
                             <button onClick={() => setWcModal(false)} style={{ color: 'var(--outline)' }}><X className="w-5 h-5" /></button>
@@ -1897,7 +1897,7 @@ export default function ReturnDetailPage() {
                                         <table className="w-full table-auto text-xs">
                                             <thead>
                                                 <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                                                    <th className="px-4 py-3.5 w-8">
+                                                    <th className="px-3 py-3 w-8">
                                                         <input
                                                             type="checkbox"
                                                             checked={wcSelected.size === wcItems.length && wcItems.length > 0}
@@ -1912,12 +1912,12 @@ export default function ReturnDetailPage() {
                                                             style={{ color: 'var(--primary)' }}
                                                         />
                                                     </th>
-                                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
-                                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product</th>
-                                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">QTY</th>
-                                                    <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Price</th>
-                                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Shelved</th>
-                                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Location</th>
+                                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
+                                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product</th>
+                                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">QTY</th>
+                                                    <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Price</th>
+                                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Shelved</th>
+                                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Location</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -1931,7 +1931,7 @@ export default function ReturnDetailPage() {
                                                         }}
                                                         onClick={() => toggleWcSelect(item.id)}
                                                     >
-                                                        <td className="px-4 py-3 text-sm">
+                                                        <td className="px-3 py-3 text-sm">
                                                             <input
                                                                 type="checkbox"
                                                                 checked={wcSelected.has(item.id)}
@@ -1940,19 +1940,19 @@ export default function ReturnDetailPage() {
                                                                 style={{ color: 'var(--primary)' }}
                                                             />
                                                         </td>
-                                                        <td className="px-4 py-3 text-sm font-mono" style={{ color: 'var(--foreground)' }}>{item.ndc || '—'}</td>
-                                                        <td className="px-4 py-3 text-sm max-w-[140px] truncate" style={{ color: 'var(--foreground)' }} title={item.productName || ''}>
+                                                        <td className="px-3 py-3 text-sm font-mono" style={{ color: 'var(--foreground)' }}>{item.ndc || '—'}</td>
+                                                        <td className="px-3 py-3 text-sm max-w-[140px] truncate" style={{ color: 'var(--foreground)' }} title={item.productName || ''}>
                                                             <div>
                                                                 <p className="truncate">{item.productName || '—'}</p>
                                                                 {item.manufacturer && <p className="text-[10px] truncate" style={{ color: 'var(--on-surface-variant)' }}>{item.manufacturer}</p>}
                                                             </div>
                                                         </td>
-                                                        <td className="px-4 py-3 text-sm text-center" style={{ color: 'var(--foreground)' }}>{item.quantity}</td>
-                                                        <td className="px-4 py-3 text-sm text-right" style={{ color: 'var(--foreground)' }}>
+                                                        <td className="px-3 py-3 text-sm text-center" style={{ color: 'var(--foreground)' }}>{item.quantity}</td>
+                                                        <td className="px-3 py-3 text-sm text-right" style={{ color: 'var(--foreground)' }}>
                                                             {item.standardPrice != null ? formatCurrency(item.standardPrice) : '—'}
                                                         </td>
-                                                        <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{formatDate(item.dateShelved)}</td>
-                                                        <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{item.physicalLocation || '—'}</td>
+                                                        <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{formatDate(item.dateShelved)}</td>
+                                                        <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{item.physicalLocation || '—'}</td>
                                                     </tr>
                                                 ))}
                                             </tbody>
@@ -1974,7 +1974,7 @@ export default function ReturnDetailPage() {
             {/* ── FedEx / USPS Tracking Sub-Modal ─────────── */}
             {fedexSubModal && (
                 <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-[60] p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => { if (!fedexApiLoading && !pickupLoading) setFedexSubModal(false); }}>
-                    <div className="rounded-lg max-w-2xl w-full shadow-xl max-h-[90vh] flex flex-col border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                    <div className="rounded-[4px] max-w-2xl w-full shadow-xl max-h-[90vh] flex flex-col border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
 
                         {/* Header */}
                         <div className="p-4 rounded-t-lg" style={{ backgroundColor: fedexMode === 'api' ? 'var(--primary)' : 'var(--tertiary-fixed)' }}>
@@ -2003,14 +2003,14 @@ export default function ReturnDetailPage() {
                                                         max="99"
                                                         value={fedexForm.boxCount}
                                                         onChange={e => setFedexForm(prev => ({ ...prev, boxCount: e.target.value }))}
-                                                        className="ml-2 w-20 px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-center"
+                                                        className="ml-2 w-20 px-3 py-1.5 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 text-center"
                                                         style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                                                         disabled={fedexApiLoading}
                                                     />
                                                 </div>
                                             </div>
 
-                                            <div className="border rounded-md p-3 text-xs text-center space-y-1" style={{ backgroundColor: 'var(--primary-fixed)', borderColor: 'var(--outline-variant)', color: 'var(--on-primary-container)' }}>
+                                            <div className="border rounded-[4px] p-3 text-xs text-center space-y-1" style={{ backgroundColor: 'var(--primary-fixed)', borderColor: 'var(--outline-variant)', color: 'var(--on-primary-container)' }}>
                                                 <p>The shipment will be created as <strong>FedEx Ground</strong> from the pharmacy address to the warehouse.</p>
                                                 <p>Make sure both pharmacy and warehouse addresses are configured correctly.</p>
                                             </div>
@@ -2055,7 +2055,7 @@ export default function ReturnDetailPage() {
                                                         }
                                                     }}
                                                     disabled={fedexApiLoading || !fedexForm.boxCount}
-                                                    className="flex items-center gap-2 px-6 py-2.5 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                                                    className="flex items-center gap-2 px-6 py-2.5 text-white text-sm font-medium rounded-[4px] transition-colors disabled:opacity-50"
                                                     style={{ backgroundColor: 'var(--primary)' }}
                                                 >
                                                     {fedexApiLoading ? (
@@ -2069,7 +2069,7 @@ export default function ReturnDetailPage() {
                                     ) : (
                                         <>
                                             {/* API Result */}
-                                            <div className="border rounded-lg p-4 space-y-3" style={{ backgroundColor: 'var(--secondary-container)', borderColor: 'var(--outline-variant)' }}>
+                                            <div className="border rounded-[4px] p-4 space-y-3" style={{ backgroundColor: 'var(--secondary-container)', borderColor: 'var(--outline-variant)' }}>
                                                 <div className="flex items-center gap-2">
                                                     <CheckCircle className="w-5 h-5" style={{ color: 'var(--secondary)' }} />
                                                     <p className="text-sm font-semibold" style={{ color: 'var(--on-secondary-container)' }}>Shipment Created Successfully</p>
@@ -2146,7 +2146,7 @@ export default function ReturnDetailPage() {
                                                         href={`${process.env.NEXT_PUBLIC_API_URL}/return-transactions/${tx.id}/labels?packageNumber=1`}
                                                         target="_blank"
                                                         rel="noreferrer"
-                                                        className="flex items-center gap-1.5 px-4 py-2 text-xs font-medium rounded-md border transition-colors hover:bg-primary-50/40"
+                                                        className="flex items-center gap-1.5 px-4 py-2 text-xs font-medium rounded-[4px] border transition-colors hover:bg-primary-50/40"
                                                         style={{ backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface)', borderColor: 'var(--outline-variant)' }}
                                                     >
                                                         <Printer className="w-3.5 h-3.5" />
@@ -2158,7 +2158,7 @@ export default function ReturnDetailPage() {
                                             {/* Schedule Pickup */}
                                             <div className="border-t pt-4 space-y-3" style={{ borderColor: 'var(--outline-variant)' }}>
                                                 <p className="text-sm font-medium" style={{ color: 'var(--on-surface)' }}>Schedule FedEx Pickup (Optional)</p>
-                                                <div className="border rounded-md p-3 mb-3" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}>
+                                                <div className="border rounded-[4px] p-3 mb-3" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}>
                                                     <p className="text-xs" style={{ color: 'var(--on-tertiary-container)' }}>
                                                         <strong>Note:</strong> Pickup scheduling may not work in sandbox/test mode. 
                                                         You can also call FedEx directly at <strong>1-800-463-3339</strong> and say &quot;Ground Return Pickup&quot;.
@@ -2171,7 +2171,7 @@ export default function ReturnDetailPage() {
                                                             type="date"
                                                             value={pickupForm.pickupDate}
                                                             onChange={e => setPickupForm(prev => ({ ...prev, pickupDate: e.target.value }))}
-                                                            className="block w-36 px-2 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                            className="block w-36 px-2 py-1.5 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                                             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                                                             disabled={pickupLoading}
                                                         />
@@ -2182,7 +2182,7 @@ export default function ReturnDetailPage() {
                                                             type="time"
                                                             value={pickupForm.readyTime}
                                                             onChange={e => setPickupForm(prev => ({ ...prev, readyTime: e.target.value }))}
-                                                            className="block w-28 px-2 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                            className="block w-28 px-2 py-1.5 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                                             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                                                             disabled={pickupLoading}
                                                         />
@@ -2193,7 +2193,7 @@ export default function ReturnDetailPage() {
                                                             type="time"
                                                             value={pickupForm.closeTime}
                                                             onChange={e => setPickupForm(prev => ({ ...prev, closeTime: e.target.value }))}
-                                                            className="block w-28 px-2 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                            className="block w-28 px-2 py-1.5 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                                             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                                                             disabled={pickupLoading}
                                                         />
@@ -2219,7 +2219,7 @@ export default function ReturnDetailPage() {
                                                                 }
                                                             }}
                                                             disabled={pickupLoading}
-                                                            className="flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-[4px] transition-colors disabled:opacity-50"
                                                             style={{ backgroundColor: 'var(--secondary)' }}
                                                         >
                                                             {pickupLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Truck className="w-3.5 h-3.5" />}
@@ -2245,7 +2245,7 @@ export default function ReturnDetailPage() {
                                             max="99"
                                             value={fedexForm.boxCount}
                                             onChange={e => setFedexForm(prev => ({ ...prev, boxCount: e.target.value }))}
-                                            className="ml-2 w-20 px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-center"
+                                            className="ml-2 w-20 px-3 py-1.5 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 text-center"
                                             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                                         />
                                     </div>
@@ -2265,7 +2265,7 @@ export default function ReturnDetailPage() {
                                             value={fedexForm.prpNumber}
                                             onChange={e => setFedexForm(prev => ({ ...prev, prpNumber: e.target.value }))}
                                             placeholder="Enter PRP Number or USPS"
-                                            className="ml-2 w-64 px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono"
+                                            className="ml-2 w-64 px-3 py-1.5 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono"
                                             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                                         />
                                     </div>
@@ -2285,7 +2285,7 @@ export default function ReturnDetailPage() {
                                                         updated[i] = e.target.value;
                                                         setFedexForm(prev => ({ ...prev, packages: updated }));
                                                     }}
-                                                    className="flex-1 px-2 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono"
+                                                    className="flex-1 px-2 py-1.5 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono"
                                                     style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                                                 />
                                             </div>

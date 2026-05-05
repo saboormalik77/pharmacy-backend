@@ -509,7 +509,7 @@ export default function RATrackingPage() {
                     >
                         <ChevronLeft className="w-3 h-3" /> Back to Warehouse
                     </Link>
-                    <h1 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>RA Tracking</h1>
+                    <h1 className="font-heading text-headline" style={{ color: 'var(--foreground)' }}>RA Tracking</h1>
                     <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>Track Return Authorization requests, receipts, and shipments</p>
                 </div>
             </div>
@@ -518,7 +518,7 @@ export default function RATrackingPage() {
                 <button
                     type="button"
                     onClick={() => setRaView('memos')}
-                    className="px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors hover:bg-primary-50/40"
+                    className="px-3 py-1.5 rounded-[4px] text-xs font-medium border transition-colors hover:bg-primary-50/40"
                     style={{
                         backgroundColor: raView === 'memos' ? 'var(--primary)' : 'var(--surface-container-lowest)',
                         color: raView === 'memos' ? 'white' : 'var(--on-surface)',
@@ -530,7 +530,7 @@ export default function RATrackingPage() {
                 <button
                     type="button"
                     onClick={() => { setRaView('group-shipments'); setShippedGroupsPage(1); }}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors hover:bg-primary-50/40"
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-[4px] text-xs font-medium border transition-colors hover:bg-primary-50/40"
                     style={{
                         backgroundColor: raView === 'group-shipments' ? 'var(--tertiary)' : 'var(--surface-container-lowest)',
                         color: raView === 'group-shipments' ? 'white' : 'var(--on-surface)',
@@ -554,7 +554,7 @@ export default function RATrackingPage() {
                     ].map(card => (
                         <div
                             key={card.label}
-                            className="rounded-lg border px-3 py-2 flex items-center gap-2"
+                            className="rounded-[4px] border px-3 py-2 flex items-center gap-2"
                             style={{ backgroundColor: card.bg, borderColor: 'var(--outline-variant)' }}
                         >
                             {card.icon}
@@ -568,7 +568,7 @@ export default function RATrackingPage() {
             )}
 
             {/* Filters — single compact row */}
-            <div className="rounded-lg shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+            <div className="rounded-[4px] shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 <div className="flex flex-wrap items-center gap-2">
                     <div className="relative flex-1 min-w-[160px]">
                         <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--outline)' }} />
@@ -609,7 +609,7 @@ export default function RATrackingPage() {
             </div>
 
             {/* Table */}
-            <div className="rounded-lg shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+            <div className="rounded-[4px] shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 {isLoading ? (
                     <div className="flex items-center justify-center py-12">
                         <Loader2 className="w-6 h-6 animate-spin text-primary-500" />
@@ -625,16 +625,16 @@ export default function RATrackingPage() {
                         <table className="min-w-full divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                             <thead>
                                 <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Memo #</th>
-                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Pharmacy</th>
-                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Dest.</th>
-                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Labeler</th>
-                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Ask</th>
-                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Requested</th>
-                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Tickler</th>
-                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">RA #</th>
-                                    <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Status</th>
-                                    <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Actions</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Memo #</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Pharmacy</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Dest.</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Labeler</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Ask</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Requested</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Tickler</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">RA #</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Status</th>
+                                    <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
@@ -648,26 +648,26 @@ export default function RATrackingPage() {
                                             className="transition-colors hover:bg-primary-50/40"
                                             style={{ backgroundColor: overdue ? 'var(--error-container)' : undefined }}
                                         >
-                                            <td className="px-4 py-3 text-sm font-semibold whitespace-nowrap" style={{ color: 'var(--primary)' }}>{memo.memoNumber}</td>
-                                            <td className="px-4 py-3 text-sm max-w-[130px] truncate" style={{ color: 'var(--on-surface)' }}>{memo.pharmacyName}</td>
-                                            <td className="px-4 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>{memo.destination || '—'}</td>
-                                            <td className="px-4 py-3 text-sm max-w-[120px] truncate" style={{ color: 'var(--on-surface-variant)' }}>{memo.labelerName || '—'}</td>
-                                            <td className="px-4 py-3 text-sm font-medium whitespace-nowrap">{formatCurrency(memo.totalAskValue)}</td>
-                                            <td className="px-4 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>
+                                            <td className="px-3 py-3 text-sm font-semibold whitespace-nowrap" style={{ color: 'var(--primary)' }}>{memo.memoNumber}</td>
+                                            <td className="px-3 py-3 text-sm max-w-[130px] truncate" style={{ color: 'var(--on-surface)' }}>{memo.pharmacyName}</td>
+                                            <td className="px-3 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>{memo.destination || '—'}</td>
+                                            <td className="px-3 py-3 text-sm max-w-[120px] truncate" style={{ color: 'var(--on-surface-variant)' }}>{memo.labelerName || '—'}</td>
+                                            <td className="px-3 py-3 text-sm font-medium whitespace-nowrap">{formatCurrency(memo.totalAskValue)}</td>
+                                            <td className="px-3 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>
                                                 {memo.raRequestedAt ? formatDate(memo.raRequestedAt) : '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-sm whitespace-nowrap">
+                                            <td className="px-3 py-3 text-sm whitespace-nowrap">
                                                 {memo.ticklerDate ? (
                                                     <span style={{ color: overdue ? 'var(--error)' : 'var(--on-surface-variant)', fontWeight: overdue ? 600 : 400 }}>
                                                         {formatDate(memo.ticklerDate)}{overdue && ' ⚠'}
                                                     </span>
                                                 ) : '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-sm font-medium whitespace-nowrap" style={{ color: 'var(--foreground)' }}>{memo.raNumber || '—'}</td>
-                                            <td className="px-4 py-3">
+                                            <td className="px-3 py-3 text-sm font-medium whitespace-nowrap" style={{ color: 'var(--foreground)' }}>{memo.raNumber || '—'}</td>
+                                            <td className="px-3 py-3">
                                                 <Badge variant={sb.variant}><span className="text-[10px]">{sb.label}</span></Badge>
                                             </td>
-                                            <td className="px-4 py-3 text-right">
+                                            <td className="px-3 py-3 text-right">
                                                 <div className="flex items-center justify-end gap-1">
                                                     {eff === 'pending' && (
                                                         <button
@@ -753,7 +753,7 @@ export default function RATrackingPage() {
 
             {raView === 'group-shipments' && (
                 <>
-                    <div className="rounded-lg shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                    <div className="rounded-[4px] shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         <p className="text-xs mb-2" style={{ color: 'var(--on-surface-variant)' }}>
                             Shipments where multiple debit memos were sent together (one FedEx tracking). Use destination to narrow the list.
                         </p>
@@ -766,7 +766,7 @@ export default function RATrackingPage() {
                             {DESTINATION_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                         </select>
                     </div>
-                    <div className="rounded-lg shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                    <div className="rounded-[4px] shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         {isGroupLoading ? (
                             <div className="flex items-center justify-center py-12">
                                 <Loader2 className="w-6 h-6 animate-spin" style={{ color: 'var(--primary)' }} />
@@ -782,13 +782,13 @@ export default function RATrackingPage() {
                                 <table className="min-w-full divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                     <thead>
                                         <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                                            <th className="px-4 py-3.5 w-8" />
-                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Shipped</th>
-                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Destination</th>
-                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Tracking</th>
-                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Boxes</th>
-                                            <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Memos</th>
-                                            <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Actions</th>
+                                            <th className="px-3 py-3 w-8" />
+                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Shipped</th>
+                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Destination</th>
+                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Tracking</th>
+                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Boxes</th>
+                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Memos</th>
+                                            <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
@@ -798,7 +798,7 @@ export default function RATrackingPage() {
                                             return (
                                                 <React.Fragment key={g.id}>
                                                     <tr className="hover:bg-primary-50/40">
-                                                        <td className="px-4 py-3">
+                                                        <td className="px-3 py-3">
                                                             <button
                                                                 type="button"
                                                                 className="p-1 rounded border hover:bg-primary-50/40"
@@ -809,14 +809,14 @@ export default function RATrackingPage() {
                                                                 <ChevronRight className={`w-4 h-4 transition-transform ${open ? 'rotate-90' : ''}`} />
                                                             </button>
                                                         </td>
-                                                        <td className="px-4 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface)' }}>
+                                                        <td className="px-3 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface)' }}>
                                                             {g.shippedAt ? formatDate(g.shippedAt) : '—'}
                                                         </td>
-                                                        <td className="px-4 py-3 text-sm font-medium capitalize" style={{ color: 'var(--foreground)' }}>{g.destination || '—'}</td>
-                                                        <td className="px-4 py-3 text-sm font-mono" style={{ color: 'var(--foreground)' }}>{g.outboundTracking || '—'}</td>
-                                                        <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{g.boxCount ?? 1}</td>
-                                                        <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{row.memos?.length ?? g.totalMemos ?? 0}</td>
-                                                        <td className="px-4 py-3 text-right">
+                                                        <td className="px-3 py-3 text-sm font-medium capitalize" style={{ color: 'var(--foreground)' }}>{g.destination || '—'}</td>
+                                                        <td className="px-3 py-3 text-sm font-mono" style={{ color: 'var(--foreground)' }}>{g.outboundTracking || '—'}</td>
+                                                        <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{g.boxCount ?? 1}</td>
+                                                        <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{row.memos?.length ?? g.totalMemos ?? 0}</td>
+                                                        <td className="px-3 py-3 text-right">
                                                             <button
                                                                 type="button"
                                                                 onClick={() => printShipmentGroupLabel(g.id)}
@@ -833,27 +833,27 @@ export default function RATrackingPage() {
                                                         <tr style={{ backgroundColor: 'color-mix(in srgb, var(--tertiary-fixed) 35%, transparent)' }}>
                                                             <td colSpan={7} className="px-4 py-3">
                                                                 <p className="text-[10px] font-semibold uppercase mb-2" style={{ color: 'var(--on-surface-variant)' }}>Debit memos in this shipment</p>
-                                                                <div className="overflow-x-auto border rounded-lg" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)' }}>
+                                                                <div className="overflow-x-auto border rounded-[4px]" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)' }}>
                                                                     <table className="min-w-full text-xs">
                                                                         <thead>
                                                                             <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                                                                                <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Memo #</th>
-                                                                                <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Pharmacy</th>
-                                                                                <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">RA #</th>
-                                                                                <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Labeler</th>
-                                                                                <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Items</th>
-                                                                                <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Ask</th>
+                                                                                <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Memo #</th>
+                                                                                <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Pharmacy</th>
+                                                                                <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">RA #</th>
+                                                                                <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Labeler</th>
+                                                                                <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Items</th>
+                                                                                <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Ask</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                                                             {(row.memos || []).map((m: DebitMemo) => (
                                                                                 <tr key={m.id} className="hover:bg-primary-50/40">
-                                                                                    <td className="px-4 py-3 text-sm font-medium" style={{ color: 'var(--primary)' }}>{m.memoNumber}</td>
-                                                                                    <td className="px-4 py-3 text-sm max-w-[140px] truncate" style={{ color: 'var(--on-surface)' }}>{m.pharmacyName}</td>
-                                                                                    <td className="px-4 py-3 text-sm font-mono" style={{ color: 'var(--foreground)' }}>{m.raNumber || '—'}</td>
-                                                                                    <td className="px-4 py-3 text-sm max-w-[120px] truncate" style={{ color: 'var(--on-surface-variant)' }}>{m.labelerName || '—'}</td>
-                                                                                    <td className="px-4 py-3 text-sm text-right">{m.totalItems}</td>
-                                                                                    <td className="px-4 py-3 text-sm text-right font-medium">{formatCurrency(m.totalAskValue)}</td>
+                                                                                    <td className="px-3 py-3 text-sm font-medium" style={{ color: 'var(--primary)' }}>{m.memoNumber}</td>
+                                                                                    <td className="px-3 py-3 text-sm max-w-[140px] truncate" style={{ color: 'var(--on-surface)' }}>{m.pharmacyName}</td>
+                                                                                    <td className="px-3 py-3 text-sm font-mono" style={{ color: 'var(--foreground)' }}>{m.raNumber || '—'}</td>
+                                                                                    <td className="px-3 py-3 text-sm max-w-[120px] truncate" style={{ color: 'var(--on-surface-variant)' }}>{m.labelerName || '—'}</td>
+                                                                                    <td className="px-3 py-3 text-sm text-right">{m.totalItems}</td>
+                                                                                    <td className="px-3 py-3 text-sm text-right font-medium">{formatCurrency(m.totalAskValue)}</td>
                                                                                 </tr>
                                                                             ))}
                                                                         </tbody>
@@ -897,16 +897,16 @@ export default function RATrackingPage() {
             {/* ── Request RA Modal (Task 11.6) ──────────────────── */}
             {activeModal === 'request' && selectedMemo && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={closeModal}>
-                    <div className="rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                    <div className="rounded-[4px] shadow-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="p-6 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <div className="flex items-center justify-between">
-                                <h2 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>Send RA Request</h2>
+                                <h2 className="font-heading text-body font-bold" style={{ color: 'var(--foreground)' }}>Send RA Request</h2>
                                 <button onClick={closeModal} style={{ color: 'var(--outline)' }}><X className="w-5 h-5" /></button>
                             </div>
                         </div>
                         <div className="p-6 space-y-4">
                             {/* Memo Details */}
-                            <div className="rounded-lg p-4 text-sm space-y-1 border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
+                            <div className="rounded-[4px] p-4 text-sm space-y-1 border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
                                 <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Memo</span><span className="font-medium" style={{ color: 'var(--foreground)' }}>{selectedMemo.memoNumber}</span></div>
                                 <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Pharmacy</span><span style={{ color: 'var(--on-surface)' }}>{selectedMemo.pharmacyName}</span></div>
                                 <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Destination</span><span style={{ color: 'var(--on-surface)' }}>{selectedMemo.destination || '—'}</span></div>
@@ -939,7 +939,7 @@ export default function RATrackingPage() {
                                 <label className="block text-sm font-medium mb-1" style={{ color: 'var(--on-surface)' }}>Email Override (optional)</label>
                                 <input
                                     type="email"
-                                    className="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
+                                    className="w-full border rounded-[4px] px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
                                     style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                                     placeholder="Override destination email..."
                                     value={requestEmail}
@@ -962,15 +962,15 @@ export default function RATrackingPage() {
             {/* ── Resend RA Modal ────────────────────────────────── */}
             {activeModal === 'resend' && selectedMemo && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={closeModal}>
-                    <div className="rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                    <div className="rounded-[4px] shadow-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="p-6 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <div className="flex items-center justify-between">
-                                <h2 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>Resend RA Reminder</h2>
+                                <h2 className="font-heading text-body font-bold" style={{ color: 'var(--foreground)' }}>Resend RA Reminder</h2>
                                 <button onClick={closeModal} style={{ color: 'var(--outline)' }}><X className="w-5 h-5" /></button>
                             </div>
                         </div>
                         <div className="p-6 space-y-4">
-                            <div className="border rounded-lg p-3 text-sm" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)', color: 'var(--on-tertiary-container)' }}>
+                            <div className="border rounded-[4px] p-3 text-sm" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)', color: 'var(--on-tertiary-container)' }}>
                                 <p>Original request sent: <strong>{selectedMemo.raRequestedAt ? formatDate(selectedMemo.raRequestedAt) : 'N/A'}</strong></p>
                                 {selectedMemo.ticklerDate && (
                                     <p>Tickler date: <strong style={{ color: isOverdue(selectedMemo) ? 'var(--error)' : 'inherit' }}>{formatDate(selectedMemo.ticklerDate)}</strong>
@@ -978,7 +978,7 @@ export default function RATrackingPage() {
                                 )}
                             </div>
 
-                            <div className="rounded-lg p-4 text-sm space-y-1 border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
+                            <div className="rounded-[4px] p-4 text-sm space-y-1 border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
                                 <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Memo</span><span className="font-medium" style={{ color: 'var(--foreground)' }}>{selectedMemo.memoNumber}</span></div>
                                 <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Labeler</span><span style={{ color: 'var(--on-surface)' }}>{selectedMemo.labelerName || '—'}</span></div>
                                 <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Ask Value</span><span className="font-medium" style={{ color: 'var(--foreground)' }}>{formatCurrency(selectedMemo.totalAskValue)}</span></div>
@@ -997,7 +997,7 @@ export default function RATrackingPage() {
                                 <label className="block text-sm font-medium mb-1" style={{ color: 'var(--on-surface)' }}>Email Override (optional)</label>
                                 <input
                                     type="email"
-                                    className="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
+                                    className="w-full border rounded-[4px] px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
                                     style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                                     placeholder="Override destination email..."
                                     value={requestEmail}
@@ -1019,15 +1019,15 @@ export default function RATrackingPage() {
             {/* ── Receive RA Modal (Task 11.7) ──────────────────── */}
             {activeModal === 'receive' && selectedMemo && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={closeModal}>
-                    <div className="rounded-xl shadow-xl max-w-md w-full mx-4 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                    <div className="rounded-[4px] shadow-xl max-w-md w-full mx-4 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="p-6 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <div className="flex items-center justify-between">
-                                <h2 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>Record RA Received</h2>
+                                <h2 className="font-heading text-body font-bold" style={{ color: 'var(--foreground)' }}>Record RA Received</h2>
                                 <button onClick={closeModal} style={{ color: 'var(--outline)' }}><X className="w-5 h-5" /></button>
                             </div>
                         </div>
                         <div className="p-6 space-y-4">
-                            <div className="rounded-lg p-4 text-sm space-y-1 border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
+                            <div className="rounded-[4px] p-4 text-sm space-y-1 border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
                                 <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Memo</span><span className="font-medium" style={{ color: 'var(--foreground)' }}>{selectedMemo.memoNumber}</span></div>
                                 <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Labeler</span><span style={{ color: 'var(--on-surface)' }}>{selectedMemo.labelerName || '—'}</span></div>
                                 <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Destination</span><span style={{ color: 'var(--on-surface)' }}>{selectedMemo.destination || '—'}</span></div>
@@ -1037,7 +1037,7 @@ export default function RATrackingPage() {
                                 <label className="block text-sm font-medium mb-1" style={{ color: 'var(--on-surface)' }}>RA Number *</label>
                                 <input
                                     type="text"
-                                    className="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
+                                    className="w-full border rounded-[4px] px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
                                     style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                                     placeholder="Enter RA number..."
                                     value={receiveRaNumber}
@@ -1050,7 +1050,7 @@ export default function RATrackingPage() {
                                 <label className="block text-sm font-medium mb-1" style={{ color: 'var(--on-surface)' }}>PDF URL (optional)</label>
                                 <input
                                     type="url"
-                                    className="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
+                                    className="w-full border rounded-[4px] px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
                                     style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                                     placeholder="https://..."
                                     value={receivePdfUrl}
@@ -1080,7 +1080,7 @@ export default function RATrackingPage() {
                     }}
                 >
                     <div
-                        className="rounded-xl shadow-xl max-w-2xl w-full mx-4 max-h-[85vh] overflow-y-auto relative border"
+                        className="rounded-[4px] shadow-xl max-w-2xl w-full mx-4 max-h-[85vh] overflow-y-auto relative border"
                         style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                         onClick={e => e.stopPropagation()}
                     >
@@ -1107,7 +1107,7 @@ export default function RATrackingPage() {
                         )}
                         <div className="p-6 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <div className="flex items-center justify-between">
-                                <h2 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>Ship to Reverse Distributor</h2>
+                                <h2 className="font-heading text-body font-bold" style={{ color: 'var(--foreground)' }}>Ship to Reverse Distributor</h2>
                                 <button
                                     type="button"
                                     onClick={closeModal}
@@ -1123,8 +1123,8 @@ export default function RATrackingPage() {
                             {groupFedexResult && groupShipGroupId ? (
                                 <div className="space-y-4">
                                     <div>
-                                        <h3 className="text-sm font-bold mb-2" style={{ color: 'var(--foreground)' }}>Group shipment</h3>
-                                        <div className="rounded-lg p-4 text-sm space-y-2 max-h-40 overflow-y-auto border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
+                                        <h3 className="font-heading text-sm font-bold mb-2" style={{ color: 'var(--foreground)' }}>Group shipment</h3>
+                                        <div className="rounded-[4px] p-4 text-sm space-y-2 max-h-40 overflow-y-auto border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
                                             <div className="flex justify-between" style={{ color: 'var(--on-surface-variant)' }}><span>Memos</span><span className="font-medium" style={{ color: 'var(--foreground)' }}>{groupShippedMemos.length}</span></div>
                                             <div className="flex justify-between" style={{ color: 'var(--on-surface-variant)' }}><span>Destination</span><span className="font-medium capitalize" style={{ color: 'var(--foreground)' }}>{groupShippedMemos[0]?.destination || '—'}</span></div>
                                             <ul className="text-xs border-t pt-2 mt-2 space-y-1" style={{ color: 'var(--on-surface)', borderColor: 'var(--outline-variant)' }}>
@@ -1139,11 +1139,11 @@ export default function RATrackingPage() {
                                             </ul>
                                         </div>
                                     </div>
-                                    <div className="rounded-lg px-4 py-3 flex items-center justify-between" style={{ backgroundColor: 'var(--primary)' }}>
+                                    <div className="rounded-[4px] px-4 py-3 flex items-center justify-between" style={{ backgroundColor: 'var(--primary)' }}>
                                         <p className="text-sm font-bold text-white">FedEx API Shipment</p>
                                         <span className="text-sm font-bold text-white underline font-mono">{groupFedexResult.masterTrackingNumber}</span>
                                     </div>
-                                    <div className="border rounded-lg p-4 space-y-3" style={{ backgroundColor: 'var(--secondary-container)', borderColor: 'var(--outline-variant)' }}>
+                                    <div className="border rounded-[4px] p-4 space-y-3" style={{ backgroundColor: 'var(--secondary-container)', borderColor: 'var(--outline-variant)' }}>
                                         <div className="flex items-center gap-2">
                                             <CheckCircle className="w-5 h-5" style={{ color: 'var(--secondary)' }} />
                                             <p className="text-sm font-semibold" style={{ color: 'var(--on-secondary-container)' }}>Shipment Created Successfully</p>
@@ -1173,7 +1173,7 @@ export default function RATrackingPage() {
                                                 Print Labels
                                             </button>
                                         </div>
-                                        <div className="border rounded-lg overflow-hidden divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
+                                        <div className="border rounded-[4px] overflow-hidden divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                             {groupFedexResult.packages.map((pkg, i) => (
                                                 <div key={i} className="flex items-center justify-between text-xs px-4 py-2.5" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                                                     <div className="flex items-center gap-2">
@@ -1196,7 +1196,7 @@ export default function RATrackingPage() {
                                     <div className="border-t pt-4 space-y-3" style={{ borderColor: 'var(--outline-variant)' }}>
                                         <p className="text-sm font-medium" style={{ color: 'var(--on-surface)' }}>Schedule FedEx Pickup (Optional)</p>
                                         {groupPickupConfirmation ? (
-                                            <div className="border rounded-lg p-3 flex items-center gap-2" style={{ backgroundColor: 'var(--secondary-container)', borderColor: 'var(--outline-variant)' }}>
+                                            <div className="border rounded-[4px] p-3 flex items-center gap-2" style={{ backgroundColor: 'var(--secondary-container)', borderColor: 'var(--outline-variant)' }}>
                                                 <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--secondary)' }} />
                                                 <div className="text-xs">
                                                     <span className="font-medium" style={{ color: 'var(--on-secondary-container)' }}>Pickup scheduled!</span>
@@ -1205,7 +1205,7 @@ export default function RATrackingPage() {
                                             </div>
                                         ) : (
                                             <>
-                                                <div className="border rounded-md p-3" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}>
+                                                <div className="border rounded-[4px] p-3" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}>
                                                     <p className="text-xs" style={{ color: 'var(--on-tertiary-container)' }}>
                                                         <strong>Note:</strong> Pickup scheduling may not work in sandbox/test mode.
                                                         You can also call FedEx directly at <strong>1-800-463-3339</strong> and say &quot;Ground Return Pickup&quot;.
@@ -1218,7 +1218,7 @@ export default function RATrackingPage() {
                                                             type="date"
                                                             value={groupPickupForm.pickupDate}
                                                             onChange={e => setGroupPickupForm(prev => ({ ...prev, pickupDate: e.target.value }))}
-                                                            className="block w-36 px-2 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                            className="block w-36 px-2 py-1.5 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                                             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                                                             disabled={groupPickupLoading}
                                                         />
@@ -1229,7 +1229,7 @@ export default function RATrackingPage() {
                                                             type="time"
                                                             value={groupPickupForm.readyTime}
                                                             onChange={e => setGroupPickupForm(prev => ({ ...prev, readyTime: e.target.value }))}
-                                                            className="block w-28 px-2 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                            className="block w-28 px-2 py-1.5 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                                             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                                                             disabled={groupPickupLoading}
                                                         />
@@ -1240,7 +1240,7 @@ export default function RATrackingPage() {
                                                             type="time"
                                                             value={groupPickupForm.closeTime}
                                                             onChange={e => setGroupPickupForm(prev => ({ ...prev, closeTime: e.target.value }))}
-                                                            className="block w-28 px-2 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                            className="block w-28 px-2 py-1.5 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                                             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                                                             disabled={groupPickupLoading}
                                                         />
@@ -1269,7 +1269,7 @@ export default function RATrackingPage() {
                                                                 }
                                                             }}
                                                             disabled={groupPickupLoading}
-                                                            className="flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-[4px] transition-colors disabled:opacity-50"
                                                             style={{ backgroundColor: 'var(--secondary)' }}
                                                         >
                                                             {groupPickupLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Truck className="w-3.5 h-3.5" />}
@@ -1284,13 +1284,13 @@ export default function RATrackingPage() {
                             ) : fedexResult ? (
                                 <div className="space-y-4">
                                     {/* Shipment header banner */}
-                                    <div className="rounded-lg px-4 py-3 flex items-center justify-between" style={{ backgroundColor: 'var(--primary)' }}>
+                                    <div className="rounded-[4px] px-4 py-3 flex items-center justify-between" style={{ backgroundColor: 'var(--primary)' }}>
                                         <p className="text-sm font-bold text-white">FedEx API Shipment</p>
                                         <span className="text-sm font-bold text-white underline font-mono">{fedexResult.masterTrackingNumber}</span>
                                     </div>
 
                                     {/* Success info */}
-                                    <div className="border rounded-lg p-4 space-y-3" style={{ backgroundColor: 'var(--secondary-container)', borderColor: 'var(--outline-variant)' }}>
+                                    <div className="border rounded-[4px] p-4 space-y-3" style={{ backgroundColor: 'var(--secondary-container)', borderColor: 'var(--outline-variant)' }}>
                                         <div className="flex items-center gap-2">
                                             <CheckCircle className="w-5 h-5" style={{ color: 'var(--secondary)' }} />
                                             <p className="text-sm font-semibold" style={{ color: 'var(--on-secondary-container)' }}>Shipment Created Successfully</p>
@@ -1326,7 +1326,7 @@ export default function RATrackingPage() {
                                                 </button>
                                             )}
                                         </div>
-                                        <div className="border rounded-lg overflow-hidden divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
+                                        <div className="border rounded-[4px] overflow-hidden divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                             {fedexResult.packages.map((pkg, i) => (
                                                 <div key={i} className="flex items-center justify-between text-xs px-4 py-2.5" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
                                                     <div className="flex items-center gap-2">
@@ -1356,7 +1356,7 @@ export default function RATrackingPage() {
                                     <div className="border-t pt-4 space-y-3" style={{ borderColor: 'var(--outline-variant)' }}>
                                         <p className="text-sm font-medium" style={{ color: 'var(--on-surface)' }}>Schedule FedEx Pickup (Optional)</p>
                                         {pickupConfirmation ? (
-                                            <div className="border rounded-lg p-3 flex items-center gap-2" style={{ backgroundColor: 'var(--secondary-container)', borderColor: 'var(--outline-variant)' }}>
+                                            <div className="border rounded-[4px] p-3 flex items-center gap-2" style={{ backgroundColor: 'var(--secondary-container)', borderColor: 'var(--outline-variant)' }}>
                                                 <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--secondary)' }} />
                                                 <div className="text-xs">
                                                     <span className="font-medium" style={{ color: 'var(--on-secondary-container)' }}>Pickup scheduled!</span>
@@ -1365,7 +1365,7 @@ export default function RATrackingPage() {
                                             </div>
                                         ) : (
                                             <>
-                                                <div className="border rounded-md p-3" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}>
+                                                <div className="border rounded-[4px] p-3" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}>
                                                     <p className="text-xs" style={{ color: 'var(--on-tertiary-container)' }}>
                                                         <strong>Note:</strong> Pickup scheduling may not work in sandbox/test mode.
                                                         You can also call FedEx directly at <strong>1-800-463-3339</strong> and say &quot;Ground Return Pickup&quot;.
@@ -1378,7 +1378,7 @@ export default function RATrackingPage() {
                                                             type="date"
                                                             value={pickupForm.pickupDate}
                                                             onChange={e => setPickupForm(prev => ({ ...prev, pickupDate: e.target.value }))}
-                                                            className="block w-36 px-2 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                            className="block w-36 px-2 py-1.5 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                                             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                                                             disabled={pickupLoading}
                                                         />
@@ -1389,7 +1389,7 @@ export default function RATrackingPage() {
                                                             type="time"
                                                             value={pickupForm.readyTime}
                                                             onChange={e => setPickupForm(prev => ({ ...prev, readyTime: e.target.value }))}
-                                                            className="block w-28 px-2 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                            className="block w-28 px-2 py-1.5 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                                             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                                                             disabled={pickupLoading}
                                                         />
@@ -1400,7 +1400,7 @@ export default function RATrackingPage() {
                                                             type="time"
                                                             value={pickupForm.closeTime}
                                                             onChange={e => setPickupForm(prev => ({ ...prev, closeTime: e.target.value }))}
-                                                            className="block w-28 px-2 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                            className="block w-28 px-2 py-1.5 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                                             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                                                             disabled={pickupLoading}
                                                         />
@@ -1428,7 +1428,7 @@ export default function RATrackingPage() {
                                                                 }
                                                             }}
                                                             disabled={pickupLoading}
-                                                            className="flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-[4px] transition-colors disabled:opacity-50"
                                                             style={{ backgroundColor: 'var(--secondary)' }}
                                                         >
                                                             {pickupLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Truck className="w-3.5 h-3.5" />}
@@ -1442,14 +1442,14 @@ export default function RATrackingPage() {
                                 </div>
                             ) : (
                                 <>
-                                    <div className="rounded-lg p-4 text-sm space-y-1 border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
+                                    <div className="rounded-[4px] p-4 text-sm space-y-1 border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
                                         <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Memo</span><span className="font-medium" style={{ color: 'var(--foreground)' }}>{selectedMemo.memoNumber}</span></div>
                                         <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>RA #</span><span className="font-medium" style={{ color: 'var(--secondary)' }}>{selectedMemo.raNumber}</span></div>
                                         <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Destination</span><span className="capitalize font-medium" style={{ color: 'var(--foreground)' }}>{selectedMemo.destination || '—'}</span></div>
                                         <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Items</span><span style={{ color: 'var(--on-surface)' }}>{selectedMemo.totalItems}</span></div>
                                     </div>
 
-                                    <div className="border rounded-lg p-4 space-y-3" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}>
+                                    <div className="border rounded-[4px] p-4 space-y-3" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}>
                                         <div className="flex items-start gap-2">
                                             <Layers className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: 'var(--tertiary)' }} />
                                             <div>
@@ -1520,7 +1520,7 @@ export default function RATrackingPage() {
                                                 <button
                                                     type="button"
                                                     onClick={() => setShipMode('fedex')}
-                                                    className="flex flex-col items-center gap-2 p-4 border-2 rounded-lg transition-all hover:bg-primary-50/40"
+                                                    className="flex flex-col items-center gap-2 p-4 border-2 rounded-[4px] transition-all hover:bg-primary-50/40"
                                                     style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)' }}
                                                 >
                                                     <Truck className="w-6 h-6" style={{ color: 'var(--primary)' }} />
@@ -1530,7 +1530,7 @@ export default function RATrackingPage() {
                                                 <button
                                                     type="button"
                                                     onClick={() => setShipMode('manual')}
-                                                    className="flex flex-col items-center gap-2 p-4 border-2 rounded-lg transition-all hover:bg-primary-50/40"
+                                                    className="flex flex-col items-center gap-2 p-4 border-2 rounded-[4px] transition-all hover:bg-primary-50/40"
                                                     style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)' }}
                                                 >
                                                     <Edit className="w-6 h-6" style={{ color: 'var(--on-surface-variant)' }} />
@@ -1561,14 +1561,14 @@ export default function RATrackingPage() {
                                                         max="99"
                                                         value={fedexBoxCount}
                                                         onChange={e => setFedexBoxCount(e.target.value)}
-                                                        className="ml-2 w-20 px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-center"
+                                                        className="ml-2 w-20 px-3 py-1.5 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 text-center"
                                                         style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                                                         disabled={fedexLoading || groupFedexLoading}
                                                     />
                                                 </div>
                                             </div>
 
-                                            <div className="border rounded-md p-3 text-xs text-center space-y-1" style={{ backgroundColor: 'var(--primary-fixed)', borderColor: 'var(--outline-variant)', color: 'var(--on-primary-container)' }}>
+                                            <div className="border rounded-[4px] p-3 text-xs text-center space-y-1" style={{ backgroundColor: 'var(--primary-fixed)', borderColor: 'var(--outline-variant)', color: 'var(--on-primary-container)' }}>
                                                 <p>Shipment: <strong>Warehouse</strong> → <strong className="capitalize">{selectedMemo.destination}</strong></p>
                                                 <p>Ensure the warehouse address and reverse distributor address are configured.</p>
                                             </div>
@@ -1618,7 +1618,7 @@ export default function RATrackingPage() {
                                                         }
                                                     }}
                                                     disabled={fedexLoading || groupFedexLoading || !fedexBoxCount}
-                                                    className="flex items-center gap-2 px-6 py-2.5 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                                                    className="flex items-center gap-2 px-6 py-2.5 text-white text-sm font-medium rounded-[4px] transition-colors disabled:opacity-50"
                                                     style={{ backgroundColor: 'var(--primary)' }}
                                                 >
                                                     {(fedexLoading || groupFedexLoading) ? (
@@ -1639,7 +1639,7 @@ export default function RATrackingPage() {
                                     {shipMode === 'manual' && (
                                         <div className="space-y-4">
                                             {selectedMemosForGroup.length > 1 && (
-                                                <p className="text-xs border rounded-md p-2" style={{ color: 'var(--on-tertiary-container)', backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}>
+                                                <p className="text-xs border rounded-[4px] p-2" style={{ color: 'var(--on-tertiary-container)', backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}>
                                                     Manual tracking applies to this memo only. Other checked memos are not updated on this step.
                                                 </p>
                                             )}
@@ -1647,7 +1647,7 @@ export default function RATrackingPage() {
                                                 <label className="block text-sm font-medium mb-1" style={{ color: 'var(--on-surface)' }}>Outbound Tracking # *</label>
                                                 <input
                                                     type="text"
-                                                    className="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
+                                                    className="w-full border rounded-[4px] px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
                                                     style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                                                     placeholder="FedEx/UPS tracking number..."
                                                     value={shipTracking}

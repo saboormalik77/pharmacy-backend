@@ -253,7 +253,7 @@ export default function SubAdminsPage() {
     <div>
       {successMsg && (
         <div
-          className="mb-4 px-4 py-3 rounded-lg text-sm border"
+          className="mb-4 px-4 py-3 rounded-[4px] text-sm border"
           style={{
             backgroundColor: 'var(--secondary-container)',
             borderColor: 'var(--secondary)',
@@ -266,7 +266,7 @@ export default function SubAdminsPage() {
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>Sub Admins</h1>
+          <h1 className="font-heading text-headline" style={{ color: 'var(--foreground)' }}>Sub Admins</h1>
           <p className="mt-1" style={{ color: 'var(--on-surface-variant)' }}>
             Manage sub-administrators and their access permissions
           </p>
@@ -278,7 +278,7 @@ export default function SubAdminsPage() {
       </div>
 
       <div
-        className="rounded-lg border p-4 mb-4"
+        className="rounded-[4px] border p-4 mb-4"
         style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
       >
         <div className="flex flex-col sm:flex-row gap-3">
@@ -289,14 +289,14 @@ export default function SubAdminsPage() {
               placeholder="Search by name or email..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full pl-9 pr-4 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
               style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-            className="px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="px-3 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
           >
             <option value="all">All Statuses</option>
@@ -307,7 +307,7 @@ export default function SubAdminsPage() {
       </div>
 
       <div
-        className="rounded-lg border overflow-hidden"
+        className="rounded-[4px] border overflow-hidden"
         style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
       >
         {isLoading ? (
@@ -328,25 +328,25 @@ export default function SubAdminsPage() {
             <table className="w-full text-sm">
               <thead className="text-white" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
                 <tr>
-                  <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Name</th>
-                  <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden md:table-cell">Email</th>
-                  <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Invite</th>
-                  <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">Permissions</th>
-                  <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Status</th>
-                  <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">Created</th>
-                  <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Actions</th>
+                  <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Name</th>
+                  <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden md:table-cell">Email</th>
+                  <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Invite</th>
+                  <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">Permissions</th>
+                  <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Status</th>
+                  <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">Created</th>
+                  <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                 {admins.map((admin) => (
                   <tr key={admin.id} className="hover:bg-primary-50/40 transition-colors">
-                    <td className="px-4 py-3 text-sm font-medium" style={{ color: 'var(--foreground)' }}>{admin.name}</td>
-                    <td className="px-4 py-3 text-sm hidden md:table-cell" style={{ color: 'var(--on-surface-variant)' }}>{admin.email}</td>
-                    <td className="px-4 py-3 text-sm text-center">{inviteStatus(admin)}</td>
-                    <td className="px-4 py-3 text-sm text-center hidden sm:table-cell">
+                    <td className="px-3 py-3 text-sm font-medium" style={{ color: 'var(--foreground)' }}>{admin.name}</td>
+                    <td className="px-3 py-3 text-sm hidden md:table-cell" style={{ color: 'var(--on-surface-variant)' }}>{admin.email}</td>
+                    <td className="px-3 py-3 text-sm text-center">{inviteStatus(admin)}</td>
+                    <td className="px-3 py-3 text-sm text-center hidden sm:table-cell">
                       <span className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>{admin.permissions?.length || 0} tabs</span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-center">
+                    <td className="px-3 py-3 text-sm text-center">
                       <span className={cn(
                         'px-2 py-0.5 rounded-full text-xs font-medium',
                         admin.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
@@ -354,8 +354,8 @@ export default function SubAdminsPage() {
                         {admin.is_active ? 'Active' : 'Inactive'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm hidden lg:table-cell" style={{ color: 'var(--on-surface-variant)' }}>{formatDate(admin.created_at)}</td>
-                    <td className="px-4 py-3 text-sm">
+                    <td className="px-3 py-3 text-sm hidden lg:table-cell" style={{ color: 'var(--on-surface-variant)' }}>{formatDate(admin.created_at)}</td>
+                    <td className="px-3 py-3 text-sm">
                       <div className="flex items-center justify-end gap-1">
                         <button onClick={() => openViewModal(admin)} className="p-1.5 rounded hover:bg-primary-50 transition-colors" style={{ color: 'var(--on-surface-variant)' }} title="View">
                           <Eye className="w-4 h-4" />
@@ -411,8 +411,8 @@ export default function SubAdminsPage() {
           className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm"
           style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 45%, transparent)' }}
         >
-          <div className="rounded-lg shadow-xl max-w-sm w-full mx-4 p-6 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
-            <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--foreground)' }}>Delete Sub Admin</h3>
+          <div className="rounded-[4px] shadow-xl max-w-sm w-full mx-4 p-6 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+            <h3 className="font-heading text-body font-semibold mb-2" style={{ color: 'var(--foreground)' }}>Delete Sub Admin</h3>
             <p className="text-sm mb-6" style={{ color: 'var(--on-surface-variant)' }}>
               Are you sure you want to delete this sub admin? This action cannot be undone.
             </p>
@@ -430,12 +430,12 @@ export default function SubAdminsPage() {
           className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm overflow-auto py-8 px-4"
           style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
         >
-          <div className="rounded-xl shadow-2xl max-w-2xl w-full my-auto border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+          <div className="rounded-[4px] shadow-xl max-w-2xl w-full my-auto border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
             {/* Header */}
             <div className="rounded-t-xl px-5 py-3" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-white/20 rounded-lg">
+                  <div className="p-1.5 bg-white/20 rounded-[4px]">
                     <UserCog className="w-4 h-4 text-white" />
                   </div>
                   <h3 className="text-sm font-bold text-white">
@@ -455,7 +455,7 @@ export default function SubAdminsPage() {
             {/* Content */}
             <div className="px-5 py-4 max-h-[calc(90vh-140px)] overflow-y-auto">
               {formError && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm mb-4">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-[4px] text-sm mb-4">
                   {formError}
                 </div>
               )}
@@ -476,7 +476,7 @@ export default function SubAdminsPage() {
                       type="text" 
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      className="w-full px-3 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                       style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                       placeholder="Enter full name"
                       disabled={isSaving}
@@ -491,7 +491,7 @@ export default function SubAdminsPage() {
                       type="email" 
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:cursor-not-allowed"
+                      className="w-full px-3 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:cursor-not-allowed"
                       style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                       placeholder="subadmin@example.com"
                       disabled={modalMode === 'edit' || isSaving}
@@ -512,7 +512,7 @@ export default function SubAdminsPage() {
                       <select
                         value={formData.isActive ? 'active' : 'inactive'}
                         onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'active' })}
-                        className="w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent cursor-pointer"
+                        className="w-full px-3 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent cursor-pointer"
                         style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                         disabled={isSaving}
                       >
@@ -530,7 +530,7 @@ export default function SubAdminsPage() {
                     <h4 className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--on-surface-variant)' }}>Access Permissions</h4>
                   </div>
 
-                  <div className="flex items-center justify-between mb-3 p-2 border rounded-lg" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
+                  <div className="flex items-center justify-between mb-3 p-2 border rounded-[4px]" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
                     <span className="text-xs font-medium" style={{ color: 'var(--on-surface-variant)' }}>
                       {formData.permissions.length} of {permissionsList.length} tabs selected
                     </span>
@@ -563,7 +563,7 @@ export default function SubAdminsPage() {
                       <label
                         key={perm}
                         className={cn(
-                          'flex items-center gap-2 p-2.5 rounded-lg border transition-all',
+                          'flex items-center gap-2 p-2.5 rounded-[4px] border transition-all',
                           formData.permissions.includes(perm)
                             ? 'shadow-sm'
                             : '',
@@ -635,12 +635,12 @@ export default function SubAdminsPage() {
       {/* View Modal */}
       {modalMode === 'view' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm overflow-auto py-8 px-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}>
-          <div className="rounded-xl shadow-2xl max-w-2xl w-full my-auto border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+          <div className="rounded-[4px] shadow-xl max-w-2xl w-full my-auto border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
             {/* Header */}
             <div className="rounded-t-xl px-5 py-3" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-white/20 rounded-lg">
+                  <div className="p-1.5 bg-white/20 rounded-[4px]">
                     <UserCheck className="w-4 h-4 text-white" />
                   </div>
                   <h3 className="text-sm font-bold text-white">Sub Admin Details</h3>
@@ -663,7 +663,7 @@ export default function SubAdminsPage() {
             ) : selectedAdmin ? (
               <div className="px-5 py-4 space-y-4">
                 {/* Primary Info Banner */}
-                <div className="border rounded-lg p-3" style={{ background: 'linear-gradient(135deg, var(--surface-container-low) 0%, var(--primary-50) 100%)', borderColor: 'var(--outline-variant)' }}>
+                <div className="border rounded-[4px] p-3" style={{ background: 'linear-gradient(135deg, var(--surface-container-low) 0%, var(--primary-50) 100%)', borderColor: 'var(--outline-variant)' }}>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <p className="text-[10px] font-semibold uppercase tracking-wide mb-0.5" style={{ color: 'var(--on-surface-variant)' }}>Administrator</p>
@@ -674,7 +674,7 @@ export default function SubAdminsPage() {
                       </div>
                     </div>
                     <span className={cn(
-                      'px-2 py-1 rounded-lg text-xs font-bold border',
+                      'px-2 py-1 rounded-[4px] text-xs font-bold border',
                       selectedAdmin.is_active 
                         ? 'bg-green-100 text-green-700 border-green-300' 
                         : 'bg-red-100 text-red-700 border-red-300'
@@ -685,12 +685,12 @@ export default function SubAdminsPage() {
                 </div>
 
                 {/* Account Information */}
-                <div className="border rounded-lg p-3" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                <div className="border rounded-[4px] p-3" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-3">
                     {/* Role */}
                     <div>
                       <span className="text-[10px] font-semibold uppercase tracking-wide block mb-1" style={{ color: 'var(--on-surface-variant)' }}>Role</span>
-                      <span className="px-2 py-0.5 rounded-lg text-xs font-bold inline-block" style={{ backgroundColor: 'var(--primary-100)', color: 'var(--primary-700)' }}>
+                      <span className="px-2 py-0.5 rounded-[4px] text-xs font-bold inline-block" style={{ backgroundColor: 'var(--primary-100)', color: 'var(--primary-700)' }}>
                         {selectedAdmin.role === 'main_admin' ? 'Main Admin' : 'Sub Admin'}
                       </span>
                     </div>
@@ -738,7 +738,7 @@ export default function SubAdminsPage() {
                 </div>
 
                 {/* Permissions Section */}
-                <div className="border rounded-lg p-3" style={{ background: 'linear-gradient(135deg, var(--surface-container-low) 0%, var(--tertiary-fixed) 100%)', borderColor: 'var(--outline-variant)' }}>
+                <div className="border rounded-[4px] p-3" style={{ background: 'linear-gradient(135deg, var(--surface-container-low) 0%, var(--tertiary-fixed) 100%)', borderColor: 'var(--outline-variant)' }}>
                   <div className="flex items-center gap-1.5 mb-3">
                     <Shield className="w-3.5 h-3.5" style={{ color: 'var(--tertiary)' }} />
                     <h4 className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--foreground)' }}>
@@ -753,7 +753,7 @@ export default function SubAdminsPage() {
                   ) : (
                     <div className="grid grid-cols-2 gap-2">
                       {selectedAdmin.permissions.map((perm) => (
-                        <div key={perm} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                        <div key={perm} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-[4px] border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                           <CheckCircle className="w-3 h-3 flex-shrink-0" style={{ color: 'var(--tertiary)' }} />
                           <span className="text-xs font-medium truncate" style={{ color: 'var(--foreground)' }}>
                             {PERMISSION_LABELS[perm] || perm.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}

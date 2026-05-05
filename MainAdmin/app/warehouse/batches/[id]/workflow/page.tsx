@@ -341,7 +341,7 @@ export default function BatchWorkflowPage() {
                     <div>
                         <div className="flex items-center gap-1.5">
                             <Layers className="w-4 h-4 text-blue-600" />
-                            <h1 className="text-base font-bold text-gray-900">Post-Closeout Workflow</h1>
+                            <h1 className="font-heading text-base font-bold text-gray-900">Post-Closeout Workflow</h1>
                         </div>
                         <p className="text-sm text-gray-500 mt-0.5">{batch.batchName} · {formatBatchMonth(batch.batchMonth)}</p>
                     </div>
@@ -350,7 +350,7 @@ export default function BatchWorkflowPage() {
             </div>
 
             {/* Progress bar */}
-            <div className="bg-white rounded-lg shadow px-5 pt-4 pb-3">
+            <div className="bg-white rounded-[4px] shadow px-5 pt-4 pb-3">
                 <div className="flex items-center gap-0">
                     {WORKFLOW_STEPS.map((step, idx) => {
                         const done = workflowState?.[step.stateKey] ?? false;
@@ -391,7 +391,7 @@ export default function BatchWorkflowPage() {
                     return (
                         <div
                             key={step.key}
-                            className={`bg-white rounded-lg shadow border-2 p-3.5 transition-all ${
+                            className={`bg-white rounded-[4px] shadow border-2 p-3.5 transition-all ${
                                 done
                                     ? 'border-green-200 bg-green-50'
                                     : isActive
@@ -400,7 +400,7 @@ export default function BatchWorkflowPage() {
                             }`}
                         >
                             <div className="flex items-start gap-3">
-                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                                <div className={`w-8 h-8 rounded-[4px] flex items-center justify-center flex-shrink-0 ${
                                     done
                                         ? 'bg-green-500'
                                         : isActive
@@ -428,7 +428,7 @@ export default function BatchWorkflowPage() {
                                                 <button
                                                     onClick={handleGenerateCardinal}
                                                     disabled={isActionLoading}
-                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors font-medium"
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors font-medium"
                                                 >
                                                     {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
                                                     Generate Cardinal Invoice
@@ -440,7 +440,7 @@ export default function BatchWorkflowPage() {
                                                 <div className="space-y-2">
                                                     <div
                                                         onClick={() => fileInputRef.current?.click()}
-                                                        className="flex items-center gap-2 px-3 py-2 border-2 border-dashed border-blue-300 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors"
+                                                        className="flex items-center gap-2 px-3 py-2 border-2 border-dashed border-blue-300 rounded-[4px] cursor-pointer hover:bg-blue-50 transition-colors"
                                                     >
                                                         <Upload className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
                                                         <span className="text-sm text-blue-600 truncate">
@@ -456,7 +456,7 @@ export default function BatchWorkflowPage() {
                                                     <button
                                                         onClick={handleSendCardinal}
                                                         disabled={isActionLoading || !cardinalFile}
-                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 transition-colors font-medium"
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 transition-colors font-medium"
                                                     >
                                                         {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                                                         Send Cardinal Invoice
@@ -475,7 +475,7 @@ export default function BatchWorkflowPage() {
                                                             <button
                                                                 onClick={handleCreateDebitMemos}
                                                                 disabled={isActionLoading}
-                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50 transition-colors font-medium"
+                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50 transition-colors font-medium"
                                                             >
                                                                 {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
                                                                 Create Debit Memos
@@ -504,7 +504,7 @@ export default function BatchWorkflowPage() {
                                                                 <button
                                                                     onClick={handleConfirmDebitMemos}
                                                                     disabled={isActionLoading}
-                                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50 transition-colors font-medium"
+                                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50 transition-colors font-medium"
                                                                 >
                                                                     {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
                                                                     Confirm &amp; Next Step
@@ -610,7 +610,7 @@ export default function BatchWorkflowPage() {
                                                                     onClick={handleCompleteRAStep}
                                                                     disabled={isActionLoading || !anyRaSent}
                                                                     title={!anyRaSent ? 'Send at least one RA request before completing this step' : undefined}
-                                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                                                                 >
                                                                     {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
                                                                     Complete Step
@@ -619,7 +619,7 @@ export default function BatchWorkflowPage() {
                                                                     <button
                                                                         onClick={handleSendAllRA}
                                                                         disabled={isSendingAllRA || !!raSendingGroup}
-                                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-green-700 text-white hover:bg-green-800 disabled:opacity-50 transition-colors font-medium"
+                                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-green-700 text-white hover:bg-green-800 disabled:opacity-50 transition-colors font-medium"
                                                                     >
                                                                         {isSendingAllRA ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                                                                         Send All RA
@@ -653,7 +653,7 @@ export default function BatchWorkflowPage() {
             </div>
 
             {/* Footer */}
-            <div className="bg-white rounded-lg shadow px-5 py-3 flex items-center justify-between">
+            <div className="bg-white rounded-[4px] shadow px-5 py-3 flex items-center justify-between">
                 {allDone ? (
                     <span className="inline-flex items-center gap-1.5 text-xs font-medium text-green-700">
                         <CheckCircle className="w-4 h-4 text-green-500" /> All steps completed

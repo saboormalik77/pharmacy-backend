@@ -48,7 +48,7 @@ export default function PayoutHubPage() {
         <div className="space-y-4">
             {/* Header */}
             <div>
-                <h1 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>Payout Management</h1>
+                <h1 className="font-heading text-headline" style={{ color: 'var(--foreground)' }}>Payout Management</h1>
                 <p className="text-xs mt-0.5" style={{ color: 'var(--on-surface-variant)' }}>
                     Manage pharmacy payouts, unpaid manufacturer memos, and GPO settlements.
                 </p>
@@ -62,13 +62,13 @@ export default function PayoutHubPage() {
                         <Link
                             key={section.href}
                             href={section.href}
-                            className={`group flex flex-col gap-3 p-4 border ${section.border} rounded-lg hover:shadow-md transition-all duration-150`}
+                            className={`group flex flex-col gap-3 p-4 border ${section.border} rounded-[4px] hover:shadow-md transition-all duration-150`}
                             style={{ backgroundColor: 'var(--surface-container-lowest)' }}
                         >
                             {/* Icon + label + badge */}
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2.5">
-                                    <div className={`p-2 rounded-lg ${section.bg}`}>
+                                    <div className={`p-2 rounded-[4px] ${section.bg}`}>
                                         <Icon className={`w-4 h-4 ${section.color}`} />
                                     </div>
                                     <span className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>{section.label}</span>

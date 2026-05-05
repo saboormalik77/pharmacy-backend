@@ -286,7 +286,7 @@ export default function WarehouseVerificationPage() {
                 <div className="flex items-center gap-2">
                     <button onClick={() => router.push('/warehouse/receiving')} className="text-gray-400 hover:text-gray-600"><ArrowLeft className="w-4 h-4" /></button>
                     <div>
-                        <h1 className="text-base font-bold text-gray-900 flex items-center gap-1.5">
+                        <h1 className="font-heading text-base font-bold text-gray-900 flex items-center gap-1.5">
                             <ClipboardCheck className="w-4 h-4 text-primary-600" />
                             Verify: {currentReturn.licensePlate}
                         </h1>
@@ -308,7 +308,7 @@ export default function WarehouseVerificationPage() {
                     { label: 'FedEx Tracking', value: currentReturn.fedexTracking || '—' },
                     { label: 'Box Count', value: currentReturn.boxCount ?? '—' },
                 ].map(c => (
-                    <div key={c.label} className="bg-white rounded-lg shadow-sm border px-3 py-2">
+                    <div key={c.label} className="bg-white rounded-[4px] shadow-sm border px-3 py-2">
                         <p className="text-[10px] text-gray-500">{c.label}</p>
                         <p className="text-xs font-semibold text-gray-900 mt-0.5 font-mono">{c.value}</p>
                     </div>
@@ -316,13 +316,13 @@ export default function WarehouseVerificationPage() {
             </div>
 
             {/* Verification Checklist */}
-            <div className="bg-white rounded-lg shadow px-4 py-3 space-y-3">
-                <h2 className="text-xs font-semibold text-gray-800 flex items-center gap-1.5">
+            <div className="bg-white rounded-[4px] shadow px-4 py-3 space-y-3">
+                <h2 className="font-heading text-xs font-semibold text-gray-800 flex items-center gap-1.5">
                     <ShieldCheck className="w-3.5 h-3.5 text-primary-600" />Verification Checklist
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {/* 1. Pieces Received */}
-                    <div className={`flex items-center gap-2 px-3 py-2 border rounded-lg transition-colors ${checklistDone.pieces ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                    <div className={`flex items-center gap-2 px-3 py-2 border rounded-[4px] transition-colors ${checklistDone.pieces ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
                         <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ${checklistDone.pieces ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-400'}`}>
                             {checklistDone.pieces ? <Check className="w-3.5 h-3.5" /> : <span className="text-[10px] font-bold">1</span>}
                         </div>
@@ -350,7 +350,7 @@ export default function WarehouseVerificationPage() {
                     </div>
 
                     {/* 2. All Items Verified */}
-                    <div className={`flex items-center gap-2 px-3 py-2 border rounded-lg ${checklistDone.items ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                    <div className={`flex items-center gap-2 px-3 py-2 border rounded-[4px] ${checklistDone.items ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
                         <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ${checklistDone.items ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-400'}`}>
                             {checklistDone.items ? <Check className="w-3.5 h-3.5" /> : <span className="text-[10px] font-bold">2</span>}
                         </div>
@@ -365,7 +365,7 @@ export default function WarehouseVerificationPage() {
                     </div>
 
                     {/* 3. Integrity Confirmed */}
-                    <label className={`flex items-center gap-2 px-3 py-2 border rounded-lg cursor-pointer transition-colors ${checklistDone.integrity ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                    <label className={`flex items-center gap-2 px-3 py-2 border rounded-[4px] cursor-pointer transition-colors ${checklistDone.integrity ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
                         <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ${checklistDone.integrity ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-400'}`}>
                             {checklistDone.integrity ? <Check className="w-3.5 h-3.5" /> : <span className="text-[10px] font-bold">3</span>}
                         </div>
@@ -384,7 +384,7 @@ export default function WarehouseVerificationPage() {
                     </label>
 
                     {/* 4. Verification Notes */}
-                    <div className={`px-3 py-2 border rounded-lg transition-colors ${checklistDone.notes ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                    <div className={`px-3 py-2 border rounded-[4px] transition-colors ${checklistDone.notes ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
                         <div className="flex items-center gap-1.5 mb-0.5">
                             <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ${checklistDone.notes ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-400'}`}>
                                 {checklistDone.notes ? <Check className="w-3.5 h-3.5" /> : <span className="text-[10px] font-bold">4</span>}
@@ -439,9 +439,9 @@ export default function WarehouseVerificationPage() {
             </div>
 
             {/* Items Grid */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="bg-white rounded-[4px] shadow overflow-hidden">
                 <div className="flex items-center justify-between px-4 py-2 border-b bg-gray-50">
-                    <h2 className="text-xs font-semibold text-gray-800">Items ({totalCount})</h2>
+                    <h2 className="font-heading text-xs font-semibold text-gray-800">Items ({totalCount})</h2>
                     <div className="flex items-center gap-2">
                         <div className="relative">
                             <Search className="w-3 h-3 absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -472,21 +472,21 @@ export default function WarehouseVerificationPage() {
                         <table className="w-full">
                             <thead>
                                 <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
-                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap w-10">✓</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Manufacturer</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Lot</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Expires</th>
-                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Qty</th>
-                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Status</th>
-                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Destination</th>
+                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap w-10">✓</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Manufacturer</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Lot</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Expires</th>
+                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Qty</th>
+                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Status</th>
+                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Destination</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {filteredItems.map(item => (
                                     <tr key={item.id} className={`${item.verified ? 'bg-green-50/50' : 'hover:bg-gray-50'}`}>
-                                        <td className="px-4 py-3 text-center">
+                                        <td className="px-3 py-3 text-center">
                                             <input
                                                 type="checkbox"
                                                 checked={item.verified}
@@ -495,18 +495,18 @@ export default function WarehouseVerificationPage() {
                                                 disabled={isActionLoading}
                                             />
                                         </td>
-                                        <td className="px-4 py-3 text-sm font-mono text-gray-900 whitespace-nowrap">{item.ndc || '—'}</td>
-                                        <td className="px-4 py-3 text-sm text-gray-900 max-w-[140px] truncate" title={item.proprietaryName || ''}>{item.proprietaryName || item.genericName || '—'}</td>
-                                        <td className="px-4 py-3 text-sm text-gray-600 max-w-[110px] truncate">{item.manufacturer || '—'}</td>
-                                        <td className="px-4 py-3 text-sm text-gray-600 font-mono whitespace-nowrap">{item.lotNumber || '—'}</td>
-                                        <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
-                                        <td className="px-4 py-3 text-sm text-center text-gray-900 font-semibold">{item.quantity}</td>
-                                        <td className="px-4 py-3 text-center">
+                                        <td className="px-3 py-3 text-sm font-mono text-gray-900 whitespace-nowrap">{item.ndc || '—'}</td>
+                                        <td className="px-3 py-3 text-sm text-gray-900 max-w-[140px] truncate" title={item.proprietaryName || ''}>{item.proprietaryName || item.genericName || '—'}</td>
+                                        <td className="px-3 py-3 text-sm text-gray-600 max-w-[110px] truncate">{item.manufacturer || '—'}</td>
+                                        <td className="px-3 py-3 text-sm text-gray-600 font-mono whitespace-nowrap">{item.lotNumber || '—'}</td>
+                                        <td className="px-3 py-3 text-sm text-gray-600 whitespace-nowrap">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
+                                        <td className="px-3 py-3 text-sm text-center text-gray-900 font-semibold">{item.quantity}</td>
+                                        <td className="px-3 py-3 text-center">
                                             <Badge variant={item.returnStatus === 'returnable' ? 'success' : item.returnStatus === 'non_returnable' ? 'danger' : 'warning'}>
                                                 <span className="text-[10px]">{item.returnStatus === 'non_returnable' ? 'non-ret' : item.returnStatus}</span>
                                             </Badge>
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-center capitalize text-gray-600">{item.destination || '—'}</td>
+                                        <td className="px-3 py-3 text-sm text-center capitalize text-gray-600">{item.destination || '—'}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -517,7 +517,7 @@ export default function WarehouseVerificationPage() {
 
             {/* Discrepancies */}
             {discrepancies.length > 0 && (
-                <div className="bg-white rounded-lg shadow overflow-hidden">
+                <div className="bg-white rounded-[4px] shadow overflow-hidden">
                     <div className="px-4 py-2 border-b bg-red-50">
                         <h2 className="text-xs font-semibold text-red-800 flex items-center gap-1.5">
                             <AlertTriangle className="w-3.5 h-3.5" /> Discrepancies ({discrepancies.length})
@@ -527,31 +527,31 @@ export default function WarehouseVerificationPage() {
                         <table className="w-full">
                             <thead>
                                 <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Type</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
-                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Expected</th>
-                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actual</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Notes</th>
-                                    <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Status</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Reported</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Type</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
+                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Expected</th>
+                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actual</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Notes</th>
+                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Status</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Reported</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {discrepancies.map(d => (
                                     <tr key={d.id} className="hover:bg-gray-50">
-                                        <td className="px-4 py-3">{discTypeBadge(d.type)}</td>
-                                        <td className="px-4 py-3 text-sm text-gray-900 max-w-[130px] truncate">{d.productName || '—'}</td>
-                                        <td className="px-4 py-3 text-sm font-mono text-gray-600">{d.ndc || '—'}</td>
-                                        <td className="px-4 py-3 text-sm text-center text-gray-900">{d.expectedQuantity ?? '—'}</td>
-                                        <td className="px-4 py-3 text-sm text-center text-gray-900">{d.actualQuantity ?? '—'}</td>
-                                        <td className="px-4 py-3 text-sm text-gray-600 max-w-[150px] truncate">{d.notes || '—'}</td>
-                                        <td className="px-4 py-3 text-center">
+                                        <td className="px-3 py-3">{discTypeBadge(d.type)}</td>
+                                        <td className="px-3 py-3 text-sm text-gray-900 max-w-[130px] truncate">{d.productName || '—'}</td>
+                                        <td className="px-3 py-3 text-sm font-mono text-gray-600">{d.ndc || '—'}</td>
+                                        <td className="px-3 py-3 text-sm text-center text-gray-900">{d.expectedQuantity ?? '—'}</td>
+                                        <td className="px-3 py-3 text-sm text-center text-gray-900">{d.actualQuantity ?? '—'}</td>
+                                        <td className="px-3 py-3 text-sm text-gray-600 max-w-[150px] truncate">{d.notes || '—'}</td>
+                                        <td className="px-3 py-3 text-center">
                                             <Badge variant={d.status === 'open' ? 'warning' : d.status === 'resolved' ? 'success' : 'secondary'}>
                                                 <span className="text-[10px]">{d.status}</span>
                                             </Badge>
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-500">{formatDate(d.createdAt)}</td>
+                                        <td className="px-3 py-3 text-sm text-gray-500">{formatDate(d.createdAt)}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -563,9 +563,9 @@ export default function WarehouseVerificationPage() {
             {/* ── Batch Assignment Modal ──────────────────── */}
             {batchModal && (
                 <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setBatchModal(false)}>
-                    <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between p-5 border-b bg-gray-50">
-                            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                            <h2 className="font-heading text-body font-semibold text-gray-900 flex items-center gap-2">
                                 <Layers className="w-5 h-5 text-primary-600" />
                                 Add to Batch
                             </h2>
@@ -587,13 +587,13 @@ export default function WarehouseVerificationPage() {
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => setCreateNewBatch(false)}
-                                            className={`flex-1 py-2 text-sm rounded-lg border font-medium transition-colors ${!createNewBatch ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                                            className={`flex-1 py-2 text-sm rounded-[4px] border font-medium transition-colors ${!createNewBatch ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
                                         >
                                             Existing Batch
                                         </button>
                                         <button
                                             onClick={() => setCreateNewBatch(true)}
-                                            className={`flex-1 py-2 text-sm rounded-lg border font-medium transition-colors ${createNewBatch ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                                            className={`flex-1 py-2 text-sm rounded-[4px] border font-medium transition-colors ${createNewBatch ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
                                         >
                                             <PlusCircle className="w-4 h-4 inline mr-1" />Create New
                                         </button>
@@ -603,14 +603,14 @@ export default function WarehouseVerificationPage() {
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700 mb-1">Select Open Batch</label>
                                             {openBatches.length === 0 ? (
-                                                <div className="text-sm text-gray-500 bg-gray-50 rounded-lg p-3 text-center">
+                                                <div className="text-sm text-gray-500 bg-gray-50 rounded-[4px] p-3 text-center">
                                                     No open batches found. Switch to "Create New" to start one.
                                                 </div>
                                             ) : (
                                                 <select
                                                     value={selectedBatchId}
                                                     onChange={e => setSelectedBatchId(e.target.value)}
-                                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                                 >
                                                     <option value="">— Choose a batch —</option>
                                                     {openBatches.map(b => (
@@ -630,14 +630,14 @@ export default function WarehouseVerificationPage() {
                                                         <Loader2 className="w-4 h-4 animate-spin text-primary-600" /> Loading months…
                                                     </div>
                                                 ) : availableNewBatchMonths.length === 0 ? (
-                                                    <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+                                                    <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-[4px] px-3 py-2">
                                                         No open month slots in the allowed range. Create a batch from Warehouse → Monthly Batches or free a month by deleting an unused open batch.
                                                     </p>
                                                 ) : (
                                                     <select
                                                         value={newBatchMonth}
                                                         onChange={e => setNewBatchMonth(e.target.value)}
-                                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
                                                     >
                                                         {availableNewBatchMonths.map(o => (
                                                             <option key={o.value} value={o.value}>{o.label}</option>
@@ -652,7 +652,7 @@ export default function WarehouseVerificationPage() {
                                                     value={newBatchName}
                                                     onChange={e => setNewBatchName(e.target.value)}
                                                     placeholder="e.g. March 2026 Batch"
-                                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500"
                                                 />
                                             </div>
                                         </div>
@@ -682,16 +682,16 @@ export default function WarehouseVerificationPage() {
             {/* ── Discrepancy Modal ───────────────────────── */}
             {discModal && (
                 <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setDiscModal(false)}>
-                    <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between p-5 border-b bg-gray-50">
-                            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2"><AlertTriangle className="w-5 h-5 text-yellow-500" />Report Discrepancy</h2>
+                            <h2 className="font-heading text-body font-semibold text-gray-900 flex items-center gap-2"><AlertTriangle className="w-5 h-5 text-yellow-500" />Report Discrepancy</h2>
                             <button onClick={() => setDiscModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
                         </div>
                         <div className="p-5 space-y-4">
                             {/* Type */}
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">Type <span className="text-red-500">*</span></label>
-                                <select value={discForm.type} onChange={e => setDiscForm({ ...discForm, type: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <select value={discForm.type} onChange={e => setDiscForm({ ...discForm, type: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500">
                                     <option value="missing">Missing</option>
                                     <option value="extra">Extra / Unmanifested</option>
                                     <option value="damaged">Damaged</option>
@@ -703,28 +703,28 @@ export default function WarehouseVerificationPage() {
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">NDC</label>
-                                    <input type="text" value={discForm.ndc} onChange={e => setDiscForm({ ...discForm, ndc: e.target.value })} placeholder="NDC code" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                    <input type="text" value={discForm.ndc} onChange={e => setDiscForm({ ...discForm, ndc: e.target.value })} placeholder="NDC code" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500" />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Product Name</label>
-                                    <input type="text" value={discForm.productName} onChange={e => setDiscForm({ ...discForm, productName: e.target.value })} placeholder="Product name" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                    <input type="text" value={discForm.productName} onChange={e => setDiscForm({ ...discForm, productName: e.target.value })} placeholder="Product name" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500" />
                                 </div>
                             </div>
                             {/* Quantities */}
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Expected Quantity</label>
-                                    <input type="number" min={0} value={discForm.expectedQuantity} onChange={e => setDiscForm({ ...discForm, expectedQuantity: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                    <input type="number" min={0} value={discForm.expectedQuantity} onChange={e => setDiscForm({ ...discForm, expectedQuantity: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500" />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Actual Quantity</label>
-                                    <input type="number" min={0} value={discForm.actualQuantity} onChange={e => setDiscForm({ ...discForm, actualQuantity: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                    <input type="number" min={0} value={discForm.actualQuantity} onChange={e => setDiscForm({ ...discForm, actualQuantity: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500" />
                                 </div>
                             </div>
                             {/* Notes */}
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
-                                <textarea value={discForm.notes} onChange={e => setDiscForm({ ...discForm, notes: e.target.value })} rows={2} placeholder="Describe the discrepancy..." className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none" />
+                                <textarea value={discForm.notes} onChange={e => setDiscForm({ ...discForm, notes: e.target.value })} rows={2} placeholder="Describe the discrepancy..." className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none" />
                             </div>
                         </div>
                         <div className="flex justify-end gap-2 p-5 border-t bg-gray-50">

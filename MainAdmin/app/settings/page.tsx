@@ -145,12 +145,12 @@ export default function SettingsPage() {
         <PermissionGate permission="settings">
             <div className="space-y-3">
                 <div>
-                    <h1 className="text-lg font-bold text-gray-900">Settings</h1>
+                    <h1 className="font-heading text-headline text-gray-900">Settings</h1>
                     <p className="text-xs text-gray-500">Manage system configuration and preferences</p>
                 </div>
 
                 {/* General Settings */}
-                <div className="bg-white rounded-lg shadow px-4 py-3">
+                <div className="bg-white rounded-[4px] shadow px-4 py-3">
                     <div className="flex items-center gap-2 mb-3">
                         <Globe className="w-4 h-4 text-primary-500" />
                         <h2 className="text-sm font-semibold text-gray-900">General Settings</h2>
@@ -179,11 +179,11 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Warehouse / Shipping Address */}
-                <div className="bg-white rounded-lg shadow-md p-6">
+                <div className="bg-white rounded-[4px] shadow-md p-6">
                     <div className="flex items-center gap-3 mb-6">
                         <Warehouse className="w-5 h-5 text-primary-500" />
                         <div>
-                            <h2 className="text-lg font-semibold text-gray-900">Warehouse / Shipping Address</h2>
+                            <h2 className="font-heading text-body font-semibold text-gray-900">Warehouse / Shipping Address</h2>
                             <p className="text-sm text-gray-500">All pharmacy returns are shipped to this address via FedEx</p>
                         </div>
                     </div>
@@ -205,7 +205,7 @@ export default function SettingsPage() {
                                         value={warehouseForm.warehouseName}
                                         onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseName: e.target.value })}
                                         placeholder="e.g. FCR Returns Warehouse"
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         disabled={isUpdating}
                                     />
                                 </div>
@@ -216,7 +216,7 @@ export default function SettingsPage() {
                                         value={warehouseForm.warehouseContactName}
                                         onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseContactName: e.target.value })}
                                         placeholder="Receiving Department"
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         disabled={isUpdating}
                                     />
                                 </div>
@@ -229,7 +229,7 @@ export default function SettingsPage() {
                                     value={warehouseForm.warehouseStreet}
                                     onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseStreet: e.target.value })}
                                     placeholder="123 Warehouse Blvd"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     disabled={isUpdating}
                                 />
                             </div>
@@ -241,7 +241,7 @@ export default function SettingsPage() {
                                         type="text"
                                         value={warehouseForm.warehouseCity}
                                         onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseCity: e.target.value })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         disabled={isUpdating}
                                     />
                                 </div>
@@ -253,7 +253,7 @@ export default function SettingsPage() {
                                         onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseState: e.target.value.toUpperCase().slice(0, 2) })}
                                         placeholder="TX"
                                         maxLength={2}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         disabled={isUpdating}
                                     />
                                 </div>
@@ -265,7 +265,7 @@ export default function SettingsPage() {
                                         onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseZip: e.target.value.replace(/\D/g, '').slice(0, 5) })}
                                         placeholder="75001"
                                         maxLength={5}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         disabled={isUpdating}
                                     />
                                 </div>
@@ -276,7 +276,7 @@ export default function SettingsPage() {
                                         value={warehouseForm.warehouseCountry}
                                         onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseCountry: e.target.value.toUpperCase().slice(0, 2) })}
                                         maxLength={2}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         disabled={isUpdating}
                                     />
                                 </div>
@@ -292,7 +292,7 @@ export default function SettingsPage() {
                                         setWarehouseForm({ ...warehouseForm, warehousePhone: cleaned });
                                     }}
                                     placeholder="4695557890"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 md:w-1/2"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 md:w-1/2"
                                     disabled={isUpdating}
                                 />
                             </div>
@@ -316,7 +316,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Security Settings - Reset Password */}
-                <div className="bg-white rounded-lg shadow px-4 py-3">
+                <div className="bg-white rounded-[4px] shadow px-4 py-3">
                     <div className="flex items-center gap-2 mb-3">
                         <Shield className="w-4 h-4 text-primary-500" />
                         <h2 className="text-sm font-semibold text-gray-900">Security Settings</h2>

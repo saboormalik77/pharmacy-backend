@@ -119,7 +119,7 @@ export default function WarehouseVerificationListPage() {
                     <Link href="/warehouse" className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-primary-600 mb-1.5 transition-colors">
                         <ChevronLeft className="w-3 h-3" /> Back to Warehouse
                     </Link>
-                    <h1 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
+                    <h1 className="font-heading text-headline flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
                         <ClipboardCheck className="w-5 h-5 text-primary-600" />
                         Warehouse Verification
                     </h1>
@@ -130,13 +130,13 @@ export default function WarehouseVerificationListPage() {
                 </div>
 
                 {/* Search */}
-                <div className="rounded-lg shadow p-3 flex gap-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                <div className="rounded-[4px] shadow p-3 flex gap-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                     <div className="relative flex-1">
                         <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2" style={{ color: 'var(--outline)' }} />
                         <input
                             type="text"
                             placeholder="Search by license plate or pharmacy name..."
-                            className="w-full pl-8 pr-3 py-1.5 text-xs border rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full pl-8 pr-3 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
                             style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}
                             value={search}
                             onChange={e => setSearch(e.target.value)}
@@ -145,7 +145,7 @@ export default function WarehouseVerificationListPage() {
                     {(search || filter) && (
                         <button
                             onClick={() => { setSearch(''); setFilter(''); }}
-                            className="px-2.5 py-1.5 text-[10px] font-medium border rounded-md transition-colors hover:bg-primary-50/40"
+                            className="px-2.5 py-1.5 text-[10px] font-medium border rounded-[4px] transition-colors hover:bg-primary-50/40"
                             style={{ color: 'var(--on-surface-variant)', borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)' }}
                         >
                             Clear
@@ -154,7 +154,7 @@ export default function WarehouseVerificationListPage() {
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-1 rounded-lg p-1 border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
+                <div className="flex gap-1 rounded-[4px] p-1 border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
                     {([
                         { label: 'All', value: '' as VerificationFilter },
                         { label: 'Not Started', value: 'not_started' as VerificationFilter },
@@ -164,7 +164,7 @@ export default function WarehouseVerificationListPage() {
                         <button
                             key={tab.label}
                             onClick={() => setFilter(tab.value)}
-                            className={`px-3 py-1.5 text-[11px] font-medium rounded-md transition-all ${filter === tab.value ? 'shadow-sm' : ''}`}
+                            className={`px-3 py-1.5 text-[11px] font-medium rounded-[4px] transition-all ${filter === tab.value ? 'shadow-sm' : ''}`}
                             style={filter === tab.value ? { backgroundColor: 'var(--surface-container-lowest)', color: 'var(--primary)' } : { color: 'var(--on-surface-variant)' }}
                         >
                             {tab.label}
@@ -173,7 +173,7 @@ export default function WarehouseVerificationListPage() {
                 </div>
 
                 {/* Table */}
-                <div className="rounded-lg shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                <div className="rounded-[4px] shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                     {isLoading ? (
                         <div className="flex items-center justify-center py-16">
                             <Loader2 className="h-5 w-5 animate-spin" style={{ color: 'var(--primary)' }} />
@@ -190,12 +190,12 @@ export default function WarehouseVerificationListPage() {
                                 <table className="w-full">
                                     <thead>
                                         <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">License Plate</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Pharmacy</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Items</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Received</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Verification</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-4 py-3.5">Action</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">License Plate</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Pharmacy</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Items</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Received</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Verification</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
@@ -203,22 +203,22 @@ export default function WarehouseVerificationListPage() {
                                             const phase = deriveWarehouseVerificationUiStatus(r);
                                             return (
                                             <tr key={r.id} className="hover:bg-primary-50/40" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
-                                                <td className="px-4 py-3 text-sm font-semibold" style={{ color: 'var(--primary)' }}>{r.licensePlate}</td>
-                                                <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{r.pharmacyName || '—'}</td>
-                                                <td className="px-4 py-3">
+                                                <td className="px-3 py-3 text-sm font-semibold" style={{ color: 'var(--primary)' }}>{r.licensePlate}</td>
+                                                <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{r.pharmacyName || '—'}</td>
+                                                <td className="px-3 py-3">
                                                     <span className="inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium" style={{ backgroundColor: 'var(--tertiary-fixed)', color: 'var(--on-tertiary-container)' }}>
                                                         {r.totalItems ?? '—'}
                                                     </span>
                                                 </td>
-                                                <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>
+                                                <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>
                                                     {formatDate(r.receivedInWarehouseDate || r.createdAt)}
                                                 </td>
-                                                <td className="px-4 py-3">
+                                                <td className="px-3 py-3">
                                                     {getStatusBadge(phase)}
                                                 </td>
-                                                <td className="px-4 py-3">
+                                                <td className="px-3 py-3">
                                                     <Link href={`/warehouse/verification/${r.id}`}>
-                                                        <button className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md transition">
+                                                        <button className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-[4px] transition">
                                                             {getActionLabel(phase)}
                                                             <ArrowRight className="w-3 h-3" />
                                                         </button>
