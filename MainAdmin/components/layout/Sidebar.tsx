@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, Warehouse, CircleDollarSign, FileText, DollarSign, AlertTriangle, Trash2, UserCog, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, Warehouse, CircleDollarSign, FileText, DollarSign, AlertTriangle, Trash2, UserCog, Settings, Menu, PanelLeftClose, PanelLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePermissions } from '@/hooks/usePermissions';
 
@@ -41,9 +41,10 @@ interface SidebarProps {
     isCollapsed: boolean;
     isOpen?: boolean;
     onClose?: () => void;
+    onToggle?: () => void;
 }
 
-export function Sidebar({ isCollapsed, isOpen = false, onClose }: SidebarProps) {
+export function Sidebar({ isCollapsed, isOpen = false, onClose, onToggle }: SidebarProps) {
     const pathname = usePathname();
     const { hasPermission, isMainAdmin } = usePermissions();
 
@@ -72,6 +73,33 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose }: SidebarProps) 
                 color: 'var(--on-primary)',
             }}
         >
+            {/* Brand Header */}
+            <div className={cn(
+                'flex items-center justify-between p-3 border-b',
+                isCollapsed && 'justify-center'
+            )} style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+                <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-[4px] flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'var(--on-primary)' }}>
+                        <span className="text-sm font-bold" style={{ color: 'var(--primary)' }}>MA</span>
+                    </div>
+                    {!isCollapsed && (
+                        <span className="text-base font-bold" style={{ color: 'var(--on-primary)' }}>Admin</span>
+                    )}
+                </div>
+                {onToggle && (
+                    <button
+                        onClick={onToggle}
+                        className="p-1.5 rounded-[4px] hover:bg-white/10 transition-colors"
+                    >
+                        {isCollapsed ? (
+                            <PanelLeft className="w-4 h-4" />
+                        ) : (
+                            <PanelLeftClose className="w-4 h-4" />
+                        )}
+                    </button>
+                )}
+            </div>
+
             <div
                 className="h-full overflow-y-auto overflow-x-hidden p-3"
                 style={{

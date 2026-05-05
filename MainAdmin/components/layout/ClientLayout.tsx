@@ -46,6 +46,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                             isCollapsed={sidebarCollapsed}
                             isOpen={sidebarOpen}
                             onClose={handleCloseSidebar}
+                            onToggle={handleToggleSidebar}
                         />
                         {sidebarOpen && (
                             <div
