@@ -220,10 +220,10 @@ export default function PoliciesPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-lg font-bold text-gray-900 flex items-center gap-1.5">
+                    <h1 className="text-lg font-bold flex items-center gap-1.5" style={{ color: 'var(--foreground)' }}>
                         <Shield className="w-4 h-4 text-primary-600" /> Labeler Info
                     </h1>
-                    <p className="text-xs text-gray-500">Manage return policies, exceptions, and timing rules</p>
+                    <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>Manage return policies, exceptions, and timing rules</p>
                 </div>
                 <button
                     onClick={() => { setAddModal(true); fetchReverseDistributors(); }}
@@ -234,7 +234,10 @@ export default function PoliciesPage() {
             </div>
 
             {/* Filters */}
-            <div className="bg-white rounded-lg shadow px-3 py-2">
+            <div
+                className="rounded-lg shadow px-3 py-2 border"
+                style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
+            >
                 <div className="flex flex-wrap gap-2">
                     <div className="relative flex-1 min-w-[160px]">
                         <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -243,15 +246,26 @@ export default function PoliciesPage() {
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                             placeholder="Search manufacturer, labeler ID, email..."
-                            className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                            className="w-full pl-8 pr-3 py-1.5 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                         />
                     </div>
-                    <select value={labelerType} onChange={e => setLabelerType(e.target.value)} className="px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500">
+                    <select
+                        value={labelerType}
+                        onChange={e => setLabelerType(e.target.value)}
+                        className="px-2 py-1.5 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                        style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
+                    >
                         <option value="all">All Types</option>
                         <option value="generic">Generic</option>
                         <option value="brand">Brand</option>
                     </select>
-                    <select value={destination} onChange={e => setDestination(e.target.value)} className="px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500">
+                    <select
+                        value={destination}
+                        onChange={e => setDestination(e.target.value)}
+                        className="px-2 py-1.5 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                        style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
+                    >
                         <option value="all">All Destinations</option>
                         <option value="inmar">Inmar</option>
                         <option value="qualanex">Qualanex</option>
@@ -261,7 +275,10 @@ export default function PoliciesPage() {
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div
+                className="rounded-lg shadow overflow-hidden border"
+                style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
+            >
                 {isLoading ? (
                     <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary-600" /></div>
                 ) : error ? (
@@ -279,7 +296,7 @@ export default function PoliciesPage() {
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
-                                <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
                                     <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Labeler ID</th>
                                     <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Manufacturer</th>
                                     <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Type</th>
@@ -290,7 +307,7 @@ export default function PoliciesPage() {
                                     <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100">
+                            <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                 {policies.map(p => {
                                     const dests = getDestinations(p);
                                     const hasPartials = (p.returnPolicies || []).some(rp => rp.partialsAccepted);
@@ -298,10 +315,10 @@ export default function PoliciesPage() {
                                         <tr
                                             key={p.id}
                                             onClick={() => router.push(`/policies/${p.id}`)}
-                                            className="hover:bg-gray-50 cursor-pointer transition-colors"
+                                            className="hover:bg-primary-50/40 cursor-pointer transition-colors"
                                         >
-                                            <td className="px-4 py-3 text-sm font-mono text-gray-900 font-semibold whitespace-nowrap">{p.labelerId}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-800 max-w-[180px] truncate" title={p.manufacturerName}>{p.manufacturerName}</td>
+                                            <td className="px-4 py-3 text-sm font-mono font-semibold whitespace-nowrap" style={{ color: 'var(--foreground)' }}>{p.labelerId}</td>
+                                            <td className="px-4 py-3 text-sm max-w-[180px] truncate" style={{ color: 'var(--foreground)' }} title={p.manufacturerName}>{p.manufacturerName}</td>
                                             <td className="px-4 py-3">
                                                 <Badge variant={p.labelerType === 'brand' ? 'info' : 'default'}>
                                                     <span className="text-[10px]">{p.labelerType === 'brand' ? 'Brand' : 'Generic'}</span>
@@ -311,24 +328,25 @@ export default function PoliciesPage() {
                                                 <div className="flex flex-wrap gap-1">
                                                     {dests.length > 0 ? dests.map(d => (
                                                         <Badge key={d} variant={getDestBadgeVariant(d)}><span className="text-[10px]">{d}</span></Badge>
-                                                    )) : <span className="text-gray-400 text-sm">—</span>}
+                                                    )) : <span className="text-sm" style={{ color: 'var(--on-surface-variant)' }}>—</span>}
                                                 </div>
                                             </td>
                                             <td className="px-4 py-3 text-center">
                                                 {hasPartials
                                                     ? <Badge variant="success"><span className="text-[10px]">Yes</span></Badge>
-                                                    : <span className="text-gray-400 text-sm">No</span>}
+                                                    : <span className="text-sm" style={{ color: 'var(--on-surface-variant)' }}>No</span>}
                                             </td>
-                                            <td className="px-4 py-3 text-right text-sm text-gray-700 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-right text-sm whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>
                                                 {p.averagePayPercent != null ? `${p.averagePayPercent}%` : '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-right text-sm text-gray-700 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-right text-sm whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>
                                                 {p.averageDaysToPay != null ? p.averageDaysToPay : '—'}
                                             </td>
                                             <td className="px-4 py-3 text-right">
                                                 <button
                                                     onClick={e => { e.stopPropagation(); setDeleteModal(p); }}
-                                                    className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                                    className="p-1 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                                    style={{ color: 'var(--on-surface-variant)' }}
                                                     title="Delete"
                                                 >
                                                     <Trash2 className="w-3.5 h-3.5" />
@@ -344,15 +362,18 @@ export default function PoliciesPage() {
 
                 {/* Pagination */}
                 {pagination && pagination.totalPages > 1 && (
-                    <div className="flex items-center justify-between px-3 py-2 border-t border-gray-100">
-                        <span className="text-xs text-gray-500">
+                    <div
+                        className="flex items-center justify-between px-3 py-2 border-t"
+                        style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
+                    >
+                        <span className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>
                             {((pagination.page - 1) * pagination.limit) + 1}–{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
                         </span>
                         <div className="flex items-center gap-1">
                             <button disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40">
                                 <ChevronLeft className="w-3.5 h-3.5" />
                             </button>
-                            <span className="text-xs text-gray-600 px-1">Page {page} of {pagination.totalPages}</span>
+                            <span className="text-xs px-1" style={{ color: 'var(--on-surface-variant)' }}>Page {page} of {pagination.totalPages}</span>
                             <button disabled={page >= pagination.totalPages} onClick={() => setPage(p => p + 1)} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40">
                                 <ChevronRight className="w-3.5 h-3.5" />
                             </button>
@@ -363,9 +384,20 @@ export default function PoliciesPage() {
 
             {/* ── Add Policy Modal ─────────────────────────── */}
             {addModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setAddModal(false)}>
-                    <div className="bg-white rounded-xl max-w-3xl w-full shadow-2xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
-                        <div className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-t-xl px-5 py-3 flex-shrink-0">
+                <div
+                    className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4"
+                    style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
+                    onClick={() => setAddModal(false)}
+                >
+                    <div
+                        className="rounded-xl max-w-3xl w-full shadow-2xl max-h-[90vh] flex flex-col border"
+                        style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div
+                            className="rounded-t-xl px-5 py-3 flex-shrink-0"
+                            style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}
+                        >
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <div className="p-1.5 bg-white/20 rounded-lg">
@@ -658,8 +690,11 @@ export default function PoliciesPage() {
                                 )}
                             </div>
                         </div>
-                        <div className="flex justify-end gap-2 px-5 py-3 border-t border-gray-200 bg-gray-50 flex-shrink-0">
-                            <button onClick={() => setAddModal(false)} className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">Cancel</button>
+                        <div
+                            className="flex justify-end gap-2 px-5 py-3 border-t flex-shrink-0"
+                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
+                        >
+                            <button onClick={() => setAddModal(false)} className="px-3 py-1.5 text-xs font-medium bg-white border rounded-md transition-colors" style={{ color: 'var(--on-surface)', borderColor: 'var(--outline-variant)' }}>Cancel</button>
                             <button onClick={handleAdd} disabled={isActionLoading} className="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 disabled:opacity-50 transition-colors inline-flex items-center">
                                 {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />Creating...</> : 'Save Contact Info'}
                             </button>
@@ -670,16 +705,20 @@ export default function PoliciesPage() {
 
             {/* ── Delete Modal ──────────────────────────────── */}
             {deleteModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setDeleteModal(null)}>
-                    <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-lg font-semibold text-gray-900">Delete Policy</h2>
-                            <button onClick={() => setDeleteModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                <div
+                    className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4"
+                    style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
+                    onClick={() => setDeleteModal(null)}
+                >
+                    <div className="rounded-lg max-w-md w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                            <h2 className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>Delete Policy</h2>
+                            <button onClick={() => setDeleteModal(null)} style={{ color: 'var(--outline)' }}><X className="w-5 h-5" /></button>
                         </div>
                         <div className="p-6">
-                            <p className="text-gray-700">Delete policy for <strong>{deleteModal.manufacturerName}</strong> (Labeler: {deleteModal.labelerId})? This will also remove all related return policies, exceptions, and notes.</p>
+                            <p style={{ color: 'var(--on-surface-variant)' }}>Delete policy for <strong>{deleteModal.manufacturerName}</strong> (Labeler: {deleteModal.labelerId})? This will also remove all related return policies, exceptions, and notes.</p>
                         </div>
-                        <div className="flex justify-end gap-2 p-5 border-t border-gray-200 bg-gray-50">
+                        <div className="flex justify-end gap-2 p-5 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <Button variant="outline" onClick={() => setDeleteModal(null)}>Cancel</Button>
                             <Button variant="danger" onClick={handleDelete} disabled={isActionLoading}>
                                 {isActionLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Deleting...</> : 'Delete'}

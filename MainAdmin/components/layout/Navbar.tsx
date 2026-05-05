@@ -46,36 +46,47 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
     };
 
     return (
-        <nav className="bg-white border-b border-gray-200 fixed top-0 left-0 right-0 z-50 h-16">
+        <nav
+            className="fixed top-0 left-0 right-0 z-50 h-16 border-b"
+            style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
+        >
             <div className="flex items-center justify-between h-full px-2 sm:px-4">
                 <div className="flex items-center gap-2 sm:gap-4">
-                    <button onClick={onToggleSidebar} className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                        <Menu className="w-5 h-5 text-gray-700" />
+                    <button
+                        onClick={onToggleSidebar}
+                        className="p-2 rounded-lg transition-colors hover:bg-primary-50/40 border"
+                        style={{ borderColor: 'transparent' }}
+                    >
+                        <Menu className="w-5 h-5" style={{ color: 'var(--on-surface)' }} />
                     </button>
                     <div className="flex items-center gap-1 sm:gap-2">
-                        <div className="w-7 h-7 sm:w-8 sm:h-8 bg-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'var(--primary)' }}>
                             <span className="text-white font-bold text-xs sm:text-sm">MA</span>
                         </div>
-                        <span className="text-base sm:text-xl font-bold text-gray-900 hidden xs:inline">Admin</span>
+                        <span className="text-base sm:text-xl font-bold hidden xs:inline" style={{ color: 'var(--foreground)' }}>Admin</span>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-2 sm:gap-3">
                     <div className="relative" ref={profileRef}>
-                        <button onClick={() => setShowProfile(!showProfile)} className="flex items-center gap-1.5 sm:gap-2 p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                            <div className="w-8 h-8 sm:w-9 sm:h-9 bg-indigo-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <button onClick={() => setShowProfile(!showProfile)} className="flex items-center gap-1.5 sm:gap-2 p-1.5 sm:p-2 rounded-lg transition-colors hover:bg-primary-50/40">
+                            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'var(--primary)' }}>
                                 <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                             </div>
-                            <span className="text-xs sm:text-sm font-medium text-gray-700 hidden sm:inline">{user?.name || 'Admin'}</span>
+                            <span className="text-xs sm:text-sm font-medium hidden sm:inline" style={{ color: 'var(--on-surface)' }}>{user?.name || 'Admin'}</span>
                         </button>
                         {showProfile && (
-                            <div className="absolute right-0 mt-2 w-48 sm:w-56 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-50">
-                                <div className="px-4 py-3 border-b border-gray-200">
-                                    <p className="font-medium text-gray-900">{user?.name || 'Admin'}</p>
-                                    <p className="text-sm text-gray-500">{user?.email || ''}</p>
+                            <div className="absolute right-0 mt-2 w-48 sm:w-56 rounded-lg shadow-lg border overflow-hidden z-50" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                                <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)' }}>
+                                    <p className="font-medium" style={{ color: 'var(--foreground)' }}>{user?.name || 'Admin'}</p>
+                                    <p className="text-sm" style={{ color: 'var(--on-surface-variant)' }}>{user?.email || ''}</p>
                                 </div>
                                 <div className="py-1">
-                                    <button onClick={handleLogout} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                    <button
+                                        onClick={handleLogout}
+                                        className="w-full flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-primary-50/40"
+                                        style={{ color: 'var(--error)' }}
+                                    >
                                         <LogOut className="w-4 h-4" />Logout
                                     </button>
                                 </div>
@@ -86,10 +97,10 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
             </div>
 
             {isLoggingOut && (
-                <div className="fixed inset-0 bg-white z-[9999] flex items-center justify-center">
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
                     <div className="flex flex-col items-center gap-3">
-                        <Loader2 className="w-8 h-8 animate-spin text-gray-600" />
-                        <p className="text-sm text-gray-600 font-medium">Logging out...</p>
+                        <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--primary)' }} />
+                        <p className="text-sm font-medium" style={{ color: 'var(--on-surface-variant)' }}>Logging out...</p>
                     </div>
                 </div>
             )}

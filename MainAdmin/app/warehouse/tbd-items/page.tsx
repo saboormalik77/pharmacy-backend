@@ -183,15 +183,15 @@ export default function TbdItemsPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-lg font-bold text-gray-900 flex items-center gap-1.5">
-                        <AlertTriangle className="w-4 h-4 text-yellow-500" /> TBD Items
+                    <h1 className="text-lg font-bold flex items-center gap-1.5" style={{ color: 'var(--foreground)' }}>
+                        <AlertTriangle className="w-4 h-4" style={{ color: 'var(--tertiary)' }} /> TBD Items
                     </h1>
-                    <p className="text-xs text-gray-500">Items requiring manual review — resolve as Returnable or Non-Returnable</p>
+                    <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>Items requiring manual review — resolve as Returnable or Non-Returnable</p>
                 </div>
             </div>
 
             {/* Search */}
-            <div className="bg-white rounded-lg shadow px-3 py-2">
+            <div className="rounded-lg shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 <div className="relative">
                     <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
@@ -199,7 +199,8 @@ export default function TbdItemsPage() {
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         placeholder="Search by NDC, product name, manufacturer, or lot..."
-                        className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                        className="w-full pl-8 pr-3 py-1.5 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                        style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                     />
                 </div>
             </div>
@@ -208,25 +209,26 @@ export default function TbdItemsPage() {
             {isLoading ? (
                 <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary-600" /></div>
             ) : groups.length === 0 ? (
-                <div className="bg-white rounded-lg shadow p-10 text-center">
-                    <CheckCircle className="w-10 h-10 text-green-300 mx-auto mb-2" />
-                    <p className="text-gray-500 text-sm font-medium">No active returns found</p>
+                <div className="rounded-lg shadow p-10 text-center border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                    <CheckCircle className="w-10 h-10 mx-auto mb-2" style={{ color: 'var(--secondary)' }} />
+                    <p className="text-sm font-medium" style={{ color: 'var(--on-surface-variant)' }}>No active returns found</p>
                 </div>
             ) : (
                 <div className="space-y-2">
                     {groups.map(({ transaction: tx, items, loading, loaded }) => {
                         const isExpanded = expandedTx.has(tx.id);
                         return (
-                            <div key={tx.id} className={`bg-white rounded-lg shadow overflow-hidden ${isExpanded ? 'ring-1 ring-yellow-300' : ''}`}>
+                            <div key={tx.id} className="rounded-lg shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: isExpanded ? 'var(--tertiary)' : 'var(--outline-variant)' }}>
                                 {/* Transaction header — clickable to expand */}
                                 <button
                                     onClick={() => toggleExpand(tx.id)}
-                                    className={`w-full flex items-center justify-between px-4 py-2 transition-colors text-left ${isExpanded ? 'bg-yellow-50 hover:bg-yellow-100' : 'hover:bg-gray-50'}`}
+                                    className="w-full flex items-center justify-between px-4 py-2 transition-colors text-left hover:bg-primary-50/40"
+                                    style={{ backgroundColor: isExpanded ? 'var(--tertiary-fixed)' : 'transparent' }}
                                 >
                                     <div className="flex items-center gap-2">
-                                        {isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-yellow-500" /> : <ChevronRight className="w-3.5 h-3.5 text-gray-400" />}
-                                        <span className="font-mono font-semibold text-gray-900 text-xs">{tx.licensePlate}</span>
-                                        <span className="text-xs text-gray-500 truncate max-w-[160px]">{tx.pharmacyName}</span>
+                                        {isExpanded ? <ChevronDown className="w-3.5 h-3.5" style={{ color: 'var(--tertiary)' }} /> : <ChevronRight className="w-3.5 h-3.5" style={{ color: 'var(--outline)' }} />}
+                                        <span className="font-mono font-semibold text-xs" style={{ color: 'var(--foreground)' }}>{tx.licensePlate}</span>
+                                        <span className="text-xs truncate max-w-[160px]" style={{ color: 'var(--on-surface-variant)' }}>{tx.pharmacyName}</span>
                                         <Badge variant={tx.status === 'in_progress' ? 'info' : tx.status === 'paused' ? 'warning' : 'success'}>
                                             <span className="text-[10px]">{tx.status.replace(/_/g, ' ')}</span>
                                         </Badge>
@@ -236,27 +238,27 @@ export default function TbdItemsPage() {
                                             <Badge variant="warning"><span className="text-[10px]">{items.length} TBD</span></Badge>
                                         )}
                                         {loaded && items.length === 0 && (
-                                            <span className="text-[10px] text-green-500">✓ Clear</span>
+                                            <span className="text-[10px]" style={{ color: 'var(--secondary)' }}>✓ Clear</span>
                                         )}
-                                        <span className="text-[10px] text-gray-400">{formatDate(tx.createdAt)}</span>
+                                        <span className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>{formatDate(tx.createdAt)}</span>
                                     </div>
                                 </button>
 
                                 {/* Expanded — TBD items table */}
                                 {isExpanded && (
-                                    <div className="border-t border-yellow-200 bg-yellow-50/30">
+                                    <div className="border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                                         {loading ? (
                                             <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 animate-spin text-primary-600" /></div>
                                         ) : items.length === 0 ? (
                                             <div className="py-4 text-center">
-                                                <CheckCircle className="w-5 h-5 text-green-300 mx-auto mb-1" />
-                                                <p className="text-xs text-gray-400">No TBD items in this return</p>
+                                                <CheckCircle className="w-5 h-5 mx-auto mb-1" style={{ color: 'var(--secondary)' }} />
+                                                <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>No TBD items in this return</p>
                                             </div>
                                         ) : (
                                             <div className="overflow-x-auto">
                                                 <table className="w-full">
                                                     <thead>
-                                                        <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                                        <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
                                                             <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
                                                             <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product</th>
                                                             <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Manufacturer</th>
@@ -266,17 +268,17 @@ export default function TbdItemsPage() {
                                                             <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
                                                         </tr>
                                                     </thead>
-                                                    <tbody className="divide-y divide-gray-100">
+                                                    <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                                         {items.map(item => (
-                                                            <tr key={item.id} className="hover:bg-gray-50">
-                                                                <td className="px-4 py-3 text-sm font-mono text-gray-900 whitespace-nowrap">{item.ndc || '—'}</td>
-                                                                <td className="px-4 py-3 text-sm text-gray-900 max-w-[140px] truncate" title={item.proprietaryName || ''}>
+                                                            <tr key={item.id} className="hover:bg-primary-50/40 transition-colors">
+                                                                <td className="px-4 py-3 text-sm font-mono whitespace-nowrap" style={{ color: 'var(--foreground)' }}>{item.ndc || '—'}</td>
+                                                                <td className="px-4 py-3 text-sm max-w-[140px] truncate" style={{ color: 'var(--foreground)' }} title={item.proprietaryName || ''}>
                                                                     {item.proprietaryName || item.genericName || '—'}
                                                                 </td>
-                                                                <td className="px-4 py-3 text-sm text-gray-600 max-w-[100px] truncate">{item.manufacturer || '—'}</td>
-                                                                <td className="px-4 py-3 text-sm text-gray-600 font-mono whitespace-nowrap">{item.lotNumber || '—'}</td>
-                                                                <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
-                                                                <td className="px-4 py-3 text-sm text-center text-gray-900 font-semibold">{item.quantity}</td>
+                                                                <td className="px-4 py-3 text-sm max-w-[100px] truncate" style={{ color: 'var(--on-surface-variant)' }}>{item.manufacturer || '—'}</td>
+                                                                <td className="px-4 py-3 text-sm font-mono whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>{item.lotNumber || '—'}</td>
+                                                                <td className="px-4 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
+                                                                <td className="px-4 py-3 text-sm text-center font-semibold" style={{ color: 'var(--foreground)' }}>{item.quantity}</td>
                                                                 <td className="px-4 py-3 text-sm text-right">
                                                                     <button
                                                                         onClick={() => {
@@ -285,7 +287,8 @@ export default function TbdItemsPage() {
                                                                             setNonReturnableRoute('destruction');
                                                                             setExpectedReturnableDate('');
                                                                         }}
-                                                                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border border-yellow-300 transition-colors whitespace-nowrap"
+                                                                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium border transition-colors whitespace-nowrap"
+                                                                        style={{ backgroundColor: 'var(--tertiary-fixed)', color: 'var(--on-surface)', borderColor: 'color-mix(in srgb, var(--tertiary) 30%, var(--outline-variant))' }}
                                                                     >
                                                                         Resolve
                                                                     </button>
@@ -306,20 +309,20 @@ export default function TbdItemsPage() {
 
             {/* ── Resolve Modal ─────────────────────────────── */}
             {resolveModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setResolveModal(null)}>
-                    <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-lg font-semibold text-gray-900">Resolve TBD Item</h2>
-                            <button onClick={() => setResolveModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setResolveModal(null)}>
+                    <div className="rounded-lg max-w-md w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                            <h2 className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>Resolve TBD Item</h2>
+                            <button onClick={() => setResolveModal(null)} style={{ color: 'var(--outline)' }}><X className="w-5 h-5" /></button>
                         </div>
                         <div className="p-5 space-y-4">
                             {/* Item info */}
-                            <div className="bg-gray-50 rounded-lg p-3 text-xs space-y-1">
-                                <p className="font-medium text-gray-900">{resolveModal.item.proprietaryName || resolveModal.item.ndc || 'Unknown item'}</p>
-                                <p className="text-gray-500">
+                            <div className="rounded-lg p-3 text-xs space-y-1 border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
+                                <p className="font-medium" style={{ color: 'var(--foreground)' }}>{resolveModal.item.proprietaryName || resolveModal.item.ndc || 'Unknown item'}</p>
+                                <p style={{ color: 'var(--on-surface-variant)' }}>
                                     NDC: <span className="font-mono">{resolveModal.item.ndc || '—'}</span> | Lot: {resolveModal.item.lotNumber || '—'} | Exp: {resolveModal.item.expirationDate ? formatDate(resolveModal.item.expirationDate) : '—'}
                                 </p>
-                                <p className="text-gray-500">Manufacturer: {resolveModal.item.manufacturer || '—'}</p>
+                                <p style={{ color: 'var(--on-surface-variant)' }}>Manufacturer: {resolveModal.item.manufacturer || '—'}</p>
                             </div>
 
                             {/* Resolution status */}
@@ -407,7 +410,7 @@ export default function TbdItemsPage() {
                                 <textarea value={resolveForm.memo} onChange={e => setResolveForm({ ...resolveForm, memo: e.target.value })} rows={2} placeholder="Optional notes about this resolution" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none" />
                             </div>
                         </div>
-                        <div className="flex justify-end gap-2 p-5 border-t border-gray-200 bg-gray-50">
+                        <div className="flex justify-end gap-2 p-5 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <Button variant="outline" onClick={() => setResolveModal(null)}>Cancel</Button>
                             <Button
                                 variant={resolveForm.new_status === 'returnable' ? 'success' : 'danger'}

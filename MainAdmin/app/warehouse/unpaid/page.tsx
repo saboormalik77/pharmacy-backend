@@ -236,12 +236,12 @@ export default function UnpaidMemosPage() {
                 <Link href="/payout-hub" className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-primary-600 mb-1.5 transition-colors">
                     <ChevronLeft className="w-3 h-3" /> Back to Payout Management
                 </Link>
-                <h1 className="text-lg font-bold text-gray-900">Payment Tracking</h1>
-                <p className="text-xs text-gray-500">Track manufacturer payments, record receipts, and view ask-vs-received analytics.</p>
+                <h1 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>Payment Tracking</h1>
+                <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>Track manufacturer payments, record receipts, and view ask-vs-received analytics.</p>
             </div>
 
             {/* Tabs */}
-            <div className="border-b border-gray-200">
+            <div className="border-b" style={{ borderColor: 'var(--outline-variant)' }}>
                 <nav className="flex gap-4">
                     {tabs.map(tab => (
                         <button
@@ -252,6 +252,7 @@ export default function UnpaidMemosPage() {
                                     ? 'border-primary-500 text-primary-600'
                                     : 'border-transparent text-gray-500 hover:text-gray-700'
                             }`}
+                            style={activeTab === tab.key ? undefined : { color: 'var(--on-surface-variant)' }}
                         >
                             {tab.icon}
                             {tab.label}
@@ -266,42 +267,44 @@ export default function UnpaidMemosPage() {
                     {/* Summary cards */}
                     {unpaidSummary && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <div className="bg-white rounded-lg border border-gray-200 px-4 py-2.5 flex items-center gap-3">
-                                <div className="p-2 bg-red-50 rounded-lg flex-shrink-0">
-                                    <AlertCircle className="w-4 h-4 text-red-500" />
+                            <div className="rounded-lg border px-4 py-2.5 flex items-center gap-3" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                                <div className="p-2 rounded-lg flex-shrink-0" style={{ backgroundColor: 'var(--error-container)' }}>
+                                    <AlertCircle className="w-4 h-4" style={{ color: 'var(--error)' }} />
                                 </div>
                                 <div>
-                                    <p className="text-[10px] text-gray-500">Unpaid Memos</p>
-                                    <p className="text-lg font-bold text-gray-900">{unpaidSummary.totalUnpaid}</p>
+                                    <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Unpaid Memos</p>
+                                    <p className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>{unpaidSummary.totalUnpaid}</p>
                                 </div>
                             </div>
-                            <div className="bg-white rounded-lg border border-gray-200 px-4 py-2.5 flex items-center gap-3">
-                                <div className="p-2 bg-orange-50 rounded-lg flex-shrink-0">
-                                    <DollarSign className="w-4 h-4 text-orange-500" />
+                            <div className="rounded-lg border px-4 py-2.5 flex items-center gap-3" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                                <div className="p-2 rounded-lg flex-shrink-0" style={{ backgroundColor: 'var(--tertiary-fixed)' }}>
+                                    <DollarSign className="w-4 h-4" style={{ color: 'var(--tertiary)' }} />
                                 </div>
                                 <div>
-                                    <p className="text-[10px] text-gray-500">Total Outstanding</p>
-                                    <p className="text-lg font-bold text-gray-900">{fmt(unpaidSummary.totalOutstanding)}</p>
+                                    <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Total Outstanding</p>
+                                    <p className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>{fmt(unpaidSummary.totalOutstanding)}</p>
                                 </div>
                             </div>
                         </div>
                     )}
 
                     {/* Filters */}
-                    <div className="bg-white rounded-lg border border-gray-200 px-3 py-2 flex flex-wrap gap-2 items-center">
+                    <div className="rounded-lg border px-3 py-2 flex flex-wrap gap-2 items-center" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         <div className="relative flex-1 min-w-[180px]">
                             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
                             <input
                                 value={search}
                                 onChange={e => { setSearch(e.target.value); setPage(1); }}
                                 placeholder="Search memos, manufacturer, pharmacy..."
-                                className="w-full pl-8 pr-3 py-1.5 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                                className="w-full pl-8 pr-3 py-1.5 border rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                                style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}
                             />
                         </div>
                         <select
                             value={destination}
                             onChange={e => { setDestination(e.target.value); setPage(1); }}
-                            className="border border-gray-300 rounded px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-primary-500"
+                            className="border rounded px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-primary-500"
+                            style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}
                         >
                             <option value="">All Destinations</option>
                             <option value="Inmar">Inmar</option>
@@ -312,7 +315,7 @@ export default function UnpaidMemosPage() {
                     </div>
 
                     {/* Table */}
-                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div className="rounded-lg border overflow-hidden" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         {isLoading ? (
                             <div className="flex items-center justify-center py-14">
                                 <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
@@ -327,7 +330,7 @@ export default function UnpaidMemosPage() {
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
-                                        <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                        <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
                                             <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Memo #</th>
                                             <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Manufacturer</th>
                                             <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Pharmacy</th>
@@ -340,21 +343,27 @@ export default function UnpaidMemosPage() {
                                             <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-100">
+                                    <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                         {unpaidMemos.map(memo => {
                                             const outstanding = (memo as any).outstandingAmount ?? (memo.amountRequested - memo.amountReceived);
                                             const days = (memo as any).daysOutstanding ?? 0;
                                             return (
-                                                <tr key={memo.id} className="hover:bg-gray-50">
-                                                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{memo.memoNumber}</td>
-                                                    <td className="px-4 py-3 text-sm text-gray-600">{memo.labelerName || '—'}</td>
-                                                    <td className="px-4 py-3 text-sm text-gray-600">{(memo as any).pharmacyName || '—'}</td>
-                                                    <td className="px-4 py-3 text-sm text-gray-600">{memo.destination || '—'}</td>
+                                                <tr key={memo.id} className="hover:bg-primary-50/40">
+                                                    <td className="px-4 py-3 text-sm font-medium" style={{ color: 'var(--foreground)' }}>{memo.memoNumber}</td>
+                                                    <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{memo.labelerName || '—'}</td>
+                                                    <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{(memo as any).pharmacyName || '—'}</td>
+                                                    <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{memo.destination || '—'}</td>
                                                     <td className="px-4 py-3 text-sm text-right font-medium">{fmt(memo.amountRequested)}</td>
                                                     <td className="px-4 py-3 text-sm text-right">{fmt(memo.amountReceived)}</td>
-                                                    <td className="px-4 py-3 text-sm text-right font-semibold text-red-600">{fmt(outstanding)}</td>
+                                                    <td className="px-4 py-3 text-sm text-right font-semibold" style={{ color: 'var(--error)' }}>{fmt(outstanding)}</td>
                                                     <td className="px-4 py-3 text-center">
-                                                        <span className={`inline-flex items-center gap-0.5 text-sm ${days > 30 ? 'text-red-600 font-semibold' : days > 14 ? 'text-orange-500' : 'text-gray-600'}`}>
+                                                        <span
+                                                            className="inline-flex items-center gap-0.5 text-sm"
+                                                            style={{
+                                                                color: days > 30 ? 'var(--error)' : days > 14 ? 'var(--tertiary)' : 'var(--on-surface-variant)',
+                                                                fontWeight: days > 30 ? 600 : undefined,
+                                                            }}
+                                                        >
                                                             <Clock className="w-3 h-3" />{days}d
                                                         </span>
                                                     </td>
@@ -370,12 +379,16 @@ export default function UnpaidMemosPage() {
                                                                     <button onClick={() => openPaymentModal(memo)} className="inline-flex items-center gap-0.5 px-2 py-1 rounded text-[11px] font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors whitespace-nowrap">
                                                                         <CreditCard className="w-3 h-3" /> Pay
                                                                     </button>
-                                                                    <button onClick={() => setReminderMemo(memo)} className="inline-flex items-center gap-0.5 px-2 py-1 rounded text-[11px] font-medium bg-yellow-100 text-yellow-800 border border-yellow-300 hover:bg-yellow-200 transition-colors whitespace-nowrap">
+                                                                    <button
+                                                                        onClick={() => setReminderMemo(memo)}
+                                                                        className="inline-flex items-center gap-0.5 px-2 py-1 rounded text-[11px] font-medium border transition-colors whitespace-nowrap hover:bg-primary-50/40"
+                                                                        style={{ backgroundColor: 'var(--tertiary-fixed)', color: 'var(--on-tertiary-container)', borderColor: 'var(--outline-variant)' }}
+                                                                    >
                                                                         <Send className="w-3 h-3" /> Remind
                                                                     </button>
                                                                 </>
                                                             ) : (
-                                                                <span className="text-[10px] text-gray-400 whitespace-nowrap" title="Record outbound shipment in RA Tracking before payment actions">
+                                                                <span className="text-[10px] whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }} title="Record outbound shipment in RA Tracking before payment actions">
                                                                     Ship first
                                                                 </span>
                                                             )}
@@ -391,16 +404,26 @@ export default function UnpaidMemosPage() {
 
                         {/* Pagination */}
                         {unpaidPagination && unpaidPagination.totalPages > 1 && (
-                            <div className="flex items-center justify-between px-3 py-2 border-t border-gray-200 bg-gray-50">
-                                <span className="text-[10px] text-gray-500">
+                            <div className="flex items-center justify-between px-3 py-2 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                                <span className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>
                                     Page {unpaidPagination.page} of {unpaidPagination.totalPages} ({unpaidPagination.total} memos)
                                 </span>
                                 <div className="flex gap-1.5">
-                                    <button disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="p-1 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-50">
-                                        <ChevronLeft className="w-3.5 h-3.5 text-gray-600" />
+                                    <button
+                                        disabled={page <= 1}
+                                        onClick={() => setPage(p => p - 1)}
+                                        className="p-1 rounded border disabled:opacity-40 hover:bg-primary-50 transition-colors"
+                                        style={{ borderColor: 'var(--outline-variant)' }}
+                                    >
+                                        <ChevronLeft className="w-3.5 h-3.5" style={{ color: 'var(--on-surface-variant)' }} />
                                     </button>
-                                    <button disabled={page >= unpaidPagination.totalPages} onClick={() => setPage(p => p + 1)} className="p-1 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-50">
-                                        <ChevronRight className="w-3.5 h-3.5 text-gray-600" />
+                                    <button
+                                        disabled={page >= unpaidPagination.totalPages}
+                                        onClick={() => setPage(p => p + 1)}
+                                        className="p-1 rounded border disabled:opacity-40 hover:bg-primary-50 transition-colors"
+                                        style={{ borderColor: 'var(--outline-variant)' }}
+                                    >
+                                        <ChevronRight className="w-3.5 h-3.5" style={{ color: 'var(--on-surface-variant)' }} />
                                     </button>
                                 </div>
                             </div>
@@ -414,32 +437,34 @@ export default function UnpaidMemosPage() {
                 <div className="space-y-2">
                     {/* Summary card */}
                     {paidPagination && (
-                        <div className="bg-white rounded-lg border border-gray-200 px-4 py-2.5 flex items-center gap-3 max-w-xs">
-                            <div className="p-2 bg-green-50 rounded-lg flex-shrink-0">
-                                <CheckCircle className="w-4 h-4 text-green-500" />
+                        <div className="rounded-lg border px-4 py-2.5 flex items-center gap-3 max-w-xs" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                            <div className="p-2 rounded-lg flex-shrink-0" style={{ backgroundColor: 'var(--secondary-container)' }}>
+                                <CheckCircle className="w-4 h-4" style={{ color: 'var(--secondary)' }} />
                             </div>
                             <div>
-                                <p className="text-[10px] text-gray-500">Total Paid Memos</p>
-                                <p className="text-lg font-bold text-gray-900">{paidPagination.total}</p>
+                                <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Total Paid Memos</p>
+                                <p className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>{paidPagination.total}</p>
                             </div>
                         </div>
                     )}
 
                     {/* Filters */}
-                    <div className="bg-white rounded-lg border border-gray-200 px-3 py-2 flex flex-wrap gap-2 items-center">
+                    <div className="rounded-lg border px-3 py-2 flex flex-wrap gap-2 items-center" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         <div className="relative flex-1 min-w-[180px]">
                             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
                             <input
                                 value={paidSearch}
                                 onChange={e => { setPaidSearch(e.target.value); setPaidPage(1); }}
                                 placeholder="Search memos, manufacturer, pharmacy..."
-                                className="w-full pl-8 pr-3 py-1.5 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                                className="w-full pl-8 pr-3 py-1.5 border rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                                style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}
                             />
                         </div>
                         <select
                             value={paidDestination}
                             onChange={e => { setPaidDestination(e.target.value); setPaidPage(1); }}
-                            className="border border-gray-300 rounded px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-primary-500"
+                            className="border rounded px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-primary-500"
+                            style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}
                         >
                             <option value="">All Destinations</option>
                             <option value="Inmar">Inmar</option>
@@ -450,7 +475,7 @@ export default function UnpaidMemosPage() {
                     </div>
 
                     {/* Table */}
-                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div className="rounded-lg border overflow-hidden" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         {isLoading ? (
                             <div className="flex items-center justify-center py-14">
                                 <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
@@ -465,7 +490,7 @@ export default function UnpaidMemosPage() {
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
-                                        <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                        <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
                                             <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Memo #</th>
                                             <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Manufacturer</th>
                                             <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Pharmacy</th>
@@ -476,15 +501,15 @@ export default function UnpaidMemosPage() {
                                             <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-100">
+                                    <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                         {(paidMemos ?? []).map(memo => (
-                                            <tr key={memo.id} className="hover:bg-gray-50">
-                                                <td className="px-4 py-3 text-sm font-medium text-gray-900">{memo.memoNumber}</td>
-                                                <td className="px-4 py-3 text-sm text-gray-600">{memo.labelerName || '—'}</td>
-                                                <td className="px-4 py-3 text-sm text-gray-600">{memo.pharmacyName || '—'}</td>
-                                                <td className="px-4 py-3 text-sm text-gray-600">{memo.destination || '—'}</td>
+                                            <tr key={memo.id} className="hover:bg-primary-50/40">
+                                                <td className="px-4 py-3 text-sm font-medium" style={{ color: 'var(--foreground)' }}>{memo.memoNumber}</td>
+                                                <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{memo.labelerName || '—'}</td>
+                                                <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{memo.pharmacyName || '—'}</td>
+                                                <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{memo.destination || '—'}</td>
                                                 <td className="px-4 py-3 text-sm text-right font-medium">{fmt(memo.amountRequested)}</td>
-                                                <td className="px-4 py-3 text-sm text-right text-green-600 font-semibold">{fmt(memo.amountReceived)}</td>
+                                                <td className="px-4 py-3 text-sm text-right font-semibold" style={{ color: 'var(--secondary)' }}>{fmt(memo.amountReceived)}</td>
                                                 <td className="px-4 py-3 text-center">
                                                     <Badge variant="success">
                                                         <span className="text-[10px]">paid</span>
@@ -495,7 +520,8 @@ export default function UnpaidMemosPage() {
                                                         <button
                                                             type="button"
                                                             onClick={() => openEditModal(memo)}
-                                                            className="inline-flex items-center gap-0.5 px-2 py-1 rounded text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors whitespace-nowrap"
+                                                            className="inline-flex items-center gap-0.5 px-2 py-1 rounded text-[11px] font-medium border transition-colors whitespace-nowrap hover:bg-primary-50/40"
+                                                            style={{ backgroundColor: 'var(--primary-container)', color: 'var(--on-primary-container)', borderColor: 'var(--outline-variant)' }}
                                                         >
                                                             <FileText className="w-3 h-3" /> Edit
                                                         </button>
@@ -510,16 +536,26 @@ export default function UnpaidMemosPage() {
 
                         {/* Pagination */}
                         {paidPagination && paidPagination.totalPages > 1 && (
-                            <div className="flex items-center justify-between px-3 py-2 border-t border-gray-200 bg-gray-50">
-                                <span className="text-[10px] text-gray-500">
+                            <div className="flex items-center justify-between px-3 py-2 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                                <span className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>
                                     Page {paidPagination.page} of {paidPagination.totalPages} ({paidPagination.total} memos)
                                 </span>
                                 <div className="flex gap-1.5">
-                                    <button disabled={paidPage <= 1} onClick={() => setPaidPage(p => p - 1)} className="p-1 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-50">
-                                        <ChevronLeft className="w-3.5 h-3.5 text-gray-600" />
+                                    <button
+                                        disabled={paidPage <= 1}
+                                        onClick={() => setPaidPage(p => p - 1)}
+                                        className="p-1 rounded border disabled:opacity-40 hover:bg-primary-50 transition-colors"
+                                        style={{ borderColor: 'var(--outline-variant)' }}
+                                    >
+                                        <ChevronLeft className="w-3.5 h-3.5" style={{ color: 'var(--on-surface-variant)' }} />
                                     </button>
-                                    <button disabled={paidPage >= paidPagination.totalPages} onClick={() => setPaidPage(p => p + 1)} className="p-1 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-50">
-                                        <ChevronRight className="w-3.5 h-3.5 text-gray-600" />
+                                    <button
+                                        disabled={paidPage >= paidPagination.totalPages}
+                                        onClick={() => setPaidPage(p => p + 1)}
+                                        className="p-1 rounded border disabled:opacity-40 hover:bg-primary-50 transition-colors"
+                                        style={{ borderColor: 'var(--outline-variant)' }}
+                                    >
+                                        <ChevronRight className="w-3.5 h-3.5" style={{ color: 'var(--on-surface-variant)' }} />
                                     </button>
                                 </div>
                             </div>
@@ -537,28 +573,46 @@ export default function UnpaidMemosPage() {
                             {[
                                 { label: 'Total Memos', value: askVsReceivedTotals.totalMemos ?? 0, color: '' },
                                 { label: 'Total Ask', value: fmt(askVsReceivedTotals.totalAskValue), color: '' },
-                                { label: 'Total Received', value: fmt(askVsReceivedTotals.totalReceived), color: 'text-green-600' },
-                                { label: 'Overall Pay %', value: pct(askVsReceivedTotals.overallPayPercent), color: '', extra: askVsReceivedTotals.overallPayPercent >= 80 ? <TrendingUp className="w-3.5 h-3.5 text-green-500 inline ml-1" /> : <TrendingDown className="w-3.5 h-3.5 text-red-500 inline ml-1" /> },
+                                { label: 'Total Received', value: fmt(askVsReceivedTotals.totalReceived), color: '', style: { color: 'var(--secondary)' } as React.CSSProperties },
+                                { label: 'Overall Pay %', value: pct(askVsReceivedTotals.overallPayPercent), color: '', extra: askVsReceivedTotals.overallPayPercent >= 80 ? <TrendingUp className="w-3.5 h-3.5 inline ml-1" style={{ color: 'var(--secondary)' }} /> : <TrendingDown className="w-3.5 h-3.5 inline ml-1" style={{ color: 'var(--error)' }} /> },
                             ].map(({ label, value, color, extra }) => (
-                                <div key={label} className="bg-white rounded-lg border border-gray-200 px-3 py-2">
-                                    <p className="text-[10px] text-gray-500">{label}</p>
-                                    <p className={`text-base font-bold text-gray-900 mt-0.5 ${color}`}>{value}{extra}</p>
+                                <div key={label} className="rounded-lg border px-3 py-2" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                                    <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>{label}</p>
+                                    <p className={`text-base font-bold mt-0.5 ${color}`} style={{ color: 'var(--foreground)' }}>{value}{extra}</p>
                                 </div>
                             ))}
                         </div>
                     )}
 
                     {/* Group toggle */}
-                    <div className="bg-white rounded-lg border border-gray-200 px-3 py-2 flex items-center gap-2">
-                        <span className="text-xs text-gray-600 font-medium">Group by:</span>
-                        <div className="flex gap-0.5 bg-gray-100 rounded p-0.5">
-                            <button onClick={() => setAnalyticsGroupBy('manufacturer')} className={`px-3 py-1 rounded text-xs font-medium transition-colors ${analyticsGroupBy === 'manufacturer' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>Manufacturer</button>
-                            <button onClick={() => setAnalyticsGroupBy('period')} className={`px-3 py-1 rounded text-xs font-medium transition-colors ${analyticsGroupBy === 'period' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>Monthly</button>
+                    <div className="rounded-lg border px-3 py-2 flex items-center gap-2" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                        <span className="text-xs font-medium" style={{ color: 'var(--on-surface-variant)' }}>Group by:</span>
+                        <div className="flex gap-0.5 rounded p-0.5" style={{ backgroundColor: 'var(--surface-container-low)' }}>
+                            <button
+                                onClick={() => setAnalyticsGroupBy('manufacturer')}
+                                className={`px-3 py-1 rounded text-xs font-medium transition-colors ${analyticsGroupBy === 'manufacturer' ? 'shadow-sm' : ''}`}
+                                style={{
+                                    backgroundColor: analyticsGroupBy === 'manufacturer' ? 'var(--surface-container-lowest)' : 'transparent',
+                                    color: analyticsGroupBy === 'manufacturer' ? 'var(--foreground)' : 'var(--on-surface-variant)',
+                                }}
+                            >
+                                Manufacturer
+                            </button>
+                            <button
+                                onClick={() => setAnalyticsGroupBy('period')}
+                                className={`px-3 py-1 rounded text-xs font-medium transition-colors ${analyticsGroupBy === 'period' ? 'shadow-sm' : ''}`}
+                                style={{
+                                    backgroundColor: analyticsGroupBy === 'period' ? 'var(--surface-container-lowest)' : 'transparent',
+                                    color: analyticsGroupBy === 'period' ? 'var(--foreground)' : 'var(--on-surface-variant)',
+                                }}
+                            >
+                                Monthly
+                            </button>
                         </div>
                     </div>
 
                     {/* Table */}
-                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div className="rounded-lg border overflow-hidden" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         {isLoading ? (
                             <div className="flex items-center justify-center py-14"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>
                         ) : askVsReceived.length === 0 ? (
@@ -570,7 +624,7 @@ export default function UnpaidMemosPage() {
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
-                                        <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                        <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
                                             <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">{analyticsGroupBy === 'manufacturer' ? 'Manufacturer' : 'Period'}</th>
                                             <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Memos</th>
                                             <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Total Ask</th>
@@ -579,16 +633,28 @@ export default function UnpaidMemosPage() {
                                             <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Pay %</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-100">
+                                    <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                         {askVsReceived.map((row: AskVsReceivedRow, i: number) => (
-                                            <tr key={i} className="hover:bg-gray-50">
-                                                <td className="px-4 py-3 text-sm font-medium text-gray-900">{analyticsGroupBy === 'manufacturer' ? (row.labelerName || row.labelerId || '—') : (row.period || '—')}</td>
+                                            <tr key={i} className="hover:bg-primary-50/40">
+                                                <td className="px-4 py-3 text-sm font-medium" style={{ color: 'var(--foreground)' }}>{analyticsGroupBy === 'manufacturer' ? (row.labelerName || row.labelerId || '—') : (row.period || '—')}</td>
                                                 <td className="px-4 py-3 text-sm text-center">{row.memoCount ?? '—'}</td>
                                                 <td className="px-4 py-3 text-sm text-right">{fmt(row.totalAskValue ?? row.totalAsk ?? 0)}</td>
-                                                <td className="px-4 py-3 text-sm text-right text-green-600 font-medium">{fmt(row.totalReceived)}</td>
-                                                <td className="px-4 py-3 text-sm text-right text-red-600">{fmt(row.difference)}</td>
+                                                <td className="px-4 py-3 text-sm text-right font-medium" style={{ color: 'var(--secondary)' }}>{fmt(row.totalReceived)}</td>
+                                                <td className="px-4 py-3 text-sm text-right" style={{ color: 'var(--error)' }}>{fmt(row.difference)}</td>
                                                 <td className="px-4 py-3 text-sm text-center">
-                                                    <span className={`font-semibold ${row.payPercent >= 80 ? 'text-green-600' : row.payPercent >= 50 ? 'text-orange-500' : 'text-red-600'}`}>{pct(row.payPercent)}</span>
+                                                    <span
+                                                        className="font-semibold"
+                                                        style={{
+                                                            color:
+                                                                row.payPercent >= 80
+                                                                    ? 'var(--secondary)'
+                                                                    : row.payPercent >= 50
+                                                                        ? 'var(--tertiary)'
+                                                                        : 'var(--error)',
+                                                        }}
+                                                    >
+                                                        {pct(row.payPercent)}
+                                                    </span>
                                                 </td>
                                             </tr>
                                         ))}
@@ -604,20 +670,21 @@ export default function UnpaidMemosPage() {
             {activeTab === 'manufacturers' && (
                 <div className="space-y-2">
                     {/* Search */}
-                    <div className="bg-white rounded-lg border border-gray-200 px-3 py-2">
+                    <div className="rounded-lg border px-3 py-2" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         <div className="relative max-w-md">
                             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
                             <input
                                 value={mfgSearch}
                                 onChange={e => { setMfgSearch(e.target.value); setMfgPage(1); }}
                                 placeholder="Search manufacturer..."
-                                className="w-full pl-8 pr-3 py-1.5 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                                className="w-full pl-8 pr-3 py-1.5 border rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                                style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}
                             />
                         </div>
                     </div>
 
                     {/* Table */}
-                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div className="rounded-lg border overflow-hidden" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         {isLoading ? (
                             <div className="flex items-center justify-center py-14"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>
                         ) : manufacturerSummary.length === 0 ? (
@@ -629,7 +696,7 @@ export default function UnpaidMemosPage() {
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
-                                        <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                        <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
                                             <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Manufacturer</th>
                                             <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Total</th>
                                             <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Unpaid</th>
@@ -641,26 +708,38 @@ export default function UnpaidMemosPage() {
                                             <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Avg Days</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-100">
+                                    <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                         {manufacturerSummary.map((row: ManufacturerPaymentSummary, i: number) => (
-                                            <tr key={i} className="hover:bg-gray-50">
+                                            <tr key={i} className="hover:bg-primary-50/40">
                                                 <td className="px-4 py-3">
-                                                    <p className="text-sm font-medium text-gray-900">{row.labelerName || '—'}</p>
-                                                    {row.labelerId && <p className="text-[10px] text-gray-400">{row.labelerId}</p>}
+                                                    <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>{row.labelerName || '—'}</p>
+                                                    {row.labelerId && <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>{row.labelerId}</p>}
                                                 </td>
                                                 <td className="px-4 py-3 text-sm text-center">{row.totalMemos}</td>
-                                                <td className="px-4 py-3 text-sm text-center">{row.unpaidMemos > 0 ? <span className="text-red-600 font-semibold">{row.unpaidMemos}</span> : <span className="text-gray-400">0</span>}</td>
-                                                <td className="px-4 py-3 text-sm text-center text-green-600">{row.paidMemos}</td>
+                                                <td className="px-4 py-3 text-sm text-center">{row.unpaidMemos > 0 ? <span className="font-semibold" style={{ color: 'var(--error)' }}>{row.unpaidMemos}</span> : <span style={{ color: 'var(--on-surface-variant)' }}>0</span>}</td>
+                                                <td className="px-4 py-3 text-sm text-center" style={{ color: 'var(--secondary)' }}>{row.paidMemos}</td>
                                                 <td className="px-4 py-3 text-sm text-right">{fmt(row.totalAskValue)}</td>
-                                                <td className="px-4 py-3 text-sm text-right text-green-600">{fmt(row.totalPaidAmount)}</td>
-                                                <td className="px-4 py-3 text-sm text-right font-semibold text-red-600">{fmt(row.outstandingAmount)}</td>
+                                                <td className="px-4 py-3 text-sm text-right" style={{ color: 'var(--secondary)' }}>{fmt(row.totalPaidAmount)}</td>
+                                                <td className="px-4 py-3 text-sm text-right font-semibold" style={{ color: 'var(--error)' }}>{fmt(row.outstandingAmount)}</td>
                                                 <td className="px-4 py-3 text-sm text-center">
-                                                    <span className={`font-semibold ${row.averagePayPercent >= 80 ? 'text-green-600' : row.averagePayPercent >= 50 ? 'text-orange-500' : 'text-red-600'}`}>{pct(row.averagePayPercent)}</span>
-                                                    {row.policyAvgPayPercent != null && <p className="text-[10px] text-gray-400">P: {pct(row.policyAvgPayPercent)}</p>}
+                                                    <span
+                                                        className="font-semibold"
+                                                        style={{
+                                                            color:
+                                                                row.averagePayPercent >= 80
+                                                                    ? 'var(--secondary)'
+                                                                    : row.averagePayPercent >= 50
+                                                                        ? 'var(--tertiary)'
+                                                                        : 'var(--error)',
+                                                        }}
+                                                    >
+                                                        {pct(row.averagePayPercent)}
+                                                    </span>
+                                                    {row.policyAvgPayPercent != null && <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>P: {pct(row.policyAvgPayPercent)}</p>}
                                                 </td>
                                                 <td className="px-4 py-3 text-sm text-center">
                                                     <span className="font-medium">{row.averageDaysToPay}d</span>
-                                                    {row.policyAvgDaysToPay != null && <p className="text-[10px] text-gray-400">P: {row.policyAvgDaysToPay}d</p>}
+                                                    {row.policyAvgDaysToPay != null && <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>P: {row.policyAvgDaysToPay}d</p>}
                                                 </td>
                                             </tr>
                                         ))}
@@ -671,14 +750,24 @@ export default function UnpaidMemosPage() {
 
                         {/* Pagination */}
                         {manufacturerPagination && manufacturerPagination.totalPages > 1 && (
-                            <div className="flex items-center justify-between px-3 py-2 border-t border-gray-200 bg-gray-50">
-                                <span className="text-[10px] text-gray-500">Page {manufacturerPagination.page} of {manufacturerPagination.totalPages}</span>
+                            <div className="flex items-center justify-between px-3 py-2 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                                <span className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Page {manufacturerPagination.page} of {manufacturerPagination.totalPages}</span>
                                 <div className="flex gap-1.5">
-                                    <button disabled={mfgPage <= 1} onClick={() => setMfgPage(p => p - 1)} className="p-1 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-50">
-                                        <ChevronLeft className="w-3.5 h-3.5 text-gray-600" />
+                                    <button
+                                        disabled={mfgPage <= 1}
+                                        onClick={() => setMfgPage(p => p - 1)}
+                                        className="p-1 rounded border disabled:opacity-40 hover:bg-primary-50 transition-colors"
+                                        style={{ borderColor: 'var(--outline-variant)' }}
+                                    >
+                                        <ChevronLeft className="w-3.5 h-3.5" style={{ color: 'var(--on-surface-variant)' }} />
                                     </button>
-                                    <button disabled={mfgPage >= manufacturerPagination.totalPages} onClick={() => setMfgPage(p => p + 1)} className="p-1 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-50">
-                                        <ChevronRight className="w-3.5 h-3.5 text-gray-600" />
+                                    <button
+                                        disabled={mfgPage >= manufacturerPagination.totalPages}
+                                        onClick={() => setMfgPage(p => p + 1)}
+                                        className="p-1 rounded border disabled:opacity-40 hover:bg-primary-50 transition-colors"
+                                        style={{ borderColor: 'var(--outline-variant)' }}
+                                    >
+                                        <ChevronRight className="w-3.5 h-3.5" style={{ color: 'var(--on-surface-variant)' }} />
                                     </button>
                                 </div>
                             </div>
@@ -689,70 +778,76 @@ export default function UnpaidMemosPage() {
 
             {/* ─── Record Payment Modal ────────────────────────── */}
             {paymentMemo && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-lg shadow-2xl w-full max-w-md">
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}>
+                    <div className="rounded-lg shadow-2xl w-full max-w-md border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)' }}>
                             <div>
-                                <h3 className="text-sm font-semibold text-gray-900">{isEditMode ? 'Update Payment' : 'Record Payment'}</h3>
-                                <p className="text-xs text-gray-500">{paymentMemo.memoNumber} — {paymentMemo.labelerName || 'Unknown'}</p>
+                                <h3 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>{isEditMode ? 'Update Payment' : 'Record Payment'}</h3>
+                                <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>{paymentMemo.memoNumber} — {paymentMemo.labelerName || 'Unknown'}</p>
                             </div>
-                            <button onClick={() => { setPaymentMemo(null); setExistingCreditMemoUrl(null); }} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                            <button onClick={() => { setPaymentMemo(null); setExistingCreditMemoUrl(null); }} style={{ color: 'var(--outline)' }}><X className="w-4 h-4" /></button>
                         </div>
 
                         <div className="px-4 py-3 space-y-3">
                             {!isEditMode ? (
-                                <div className="grid grid-cols-3 gap-2 p-2.5 bg-gray-50 rounded text-center">
-                                    <div><p className="text-[10px] text-gray-500">Asked</p><p className="text-xs font-semibold">{fmt(paymentMemo.amountRequested)}</p></div>
-                                    <div><p className="text-[10px] text-gray-500">Received So Far</p><p className="text-xs font-semibold text-green-600">{fmt(paymentMemo.amountReceived)}</p></div>
-                                    <div><p className="text-[10px] text-gray-500">Outstanding</p><p className="text-xs font-semibold text-red-600">{fmt(paymentMemo.amountRequested - paymentMemo.amountReceived)}</p></div>
+                                <div className="grid grid-cols-3 gap-2 p-2.5 rounded text-center border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
+                                    <div><p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Asked</p><p className="text-xs font-semibold">{fmt(paymentMemo.amountRequested)}</p></div>
+                                    <div><p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Received So Far</p><p className="text-xs font-semibold" style={{ color: 'var(--secondary)' }}>{fmt(paymentMemo.amountReceived)}</p></div>
+                                    <div><p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Outstanding</p><p className="text-xs font-semibold" style={{ color: 'var(--error)' }}>{fmt(paymentMemo.amountRequested - paymentMemo.amountReceived)}</p></div>
                                 </div>
                             ) : (
-                                <div className="p-2.5 bg-blue-50 border border-blue-200 rounded">
-                                    <p className="text-xs text-blue-700 mb-1.5"><strong>Editing payment record</strong></p>
+                                <div className="p-2.5 border rounded" style={{ backgroundColor: 'var(--primary-container)', borderColor: 'var(--outline-variant)' }}>
+                                    <p className="text-xs mb-1.5" style={{ color: 'var(--on-primary-container)' }}><strong>Editing payment record</strong></p>
                                     <div className="grid grid-cols-2 gap-2 text-center">
-                                        <div><p className="text-[10px] text-blue-600">Asked</p><p className="text-xs font-semibold text-blue-800">{fmt(paymentMemo.amountRequested)}</p></div>
-                                        <div><p className="text-[10px] text-blue-600">Currently Recorded</p><p className="text-xs font-semibold text-blue-800">{fmt(paymentMemo.amountReceived)}</p></div>
+                                        <div><p className="text-[10px]" style={{ color: 'var(--on-primary-container)' }}>Asked</p><p className="text-xs font-semibold" style={{ color: 'var(--on-primary-container)' }}>{fmt(paymentMemo.amountRequested)}</p></div>
+                                        <div><p className="text-[10px]" style={{ color: 'var(--on-primary-container)' }}>Currently Recorded</p><p className="text-xs font-semibold" style={{ color: 'var(--on-primary-container)' }}>{fmt(paymentMemo.amountReceived)}</p></div>
                                     </div>
                                 </div>
                             )}
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-0.5">Amount Received <span className="text-red-500">*</span></label>
+                                <label className="block text-xs font-medium mb-0.5" style={{ color: 'var(--on-surface)' }}>Amount Received <span style={{ color: 'var(--error)' }}>*</span></label>
                                 <div className="relative">
                                     <DollarSign className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
-                                    <input type="number" step="0.01" min="0" value={paymentAmount} onChange={e => setPaymentAmount(e.target.value)} className="w-full pl-8 pr-3 py-1.5 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500" placeholder="0.00" />
+                                    <input type="number" step="0.01" min="0" value={paymentAmount} onChange={e => setPaymentAmount(e.target.value)} className="w-full pl-8 pr-3 py-1.5 border rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }} placeholder="0.00" />
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-0.5">Payment Date</label>
-                                <input type="date" value={paymentDate} onChange={e => setPaymentDate(e.target.value)} className="w-full px-2.5 py-1.5 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500" />
+                                <label className="block text-xs font-medium mb-0.5" style={{ color: 'var(--on-surface)' }}>Payment Date</label>
+                                <input type="date" value={paymentDate} onChange={e => setPaymentDate(e.target.value)} className="w-full px-2.5 py-1.5 border rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }} />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-0.5">Reference # (check/wire)</label>
-                                <input value={paymentRef} onChange={e => setPaymentRef(e.target.value)} className="w-full px-2.5 py-1.5 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500" placeholder="e.g. CHK-12345" />
+                                <label className="block text-xs font-medium mb-0.5" style={{ color: 'var(--on-surface)' }}>Reference # (check/wire)</label>
+                                <input value={paymentRef} onChange={e => setPaymentRef(e.target.value)} className="w-full px-2.5 py-1.5 border rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }} placeholder="e.g. CHK-12345" />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-0.5">Notes</label>
-                                <textarea value={paymentNotes} onChange={e => setPaymentNotes(e.target.value)} rows={2} className="w-full px-2.5 py-1.5 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500 resize-none" placeholder="Optional notes..." />
+                                <label className="block text-xs font-medium mb-0.5" style={{ color: 'var(--on-surface)' }}>Notes</label>
+                                <textarea value={paymentNotes} onChange={e => setPaymentNotes(e.target.value)} rows={2} className="w-full px-2.5 py-1.5 border rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500 resize-none" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }} placeholder="Optional notes..." />
                             </div>
 
                             {/* Credit Memo Upload (required for new, optional for edit) */}
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-0.5">
-                                    Credit Memo {!isEditMode && <span className="text-red-500">*</span>}
-                                    <span className="ml-1 text-[10px] font-normal text-gray-400">(PDF only)</span>
+                                <label className="block text-xs font-medium mb-0.5" style={{ color: 'var(--on-surface)' }}>
+                                    Credit Memo {!isEditMode && <span style={{ color: 'var(--error)' }}>*</span>}
+                                    <span className="ml-1 text-[10px] font-normal" style={{ color: 'var(--on-surface-variant)' }}>(PDF only)</span>
                                 </label>
                                 {isEditMode && existingCreditMemoUrl && !creditMemoFile && (
-                                    <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded flex items-center gap-2">
-                                        <FileText className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
+                                    <div className="mb-2 p-2 border rounded flex items-center gap-2" style={{ backgroundColor: 'var(--primary-container)', borderColor: 'var(--outline-variant)' }}>
+                                        <FileText className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--primary)' }} />
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-xs text-blue-700">Current credit memo on file</p>
-                                            <a href={existingCreditMemoUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-600 hover:underline truncate block">
+                                            <p className="text-xs" style={{ color: 'var(--on-primary-container)' }}>Current credit memo on file</p>
+                                            <a href={existingCreditMemoUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] hover:underline truncate block" style={{ color: 'var(--primary)' }}>
                                                 View existing PDF
                                             </a>
                                         </div>
                                     </div>
                                 )}
-                                <label className={`flex items-center gap-3 w-full px-3 py-2.5 border-2 border-dashed rounded cursor-pointer transition-colors ${creditMemoFile ? 'border-green-400 bg-green-50' : 'border-gray-300 bg-gray-50 hover:border-primary-400 hover:bg-primary-50'}`}>
+                                <label
+                                    className="flex items-center gap-3 w-full px-3 py-2.5 border-2 border-dashed rounded cursor-pointer transition-colors"
+                                    style={{
+                                        borderColor: creditMemoFile ? 'var(--secondary)' : 'var(--outline-variant)',
+                                        backgroundColor: creditMemoFile ? 'var(--secondary-container)' : 'var(--surface-container-low)',
+                                    }}
+                                >
                                     <input
                                         type="file"
                                         accept="application/pdf"
@@ -768,25 +863,26 @@ export default function UnpaidMemosPage() {
                                     />
                                     {creditMemoFile ? (
                                         <>
-                                            <FileText className="w-4 h-4 text-green-600 flex-shrink-0" />
+                                            <FileText className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--secondary)' }} />
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-xs font-medium text-green-700 truncate">{creditMemoFile.name}</p>
-                                                <p className="text-[10px] text-green-600">{(creditMemoFile.size / 1024).toFixed(1)} KB — Click to change</p>
+                                                <p className="text-xs font-medium truncate" style={{ color: 'var(--on-secondary-container)' }}>{creditMemoFile.name}</p>
+                                                <p className="text-[10px]" style={{ color: 'var(--on-secondary-container)' }}>{(creditMemoFile.size / 1024).toFixed(1)} KB — Click to change</p>
                                             </div>
                                             <button
                                                 type="button"
                                                 onClick={e => { e.preventDefault(); setCreditMemoFile(null); }}
-                                                className="flex-shrink-0 text-gray-400 hover:text-red-500 transition-colors"
+                                                className="flex-shrink-0 transition-colors"
+                                                style={{ color: 'var(--outline)' }}
                                             >
                                                 <X className="w-3.5 h-3.5" />
                                             </button>
                                         </>
                                     ) : (
                                         <>
-                                            <Upload className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                                            <Upload className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--outline)' }} />
                                             <div>
-                                                <p className="text-xs text-gray-600 font-medium">{isEditMode ? 'Click to upload new credit memo (optional)' : 'Click to upload credit memo'}</p>
-                                                <p className="text-[10px] text-gray-400">PDF up to 10MB</p>
+                                                <p className="text-xs font-medium" style={{ color: 'var(--on-surface)' }}>{isEditMode ? 'Click to upload new credit memo (optional)' : 'Click to upload credit memo'}</p>
+                                                <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>PDF up to 10MB</p>
                                             </div>
                                         </>
                                     )}
@@ -794,9 +890,20 @@ export default function UnpaidMemosPage() {
                             </div>
                         </div>
 
-                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200">
-                            <button onClick={() => { setPaymentMemo(null); setCreditMemoFile(null); setExistingCreditMemoUrl(null); }} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleRecordPayment} disabled={isActionLoading || (!isEditMode && !creditMemoFile)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors">
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                            <button
+                                onClick={() => { setPaymentMemo(null); setCreditMemoFile(null); setExistingCreditMemoUrl(null); }}
+                                className="px-3 py-1.5 text-xs rounded border transition-colors hover:bg-primary-50/40"
+                                style={{ borderColor: 'var(--outline-variant)', color: 'var(--on-surface)', backgroundColor: 'var(--surface-container-lowest)' }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleRecordPayment}
+                                disabled={isActionLoading || (!isEditMode && !creditMemoFile)}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded text-white disabled:opacity-50 transition-colors"
+                                style={{ backgroundColor: 'var(--secondary)' }}
+                            >
                                 {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CreditCard className="w-3.5 h-3.5" />}
                                 {isEditMode ? 'Update Payment' : 'Record Payment'}
                             </button>
@@ -807,29 +914,40 @@ export default function UnpaidMemosPage() {
 
             {/* ─── Send Reminder Modal ─────────────────────────── */}
             {reminderMemo && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-lg shadow-2xl w-full max-w-sm">
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}>
+                    <div className="rounded-lg shadow-2xl w-full max-w-sm border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)' }}>
                             <div>
-                                <h3 className="text-sm font-semibold text-gray-900">Send Payment Reminder</h3>
-                                <p className="text-xs text-gray-500">{reminderMemo.memoNumber} — Outstanding: {fmt(reminderMemo.amountRequested - reminderMemo.amountReceived)}</p>
+                                <h3 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Send Payment Reminder</h3>
+                                <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>{reminderMemo.memoNumber} — Outstanding: {fmt(reminderMemo.amountRequested - reminderMemo.amountReceived)}</p>
                             </div>
-                            <button onClick={() => { setReminderMemo(null); setReminderEmail(''); }} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                            <button onClick={() => { setReminderMemo(null); setReminderEmail(''); }} style={{ color: 'var(--outline)' }}><X className="w-4 h-4" /></button>
                         </div>
 
                         <div className="px-4 py-3 space-y-3">
-                            <div className="p-2.5 bg-blue-50 rounded text-xs text-blue-700">
+                            <div className="p-2.5 rounded text-xs border" style={{ backgroundColor: 'var(--primary-container)', borderColor: 'var(--outline-variant)', color: 'var(--on-primary-container)' }}>
                                 Sent to the <strong>reverse distributor</strong> contact email for this destination — same address as RA request emails (from Distributors). Use override below only if you need a different recipient.
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-0.5">Email Override (optional)</label>
-                                <input type="email" value={reminderEmail} onChange={e => setReminderEmail(e.target.value)} className="w-full px-2.5 py-1.5 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500" placeholder="Override email..." />
+                                <label className="block text-xs font-medium mb-0.5" style={{ color: 'var(--on-surface)' }}>Email Override (optional)</label>
+                                <input type="email" value={reminderEmail} onChange={e => setReminderEmail(e.target.value)} className="w-full px-2.5 py-1.5 border rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }} placeholder="Override email..." />
                             </div>
                         </div>
 
-                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200">
-                            <button onClick={() => { setReminderMemo(null); setReminderEmail(''); }} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleSendReminder} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-50 transition-colors">
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                            <button
+                                onClick={() => { setReminderMemo(null); setReminderEmail(''); }}
+                                className="px-3 py-1.5 text-xs rounded border transition-colors hover:bg-primary-50/40"
+                                style={{ borderColor: 'var(--outline-variant)', color: 'var(--on-surface)', backgroundColor: 'var(--surface-container-lowest)' }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSendReminder}
+                                disabled={isActionLoading}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded text-white disabled:opacity-50 transition-colors"
+                                style={{ backgroundColor: 'var(--tertiary)' }}
+                            >
                                 {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                                 Send Reminder
                             </button>

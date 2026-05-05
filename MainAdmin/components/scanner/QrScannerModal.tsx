@@ -193,22 +193,25 @@ export default function QrScannerModal({ onScan, onClose }: QrScannerModalProps)
 
     return (
         <div
-            className="fixed inset-0 bg-gray-950/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4"
+            className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-[100] p-4"
             onClick={onClose}
+            style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 80%, transparent)' }}
         >
             <div
-                className="bg-white rounded-2xl w-full max-w-sm shadow-2xl flex flex-col overflow-hidden"
+                className="rounded-2xl w-full max-w-sm shadow-2xl flex flex-col overflow-hidden"
                 onClick={e => e.stopPropagation()}
+                style={{ backgroundColor: 'var(--surface-container-lowest)' }}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 flex-shrink-0">
-                    <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-                        <Camera className="w-5 h-5 text-green-600" />
+                <div className="flex items-center justify-between px-5 py-4 border-b flex-shrink-0" style={{ borderColor: 'var(--outline-variant)' }}>
+                    <h2 className="font-semibold flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
+                        <Camera className="w-5 h-5" style={{ color: 'var(--secondary)' }} />
                         Scan QR / Barcode
                     </h2>
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-gray-700 transition-colors p-1 rounded-lg hover:bg-gray-100"
+                        className="transition-colors p-1 rounded-lg"
+                        style={{ color: 'var(--outline)' }}
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -220,14 +223,14 @@ export default function QrScannerModal({ onScan, onClose }: QrScannerModalProps)
                     {/* Error state */}
                     {status === 'error' && (
                         <div className="flex flex-col items-center justify-center py-10 px-6 gap-4 text-center">
-                            <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center">
-                                <AlertCircle className="w-7 h-7 text-red-500" />
+                            <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--error-container)' }}>
+                                <AlertCircle className="w-7 h-7" style={{ color: 'var(--error)' }} />
                             </div>
                             <div>
-                                <p className="text-sm font-semibold text-red-700">Camera unavailable</p>
-                                <p className="text-xs text-gray-500 mt-1">{errorMsg}</p>
+                                <p className="text-sm font-semibold" style={{ color: 'var(--error)' }}>Camera unavailable</p>
+                                <p className="text-xs mt-1" style={{ color: 'var(--on-surface-variant)' }}>{errorMsg}</p>
                             </div>
-                            <p className="text-xs text-gray-400 bg-gray-50 rounded-lg px-3 py-2">
+                            <p className="text-xs rounded-lg px-3 py-2" style={{ color: 'var(--on-surface-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                                 Use USB scanner input or Manual NDC entry instead.
                             </p>
                         </div>
@@ -239,12 +242,12 @@ export default function QrScannerModal({ onScan, onClose }: QrScannerModalProps)
 
                             {/* Loading overlay */}
                             {status === 'requesting' && (
-                                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gray-50 z-10">
-                                    <div className="w-14 h-14 rounded-full bg-primary-100 flex items-center justify-center">
+                                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10" style={{ backgroundColor: 'var(--surface-container-low)' }}>
+                                    <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--primary-fixed)' }}>
                                         <Loader2 className="w-7 h-7 animate-spin text-primary-600" />
                                     </div>
-                                    <p className="text-sm font-medium text-gray-700">Starting camera...</p>
-                                    <p className="text-xs text-gray-400">Allow camera access when prompted</p>
+                                    <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>Starting camera...</p>
+                                    <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>Allow camera access when prompted</p>
                                 </div>
                             )}
 
@@ -265,10 +268,10 @@ export default function QrScannerModal({ onScan, onClose }: QrScannerModalProps)
                                     {status === 'active' && (
                                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                                             <div className="relative w-52 h-52">
-                                                <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-green-400" />
-                                                <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-green-400" />
-                                                <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-green-400" />
-                                                <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-green-400" />
+                                                <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4" style={{ borderColor: 'var(--secondary)' }} />
+                                                <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4" style={{ borderColor: 'var(--secondary)' }} />
+                                                <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4" style={{ borderColor: 'var(--secondary)' }} />
+                                                <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4" style={{ borderColor: 'var(--secondary)' }} />
                                             </div>
                                         </div>
                                     )}
@@ -285,17 +288,18 @@ export default function QrScannerModal({ onScan, onClose }: QrScannerModalProps)
 
                     {/* Hint */}
                     {status === 'active' && (
-                        <p className="text-xs text-center text-gray-400 px-4 py-2 border-t border-gray-100">
+                        <p className="text-xs text-center px-4 py-2 border-t" style={{ color: 'var(--on-surface-variant)', borderColor: 'var(--outline-variant)' }}>
                             Point camera at the QR code or barcode on the bottle
                         </p>
                     )}
                 </div>
 
                 {/* Footer */}
-                <div className="px-5 py-3 border-t border-gray-100 flex-shrink-0">
+                <div className="px-5 py-3 border-t flex-shrink-0" style={{ borderColor: 'var(--outline-variant)' }}>
                     <button
                         onClick={onClose}
-                        className="w-full py-2 text-sm text-gray-500 hover:text-gray-800 transition-colors font-medium rounded-lg hover:bg-gray-50"
+                        className="w-full py-2 text-sm transition-colors font-medium rounded-lg"
+                        style={{ color: 'var(--on-surface-variant)' }}
                     >
                         Cancel
                     </button>

@@ -110,6 +110,25 @@ export default function BatchesPage() {
         submitted: batches.filter(b => b.status === 'submitted').length,
     };
 
+    const statusPillStyle = (status: string): React.CSSProperties => {
+        switch (status) {
+            case 'open':
+                return { backgroundColor: 'var(--tertiary-fixed)', color: 'var(--on-tertiary-container)', borderColor: 'var(--outline-variant)' };
+            case 'closed':
+                return { backgroundColor: 'var(--surface-container-low)', color: 'var(--primary)', borderColor: 'var(--outline-variant)' };
+            case 'submitted':
+                return { backgroundColor: 'var(--secondary-container)', color: 'var(--on-secondary-container)', borderColor: 'var(--outline-variant)' };
+            default:
+                return { backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface-variant)', borderColor: 'var(--outline-variant)' };
+        }
+    };
+
+    const cardinalPillStyle = (state: 'submitted' | 'file_ready' | 'pending'): React.CSSProperties => {
+        if (state === 'submitted') return { backgroundColor: 'var(--secondary-container)', color: 'var(--on-secondary-container)', borderColor: 'var(--outline-variant)' };
+        if (state === 'file_ready') return { backgroundColor: 'var(--primary-container)', color: 'var(--on-primary-container)', borderColor: 'var(--outline-variant)' };
+        return { backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface-variant)', borderColor: 'var(--outline-variant)' };
+    };
+
     return (
         <PermissionGate permission="warehouse">
         <div className="space-y-3">
@@ -121,8 +140,8 @@ export default function BatchesPage() {
                     <Link href="/warehouse" className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-primary-600 mb-1.5 transition-colors">
                         <ChevronLeft className="w-3 h-3" /> Back to Warehouse
                     </Link>
-                    <h1 className="text-lg font-bold text-gray-900">Monthly Batches</h1>
-                    <p className="text-xs text-gray-500">Manage return batches and close-outs</p>
+                    <h1 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>Monthly Batches</h1>
+                    <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>Manage return batches and close-outs</p>
                 </div>
                 <button
                     onClick={() => {
@@ -138,24 +157,25 @@ export default function BatchesPage() {
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 {[
-                    { icon: Layers, bg: 'bg-gray-100', color: 'text-gray-600', label: 'Total', value: stats.total, valueColor: '' },
-                    { icon: Calendar, bg: 'bg-yellow-100', color: 'text-yellow-600', label: 'Open', value: stats.open, valueColor: 'text-yellow-600' },
-                    { icon: CheckCircle, bg: 'bg-blue-100', color: 'text-blue-600', label: 'Closed', value: stats.closed, valueColor: 'text-blue-600' },
-                    { icon: Send, bg: 'bg-green-100', color: 'text-green-600', label: 'Submitted', value: stats.submitted, valueColor: 'text-green-600' },
-                ].map(({ icon: Icon, bg, color, label, value, valueColor }) => (
-                    <div key={label} className="bg-white rounded-lg shadow px-3 py-2">
+                    { icon: Layers, iconColor: 'var(--outline)', label: 'Total', value: stats.total, valueStyle: {} as React.CSSProperties },
+                    { icon: Calendar, iconColor: 'var(--tertiary)', label: 'Open', value: stats.open, valueStyle: { color: 'var(--tertiary)' } as React.CSSProperties },
+                    { icon: CheckCircle, iconColor: 'var(--primary)', label: 'Closed', value: stats.closed, valueStyle: { color: 'var(--primary)' } as React.CSSProperties },
+                    { icon: Send, iconColor: 'var(--secondary)', label: 'Submitted', value: stats.submitted, valueStyle: { color: 'var(--secondary)' } as React.CSSProperties },
+                ].map(({ icon: Icon, chipBg, iconColor, label, value, valueStyle }) => (
+                    <div key={label} className="rounded-lg shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         <div className="flex items-center gap-2">
-                            <div className={`w-7 h-7 ${bg} rounded flex items-center justify-center flex-shrink-0`}><Icon className={`w-3.5 h-3.5 ${color}`} /></div>
-                            <div><p className="text-[10px] text-gray-500">{label}</p><p className={`text-base font-bold ${valueColor}`}>{value}</p></div>
+                            <div className="w-7 h-7 rounded flex items-center justify-center flex-shrink-0 border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}><Icon className="w-3.5 h-3.5" style={{ color: iconColor }} /></div>
+                            <div><p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>{label}</p><p className="text-base font-bold" style={{ color: 'var(--foreground)', ...valueStyle }}>{value}</p></div>
                         </div>
                     </div>
                 ))}
             </div>
 
             {/* Filters */}
-            <div className="bg-white rounded-lg shadow px-3 py-2">
+            <div className="rounded-lg shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 <select
-                    className="border border-gray-300 rounded px-2.5 py-1 text-xs focus:ring-1 focus:ring-primary-500 focus:border-transparent"
+                    className="border rounded px-2.5 py-1 text-xs focus:ring-1 focus:ring-primary-500 focus:border-transparent"
+                    style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                     value={statusFilter}
                     onChange={e => { setStatusFilter(e.target.value); setCurrentPage(1); }}
                 >
@@ -164,14 +184,14 @@ export default function BatchesPage() {
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="rounded-lg shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 {isLoading ? (
                     <div className="flex items-center justify-center py-14">
                         <Loader2 className="w-6 h-6 animate-spin text-primary-500" />
                     </div>
                 ) : batches.length === 0 ? (
-                    <div className="text-center py-14 text-gray-500">
-                        <Layers className="w-10 h-10 mx-auto mb-2 text-gray-300" />
+                    <div className="text-center py-14" style={{ color: 'var(--on-surface-variant)' }}>
+                        <Layers className="w-10 h-10 mx-auto mb-2" style={{ color: 'var(--outline-variant)' }} />
                         <p className="text-sm font-medium">No batches found</p>
                         <p className="text-xs mt-0.5">Create a new batch to get started.</p>
                     </div>
@@ -179,7 +199,7 @@ export default function BatchesPage() {
                     <div className="overflow-x-auto">
                         <table className="min-w-full">
                             <thead>
-                                <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
                                     <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Batch Month</th>
                                     <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Name</th>
                                     <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Status</th>
@@ -191,50 +211,60 @@ export default function BatchesPage() {
                                     <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100">
+                            <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                 {batches.map(batch => {
                                     const sb = getStatusBadge(batch.status);
                                     return (
                                         <tr
                                             key={batch.id}
                                             onClick={() => router.push(`/warehouse/batches/${batch.id}`)}
-                                            className="odd:bg-white even:bg-gray-50/40 hover:bg-gray-50 cursor-pointer transition-colors"
+                                            className="hover:bg-primary-50/40 cursor-pointer transition-colors"
+                                            style={{ backgroundColor: 'var(--surface-container-lowest)' }}
                                         >
-                                            <td className="px-4 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-sm font-medium whitespace-nowrap" style={{ color: 'var(--foreground)' }}>
                                                 {formatBatchMonth(batch.batchMonth)}
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface)' }}>
                                                 {batch.batchName}
                                             </td>
                                             <td className="px-4 py-3 whitespace-nowrap">
-                                                <Badge variant={sb.variant}><span className="text-[10px]">{sb.label}</span></Badge>
+                                                <span className="inline-flex items-center px-2 py-0.5 rounded border text-[10px] font-medium" style={statusPillStyle(batch.status)}>
+                                                    {sb.label}
+                                                </span>
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface)' }}>
                                                 {batch.totalReturns}
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface)' }}>
                                                 {batch.totalDebitMemos}
                                             </td>
-                                            <td className="px-4 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-sm font-medium whitespace-nowrap" style={{ color: 'var(--foreground)' }}>
                                                 {formatCurrency(batch.totalValue)}
                                             </td>
                                             <td className="px-4 py-3 whitespace-nowrap">
                                                 {batch.cardinalSubmittedAt ? (
-                                                    <Badge variant="success"><span className="text-[10px]">Submitted</span></Badge>
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded border text-[10px] font-medium" style={cardinalPillStyle('submitted')}>
+                                                        Submitted
+                                                    </span>
                                                 ) : batch.cardinalFileGenerated ? (
-                                                    <Badge variant="info"><span className="text-[10px]">File Ready</span></Badge>
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded border text-[10px] font-medium" style={cardinalPillStyle('file_ready')}>
+                                                        File Ready
+                                                    </span>
                                                 ) : (
-                                                    <Badge variant="default"><span className="text-[10px]">Pending</span></Badge>
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded border text-[10px] font-medium" style={cardinalPillStyle('pending')}>
+                                                        Pending
+                                                    </span>
                                                 )}
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>
                                                 {formatDate(batch.createdAt)}
                                             </td>
                                             <td className="px-4 py-3 whitespace-nowrap" onClick={e => e.stopPropagation()}>
                                                 {batch.status === 'open' && (
                                                     <button
                                                         onClick={() => router.push(`/warehouse/batches/${batch.id}?action=closeout`)}
-                                                        className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded bg-yellow-100 text-yellow-800 border border-yellow-300 hover:bg-yellow-200 transition-colors"
+                                                        className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded border transition-colors hover:bg-primary-50/40"
+                                                        style={{ backgroundColor: 'var(--tertiary-fixed)', color: 'var(--on-tertiary-container)', borderColor: 'var(--outline-variant)' }}
                                                     >
                                                         <Lock className="w-3 h-3" /> Closeout
                                                     </button>
@@ -250,16 +280,16 @@ export default function BatchesPage() {
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                    <div className="flex items-center justify-between px-3 py-2 border-t border-gray-200">
-                        <p className="text-[10px] text-gray-500">
+                    <div className="flex items-center justify-between px-3 py-2 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                        <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>
                             Page {currentPage} of {totalPages}{batchPagination?.total != null && ` · ${batchPagination.total} batches`}
                         </p>
                         <div className="flex items-center gap-1.5">
-                            <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="p-1 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-50">
-                                <ChevronLeft className="w-3.5 h-3.5 text-gray-600" />
+                            <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="p-1 rounded border disabled:opacity-40 hover:bg-primary-50 transition-colors" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)' }}>
+                                <ChevronLeft className="w-3.5 h-3.5" style={{ color: 'var(--on-surface-variant)' }} />
                             </button>
-                            <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="p-1 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-50">
-                                <ChevronRight className="w-3.5 h-3.5 text-gray-600" />
+                            <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="p-1 rounded border disabled:opacity-40 hover:bg-primary-50 transition-colors" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)' }}>
+                                <ChevronRight className="w-3.5 h-3.5" style={{ color: 'var(--on-surface-variant)' }} />
                             </button>
                         </div>
                     </div>
@@ -268,24 +298,25 @@ export default function BatchesPage() {
 
             {/* Create Batch Modal */}
             {showCreate && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowCreate(false)}>
-                    <div className="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 p-5" onClick={e => e.stopPropagation()}>
-                        <h2 className="text-sm font-bold text-gray-900 mb-3">Create New Batch</h2>
+                <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setShowCreate(false)}>
+                    <div className="rounded-lg shadow-xl max-w-sm w-full mx-4 p-5 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                        <h2 className="text-sm font-bold mb-3" style={{ color: 'var(--foreground)' }}>Create New Batch</h2>
 
                         <div className="space-y-3">
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Batch Month <span className="text-red-500">*</span></label>
+                                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--on-surface)' }}>Batch Month <span style={{ color: 'var(--error)' }}>*</span></label>
                                 {usedMonthsLoading ? (
-                                    <div className="flex items-center gap-2 py-2 text-xs text-gray-500">
+                                    <div className="flex items-center gap-2 py-2 text-xs" style={{ color: 'var(--on-surface-variant)' }}>
                                         <Loader2 className="w-3.5 h-3.5 animate-spin" /> Loading months…
                                     </div>
                                 ) : availableBatchMonths.length === 0 ? (
-                                    <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2.5 py-2">
+                                    <p className="text-xs border rounded px-2.5 py-2" style={{ color: 'var(--on-tertiary-container)', backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}>
                                         Every month in the allowed range already has a batch. Delete an open unused batch or contact support to add a month outside the window.
                                     </p>
                                 ) : (
                                     <select
-                                        className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-primary-500 focus:border-transparent bg-white"
+                                        className="w-full border rounded px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-primary-500 focus:border-transparent"
+                                        style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                                         value={newBatch.batchMonth}
                                         onChange={e => setNewBatch(prev => ({ ...prev, batchMonth: e.target.value }))}
                                     >
@@ -297,10 +328,11 @@ export default function BatchesPage() {
                                 )}
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Batch Name <span className="text-gray-400 font-normal">(optional)</span></label>
+                                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--on-surface)' }}>Batch Name <span className="font-normal" style={{ color: 'var(--on-surface-variant)' }}>(optional)</span></label>
                                 <input
                                     type="text"
-                                    className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-primary-500 focus:border-transparent"
+                                    className="w-full border rounded px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-primary-500 focus:border-transparent"
+                                    style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                                     placeholder="e.g. March 2026 Returns"
                                     value={newBatch.batchName}
                                     onChange={e => setNewBatch(prev => ({ ...prev, batchName: e.target.value }))}
@@ -309,7 +341,7 @@ export default function BatchesPage() {
                         </div>
 
                         <div className="flex justify-end gap-2 mt-4">
-                            <button onClick={() => setShowCreate(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button onClick={() => setShowCreate(false)} className="px-3 py-1.5 text-xs rounded border transition-colors hover:bg-primary-50/40" style={{ borderColor: 'var(--outline-variant)', color: 'var(--on-surface)', backgroundColor: 'var(--surface-container-lowest)' }}>Cancel</button>
                             <button
                                 onClick={handleCreate}
                                 disabled={isActionLoading || usedMonthsLoading || availableBatchMonths.length === 0}

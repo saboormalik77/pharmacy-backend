@@ -198,21 +198,22 @@ export default function WarehouseReceivingPage() {
                 <Link href="/warehouse" className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-primary-600 mb-1.5 transition-colors">
                     <ChevronLeft className="w-3 h-3" /> Back to Warehouse
                 </Link>
-                <h1 className="text-lg font-bold text-gray-900 flex items-center gap-1.5">
+                <h1 className="text-lg font-bold flex items-center gap-1.5" style={{ color: 'var(--foreground)' }}>
                     <PackageCheck className="w-4 h-4 text-primary-600" /> Warehouse Receiving
                 </h1>
-                <p className="text-xs text-gray-500">Scan each box's tracking number. All boxes must be scanned before the return is marked as received.</p>
+                <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>Scan each box's tracking number. All boxes must be scanned before the return is marked as received.</p>
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+            <div className="flex gap-1 rounded-lg p-1 border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
                 {tabs.map(t => (
                     <button
                         key={t.key}
                         onClick={() => setTab(t.key)}
                         className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                            tab === t.key ? 'bg-white text-primary-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                            tab === t.key ? 'shadow-sm' : ''
                         }`}
+                        style={tab === t.key ? { backgroundColor: 'var(--surface-container-lowest)', color: 'var(--primary)' } : { color: 'var(--on-surface-variant)' }}
                     >
                         <t.icon className="w-3.5 h-3.5" />{t.label}
                     </button>
@@ -223,9 +224,9 @@ export default function WarehouseReceivingPage() {
             {tab === 'scan' && (
                 <div className="space-y-3">
                     {/* Scanner: camera (same modal as return add-items) or USB / keyboard */}
-                    <div className="bg-white rounded-lg shadow px-4 py-3 space-y-2">
+                    <div className="rounded-lg shadow px-4 py-3 space-y-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         <div className="flex items-center justify-between gap-2 flex-wrap">
-                            <label className="block text-xs font-medium text-gray-700">
+                            <label className="block text-xs font-medium" style={{ color: 'var(--on-surface)' }}>
                                 <Truck className="w-3.5 h-3.5 inline mr-1" />
                                 {scanProgress && !scanProgress.allScanned
                                     ? `Next box (${scanProgress.scannedCount} of ${scanProgress.totalPackages} scanned)`
@@ -243,9 +244,10 @@ export default function WarehouseReceivingPage() {
                                         onClick={() => setReceiveScanMode(key)}
                                         className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium transition-colors ${
                                             receiveScanMode === key
-                                                ? 'bg-primary-100 text-primary-700 ring-1 ring-primary-300'
-                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                ? ''
+                                                : ''
                                         }`}
+                                        style={receiveScanMode === key ? { backgroundColor: 'var(--primary-container)', color: 'var(--on-primary-container)', boxShadow: `0 0 0 1px var(--outline-variant)` } : { backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface-variant)' }}
                                     >
                                         <Icon className="w-3 h-3" /> {label}
                                     </button>
@@ -259,21 +261,22 @@ export default function WarehouseReceivingPage() {
                                     type="button"
                                     onClick={() => setCameraOpen(true)}
                                     disabled={isActionLoading || (scanProgress?.allScanned ?? false)}
-                                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-dashed border-primary-300 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-dashed rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface)' }}
                                 >
                                     {isActionLoading ? (
                                         <>
-                                            <Loader2 className="w-4 h-4 animate-spin text-primary-600" />
-                                            <span className="text-xs font-medium text-primary-700">Processing…</span>
+                                            <Loader2 className="w-4 h-4 animate-spin" style={{ color: 'var(--primary)' }} />
+                                            <span className="text-xs font-medium" style={{ color: 'var(--primary)' }}>Processing…</span>
                                         </>
                                     ) : (
                                         <>
-                                            <Camera className="w-4 h-4 text-primary-600" />
-                                            <span className="text-xs font-semibold text-primary-800">Open camera scanner</span>
+                                            <Camera className="w-4 h-4" style={{ color: 'var(--primary)' }} />
+                                            <span className="text-xs font-semibold" style={{ color: 'var(--foreground)' }}>Open camera scanner</span>
                                         </>
                                     )}
                                 </button>
-                                <p className="text-[10px] text-gray-400 mt-1">
+                                <p className="text-[10px] mt-1" style={{ color: 'var(--on-surface-variant)' }}>
                                     Scan the FedEx/UPS barcode on the shipping label (same scanner as return add-items).
                                 </p>
                             </div>
@@ -282,7 +285,7 @@ export default function WarehouseReceivingPage() {
                         {receiveScanMode === 'input' && (
                             <div className="flex gap-2">
                                 <div className="relative flex-1">
-                                    <ScanLine className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <ScanLine className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--outline)' }} />
                                     <input
                                         ref={inputRef}
                                         type="text"
@@ -293,7 +296,8 @@ export default function WarehouseReceivingPage() {
                                             ? 'Scan next box tracking number…'
                                             : 'USB wedge: scan barcode — or type — then Enter'
                                         }
-                                        className="w-full pl-9 pr-3 py-2 text-sm border-2 border-primary-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-primary-50 font-mono"
+                                        className="w-full pl-9 pr-3 py-2 text-sm border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-mono"
+                                        style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                                         autoFocus
                                         disabled={isActionLoading || (scanProgress?.allScanned ?? false)}
                                     />
@@ -323,7 +327,7 @@ export default function WarehouseReceivingPage() {
                         )}
 
                         {receiveScanMode === 'input' && (
-                            <p className="text-[10px] text-gray-400">
+                            <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>
                                 USB or Bluetooth handheld scanner types into the field and sends Enter; or type the tracking number and press Enter / Scan.
                             </p>
                         )}
@@ -335,34 +339,32 @@ export default function WarehouseReceivingPage() {
 
                     {/* Error */}
                     {scanError && (
-                        <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-2.5 flex items-start gap-2.5">
-                            <XCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                        <div className="border rounded-lg px-4 py-2.5 flex items-start gap-2.5" style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
+                            <XCircle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--error)' }} />
                             <div>
-                                <p className="text-xs font-medium text-red-800">Could not scan box</p>
-                                <p className="text-xs text-red-600">{scanError}</p>
+                                <p className="text-xs font-medium" style={{ color: 'var(--on-error-container)' }}>Could not scan box</p>
+                                <p className="text-xs" style={{ color: 'var(--on-error-container)' }}>{scanError}</p>
                             </div>
                         </div>
                     )}
 
                     {/* Scan Progress Card */}
                     {scannedReturn && scanProgress && (
-                        <div className={`border-2 rounded-lg overflow-hidden ${
-                            scanProgress.allScanned
-                                ? 'bg-green-50 border-green-300'
-                                : 'bg-blue-50 border-blue-300'
-                        }`}>
+                        <div
+                            className="border-2 rounded-lg overflow-hidden"
+                            style={{
+                                backgroundColor: scanProgress.allScanned ? 'var(--secondary-container)' : 'var(--primary-container)',
+                                borderColor: 'var(--outline-variant)',
+                            }}
+                        >
                             {/* Header */}
-                            <div className={`px-4 py-2 flex items-center justify-between ${
-                                scanProgress.allScanned ? 'bg-green-100' : 'bg-blue-100'
-                            }`}>
+                            <div className="px-4 py-2 flex items-center justify-between" style={{ backgroundColor: 'var(--surface-container-low)' }}>
                                 <div className="flex items-center gap-2">
                                     {scanProgress.allScanned
-                                        ? <CheckCircle className="w-4 h-4 text-green-600" />
-                                        : <Box className="w-4 h-4 text-blue-600" />
+                                        ? <CheckCircle className="w-4 h-4" style={{ color: 'var(--secondary)' }} />
+                                        : <Box className="w-4 h-4" style={{ color: 'var(--primary)' }} />
                                     }
-                                    <h3 className={`text-sm font-semibold ${
-                                        scanProgress.allScanned ? 'text-green-800' : 'text-blue-800'
-                                    }`}>
+                                    <h3 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
                                         {scanProgress.allScanned
                                             ? 'All Boxes Scanned — Return Received!'
                                             : `Scanning in Progress — ${scanProgress.scannedCount} of ${scanProgress.totalPackages} boxes`
@@ -384,7 +386,7 @@ export default function WarehouseReceivingPage() {
                                         { label: 'Pharmacy', value: scannedReturn.pharmacyName },
                                         { label: 'Total Items', value: scannedReturn.totalItems },
                                         { label: 'Box Count', value: scannedReturn.boxCount ?? scanProgress.totalPackages },
-                                        { label: 'Returnable Value', value: <span className="text-green-700">${Number(scannedReturn.totalReturnableValue || 0).toFixed(2)}</span> },
+                                        { label: 'Returnable Value', value: <span style={{ color: 'var(--secondary)' }}>${Number(scannedReturn.totalReturnableValue || 0).toFixed(2)}</span> },
                                         { label: 'Status', value: (
                                             <Badge variant={scanProgress.allScanned ? 'success' : 'warning'}>
                                                 <span className="text-[10px]">{scanProgress.allScanned ? 'Received' : 'Scanning'}</span>
@@ -392,24 +394,25 @@ export default function WarehouseReceivingPage() {
                                         )},
                                     ].map(({ label, value }) => (
                                         <div key={label}>
-                                            <p className="text-[10px] text-gray-500">{label}</p>
-                                            <p className="text-xs font-medium text-gray-900 mt-0.5">{value}</p>
+                                            <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>{label}</p>
+                                            <p className="text-xs font-medium mt-0.5" style={{ color: 'var(--foreground)' }}>{value}</p>
                                         </div>
                                     ))}
                                 </div>
 
                                 {/* Progress bar */}
                                 <div>
-                                    <div className="flex justify-between text-[10px] text-gray-600 mb-1">
+                                    <div className="flex justify-between text-[10px] mb-1" style={{ color: 'var(--on-surface-variant)' }}>
                                         <span>Scan progress</span>
                                         <span>{scanProgress.scannedCount} / {scanProgress.totalPackages}</span>
                                     </div>
-                                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div className="w-full rounded-full h-2.5" style={{ backgroundColor: 'var(--surface-container-low)' }}>
                                         <div
-                                            className={`h-2.5 rounded-full transition-all duration-500 ${
-                                                scanProgress.allScanned ? 'bg-green-500' : 'bg-blue-500'
-                                            }`}
-                                            style={{ width: `${(scanProgress.scannedCount / scanProgress.totalPackages) * 100}%` }}
+                                            className="h-2.5 rounded-full transition-all duration-500"
+                                            style={{
+                                                backgroundColor: scanProgress.allScanned ? 'var(--secondary)' : 'var(--primary)',
+                                                width: `${(scanProgress.scannedCount / scanProgress.totalPackages) * 100}%`,
+                                            }}
                                         />
                                     </div>
                                 </div>
@@ -417,7 +420,7 @@ export default function WarehouseReceivingPage() {
                                 {/* Package list with scan status */}
                                 {allPackageTrackingNumbers.length > 0 && (
                                     <div>
-                                        <p className="text-[10px] font-semibold text-gray-600 uppercase mb-1.5">Package Tracking Numbers</p>
+                                        <p className="text-[10px] font-semibold uppercase mb-1.5" style={{ color: 'var(--on-surface-variant)' }}>Package Tracking Numbers</p>
                                         <div className="space-y-1">
                                             {allPackageTrackingNumbers.map((num, idx) => {
                                                 const isScanned = scanState.scannedNumbers.some(
@@ -426,23 +429,23 @@ export default function WarehouseReceivingPage() {
                                                 return (
                                                     <div
                                                         key={idx}
-                                                        className={`flex items-center justify-between px-3 py-1.5 rounded-md border ${
-                                                            isScanned
-                                                                ? 'bg-green-50 border-green-200'
-                                                                : 'bg-white border-gray-200'
-                                                        }`}
+                                                        className="flex items-center justify-between px-3 py-1.5 rounded-md border"
+                                                        style={{
+                                                            backgroundColor: isScanned ? 'var(--secondary-container)' : 'var(--surface-container-lowest)',
+                                                            borderColor: 'var(--outline-variant)',
+                                                        }}
                                                     >
                                                         <div className="flex items-center gap-2">
-                                                            <span className="text-[10px] text-gray-500 w-16">Box {idx + 1}</span>
-                                                            <span className="font-mono text-xs font-medium text-gray-900">{num}</span>
+                                                            <span className="text-[10px] w-16" style={{ color: 'var(--on-surface-variant)' }}>Box {idx + 1}</span>
+                                                            <span className="font-mono text-xs font-medium" style={{ color: 'var(--foreground)' }}>{num}</span>
                                                         </div>
                                                         {isScanned ? (
-                                                            <div className="flex items-center gap-1 text-green-600">
+                                                            <div className="flex items-center gap-1" style={{ color: 'var(--secondary)' }}>
                                                                 <CheckCircle className="w-3.5 h-3.5" />
                                                                 <span className="text-[10px] font-medium">Scanned</span>
                                                             </div>
                                                         ) : (
-                                                            <div className="flex items-center gap-1 text-gray-400">
+                                                            <div className="flex items-center gap-1" style={{ color: 'var(--outline)' }}>
                                                                 <Clock className="w-3.5 h-3.5" />
                                                                 <span className="text-[10px] font-medium">Waiting</span>
                                                             </div>
@@ -456,11 +459,7 @@ export default function WarehouseReceivingPage() {
 
                                 {/* Info message */}
                                 {scanMessage && (
-                                    <div className={`flex items-center gap-2 px-3 py-2 rounded text-xs ${
-                                        scanProgress.allScanned
-                                            ? 'bg-green-100 text-green-800'
-                                            : 'bg-blue-100 text-blue-800'
-                                    }`}>
+                                    <div className="flex items-center gap-2 px-3 py-2 rounded text-xs border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)', color: 'var(--on-surface)' }}>
                                         {scanProgress.allScanned
                                             ? <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" />
                                             : <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
@@ -470,7 +469,7 @@ export default function WarehouseReceivingPage() {
                                 )}
 
                                 {/* Actions */}
-                                <div className="flex gap-2 pt-2 border-t border-gray-200">
+                                <div className="flex gap-2 pt-2 border-t" style={{ borderColor: 'var(--outline-variant)' }}>
                                     {scanProgress.allScanned && (
                                         <Button variant="primary" size="sm" onClick={() => router.push(`/warehouse/verification/${scannedReturn.id}`)}>
                                             <ArrowRight className="w-3.5 h-3.5 mr-1" />Start Verification
@@ -490,15 +489,16 @@ export default function WarehouseReceivingPage() {
             {/* ── Tab: Pending ────────────────────────────── */}
             {tab === 'pending' && (
                 <div className="space-y-2">
-                    <div className="bg-white rounded-lg shadow px-3 py-2">
+                    <div className="rounded-lg shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         <div className="relative">
-                            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--outline)' }} />
                             <input
                                 type="text"
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
                                 placeholder="Search by license plate, tracking, or pharmacy..."
-                                className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                className="w-full pl-8 pr-3 py-1.5 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}
                             />
                         </div>
                     </div>
@@ -506,15 +506,15 @@ export default function WarehouseReceivingPage() {
                     {isLoading ? (
                         <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 animate-spin text-primary-600" /></div>
                     ) : pendingReturns.length === 0 ? (
-                        <div className="bg-white rounded-lg shadow p-10 text-center">
-                            <Package className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-                            <p className="text-xs text-gray-500">No finalized returns awaiting check-in</p>
+                        <div className="rounded-lg shadow p-10 text-center border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                            <Package className="w-10 h-10 mx-auto mb-2" style={{ color: 'var(--outline-variant)' }} />
+                            <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>No finalized returns awaiting check-in</p>
                         </div>
                     ) : (
-                        <div className="bg-white rounded-lg shadow overflow-hidden">
+                        <div className="rounded-lg shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                             <table className="w-full">
                                 <thead>
-                                    <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                    <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
                                         <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">License Plate</th>
                                         <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Pharmacy</th>
                                         <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">FedEx Tracking</th>
@@ -524,7 +524,7 @@ export default function WarehouseReceivingPage() {
                                         <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Finalized</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-100">
+                                <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                     {pendingReturns.map(r => {
                                         const totalPkgs = r.packageTracking && typeof r.packageTracking === 'object'
                                             ? Object.keys(r.packageTracking).length
@@ -535,9 +535,9 @@ export default function WarehouseReceivingPage() {
                                         const fedexCopyKey = `${r.id}:fedex`;
                                         const fedexJustCopied = copiedTrackingKey === fedexCopyKey;
                                         return (
-                                            <tr key={r.id} className="odd:bg-white even:bg-gray-50/40 hover:bg-gray-50">
-                                                <td className="px-4 py-3 text-sm font-mono font-semibold text-gray-900">{r.licensePlate}</td>
-                                                <td className="px-4 py-3 text-sm text-gray-700">{r.pharmacyName}</td>
+                                            <tr key={r.id} className="hover:bg-primary-50/40" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
+                                                <td className="px-4 py-3 text-sm font-mono font-semibold" style={{ color: 'var(--foreground)' }}>{r.licensePlate}</td>
+                                                <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{r.pharmacyName}</td>
                                                 <td className="px-4 py-3">
                                                     {r.packageTracking && Object.keys(r.packageTracking).length > 0 ? (
                                                         <div className="flex flex-col gap-0.5">
@@ -546,15 +546,16 @@ export default function WarehouseReceivingPage() {
                                                                 const justCopied = copiedTrackingKey === ck;
                                                                 return (
                                                                 <div key={i} className="flex items-center gap-1 group/tn">
-                                                                    <span className="text-[11px] font-mono text-gray-600 leading-tight">{tn}</span>
+                                                                    <span className="text-[11px] font-mono leading-tight" style={{ color: 'var(--on-surface-variant)' }}>{tn}</span>
                                                                     <button
                                                                         type="button"
                                                                         onClick={() => copyTrackingNumber(String(tn), ck)}
                                                                         className={`p-0.5 rounded transition-all ${
                                                                             justCopied
-                                                                                ? 'opacity-100 text-green-600 bg-green-50'
-                                                                                : 'opacity-0 group-hover/tn:opacity-100 text-gray-400 hover:text-gray-700 hover:bg-gray-100'
+                                                                                ? 'opacity-100'
+                                                                                : 'opacity-0 group-hover/tn:opacity-100'
                                                                         }`}
+                                                                        style={justCopied ? { color: 'var(--secondary)', backgroundColor: 'var(--secondary-container)' } : { color: 'var(--outline)' }}
                                                                         title={justCopied ? 'Copied' : 'Copy tracking number'}
                                                                     >
                                                                         {justCopied ? (
@@ -569,16 +570,17 @@ export default function WarehouseReceivingPage() {
                                                         </div>
                                                     ) : (
                                                         <div className="flex items-center gap-1 group/tn">
-                                                            <span className="text-[11px] font-mono text-gray-600">{r.fedexTracking || '—'}</span>
+                                                            <span className="text-[11px] font-mono" style={{ color: 'var(--on-surface-variant)' }}>{r.fedexTracking || '—'}</span>
                                                             {r.fedexTracking && (
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => copyTrackingNumber(r.fedexTracking!, fedexCopyKey)}
                                                                     className={`p-0.5 rounded transition-all ${
                                                                         fedexJustCopied
-                                                                            ? 'opacity-100 text-green-600 bg-green-50'
-                                                                            : 'opacity-0 group-hover/tn:opacity-100 text-gray-400 hover:text-gray-700 hover:bg-gray-100'
+                                                                            ? 'opacity-100'
+                                                                            : 'opacity-0 group-hover/tn:opacity-100'
                                                                     }`}
+                                                                    style={fedexJustCopied ? { color: 'var(--secondary)', backgroundColor: 'var(--secondary-container)' } : { color: 'var(--outline)' }}
                                                                     title={fedexJustCopied ? 'Copied' : 'Copy tracking number'}
                                                                 >
                                                                     {fedexJustCopied ? (
@@ -591,8 +593,8 @@ export default function WarehouseReceivingPage() {
                                                         </div>
                                                     )}
                                                 </td>
-                                                <td className="px-4 py-3 text-sm text-center text-gray-900">{r.totalItems}</td>
-                                                <td className="px-4 py-3 text-sm text-center text-gray-900">{r.boxCount ?? '—'}</td>
+                                                <td className="px-4 py-3 text-sm text-center" style={{ color: 'var(--foreground)' }}>{r.totalItems}</td>
+                                                <td className="px-4 py-3 text-sm text-center" style={{ color: 'var(--foreground)' }}>{r.boxCount ?? '—'}</td>
                                                 <td className="px-4 py-3 text-center">
                                                     {scannedPkgs > 0 ? (
                                                         <Badge variant="warning">
@@ -604,14 +606,14 @@ export default function WarehouseReceivingPage() {
                                                         </Badge>
                                                     )}
                                                 </td>
-                                                <td className="px-4 py-3 text-sm text-gray-500">{r.finalizedAt ? formatDate(r.finalizedAt) : '—'}</td>
+                                                <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{r.finalizedAt ? formatDate(r.finalizedAt) : '—'}</td>
                                             </tr>
                                         );
                                     })}
                                 </tbody>
                             </table>
                             {pendingPagination && pendingPagination.totalPages > 1 && (
-                                <div className="flex justify-between items-center px-3 py-2 border-t bg-gray-50 text-[10px] text-gray-500">
+                                <div className="flex justify-between items-center px-3 py-2 border-t text-[10px]" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface-variant)' }}>
                                     <span>Page {pendingPagination.page} of {pendingPagination.totalPages} ({pendingPagination.total} total)</span>
                                 </div>
                             )}
@@ -623,28 +625,30 @@ export default function WarehouseReceivingPage() {
             {/* ── Tab: Received ───────────────────────────── */}
             {tab === 'received' && (
                 <div className="space-y-2">
-                    <div className="bg-white rounded-lg shadow px-3 py-2 space-y-2">
+                    <div className="rounded-lg shadow px-3 py-2 space-y-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         <div className="relative">
-                            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--outline)' }} />
                             <input
                                 type="text"
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
                                 placeholder="Search by license plate, tracking, or pharmacy..."
-                                className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                className="w-full pl-8 pr-3 py-1.5 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}
                             />
                         </div>
                         
                         {/* Verification Status Filter */}
                         <div className="flex items-center gap-1">
-                            <span className="text-[10px] font-medium text-gray-500 mr-2">Filter:</span>
+                            <span className="text-[10px] font-medium mr-2" style={{ color: 'var(--on-surface-variant)' }}>Filter:</span>
                             <button
                                 onClick={() => setVerificationFilter('')}
                                 className={`px-2 py-1 text-[10px] rounded transition-colors ${
                                     verificationFilter === '' 
-                                        ? 'bg-primary-100 text-primary-800 border border-primary-300' 
-                                        : 'bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200'
+                                        ? '' 
+                                        : ''
                                 }`}
+                                style={verificationFilter === '' ? { backgroundColor: 'var(--primary-container)', color: 'var(--on-primary-container)', borderColor: 'var(--outline-variant)' } : { backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface-variant)', borderColor: 'var(--outline-variant)' }}
                             >
                                 All Returns
                             </button>
@@ -652,9 +656,10 @@ export default function WarehouseReceivingPage() {
                                 onClick={() => setVerificationFilter('unverified')}
                                 className={`px-2 py-1 text-[10px] rounded transition-colors ${
                                     verificationFilter === 'unverified' 
-                                        ? 'bg-orange-100 text-orange-800 border border-orange-300' 
-                                        : 'bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200'
+                                        ? '' 
+                                        : ''
                                 }`}
+                                style={verificationFilter === 'unverified' ? { backgroundColor: 'var(--tertiary-fixed)', color: 'var(--on-tertiary-container)', borderColor: 'var(--outline-variant)' } : { backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface-variant)', borderColor: 'var(--outline-variant)' }}
                             >
                                 Needs Verification
                             </button>
@@ -662,9 +667,10 @@ export default function WarehouseReceivingPage() {
                                 onClick={() => setVerificationFilter('verified')}
                                 className={`px-2 py-1 text-[10px] rounded transition-colors ${
                                     verificationFilter === 'verified' 
-                                        ? 'bg-green-100 text-green-800 border border-green-300' 
-                                        : 'bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200'
+                                        ? '' 
+                                        : ''
                                 }`}
+                                style={verificationFilter === 'verified' ? { backgroundColor: 'var(--secondary-container)', color: 'var(--on-secondary-container)', borderColor: 'var(--outline-variant)' } : { backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface-variant)', borderColor: 'var(--outline-variant)' }}
                             >
                                 Verified
                             </button>
@@ -674,19 +680,19 @@ export default function WarehouseReceivingPage() {
                     {isLoading ? (
                         <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 animate-spin text-primary-600" /></div>
                     ) : receivedReturns.length === 0 ? (
-                        <div className="bg-white rounded-lg shadow p-10 text-center">
-                            <CheckCircle className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-                            <p className="text-xs text-gray-500">
+                        <div className="rounded-lg shadow p-10 text-center border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                            <CheckCircle className="w-10 h-10 mx-auto mb-2" style={{ color: 'var(--outline-variant)' }} />
+                            <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>
                                 {verificationFilter === 'verified' ? 'No verified returns found' :
                                  verificationFilter === 'unverified' ? 'No returns awaiting verification' :
                                  'No received returns found'}
                             </p>
                         </div>
                     ) : (
-                        <div className="bg-white rounded-lg shadow overflow-hidden">
+                        <div className="rounded-lg shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                             <table className="w-full">
                                 <thead>
-                                    <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                    <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
                                         <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">License Plate</th>
                                         <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Pharmacy</th>
                                         <th className="text-center px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Items</th>
@@ -695,13 +701,13 @@ export default function WarehouseReceivingPage() {
                                         <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-100">
+                                <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                     {receivedReturns.map(r => (
-                                        <tr key={r.id} className="odd:bg-white even:bg-gray-50/40 hover:bg-gray-50">
-                                            <td className="px-4 py-3 text-sm font-mono font-semibold text-gray-900">{r.licensePlate}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-700">{r.pharmacyName}</td>
-                                            <td className="px-4 py-3 text-sm text-center text-gray-900">{r.totalItems}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-500">{r.receivedInWarehouseDate ? formatDateTime(r.receivedInWarehouseDate) : '—'}</td>
+                                        <tr key={r.id} className="hover:bg-primary-50/40" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
+                                            <td className="px-4 py-3 text-sm font-mono font-semibold" style={{ color: 'var(--foreground)' }}>{r.licensePlate}</td>
+                                            <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{r.pharmacyName}</td>
+                                            <td className="px-4 py-3 text-sm text-center" style={{ color: 'var(--foreground)' }}>{r.totalItems}</td>
+                                            <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{r.receivedInWarehouseDate ? formatDateTime(r.receivedInWarehouseDate) : '—'}</td>
                                             <td className="px-4 py-3 text-center">
                                                 {r.verifiedIntegrity ? (
                                                     <Badge variant="success"><span className="text-[10px]">Verified</span></Badge>
@@ -714,7 +720,8 @@ export default function WarehouseReceivingPage() {
                                                     <button
                                                         type="button"
                                                         onClick={() => router.push(`/warehouse/returns/${r.id}`)}
-                                                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap"
+                                                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium border transition-colors whitespace-nowrap hover:bg-primary-50/40"
+                                                        style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}
                                                     >
                                                         View <ArrowRight className="w-3 h-3" />
                                                     </button>
@@ -733,7 +740,7 @@ export default function WarehouseReceivingPage() {
                                 </tbody>
                             </table>
                             {receivedPagination && receivedPagination.totalPages > 1 && (
-                                <div className="flex justify-between items-center px-3 py-2 border-t bg-gray-50 text-[10px] text-gray-500">
+                                <div className="flex justify-between items-center px-3 py-2 border-t text-[10px]" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface-variant)' }}>
                                     <span>Page {receivedPagination.page} of {receivedPagination.totalPages} ({receivedPagination.total} total)</span>
                                 </div>
                             )}

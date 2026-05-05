@@ -1,24 +1,76 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Nordic Healthcare — exact palette from DESIGN.md */
+  --background: #fcf9f8;
+  --foreground: #1c1b1b;
 
-  --primary-50: #eef2ff;
-  --primary-100: #e0e7ff;
-  --primary-200: #c7d2fe;
-  --primary-300: #a5b4fc;
-  --primary-400: #818cf8;
-  --primary-500: #6366f1;
-  --primary-600: #4f46e5;
-  --primary-700: #4338ca;
-  --primary-800: #3730a3;
-  --primary-900: #312e81;
+  --surface: #fcf9f8;
+  --surface-dim: #dcd9d9;
+  --surface-bright: #fcf9f8;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f6f3f2;
+  --surface-container: #f0edec;
+  --surface-container-high: #ebe7e7;
+  --surface-container-highest: #e5e2e1;
+  --surface-variant: #e5e2e1;
 
-  --sidebar-bg: #1e293b;
-  --sidebar-text: #cbd5e1;
-  --sidebar-hover: #334155;
-  --sidebar-active: #818cf8;
+  --on-surface: #1c1b1b;
+  --on-surface-variant: #434847;
+  --inverse-surface: #313030;
+  --inverse-on-surface: #f3f0ef;
+  --outline: #747878;
+  --outline-variant: #c3c7c7;
+  --surface-tint: #5a5f5f;
+
+  --primary: #171c1c;
+  --on-primary: #ffffff;
+  --primary-container: #2c3131;
+  --on-primary-container: #949998;
+  --inverse-primary: #c3c7c7;
+
+  --secondary: #516257;
+  --on-secondary: #ffffff;
+  --secondary-container: #d1e4d5;
+  --on-secondary-container: #55675b;
+
+  --tertiary: #281801;
+  --on-tertiary: #ffffff;
+  --tertiary-container: #3f2d11;
+  --on-tertiary-container: #af9470;
+
+  /*
+   * Fixed tints (used by some pages as subtle highlights).
+   * These weren't in DESIGN.md explicitly, but we derive them as light tints
+   * from the core tokens to keep page styles consistent.
+   */
+  --primary-fixed: color-mix(in srgb, var(--primary) 12%, var(--surface-container-lowest));
+  --tertiary-fixed: color-mix(in srgb, var(--tertiary) 12%, var(--surface-container-lowest));
+
+  --error: #ba1a1a;
+  --on-error: #ffffff;
+  --error-container: #ffdad6;
+  --on-error-container: #93000a;
+
+  /*
+   * Tailwind `primary-*` scale used across MainAdmin pages.
+   * Keep the same names, but map them into the Nordic palette.
+   */
+  --primary-50: var(--surface-container-low);
+  --primary-100: var(--surface-container);
+  --primary-200: var(--surface-container-high);
+  --primary-300: var(--outline-variant);
+  --primary-400: var(--surface-tint);
+  --primary-500: var(--primary);
+  --primary-600: var(--primary-container);
+  --primary-700: var(--inverse-surface);
+  --primary-800: #1c1b1b; /* on-surface */
+  --primary-900: #0f1111; /* deeper charcoal for emphasis */
+
+  --sidebar-bg: var(--primary);
+  --sidebar-text: var(--inverse-on-surface);
+  --sidebar-hover: var(--primary-container);
+  --sidebar-active: var(--secondary);
 }
 
 @theme inline {
@@ -41,8 +93,8 @@
 }
 
 body {
-  background: #f3f4f6;
-  color: #171717;
+  background: var(--background);
+  color: var(--foreground);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;

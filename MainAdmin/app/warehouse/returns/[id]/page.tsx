@@ -66,8 +66,8 @@ function ReturnTransactionStoreAndProcessorDl({
 }) {
     const emerald = variant === 'emerald';
     const dlCls = emerald ? 'space-y-2.5' : 'space-y-1.5';
-    const labelCls = emerald ? 'text-xs text-emerald-700 font-medium' : 'text-[11px] text-gray-500';
-    const valueCls = emerald ? 'text-xs font-bold text-gray-800' : 'text-[11px] font-medium text-gray-900';
+    const labelCls = emerald ? 'text-xs font-medium' : 'text-[11px]';
+    const valueCls = emerald ? 'text-xs font-bold' : 'text-[11px] font-medium';
     const rowCls = emerald ? 'flex justify-between items-center gap-2' : 'flex justify-between gap-2';
     const valueWrap = `${valueCls} text-right min-w-0 break-words max-w-[65%]`;
 
@@ -79,43 +79,43 @@ function ReturnTransactionStoreAndProcessorDl({
     return (
         <dl className={dlCls}>
             <div className={rowCls}>
-                <dt className={`${labelCls} shrink-0`}>Store Name</dt>
-                <dd className={valueWrap}>{tx.pharmacyName || '—'}</dd>
+                <dt className={`${labelCls} shrink-0`} style={{ color: 'var(--on-surface-variant)' }}>Store Name</dt>
+                <dd className={valueWrap} style={{ color: 'var(--foreground)' }}>{tx.pharmacyName || '—'}</dd>
             </div>
             {tx.storeNumber ? (
                 <div className={rowCls}>
-                    <dt className={`${labelCls} shrink-0`}>Store #</dt>
-                    <dd className={`${valueCls} text-right`}>{tx.storeNumber}</dd>
+                    <dt className={`${labelCls} shrink-0`} style={{ color: 'var(--on-surface-variant)' }}>Store #</dt>
+                    <dd className={`${valueCls} text-right`} style={{ color: 'var(--foreground)' }}>{tx.storeNumber}</dd>
                 </div>
             ) : null}
             {tx.pharmacyStreetAddress ? (
                 <div className={emerald ? 'flex justify-between items-start gap-2' : 'flex justify-between gap-2 items-start'}>
-                    <dt className={`${labelCls} shrink-0`}>Address</dt>
-                    <dd className={valueWrap}>{tx.pharmacyStreetAddress}</dd>
+                    <dt className={`${labelCls} shrink-0`} style={{ color: 'var(--on-surface-variant)' }}>Address</dt>
+                    <dd className={valueWrap} style={{ color: 'var(--foreground)' }}>{tx.pharmacyStreetAddress}</dd>
                 </div>
             ) : null}
             {cityState ? (
                 <div className={emerald ? 'flex justify-between items-start gap-2' : 'flex justify-between gap-2 items-start'}>
-                    <dt className={`${labelCls} shrink-0`}>City / State</dt>
-                    <dd className={valueWrap}>{cityState}</dd>
+                    <dt className={`${labelCls} shrink-0`} style={{ color: 'var(--on-surface-variant)' }}>City / State</dt>
+                    <dd className={valueWrap} style={{ color: 'var(--foreground)' }}>{cityState}</dd>
                 </div>
             ) : null}
             <div className={rowCls}>
-                <dt className={`${labelCls} shrink-0`}>Service Type</dt>
-                <dd className={`${valueCls} text-right min-w-0`}>{serviceLabel}</dd>
+                <dt className={`${labelCls} shrink-0`} style={{ color: 'var(--on-surface-variant)' }}>Service Type</dt>
+                <dd className={`${valueCls} text-right min-w-0`} style={{ color: 'var(--foreground)' }}>{serviceLabel}</dd>
             </div>
             {tx.pharmacyLastVisitDate ? (
                 <div className={rowCls}>
-                    <dt className={`${labelCls} shrink-0`}>Last Visit</dt>
-                    <dd className={`${valueCls} text-right`}>
+                    <dt className={`${labelCls} shrink-0`} style={{ color: 'var(--on-surface-variant)' }}>Last Visit</dt>
+                    <dd className={`${valueCls} text-right`} style={{ color: 'var(--foreground)' }}>
                         {new Date(tx.pharmacyLastVisitDate).toLocaleDateString()}
                     </dd>
                 </div>
             ) : null}
             <div className={rowCls}>
-                <dt className={`${labelCls} shrink-0`}>Processor</dt>
-                <dd className={`${valueCls} flex items-center gap-1 justify-end ${emerald ? 'font-semibold' : ''}`}>
-                    <UserCog className={emerald ? 'w-3.5 h-3.5 text-emerald-500 flex-shrink-0' : 'w-3 h-3 text-gray-400 flex-shrink-0'} />
+                <dt className={`${labelCls} shrink-0`} style={{ color: 'var(--on-surface-variant)' }}>Processor</dt>
+                <dd className={`${valueCls} flex items-center gap-1 justify-end ${emerald ? 'font-semibold' : ''}`} style={{ color: 'var(--foreground)' }}>
+                    <UserCog className={emerald ? 'w-3.5 h-3.5 flex-shrink-0' : 'w-3 h-3 flex-shrink-0'} style={{ color: emerald ? 'var(--secondary)' : 'var(--outline)' }} />
                     {tx.processorName || '—'}
                 </dd>
             </div>
@@ -123,23 +123,23 @@ function ReturnTransactionStoreAndProcessorDl({
             {/* Shipping Details */}
             {(tx.fedexTracking || tx.fedexPickupConfirmation || tx.fedexShipmentId) && (
                 <>
-                    <div className={`pt-2 border-t ${emerald ? 'border-emerald-200' : 'border-gray-100'}`} />
+                    <div className="pt-2 border-t" style={{ borderColor: 'var(--outline-variant)' }} />
                     {tx.fedexTracking && (
                         <div className={rowCls}>
-                            <dt className={`${labelCls} shrink-0`}>FedEx Tracking</dt>
-                            <dd className={`${valueCls} text-right font-mono`}>{tx.fedexTracking}</dd>
+                            <dt className={`${labelCls} shrink-0`} style={{ color: 'var(--on-surface-variant)' }}>FedEx Tracking</dt>
+                            <dd className={`${valueCls} text-right font-mono`} style={{ color: 'var(--foreground)' }}>{tx.fedexTracking}</dd>
                         </div>
                     )}
                     {tx.fedexPickupConfirmation && (
                         <div className={rowCls}>
-                            <dt className={`${labelCls} shrink-0`}>Pickup Confirmation</dt>
-                            <dd className={`${valueCls} text-right font-mono`}>{tx.fedexPickupConfirmation}</dd>
+                            <dt className={`${labelCls} shrink-0`} style={{ color: 'var(--on-surface-variant)' }}>Pickup Confirmation</dt>
+                            <dd className={`${valueCls} text-right font-mono`} style={{ color: 'var(--foreground)' }}>{tx.fedexPickupConfirmation}</dd>
                         </div>
                     )}
                     {tx.fedexShipmentId && (
                         <div className={rowCls}>
-                            <dt className={`${labelCls} shrink-0`}>Shipment ID</dt>
-                            <dd className={`${valueCls} text-right font-mono`}>{tx.fedexShipmentId}</dd>
+                            <dt className={`${labelCls} shrink-0`} style={{ color: 'var(--on-surface-variant)' }}>Shipment ID</dt>
+                            <dd className={`${valueCls} text-right font-mono`} style={{ color: 'var(--foreground)' }}>{tx.fedexShipmentId}</dd>
                         </div>
                     )}
                 </>
@@ -147,8 +147,8 @@ function ReturnTransactionStoreAndProcessorDl({
             
             {/* Package Tracking */}
             {tx.packageTracking && Object.keys(tx.packageTracking).length > 0 && (
-                <div className={`pt-2 border-t ${emerald ? 'border-emerald-200' : 'border-gray-100'}`}>
-                    <dt className={`${labelCls} mb-1`}>Package Tracking</dt>
+                <div className="pt-2 border-t" style={{ borderColor: 'var(--outline-variant)' }}>
+                    <dt className={`${labelCls} mb-1`} style={{ color: 'var(--on-surface-variant)' }}>Package Tracking</dt>
                     <dd className="space-y-1">
                         {Object.entries(tx.packageTracking)
                             .filter(([, v]) => v)
@@ -159,8 +159,8 @@ function ReturnTransactionStoreAndProcessorDl({
                                     : `Package ${key}`;
                                 return (
                                     <div key={key} className={`${rowCls} text-xs`}>
-                                        <span className={`${labelCls} capitalize`}>{displayKey}</span>
-                                        <span className={`${valueCls} font-mono`}>{val}</span>
+                                        <span className={`${labelCls} capitalize`} style={{ color: 'var(--on-surface-variant)' }}>{displayKey}</span>
+                                        <span className={`${valueCls} font-mono`} style={{ color: 'var(--foreground)' }}>{val}</span>
                                     </div>
                                 );
                             })
@@ -786,7 +786,7 @@ export default function ReturnDetailPage() {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-96">
-                <Loader2 className="w-10 h-10 animate-spin text-primary-600" />
+                <Loader2 className="w-10 h-10 animate-spin" style={{ color: 'var(--primary)' }} />
             </div>
         );
     }
@@ -794,12 +794,12 @@ export default function ReturnDetailPage() {
     if (error || !tx) {
         return (
             <div className="space-y-4">
-                <button onClick={handleBackNavigation} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800">
+                <button onClick={handleBackNavigation} className="flex items-center gap-2 text-sm" style={{ color: 'var(--on-surface-variant)' }}>
                     <ArrowLeft className="w-4 h-4" /> Back
                 </button>
-                <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-                    <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-3" />
-                    <p className="text-red-800 font-medium">{error || 'Return transaction not found.'}</p>
+                <div className="border rounded-lg p-6 text-center" style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
+                    <AlertCircle className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--error)' }} />
+                    <p className="font-medium" style={{ color: 'var(--on-error-container)' }}>{error || 'Return transaction not found.'}</p>
                     <Button variant="outline" className="mt-4" onClick={() => router.push('/warehouse/returns')}>Go Back</Button>
                 </div>
             </div>
@@ -814,12 +814,12 @@ export default function ReturnDetailPage() {
 
             {/* Lock Status Warning */}
             {isLocked && (
-                <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                <div className="border rounded-lg px-3 py-2" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}>
                     <div className="flex items-center gap-2">
-                        <Lock className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                        <Lock className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--tertiary)' }} />
                         <div>
-                            <p className="text-xs font-semibold text-amber-800">Partially Locked — Core data is frozen</p>
-                            <p className="text-[10px] text-amber-700">Item classification (status, destination, memo) and return notes can still be updated. Quantity, price, and other core fields are locked.</p>
+                            <p className="text-xs font-semibold" style={{ color: 'var(--on-tertiary-container)' }}>Partially Locked — Core data is frozen</p>
+                            <p className="text-[10px]" style={{ color: 'var(--on-tertiary-container)' }}>Item classification (status, destination, memo) and return notes can still be updated. Quantity, price, and other core fields are locked.</p>
                         </div>
                     </div>
                 </div>
@@ -828,17 +828,21 @@ export default function ReturnDetailPage() {
 
             {/* Back + Header */}
             <div>
-                <button onClick={handleBackNavigation} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 mb-1.5">
+                <button onClick={handleBackNavigation} className="flex items-center gap-1.5 text-xs mb-1.5" style={{ color: 'var(--on-surface-variant)' }}>
                     <ArrowLeft className="w-3.5 h-3.5" /> Back
                 </button>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                     <div className="flex items-center gap-2">
-                        <h1 className="text-base font-bold font-mono text-gray-900">{tx.licensePlate}</h1>
+                        <h1 className="text-base font-bold font-mono" style={{ color: 'var(--foreground)' }}>{tx.licensePlate}</h1>
                         <Badge variant={badge.variant}><span className="text-[10px]">{badge.label}</span></Badge>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                         {/* {canDoAction(tx, 'edit') && (
-                            <button onClick={() => setEditModal(true)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors">
+                            <button
+                                onClick={() => setEditModal(true)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border transition-colors hover:bg-primary-50/40"
+                                style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}
+                            >
                                 <Edit className="w-3 h-3" /> {isLocked ? 'Edit Notes' : 'Edit'}
                             </button>
                         )} */}
@@ -850,7 +854,7 @@ export default function ReturnDetailPage() {
                         )}
                         */}
                         {canDoAction(tx, 'resume') && canEdit && (
-                            <button onClick={() => checkActionWithToast('resume return', () => setActionModal('resume'))} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-green-100 text-green-800 border border-green-300 hover:bg-green-200 transition-colors">
+                            <button onClick={() => checkActionWithToast('resume return', () => setActionModal('resume'))} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border transition-colors hover:bg-primary-50/40" style={{ backgroundColor: 'var(--secondary-container)', color: 'var(--on-secondary-container)', borderColor: 'var(--outline-variant)' }}>
                                 <Play className="w-3 h-3" /> Resume
                             </button>
                         )}
@@ -860,7 +864,7 @@ export default function ReturnDetailPage() {
                             </button>
                         )}
                         {canDoAction(tx, 'finalize') && canEdit && (
-                            <button onClick={() => checkActionWithToast('finalize return', () => openFinalizeModal())} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-red-600 text-white hover:bg-red-700 transition-colors">
+                            <button onClick={() => checkActionWithToast('finalize return', () => openFinalizeModal())} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium text-white transition-colors" style={{ backgroundColor: 'var(--error)' }}>
                                 <Lock className="w-3 h-3" /> Finalize
                             </button>
                         )}
@@ -869,7 +873,8 @@ export default function ReturnDetailPage() {
                             <button
                                 onClick={printJobSheet}
                                 disabled={pdfLoading === 'job-sheet'}
-                                className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors disabled:opacity-50"
+                                className="inline-flex items-center px-3 py-1.5 text-sm font-medium border rounded-md shadow-sm transition-colors disabled:opacity-50 hover:bg-primary-50/40"
+                                style={{ color: 'var(--on-surface)', backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                                 title="Print job sheet with addresses and barcodes"
                             >
                                 {pdfLoading === 'job-sheet' ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <FileText className="w-4 h-4 mr-1" />}
@@ -877,12 +882,12 @@ export default function ReturnDetailPage() {
                             </button>
                         )}
                         {canDoAction(tx, 'delete') && canEdit && (
-                            <button onClick={() => checkActionWithToast('delete return', () => setDeleteModal(true))} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-red-100 text-red-800 border border-red-300 hover:bg-red-200 transition-colors">
+                            <button onClick={() => checkActionWithToast('delete return', () => setDeleteModal(true))} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border transition-colors hover:bg-primary-50/40" style={{ backgroundColor: 'var(--error-container)', color: 'var(--on-error-container)', borderColor: 'var(--outline-variant)' }}>
                                 <Trash2 className="w-3 h-3" /> Delete
                             </button>
                         )}
                         {canDoAction(tx, 'delete') && !canEdit && (
-                            <button disabled className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-gray-100 text-gray-400 border border-gray-300 cursor-not-allowed">
+                            <button disabled className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border cursor-not-allowed" style={{ backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface-variant)', borderColor: 'var(--outline-variant)' }}>
                                 <Lock className="w-3 h-3" /> Locked
                             </button>
                         )}
@@ -895,8 +900,8 @@ export default function ReturnDetailPage() {
                 /* Layout with Shipping & Processing: 2x2 grid */
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 {/* General Info */}
-                <div className="bg-white rounded-lg shadow px-4 py-3">
-                    <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <div className="rounded-lg shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                    <h2 className="text-[10px] font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: 'var(--on-surface-variant)' }}>
                         <ClipboardList className="w-3.5 h-3.5" /> General Information
                     </h2>
                     <dl className="space-y-1.5">
@@ -910,78 +915,79 @@ export default function ReturnDetailPage() {
                                 label: 'Batch Assignment', 
                                 value: (
                                     <div className="flex items-center gap-1">
-                                        <span className="text-[10px] text-blue-600 font-medium">Assigned</span>
+                                        <span className="text-[10px] font-medium" style={{ color: 'var(--primary)' }}>Assigned</span>
                                         <button
                                             onClick={() => handleUnassignFromBatch()}
-                                            className="text-[9px] text-red-600 hover:text-red-800 underline ml-1"
+                                            className="text-[9px] underline ml-1"
+                                            style={{ color: 'var(--error)' }}
                                             title="Remove from batch"
                                         >
                                             Remove
                                         </button>
                                     </div>
                                 )
-                            }] : [{ label: 'Batch Assignment', value: <span className="text-[10px] text-gray-400">Not assigned</span> }]),
+                            }] : [{ label: 'Batch Assignment', value: <span style={{ color: 'var(--on-surface-variant)' }}>Not assigned</span> }]),
                         ].map(({ label, value }) => (
                             <div key={label} className="flex justify-between">
-                                <dt className="text-[11px] text-gray-500">{label}</dt>
-                                <dd className="text-[11px] text-gray-900">{value}</dd>
+                                <dt className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>{label}</dt>
+                                <dd className="text-[11px]" style={{ color: 'var(--foreground)' }}>{value}</dd>
                             </div>
                         ))}
                         {tx.notes && (
-                            <div className="pt-1.5 border-t border-gray-100">
-                                <dt className="text-[11px] text-gray-500 mb-0.5">Notes</dt>
-                                <dd className="text-[11px] text-gray-700">{tx.notes}</dd>
+                            <div className="pt-1.5 border-t" style={{ borderColor: 'var(--outline-variant)' }}>
+                                <dt className="text-[11px] mb-0.5" style={{ color: 'var(--on-surface-variant)' }}>Notes</dt>
+                                <dd className="text-[11px]" style={{ color: 'var(--on-surface)' }}>{tx.notes}</dd>
                             </div>
                         )}
                     </dl>
                 </div>
 
                 {/* Store & Processor */}
-                <div className="bg-white rounded-lg shadow px-4 py-3">
-                    <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <div className="rounded-lg shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                    <h2 className="text-[10px] font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: 'var(--on-surface-variant)' }}>
                         <Building2 className="w-3.5 h-3.5" /> Store & Processor
                     </h2>
                     <ReturnTransactionStoreAndProcessorDl tx={tx} variant="plain" />
                 </div>
 
                 {/* Values */}
-                <div className="bg-white rounded-lg shadow px-4 py-3">
-                    <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <div className="rounded-lg shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                    <h2 className="text-[10px] font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: 'var(--on-surface-variant)' }}>
                         <Package className="w-3.5 h-3.5" /> Items & Values
                     </h2>
                     <dl className="space-y-1.5">
                         <div className="flex justify-between">
-                            <dt className="text-[11px] text-gray-500">Total Items</dt>
-                            <dd className="text-[11px] font-semibold text-gray-900">{nonWcReturnableAndTbdItemsCount}</dd>
+                            <dt className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>Total Items</dt>
+                            <dd className="text-[11px] font-semibold" style={{ color: 'var(--foreground)' }}>{nonWcReturnableAndTbdItemsCount}</dd>
                         </div>
                         <div className="flex justify-between">
-                            <dt className="text-[11px] text-gray-500">Returnable Value</dt>
-                            <dd className="text-[11px] font-semibold text-green-700">{formatCurrency(nonWcReturnableValue)}</dd>
+                            <dt className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>Returnable Value</dt>
+                            <dd className="text-[11px] font-semibold" style={{ color: 'var(--secondary)' }}>{formatCurrency(nonWcReturnableValue)}</dd>
                         </div>
                         {/* <div className="flex justify-between">
                             <dt className="text-[11px] text-gray-500">Non-Returnable Value</dt>
                             <dd className="text-[11px] font-semibold text-red-700">{formatCurrency(nonWcNonReturnableValue)}</dd>
                         </div> */}
-                        <div className="flex justify-between pt-1.5 border-t border-gray-100">
-                            <dt className="text-[11px] text-gray-500 font-medium">Total Value</dt>
-                            <dd className="text-[11px] font-bold text-gray-900">{formatCurrency(nonWcTotalValue)}</dd>
+                        <div className="flex justify-between pt-1.5 border-t" style={{ borderColor: 'var(--outline-variant)' }}>
+                            <dt className="text-[11px] font-medium" style={{ color: 'var(--on-surface-variant)' }}>Total Value</dt>
+                            <dd className="text-[11px] font-bold" style={{ color: 'var(--foreground)' }}>{formatCurrency(nonWcTotalValue)}</dd>
                         </div>
                     </dl>
                 </div>
 
                     {/* Shipping & Processing */}
-                    <div className="bg-white rounded-lg shadow px-4 py-3">
-                        <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <div className="rounded-lg shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                        <h2 className="text-[10px] font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: 'var(--on-surface-variant)' }}>
                             <Truck className="w-3.5 h-3.5" /> Shipping & Processing
                         </h2>
                         <dl className="space-y-1.5">
                             <div className="flex justify-between">
-                                <dt className="text-[11px] text-gray-500">FedEx Tracking</dt>
-                                <dd className="text-[11px] text-gray-900 font-mono">{tx.fedexTracking || '—'}</dd>
+                                <dt className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>FedEx Tracking</dt>
+                                <dd className="text-[11px] font-mono" style={{ color: 'var(--foreground)' }}>{tx.fedexTracking || '—'}</dd>
                             </div>
                             <div className="flex justify-between">
-                                <dt className="text-[11px] text-gray-500">Pickup Confirmation</dt>
-                                <dd className="text-[11px] text-gray-900">{tx.fedexPickupConfirmation || '—'}</dd>
+                                <dt className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>Pickup Confirmation</dt>
+                                <dd className="text-[11px]" style={{ color: 'var(--foreground)' }}>{tx.fedexPickupConfirmation || '—'}</dd>
                             </div>
                             {/* Commented out as requested:
                             <div className="flex justify-between">
@@ -995,8 +1001,8 @@ export default function ReturnDetailPage() {
                             */}
                             {tx.receivedInWarehouseDate && (
                                 <div className="flex justify-between">
-                                    <dt className="text-[11px] text-gray-500">Received in Warehouse</dt>
-                                    <dd className="text-[11px] text-gray-900">{formatDate(tx.receivedInWarehouseDate)}</dd>
+                                    <dt className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>Received in Warehouse</dt>
+                                    <dd className="text-[11px]" style={{ color: 'var(--foreground)' }}>{formatDate(tx.receivedInWarehouseDate)}</dd>
                                 </div>
                             )}
                             {/* Commented out as requested:
@@ -1007,31 +1013,32 @@ export default function ReturnDetailPage() {
                             */}
                         {tx.boxCount != null && (
                             <div className="flex justify-between">
-                                <dt className="text-[11px] text-gray-500">Box Count</dt>
-                                <dd className="text-[11px] text-gray-900 font-semibold">{tx.boxCount}</dd>
+                                <dt className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>Box Count</dt>
+                                <dd className="text-[11px] font-semibold" style={{ color: 'var(--foreground)' }}>{tx.boxCount}</dd>
                             </div>
                         )}
                         {tx.prpNumber && (
                             <div className="flex justify-between">
-                                <dt className="text-gray-500">PRP Number</dt>
-                                <dd className="text-gray-900 font-mono text-xs">{tx.prpNumber}</dd>
+                                <dt className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>PRP Number</dt>
+                                <dd className="font-mono text-xs" style={{ color: 'var(--foreground)' }}>{tx.prpNumber}</dd>
                             </div>
                         )}
                         {tx.fedexShipmentId && (
                             <div className="flex justify-between">
-                                <dt className="text-gray-500">Shipment ID</dt>
-                                <dd className="text-gray-900 font-mono text-xs">{tx.fedexShipmentId}</dd>
+                                <dt className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>Shipment ID</dt>
+                                <dd className="font-mono text-xs" style={{ color: 'var(--foreground)' }}>{tx.fedexShipmentId}</dd>
                             </div>
                         )}
                         {tx.packageTracking && Object.keys(tx.packageTracking).length > 0 && (
-                            <div className="pt-2 border-t border-gray-100">
-                                <dt className="text-gray-500 mb-1 flex items-center justify-between">
+                            <div className="pt-2 border-t" style={{ borderColor: 'var(--outline-variant)' }}>
+                                <dt className="mb-1 flex items-center justify-between" style={{ color: 'var(--on-surface-variant)' }}>
                                     <span>Package Tracking</span>
                                     <div className="flex items-center gap-1">
                                         <button
                                             onClick={printShippingLabels}
                                             disabled={pdfLoading === 'shipping-labels'}
-                                            className="flex items-center gap-1 px-2 py-1 bg-green-100 hover:bg-green-200 text-xs text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
+                                            className="flex items-center gap-1 px-2 py-1 text-xs rounded border transition-colors disabled:opacity-50 hover:bg-primary-50/40"
+                                            style={{ backgroundColor: 'var(--secondary-container)', color: 'var(--on-secondary-container)', borderColor: 'var(--outline-variant)' }}
                                             title="Print all shipping labels with addresses and barcodes"
                                         >
                                             {pdfLoading === 'shipping-labels' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
@@ -1045,13 +1052,14 @@ export default function ReturnDetailPage() {
                                         .filter(([, v]) => v)
                                         .map(([key, val], idx) => (
                                             <div key={key} className="flex justify-between items-center text-xs">
-                                                <span className="text-gray-500 capitalize">{key.replace(/([0-9]+)/, ' $1')}</span>
+                                                <span className="capitalize" style={{ color: 'var(--on-surface-variant)' }}>{key.replace(/([0-9]+)/, ' $1')}</span>
                                                 <div className="flex items-center gap-1.5">
-                                                    <span className="font-mono text-gray-900">{val}</span>
+                                                    <span className="font-mono" style={{ color: 'var(--foreground)' }}>{val}</span>
                                                     <button
                                                         onClick={() => printSingleLabel(idx + 1)}
                                                         disabled={pdfLoading === `shipping-label-${idx + 1}`}
-                                                        className="flex items-center gap-0.5 px-1.5 py-0.5 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
+                                                        className="flex items-center gap-0.5 px-1.5 py-0.5 rounded border transition-colors disabled:opacity-50 hover:bg-primary-50/40"
+                                                        style={{ backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface)', borderColor: 'var(--outline-variant)' }}
                                                         title={`Print shipping label for ${val}`}
                                                     >
                                                         {pdfLoading === `shipping-label-${idx + 1}` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
@@ -1065,8 +1073,8 @@ export default function ReturnDetailPage() {
                             </div>
                         )}
                         {tx.fedexLabels && Object.keys(tx.fedexLabels).length > 0 && (
-                            <div className="pt-2 border-t border-gray-100">
-                                <dt className="text-gray-500 mb-1 flex items-center gap-1"><Printer className="w-3.5 h-3.5" /> Shipping Labels</dt>
+                            <div className="pt-2 border-t" style={{ borderColor: 'var(--outline-variant)' }}>
+                                <dt className="mb-1 flex items-center gap-1" style={{ color: 'var(--on-surface-variant)' }}><Printer className="w-3.5 h-3.5" /> Shipping Labels</dt>
                                 <dd className="flex flex-wrap gap-2">
                                     {Object.keys(tx.fedexLabels).map((key) => {
                                         const num = key.replace('package', '');
@@ -1076,7 +1084,8 @@ export default function ReturnDetailPage() {
                                                 href={`${process.env.NEXT_PUBLIC_API_URL}/return-transactions/${tx.id}/labels/${num}/download`}
                                                 target="_blank"
                                                 rel="noreferrer"
-                                                className="flex items-center gap-1 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-xs text-gray-700 rounded border border-gray-200 transition-colors"
+                                                className="flex items-center gap-1 px-2 py-1 text-xs rounded border transition-colors hover:bg-primary-50/40"
+                                                style={{ backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface)', borderColor: 'var(--outline-variant)' }}
                                             >
                                                 <Download className="w-3 h-3" /> Label {num}
                                             </a>
@@ -1092,16 +1101,16 @@ export default function ReturnDetailPage() {
                 /* Layout without Shipping & Processing: 3 cards in one row */
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                     {/* General Information */}
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-sm border border-blue-100 px-5 py-4 hover:shadow-md transition-shadow">
-                        <h2 className="text-xs font-bold text-blue-800 uppercase tracking-wider mb-3 flex items-center gap-2">
-                            <div className="p-1.5 bg-blue-100 rounded-lg">
-                                <ClipboardList className="w-4 h-4 text-blue-600" />
+                    <div className="rounded-xl shadow-sm border px-5 py-4 hover:shadow-md transition-shadow" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                        <h2 className="text-xs font-bold uppercase tracking-wider mb-3 flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
+                            <div className="p-1.5 rounded-lg" style={{ backgroundColor: 'var(--primary-container)' }}>
+                                <ClipboardList className="w-4 h-4" style={{ color: 'var(--primary)' }} />
                             </div>
                             General Information
                         </h2>
                         <dl className="space-y-2.5">
                             {[
-                                { label: 'License Plate', value: <span className="font-mono font-bold text-gray-800">{tx.licensePlate}</span> },
+                                { label: 'License Plate', value: <span className="font-mono font-bold" style={{ color: 'var(--foreground)' }}>{tx.licensePlate}</span> },
                                 { label: 'Service Type', value: tx.serviceType.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) },
                                 { label: 'Created', value: formatDate(tx.createdAt) },
                                 { label: 'Last Updated', value: formatDate(tx.updatedAt) },
@@ -1110,37 +1119,38 @@ export default function ReturnDetailPage() {
                                     label: 'Batch Assignment', 
                                     value: (
                                         <div className="flex items-center gap-2">
-                                            <span className="text-xs text-blue-600 font-medium">Assigned to Batch</span>
+                                            <span className="text-xs font-medium" style={{ color: 'var(--primary)' }}>Assigned to Batch</span>
                                             <button
                                                 onClick={() => handleUnassignFromBatch()}
-                                                className="text-xs text-red-600 hover:text-red-800 underline"
+                                                className="text-xs underline"
+                                                style={{ color: 'var(--error)' }}
                                                 title="Remove from batch"
                                             >
                                                 Remove
                                             </button>
                                         </div>
                                     )
-                                }] : [{ label: 'Batch Assignment', value: <span className="text-xs text-gray-400">Not assigned</span> }]),
+                                }] : [{ label: 'Batch Assignment', value: <span style={{ color: 'var(--on-surface-variant)' }}>Not assigned</span> }]),
                             ].map(({ label, value }) => (
                                 <div key={label} className="flex justify-between items-center">
-                                    <dt className="text-xs text-blue-700 font-medium">{label}</dt>
-                                    <dd className="text-xs text-gray-800 font-semibold">{value}</dd>
+                                    <dt className="text-xs font-medium" style={{ color: 'var(--on-surface-variant)' }}>{label}</dt>
+                                    <dd className="text-xs font-semibold" style={{ color: 'var(--foreground)' }}>{value}</dd>
                                 </div>
                             ))}
                             {tx.notes && (
-                                <div className="pt-2 border-t border-blue-200">
-                                    <dt className="text-xs text-blue-700 font-medium mb-1">Notes</dt>
-                                    <dd className="text-xs text-gray-700 bg-white/60 rounded px-2 py-1">{tx.notes}</dd>
+                                <div className="pt-2 border-t" style={{ borderColor: 'var(--outline-variant)' }}>
+                                    <dt className="text-xs font-medium mb-1" style={{ color: 'var(--on-surface-variant)' }}>Notes</dt>
+                                    <dd className="text-xs rounded px-2 py-1 border" style={{ color: 'var(--on-surface)', backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>{tx.notes}</dd>
                                 </div>
                             )}
                         </dl>
                     </div>
 
                     {/* Store & Processor */}
-                    <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl shadow-sm border border-emerald-100 px-5 py-4 hover:shadow-md transition-shadow">
-                        <h2 className="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-3 flex items-center gap-2">
-                            <div className="p-1.5 bg-emerald-100 rounded-lg">
-                                <Building2 className="w-4 h-4 text-emerald-600" />
+                    <div className="rounded-xl shadow-sm border px-5 py-4 hover:shadow-md transition-shadow" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                        <h2 className="text-xs font-bold uppercase tracking-wider mb-3 flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
+                            <div className="p-1.5 rounded-lg" style={{ backgroundColor: 'var(--secondary-container)' }}>
+                                <Building2 className="w-4 h-4" style={{ color: 'var(--secondary)' }} />
                             </div>
                             Store & Processor
                         </h2>
@@ -1162,7 +1172,7 @@ export default function ReturnDetailPage() {
                             </div>
                             <div className="flex justify-between items-center">
                                 <dt className="text-xs text-amber-700 font-medium">Returnable Value</dt>
-                                <dd className="text-xs font-bold text-green-700">{formatCurrency(nonWcReturnableValue)}</dd>
+                                <dd className="text-xs font-bold" style={{ color: 'var(--secondary)' }}>{formatCurrency(nonWcReturnableValue)}</dd>
                             </div>
                             <div className="flex justify-between items-center">
                                 <dt className="text-xs text-amber-700 font-medium">Non-Returnable Value</dt>
@@ -1179,15 +1189,16 @@ export default function ReturnDetailPage() {
 
             {/* ── Documents Section (post-finalization) ──────── */}
             {isFinalized && (
-                <div className="bg-white rounded-lg shadow px-4 py-3">
-                    <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <div className="rounded-lg shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                    <h2 className="text-[10px] font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: 'var(--on-surface-variant)' }}>
                         <FileText className="w-3.5 h-3.5" /> Documents
                     </h2>
                     <div className="flex flex-wrap gap-2">
                         <button
                             onClick={() => downloadPdf('manifest', `manifest-${tx.licensePlate}.pdf`)}
                             disabled={pdfLoading === 'manifest'}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded text-xs text-blue-700 font-medium transition-colors disabled:opacity-50"
+                            className="flex items-center gap-1.5 px-3 py-1.5 border rounded text-xs font-medium transition-colors disabled:opacity-50 hover:bg-primary-50/40"
+                            style={{ backgroundColor: 'var(--primary-container)', borderColor: 'var(--outline-variant)', color: 'var(--on-primary-container)' }}
                         >
                             {pdfLoading === 'manifest' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
                             Download Manifest
@@ -1202,15 +1213,15 @@ export default function ReturnDetailPage() {
                         </button> */}
                     </div>
                     {tx.manifestGeneratedAt && (
-                        <p className="text-[10px] text-gray-400 mt-2">Manifest last generated: {formatDate(tx.manifestGeneratedAt)}</p>
+                        <p className="text-[10px] mt-2" style={{ color: 'var(--on-surface-variant)' }}>Manifest last generated: {formatDate(tx.manifestGeneratedAt)}</p>
                     )}
                 </div>
             )}
 
             {/* ── Items Section ──────────────────────────────── */}
-            <div className="bg-white rounded-lg shadow px-4 py-3">
+            <div className="rounded-lg shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2">
-                    <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <h2 className="text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1.5" style={{ color: 'var(--on-surface-variant)' }}>
                         <ScanLine className="w-3.5 h-3.5" /> Products ({nonWcItems.length})
                     </h2>
                     {isProcessor && canAddDeleteItems && (
@@ -1218,14 +1229,14 @@ export default function ReturnDetailPage() {
                             <button onClick={() => router.push(`/warehouse/returns/${id}/add-items`)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors">
                                 <Plus className="w-3 h-3" /> Add Items
                             </button>
-                            <button onClick={() => openWcModal()} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors">
+                            <button onClick={() => openWcModal()} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border transition-colors hover:bg-primary-50/40" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}>
                                 <Archive className="w-3 h-3" /> Wine Cellar Items
                             </button>
                         </div>
                     )}
                     {isProcessor && canDoAction(tx, 'edit') && !canEdit && (
                         <div className="flex gap-1.5">
-                            <button disabled className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-gray-100 text-gray-400 border border-gray-300 cursor-not-allowed">
+                            <button disabled className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border cursor-not-allowed" style={{ backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface-variant)', borderColor: 'var(--outline-variant)' }}>
                                 <Lock className="w-3 h-3" /> Locked
                             </button>
                         </div>
@@ -1257,19 +1268,21 @@ export default function ReturnDetailPage() {
                 {/* Items Filters */}
                 <div className="flex flex-col sm:flex-row gap-1.5 mb-2">
                     <div className="relative flex-1">
-                        <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--outline)' }} />
                         <input
                             type="text"
                             value={itemSearch}
                             onChange={e => setItemSearch(e.target.value)}
                             placeholder="Search by NDC, name, manufacturer, lot..."
-                            className="w-full pl-8 pr-3 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                            className="w-full pl-8 pr-3 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                         />
                     </div>
                     <select
                         value={itemStatusFilter}
                         onChange={e => setItemStatusFilter(e.target.value)}
-                        className="px-2.5 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                        className="px-2.5 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                        style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                     >
                         <option value="">All Statuses</option>
                         <option value="returnable">Returnable</option>
@@ -1281,19 +1294,19 @@ export default function ReturnDetailPage() {
                 {/* Items Table */}
                 {isItemsLoading ? (
                     <div className="flex justify-center py-6">
-                        <Loader2 className="w-5 h-5 animate-spin text-primary-600" />
+                        <Loader2 className="w-5 h-5 animate-spin" style={{ color: 'var(--primary)' }} />
                     </div>
                 ) : nonWcItems.length === 0 ? (
                     <div className="text-center py-6">
-                        <Package className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-                        <p className="text-gray-500 text-xs font-medium">No items yet</p>
+                        <Package className="w-10 h-10 mx-auto mb-2" style={{ color: 'var(--outline-variant)' }} />
+                        <p className="text-xs font-medium" style={{ color: 'var(--on-surface-variant)' }}>No items yet</p>
                         {isProcessor && canAddDeleteItems && (
                             <button onClick={() => router.push(`/warehouse/returns/${id}/add-items`)} className="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors">
                                 <Plus className="w-3 h-3" /> Start Scanning
                             </button>
                         )}
                         {isProcessor && canDoAction(tx, 'edit') && !canEdit && (
-                            <button disabled className="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-gray-100 text-gray-400 border border-gray-300 cursor-not-allowed">
+                            <button disabled className="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border cursor-not-allowed" style={{ backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface-variant)', borderColor: 'var(--outline-variant)' }}>
                                 <Lock className="w-3 h-3" /> Locked
                             </button>
                         )}
@@ -1302,7 +1315,7 @@ export default function ReturnDetailPage() {
                     <div className="overflow-x-auto">
                         <table className="w-full table-auto">
                             <thead>
-                                <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
                                     <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-white w-28">NDC</th>
                                     <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-white">Name</th>
                                     <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-white">Manufacturer</th>
@@ -1318,29 +1331,29 @@ export default function ReturnDetailPage() {
                                     <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100">
+                            <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                 {nonWcItems.map((item) => {
                                     const sBadge = getItemStatusBadge(item.returnStatus);
                                     return (
-                                        <tr key={item.id} className="hover:bg-gray-50">
-                                            <td className="px-4 py-3 text-xs font-mono text-gray-900 w-28 whitespace-nowrap">{item.ndc || '—'}</td>
-                                            <td className="px-4 py-3 text-xs text-gray-900 max-w-[130px] truncate" title={item.proprietaryName || ''}>
+                                        <tr key={item.id} className="hover:bg-primary-50/40" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
+                                            <td className="px-4 py-3 text-xs font-mono w-28 whitespace-nowrap" style={{ color: 'var(--foreground)' }}>{item.ndc || '—'}</td>
+                                            <td className="px-4 py-3 text-xs max-w-[130px] truncate" style={{ color: 'var(--foreground)' }} title={item.proprietaryName || ''}>
                                                 {item.proprietaryName || item.genericName || '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-xs text-gray-600 max-w-[110px] truncate" title={item.manufacturer || ''}>
+                                            <td className="px-4 py-3 text-xs max-w-[110px] truncate" style={{ color: 'var(--on-surface-variant)' }} title={item.manufacturer || ''}>
                                                 {item.manufacturer || '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-xs text-center text-gray-900 w-16 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-xs text-center w-16 whitespace-nowrap" style={{ color: 'var(--foreground)' }}>
                                                 {item.fullPackageSize || '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-xs text-center text-gray-900 w-20 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-xs text-center w-20 whitespace-nowrap" style={{ color: 'var(--foreground)' }}>
                                                 {(() => {
                                                     const qtyReturned = item.fullPackageQtyReturned ?? item.quantity;
                                                     const displayQty = (item.fullPackageQtyReturned && item.fullPackageSize && item.fullPackageQtyReturned === item.fullPackageSize) ? 1 : qtyReturned;
-                                                    return <>{displayQty}{item.isPartial && <span className="text-yellow-600 ml-0.5">P</span>}</>;
+                                                    return <>{displayQty}{item.isPartial && <span className="ml-0.5" style={{ color: 'var(--tertiary)' }}>P</span>}</>;
                                                 })()}
                                             </td>
-                                            <td className="px-4 py-3 text-xs text-gray-600 font-mono w-28 max-w-[7rem]">
+                                            <td className="px-4 py-3 text-xs font-mono w-28 max-w-[7rem]" style={{ color: 'var(--on-surface-variant)' }}>
                                                 <span className="block truncate" title={item.serialNumber || ''}>
                                                     {item.serialNumber || '—'}
                                                 </span>
@@ -1354,7 +1367,7 @@ export default function ReturnDetailPage() {
                                             {/* <td className="px-4 py-3 text-xs text-right font-medium text-gray-900">
                                                 {item.estimatedStoreValue != null ? formatCurrency(item.estimatedStoreValue) : '—'}
                                             </td> */}
-                                            <td className="px-4 py-3 text-xs text-gray-600 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-xs whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>
                                                 {item.expirationDate ? formatDate(item.expirationDate) : '—'}
                                             </td>
                                             <td className="px-4 py-3 text-xs whitespace-nowrap">
@@ -1365,29 +1378,29 @@ export default function ReturnDetailPage() {
                                                     )}
                                                 </div>
                                             </td>
-                                            <td className="px-4 py-3 text-xs text-gray-600 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-xs whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>
                                                 {item.returnStatus === 'returnable' ? (
                                                     item.destination ? (
-                                                        <span className="capitalize font-medium text-gray-900">{item.destination}</span>
+                                                        <span className="capitalize font-medium" style={{ color: 'var(--foreground)' }}>{item.destination}</span>
                                                     ) : (
-                                                        <span className="text-orange-600 font-medium">Missing</span>
+                                                        <span className="font-medium" style={{ color: 'var(--tertiary)' }}>Missing</span>
                                                     )
                                                 ) : '—'}
                                             </td>
                                             <td className="px-4 py-3 text-xs whitespace-nowrap">
                                                 <div className="flex items-center justify-end gap-0.5">
                                                     {canAddDeleteItems && item.nonReturnableReason === 'date' && !item.wineCellarId && (
-                                                        <button onClick={() => handleMoveToWineCellar(item)} className="p-1 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded" title="Move to Wine Cellar">
+                                                        <button onClick={() => handleMoveToWineCellar(item)} className="p-1 rounded" style={{ color: 'var(--outline)' }} title="Move to Wine Cellar">
                                                             <Archive className="w-3 h-3" />
                                                         </button>
                                                     )}
                                                     {canAddDeleteItems && (
-                                                        <button onClick={() => setEditItemModal(item)} className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title={isLocked ? 'Edit classification' : 'Edit item'}>
+                                                        <button onClick={() => setEditItemModal(item)} className="p-1 rounded" style={{ color: 'var(--outline)' }} title={isLocked ? 'Edit classification' : 'Edit item'}>
                                                             <Edit className="w-3 h-3" />
                                                         </button>
                                                     )}
                                                     {canAddDeleteItems && (
-                                                        <button onClick={() => setDeleteItemModal(item)} className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded" title="Delete item">
+                                                        <button onClick={() => setDeleteItemModal(item)} className="p-1 rounded" style={{ color: 'var(--outline)' }} title="Delete item">
                                                             <Trash2 className="w-3 h-3" />
                                                         </button>
                                                     )}
@@ -1404,31 +1417,31 @@ export default function ReturnDetailPage() {
 
             {/* ── Edit Item Modal ───────────────────────────── */}
             {editItemModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setEditItemModal(null)}>
-                    <div className="bg-white rounded-lg max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-sm font-semibold text-gray-900">Edit Item</h2>
-                            <button onClick={() => setEditItemModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setEditItemModal(null)}>
+                    <div className="rounded-lg max-w-sm w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                            <h2 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Edit Item</h2>
+                            <button onClick={() => setEditItemModal(null)} style={{ color: 'var(--outline)' }}><X className="w-4 h-4" /></button>
                         </div>
                         <div className="px-4 py-3">
-                            <p className="text-[11px] text-gray-500 mb-2">{editItemModal.proprietaryName || editItemModal.ndc} — Lot: {editItemModal.lotNumber || '—'}</p>
+                            <p className="text-[11px] mb-2" style={{ color: 'var(--on-surface-variant)' }}>{editItemModal.proprietaryName || editItemModal.ndc} — Lot: {editItemModal.lotNumber || '—'}</p>
                             {isLocked && (
-                                <div className="bg-yellow-50 border border-yellow-200 rounded px-2.5 py-1.5 mb-2">
-                                    <p className="text-[10px] text-yellow-800">Core data (pkg size, qty, price) is locked. Classification fields can still be updated.</p>
+                                <div className="border rounded px-2.5 py-1.5 mb-2" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}>
+                                    <p className="text-[10px]" style={{ color: 'var(--on-tertiary-container)' }}>Core data (pkg size, qty, price) is locked. Classification fields can still be updated.</p>
                                 </div>
                             )}
                             <div className="space-y-2">
                                 <div>
-                                    <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Quantity</label>
+                                    <label className="block text-[11px] font-medium mb-0.5" style={{ color: 'var(--on-surface)' }}>Quantity</label>
                                     <div className="grid grid-cols-3 gap-2 text-xs">
                                         <div>
-                                            <label className="block text-[10px] text-gray-500 mb-0.5">Pkg Size</label>
-                                            <div className="text-center py-1.5 bg-gray-50 border border-gray-200 rounded">
+                                            <label className="block text-[10px] mb-0.5" style={{ color: 'var(--on-surface-variant)' }}>Pkg Size</label>
+                                            <div className="text-center py-1.5 border rounded" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
                                                 {editItemForm.fullPackageSize || '—'}
                                             </div>
                                         </div>
                                         <div>
-                                            <label className="block text-[10px] text-gray-500 mb-0.5">Qty Returned (units)</label>
+                                            <label className="block text-[10px] mb-0.5" style={{ color: 'var(--on-surface-variant)' }}>Qty Returned (units)</label>
                                             <input 
                                                 type="number" 
                                                 min="0" 
@@ -1436,12 +1449,13 @@ export default function ReturnDetailPage() {
                                                 value={editItemForm.fullPackageQtyReturned} 
                                                 onChange={e => setEditItemForm({ ...editItemForm, fullPackageQtyReturned: e.target.value })} 
                                                 disabled={isLocked} 
-                                                className={`w-full px-2 py-1.5 text-center text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} 
+                                                className={`w-full px-2 py-1.5 text-center text-xs border rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'cursor-not-allowed' : ''}`} 
+                                                style={{ borderColor: 'var(--outline-variant)', backgroundColor: isLocked ? 'var(--surface-container-low)' : 'var(--surface-container-low)' }}
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-[10px] text-gray-500 mb-0.5">#</label>
-                                            <div className="text-center py-1.5 bg-gray-50 border border-gray-200 rounded">
+                                            <label className="block text-[10px] mb-0.5" style={{ color: 'var(--on-surface-variant)' }}>#</label>
+                                            <div className="text-center py-1.5 border rounded" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
                                                 {editItemForm.fullPackageQtyReturned && editItemForm.fullPackageSize ? 
                                                     Math.ceil(Number(editItemForm.fullPackageQtyReturned) / Number(editItemForm.fullPackageSize)) : '—'}
                                             </div>
@@ -1449,21 +1463,21 @@ export default function ReturnDetailPage() {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Return Status</label>
-                                    <select value={editItemForm.returnStatus} onChange={e => setEditItemForm({ ...editItemForm, returnStatus: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500">
+                                    <label className="block text-[11px] font-medium mb-0.5" style={{ color: 'var(--on-surface)' }}>Return Status</label>
+                                    <select value={editItemForm.returnStatus} onChange={e => setEditItemForm({ ...editItemForm, returnStatus: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-primary-500" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                                         <option value="tbd">TBD</option>
                                         <option value="returnable">Returnable</option>
                                         <option value="non_returnable">Non-Returnable</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Memo</label>
-                                    <input type="text" value={editItemForm.memo} onChange={e => setEditItemForm({ ...editItemForm, memo: e.target.value })} placeholder="Optional memo" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                    <label className="block text-[11px] font-medium mb-0.5" style={{ color: 'var(--on-surface)' }}>Memo</label>
+                                    <input type="text" value={editItemForm.memo} onChange={e => setEditItemForm({ ...editItemForm, memo: e.target.value })} placeholder="Optional memo" className="w-full px-2.5 py-1.5 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-primary-500" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }} />
                                 </div>
                             </div>
                         </div>
-                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
-                            <button onClick={() => setEditItemModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                            <button onClick={() => setEditItemModal(null)} className="px-3 py-1.5 text-xs rounded border transition-colors hover:bg-primary-50/40" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}>Cancel</button>
                             <button onClick={handleUpdateItem} disabled={isItemActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
                                 {isItemActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Saving...</> : 'Save'}
                             </button>
@@ -1474,21 +1488,21 @@ export default function ReturnDetailPage() {
 
             {/* ── Delete Item Modal ────────────────────────── */}
             {deleteItemModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setDeleteItemModal(null)}>
-                    <div className="bg-white rounded-lg max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-sm font-semibold text-gray-900">Delete Item</h2>
-                            <button onClick={() => setDeleteItemModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setDeleteItemModal(null)}>
+                    <div className="rounded-lg max-w-sm w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                            <h2 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Delete Item</h2>
+                            <button onClick={() => setDeleteItemModal(null)} style={{ color: 'var(--outline)' }}><X className="w-4 h-4" /></button>
                         </div>
                         <div className="px-4 py-3">
-                            <p className="text-xs text-gray-700">
+                            <p className="text-xs" style={{ color: 'var(--on-surface)' }}>
                                 Delete <strong>{deleteItemModal.proprietaryName || deleteItemModal.ndc || 'this item'}</strong>
                                 {deleteItemModal.lotNumber && <> (Lot: {deleteItemModal.lotNumber})</>}?
                             </p>
                         </div>
-                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
-                            <button onClick={() => setDeleteItemModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleDeleteItem} disabled={isItemActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors">
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                            <button onClick={() => setDeleteItemModal(null)} className="px-3 py-1.5 text-xs rounded border transition-colors hover:bg-primary-50/40" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}>Cancel</button>
+                            <button onClick={handleDeleteItem} disabled={isItemActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded text-white disabled:opacity-50 transition-colors" style={{ backgroundColor: 'var(--error)' }}>
                                 {isItemActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Deleting...</> : 'Delete'}
                             </button>
                         </div>
@@ -1498,33 +1512,33 @@ export default function ReturnDetailPage() {
 
             {/* ── Edit Modal ────────────────────────────────── */}
             {editModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setEditModal(false)}>
-                    <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-sm font-semibold text-gray-900">Edit Return — {tx.licensePlate}</h2>
-                            <button onClick={() => setEditModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setEditModal(false)}>
+                    <div className="rounded-lg max-w-md w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                            <h2 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Edit Return — {tx.licensePlate}</h2>
+                            <button onClick={() => setEditModal(false)} style={{ color: 'var(--outline)' }}><X className="w-4 h-4" /></button>
                         </div>
                         <div className="px-4 py-3 space-y-2">
                             {isLocked && (
-                                <div className="bg-yellow-50 border border-yellow-200 rounded px-2.5 py-1.5 mb-1">
-                                    <p className="text-[10px] text-yellow-800">Return is locked. Only notes can be updated.</p>
+                                <div className="border rounded px-2.5 py-1.5 mb-1" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}>
+                                    <p className="text-[10px]" style={{ color: 'var(--on-tertiary-container)' }}>Return is locked. Only notes can be updated.</p>
                                 </div>
                             )}
                             <div>
-                                <label className="block text-[11px] font-medium text-gray-700 mb-0.5">FedEx Tracking Number</label>
-                                <input type="text" value={editForm.fedexTracking} onChange={e => setEditForm({ ...editForm, fedexTracking: e.target.value })} disabled={isLocked} className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} placeholder="Enter tracking number" />
+                                <label className="block text-[11px] font-medium mb-0.5" style={{ color: 'var(--on-surface)' }}>FedEx Tracking Number</label>
+                                <input type="text" value={editForm.fedexTracking} onChange={e => setEditForm({ ...editForm, fedexTracking: e.target.value })} disabled={isLocked} className={`w-full px-2.5 py-1.5 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'cursor-not-allowed' : ''}`} style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }} placeholder="Enter tracking number" />
                             </div>
                             <div>
-                                <label className="block text-[11px] font-medium text-gray-700 mb-0.5">FedEx Pickup Confirmation</label>
-                                <input type="text" value={editForm.fedexPickupConfirmation} onChange={e => setEditForm({ ...editForm, fedexPickupConfirmation: e.target.value })} disabled={isLocked} className={`w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`} placeholder="Enter pickup confirmation" />
+                                <label className="block text-[11px] font-medium mb-0.5" style={{ color: 'var(--on-surface)' }}>FedEx Pickup Confirmation</label>
+                                <input type="text" value={editForm.fedexPickupConfirmation} onChange={e => setEditForm({ ...editForm, fedexPickupConfirmation: e.target.value })} disabled={isLocked} className={`w-full px-2.5 py-1.5 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-primary-500 ${isLocked ? 'cursor-not-allowed' : ''}`} style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }} placeholder="Enter pickup confirmation" />
                             </div>
                             <div>
-                                <label className="block text-[11px] font-medium text-gray-700 mb-0.5">Notes</label>
-                                <textarea value={editForm.notes} onChange={e => setEditForm({ ...editForm, notes: e.target.value })} rows={3} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none" placeholder="Optional notes" />
+                                <label className="block text-[11px] font-medium mb-0.5" style={{ color: 'var(--on-surface)' }}>Notes</label>
+                                <textarea value={editForm.notes} onChange={e => setEditForm({ ...editForm, notes: e.target.value })} rows={3} className="w-full px-2.5 py-1.5 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }} placeholder="Optional notes" />
                             </div>
                         </div>
-                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
-                            <button onClick={() => setEditModal(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                            <button onClick={() => setEditModal(false)} className="px-3 py-1.5 text-xs rounded border transition-colors hover:bg-primary-50/40" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}>Cancel</button>
                             <button onClick={handleUpdate} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
                                 {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Saving...</> : 'Save Changes'}
                             </button>
@@ -1535,23 +1549,23 @@ export default function ReturnDetailPage() {
 
             {/* ── Status Action Modal ──────────────────────── */}
             {actionModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setActionModal(null)}>
-                    <div className="bg-white rounded-lg max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-sm font-semibold text-gray-900">
+                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setActionModal(null)}>
+                    <div className="rounded-lg max-w-sm w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                            <h2 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
                                 {actionModal === 'pause' && 'Pause Return'}
                                 {actionModal === 'resume' && 'Resume Return'}
                                 {actionModal === 'complete' && 'Mark as Completed'}
                             </h2>
-                            <button onClick={() => setActionModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                            <button onClick={() => setActionModal(null)} style={{ color: 'var(--outline)' }}><X className="w-4 h-4" /></button>
                         </div>
                         <div className="px-4 py-3">
-                            <p className="text-xs text-gray-700">
+                            <p className="text-xs" style={{ color: 'var(--on-surface)' }}>
                                 Are you sure you want to <strong>{actionModal}</strong> return <strong>{tx.licensePlate}</strong>?
                             </p>
                         </div>
-                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
-                            <button onClick={() => setActionModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                            <button onClick={() => setActionModal(null)} className="px-3 py-1.5 text-xs rounded border transition-colors hover:bg-primary-50/40" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}>Cancel</button>
                             <button onClick={handleStatusAction} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
                                 {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Processing...</> : 'Confirm'}
                             </button>
@@ -1562,20 +1576,20 @@ export default function ReturnDetailPage() {
 
             {/* ── Delete Modal ─────────────────────────────── */}
             {deleteModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setDeleteModal(false)}>
-                    <div className="bg-white rounded-lg max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-sm font-semibold text-gray-900">Delete Return</h2>
-                            <button onClick={() => setDeleteModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setDeleteModal(false)}>
+                    <div className="rounded-lg max-w-sm w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                            <h2 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Delete Return</h2>
+                            <button onClick={() => setDeleteModal(false)} style={{ color: 'var(--outline)' }}><X className="w-4 h-4" /></button>
                         </div>
                         <div className="px-4 py-3">
-                            <p className="text-xs text-gray-700">
+                            <p className="text-xs" style={{ color: 'var(--on-surface)' }}>
                                 Are you sure you want to delete return <strong>{tx.licensePlate}</strong>? This action cannot be undone.
                             </p>
                         </div>
-                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
-                            <button onClick={() => setDeleteModal(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleDelete} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors">
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                            <button onClick={() => setDeleteModal(false)} className="px-3 py-1.5 text-xs rounded border transition-colors hover:bg-primary-50/40" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}>Cancel</button>
+                            <button onClick={handleDelete} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded text-white disabled:opacity-50 transition-colors" style={{ backgroundColor: 'var(--error)' }}>
                                 {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Deleting...</> : 'Delete'}
                             </button>
                         </div>
@@ -1585,28 +1599,28 @@ export default function ReturnDetailPage() {
 
             {/* ── Finalize Return Modal ──────────────────── */}
             {finalizeModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setFinalizeModal(false)}>
-                    <div className="bg-white rounded-lg max-w-xl w-full shadow-xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setFinalizeModal(false)}>
+                    <div className="rounded-lg max-w-xl w-full shadow-xl max-h-[90vh] flex flex-col border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
 
                         {/* Header */}
-                        <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                                <Lock className="w-5 h-5 text-red-600" /> Finalize Return — {tx.licensePlate}
+                        <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                            <h2 className="text-lg font-semibold flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
+                                <Lock className="w-5 h-5" style={{ color: 'var(--error)' }} /> Finalize Return — {tx.licensePlate}
                             </h2>
-                            <button onClick={() => setFinalizeModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                            <button onClick={() => setFinalizeModal(false)} style={{ color: 'var(--outline)' }}><X className="w-5 h-5" /></button>
                         </div>
 
                         <div className="p-5 flex-1 overflow-y-auto space-y-3">
 
                             {/* TBD blocker */}
                             {hasTbdItems && (
-                                <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
-                                    <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                                <div className="border rounded-lg p-3 flex items-start gap-2" style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
+                                    <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: 'var(--error)' }} />
                                     <div>
-                                        <p className="text-sm font-medium text-red-800">
+                                        <p className="text-sm font-medium" style={{ color: 'var(--on-error-container)' }}>
                                             {tbdItems.length} item{tbdItems.length !== 1 ? 's' : ''} still have TBD status
                                         </p>
-                                        <p className="text-xs text-red-700 mt-0.5">
+                                        <p className="text-xs mt-0.5" style={{ color: 'var(--on-error-container)' }}>
                                             Resolve all TBD items before finalizing.
                                         </p>
                                     </div>
@@ -1614,16 +1628,22 @@ export default function ReturnDetailPage() {
                             )}
 
                             {/* ── Step 1: Print Itemized Return ── */}
-                            <div className={`border rounded-lg p-4 transition-all ${hasTbdItems ? 'opacity-50 pointer-events-none' : ''} ${finalizeStepsDone.printManifest ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-white'}`}>
+                            <div
+                                className={`border rounded-lg p-4 transition-all ${hasTbdItems ? 'opacity-50 pointer-events-none' : ''}`}
+                                style={{
+                                    borderColor: 'var(--outline-variant)',
+                                    backgroundColor: finalizeStepsDone.printManifest ? 'var(--secondary-container)' : 'var(--surface-container-lowest)',
+                                }}
+                            >
                                 <div className="flex items-start gap-3">
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${finalizeStepsDone.printManifest ? 'bg-green-500 text-white' : 'bg-blue-500 text-white'}`}>
+                                    <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm text-white" style={{ backgroundColor: finalizeStepsDone.printManifest ? 'var(--secondary)' : 'var(--primary)' }}>
                                         {finalizeStepsDone.printManifest ? <CheckCircle className="w-4 h-4" /> : '1'}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className={`text-sm font-semibold ${finalizeStepsDone.printManifest ? 'text-green-800' : 'text-gray-800'}`}>
+                                        <p className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
                                             Print Itemized Return
                                         </p>
-                                        <p className="text-xs text-gray-500 mt-0.5">Print the full list of all items included in this return.</p>
+                                        <p className="text-xs mt-0.5" style={{ color: 'var(--on-surface-variant)' }}>Print the full list of all items included in this return.</p>
                                         <div className="flex items-center gap-3 mt-2">
                                             <button
                                                 onClick={() => {
@@ -1631,13 +1651,14 @@ export default function ReturnDetailPage() {
                                                     markStep({ printManifest: true });
                                                 }}
                                                 disabled={pdfLoading === 'manifest'}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+                                                className="flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+                                                style={{ backgroundColor: 'var(--primary)' }}
                                             >
                                                 {pdfLoading === 'manifest' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Printer className="w-3.5 h-3.5" />}
                                                 Print
                                             </button>
                                             {finalizeStepsDone.printManifest && (
-                                                <span className="text-xs text-green-700 font-medium flex items-center gap-1">
+                                                <span className="text-xs font-medium flex items-center gap-1" style={{ color: 'var(--secondary)' }}>
                                                     <CheckCircle className="w-3.5 h-3.5" /> Done
                                                 </span>
                                             )}
@@ -1647,39 +1668,57 @@ export default function ReturnDetailPage() {
                             </div>
 
                             {/* ── Step 2: Enter FedEx Tracking ── */}
-                            <div className={`border rounded-lg p-4 transition-all ${hasTbdItems || !finalizeStepsDone.printManifest ? 'opacity-50 pointer-events-none' : ''} ${finalizeStepsDone.fedexEntered ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-white'}`}>
+                            <div
+                                className={`border rounded-lg p-4 transition-all ${hasTbdItems || !finalizeStepsDone.printManifest ? 'opacity-50 pointer-events-none' : ''}`}
+                                style={{
+                                    borderColor: 'var(--outline-variant)',
+                                    backgroundColor: finalizeStepsDone.fedexEntered ? 'var(--secondary-container)' : 'var(--surface-container-lowest)',
+                                }}
+                            >
                                 <div className="flex items-start gap-3">
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${finalizeStepsDone.fedexEntered ? 'bg-green-500 text-white' : finalizeStepsDone.printManifest ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'}`}>
+                                    <div
+                                        className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm"
+                                        style={{
+                                            backgroundColor: finalizeStepsDone.fedexEntered
+                                                ? 'var(--secondary)'
+                                                : finalizeStepsDone.printManifest
+                                                    ? 'var(--primary)'
+                                                    : 'var(--surface-container-low)',
+                                            color: finalizeStepsDone.fedexEntered || finalizeStepsDone.printManifest ? 'white' : 'var(--on-surface-variant)',
+                                        }}
+                                    >
                                         {finalizeStepsDone.fedexEntered ? <CheckCircle className="w-4 h-4" /> : '2'}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className={`text-sm font-semibold ${finalizeStepsDone.fedexEntered ? 'text-green-800' : 'text-gray-800'}`}>
+                                        <p className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
                                             FedEx / USPS Shipping
                                         </p>
-                                        <p className="text-xs text-gray-500 mt-0.5">Create a shipment via FedEx API or enter tracking info manually.</p>
+                                        <p className="text-xs mt-0.5" style={{ color: 'var(--on-surface-variant)' }}>Create a shipment via FedEx API or enter tracking info manually.</p>
                                         <div className="flex items-center gap-2 mt-2 flex-wrap">
                                             <button
                                                 onClick={() => { setFedexMode('api'); setFedexSubModal(true); }}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition-colors"
+                                                className="flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-md transition-colors"
+                                                style={{ backgroundColor: 'var(--primary)' }}
                                             >
                                                 <Truck className="w-3.5 h-3.5" />
                                                 {finalizeStepsDone.fedexEntered ? 'Edit Shipment' : 'Create FedEx Shipment'}
                                             </button>
                                             <button
                                                 onClick={() => { setFedexMode('manual'); setFedexSubModal(true); }}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded-md transition-colors border border-gray-300"
+                                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors border hover:bg-primary-50/40"
+                                                style={{ backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface)', borderColor: 'var(--outline-variant)' }}
                                             >
                                                 <Edit className="w-3.5 h-3.5" />
                                                 Enter Manually
                                             </button>
                                             {finalizeStepsDone.fedexEntered && (
-                                                <span className="text-xs text-green-700 font-medium flex items-center gap-1">
+                                                <span className="text-xs font-medium flex items-center gap-1" style={{ color: 'var(--secondary)' }}>
                                                     <CheckCircle className="w-3.5 h-3.5" /> Done
                                                 </span>
                                             )}
                                         </div>
                                         {finalizeStepsDone.fedexEntered && (finalizeForm.fedexTracking.trim() || tx.fedexTracking) && (
-                                            <div className="mt-2 text-xs text-gray-600 space-y-0.5">
+                                            <div className="mt-2 text-xs space-y-0.5" style={{ color: 'var(--on-surface-variant)' }}>
                                                 <p><span className="font-medium">Tracking:</span> <span className="font-mono">{fedexForm.prpNumber || finalizeForm.fedexTracking || tx.fedexTracking || '—'}</span></p>
                                                 <p><span className="font-medium">Boxes:</span> {finalizeForm.boxCount || tx.boxCount || '—'}</p>
                                                 {fedexForm.packages.filter((p: string) => p.trim()).length > 0 && (
@@ -1695,16 +1734,32 @@ export default function ReturnDetailPage() {
                             </div>
 
                             {/* ── Step 3: Print Job Sheets ── */}
-                            <div className={`border rounded-lg p-4 transition-all ${hasTbdItems || !finalizeStepsDone.fedexEntered ? 'opacity-50 pointer-events-none' : ''} ${finalizeStepsDone.printJobSheets ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-white'}`}>
+                            <div
+                                className={`border rounded-lg p-4 transition-all ${hasTbdItems || !finalizeStepsDone.fedexEntered ? 'opacity-50 pointer-events-none' : ''}`}
+                                style={{
+                                    borderColor: 'var(--outline-variant)',
+                                    backgroundColor: finalizeStepsDone.printJobSheets ? 'var(--secondary-container)' : 'var(--surface-container-lowest)',
+                                }}
+                            >
                                 <div className="flex items-start gap-3">
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${finalizeStepsDone.printJobSheets ? 'bg-green-500 text-white' : finalizeStepsDone.fedexEntered ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'}`}>
+                                    <div
+                                        className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm"
+                                        style={{
+                                            backgroundColor: finalizeStepsDone.printJobSheets
+                                                ? 'var(--secondary)'
+                                                : finalizeStepsDone.fedexEntered
+                                                    ? 'var(--primary)'
+                                                    : 'var(--surface-container-low)',
+                                            color: finalizeStepsDone.printJobSheets || finalizeStepsDone.fedexEntered ? 'white' : 'var(--on-surface-variant)',
+                                        }}
+                                    >
                                         {finalizeStepsDone.printJobSheets ? <CheckCircle className="w-4 h-4" /> : '3'}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className={`text-sm font-semibold ${finalizeStepsDone.printJobSheets ? 'text-green-800' : 'text-gray-800'}`}>
+                                        <p className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
                                             Print Job Sheets
                                         </p>
-                                        <p className="text-xs text-gray-500 mt-0.5">Print job sheets for all outgoing boxes.</p>
+                                        <p className="text-xs mt-0.5" style={{ color: 'var(--on-surface-variant)' }}>Print job sheets for all outgoing boxes.</p>
                                         <div className="flex items-center gap-3 mt-2 flex-wrap">
                                             <button
                                                 onClick={() => {
@@ -1712,7 +1767,8 @@ export default function ReturnDetailPage() {
                                                     markStep({ printJobSheets: true });
                                                 }}
                                                 disabled={pdfLoading === 'job-sheet'}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+                                                className="flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+                                                style={{ backgroundColor: 'var(--primary)' }}
                                             >
                                                 {pdfLoading === 'job-sheet' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
                                                 Print Job Sheet
@@ -1725,7 +1781,8 @@ export default function ReturnDetailPage() {
                                                         markStep({ printJobSheets: true });
                                                     }}
                                                     disabled={pdfLoading === 'dea-form-222'}
-                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+                                                    className="flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+                                                    style={{ backgroundColor: 'var(--tertiary)' }}
                                                 >
                                                     {pdfLoading === 'dea-form-222' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
                                                     Print DEA Form 222
@@ -1733,7 +1790,7 @@ export default function ReturnDetailPage() {
                                             )}
                                             
                                             {finalizeStepsDone.printJobSheets && (
-                                                <span className="text-xs text-green-700 font-medium flex items-center gap-1">
+                                                <span className="text-xs font-medium flex items-center gap-1" style={{ color: 'var(--secondary)' }}>
                                                     <CheckCircle className="w-3.5 h-3.5" /> Done
                                                 </span>
                                             )}
@@ -1743,34 +1800,51 @@ export default function ReturnDetailPage() {
                             </div>
 
                             {/* ── Step 4: Finalize Return ── */}
-                            <div className={`border-2 rounded-lg p-4 transition-all ${hasTbdItems || !finalizeStepsDone.printJobSheets ? 'opacity-50 pointer-events-none' : ''} ${canFinalize ? 'border-green-200 bg-green-50' : 'border-dashed border-gray-200 bg-gray-50'}`}>
+                            <div
+                                className={`border-2 rounded-lg p-4 transition-all ${hasTbdItems || !finalizeStepsDone.printJobSheets ? 'opacity-50 pointer-events-none' : ''}`}
+                                style={{
+                                    borderStyle: canFinalize ? 'solid' : 'dashed',
+                                    borderColor: 'var(--outline-variant)',
+                                    backgroundColor: canFinalize ? 'var(--secondary-container)' : 'var(--surface-container-low)',
+                                }}
+                            >
                                 <div className="flex items-start gap-3">
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${canFinalize ? 'bg-green-500 text-white' : finalizeStepsDone.printJobSheets ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-500'}`}>
+                                    <div
+                                        className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm"
+                                        style={{
+                                            backgroundColor: canFinalize
+                                                ? 'var(--secondary)'
+                                                : finalizeStepsDone.printJobSheets
+                                                    ? 'var(--primary)'
+                                                    : 'var(--surface-container-low)',
+                                            color: canFinalize || finalizeStepsDone.printJobSheets ? 'white' : 'var(--on-surface-variant)',
+                                        }}
+                                    >
                                         {canFinalize ? <CheckCircle className="w-4 h-4" /> : '4'}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className={`text-sm font-semibold ${canFinalize ? 'text-green-800' : 'text-gray-400'}`}>
+                                        <p className="text-sm font-semibold" style={{ color: canFinalize ? 'var(--foreground)' : 'var(--on-surface-variant)' }}>
                                             Finalize Return
                                         </p>
-                                        <p className={`text-xs mt-0.5 ${canFinalize ? 'text-green-700' : 'text-gray-400'}`}>
+                                        <p className="text-xs mt-0.5" style={{ color: canFinalize ? 'var(--on-surface)' : 'var(--on-surface-variant)' }}>
                                             Lock this return permanently. This cannot be undone.
                                         </p>
                                         {!allStepsDone && (
-                                            <p className="text-xs text-gray-400 mt-1">Complete steps 1 – 3 above to enable finalization.</p>
+                                            <p className="text-xs mt-1" style={{ color: 'var(--on-surface-variant)' }}>Complete steps 1 – 3 above to enable finalization.</p>
                                         )}
                                         {allStepsDone && (
                                             <div className="mt-3">
                                                 {hasTbdItems && (
-                                                    <div className="bg-red-50 border border-red-200 rounded-md p-2 flex items-start gap-1.5 mb-3">
-                                                        <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
-                                                        <p className="text-xs text-red-700">
+                                                    <div className="border rounded-md p-2 flex items-start gap-1.5 mb-3" style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
+                                                        <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--error)' }} />
+                                                        <p className="text-xs" style={{ color: 'var(--on-error-container)' }}>
                                                             Resolve all TBD items before finalizing.
                                                         </p>
                                                     </div>
                                                 )}
-                                                <div className="bg-yellow-50 border border-yellow-200 rounded-md p-2 flex items-start gap-1.5 mb-3">
-                                                    <AlertTriangle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
-                                                    <p className="text-xs text-yellow-800">
+                                                <div className="border rounded-md p-2 flex items-start gap-1.5 mb-3" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}>
+                                                    <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--tertiary)' }} />
+                                                    <p className="text-xs" style={{ color: 'var(--on-tertiary-container)' }}>
                                                         Once finalized, items and shipping details can no longer be edited.
                                                     </p>
                                                 </div>
@@ -1788,7 +1862,7 @@ export default function ReturnDetailPage() {
 
                         </div>
 
-                        <div className="flex justify-end p-4 border-t border-gray-200 bg-gray-50">
+                        <div className="flex justify-end p-4 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <Button variant="outline" onClick={() => setFinalizeModal(false)}>Cancel</Button>
                         </div>
                     </div>
@@ -1797,32 +1871,32 @@ export default function ReturnDetailPage() {
 
             {/* ── Wine Cellar Modal ────────────────────────── */}
             {wcModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setWcModal(false)}>
-                    <div className="bg-white rounded-lg max-w-2xl w-full shadow-xl max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                                <Archive className="w-5 h-5 text-purple-600" /> Add Wine Cellar Items
+                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setWcModal(false)}>
+                    <div className="rounded-lg max-w-2xl w-full shadow-xl max-h-[80vh] flex flex-col border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                            <h2 className="text-lg font-semibold flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
+                                <Archive className="w-5 h-5" style={{ color: 'var(--tertiary)' }} /> Add Wine Cellar Items
                             </h2>
-                            <button onClick={() => setWcModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                            <button onClick={() => setWcModal(false)} style={{ color: 'var(--outline)' }}><X className="w-5 h-5" /></button>
                         </div>
                         <div className="p-5 flex-1 overflow-y-auto">
                             {wcLoading ? (
                                 <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary-600" /></div>
                             ) : wcItems.length === 0 ? (
                                 <div className="text-center py-12">
-                                    <Archive className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                                    <p className="text-gray-500 text-sm font-medium">No wine cellar items ready to return</p>
-                                    <p className="text-gray-400 text-xs mt-1">Items with &quot;Ready to Return&quot; status for this pharmacy will appear here.</p>
+                                    <Archive className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--outline-variant)' }} />
+                                    <p className="text-sm font-medium" style={{ color: 'var(--on-surface)' }}>No wine cellar items ready to return</p>
+                                    <p className="text-xs mt-1" style={{ color: 'var(--on-surface-variant)' }}>Items with &quot;Ready to Return&quot; status for this pharmacy will appear here.</p>
                                 </div>
                             ) : (
                                 <>
-                                    <p className="text-xs text-gray-500 mb-3">
+                                    <p className="text-xs mb-3" style={{ color: 'var(--on-surface-variant)' }}>
                                         Select items to add to this return. {wcSelected.size > 0 && <strong>{wcSelected.size} selected</strong>}
                                     </p>
                                     <div className="overflow-x-auto">
                                         <table className="w-full table-auto text-xs">
                                             <thead>
-                                                <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                                <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
                                                     <th className="px-4 py-3.5 w-8">
                                                         <input
                                                             type="checkbox"
@@ -1834,7 +1908,8 @@ export default function ReturnDetailPage() {
                                                                     setWcSelected(new Set(wcItems.map(i => i.id)));
                                                                 }
                                                             }}
-                                                            className="rounded text-purple-600 focus:ring-purple-500"
+                                                            className="rounded focus:ring-primary-500"
+                                                            style={{ color: 'var(--primary)' }}
                                                         />
                                                     </th>
                                                     <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
@@ -1849,7 +1924,11 @@ export default function ReturnDetailPage() {
                                                 {wcItems.map(item => (
                                                     <tr
                                                         key={item.id}
-                                                        className={`border-b border-gray-100 cursor-pointer transition-colors ${wcSelected.has(item.id) ? 'bg-purple-50' : 'hover:bg-gray-50'}`}
+                                                        className="cursor-pointer transition-colors border-b"
+                                                        style={{
+                                                            borderColor: 'var(--outline-variant)',
+                                                            backgroundColor: wcSelected.has(item.id) ? 'var(--tertiary-fixed)' : 'transparent',
+                                                        }}
                                                         onClick={() => toggleWcSelect(item.id)}
                                                     >
                                                         <td className="px-4 py-3 text-sm">
@@ -1857,22 +1936,23 @@ export default function ReturnDetailPage() {
                                                                 type="checkbox"
                                                                 checked={wcSelected.has(item.id)}
                                                                 onChange={() => toggleWcSelect(item.id)}
-                                                                className="rounded text-purple-600 focus:ring-purple-500"
+                                                                className="rounded focus:ring-primary-500"
+                                                                style={{ color: 'var(--primary)' }}
                                                             />
                                                         </td>
-                                                        <td className="px-4 py-3 text-sm font-mono text-gray-900">{item.ndc || '—'}</td>
-                                                        <td className="px-4 py-3 text-sm text-gray-900 max-w-[140px] truncate" title={item.productName || ''}>
+                                                        <td className="px-4 py-3 text-sm font-mono" style={{ color: 'var(--foreground)' }}>{item.ndc || '—'}</td>
+                                                        <td className="px-4 py-3 text-sm max-w-[140px] truncate" style={{ color: 'var(--foreground)' }} title={item.productName || ''}>
                                                             <div>
                                                                 <p className="truncate">{item.productName || '—'}</p>
-                                                                {item.manufacturer && <p className="text-gray-400 text-[10px] truncate">{item.manufacturer}</p>}
+                                                                {item.manufacturer && <p className="text-[10px] truncate" style={{ color: 'var(--on-surface-variant)' }}>{item.manufacturer}</p>}
                                                             </div>
                                                         </td>
-                                                        <td className="px-4 py-3 text-sm text-center text-gray-900">{item.quantity}</td>
-                                                        <td className="px-4 py-3 text-sm text-right text-gray-900">
+                                                        <td className="px-4 py-3 text-sm text-center" style={{ color: 'var(--foreground)' }}>{item.quantity}</td>
+                                                        <td className="px-4 py-3 text-sm text-right" style={{ color: 'var(--foreground)' }}>
                                                             {item.standardPrice != null ? formatCurrency(item.standardPrice) : '—'}
                                                         </td>
-                                                        <td className="px-4 py-3 text-sm text-gray-600">{formatDate(item.dateShelved)}</td>
-                                                        <td className="px-4 py-3 text-sm text-gray-600">{item.physicalLocation || '—'}</td>
+                                                        <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{formatDate(item.dateShelved)}</td>
+                                                        <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{item.physicalLocation || '—'}</td>
                                                     </tr>
                                                 ))}
                                             </tbody>
@@ -1881,7 +1961,7 @@ export default function ReturnDetailPage() {
                                 </>
                             )}
                         </div>
-                        <div className="flex justify-end gap-2 p-5 border-t border-gray-200 bg-gray-50">
+                        <div className="flex justify-end gap-2 p-5 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <Button variant="outline" onClick={() => setWcModal(false)}>Cancel</Button>
                             <Button variant="primary" onClick={handleAddWcItems} disabled={wcAdding || wcSelected.size === 0}>
                                 {wcAdding ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Adding...</> : `Add ${wcSelected.size} Item${wcSelected.size !== 1 ? 's' : ''}`}
@@ -1893,12 +1973,12 @@ export default function ReturnDetailPage() {
 
             {/* ── FedEx / USPS Tracking Sub-Modal ─────────── */}
             {fedexSubModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-[60] p-4" onClick={() => { if (!fedexApiLoading && !pickupLoading) setFedexSubModal(false); }}>
-                    <div className="bg-white rounded-lg max-w-2xl w-full shadow-xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-[60] p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => { if (!fedexApiLoading && !pickupLoading) setFedexSubModal(false); }}>
+                    <div className="rounded-lg max-w-2xl w-full shadow-xl max-h-[90vh] flex flex-col border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
 
                         {/* Header */}
-                        <div className={`p-4 rounded-t-lg ${fedexMode === 'api' ? 'bg-blue-600' : 'bg-amber-400'}`}>
-                            <h2 className={`text-center text-lg font-bold ${fedexMode === 'api' ? 'text-white' : 'text-gray-900'}`}>
+                        <div className="p-4 rounded-t-lg" style={{ backgroundColor: fedexMode === 'api' ? 'var(--primary)' : 'var(--tertiary-fixed)' }}>
+                            <h2 className="text-center text-lg font-bold" style={{ color: fedexMode === 'api' ? 'white' : 'var(--on-tertiary-container)' }}>
                                 {fedexMode === 'api' ? 'FedEx API Shipment' : 'FedEX or USPS Info'} — <span className="underline font-mono">{tx.licensePlate}</span>
                             </h2>
                         </div>
@@ -1910,26 +1990,27 @@ export default function ReturnDetailPage() {
                                 <>
                                     {!fedexApiResult ? (
                                         <>
-                                            <p className="text-sm text-gray-600 text-center">
+                                                    <p className="text-sm text-center" style={{ color: 'var(--on-surface-variant)' }}>
                                                 Create a FedEx Ground shipment via the FedEx API. Tracking numbers and shipping labels will be generated automatically.
                                             </p>
 
                                             <div className="flex items-center justify-center gap-4">
                                                 <div>
-                                                    <label className="text-sm font-medium text-gray-700">Number of Boxes:</label>
+                                                    <label className="text-sm font-medium" style={{ color: 'var(--on-surface)' }}>Number of Boxes:</label>
                                                     <input
                                                         type="number"
                                                         min="1"
                                                         max="99"
                                                         value={fedexForm.boxCount}
                                                         onChange={e => setFedexForm(prev => ({ ...prev, boxCount: e.target.value }))}
-                                                        className="ml-2 w-20 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+                                                        className="ml-2 w-20 px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-center"
+                                                        style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                                                         disabled={fedexApiLoading}
                                                     />
                                                 </div>
                                             </div>
 
-                                            <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-xs text-blue-800 text-center space-y-1">
+                                            <div className="border rounded-md p-3 text-xs text-center space-y-1" style={{ backgroundColor: 'var(--primary-fixed)', borderColor: 'var(--outline-variant)', color: 'var(--on-primary-container)' }}>
                                                 <p>The shipment will be created as <strong>FedEx Ground</strong> from the pharmacy address to the warehouse.</p>
                                                 <p>Make sure both pharmacy and warehouse addresses are configured correctly.</p>
                                             </div>
@@ -1974,7 +2055,8 @@ export default function ReturnDetailPage() {
                                                         }
                                                     }}
                                                     disabled={fedexApiLoading || !fedexForm.boxCount}
-                                                    className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-medium rounded-lg transition-colors"
+                                                    className="flex items-center gap-2 px-6 py-2.5 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                                                    style={{ backgroundColor: 'var(--primary)' }}
                                                 >
                                                     {fedexApiLoading ? (
                                                         <><Loader2 className="w-4 h-4 animate-spin" /> Creating Shipment...</>
@@ -1987,19 +2069,19 @@ export default function ReturnDetailPage() {
                                     ) : (
                                         <>
                                             {/* API Result */}
-                                            <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-3">
+                                            <div className="border rounded-lg p-4 space-y-3" style={{ backgroundColor: 'var(--secondary-container)', borderColor: 'var(--outline-variant)' }}>
                                                 <div className="flex items-center gap-2">
-                                                    <CheckCircle className="w-5 h-5 text-green-600" />
-                                                    <p className="text-sm font-semibold text-green-800">Shipment Created Successfully</p>
+                                                    <CheckCircle className="w-5 h-5" style={{ color: 'var(--secondary)' }} />
+                                                    <p className="text-sm font-semibold" style={{ color: 'var(--on-secondary-container)' }}>Shipment Created Successfully</p>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-2 text-xs">
                                                     <div>
-                                                        <span className="text-gray-500">Master Tracking:</span>
-                                                        <span className="ml-1 font-mono font-medium text-gray-900">{fedexApiResult.masterTrackingNumber}</span>
+                                                        <span style={{ color: 'var(--on-surface-variant)' }}>Master Tracking:</span>
+                                                        <span className="ml-1 font-mono font-medium" style={{ color: 'var(--foreground)' }}>{fedexApiResult.masterTrackingNumber}</span>
                                                     </div>
                                                     <div>
-                                                        <span className="text-gray-500">Packages:</span>
-                                                        <span className="ml-1 font-medium text-gray-900">{fedexApiResult.packages.length}</span>
+                                                        <span style={{ color: 'var(--on-surface-variant)' }}>Packages:</span>
+                                                        <span className="ml-1 font-medium" style={{ color: 'var(--foreground)' }}>{fedexApiResult.packages.length}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -2007,12 +2089,13 @@ export default function ReturnDetailPage() {
                                             {/* Package Tracking Numbers */}
                                             <div className="space-y-2">
                                                 <div className="flex items-center justify-between">
-                                                    <p className="text-sm font-medium text-gray-700">Package Tracking Numbers:</p>
+                                                    <p className="text-sm font-medium" style={{ color: 'var(--on-surface)' }}>Package Tracking Numbers:</p>
                                                     <div className="flex items-center gap-1">
                                                         <button
                                                             onClick={printShippingLabels}
                                                             disabled={pdfLoading === 'shipping-labels'}
-                                                            className="flex items-center gap-1 px-2 py-1 bg-green-100 hover:bg-green-200 text-xs text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
+                                                            className="flex items-center gap-1 px-2 py-1 text-xs rounded border transition-colors disabled:opacity-50 hover:bg-primary-50/40"
+                                                            style={{ backgroundColor: 'var(--surface-container-low)', color: 'var(--secondary)', borderColor: 'var(--outline-variant)' }}
                                                             title="Print all shipping labels"
                                                         >
                                                             <Printer className="w-3 h-3" /> Print Labels
@@ -2024,14 +2107,15 @@ export default function ReturnDetailPage() {
                                                     {fedexApiResult.packages.map((pkg, i) => (
                                                         <div key={i} className="flex items-center justify-between text-xs">
                                                             <div className="flex items-center gap-2">
-                                                                <span className="text-gray-500">Package {i + 1}:</span>
-                                                                <span className="font-mono text-gray-900">{pkg.trackingNumber}</span>
+                                                                <span style={{ color: 'var(--on-surface-variant)' }}>Package {i + 1}:</span>
+                                                                <span className="font-mono" style={{ color: 'var(--foreground)' }}>{pkg.trackingNumber}</span>
                                                             </div>
                                                             <div className="flex items-center gap-1">
                                                                 <button
                                                                     onClick={() => printSingleLabel(i + 1)}
                                                                     disabled={pdfLoading === `shipping-label-${i + 1}`}
-                                                                    className="flex items-center gap-1 px-1.5 py-0.5 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
+                                                                    className="flex items-center gap-1 px-1.5 py-0.5 rounded border transition-colors disabled:opacity-50 hover:bg-primary-50/40"
+                                                                    style={{ backgroundColor: 'var(--surface-container-low)', color: 'var(--secondary)', borderColor: 'var(--outline-variant)' }}
                                                                     title={`Print shipping label for ${pkg.trackingNumber}`}
                                                                 >
                                                                     {pdfLoading === `shipping-label-${i + 1}` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
@@ -2042,7 +2126,8 @@ export default function ReturnDetailPage() {
                                                                         href={`${process.env.NEXT_PUBLIC_API_URL}/return-transactions/${tx.id}/labels/${i + 1}/download`}
                                                                         target="_blank"
                                                                         rel="noreferrer"
-                                                                        className="text-blue-600 hover:text-blue-800"
+                                                                        className="hover:underline"
+                                                                        style={{ color: 'var(--primary)' }}
                                                                         title="Download Label"
                                                                     >
                                                                         <Download className="w-3.5 h-3.5" />
@@ -2061,7 +2146,8 @@ export default function ReturnDetailPage() {
                                                         href={`${process.env.NEXT_PUBLIC_API_URL}/return-transactions/${tx.id}/labels?packageNumber=1`}
                                                         target="_blank"
                                                         rel="noreferrer"
-                                                        className="flex items-center gap-1.5 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded-md border border-gray-300 transition-colors"
+                                                        className="flex items-center gap-1.5 px-4 py-2 text-xs font-medium rounded-md border transition-colors hover:bg-primary-50/40"
+                                                        style={{ backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface)', borderColor: 'var(--outline-variant)' }}
                                                     >
                                                         <Printer className="w-3.5 h-3.5" />
                                                         Download Labels
@@ -2070,42 +2156,45 @@ export default function ReturnDetailPage() {
                                             )}
 
                                             {/* Schedule Pickup */}
-                                            <div className="border-t border-gray-200 pt-4 space-y-3">
-                                                <p className="text-sm font-medium text-gray-700">Schedule FedEx Pickup (Optional)</p>
-                                                <div className="bg-amber-50 border border-amber-200 rounded-md p-3 mb-3">
-                                                    <p className="text-xs text-amber-800">
+                                            <div className="border-t pt-4 space-y-3" style={{ borderColor: 'var(--outline-variant)' }}>
+                                                <p className="text-sm font-medium" style={{ color: 'var(--on-surface)' }}>Schedule FedEx Pickup (Optional)</p>
+                                                <div className="border rounded-md p-3 mb-3" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}>
+                                                    <p className="text-xs" style={{ color: 'var(--on-tertiary-container)' }}>
                                                         <strong>Note:</strong> Pickup scheduling may not work in sandbox/test mode. 
                                                         You can also call FedEx directly at <strong>1-800-463-3339</strong> and say &quot;Ground Return Pickup&quot;.
                                                     </p>
                                                 </div>
                                                 <div className="flex items-center gap-4 flex-wrap">
                                                     <div>
-                                                        <label className="text-xs text-gray-500">Pickup Date</label>
+                                                        <label className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>Pickup Date</label>
                                                         <input
                                                             type="date"
                                                             value={pickupForm.pickupDate}
                                                             onChange={e => setPickupForm(prev => ({ ...prev, pickupDate: e.target.value }))}
-                                                            className="block w-36 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                            className="block w-36 px-2 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                                                             disabled={pickupLoading}
                                                         />
                                                     </div>
                                                     <div>
-                                                        <label className="text-xs text-gray-500">Ready Time</label>
+                                                        <label className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>Ready Time</label>
                                                         <input
                                                             type="time"
                                                             value={pickupForm.readyTime}
                                                             onChange={e => setPickupForm(prev => ({ ...prev, readyTime: e.target.value }))}
-                                                            className="block w-28 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                            className="block w-28 px-2 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                                                             disabled={pickupLoading}
                                                         />
                                                     </div>
                                                     <div>
-                                                        <label className="text-xs text-gray-500">Close Time</label>
+                                                        <label className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>Close Time</label>
                                                         <input
                                                             type="time"
                                                             value={pickupForm.closeTime}
                                                             onChange={e => setPickupForm(prev => ({ ...prev, closeTime: e.target.value }))}
-                                                            className="block w-28 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                            className="block w-28 px-2 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                                                             disabled={pickupLoading}
                                                         />
                                                     </div>
@@ -2130,7 +2219,8 @@ export default function ReturnDetailPage() {
                                                                 }
                                                             }}
                                                             disabled={pickupLoading}
-                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white text-xs font-medium rounded-md transition-colors"
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+                                                            style={{ backgroundColor: 'var(--secondary)' }}
                                                         >
                                                             {pickupLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Truck className="w-3.5 h-3.5" />}
                                                             Schedule Pickup
@@ -2148,19 +2238,20 @@ export default function ReturnDetailPage() {
                                 <>
                                     {/* Number of Boxes */}
                                     <div className="text-center">
-                                        <label className="text-sm font-medium text-gray-700">Number of Boxes on this Return:</label>
+                                        <label className="text-sm font-medium" style={{ color: 'var(--on-surface)' }}>Number of Boxes on this Return:</label>
                                         <input
                                             type="number"
                                             min="1"
                                             max="99"
                                             value={fedexForm.boxCount}
                                             onChange={e => setFedexForm(prev => ({ ...prev, boxCount: e.target.value }))}
-                                            className="ml-2 w-20 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-center"
+                                            className="ml-2 w-20 px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-center"
+                                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                                         />
                                     </div>
 
                                     {/* Instructions */}
-                                    <div className="text-center text-xs text-gray-600 space-y-1">
+                                    <div className="text-center text-xs space-y-1" style={{ color: 'var(--on-surface-variant)' }}>
                                         <p>For FedEX Call <strong>1-(800) 463-3339</strong> and say &quot;Ground Return Pickup&quot;</p>
                                         <p>Once you have the Fed EX PRP Number Enter Below, Then Scan Tracking BarCodes Into &quot;Package Fields&quot;</p>
                                         <p>If This Is A USPS Shipment Enter &quot;USPS&quot; In the PRP Field, Then Scan Tracking BarCodes Into &quot;Package Fields&quot;</p>
@@ -2168,23 +2259,24 @@ export default function ReturnDetailPage() {
 
                                     {/* PRP Number */}
                                     <div className="text-center">
-                                        <label className="text-sm font-medium text-gray-700">PRP Number:</label>
+                                        <label className="text-sm font-medium" style={{ color: 'var(--on-surface)' }}>PRP Number:</label>
                                         <input
                                             type="text"
                                             value={fedexForm.prpNumber}
                                             onChange={e => setFedexForm(prev => ({ ...prev, prpNumber: e.target.value }))}
                                             placeholder="Enter PRP Number or USPS"
-                                            className="ml-2 w-64 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
+                                            className="ml-2 w-64 px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono"
+                                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                                         />
                                     </div>
 
-                                    <div className="border-t-2 border-amber-400" />
+                                    <div className="border-t-2" style={{ borderColor: 'var(--outline-variant)' }} />
 
                                     {/* Package Tracking Fields */}
                                     <div className="grid grid-cols-2 gap-x-6 gap-y-2">
                                         {fedexForm.packages.map((val, i) => (
                                             <div key={i} className="flex items-center gap-2">
-                                                <label className="text-sm text-gray-700 w-24 text-right flex-shrink-0">Package {i + 1}:</label>
+                                                <label className="text-sm w-24 text-right flex-shrink-0" style={{ color: 'var(--on-surface)' }}>Package {i + 1}:</label>
                                                 <input
                                                     type="text"
                                                     value={val}
@@ -2193,7 +2285,8 @@ export default function ReturnDetailPage() {
                                                         updated[i] = e.target.value;
                                                         setFedexForm(prev => ({ ...prev, packages: updated }));
                                                     }}
-                                                    className="flex-1 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
+                                                    className="flex-1 px-2 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono"
+                                                    style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                                                 />
                                             </div>
                                         ))}
@@ -2203,7 +2296,7 @@ export default function ReturnDetailPage() {
                         </div>
 
                         {/* Footer */}
-                        <div className="flex justify-between items-center p-4 border-t border-gray-200 bg-gray-100">
+                        <div className="flex justify-between items-center p-4 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             {fedexMode === 'manual' ? (
                                 <Button
                                     variant="primary"

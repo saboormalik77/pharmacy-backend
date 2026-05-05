@@ -502,11 +502,15 @@ export default function RATrackingPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <Link href="/warehouse" className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-primary-600 mb-1.5 transition-colors">
+                    <Link
+                        href="/warehouse"
+                        className="inline-flex items-center gap-1 text-[11px] mb-1.5 transition-colors hover:underline"
+                        style={{ color: 'var(--outline)' }}
+                    >
                         <ChevronLeft className="w-3 h-3" /> Back to Warehouse
                     </Link>
-                    <h1 className="text-lg font-bold text-gray-900">RA Tracking</h1>
-                    <p className="text-xs text-gray-500">Track Return Authorization requests, receipts, and shipments</p>
+                    <h1 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>RA Tracking</h1>
+                    <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>Track Return Authorization requests, receipts, and shipments</p>
                 </div>
             </div>
 
@@ -514,14 +518,24 @@ export default function RATrackingPage() {
                 <button
                     type="button"
                     onClick={() => setRaView('memos')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${raView === 'memos' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`}
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors hover:bg-primary-50/40"
+                    style={{
+                        backgroundColor: raView === 'memos' ? 'var(--primary)' : 'var(--surface-container-lowest)',
+                        color: raView === 'memos' ? 'white' : 'var(--on-surface)',
+                        borderColor: raView === 'memos' ? 'var(--primary)' : 'var(--outline-variant)',
+                    }}
                 >
                     All debit memos
                 </button>
                 <button
                     type="button"
                     onClick={() => { setRaView('group-shipments'); setShippedGroupsPage(1); }}
-                    className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${raView === 'group-shipments' ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors hover:bg-primary-50/40"
+                    style={{
+                        backgroundColor: raView === 'group-shipments' ? 'var(--tertiary)' : 'var(--surface-container-lowest)',
+                        color: raView === 'group-shipments' ? 'white' : 'var(--on-surface)',
+                        borderColor: raView === 'group-shipments' ? 'var(--tertiary)' : 'var(--outline-variant)',
+                    }}
                 >
                     <Package className="w-3.5 h-3.5" /> Group shipments
                 </button>
@@ -532,17 +546,21 @@ export default function RATrackingPage() {
             {summary && (
                 <div className="grid grid-cols-5 gap-2">
                     {[
-                        { icon: <Clock className="w-3.5 h-3.5 text-gray-500" />, label: 'Pending',   value: summary.pending,   color: 'text-gray-700',   bg: 'bg-gray-50'   },
-                        { icon: <Mail className="w-3.5 h-3.5 text-blue-500" />,  label: 'Requested', value: summary.requested, color: 'text-blue-700',   bg: 'bg-blue-50'   },
-                        { icon: <MailCheck className="w-3.5 h-3.5 text-green-500" />, label: 'Received', value: summary.received, color: 'text-green-700', bg: 'bg-green-50' },
-                        { icon: <Truck className="w-3.5 h-3.5 text-purple-500" />, label: 'Shipped', value: summary.shipped,   color: 'text-purple-700', bg: 'bg-purple-50' },
-                        { icon: <AlertTriangle className="w-3.5 h-3.5 text-red-500" />, label: 'Overdue', value: summary.overdue, color: 'text-red-700',  bg: 'bg-red-50'   },
+                        { icon: <Clock className="w-3.5 h-3.5" style={{ color: 'var(--outline)' }} />, label: 'Pending',   value: summary.pending,   valueColor: 'var(--on-surface)', bg: 'var(--surface-container-low)' },
+                        { icon: <Mail className="w-3.5 h-3.5" style={{ color: 'var(--primary)' }} />,  label: 'Requested', value: summary.requested, valueColor: 'var(--primary)', bg: 'var(--primary-fixed)' },
+                        { icon: <MailCheck className="w-3.5 h-3.5" style={{ color: 'var(--secondary)' }} />, label: 'Received', value: summary.received, valueColor: 'var(--secondary)', bg: 'var(--secondary-container)' },
+                        { icon: <Truck className="w-3.5 h-3.5" style={{ color: 'var(--tertiary)' }} />, label: 'Shipped', value: summary.shipped, valueColor: 'var(--tertiary)', bg: 'var(--tertiary-fixed)' },
+                        { icon: <AlertTriangle className="w-3.5 h-3.5" style={{ color: 'var(--error)' }} />, label: 'Overdue', value: summary.overdue, valueColor: 'var(--error)', bg: 'var(--error-container)' },
                     ].map(card => (
-                        <div key={card.label} className={`${card.bg} rounded-lg border border-gray-100 px-3 py-2 flex items-center gap-2`}>
+                        <div
+                            key={card.label}
+                            className="rounded-lg border px-3 py-2 flex items-center gap-2"
+                            style={{ backgroundColor: card.bg, borderColor: 'var(--outline-variant)' }}
+                        >
                             {card.icon}
                             <div>
-                                <p className="text-[10px] text-gray-500 leading-none">{card.label}</p>
-                                <p className={`text-base font-bold leading-tight ${card.color}`}>{card.value}</p>
+                                <p className="text-[10px] leading-none" style={{ color: 'var(--on-surface-variant)' }}>{card.label}</p>
+                                <p className="text-base font-bold leading-tight" style={{ color: card.valueColor }}>{card.value}</p>
                             </div>
                         </div>
                     ))}
@@ -550,48 +568,63 @@ export default function RATrackingPage() {
             )}
 
             {/* Filters — single compact row */}
-            <div className="bg-white rounded-lg shadow px-3 py-2">
+            <div className="rounded-lg shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 <div className="flex flex-wrap items-center gap-2">
                     <div className="relative flex-1 min-w-[160px]">
-                        <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--outline)' }} />
                         <input
                             type="text" placeholder="Search memo #, pharmacy, RA #..."
-                            className="w-full pl-8 pr-2 py-1.5 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full pl-8 pr-2 py-1.5 border rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                             value={search} onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
                         />
                     </div>
-                    <select className="border border-gray-300 rounded px-2 py-1.5 text-xs focus:ring-1 focus:ring-primary-500" value={raStatus}
+                    <select
+                        className="border rounded px-2 py-1.5 text-xs focus:ring-1 focus:ring-primary-500"
+                        style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
+                        value={raStatus}
                         onChange={e => { setRaStatus(e.target.value); setCurrentPage(1); }}>
                         {RA_STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                     </select>
-                    <select className="border border-gray-300 rounded px-2 py-1.5 text-xs focus:ring-1 focus:ring-primary-500" value={destination}
+                    <select
+                        className="border rounded px-2 py-1.5 text-xs focus:ring-1 focus:ring-primary-500"
+                        style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
+                        value={destination}
                         onChange={e => { setDestination(e.target.value); setCurrentPage(1); }}>
                         {DESTINATION_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                     </select>
-                    <input type="date" className="border border-gray-300 rounded px-2 py-1.5 text-xs focus:ring-1 focus:ring-primary-500" value={dateFrom}
+                    <input
+                        type="date"
+                        className="border rounded px-2 py-1.5 text-xs focus:ring-1 focus:ring-primary-500"
+                        style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
+                        value={dateFrom}
                         onChange={e => { setDateFrom(e.target.value); setCurrentPage(1); }} title="From date" />
-                    <input type="date" className="border border-gray-300 rounded px-2 py-1.5 text-xs focus:ring-1 focus:ring-primary-500" value={dateTo}
+                    <input
+                        type="date"
+                        className="border rounded px-2 py-1.5 text-xs focus:ring-1 focus:ring-primary-500"
+                        style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
+                        value={dateTo}
                         onChange={e => { setDateTo(e.target.value); setCurrentPage(1); }} title="To date" />
                 </div>
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="rounded-lg shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 {isLoading ? (
                     <div className="flex items-center justify-center py-12">
                         <Loader2 className="w-6 h-6 animate-spin text-primary-500" />
                     </div>
                 ) : memos.length === 0 ? (
-                    <div className="text-center py-12 text-gray-500">
-                        <MailCheck className="w-10 h-10 mx-auto mb-2 text-gray-300" />
+                    <div className="text-center py-12" style={{ color: 'var(--on-surface-variant)' }}>
+                        <MailCheck className="w-10 h-10 mx-auto mb-2" style={{ color: 'var(--outline-variant)' }} />
                         <p className="text-sm font-medium">No RA records found</p>
                         <p className="text-xs mt-1">RA tracking entries appear after batches are closed and debit memos generated.</p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
+                        <table className="min-w-full divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                             <thead>
-                                <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
                                     <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Memo #</th>
                                     <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Pharmacy</th>
                                     <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Dest.</th>
@@ -604,29 +637,33 @@ export default function RATrackingPage() {
                                     <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100">
+                            <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                 {memos.map(memo => {
                                     const eff = effectiveRaStatus(memo);
                                     const sb = getRAStatusBadge(eff);
                                     const overdue = isOverdue(memo);
                                     return (
-                                        <tr key={memo.id} className={`hover:bg-gray-50 transition-colors ${overdue ? 'bg-red-50' : ''}`}>
-                                            <td className="px-4 py-3 text-sm font-semibold text-primary-600 whitespace-nowrap">{memo.memoNumber}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-700 max-w-[130px] truncate">{memo.pharmacyName}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">{memo.destination || '—'}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-600 max-w-[120px] truncate">{memo.labelerName || '—'}</td>
+                                        <tr
+                                            key={memo.id}
+                                            className="transition-colors hover:bg-primary-50/40"
+                                            style={{ backgroundColor: overdue ? 'var(--error-container)' : undefined }}
+                                        >
+                                            <td className="px-4 py-3 text-sm font-semibold whitespace-nowrap" style={{ color: 'var(--primary)' }}>{memo.memoNumber}</td>
+                                            <td className="px-4 py-3 text-sm max-w-[130px] truncate" style={{ color: 'var(--on-surface)' }}>{memo.pharmacyName}</td>
+                                            <td className="px-4 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>{memo.destination || '—'}</td>
+                                            <td className="px-4 py-3 text-sm max-w-[120px] truncate" style={{ color: 'var(--on-surface-variant)' }}>{memo.labelerName || '—'}</td>
                                             <td className="px-4 py-3 text-sm font-medium whitespace-nowrap">{formatCurrency(memo.totalAskValue)}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>
                                                 {memo.raRequestedAt ? formatDate(memo.raRequestedAt) : '—'}
                                             </td>
                                             <td className="px-4 py-3 text-sm whitespace-nowrap">
                                                 {memo.ticklerDate ? (
-                                                    <span className={overdue ? 'text-red-600 font-semibold' : 'text-gray-500'}>
+                                                    <span style={{ color: overdue ? 'var(--error)' : 'var(--on-surface-variant)', fontWeight: overdue ? 600 : 400 }}>
                                                         {formatDate(memo.ticklerDate)}{overdue && ' ⚠'}
                                                     </span>
                                                 ) : '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-sm font-medium text-gray-800 whitespace-nowrap">{memo.raNumber || '—'}</td>
+                                            <td className="px-4 py-3 text-sm font-medium whitespace-nowrap" style={{ color: 'var(--foreground)' }}>{memo.raNumber || '—'}</td>
                                             <td className="px-4 py-3">
                                                 <Badge variant={sb.variant}><span className="text-[10px]">{sb.label}</span></Badge>
                                             </td>
@@ -646,14 +683,16 @@ export default function RATrackingPage() {
                                                             <button
                                                                 onClick={e => { e.stopPropagation(); openResend(memo); }}
                                                                 title="Resend Reminder"
-                                                                className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border border-yellow-200 transition-colors whitespace-nowrap"
+                                                            className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium border transition-colors whitespace-nowrap hover:bg-primary-50/40"
+                                                            style={{ backgroundColor: 'var(--tertiary-fixed)', color: 'var(--on-tertiary-container)', borderColor: 'var(--outline-variant)' }}
                                                             >
                                                                 <RefreshCw className="w-3 h-3" /> Resend
                                                             </button>
                                                             <button
                                                                 onClick={e => { e.stopPropagation(); openReceive(memo); }}
                                                                 title="Record RA Received"
-                                                                className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 transition-colors whitespace-nowrap"
+                                                            className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium border transition-colors whitespace-nowrap hover:bg-primary-50/40"
+                                                            style={{ backgroundColor: 'var(--secondary-container)', color: 'var(--on-secondary-container)', borderColor: 'var(--outline-variant)' }}
                                                             >
                                                                 <CheckCircle className="w-3 h-3" /> Record
                                                             </button>
@@ -663,7 +702,8 @@ export default function RATrackingPage() {
                                                         <button
                                                             onClick={e => { e.stopPropagation(); openShip(memo); }}
                                                             title="Record Shipment"
-                                                            className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 transition-colors whitespace-nowrap"
+                                                        className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium border transition-colors whitespace-nowrap hover:bg-primary-50/40"
+                                                        style={{ backgroundColor: 'var(--tertiary-fixed)', color: 'var(--on-tertiary-container)', borderColor: 'var(--outline-variant)' }}
                                                         >
                                                             <Truck className="w-3 h-3" /> Ship
                                                         </button>
@@ -673,7 +713,8 @@ export default function RATrackingPage() {
                                                             onClick={e => { e.stopPropagation(); printDebitMemoLabel(memo.id); }}
                                                             disabled={printLabelLoading === memo.id}
                                                             title="Print shipping label"
-                                                            className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 transition-colors whitespace-nowrap disabled:opacity-50"
+                                                        className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium border transition-colors whitespace-nowrap disabled:opacity-50 hover:bg-primary-50/40"
+                                                        style={{ backgroundColor: 'var(--secondary-container)', color: 'var(--on-secondary-container)', borderColor: 'var(--outline-variant)' }}
                                                         >
                                                             {printLabelLoading === memo.id
                                                                 ? <Loader2 className="w-3 h-3 animate-spin" />
@@ -693,8 +734,8 @@ export default function RATrackingPage() {
                 )}
 
                 {totalPages > 1 && (
-                    <div className="flex items-center justify-between px-4 py-2 border-t border-gray-200">
-                        <p className="text-xs text-gray-500">
+                    <div className="flex items-center justify-between px-4 py-2 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                        <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>
                             Page {currentPage} of {totalPages}{pagination?.total != null && ` · ${pagination.total} memos`}
                         </p>
                         <div className="flex items-center gap-1.5">
@@ -712,34 +753,35 @@ export default function RATrackingPage() {
 
             {raView === 'group-shipments' && (
                 <>
-                    <div className="bg-white rounded-lg shadow px-3 py-2">
-                        <p className="text-xs text-gray-600 mb-2">
+                    <div className="rounded-lg shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                        <p className="text-xs mb-2" style={{ color: 'var(--on-surface-variant)' }}>
                             Shipments where multiple debit memos were sent together (one FedEx tracking). Use destination to narrow the list.
                         </p>
                         <select
-                            className="border border-gray-300 rounded px-2 py-1.5 text-xs focus:ring-1 focus:ring-purple-500"
+                            className="border rounded px-2 py-1.5 text-xs focus:ring-1 focus:ring-primary-500"
+                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                             value={destination}
                             onChange={e => { setDestination(e.target.value); setShippedGroupsPage(1); }}
                         >
                             {DESTINATION_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                         </select>
                     </div>
-                    <div className="bg-white rounded-lg shadow overflow-hidden">
+                    <div className="rounded-lg shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         {isGroupLoading ? (
                             <div className="flex items-center justify-center py-12">
-                                <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
+                                <Loader2 className="w-6 h-6 animate-spin" style={{ color: 'var(--primary)' }} />
                             </div>
                         ) : shippedGroups.length === 0 ? (
-                            <div className="text-center py-12 text-gray-500">
-                                <Package className="w-10 h-10 mx-auto mb-2 text-gray-300" />
+                            <div className="text-center py-12" style={{ color: 'var(--on-surface-variant)' }}>
+                                <Package className="w-10 h-10 mx-auto mb-2" style={{ color: 'var(--outline-variant)' }} />
                                 <p className="text-sm font-medium">No group shipments found</p>
                                 <p className="text-xs mt-1">Ship a received memo from the list and include other memos with the same destination on one FedEx shipment.</p>
                             </div>
                         ) : (
                             <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
+                                <table className="min-w-full divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                     <thead>
-                                        <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                        <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
                                             <th className="px-4 py-3.5 w-8" />
                                             <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Shipped</th>
                                             <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Destination</th>
@@ -749,36 +791,38 @@ export default function RATrackingPage() {
                                             <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-100">
+                                    <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                         {shippedGroups.map(row => {
                                             const g = row.group;
                                             const open = expandedShippedGroupId === g.id;
                                             return (
                                                 <React.Fragment key={g.id}>
-                                                    <tr className="hover:bg-gray-50">
+                                                    <tr className="hover:bg-primary-50/40">
                                                         <td className="px-4 py-3">
                                                             <button
                                                                 type="button"
-                                                                className="p-1 rounded hover:bg-gray-200 text-gray-600"
+                                                                className="p-1 rounded border hover:bg-primary-50/40"
+                                                                style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface-variant)' }}
                                                                 onClick={() => setExpandedShippedGroupId(open ? null : g.id)}
                                                                 aria-expanded={open}
                                                             >
                                                                 <ChevronRight className={`w-4 h-4 transition-transform ${open ? 'rotate-90' : ''}`} />
                                                             </button>
                                                         </td>
-                                                        <td className="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">
+                                                        <td className="px-4 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface)' }}>
                                                             {g.shippedAt ? formatDate(g.shippedAt) : '—'}
                                                         </td>
-                                                        <td className="px-4 py-3 text-sm font-medium capitalize">{g.destination || '—'}</td>
-                                                        <td className="px-4 py-3 text-sm font-mono text-gray-800">{g.outboundTracking || '—'}</td>
-                                                        <td className="px-4 py-3 text-sm text-gray-600">{g.boxCount ?? 1}</td>
-                                                        <td className="px-4 py-3 text-sm text-gray-700">{row.memos?.length ?? g.totalMemos ?? 0}</td>
+                                                        <td className="px-4 py-3 text-sm font-medium capitalize" style={{ color: 'var(--foreground)' }}>{g.destination || '—'}</td>
+                                                        <td className="px-4 py-3 text-sm font-mono" style={{ color: 'var(--foreground)' }}>{g.outboundTracking || '—'}</td>
+                                                        <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{g.boxCount ?? 1}</td>
+                                                        <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{row.memos?.length ?? g.totalMemos ?? 0}</td>
                                                         <td className="px-4 py-3 text-right">
                                                             <button
                                                                 type="button"
                                                                 onClick={() => printShipmentGroupLabel(g.id)}
                                                                 disabled={printGroupLabelLoading}
-                                                                className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 disabled:opacity-50"
+                                                                className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium border transition-colors hover:bg-primary-50/40 disabled:opacity-50"
+                                                                style={{ backgroundColor: 'var(--secondary-container)', color: 'var(--on-secondary-container)', borderColor: 'var(--outline-variant)' }}
                                                             >
                                                                 {printGroupLabelLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
                                                                 Print label
@@ -786,13 +830,13 @@ export default function RATrackingPage() {
                                                         </td>
                                                     </tr>
                                                     {open && (
-                                                        <tr className="bg-purple-50/40">
+                                                        <tr style={{ backgroundColor: 'color-mix(in srgb, var(--tertiary-fixed) 35%, transparent)' }}>
                                                             <td colSpan={7} className="px-4 py-3">
-                                                                <p className="text-[10px] font-semibold text-gray-500 uppercase mb-2">Debit memos in this shipment</p>
-                                                                <div className="overflow-x-auto border border-gray-200 rounded-lg bg-white">
+                                                                <p className="text-[10px] font-semibold uppercase mb-2" style={{ color: 'var(--on-surface-variant)' }}>Debit memos in this shipment</p>
+                                                                <div className="overflow-x-auto border rounded-lg" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)' }}>
                                                                     <table className="min-w-full text-xs">
                                                                         <thead>
-                                                                            <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                                                            <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
                                                                                 <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Memo #</th>
                                                                                 <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Pharmacy</th>
                                                                                 <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">RA #</th>
@@ -801,13 +845,13 @@ export default function RATrackingPage() {
                                                                                 <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Ask</th>
                                                                             </tr>
                                                                         </thead>
-                                                                        <tbody className="divide-y divide-gray-100">
+                                                                        <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                                                             {(row.memos || []).map((m: DebitMemo) => (
-                                                                                <tr key={m.id}>
-                                                                                    <td className="px-4 py-3 text-sm font-medium text-primary-600">{m.memoNumber}</td>
-                                                                                    <td className="px-4 py-3 text-sm text-gray-700 max-w-[140px] truncate">{m.pharmacyName}</td>
-                                                                                    <td className="px-4 py-3 text-sm font-mono text-gray-800">{m.raNumber || '—'}</td>
-                                                                                    <td className="px-4 py-3 text-sm text-gray-600 max-w-[120px] truncate">{m.labelerName || '—'}</td>
+                                                                                <tr key={m.id} className="hover:bg-primary-50/40">
+                                                                                    <td className="px-4 py-3 text-sm font-medium" style={{ color: 'var(--primary)' }}>{m.memoNumber}</td>
+                                                                                    <td className="px-4 py-3 text-sm max-w-[140px] truncate" style={{ color: 'var(--on-surface)' }}>{m.pharmacyName}</td>
+                                                                                    <td className="px-4 py-3 text-sm font-mono" style={{ color: 'var(--foreground)' }}>{m.raNumber || '—'}</td>
+                                                                                    <td className="px-4 py-3 text-sm max-w-[120px] truncate" style={{ color: 'var(--on-surface-variant)' }}>{m.labelerName || '—'}</td>
                                                                                     <td className="px-4 py-3 text-sm text-right">{m.totalItems}</td>
                                                                                     <td className="px-4 py-3 text-sm text-right font-medium">{formatCurrency(m.totalAskValue)}</td>
                                                                                 </tr>
@@ -826,8 +870,8 @@ export default function RATrackingPage() {
                             </div>
                         )}
                         {(shippedPagination?.totalPages ?? 0) > 1 && (
-                            <div className="flex items-center justify-between px-4 py-2 border-t border-gray-200">
-                                <p className="text-xs text-gray-500">
+                            <div className="flex items-center justify-between px-4 py-2 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                                <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>
                                     Page {shippedGroupsPage} of {shippedPagination?.totalPages}
                                     {shippedPagination?.total != null && ` · ${shippedPagination.total} groups`}
                                 </p>
@@ -852,23 +896,23 @@ export default function RATrackingPage() {
 
             {/* ── Request RA Modal (Task 11.6) ──────────────────── */}
             {activeModal === 'request' && selectedMemo && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={closeModal}>
-                    <div className="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                        <div className="p-6 border-b border-gray-200">
+                <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={closeModal}>
+                    <div className="rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                        <div className="p-6 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <div className="flex items-center justify-between">
-                                <h2 className="text-lg font-bold text-gray-900">Send RA Request</h2>
-                                <button onClick={closeModal} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                                <h2 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>Send RA Request</h2>
+                                <button onClick={closeModal} style={{ color: 'var(--outline)' }}><X className="w-5 h-5" /></button>
                             </div>
                         </div>
                         <div className="p-6 space-y-4">
                             {/* Memo Details */}
-                            <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-1">
-                                <div className="flex justify-between"><span className="text-gray-500">Memo</span><span className="font-medium">{selectedMemo.memoNumber}</span></div>
-                                <div className="flex justify-between"><span className="text-gray-500">Pharmacy</span><span>{selectedMemo.pharmacyName}</span></div>
-                                <div className="flex justify-between"><span className="text-gray-500">Destination</span><span>{selectedMemo.destination || '—'}</span></div>
-                                <div className="flex justify-between"><span className="text-gray-500">Labeler</span><span>{selectedMemo.labelerName || '—'}</span></div>
-                                <div className="flex justify-between"><span className="text-gray-500">Items</span><span>{selectedMemo.totalItems}</span></div>
-                                <div className="flex justify-between"><span className="text-gray-500">Ask Value</span><span className="font-medium text-green-700">{formatCurrency(selectedMemo.totalAskValue)}</span></div>
+                            <div className="rounded-lg p-4 text-sm space-y-1 border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
+                                <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Memo</span><span className="font-medium" style={{ color: 'var(--foreground)' }}>{selectedMemo.memoNumber}</span></div>
+                                <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Pharmacy</span><span style={{ color: 'var(--on-surface)' }}>{selectedMemo.pharmacyName}</span></div>
+                                <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Destination</span><span style={{ color: 'var(--on-surface)' }}>{selectedMemo.destination || '—'}</span></div>
+                                <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Labeler</span><span style={{ color: 'var(--on-surface)' }}>{selectedMemo.labelerName || '—'}</span></div>
+                                <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Items</span><span style={{ color: 'var(--on-surface)' }}>{selectedMemo.totalItems}</span></div>
+                                <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Ask Value</span><span className="font-medium" style={{ color: 'var(--secondary)' }}>{formatCurrency(selectedMemo.totalAskValue)}</span></div>
                             </div>
 
                             {/* Email Preview */}
@@ -877,33 +921,34 @@ export default function RATrackingPage() {
                             ) : emailPreview ? (
                                 <div className="space-y-3">
                                     <div>
-                                        <label className="block text-xs text-gray-500 mb-1">To</label>
-                                        <p className="text-sm font-medium">{emailPreview.to || <span className="text-red-500">No email found — enter override below</span>}</p>
+                                        <label className="block text-xs mb-1" style={{ color: 'var(--on-surface-variant)' }}>To</label>
+                                        <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>{emailPreview.to || <span style={{ color: 'var(--error)' }}>No email found — enter override below</span>}</p>
                                     </div>
                                     <div>
-                                        <label className="block text-xs text-gray-500 mb-1">Subject</label>
-                                        <p className="text-sm">{emailPreview.subject}</p>
+                                        <label className="block text-xs mb-1" style={{ color: 'var(--on-surface-variant)' }}>Subject</label>
+                                        <p className="text-sm" style={{ color: 'var(--on-surface)' }}>{emailPreview.subject}</p>
                                     </div>
                                     <div>
-                                        <label className="block text-xs text-gray-500 mb-1">Preview</label>
-                                        <pre className="text-xs bg-gray-50 rounded p-3 whitespace-pre-wrap max-h-40 overflow-y-auto border border-gray-200">{emailPreview.body}</pre>
+                                        <label className="block text-xs mb-1" style={{ color: 'var(--on-surface-variant)' }}>Preview</label>
+                                        <pre className="text-xs rounded p-3 whitespace-pre-wrap max-h-40 overflow-y-auto border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)', color: 'var(--on-surface)' }}>{emailPreview.body}</pre>
                                     </div>
                                 </div>
                             ) : null}
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Email Override (optional)</label>
+                                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--on-surface)' }}>Email Override (optional)</label>
                                 <input
                                     type="email"
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
+                                    className="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
+                                    style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                                     placeholder="Override destination email..."
                                     value={requestEmail}
                                     onChange={e => setRequestEmail(e.target.value)}
                                 />
-                                <p className="text-xs text-gray-400 mt-1">Leave blank to use the email from manufacturer policies.</p>
+                                <p className="text-xs mt-1" style={{ color: 'var(--on-surface-variant)' }}>Leave blank to use the email from manufacturer policies.</p>
                             </div>
                         </div>
-                        <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
+                        <div className="p-6 border-t flex justify-end gap-3" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <Button variant="ghost" onClick={closeModal}>Cancel</Button>
                             <Button variant="primary" onClick={handleSendRequest} disabled={isActionLoading}>
                                 {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Send className="w-4 h-4 mr-1" />}
@@ -916,50 +961,51 @@ export default function RATrackingPage() {
 
             {/* ── Resend RA Modal ────────────────────────────────── */}
             {activeModal === 'resend' && selectedMemo && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={closeModal}>
-                    <div className="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                        <div className="p-6 border-b border-gray-200">
+                <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={closeModal}>
+                    <div className="rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                        <div className="p-6 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <div className="flex items-center justify-between">
-                                <h2 className="text-lg font-bold text-gray-900">Resend RA Reminder</h2>
-                                <button onClick={closeModal} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                                <h2 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>Resend RA Reminder</h2>
+                                <button onClick={closeModal} style={{ color: 'var(--outline)' }}><X className="w-5 h-5" /></button>
                             </div>
                         </div>
                         <div className="p-6 space-y-4">
-                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-800">
+                            <div className="border rounded-lg p-3 text-sm" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)', color: 'var(--on-tertiary-container)' }}>
                                 <p>Original request sent: <strong>{selectedMemo.raRequestedAt ? formatDate(selectedMemo.raRequestedAt) : 'N/A'}</strong></p>
                                 {selectedMemo.ticklerDate && (
-                                    <p>Tickler date: <strong className={isOverdue(selectedMemo) ? 'text-red-600' : ''}>{formatDate(selectedMemo.ticklerDate)}</strong>
+                                    <p>Tickler date: <strong style={{ color: isOverdue(selectedMemo) ? 'var(--error)' : 'inherit' }}>{formatDate(selectedMemo.ticklerDate)}</strong>
                                     {isOverdue(selectedMemo) && ' — OVERDUE'}</p>
                                 )}
                             </div>
 
-                            <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-1">
-                                <div className="flex justify-between"><span className="text-gray-500">Memo</span><span className="font-medium">{selectedMemo.memoNumber}</span></div>
-                                <div className="flex justify-between"><span className="text-gray-500">Labeler</span><span>{selectedMemo.labelerName || '—'}</span></div>
-                                <div className="flex justify-between"><span className="text-gray-500">Ask Value</span><span className="font-medium">{formatCurrency(selectedMemo.totalAskValue)}</span></div>
+                            <div className="rounded-lg p-4 text-sm space-y-1 border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
+                                <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Memo</span><span className="font-medium" style={{ color: 'var(--foreground)' }}>{selectedMemo.memoNumber}</span></div>
+                                <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Labeler</span><span style={{ color: 'var(--on-surface)' }}>{selectedMemo.labelerName || '—'}</span></div>
+                                <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Ask Value</span><span className="font-medium" style={{ color: 'var(--foreground)' }}>{formatCurrency(selectedMemo.totalAskValue)}</span></div>
                             </div>
 
                             {isPreviewLoading ? (
                                 <div className="flex items-center justify-center py-6"><Loader2 className="w-6 h-6 animate-spin text-primary-500" /></div>
                             ) : emailPreview ? (
                                 <div>
-                                    <label className="block text-xs text-gray-500 mb-1">Reminder Preview</label>
-                                    <pre className="text-xs bg-gray-50 rounded p-3 whitespace-pre-wrap max-h-32 overflow-y-auto border border-gray-200">{emailPreview.body}</pre>
+                                    <label className="block text-xs mb-1" style={{ color: 'var(--on-surface-variant)' }}>Reminder Preview</label>
+                                    <pre className="text-xs rounded p-3 whitespace-pre-wrap max-h-32 overflow-y-auto border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)', color: 'var(--on-surface)' }}>{emailPreview.body}</pre>
                                 </div>
                             ) : null}
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Email Override (optional)</label>
+                                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--on-surface)' }}>Email Override (optional)</label>
                                 <input
                                     type="email"
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                                    className="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
+                                    style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                                     placeholder="Override destination email..."
                                     value={requestEmail}
                                     onChange={e => setRequestEmail(e.target.value)}
                                 />
                             </div>
                         </div>
-                        <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
+                        <div className="p-6 border-t flex justify-end gap-3" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <Button variant="ghost" onClick={closeModal}>Cancel</Button>
                             <Button variant="warning" onClick={handleResend} disabled={isActionLoading}>
                                 {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <RefreshCw className="w-4 h-4 mr-1" />}
@@ -972,26 +1018,27 @@ export default function RATrackingPage() {
 
             {/* ── Receive RA Modal (Task 11.7) ──────────────────── */}
             {activeModal === 'receive' && selectedMemo && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={closeModal}>
-                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4" onClick={e => e.stopPropagation()}>
-                        <div className="p-6 border-b border-gray-200">
+                <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={closeModal}>
+                    <div className="rounded-xl shadow-xl max-w-md w-full mx-4 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                        <div className="p-6 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <div className="flex items-center justify-between">
-                                <h2 className="text-lg font-bold text-gray-900">Record RA Received</h2>
-                                <button onClick={closeModal} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                                <h2 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>Record RA Received</h2>
+                                <button onClick={closeModal} style={{ color: 'var(--outline)' }}><X className="w-5 h-5" /></button>
                             </div>
                         </div>
                         <div className="p-6 space-y-4">
-                            <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-1">
-                                <div className="flex justify-between"><span className="text-gray-500">Memo</span><span className="font-medium">{selectedMemo.memoNumber}</span></div>
-                                <div className="flex justify-between"><span className="text-gray-500">Labeler</span><span>{selectedMemo.labelerName || '—'}</span></div>
-                                <div className="flex justify-between"><span className="text-gray-500">Destination</span><span>{selectedMemo.destination || '—'}</span></div>
+                            <div className="rounded-lg p-4 text-sm space-y-1 border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
+                                <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Memo</span><span className="font-medium" style={{ color: 'var(--foreground)' }}>{selectedMemo.memoNumber}</span></div>
+                                <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Labeler</span><span style={{ color: 'var(--on-surface)' }}>{selectedMemo.labelerName || '—'}</span></div>
+                                <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Destination</span><span style={{ color: 'var(--on-surface)' }}>{selectedMemo.destination || '—'}</span></div>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">RA Number *</label>
+                                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--on-surface)' }}>RA Number *</label>
                                 <input
                                     type="text"
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
+                                    className="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
+                                    style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                                     placeholder="Enter RA number..."
                                     value={receiveRaNumber}
                                     onChange={e => setReceiveRaNumber(e.target.value)}
@@ -1000,18 +1047,19 @@ export default function RATrackingPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">PDF URL (optional)</label>
+                                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--on-surface)' }}>PDF URL (optional)</label>
                                 <input
                                     type="url"
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                                    className="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
+                                    style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                                     placeholder="https://..."
                                     value={receivePdfUrl}
                                     onChange={e => setReceivePdfUrl(e.target.value)}
                                 />
-                                <p className="text-xs text-gray-400 mt-1">Link to the RA authorization PDF if available.</p>
+                                <p className="text-xs mt-1" style={{ color: 'var(--on-surface-variant)' }}>Link to the RA authorization PDF if available.</p>
                             </div>
                         </div>
-                        <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
+                        <div className="p-6 border-t flex justify-end gap-3" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <Button variant="ghost" onClick={closeModal}>Cancel</Button>
                             <Button variant="success" onClick={handleReceive} disabled={isActionLoading || !receiveRaNumber.trim()}>
                                 {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <CheckCircle className="w-4 h-4 mr-1" />}
@@ -1025,43 +1073,47 @@ export default function RATrackingPage() {
             {/* ── Ship Modal (FedEx + Manual) ──────────────────── */}
             {activeModal === 'ship' && selectedMemo && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+                    className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md"
+                    style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
                     onClick={() => {
                         if (!fedexLoading && !groupFedexLoading) closeModal();
                     }}
                 >
                     <div
-                        className="bg-white rounded-xl shadow-xl max-w-2xl w-full mx-4 max-h-[85vh] overflow-y-auto relative"
+                        className="rounded-xl shadow-xl max-w-2xl w-full mx-4 max-h-[85vh] overflow-y-auto relative border"
+                        style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                         onClick={e => e.stopPropagation()}
                     >
                         {groupFedexLoading && (
                             <div
-                                className="absolute inset-0 z-30 bg-white/90 backdrop-blur-[1px] flex flex-col items-center justify-center px-6"
+                                className="absolute inset-0 z-30 backdrop-blur-[1px] flex flex-col items-center justify-center px-6"
+                                style={{ backgroundColor: 'color-mix(in srgb, var(--surface-container-lowest) 90%, transparent)' }}
                                 role="status"
                                 aria-live="polite"
                                 aria-busy="true"
                             >
-                                <Loader2 className="w-10 h-10 animate-spin text-purple-600" />
-                                <p className="mt-4 text-sm font-semibold text-gray-900">
+                                <Loader2 className="w-10 h-10 animate-spin" style={{ color: 'var(--primary)' }} />
+                                <p className="mt-4 text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
                                     {groupShipSubmitPhase === 'creating-group'
                                         ? 'Creating shipment group…'
                                         : 'Creating FedEx shipment…'}
                                 </p>
-                                <p className="mt-2 text-xs text-gray-500 text-center max-w-sm">
+                                <p className="mt-2 text-xs text-center max-w-sm" style={{ color: 'var(--on-surface-variant)' }}>
                                     {groupShipSubmitPhase === 'creating-fedex'
                                         ? 'Please wait for labels and tracking from FedEx.'
                                         : 'Preparing your multi-memo shipment.'}
                                 </p>
                             </div>
                         )}
-                        <div className="p-6 border-b border-gray-200">
+                        <div className="p-6 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <div className="flex items-center justify-between">
-                                <h2 className="text-lg font-bold text-gray-900">Ship to Reverse Distributor</h2>
+                                <h2 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>Ship to Reverse Distributor</h2>
                                 <button
                                     type="button"
                                     onClick={closeModal}
                                     disabled={fedexLoading || groupFedexLoading}
-                                    className="text-gray-400 hover:text-gray-600 disabled:opacity-40 disabled:pointer-events-none"
+                                    className="disabled:opacity-40 disabled:pointer-events-none"
+                                    style={{ color: 'var(--outline)' }}
                                 >
                                     <X className="w-5 h-5" />
                                 </button>
@@ -1071,67 +1123,69 @@ export default function RATrackingPage() {
                             {groupFedexResult && groupShipGroupId ? (
                                 <div className="space-y-4">
                                     <div>
-                                        <h3 className="text-sm font-bold text-gray-900 mb-2">Group shipment</h3>
-                                        <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-2 max-h-40 overflow-y-auto">
-                                            <div className="flex justify-between text-gray-500"><span>Memos</span><span className="font-medium text-gray-900">{groupShippedMemos.length}</span></div>
-                                            <div className="flex justify-between text-gray-500"><span>Destination</span><span className="font-medium capitalize text-gray-900">{groupShippedMemos[0]?.destination || '—'}</span></div>
-                                            <ul className="text-xs text-gray-700 border-t border-gray-200 pt-2 mt-2 space-y-1">
+                                        <h3 className="text-sm font-bold mb-2" style={{ color: 'var(--foreground)' }}>Group shipment</h3>
+                                        <div className="rounded-lg p-4 text-sm space-y-2 max-h-40 overflow-y-auto border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
+                                            <div className="flex justify-between" style={{ color: 'var(--on-surface-variant)' }}><span>Memos</span><span className="font-medium" style={{ color: 'var(--foreground)' }}>{groupShippedMemos.length}</span></div>
+                                            <div className="flex justify-between" style={{ color: 'var(--on-surface-variant)' }}><span>Destination</span><span className="font-medium capitalize" style={{ color: 'var(--foreground)' }}>{groupShippedMemos[0]?.destination || '—'}</span></div>
+                                            <ul className="text-xs border-t pt-2 mt-2 space-y-1" style={{ color: 'var(--on-surface)', borderColor: 'var(--outline-variant)' }}>
                                                 {groupShippedMemos.map(m => (
                                                     <li key={m.id} className="flex justify-between gap-2">
-                                                        <span className="font-medium text-purple-700">{m.memoNumber}</span>
+                                                        <span className="font-medium" style={{ color: 'var(--primary)' }}>{m.memoNumber}</span>
                                                         <span className="truncate">{m.pharmacyName}</span>
-                                                        <span className="text-gray-500 whitespace-nowrap">RA {m.raNumber}</span>
+                                                        <span className="whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>RA {m.raNumber}</span>
                                                         <span>{m.totalItems} items</span>
                                                     </li>
                                                 ))}
                                             </ul>
                                         </div>
                                     </div>
-                                    <div className="bg-blue-600 rounded-lg px-4 py-3 flex items-center justify-between">
+                                    <div className="rounded-lg px-4 py-3 flex items-center justify-between" style={{ backgroundColor: 'var(--primary)' }}>
                                         <p className="text-sm font-bold text-white">FedEx API Shipment</p>
                                         <span className="text-sm font-bold text-white underline font-mono">{groupFedexResult.masterTrackingNumber}</span>
                                     </div>
-                                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-3">
+                                    <div className="border rounded-lg p-4 space-y-3" style={{ backgroundColor: 'var(--secondary-container)', borderColor: 'var(--outline-variant)' }}>
                                         <div className="flex items-center gap-2">
-                                            <CheckCircle className="w-5 h-5 text-green-600" />
-                                            <p className="text-sm font-semibold text-green-800">Shipment Created Successfully</p>
+                                            <CheckCircle className="w-5 h-5" style={{ color: 'var(--secondary)' }} />
+                                            <p className="text-sm font-semibold" style={{ color: 'var(--on-secondary-container)' }}>Shipment Created Successfully</p>
                                         </div>
                                         <div className="grid grid-cols-2 gap-2 text-xs">
                                             <div>
-                                                <span className="text-gray-500">Master Tracking:</span>
-                                                <span className="ml-1 font-mono font-bold text-gray-900">{groupFedexResult.masterTrackingNumber}</span>
+                                                <span style={{ color: 'var(--on-surface-variant)' }}>Master Tracking:</span>
+                                                <span className="ml-1 font-mono font-bold" style={{ color: 'var(--foreground)' }}>{groupFedexResult.masterTrackingNumber}</span>
                                             </div>
                                             <div>
-                                                <span className="text-gray-500">Packages:</span>
-                                                <span className="ml-1 font-medium text-gray-900">{groupFedexResult.packages.length}</span>
+                                                <span style={{ color: 'var(--on-surface-variant)' }}>Packages:</span>
+                                                <span className="ml-1 font-medium" style={{ color: 'var(--foreground)' }}>{groupFedexResult.packages.length}</span>
                                             </div>
                                         </div>
                                     </div>
                                     <div className="space-y-2">
                                         <div className="flex items-center justify-between">
-                                            <p className="text-sm font-semibold text-gray-800">Package Tracking Numbers:</p>
+                                            <p className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Package Tracking Numbers:</p>
                                             <button
                                                 type="button"
                                                 onClick={() => printShipmentGroupLabel(groupShipGroupId)}
                                                 disabled={printGroupLabelLoading}
-                                                className="flex items-center gap-1 px-2 py-1 bg-green-100 hover:bg-green-200 text-xs text-green-700 rounded border border-green-200 disabled:opacity-50"
+                                                className="flex items-center gap-1 px-2 py-1 text-xs rounded border disabled:opacity-50 hover:bg-primary-50/40"
+                                                style={{ backgroundColor: 'var(--surface-container-low)', color: 'var(--secondary)', borderColor: 'var(--outline-variant)' }}
                                             >
                                                 {printGroupLabelLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
                                                 Print Labels
                                             </button>
                                         </div>
-                                        <div className="border border-gray-200 rounded-lg overflow-hidden divide-y divide-gray-100">
+                                        <div className="border rounded-lg overflow-hidden divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                             {groupFedexResult.packages.map((pkg, i) => (
-                                                <div key={i} className="flex items-center justify-between text-xs bg-white px-4 py-2.5">
+                                                <div key={i} className="flex items-center justify-between text-xs px-4 py-2.5" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-gray-500 font-medium">Package {i + 1}:</span>
-                                                        <span className="font-mono font-semibold text-gray-900">{pkg.trackingNumber}</span>
+                                                        <span className="font-medium" style={{ color: 'var(--on-surface-variant)' }}>Package {i + 1}:</span>
+                                                        <span className="font-mono font-semibold" style={{ color: 'var(--foreground)' }}>{pkg.trackingNumber}</span>
                                                     </div>
                                                     <button
                                                         type="button"
                                                         onClick={() => printShipmentGroupLabel(groupShipGroupId)}
                                                         disabled={printGroupLabelLoading}
-                                                        className="flex items-center justify-center w-7 h-7 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 disabled:opacity-50"
+                                                        className="flex items-center justify-center w-7 h-7 rounded border disabled:opacity-50 hover:bg-primary-50/40"
+                                                        style={{ backgroundColor: 'var(--surface-container-low)', color: 'var(--secondary)', borderColor: 'var(--outline-variant)' }}
                                                     >
                                                         {printGroupLabelLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
                                                     </button>
@@ -1139,52 +1193,55 @@ export default function RATrackingPage() {
                                             ))}
                                         </div>
                                     </div>
-                                    <div className="border-t border-gray-200 pt-4 space-y-3">
-                                        <p className="text-sm font-medium text-gray-700">Schedule FedEx Pickup (Optional)</p>
+                                    <div className="border-t pt-4 space-y-3" style={{ borderColor: 'var(--outline-variant)' }}>
+                                        <p className="text-sm font-medium" style={{ color: 'var(--on-surface)' }}>Schedule FedEx Pickup (Optional)</p>
                                         {groupPickupConfirmation ? (
-                                            <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
-                                                <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                                            <div className="border rounded-lg p-3 flex items-center gap-2" style={{ backgroundColor: 'var(--secondary-container)', borderColor: 'var(--outline-variant)' }}>
+                                                <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--secondary)' }} />
                                                 <div className="text-xs">
-                                                    <span className="text-green-800 font-medium">Pickup scheduled!</span>
-                                                    <span className="ml-1 text-green-700">Confirmation: <span className="font-mono font-semibold">{groupPickupConfirmation}</span></span>
+                                                    <span className="font-medium" style={{ color: 'var(--on-secondary-container)' }}>Pickup scheduled!</span>
+                                                    <span className="ml-1" style={{ color: 'var(--on-secondary-container)' }}>Confirmation: <span className="font-mono font-semibold">{groupPickupConfirmation}</span></span>
                                                 </div>
                                             </div>
                                         ) : (
                                             <>
-                                                <div className="bg-amber-50 border border-amber-200 rounded-md p-3">
-                                                    <p className="text-xs text-amber-800">
+                                                <div className="border rounded-md p-3" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}>
+                                                    <p className="text-xs" style={{ color: 'var(--on-tertiary-container)' }}>
                                                         <strong>Note:</strong> Pickup scheduling may not work in sandbox/test mode.
                                                         You can also call FedEx directly at <strong>1-800-463-3339</strong> and say &quot;Ground Return Pickup&quot;.
                                                     </p>
                                                 </div>
                                                 <div className="flex items-center gap-4 flex-wrap">
                                                     <div>
-                                                        <label className="text-xs text-gray-500">Pickup Date</label>
+                                                        <label className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>Pickup Date</label>
                                                         <input
                                                             type="date"
                                                             value={groupPickupForm.pickupDate}
                                                             onChange={e => setGroupPickupForm(prev => ({ ...prev, pickupDate: e.target.value }))}
-                                                            className="block w-36 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                                            className="block w-36 px-2 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                                                             disabled={groupPickupLoading}
                                                         />
                                                     </div>
                                                     <div>
-                                                        <label className="text-xs text-gray-500">Ready Time</label>
+                                                        <label className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>Ready Time</label>
                                                         <input
                                                             type="time"
                                                             value={groupPickupForm.readyTime}
                                                             onChange={e => setGroupPickupForm(prev => ({ ...prev, readyTime: e.target.value }))}
-                                                            className="block w-28 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                                            className="block w-28 px-2 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                                                             disabled={groupPickupLoading}
                                                         />
                                                     </div>
                                                     <div>
-                                                        <label className="text-xs text-gray-500">Close Time</label>
+                                                        <label className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>Close Time</label>
                                                         <input
                                                             type="time"
                                                             value={groupPickupForm.closeTime}
                                                             onChange={e => setGroupPickupForm(prev => ({ ...prev, closeTime: e.target.value }))}
-                                                            className="block w-28 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                                            className="block w-28 px-2 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                                                             disabled={groupPickupLoading}
                                                         />
                                                     </div>
@@ -1212,7 +1269,8 @@ export default function RATrackingPage() {
                                                                 }
                                                             }}
                                                             disabled={groupPickupLoading}
-                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white text-xs font-medium rounded-md transition-colors"
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+                                                            style={{ backgroundColor: 'var(--secondary)' }}
                                                         >
                                                             {groupPickupLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Truck className="w-3.5 h-3.5" />}
                                                             Schedule Pickup
@@ -1226,25 +1284,25 @@ export default function RATrackingPage() {
                             ) : fedexResult ? (
                                 <div className="space-y-4">
                                     {/* Shipment header banner */}
-                                    <div className="bg-blue-600 rounded-lg px-4 py-3 flex items-center justify-between">
+                                    <div className="rounded-lg px-4 py-3 flex items-center justify-between" style={{ backgroundColor: 'var(--primary)' }}>
                                         <p className="text-sm font-bold text-white">FedEx API Shipment</p>
                                         <span className="text-sm font-bold text-white underline font-mono">{fedexResult.masterTrackingNumber}</span>
                                     </div>
 
                                     {/* Success info */}
-                                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-3">
+                                    <div className="border rounded-lg p-4 space-y-3" style={{ backgroundColor: 'var(--secondary-container)', borderColor: 'var(--outline-variant)' }}>
                                         <div className="flex items-center gap-2">
-                                            <CheckCircle className="w-5 h-5 text-green-600" />
-                                            <p className="text-sm font-semibold text-green-800">Shipment Created Successfully</p>
+                                            <CheckCircle className="w-5 h-5" style={{ color: 'var(--secondary)' }} />
+                                            <p className="text-sm font-semibold" style={{ color: 'var(--on-secondary-container)' }}>Shipment Created Successfully</p>
                                         </div>
                                         <div className="grid grid-cols-2 gap-2 text-xs">
                                             <div>
-                                                <span className="text-gray-500">Master Tracking:</span>
-                                                <span className="ml-1 font-mono font-bold text-gray-900">{fedexResult.masterTrackingNumber}</span>
+                                                <span style={{ color: 'var(--on-surface-variant)' }}>Master Tracking:</span>
+                                                <span className="ml-1 font-mono font-bold" style={{ color: 'var(--foreground)' }}>{fedexResult.masterTrackingNumber}</span>
                                             </div>
                                             <div>
-                                                <span className="text-gray-500">Packages:</span>
-                                                <span className="ml-1 font-medium text-gray-900">{fedexResult.packages.length}</span>
+                                                <span style={{ color: 'var(--on-surface-variant)' }}>Packages:</span>
+                                                <span className="ml-1 font-medium" style={{ color: 'var(--foreground)' }}>{fedexResult.packages.length}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -1252,12 +1310,13 @@ export default function RATrackingPage() {
                                     {/* Package Tracking Numbers */}
                                     <div className="space-y-2">
                                         <div className="flex items-center justify-between">
-                                            <p className="text-sm font-semibold text-gray-800">Package Tracking Numbers:</p>
+                                            <p className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Package Tracking Numbers:</p>
                                             {selectedMemo && (
                                                 <button
                                                     onClick={() => printDebitMemoLabel(selectedMemo.id)}
                                                     disabled={printLabelLoading === selectedMemo.id}
-                                                    className="flex items-center gap-1 px-2 py-1 bg-green-100 hover:bg-green-200 text-xs text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
+                                                    className="flex items-center gap-1 px-2 py-1 text-xs rounded border transition-colors disabled:opacity-50 hover:bg-primary-50/40"
+                                                    style={{ backgroundColor: 'var(--surface-container-low)', color: 'var(--secondary)', borderColor: 'var(--outline-variant)' }}
                                                     title="Print shipping label"
                                                 >
                                                     {printLabelLoading === selectedMemo.id
@@ -1267,18 +1326,19 @@ export default function RATrackingPage() {
                                                 </button>
                                             )}
                                         </div>
-                                        <div className="border border-gray-200 rounded-lg overflow-hidden divide-y divide-gray-100">
+                                        <div className="border rounded-lg overflow-hidden divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                             {fedexResult.packages.map((pkg, i) => (
-                                                <div key={i} className="flex items-center justify-between text-xs bg-white px-4 py-2.5">
+                                                <div key={i} className="flex items-center justify-between text-xs px-4 py-2.5" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-gray-500 font-medium">Package {i + 1}:</span>
-                                                        <span className="font-mono font-semibold text-gray-900">{pkg.trackingNumber}</span>
+                                                        <span className="font-medium" style={{ color: 'var(--on-surface-variant)' }}>Package {i + 1}:</span>
+                                                        <span className="font-mono font-semibold" style={{ color: 'var(--foreground)' }}>{pkg.trackingNumber}</span>
                                                     </div>
                                                     {selectedMemo && (
                                                         <button
                                                             onClick={() => printDebitMemoLabel(selectedMemo.id)}
                                                             disabled={printLabelLoading === selectedMemo.id}
-                                                            className="flex items-center justify-center w-7 h-7 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 transition-colors disabled:opacity-50"
+                                                            className="flex items-center justify-center w-7 h-7 rounded border transition-colors disabled:opacity-50 hover:bg-primary-50/40"
+                                                            style={{ backgroundColor: 'var(--surface-container-low)', color: 'var(--secondary)', borderColor: 'var(--outline-variant)' }}
                                                             title="Print shipping label"
                                                         >
                                                             {printLabelLoading === selectedMemo.id
@@ -1293,52 +1353,55 @@ export default function RATrackingPage() {
                                     </div>
 
                                     {/* Schedule Pickup */}
-                                    <div className="border-t border-gray-200 pt-4 space-y-3">
-                                        <p className="text-sm font-medium text-gray-700">Schedule FedEx Pickup (Optional)</p>
+                                    <div className="border-t pt-4 space-y-3" style={{ borderColor: 'var(--outline-variant)' }}>
+                                        <p className="text-sm font-medium" style={{ color: 'var(--on-surface)' }}>Schedule FedEx Pickup (Optional)</p>
                                         {pickupConfirmation ? (
-                                            <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
-                                                <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                                            <div className="border rounded-lg p-3 flex items-center gap-2" style={{ backgroundColor: 'var(--secondary-container)', borderColor: 'var(--outline-variant)' }}>
+                                                <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--secondary)' }} />
                                                 <div className="text-xs">
-                                                    <span className="text-green-800 font-medium">Pickup scheduled!</span>
-                                                    <span className="ml-1 text-green-700">Confirmation: <span className="font-mono font-semibold">{pickupConfirmation}</span></span>
+                                                    <span className="font-medium" style={{ color: 'var(--on-secondary-container)' }}>Pickup scheduled!</span>
+                                                    <span className="ml-1" style={{ color: 'var(--on-secondary-container)' }}>Confirmation: <span className="font-mono font-semibold">{pickupConfirmation}</span></span>
                                                 </div>
                                             </div>
                                         ) : (
                                             <>
-                                                <div className="bg-amber-50 border border-amber-200 rounded-md p-3">
-                                                    <p className="text-xs text-amber-800">
+                                                <div className="border rounded-md p-3" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}>
+                                                    <p className="text-xs" style={{ color: 'var(--on-tertiary-container)' }}>
                                                         <strong>Note:</strong> Pickup scheduling may not work in sandbox/test mode.
                                                         You can also call FedEx directly at <strong>1-800-463-3339</strong> and say &quot;Ground Return Pickup&quot;.
                                                     </p>
                                                 </div>
                                                 <div className="flex items-center gap-4 flex-wrap">
                                                     <div>
-                                                        <label className="text-xs text-gray-500">Pickup Date</label>
+                                                        <label className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>Pickup Date</label>
                                                         <input
                                                             type="date"
                                                             value={pickupForm.pickupDate}
                                                             onChange={e => setPickupForm(prev => ({ ...prev, pickupDate: e.target.value }))}
-                                                            className="block w-36 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                            className="block w-36 px-2 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                                                             disabled={pickupLoading}
                                                         />
                                                     </div>
                                                     <div>
-                                                        <label className="text-xs text-gray-500">Ready Time</label>
+                                                        <label className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>Ready Time</label>
                                                         <input
                                                             type="time"
                                                             value={pickupForm.readyTime}
                                                             onChange={e => setPickupForm(prev => ({ ...prev, readyTime: e.target.value }))}
-                                                            className="block w-28 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                            className="block w-28 px-2 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                                                             disabled={pickupLoading}
                                                         />
                                                     </div>
                                                     <div>
-                                                        <label className="text-xs text-gray-500">Close Time</label>
+                                                        <label className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>Close Time</label>
                                                         <input
                                                             type="time"
                                                             value={pickupForm.closeTime}
                                                             onChange={e => setPickupForm(prev => ({ ...prev, closeTime: e.target.value }))}
-                                                            className="block w-28 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                            className="block w-28 px-2 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                                                             disabled={pickupLoading}
                                                         />
                                                     </div>
@@ -1365,7 +1428,8 @@ export default function RATrackingPage() {
                                                                 }
                                                             }}
                                                             disabled={pickupLoading}
-                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white text-xs font-medium rounded-md transition-colors"
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+                                                            style={{ backgroundColor: 'var(--secondary)' }}
                                                         >
                                                             {pickupLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Truck className="w-3.5 h-3.5" />}
                                                             Schedule Pickup
@@ -1378,63 +1442,69 @@ export default function RATrackingPage() {
                                 </div>
                             ) : (
                                 <>
-                                    <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-1">
-                                        <div className="flex justify-between"><span className="text-gray-500">Memo</span><span className="font-medium">{selectedMemo.memoNumber}</span></div>
-                                        <div className="flex justify-between"><span className="text-gray-500">RA #</span><span className="font-medium text-green-700">{selectedMemo.raNumber}</span></div>
-                                        <div className="flex justify-between"><span className="text-gray-500">Destination</span><span className="capitalize font-medium">{selectedMemo.destination || '—'}</span></div>
-                                        <div className="flex justify-between"><span className="text-gray-500">Items</span><span>{selectedMemo.totalItems}</span></div>
+                                    <div className="rounded-lg p-4 text-sm space-y-1 border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
+                                        <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Memo</span><span className="font-medium" style={{ color: 'var(--foreground)' }}>{selectedMemo.memoNumber}</span></div>
+                                        <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>RA #</span><span className="font-medium" style={{ color: 'var(--secondary)' }}>{selectedMemo.raNumber}</span></div>
+                                        <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Destination</span><span className="capitalize font-medium" style={{ color: 'var(--foreground)' }}>{selectedMemo.destination || '—'}</span></div>
+                                        <div className="flex justify-between"><span style={{ color: 'var(--on-surface-variant)' }}>Items</span><span style={{ color: 'var(--on-surface)' }}>{selectedMemo.totalItems}</span></div>
                                     </div>
 
-                                    <div className="border border-purple-200 bg-purple-50/70 rounded-lg p-4 space-y-3">
+                                    <div className="border rounded-lg p-4 space-y-3" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}>
                                         <div className="flex items-start gap-2">
-                                            <Layers className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                                            <Layers className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: 'var(--tertiary)' }} />
                                             <div>
-                                                <p className="text-sm font-semibold text-gray-900">Ship together (same destination)</p>
-                                                <p className="text-xs text-gray-600 mt-1">
+                                                <p className="text-sm font-semibold" style={{ color: 'var(--on-tertiary-container)' }}>Ship together (same destination)</p>
+                                                <p className="text-xs mt-1" style={{ color: 'var(--on-tertiary-container)' }}>
                                                     Add other received memos going to <span className="font-medium capitalize">{selectedMemo.destination || 'this reverse distributor'}</span> on one FedEx shipment. This memo stays included.
                                                 </p>
                                             </div>
                                         </div>
                                         {isGroupLoading ? (
-                                            <div className="flex items-center gap-2 text-xs text-gray-500 py-1">
-                                                <Loader2 className="w-4 h-4 animate-spin text-purple-600" />
+                                            <div className="flex items-center gap-2 text-xs py-1" style={{ color: 'var(--on-tertiary-container)' }}>
+                                                <Loader2 className="w-4 h-4 animate-spin" style={{ color: 'var(--tertiary)' }} />
                                                 Checking for other eligible memos…
                                             </div>
                                         ) : (
                                             <>
-                                                <label className="flex items-center gap-3 p-2 rounded bg-white border border-gray-100">
-                                                    <input type="checkbox" checked readOnly disabled className="rounded border-gray-300 text-purple-600 opacity-70" />
+                                                <label className="flex items-center gap-3 p-2 rounded border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                                                    <input type="checkbox" checked readOnly disabled className="rounded opacity-70" style={{ borderColor: 'var(--outline-variant)', color: 'var(--primary)' }} />
                                                     <div className="flex-1 min-w-0 text-sm">
-                                                        <span className="font-medium text-purple-700">{selectedMemo.memoNumber}</span>
-                                                        <span className="text-gray-500 mx-2">{selectedMemo.pharmacyName}</span>
-                                                        <span className="text-gray-400 text-xs">RA {selectedMemo.raNumber}</span>
+                                                        <span className="font-medium" style={{ color: 'var(--primary)' }}>{selectedMemo.memoNumber}</span>
+                                                        <span className="mx-2" style={{ color: 'var(--on-surface-variant)' }}>{selectedMemo.pharmacyName}</span>
+                                                        <span className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>RA {selectedMemo.raNumber}</span>
                                                     </div>
-                                                    <span className="text-[10px] uppercase text-gray-400 shrink-0">This memo</span>
+                                                    <span className="text-[10px] uppercase shrink-0" style={{ color: 'var(--on-surface-variant)' }}>This memo</span>
                                                 </label>
                                                 {shipModalPeers.map(memo => (
-                                                    <label key={memo.id} className="flex items-center gap-3 p-2 rounded hover:bg-white border border-transparent hover:border-gray-100 cursor-pointer">
+                                                    <label
+                                                        key={memo.id}
+                                                        className="flex items-center gap-3 p-2 rounded border cursor-pointer hover:bg-primary-50/40"
+                                                        style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'transparent' }}
+                                                    >
                                                         <input
                                                             type="checkbox"
                                                             checked={selectedMemosForGroup.includes(memo.id)}
                                                             onChange={() => toggleShipWithMemo(memo.id)}
-                                                            className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                                                            className="rounded focus:ring-primary-500"
+                                                            style={{ borderColor: 'var(--outline-variant)', color: 'var(--primary)' }}
                                                         />
                                                         <div className="flex-1 min-w-0 text-sm flex flex-wrap gap-x-3 gap-y-0.5">
-                                                            <span className="font-medium text-purple-700">{memo.memoNumber}</span>
-                                                            <span className="text-gray-600">{memo.pharmacyName}</span>
-                                                            <span className="text-gray-400 text-xs">RA {memo.raNumber}</span>
-                                                            <span className="text-gray-500">{formatCurrency(memo.totalAskValue)}</span>
+                                                            <span className="font-medium" style={{ color: 'var(--primary)' }}>{memo.memoNumber}</span>
+                                                            <span style={{ color: 'var(--on-surface)' }}>{memo.pharmacyName}</span>
+                                                            <span className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>RA {memo.raNumber}</span>
+                                                            <span style={{ color: 'var(--on-surface-variant)' }}>{formatCurrency(memo.totalAskValue)}</span>
                                                         </div>
                                                     </label>
                                                 ))}
                                                 {shipModalPeers.length === 0 && (
-                                                    <p className="text-xs text-gray-500">No other eligible memos share this destination right now.</p>
+                                                    <p className="text-xs" style={{ color: 'var(--on-tertiary-container)' }}>No other eligible memos share this destination right now.</p>
                                                 )}
                                                 {shipModalPeers.length > 0 && (
                                                     <button
                                                         type="button"
                                                         onClick={selectAllShipPeersSameDestination}
-                                                        className="text-xs font-medium text-purple-700 hover:text-purple-900"
+                                                        className="text-xs font-medium hover:underline"
+                                                        style={{ color: 'var(--primary)' }}
                                                     >
                                                         Select all at this destination ({shipModalPeers.length + 1} memos)
                                                     </button>
@@ -1445,25 +1515,27 @@ export default function RATrackingPage() {
 
                                     {shipMode === 'choose' && (
                                         <div className="space-y-3">
-                                            <p className="text-sm text-gray-600 text-center">How would you like to ship?</p>
+                                            <p className="text-sm text-center" style={{ color: 'var(--on-surface-variant)' }}>How would you like to ship?</p>
                                             <div className="grid grid-cols-2 gap-3">
                                                 <button
                                                     type="button"
                                                     onClick={() => setShipMode('fedex')}
-                                                    className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all"
+                                                    className="flex flex-col items-center gap-2 p-4 border-2 rounded-lg transition-all hover:bg-primary-50/40"
+                                                    style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)' }}
                                                 >
-                                                    <Truck className="w-6 h-6 text-blue-600" />
-                                                    <span className="text-sm font-semibold text-gray-900">Create FedEx Shipment</span>
-                                                    <span className="text-[10px] text-gray-500">Auto-generate labels & tracking</span>
+                                                    <Truck className="w-6 h-6" style={{ color: 'var(--primary)' }} />
+                                                    <span className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Create FedEx Shipment</span>
+                                                    <span className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Auto-generate labels & tracking</span>
                                                 </button>
                                                 <button
                                                     type="button"
                                                     onClick={() => setShipMode('manual')}
-                                                    className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-lg hover:border-gray-500 hover:bg-gray-50 transition-all"
+                                                    className="flex flex-col items-center gap-2 p-4 border-2 rounded-lg transition-all hover:bg-primary-50/40"
+                                                    style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)' }}
                                                 >
-                                                    <Edit className="w-6 h-6 text-gray-600" />
-                                                    <span className="text-sm font-semibold text-gray-900">Enter Manually</span>
-                                                    <span className="text-[10px] text-gray-500">Paste tracking number</span>
+                                                    <Edit className="w-6 h-6" style={{ color: 'var(--on-surface-variant)' }} />
+                                                    <span className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Enter Manually</span>
+                                                    <span className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Paste tracking number</span>
                                                 </button>
                                             </div>
                                         </div>
@@ -1471,10 +1543,10 @@ export default function RATrackingPage() {
 
                                     {shipMode === 'fedex' && (
                                         <div className="space-y-4">
-                                            <p className="text-sm text-gray-600 text-center">
+                                            <p className="text-sm text-center" style={{ color: 'var(--on-surface-variant)' }}>
                                                 Create a FedEx Ground shipment from the warehouse to <strong className="capitalize">{selectedMemo.destination}</strong>
                                                 {selectedMemosForGroup.length >= 2 && (
-                                                    <span className="block mt-2 font-semibold text-blue-800">
+                                                    <span className="block mt-2 font-semibold" style={{ color: 'var(--primary)' }}>
                                                         {selectedMemosForGroup.length} memos will ship on one FedEx shipment.
                                                     </span>
                                                 )}
@@ -1482,20 +1554,21 @@ export default function RATrackingPage() {
 
                                             <div className="flex items-center justify-center gap-4">
                                                 <div>
-                                                    <label className="text-sm font-medium text-gray-700">Number of Boxes:</label>
+                                                    <label className="text-sm font-medium" style={{ color: 'var(--on-surface)' }}>Number of Boxes:</label>
                                                     <input
                                                         type="number"
                                                         min="1"
                                                         max="99"
                                                         value={fedexBoxCount}
                                                         onChange={e => setFedexBoxCount(e.target.value)}
-                                                        className="ml-2 w-20 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+                                                        className="ml-2 w-20 px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-center"
+                                                        style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                                                         disabled={fedexLoading || groupFedexLoading}
                                                     />
                                                 </div>
                                             </div>
 
-                                            <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-xs text-blue-800 text-center space-y-1">
+                                            <div className="border rounded-md p-3 text-xs text-center space-y-1" style={{ backgroundColor: 'var(--primary-fixed)', borderColor: 'var(--outline-variant)', color: 'var(--on-primary-container)' }}>
                                                 <p>Shipment: <strong>Warehouse</strong> → <strong className="capitalize">{selectedMemo.destination}</strong></p>
                                                 <p>Ensure the warehouse address and reverse distributor address are configured.</p>
                                             </div>
@@ -1504,7 +1577,8 @@ export default function RATrackingPage() {
                                                 <button
                                                     type="button"
                                                     onClick={() => setShipMode('choose')}
-                                                    className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+                                                    className="px-4 py-2 text-sm transition-colors hover:underline"
+                                                    style={{ color: 'var(--on-surface-variant)' }}
                                                 >
                                                     Back
                                                 </button>
@@ -1544,7 +1618,8 @@ export default function RATrackingPage() {
                                                         }
                                                     }}
                                                     disabled={fedexLoading || groupFedexLoading || !fedexBoxCount}
-                                                    className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-medium rounded-lg transition-colors"
+                                                    className="flex items-center gap-2 px-6 py-2.5 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                                                    style={{ backgroundColor: 'var(--primary)' }}
                                                 >
                                                     {(fedexLoading || groupFedexLoading) ? (
                                                         <><Loader2 className="w-4 h-4 animate-spin" /> Creating Shipment...</>
@@ -1564,15 +1639,16 @@ export default function RATrackingPage() {
                                     {shipMode === 'manual' && (
                                         <div className="space-y-4">
                                             {selectedMemosForGroup.length > 1 && (
-                                                <p className="text-xs text-amber-800 bg-amber-50 border border-amber-100 rounded-md p-2">
+                                                <p className="text-xs border rounded-md p-2" style={{ color: 'var(--on-tertiary-container)', backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}>
                                                     Manual tracking applies to this memo only. Other checked memos are not updated on this step.
                                                 </p>
                                             )}
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Outbound Tracking # *</label>
+                                                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--on-surface)' }}>Outbound Tracking # *</label>
                                                 <input
                                                     type="text"
-                                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
+                                                    className="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
+                                                    style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                                                     placeholder="FedEx/UPS tracking number..."
                                                     value={shipTracking}
                                                     onChange={e => setShipTracking(e.target.value)}
@@ -1585,7 +1661,7 @@ export default function RATrackingPage() {
                             )}
                         </div>
 
-                        <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
+                        <div className="p-6 border-t flex justify-end gap-3" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             {groupFedexResult && groupShipGroupId ? (
                                 <Button variant="primary" onClick={closeModal}>
                                     Done

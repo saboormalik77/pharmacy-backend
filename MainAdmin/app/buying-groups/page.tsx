@@ -373,7 +373,14 @@ export default function BuyingGroupsPage() {
   return (
     <div>
       {successMsg && (
-        <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+        <div
+          className="mb-4 px-4 py-3 rounded-lg text-sm border"
+          style={{
+            backgroundColor: 'var(--secondary-container)',
+            borderColor: 'var(--secondary)',
+            color: 'var(--on-surface)',
+          }}
+        >
           {successMsg}
         </div>
       )}
@@ -381,8 +388,10 @@ export default function BuyingGroupsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-lg font-bold text-gray-900">Buying Groups</h1>
-          <p className="text-gray-600 mt-1">Manage your buying groups and their admin accounts</p>
+          <h1 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>Buying Groups</h1>
+          <p className="mt-1" style={{ color: 'var(--on-surface-variant)' }}>
+            Manage your buying groups and their admin accounts
+          </p>
         </div>
         <Button variant="primary" onClick={openCreateModal} className="flex items-center gap-2">
           <Plus className="w-4 h-4" />
@@ -393,20 +402,24 @@ export default function BuyingGroupsPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         {[
-          { label: 'Total', value: stats.total, icon: Users, color: 'text-indigo-600 bg-indigo-100' },
+          { label: 'Total', value: stats.total, icon: Users, color: 'text-primary-700 bg-primary-100' },
           { label: 'Active', value: stats.active, icon: CheckCircle, color: 'text-green-600 bg-green-100' },
           { label: 'Inactive', value: stats.inactive, icon: XCircle, color: 'text-gray-600 bg-gray-100' },
           { label: 'Suspended', value: stats.suspended, icon: AlertTriangle, color: 'text-red-600 bg-red-100' },
         ].map((s) => {
           const Icon = s.icon;
           return (
-            <div key={s.label} className="bg-white rounded-lg border border-gray-200 p-3 flex items-center gap-3">
+            <div
+              key={s.label}
+              className="rounded-lg border p-3 flex items-center gap-3"
+              style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
+            >
               <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center', s.color)}>
                 <Icon className="w-4 h-4" />
               </div>
               <div>
-                <p className="text-xs text-gray-500">{s.label}</p>
-                <p className="text-lg font-bold text-gray-900">{isLoading ? '...' : s.value}</p>
+                <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>{s.label}</p>
+                <p className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>{isLoading ? '...' : s.value}</p>
               </div>
             </div>
           );
@@ -414,7 +427,10 @@ export default function BuyingGroupsPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
+      <div
+        className="rounded-lg border p-4 mb-4"
+        style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
+      >
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -424,13 +440,15 @@ export default function BuyingGroupsPage() {
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               autoComplete="off"
-              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full pl-9 pr-4 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-            className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
           >
             <option value="all">All Statuses</option>
             <option value="active">Active</option>
@@ -441,7 +459,7 @@ export default function BuyingGroupsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="rounded-lg border overflow-hidden" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
         {isLoading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
@@ -458,7 +476,7 @@ export default function BuyingGroupsPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gradient-to-r from-indigo-500 to-indigo-400 text-white">
+              <thead className="text-white" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
                 <tr>
                   <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Name</th>
                   <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden md:table-cell">Contact Email</th>
@@ -469,24 +487,24 @@ export default function BuyingGroupsPage() {
                   <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                 {buyingGroups.map((group) => (
-                  <tr key={group.id} className="odd:bg-white even:bg-gray-50/40 hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{group.name}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600 hidden md:table-cell">{group.contactEmail || '-'}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600 hidden lg:table-cell">{group.contactPhone || '-'}</td>
-                    <td className="px-4 py-3 text-sm text-center text-gray-600">{group.adminCount}</td>
+                  <tr key={group.id} className="transition-colors hover:bg-primary-50/40">
+                    <td className="px-4 py-3 text-sm font-medium" style={{ color: 'var(--foreground)' }}>{group.name}</td>
+                    <td className="px-4 py-3 text-sm hidden md:table-cell" style={{ color: 'var(--on-surface-variant)' }}>{group.contactEmail || '-'}</td>
+                    <td className="px-4 py-3 text-sm hidden lg:table-cell" style={{ color: 'var(--on-surface-variant)' }}>{group.contactPhone || '-'}</td>
+                    <td className="px-4 py-3 text-sm text-center" style={{ color: 'var(--on-surface-variant)' }}>{group.adminCount}</td>
                     <td className="px-4 py-3 text-sm text-center">{statusBadge(group.status)}</td>
-                    <td className="px-4 py-3 text-sm text-gray-500 hidden sm:table-cell">{formatDate(group.createdAt)}</td>
+                    <td className="px-4 py-3 text-sm hidden sm:table-cell" style={{ color: 'var(--on-surface-variant)' }}>{formatDate(group.createdAt)}</td>
                     <td className="px-4 py-3 text-sm">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => openViewModal(group)} className="p-1.5 rounded hover:bg-gray-100 text-gray-500 hover:text-indigo-600" title="View">
+                        <button onClick={() => openViewModal(group)} className="p-1.5 rounded hover:bg-primary-50 transition-colors" style={{ color: 'var(--on-surface-variant)' }} title="View">
                           <Eye className="w-4 h-4" />
                         </button>
-                        <button onClick={() => openEditModal(group)} className="p-1.5 rounded hover:bg-gray-100 text-gray-500 hover:text-yellow-600" title="Edit">
+                        <button onClick={() => openEditModal(group)} className="p-1.5 rounded hover:bg-primary-50 transition-colors" style={{ color: 'var(--on-surface-variant)' }} title="Edit">
                           <Pencil className="w-4 h-4" />
                         </button>
-                        <button onClick={() => setDeleteConfirm(group.id)} className="p-1.5 rounded hover:bg-gray-100 text-gray-500 hover:text-red-600" title="Delete">
+                        <button onClick={() => setDeleteConfirm(group.id)} className="p-1.5 rounded hover:bg-primary-50 transition-colors" style={{ color: 'var(--on-surface-variant)' }} title="Delete">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -526,10 +544,16 @@ export default function BuyingGroupsPage() {
 
       {/* Delete Confirm Dialog */}
       {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete Buying Group</h3>
-            <p className="text-sm text-gray-600 mb-6">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm"
+          style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 45%, transparent)' }}
+        >
+          <div
+            className="rounded-lg shadow-xl max-w-sm w-full mx-4 p-6 border"
+            style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
+          >
+            <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--foreground)' }}>Delete Buying Group</h3>
+            <p className="text-sm mb-6" style={{ color: 'var(--on-surface-variant)' }}>
               Are you sure you want to delete this buying group? Associated admin accounts will be deactivated.
             </p>
             <div className="flex justify-end gap-3">
@@ -546,11 +570,20 @@ export default function BuyingGroupsPage() {
 
       {/* Create / Edit Modal */}
       {(modalMode === 'create' || modalMode === 'edit') && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-y-auto py-6 px-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-xl max-h-[92vh] flex flex-col">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm overflow-y-auto py-6 px-4"
+          style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
+        >
+          <div
+            className="rounded-xl shadow-2xl w-full max-w-xl max-h-[92vh] flex flex-col border"
+            style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
+          >
 
             {/* Modal Header */}
-            <div className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-t-xl px-6 py-4 flex items-center justify-between shrink-0">
+            <div
+              className="rounded-t-xl px-6 py-4 flex items-center justify-between shrink-0"
+              style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}
+            >
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
                   <Users className="w-4 h-4 text-white" />
@@ -559,7 +592,7 @@ export default function BuyingGroupsPage() {
                   <h3 className="text-base font-semibold text-white">
                     {modalMode === 'create' ? 'Add Buying Group' : 'Edit Buying Group'}
                   </h3>
-                  <p className="text-indigo-200 text-xs mt-0.5">
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--inverse-on-surface)' }}>
                     {modalMode === 'create' ? 'Fill in the details to create a new buying group' : 'Update the buying group information'}
                   </p>
                 </div>
@@ -895,7 +928,10 @@ export default function BuyingGroupsPage() {
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-xl shrink-0">
+            <div
+              className="flex items-center justify-end gap-3 px-6 py-4 border-t rounded-b-xl shrink-0"
+              style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
+            >
               <Button variant="outline" onClick={closeModal} disabled={isSubmitting}>
                 Cancel
               </Button>
@@ -921,18 +957,27 @@ export default function BuyingGroupsPage() {
 
       {/* View Modal */}
       {modalMode === 'view' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-y-auto py-6 px-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-xl max-h-[92vh] flex flex-col">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm overflow-y-auto py-6 px-4"
+          style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
+        >
+          <div
+            className="rounded-xl shadow-2xl w-full max-w-xl max-h-[92vh] flex flex-col border"
+            style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
+          >
 
             {/* Header */}
-            <div className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-t-xl px-6 py-4 flex items-center justify-between shrink-0">
+            <div
+              className="rounded-t-xl px-6 py-4 flex items-center justify-between shrink-0"
+              style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}
+            >
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
                   <Eye className="w-4 h-4 text-white" />
                 </div>
                 <div>
                   <h3 className="text-base font-semibold text-white">Buying Group Details</h3>
-                  <p className="text-indigo-200 text-xs mt-0.5">View group information and linked accounts</p>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--inverse-on-surface)' }}>View group information and linked accounts</p>
                 </div>
               </div>
               <button onClick={closeModal} className="p-1.5 rounded-lg hover:bg-white/20 text-white/80 hover:text-white transition-colors cursor-pointer">
@@ -1065,7 +1110,10 @@ export default function BuyingGroupsPage() {
               <div className="px-6 py-8 text-center text-gray-500">Buying group not found.</div>
             )}
 
-            <div className="flex justify-end px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-xl shrink-0">
+            <div
+              className="flex justify-end px-6 py-4 border-t rounded-b-xl shrink-0"
+              style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
+            >
               <Button variant="outline" onClick={closeModal}>Close</Button>
             </div>
           </div>

@@ -21,18 +21,14 @@ const warehouseSections = [
         icon: PackageCheck,
         label: 'Receiving',
         description: 'Scan and receive returned packages from pharmacies. Verify contents and log discrepancies.',
-        color: 'text-blue-600',
-        bg: 'bg-blue-50',
-        border: 'border-blue-100',
+        tone: { chipBg: 'var(--surface-container-low)', icon: 'var(--primary)' },
     },
     {
         href: '/warehouse/verification',
         icon: ClipboardCheck,
         label: 'Verification',
         description: 'Verify received returns item-by-item. Check conditions, report damaged or missing items, track surplus.',
-        color: 'text-teal-600',
-        bg: 'bg-teal-50',
-        border: 'border-teal-100',
+        tone: { chipBg: 'var(--surface-container-low)', icon: 'var(--secondary)' },
     },
     // {
     //     href: '/warehouse/surplus',
@@ -48,54 +44,42 @@ const warehouseSections = [
         icon: Layers,
         label: 'Batches',
         description: 'Create and manage monthly batches. Assign returns, close batches and submit to Cardinal.',
-        color: 'text-purple-600',
-        bg: 'bg-purple-50',
-        border: 'border-purple-100',
+        tone: { chipBg: 'var(--surface-container-low)', icon: 'var(--tertiary)' },
     },
     {
         href: '/warehouse/debit-memos',
         icon: Receipt,
         label: 'Debit Memos',
         description: 'View auto-generated debit memos per reverse distributor. Track RA status and payment.',
-        color: 'text-orange-600',
-        bg: 'bg-orange-50',
-        border: 'border-orange-100',
+        tone: { chipBg: 'var(--surface-container-low)', icon: 'var(--tertiary)' },
     },
     {
         href: '/warehouse/ra-tracking',
         icon: MailCheck,
         label: 'RA Tracking',
         description: 'Manage return authorization requests. Track outbound shipments and RA receipts.',
-        color: 'text-green-600',
-        bg: 'bg-green-50',
-        border: 'border-green-100',
+        tone: { chipBg: 'var(--surface-container-low)', icon: 'var(--secondary)' },
     },
     {
         href: '/warehouse/wine-cellar',
         icon: Archive,
         label: 'Wine Cellar',
         description: 'Products stored for future return processing. Monitor shelved items and ready-to-return inventory.',
-        color: 'text-purple-600',
-        bg: 'bg-purple-50',
-        border: 'border-purple-100',
+        tone: { chipBg: 'var(--surface-container-low)', icon: 'var(--primary)' },
     },
     {
         href: '/warehouse/tbd-items',
         icon: Clock,
         label: 'TBD Items',
         description: 'Items pending disposition decisions. Review and resolve items awaiting classification.',
-        color: 'text-yellow-600',
-        bg: 'bg-yellow-50',
-        border: 'border-yellow-100',
+        tone: { chipBg: 'var(--surface-container-low)', icon: 'var(--tertiary)' },
     },
     {
         href: '/warehouse/destruction',
         icon: Ban,
         label: 'Destruction',
         description: 'Items scheduled for destruction. Track destruction records and compliance documentation.',
-        color: 'text-red-600',
-        bg: 'bg-red-50',
-        border: 'border-red-100',
+        tone: { chipBg: 'var(--error-container)', icon: 'var(--error)' },
     },
 ];
 
@@ -105,19 +89,22 @@ export default function WarehouseHubPage() {
         <div className="space-y-4">
             {/* Header */}
             <div>
-                <h1 className="text-lg font-bold text-gray-900">Warehouse</h1>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <h1 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>Warehouse</h1>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--on-surface-variant)' }}>
                     Manage the full return processing flow — from receiving to manufacturer payments.
                 </p>
             </div>
 
             {/* Flow indicator */}
-            <div className="flex items-center gap-1.5 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg overflow-x-auto">
+            <div
+                className="flex items-center gap-1.5 px-3 py-2 border rounded-lg overflow-x-auto"
+                style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}
+            >
                 {warehouseSections.map((section, idx) => (
                     <div key={section.href} className="flex items-center gap-1.5 whitespace-nowrap">
-                        <span className="text-[10px] font-medium text-gray-500">{section.label}</span>
+                        <span className="text-[10px] font-medium" style={{ color: 'var(--on-surface-variant)' }}>{section.label}</span>
                         {idx < warehouseSections.length - 1 && (
-                            <ArrowRight className="w-3 h-3 text-gray-300 flex-shrink-0" />
+                            <ArrowRight className="w-3 h-3 flex-shrink-0" style={{ color: 'var(--outline-variant)' }} />
                         )}
                     </div>
                 ))}
@@ -131,21 +118,22 @@ export default function WarehouseHubPage() {
                         <Link
                             key={section.href}
                             href={section.href}
-                            className={`group flex flex-col gap-3 p-4 bg-white border ${section.border} rounded-lg hover:shadow-md transition-all duration-150 hover:border-opacity-60`}
+                            className="group flex flex-col gap-3 p-4 border rounded-lg hover:shadow-md transition-all duration-150"
+                            style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                         >
                             {/* Icon + label */}
                             <div className="flex items-center justify-between">
                                 <div className={`flex items-center gap-2.5`}>
-                                    <div className={`p-2 rounded-lg ${section.bg}`}>
-                                        <Icon className={`w-4 h-4 ${section.color}`} />
+                                    <div className="p-2 rounded-lg" style={{ backgroundColor: section.tone.chipBg }}>
+                                        <Icon className="w-4 h-4" style={{ color: section.tone.icon }} />
                                     </div>
-                                    <span className="text-sm font-semibold text-gray-800">{section.label}</span>
+                                    <span className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>{section.label}</span>
                                 </div>
-                                <ArrowRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-gray-500 group-hover:translate-x-0.5 transition-all" />
+                                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-all" style={{ color: 'var(--outline)' }} />
                             </div>
 
                             {/* Description */}
-                            <p className="text-xs text-gray-500 leading-relaxed">
+                            <p className="text-xs leading-relaxed" style={{ color: 'var(--on-surface-variant)' }}>
                                 {section.description}
                             </p>
                         </Link>

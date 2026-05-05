@@ -298,8 +298,8 @@ export default function NDCPricingPage() {
                         <DollarSign className="w-5 h-5 text-primary-600" />
                     </div>
                     <div>
-                        <h1 className="text-lg font-bold text-gray-900">NDC Pricing</h1>
-                        <p className="text-xs text-gray-500">
+                        <h1 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>NDC Pricing</h1>
+                        <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>
                             {pagination ? `${pagination.total} entries` : 'Manage NDC price book'}
                         </p>
                     </div>
@@ -320,7 +320,8 @@ export default function NDCPricingPage() {
                     placeholder="Search by NDC or product name..."
                     value={search}
                     onChange={e => setSearch(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 text-xs border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-primary-500 placeholder:text-gray-400"
+                    className="w-full pl-9 pr-4 py-2 text-xs border rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 placeholder:text-gray-400"
+                    style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)' }}
                 />
             </div>
 
@@ -332,11 +333,11 @@ export default function NDCPricingPage() {
             )}
 
             {/* Table */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="rounded-lg shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
-                            <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                            <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
                                 <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
                                 <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product Name</th>
                                 <th className="text-right px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Current Price</th>
@@ -361,38 +362,40 @@ export default function NDCPricingPage() {
                                     </td>
                                 </tr>
                             ) : items.map(row => (
-                                <tr key={row.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                <tr key={row.id} className="border-b hover:bg-primary-50/40 transition-colors" style={{ borderColor: 'var(--outline-variant)' }}>
                                     <td className="px-4 py-3">
                                         <span className="font-mono text-sm font-semibold text-primary-600">{row.ndc}</span>
                                     </td>
                                     <td className="px-4 py-3">
-                                        <span className="text-sm text-gray-900 truncate block max-w-[200px]">{row.productName || '—'}</span>
+                                        <span className="text-sm truncate block max-w-[200px]" style={{ color: 'var(--foreground)' }}>{row.productName || '—'}</span>
                                     </td>
-                                    <td className="px-4 py-3 text-right font-mono text-sm font-medium text-gray-900">{fmt(row.currentPrice)}</td>
-                                    <td className="px-4 py-3 text-right font-mono text-sm text-gray-900">{fmt(row.estimatedStorePrice)}</td>
+                                    <td className="px-4 py-3 text-right font-mono text-sm font-medium" style={{ color: 'var(--foreground)' }}>{fmt(row.currentPrice)}</td>
+                                    <td className="px-4 py-3 text-right font-mono text-sm" style={{ color: 'var(--foreground)' }}>{fmt(row.estimatedStorePrice)}</td>
                                     <td className="px-4 py-3">
                                         {row.priceSource
-                                            ? <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200 truncate max-w-[130px]">{row.priceSource}</span>
-                                            : <span className="text-gray-400 text-sm">—</span>}
+                                            ? <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border truncate max-w-[130px]" style={{ backgroundColor: 'var(--secondary-container)', color: 'var(--on-surface)', borderColor: 'color-mix(in srgb, var(--secondary) 35%, var(--outline-variant))' }}>{row.priceSource}</span>
+                                            : <span className="text-sm" style={{ color: 'var(--on-surface-variant)' }}>—</span>}
                                     </td>
                                     <td className="px-4 py-3">
                                         {row.closeOutDestination
-                                            ? <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-50 text-purple-700 border border-purple-200 capitalize">{row.closeOutDestination}</span>
-                                            : <span className="text-gray-400 text-sm">—</span>}
+                                            ? <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border capitalize" style={{ backgroundColor: 'var(--tertiary-fixed)', color: 'var(--on-surface)', borderColor: 'color-mix(in srgb, var(--tertiary) 30%, var(--outline-variant))' }}>{row.closeOutDestination}</span>
+                                            : <span className="text-sm" style={{ color: 'var(--on-surface-variant)' }}>—</span>}
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-gray-500">{fmtDate(row.updatedAt)}</td>
+                                    <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{fmtDate(row.updatedAt)}</td>
                                     <td className="px-4 py-3">
                                         <div className="flex items-center justify-center gap-1">
                                             <button
                                                 onClick={() => openEdit(row)}
-                                                className="p-1 rounded hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-colors"
+                                                className="p-1 rounded hover:bg-primary-50 transition-colors"
+                                                style={{ color: 'var(--on-surface-variant)' }}
                                                 title="Edit"
                                             >
                                                 <Pencil className="w-3.5 h-3.5" />
                                             </button>
                                             <button
                                                 onClick={() => setDeleteModal(row)}
-                                                className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors"
+                                                className="p-1 rounded hover:bg-red-50 hover:text-red-600 transition-colors"
+                                                style={{ color: 'var(--on-surface-variant)' }}
                                                 title="Delete"
                                             >
                                                 <Trash2 className="w-3.5 h-3.5" />
@@ -407,22 +410,24 @@ export default function NDCPricingPage() {
 
                 {/* Pagination */}
                 {pagination && pagination.totalPages > 1 && (
-                    <div className="flex items-center justify-between px-3 py-2 border-t border-gray-100 bg-gray-50">
-                        <span className="text-[10px] text-gray-500">
+                    <div className="flex items-center justify-between px-3 py-2 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                        <span className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>
                             Page {pagination.page} of {pagination.totalPages} &middot; {pagination.total} entries
                         </span>
                         <div className="flex gap-1">
                             <button
                                 disabled={page <= 1}
                                 onClick={() => setPage(p => Math.max(1, p - 1))}
-                                className="p-1 rounded hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed text-gray-600 transition-colors"
+                                className="p-1 rounded hover:bg-primary-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                style={{ color: 'var(--on-surface-variant)' }}
                             >
                                 <ChevronLeft className="w-4 h-4" />
                             </button>
                             <button
                                 disabled={page >= pagination.totalPages}
                                 onClick={() => setPage(p => p + 1)}
-                                className="p-1 rounded hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed text-gray-600 transition-colors"
+                                className="p-1 rounded hover:bg-primary-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                style={{ color: 'var(--on-surface-variant)' }}
                             >
                                 <ChevronRight className="w-4 h-4" />
                             </button>
@@ -433,9 +438,13 @@ export default function NDCPricingPage() {
 
             {/* ── Add / Edit Modal ─────────────────────────── */}
             {formModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setFormModal(false)}>
-                    <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
-                        <div className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-t-xl px-4 py-3">
+                <div
+                    className="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                    style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
+                    onClick={() => setFormModal(false)}
+                >
+                    <div className="rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                        <div className="rounded-t-xl px-4 py-3" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <div className="p-1.5 bg-white/20 rounded-lg">
@@ -711,20 +720,24 @@ export default function NDCPricingPage() {
 
             {/* ── Delete Confirmation Modal ─────────────────── */}
             {deleteModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setDeleteModal(null)}>
-                    <div className="bg-white rounded-lg max-w-sm w-full shadow-2xl" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50 rounded-t-lg">
-                            <h3 className="text-sm font-semibold text-gray-900">Delete NDC Pricing</h3>
-                            <button onClick={() => setDeleteModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                <div
+                    className="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                    style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
+                    onClick={() => setDeleteModal(null)}
+                >
+                    <div className="rounded-lg max-w-sm w-full shadow-2xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b rounded-t-lg" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                            <h3 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Delete NDC Pricing</h3>
+                            <button onClick={() => setDeleteModal(null)} style={{ color: 'var(--outline)' }}><X className="w-4 h-4" /></button>
                         </div>
                         <div className="px-4 py-3">
-                            <p className="text-xs text-gray-600 mb-1">Are you sure you want to delete pricing for:</p>
-                            <p className="text-xs font-mono font-semibold text-gray-900">
+                            <p className="text-xs mb-1" style={{ color: 'var(--on-surface-variant)' }}>Are you sure you want to delete pricing for:</p>
+                            <p className="text-xs font-mono font-semibold" style={{ color: 'var(--foreground)' }}>
                                 {deleteModal.ndc}{deleteModal.productName ? ` — ${deleteModal.productName}` : ''}
                             </p>
                         </div>
-                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50 rounded-b-lg">
-                            <button onClick={() => setDeleteModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors">Cancel</button>
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t rounded-b-lg" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                            <button onClick={() => setDeleteModal(null)} className="px-3 py-1.5 text-xs rounded border transition-colors" style={{ borderColor: 'var(--outline-variant)', color: 'var(--on-surface)' }}>Cancel</button>
                             <button onClick={handleDelete} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors font-medium">
                                 {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                                 Delete

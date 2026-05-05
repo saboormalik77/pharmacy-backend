@@ -38,6 +38,25 @@ function getStatusBadge(status: string): { label: string; variant: 'success' | '
     }
 }
 
+function statusPillStyle(status: string): React.CSSProperties {
+    switch (status) {
+        case 'open':
+            return { backgroundColor: 'var(--tertiary-fixed)', color: 'var(--on-tertiary-container)', borderColor: 'var(--outline-variant)' };
+        case 'closed':
+            return { backgroundColor: 'var(--surface-container-low)', color: 'var(--primary)', borderColor: 'var(--outline-variant)' };
+        case 'submitted':
+            return { backgroundColor: 'var(--secondary-container)', color: 'var(--on-secondary-container)', borderColor: 'var(--outline-variant)' };
+        default:
+            return { backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface-variant)', borderColor: 'var(--outline-variant)' };
+    }
+}
+
+function cardinalPillStyle(state: 'submitted' | 'file_ready' | 'pending'): React.CSSProperties {
+    if (state === 'submitted') return { backgroundColor: 'var(--secondary-container)', color: 'var(--on-secondary-container)', borderColor: 'var(--outline-variant)' };
+    if (state === 'file_ready') return { backgroundColor: 'var(--primary-container)', color: 'var(--on-primary-container)', borderColor: 'var(--outline-variant)' };
+    return { backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface-variant)', borderColor: 'var(--outline-variant)' };
+}
+
 function returnTransactionStatusBadgeVariant(status: ReturnTransaction['status']): 'success' | 'info' | 'warning' | 'default' {
     switch (status) {
         case 'received':
@@ -243,8 +262,8 @@ export default function BatchDetailPage() {
     if (!batch) {
         return (
             <div className="text-center py-20">
-                <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-3" />
-                <p className="text-lg font-medium text-gray-900">Batch not found</p>
+                <AlertCircle className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--error)' }} />
+                <p className="text-lg font-medium" style={{ color: 'var(--foreground)' }}>Batch not found</p>
                 <Button variant="ghost" onClick={() => router.push('/warehouse/batches')} className="mt-4">
                     <ArrowLeft className="w-4 h-4 mr-1" /> Back to Batches
                 </Button>
@@ -261,15 +280,17 @@ export default function BatchDetailPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <div className="flex items-center gap-2">
-                    <button onClick={() => router.push('/warehouse/batches')} className="text-gray-400 hover:text-gray-600 p-0.5">
+                    <button onClick={() => router.push('/warehouse/batches')} className="p-0.5" style={{ color: 'var(--outline)' }}>
                         <ArrowLeft className="w-4 h-4" />
                     </button>
                     <div>
                         <div className="flex items-center gap-1.5">
-                            <h1 className="text-base font-bold text-gray-900">{batch.batchName}</h1>
-                            <Badge variant={sb.variant}><span className="text-[10px]">{sb.label}</span></Badge>
+                            <h1 className="text-base font-bold" style={{ color: 'var(--foreground)' }}>{batch.batchName}</h1>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded border text-[10px] font-medium" style={statusPillStyle(batch.status)}>
+                                {sb.label}
+                            </span>
                         </div>
-                        <p className="text-xs text-gray-500">{formatBatchMonth(batch.batchMonth)}</p>
+                        <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>{formatBatchMonth(batch.batchMonth)}</p>
                     </div>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
@@ -279,15 +300,15 @@ export default function BatchDetailPage() {
                                 <Plus className="w-3.5 h-3.5" /> Assign Returns
                             </button>
                             {batchReturns.length > 0 && (
-                                <button onClick={openUnassignModal} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium bg-orange-100 text-orange-800 border border-orange-300 hover:bg-orange-200 transition-colors">
+                                <button onClick={openUnassignModal} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium border transition-colors hover:bg-primary-50/40" style={{ backgroundColor: 'var(--tertiary-fixed)', color: 'var(--on-tertiary-container)', borderColor: 'var(--outline-variant)' }}>
                                     <UserX className="w-3.5 h-3.5" /> Unassign Returns
                                 </button>
                             )}
-                            <button onClick={() => setShowClose(true)} disabled={batch.totalReturns === 0} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-300 hover:bg-yellow-200 disabled:opacity-40 transition-colors">
+                            <button onClick={() => setShowClose(true)} disabled={batch.totalReturns === 0} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium border disabled:opacity-40 transition-colors hover:bg-primary-50/40" style={{ backgroundColor: 'var(--tertiary-fixed)', color: 'var(--on-tertiary-container)', borderColor: 'var(--outline-variant)' }}>
                                 <Lock className="w-3.5 h-3.5" /> Close Batch
                             </button>
                             {batchPermissions?.canDelete && (
-                                <button onClick={() => setShowDelete(true)} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium bg-red-100 text-red-800 border border-red-300 hover:bg-red-200 transition-colors">
+                                <button onClick={() => setShowDelete(true)} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium border transition-colors hover:bg-primary-50/40" style={{ backgroundColor: 'var(--error-container)', color: 'var(--on-error-container)', borderColor: 'var(--outline-variant)' }}>
                                     <Trash2 className="w-3.5 h-3.5" /> Delete Batch
                                 </button>
                             )}
@@ -296,7 +317,8 @@ export default function BatchDetailPage() {
                     {(batch.status === 'closed' || batch.status === 'submitted') && (
                         <button
                             onClick={() => router.push(`/warehouse/batches/${batchId}/workflow`)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium text-white transition-colors"
+                            style={{ backgroundColor: 'var(--primary)' }}
                         >
                             <Layers className="w-3.5 h-3.5" />
                             Continue Workflow
@@ -307,60 +329,68 @@ export default function BatchDetailPage() {
 
             {/* Batch Info Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                <div className="bg-white rounded-lg shadow px-3 py-2">
-                    <p className="text-[10px] text-gray-500 uppercase font-medium">Returns</p>
+                <div className="rounded-lg shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                    <p className="text-[10px] uppercase font-medium" style={{ color: 'var(--on-surface-variant)' }}>Returns</p>
                     <p className="text-lg font-bold mt-0.5">{batch.totalReturns}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow px-3 py-2">
-                    <p className="text-[10px] text-gray-500 uppercase font-medium">Debit Memos</p>
+                <div className="rounded-lg shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                    <p className="text-[10px] uppercase font-medium" style={{ color: 'var(--on-surface-variant)' }}>Debit Memos</p>
                     <p className="text-lg font-bold mt-0.5">{batch.totalDebitMemos}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow px-3 py-2">
-                    <p className="text-[10px] text-gray-500 uppercase font-medium">Total Value</p>
-                    <p className="text-lg font-bold mt-0.5 text-green-700">{formatCurrency(batch.totalValue)}</p>
+                <div className="rounded-lg shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                    <p className="text-[10px] uppercase font-medium" style={{ color: 'var(--on-surface-variant)' }}>Total Value</p>
+                    <p className="text-lg font-bold mt-0.5" style={{ color: 'var(--secondary)' }}>{formatCurrency(batch.totalValue)}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow px-3 py-2">
-                    <p className="text-[10px] text-gray-500 uppercase font-medium">Cardinal Status</p>
+                <div className="rounded-lg shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                    <p className="text-[10px] uppercase font-medium" style={{ color: 'var(--on-surface-variant)' }}>Cardinal Status</p>
                     <div className="mt-0.5">
                         {batch.cardinalSubmittedAt ? (
                             <div>
-                                <Badge variant="success"><span className="text-[10px]">Submitted</span></Badge>
-                                <p className="text-[10px] text-gray-500 mt-0.5">{formatDate(batch.cardinalSubmittedAt)}</p>
+                                <span className="inline-flex items-center px-2 py-0.5 rounded border text-[10px] font-medium" style={cardinalPillStyle('submitted')}>
+                                    Submitted
+                                </span>
+                                <p className="text-[10px] mt-0.5" style={{ color: 'var(--on-surface-variant)' }}>{formatDate(batch.cardinalSubmittedAt)}</p>
                             </div>
                         ) : batch.cardinalFileGenerated ? (
-                            <Badge variant="info"><span className="text-[10px]">File Ready</span></Badge>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded border text-[10px] font-medium" style={cardinalPillStyle('file_ready')}>
+                                File Ready
+                            </span>
                         ) : (
-                            <Badge variant="default"><span className="text-[10px]">Pending</span></Badge>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded border text-[10px] font-medium" style={cardinalPillStyle('pending')}>
+                                Pending
+                            </span>
                         )}
                     </div>
                 </div>
             </div>
 
             {/* Batch Metadata */}
-            <div className="bg-white rounded-lg shadow px-4 py-3">
-                <h2 className="text-xs font-semibold text-gray-900 mb-2">Batch Details</h2>
+            <div className="rounded-lg shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                <h2 className="text-xs font-semibold mb-2" style={{ color: 'var(--foreground)' }}>Batch Details</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div>
-                        <p className="text-[10px] text-gray-500">Created</p>
+                        <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Created</p>
                         <p className="text-xs font-medium">{formatDateTime(batch.createdAt)}</p>
                     </div>
                     {batch.closedAt && (
                         <div>
-                            <p className="text-[10px] text-gray-500">Closed</p>
+                            <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Closed</p>
                             <p className="text-xs font-medium">{formatDateTime(batch.closedAt)}</p>
                         </div>
                     )}
                     {batch.cardinalApprovedAt && (
                         <div>
-                            <p className="text-[10px] text-gray-500">Cardinal Approved</p>
+                            <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Cardinal Approved</p>
                             <p className="text-xs font-medium">{formatDateTime(batch.cardinalApprovedAt)}</p>
                         </div>
                     )}
                     {batch.cardinalFileUrl && (
                         <div>
-                            <p className="text-[10px] text-gray-500">Cardinal File</p>
+                            <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Cardinal File</p>
                             <a href={batch.cardinalFileUrl} target="_blank" rel="noopener noreferrer"
-                               className="text-xs text-primary-600 hover:underline flex items-center gap-1">
+                               className="text-xs hover:underline flex items-center gap-1"
+                               style={{ color: 'var(--primary)' }}
+                            >
                                 Download <ExternalLink className="w-3 h-3" />
                             </a>
                         </div>
@@ -369,28 +399,28 @@ export default function BatchDetailPage() {
             </div>
 
             {/* Returns in Batch */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="rounded-lg shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 <button
                     onClick={() => setReturnsExpanded(e => !e)}
-                    className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 transition-colors"
+                    className="w-full flex items-center justify-between px-4 py-2.5 transition-colors hover:bg-primary-50/40"
                 >
                     <div className="flex items-center gap-1.5">
-                        <Package className="w-3.5 h-3.5 text-gray-600" />
-                        <h2 className="text-xs font-semibold text-gray-900">Returns in Batch</h2>
+                        <Package className="w-3.5 h-3.5" style={{ color: 'var(--on-surface-variant)' }} />
+                        <h2 className="text-xs font-semibold" style={{ color: 'var(--foreground)' }}>Returns in Batch</h2>
                         <Badge variant="default"><span className="text-[10px]">{batchReturns.length}</span></Badge>
                     </div>
-                    {returnsExpanded ? <ChevronUp className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
+                    {returnsExpanded ? <ChevronUp className="w-3.5 h-3.5" style={{ color: 'var(--outline)' }} /> : <ChevronDown className="w-3.5 h-3.5" style={{ color: 'var(--outline)' }} />}
                 </button>
 
                 {returnsExpanded && (
-                    <div className="border-t border-gray-200">
+                    <div className="border-t" style={{ borderColor: 'var(--outline-variant)' }}>
                         {batchReturns.length === 0 ? (
-                            <p className="text-center py-6 text-xs text-gray-500">No returns assigned yet.</p>
+                            <p className="text-center py-6 text-xs" style={{ color: 'var(--on-surface-variant)' }}>No returns assigned yet.</p>
                         ) : (
                             <div className="overflow-x-auto">
                                 <table className="min-w-full">
                                     <thead>
-                                        <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                        <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
                                             <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">License Plate</th>
                                             <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Pharmacy</th>
                                             <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Status</th>
@@ -400,22 +430,24 @@ export default function BatchDetailPage() {
                                             <th className="px-4 py-3.5 text-center text-xs font-semibold uppercase tracking-wider text-white">Action</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-100">
+                                    <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                         {batchReturns.map((rt: ReturnTransaction) => (
-                                            <tr key={rt.id} className="hover:bg-gray-50 cursor-pointer"
+                                            <tr key={rt.id} className="hover:bg-primary-50/40 cursor-pointer"
+                                                style={{ backgroundColor: 'var(--surface-container-lowest)' }}
                                                 onClick={() => router.push(`/warehouse/returns/${rt.id}`)}>
-                                                <td className="px-4 py-3 text-sm font-medium text-gray-900">{rt.licensePlate}</td>
-                                                <td className="px-4 py-3 text-sm text-gray-700">{rt.pharmacyName}</td>
+                                                <td className="px-4 py-3 text-sm font-medium" style={{ color: 'var(--foreground)' }}>{rt.licensePlate}</td>
+                                                <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{rt.pharmacyName}</td>
                                                 <td className="px-4 py-3"><Badge variant="default"><span className="text-[10px]">{rt.status?.replace(/_/g, ' ')}</span></Badge></td>
-                                                <td className="px-4 py-3 text-sm text-gray-700">{rt.totalItems}</td>
+                                                <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{rt.totalItems}</td>
                                                 <td className="px-4 py-3 text-sm font-medium">{formatCurrency(rt.totalReturnableValue || 0)}</td>
-                                                <td className="px-4 py-3 text-sm text-gray-500">{rt.fedexTracking || '—'}</td>
+                                                <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{rt.fedexTracking || '—'}</td>
                                                 <td className="px-4 py-3 text-center">
                                                     {(batch.status === 'closed' || batch.status === 'submitted') && (
                                                         <button
                                                             onClick={(e) => handleDownloadSummary(rt.id, e)}
                                                             disabled={downloadingReturnId === rt.id}
-                                                            className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary-50/40"
+                                                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}
                                                         >
                                                             {downloadingReturnId === rt.id ? (
                                                                 <><Loader2 className="w-3 h-3 animate-spin" /> Downloading...</>
@@ -437,19 +469,20 @@ export default function BatchDetailPage() {
 
             {/* ── Assign Returns Modal ──────────────────────────────── */}
             {showAssign && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowAssign(false)}>
-                    <div className="bg-white rounded-lg shadow-xl max-w-xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
-                        <div className="px-4 py-3 border-b border-gray-200">
+                <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setShowAssign(false)}>
+                    <div className="rounded-lg shadow-xl max-w-xl w-full mx-4 max-h-[80vh] flex flex-col border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                        <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)' }}>
                             <div className="flex items-center justify-between">
-                                <h2 className="text-sm font-bold text-gray-900">Assign Returns to Batch</h2>
-                                <button onClick={() => setShowAssign(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                                <h2 className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>Assign Returns to Batch</h2>
+                                <button onClick={() => setShowAssign(false)} style={{ color: 'var(--outline)' }}><X className="w-4 h-4" /></button>
                             </div>
                             <div className="relative mt-2">
-                                <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                                <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--outline)' }} />
                                 <input
                                     type="text"
                                     placeholder="Search by license plate, pharmacy, tracking..."
-                                    className="w-full pl-8 pr-3 py-1.5 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary-500"
+                                    className="w-full pl-8 pr-3 py-1.5 border rounded text-xs focus:ring-1 focus:ring-primary-500"
+                                    style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                                     value={assignSearch}
                                     onChange={e => setAssignSearch(e.target.value)}
                                 />
@@ -458,7 +491,7 @@ export default function BatchDetailPage() {
 
                         <div className="overflow-y-auto flex-1 p-3">
                             {filteredReceived.length === 0 ? (
-                                <p className="text-center py-6 text-xs text-gray-500">No verified returns available for assignment.</p>
+                                <p className="text-center py-6 text-xs" style={{ color: 'var(--on-surface-variant)' }}>No verified returns available for assignment.</p>
                             ) : (
                                 <div className="space-y-1.5">
                                     {filteredReceived.map(rt => {
@@ -467,8 +500,9 @@ export default function BatchDetailPage() {
                                             <label
                                                 key={rt.id}
                                                 className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border-2 cursor-pointer transition-colors ${
-                                                    selected ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-gray-300'
+                                                    selected ? '' : ''
                                                 }`}
+                                                style={selected ? { borderColor: 'var(--primary)', backgroundColor: 'var(--primary-container)' } : { borderColor: 'var(--outline-variant)' }}
                                             >
                                                 <input
                                                     type="checkbox"
@@ -477,8 +511,8 @@ export default function BatchDetailPage() {
                                                     className="w-3.5 h-3.5 text-primary-600 rounded focus:ring-primary-500"
                                                 />
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-xs font-medium text-gray-900">{rt.licensePlate}</p>
-                                                    <p className="text-[10px] text-gray-500">{rt.pharmacyName} · {rt.totalItems} items · {formatCurrency(rt.totalReturnableValue || 0)}</p>
+                                                    <p className="text-xs font-medium" style={{ color: 'var(--foreground)' }}>{rt.licensePlate}</p>
+                                                    <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>{rt.pharmacyName} · {rt.totalItems} items · {formatCurrency(rt.totalReturnableValue || 0)}</p>
                                                 </div>
                                                 <Badge variant="default"><span className="text-[10px]">{rt.status?.replace(/_/g, ' ')}</span></Badge>
                                             </label>
@@ -488,10 +522,10 @@ export default function BatchDetailPage() {
                             )}
                         </div>
 
-                        <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
-                            <p className="text-xs text-gray-500">{selectedReturnIds.length} selected</p>
+                        <div className="px-4 py-3 border-t flex items-center justify-between" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                            <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>{selectedReturnIds.length} selected</p>
                             <div className="flex gap-2">
-                                <button onClick={() => setShowAssign(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                                <button onClick={() => setShowAssign(false)} className="px-3 py-1.5 text-xs rounded border transition-colors hover:bg-primary-50/40" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}>Cancel</button>
                                 <button onClick={handleAssign} disabled={isActionLoading || selectedReturnIds.length === 0} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
                                     {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
                                     Assign ({selectedReturnIds.length})
@@ -504,18 +538,18 @@ export default function BatchDetailPage() {
 
             {/* ── Close Batch Confirm ──────────────────────────────── */}
             {showClose && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowClose(false)}>
-                    <div className="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 p-4" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setShowClose(false)}>
+                    <div className="rounded-lg shadow-xl max-w-sm w-full mx-4 p-4 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="flex items-center gap-2.5 mb-3">
-                            <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                <Lock className="w-4 h-4 text-yellow-600" />
+                            <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'var(--tertiary-fixed)' }}>
+                                <Lock className="w-4 h-4" style={{ color: 'var(--tertiary)' }} />
                             </div>
                             <div>
-                                <h3 className="text-sm font-bold text-gray-900">Close Batch</h3>
-                                <p className="text-xs text-gray-500">This will generate debit memos and cannot be undone.</p>
+                                <h3 className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>Close Batch</h3>
+                                <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>This will generate debit memos and cannot be undone.</p>
                             </div>
                         </div>
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2.5 text-xs text-yellow-800 mb-3">
+                        <div className="border rounded-lg p-2.5 text-xs mb-3" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)', color: 'var(--on-tertiary-container)' }}>
                             <p className="font-medium mb-1">This action will:</p>
                             <ul className="list-disc ml-4 space-y-0.5">
                                 <li>Lock the batch from further changes</li>
@@ -524,8 +558,8 @@ export default function BatchDetailPage() {
                             </ul>
                         </div>
                         <div className="flex justify-end gap-2">
-                            <button onClick={() => setShowClose(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleClose} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-50 transition-colors">
+                            <button onClick={() => setShowClose(false)} className="px-3 py-1.5 text-xs rounded border transition-colors hover:bg-primary-50/40" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}>Cancel</button>
+                            <button onClick={handleClose} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded text-white disabled:opacity-50 transition-colors" style={{ backgroundColor: 'var(--tertiary)' }}>
                                 {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Lock className="w-3.5 h-3.5" />}
                                 Close Batch
                             </button>
@@ -536,23 +570,23 @@ export default function BatchDetailPage() {
 
             {/* ── Submit Cardinal Confirm ──────────────────────────── */}
             {showSubmit && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowSubmit(false)}>
-                    <div className="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 p-4" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setShowSubmit(false)}>
+                    <div className="rounded-lg shadow-xl max-w-sm w-full mx-4 p-4 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="flex items-center gap-2.5 mb-3">
-                            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                <Send className="w-4 h-4 text-green-600" />
+                            <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'var(--secondary-container)' }}>
+                                <Send className="w-4 h-4" style={{ color: 'var(--secondary)' }} />
                             </div>
                             <div>
-                                <h3 className="text-sm font-bold text-gray-900">Submit to Cardinal</h3>
-                                <p className="text-xs text-gray-500">Mark this batch as submitted to Cardinal.</p>
+                                <h3 className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>Submit to Cardinal</h3>
+                                <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>Mark this batch as submitted to Cardinal.</p>
                             </div>
                         </div>
-                        <p className="text-xs text-gray-600 mb-3">
+                        <p className="text-xs mb-3" style={{ color: 'var(--on-surface)' }}>
                             This records that the Cardinal file for batch <strong>{batch.batchName}</strong> has been submitted.
                         </p>
                         <div className="flex justify-end gap-2">
-                            <button onClick={() => setShowSubmit(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleSubmitCardinal} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors">
+                            <button onClick={() => setShowSubmit(false)} className="px-3 py-1.5 text-xs rounded border transition-colors hover:bg-primary-50/40" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}>Cancel</button>
+                            <button onClick={handleSubmitCardinal} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded text-white disabled:opacity-50 transition-colors" style={{ backgroundColor: 'var(--secondary)' }}>
                                 {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                                 Confirm Submission
                             </button>
@@ -563,24 +597,24 @@ export default function BatchDetailPage() {
 
             {/* ── Delete Batch Confirm ──────────────────────────── */}
             {showDelete && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowDelete(false)}>
-                    <div className="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 p-4" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setShowDelete(false)}>
+                    <div className="rounded-lg shadow-xl max-w-sm w-full mx-4 p-4 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
                         <div className="flex items-center gap-2.5 mb-3">
-                            <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                <Trash2 className="w-4 h-4 text-red-600" />
+                            <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'var(--error-container)' }}>
+                                <Trash2 className="w-4 h-4" style={{ color: 'var(--error)' }} />
                             </div>
                             <div>
-                                <h3 className="text-sm font-bold text-gray-900">Delete Batch</h3>
-                                <p className="text-xs text-gray-500">This action cannot be undone.</p>
+                                <h3 className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>Delete Batch</h3>
+                                <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>This action cannot be undone.</p>
                             </div>
                         </div>
-                        <p className="text-xs text-gray-600 mb-3">
+                        <p className="text-xs mb-3" style={{ color: 'var(--on-surface)' }}>
                             Are you sure you want to delete batch <strong>{batch.batchName}</strong>?
                             {batch.totalReturns > 0 && ` All ${batch.totalReturns} assigned return(s) will be unassigned.`}
                         </p>
                         <div className="flex justify-end gap-2">
-                            <button onClick={() => setShowDelete(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleDeleteBatch} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors">
+                            <button onClick={() => setShowDelete(false)} className="px-3 py-1.5 text-xs rounded border transition-colors hover:bg-primary-50/40" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}>Cancel</button>
+                            <button onClick={handleDeleteBatch} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded text-white disabled:opacity-50 transition-colors" style={{ backgroundColor: 'var(--error)' }}>
                                 {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                                 Delete Batch
                             </button>
@@ -591,41 +625,42 @@ export default function BatchDetailPage() {
 
             {/* ── Unassign Returns Modal ──────────────────────────────── */}
             {showUnassign && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowUnassign(false)}>
-                    <div className="bg-white rounded-lg shadow-xl max-w-xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
-                        <div className="px-4 py-3 border-b border-gray-200">
+                <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setShowUnassign(false)}>
+                    <div className="rounded-lg shadow-xl max-w-xl w-full mx-4 max-h-[80vh] flex flex-col border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                        <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--outline-variant)' }}>
                             <div className="flex items-center justify-between">
-                                <h2 className="text-sm font-bold text-gray-900">Unassign Returns from Batch</h2>
-                                <button onClick={() => setShowUnassign(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                                <h2 className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>Unassign Returns from Batch</h2>
+                                <button onClick={() => setShowUnassign(false)} style={{ color: 'var(--outline)' }}><X className="w-4 h-4" /></button>
                             </div>
-                            <p className="text-xs text-gray-500 mt-1">Select returns to remove from this batch</p>
+                            <p className="text-xs mt-1" style={{ color: 'var(--on-surface-variant)' }}>Select returns to remove from this batch</p>
                         </div>
 
                         <div className="overflow-y-auto flex-1 p-3">
                             {batchReturns.length === 0 ? (
                                 <div className="text-center py-8">
-                                    <Package className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                                    <p className="text-xs text-gray-500">No returns assigned to this batch</p>
+                                    <Package className="w-8 h-8 mx-auto mb-2" style={{ color: 'var(--outline-variant)' }} />
+                                    <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>No returns assigned to this batch</p>
                                 </div>
                             ) : (
                                 <div className="space-y-2">
                                     {batchReturns.map(ret => (
-                                        <div key={ret.id} className="flex items-center gap-2 p-2 border border-gray-200 rounded hover:bg-gray-50">
+                                        <div key={ret.id} className="flex items-center gap-2 p-2 border rounded hover:bg-primary-50/40 transition-colors" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)' }}>
                                             <input
                                                 type="checkbox"
                                                 checked={selectedUnassignIds.includes(ret.id)}
                                                 onChange={() => toggleUnassignSelection(ret.id)}
-                                                className="w-3.5 h-3.5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                                                className="w-3.5 h-3.5 text-primary-600 rounded focus:ring-primary-500"
+                                                style={{ borderColor: 'var(--outline-variant)' }}
                                             />
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-1.5 mb-0.5">
-                                                    <span className="text-xs font-medium text-gray-900">{ret.licensePlate}</span>
+                                                    <span className="text-xs font-medium" style={{ color: 'var(--foreground)' }}>{ret.licensePlate}</span>
                                                     <Badge variant={returnTransactionStatusBadgeVariant(ret.status)}>
                                                         <span className="text-[10px]">{ret.status}</span>
                                                     </Badge>
                                                 </div>
-                                                <p className="text-[10px] text-gray-500">{ret.pharmacyName}</p>
-                                                <p className="text-[10px] text-gray-400">{formatCurrency(ret.totalReturnableValue + ret.totalNonReturnableValue)}</p>
+                                                <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>{ret.pharmacyName}</p>
+                                                <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>{formatCurrency(ret.totalReturnableValue + ret.totalNonReturnableValue)}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -633,19 +668,20 @@ export default function BatchDetailPage() {
                             )}
                         </div>
 
-                        <div className="px-4 py-3 border-t border-gray-200">
+                        <div className="px-4 py-3 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <div className="flex items-center justify-between">
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>
                                     {selectedUnassignIds.length} of {batchReturns.length} selected
                                 </p>
                                 <div className="flex gap-2">
-                                    <button onClick={() => setShowUnassign(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <button onClick={() => setShowUnassign(false)} className="px-3 py-1.5 text-xs rounded border transition-colors hover:bg-primary-50/40" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}>
                                         Cancel
                                     </button>
                                     <button
                                         onClick={handleUnassignReturns}
                                         disabled={isActionLoading || selectedUnassignIds.length === 0}
-                                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-orange-600 text-white hover:bg-orange-700 disabled:opacity-50 transition-colors"
+                                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded text-white disabled:opacity-50 transition-colors"
+                                        style={{ backgroundColor: 'var(--tertiary)' }}
                                     >
                                         {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UserX className="w-3.5 h-3.5" />}
                                         Unassign ({selectedUnassignIds.length})

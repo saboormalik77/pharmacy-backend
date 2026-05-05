@@ -51,6 +51,36 @@ function getPaymentBadge(s: string): { variant: 'success' | 'warning' | 'danger'
     }
 }
 
+function pillStyle(kind: 'success' | 'warning' | 'danger' | 'info' | 'default') {
+    const base: React.CSSProperties = {
+        display: 'inline-flex',
+        alignItems: 'center',
+        padding: '2px 8px',
+        borderRadius: 9999,
+        fontSize: 10,
+        lineHeight: '14px',
+        fontWeight: 600,
+        border: '1px solid var(--outline-variant)',
+        backgroundColor: 'var(--surface-container-low)',
+        color: 'var(--on-surface)',
+        whiteSpace: 'nowrap',
+        textTransform: 'capitalize',
+    };
+
+    switch (kind) {
+        case 'success':
+            return { ...base, backgroundColor: 'var(--secondary-container)', color: 'var(--on-secondary-container)' };
+        case 'warning':
+            return { ...base, backgroundColor: 'var(--tertiary-fixed)', color: 'var(--on-tertiary-container)' };
+        case 'danger':
+            return { ...base, backgroundColor: 'var(--error-container)', color: 'var(--on-error-container)' };
+        case 'info':
+            return { ...base, backgroundColor: 'var(--primary-fixed)', color: 'var(--on-primary-container)' };
+        default:
+            return base;
+    }
+}
+
 export default function DebitMemosPage() {
     const dispatch = useAppDispatch();
     const searchParams = useSearchParams();
@@ -196,35 +226,42 @@ export default function DebitMemosPage() {
 
             {/* Header */}
             <div>
-                <Link href="/warehouse" className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-primary-600 mb-1.5 transition-colors">
+                <Link
+                    href="/warehouse"
+                    className="inline-flex items-center gap-1 text-[11px] mb-1.5 transition-colors hover:underline"
+                    style={{ color: 'var(--outline)' }}
+                >
                     <ChevronLeft className="w-3 h-3" /> Back to Warehouse
                 </Link>
-                <h1 className="text-lg font-bold text-gray-900">Debit Memos</h1>
-                <p className="text-xs text-gray-500">View and manage debit memos generated from closed batches</p>
+                <h1 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>Debit Memos</h1>
+                <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>View and manage debit memos generated from closed batches</p>
             </div>
 
             {/* Filters */}
-            <div className="bg-white rounded-lg shadow px-3 py-2">
+            <div className="rounded-lg shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 <div className="flex flex-wrap items-center gap-2">
                     <div className="relative flex-1 min-w-[180px]">
-                        <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--outline)' }} />
                         <input
                             type="text"
                             placeholder="Search by memo #, pharmacy, labeler..."
-                            className="w-full pl-8 pr-3 py-1.5 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-transparent"
+                            className="w-full pl-8 pr-3 py-1.5 border rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-transparent"
+                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                             value={search}
                             onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
                         />
                     </div>
                     <select
-                        className="border border-gray-300 rounded px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-primary-500"
+                        className="border rounded px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-primary-500"
+                        style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                         value={destination}
                         onChange={e => { setDestination(e.target.value); setCurrentPage(1); }}
                     >
                         {DESTINATION_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                     </select>
                     <select
-                        className="border border-gray-300 rounded px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-primary-500"
+                        className="border rounded px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-primary-500"
+                        style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                         value={paymentStatus}
                         onChange={e => { setPaymentStatus(e.target.value); setCurrentPage(1); }}
                     >
@@ -234,14 +271,14 @@ export default function DebitMemosPage() {
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="rounded-lg shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 {isLoading ? (
                     <div className="flex items-center justify-center py-14">
                         <Loader2 className="w-6 h-6 animate-spin text-primary-500" />
                     </div>
                 ) : debitMemos.length === 0 ? (
-                    <div className="text-center py-14 text-gray-500">
-                        <Receipt className="w-10 h-10 mx-auto mb-2 text-gray-300" />
+                    <div className="text-center py-14" style={{ color: 'var(--on-surface-variant)' }}>
+                        <Receipt className="w-10 h-10 mx-auto mb-2" style={{ color: 'var(--outline-variant)' }} />
                         <p className="text-sm font-medium">No debit memos found</p>
                         <p className="text-xs mt-0.5">Debit memos are generated when a batch is closed.</p>
                     </div>
@@ -252,48 +289,67 @@ export default function DebitMemosPage() {
                             const pb = getPaymentBadge(memo.paymentStatus);
 
                             return (
-                                <div key={memo.id} className={`border-b border-gray-200 last:border-b-0 ${isExpanded ? 'ring-2 ring-inset ring-teal-300' : highlightId === memo.id ? 'bg-yellow-50' : ''}`}>
+                                <div
+                                    key={memo.id}
+                                    className="border-b last:border-b-0"
+                                    style={{
+                                        borderColor: 'var(--outline-variant)',
+                                        boxShadow: isExpanded ? 'inset 0 0 0 2px color-mix(in srgb, var(--secondary) 35%, transparent)' : undefined,
+                                        backgroundColor: !isExpanded && highlightId === memo.id ? 'var(--tertiary-fixed)' : undefined,
+                                    }}
+                                >
                                     {/* Collapsed Row */}
                                     <button
                                         onClick={() => toggleExpand(memo.id)}
-                                        className={`w-full flex items-center gap-3 px-4 py-2 transition-colors text-left ${isExpanded ? 'bg-teal-50 hover:bg-teal-100' : 'hover:bg-gray-50'}`}
+                                        className="w-full flex items-center gap-3 px-4 py-2 transition-colors text-left hover:bg-primary-50/40"
+                                        style={{ backgroundColor: isExpanded ? 'var(--secondary-container)' : 'transparent' }}
                                     >
                                         <div className="flex-1 grid grid-cols-2 md:grid-cols-7 gap-2">
                                             <div>
-                                                <p className="text-[10px] text-gray-400 uppercase">Memo #</p>
-                                                <p className="text-xs font-medium text-primary-600">{memo.memoNumber}</p>
+                                                <p className="text-[10px] uppercase" style={{ color: 'var(--on-surface-variant)' }}>Memo #</p>
+                                                <p className="text-xs font-medium" style={{ color: 'var(--primary)' }}>{memo.memoNumber}</p>
                                             </div>
                                             <div>
-                                                <p className="text-[10px] text-gray-400 uppercase">Pharmacy</p>
-                                                <p className="text-xs font-medium text-gray-900 truncate">{memo.pharmacyName}</p>
+                                                <p className="text-[10px] uppercase" style={{ color: 'var(--on-surface-variant)' }}>Pharmacy</p>
+                                                <p className="text-xs font-medium truncate" style={{ color: 'var(--foreground)' }}>{memo.pharmacyName}</p>
                                             </div>
                                             <div>
-                                                <p className="text-[10px] text-gray-400 uppercase">Destination</p>
-                                                <p className="text-xs text-gray-700">{memo.destination || '—'}</p>
+                                                <p className="text-[10px] uppercase" style={{ color: 'var(--on-surface-variant)' }}>Destination</p>
+                                                <p className="text-xs" style={{ color: 'var(--on-surface)' }}>{memo.destination || '—'}</p>
                                             </div>
                                             <div>
-                                                <p className="text-[10px] text-gray-400 uppercase">Items</p>
-                                                <p className="text-xs text-gray-700">{memo.totalItems}</p>
+                                                <p className="text-[10px] uppercase" style={{ color: 'var(--on-surface-variant)' }}>Items</p>
+                                                <p className="text-xs" style={{ color: 'var(--on-surface)' }}>{memo.totalItems}</p>
                                             </div>
                                             <div>
-                                                <p className="text-[10px] text-gray-400 uppercase">Ask Value</p>
-                                                <p className="text-xs font-medium">{formatCurrency(memo.totalAskValue)}</p>
+                                                <p className="text-[10px] uppercase" style={{ color: 'var(--on-surface-variant)' }}>Ask Value</p>
+                                                <p className="text-xs font-medium" style={{ color: 'var(--foreground)' }}>{formatCurrency(memo.totalAskValue)}</p>
                                             </div>
                                             <div>
-                                                <p className="text-[10px] text-gray-400 uppercase">RA Status</p>
-                                                <p>{memo.raNumber ? <Badge variant="success"><span className="text-[10px]">Received</span></Badge> : memo.raRequestedAt ? <Badge variant="info"><span className="text-[10px]">Requested</span></Badge> : <Badge variant="default"><span className="text-[10px]">Pending</span></Badge>}</p>
+                                                <p className="text-[10px] uppercase" style={{ color: 'var(--on-surface-variant)' }}>RA Status</p>
+                                                <p>
+                                                    {memo.raNumber
+                                                        ? <span style={pillStyle('success')}>Received</span>
+                                                        : memo.raRequestedAt
+                                                            ? <span style={pillStyle('info')}>Requested</span>
+                                                            : <span style={pillStyle('default')}>Pending</span>
+                                                    }
+                                                </p>
                                             </div>
                                             <div>
-                                                <p className="text-[10px] text-gray-400 uppercase">Payment</p>
-                                                <Badge variant={pb.variant}><span className="text-[10px]">{memo.paymentStatus}</span></Badge>
+                                                <p className="text-[10px] uppercase" style={{ color: 'var(--on-surface-variant)' }}>Payment</p>
+                                                <span style={pillStyle(pb.variant)}>{memo.paymentStatus}</span>
                                             </div>
                                         </div>
-                                        {isExpanded ? <ChevronUp className="w-3.5 h-3.5 text-teal-600 flex-shrink-0" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />}
+                                        {isExpanded
+                                            ? <ChevronUp className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--secondary)' }} />
+                                            : <ChevronDown className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--outline)' }} />
+                                        }
                                     </button>
 
                                     {/* Expanded Detail */}
                                     {isExpanded && (
-                                        <div className="border-t border-teal-200 bg-teal-50/50 px-4 py-3">
+                                        <div className="border-t px-4 py-3" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'color-mix(in srgb, var(--secondary-container) 45%, transparent)' }}>
                                             {!currentMemo || currentMemo.id !== memo.id ? (
                                                 <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-primary-500" /></div>
                                             ) : (
@@ -305,7 +361,8 @@ export default function DebitMemosPage() {
                                                                 <button 
                                                                     onClick={() => handleDownload(currentMemo.id)} 
                                                                     disabled={downloadingMemoId === currentMemo.id}
-                                                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary-50/40"
+                                                                    style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}
                                                                 >
                                                                     {downloadingMemoId === currentMemo.id ? (
                                                                         <><Loader2 className="w-3 h-3 animate-spin" /> Downloading...</>
@@ -313,13 +370,23 @@ export default function DebitMemosPage() {
                                                                         <><Download className="w-3 h-3" /> Download</>
                                                                     )}
                                                                 </button>
-                                                                <button onClick={() => startEditing(currentMemo)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer">
+                                                                <button
+                                                                    onClick={() => startEditing(currentMemo)}
+                                                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border transition-colors cursor-pointer hover:bg-primary-50/40"
+                                                                    style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}
+                                                                >
                                                                     <Edit className="w-3 h-3" /> Edit
                                                                 </button>
                                                             </div>
                                                         ) : (
                                                             <div className="flex gap-1.5">
-                                                                <button onClick={() => setEditing(false)} className="px-2.5 py-1 rounded text-xs border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer">Cancel</button>
+                                                                <button
+                                                                    onClick={() => setEditing(false)}
+                                                                    className="px-2.5 py-1 rounded text-xs border transition-colors cursor-pointer hover:bg-primary-50/40"
+                                                                    style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}
+                                                                >
+                                                                    Cancel
+                                                                </button>
                                                                 <button onClick={handleSave} disabled={isActionLoading} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors cursor-pointer">
                                                                     {isActionLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
                                                                     Save
@@ -331,8 +398,8 @@ export default function DebitMemosPage() {
                                                     {/* Detail Cards */}
                                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                                                         {/* RA Info */}
-                                                        <div className="bg-white rounded-lg shadow-sm px-3 py-2">
-                                                            <h4 className="text-[11px] font-semibold text-gray-700 mb-2 flex items-center gap-1"><FileText className="w-3.5 h-3.5" /> RA Info</h4>
+                                                        <div className="rounded-lg shadow-sm px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                                                            <h4 className="text-[11px] font-semibold mb-2 flex items-center gap-1" style={{ color: 'var(--on-surface)' }}><FileText className="w-3.5 h-3.5" /> RA Info</h4>
                                                             {editing ? (
                                                                 <div className="space-y-2">
                                                                     {[
@@ -342,8 +409,14 @@ export default function DebitMemosPage() {
                                                                         { label: 'Tickler Date', key: 'ticklerDate', type: 'date' },
                                                                     ].map(({ label, key, type }) => (
                                                                         <div key={key}>
-                                                                            <label className="block text-[10px] text-gray-500 mb-0.5">{label}</label>
-                                                                            <input type={type} className="w-full border border-gray-300 rounded px-2 py-1 text-xs" value={editForm[key]} onChange={e => setEditForm(f => ({ ...f, [key]: e.target.value }))} />
+                                                                            <label className="block text-[10px] mb-0.5" style={{ color: 'var(--on-surface-variant)' }}>{label}</label>
+                                                                            <input
+                                                                                type={type}
+                                                                                className="w-full border rounded px-2 py-1 text-xs focus:ring-1 focus:ring-primary-500"
+                                                                                style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
+                                                                                value={editForm[key]}
+                                                                                onChange={e => setEditForm(f => ({ ...f, [key]: e.target.value }))}
+                                                                            />
                                                                         </div>
                                                                     ))}
                                                                 </div>
@@ -356,8 +429,8 @@ export default function DebitMemosPage() {
                                                                         { label: 'Tickler', value: currentMemo.ticklerDate ? formatDate(currentMemo.ticklerDate) : '—' },
                                                                     ].map(({ label, value }) => (
                                                                         <div key={label} className="flex justify-between">
-                                                                            <span className="text-[11px] text-gray-500">{label}</span>
-                                                                            <span className="text-[11px] font-medium">{value}</span>
+                                                                            <span className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>{label}</span>
+                                                                            <span className="text-[11px] font-medium" style={{ color: 'var(--foreground)' }}>{value}</span>
                                                                         </div>
                                                                     ))}
                                                                 </div>
@@ -365,8 +438,8 @@ export default function DebitMemosPage() {
                                                         </div>
 
                                                         {/* Shipping */}
-                                                        <div className="bg-white rounded-lg shadow-sm px-3 py-2">
-                                                            <h4 className="text-[11px] font-semibold text-gray-700 mb-2 flex items-center gap-1"><Truck className="w-3.5 h-3.5" /> Shipping</h4>
+                                                        <div className="rounded-lg shadow-sm px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                                                            <h4 className="text-[11px] font-semibold mb-2 flex items-center gap-1" style={{ color: 'var(--on-surface)' }}><Truck className="w-3.5 h-3.5" /> Shipping</h4>
                                                             {editing ? (
                                                                 <div className="space-y-2">
                                                                     {[
@@ -375,8 +448,14 @@ export default function DebitMemosPage() {
                                                                         { label: 'Shipped At', key: 'shippedAt', type: 'date' },
                                                                     ].map(({ label, key, type }) => (
                                                                         <div key={key}>
-                                                                            <label className="block text-[10px] text-gray-500 mb-0.5">{label}</label>
-                                                                            <input type={type} className="w-full border border-gray-300 rounded px-2 py-1 text-xs" value={editForm[key]} onChange={e => setEditForm(f => ({ ...f, [key]: e.target.value }))} />
+                                                                            <label className="block text-[10px] mb-0.5" style={{ color: 'var(--on-surface-variant)' }}>{label}</label>
+                                                                            <input
+                                                                                type={type}
+                                                                                className="w-full border rounded px-2 py-1 text-xs focus:ring-1 focus:ring-primary-500"
+                                                                                style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
+                                                                                value={editForm[key]}
+                                                                                onChange={e => setEditForm(f => ({ ...f, [key]: e.target.value }))}
+                                                                            />
                                                                         </div>
                                                                     ))}
                                                                 </div>
@@ -388,8 +467,8 @@ export default function DebitMemosPage() {
                                                                         { label: 'Shipped', value: currentMemo.shippedAt ? formatDate(currentMemo.shippedAt) : '—' },
                                                                     ].map(({ label, value }) => (
                                                                         <div key={label} className="flex justify-between">
-                                                                            <span className="text-[11px] text-gray-500">{label}</span>
-                                                                            <span className="text-[11px] font-medium">{value}</span>
+                                                                            <span className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>{label}</span>
+                                                                            <span className="text-[11px] font-medium" style={{ color: 'var(--foreground)' }}>{value}</span>
                                                                         </div>
                                                                     ))}
                                                                 </div>
@@ -397,13 +476,18 @@ export default function DebitMemosPage() {
                                                         </div>
 
                                                         {/* Payment */}
-                                                        <div className="bg-white rounded-lg shadow-sm px-3 py-2">
-                                                            <h4 className="text-[11px] font-semibold text-gray-700 mb-2 flex items-center gap-1"><DollarSign className="w-3.5 h-3.5" /> Payment</h4>
+                                                        <div className="rounded-lg shadow-sm px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                                                            <h4 className="text-[11px] font-semibold mb-2 flex items-center gap-1" style={{ color: 'var(--on-surface)' }}><DollarSign className="w-3.5 h-3.5" /> Payment</h4>
                                                             {editing ? (
                                                                 <div className="space-y-2">
                                                                     <div>
-                                                                        <label className="block text-[10px] text-gray-500 mb-0.5">Status</label>
-                                                                        <select className="w-full border border-gray-300 rounded px-2 py-1 text-xs" value={editForm.paymentStatus} onChange={e => setEditForm(f => ({ ...f, paymentStatus: e.target.value }))}>
+                                                                        <label className="block text-[10px] mb-0.5" style={{ color: 'var(--on-surface-variant)' }}>Status</label>
+                                                                        <select
+                                                                            className="w-full border rounded px-2 py-1 text-xs focus:ring-1 focus:ring-primary-500"
+                                                                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
+                                                                            value={editForm.paymentStatus}
+                                                                            onChange={e => setEditForm(f => ({ ...f, paymentStatus: e.target.value }))}
+                                                                        >
                                                                             <option value="pending">Pending</option>
                                                                             <option value="partial">Partial</option>
                                                                             <option value="paid">Paid</option>
@@ -411,55 +495,83 @@ export default function DebitMemosPage() {
                                                                         </select>
                                                                     </div>
                                                                     <div>
-                                                                        <label className="block text-[10px] text-gray-500 mb-0.5">Amount Requested</label>
-                                                                        <input type="number" step="0.01" className="w-full border border-gray-300 rounded px-2 py-1 text-xs" value={editForm.amountRequested} onChange={e => setEditForm(f => ({ ...f, amountRequested: e.target.value }))} />
+                                                                        <label className="block text-[10px] mb-0.5" style={{ color: 'var(--on-surface-variant)' }}>Amount Requested</label>
+                                                                        <input
+                                                                            type="number"
+                                                                            step="0.01"
+                                                                            className="w-full border rounded px-2 py-1 text-xs focus:ring-1 focus:ring-primary-500"
+                                                                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
+                                                                            value={editForm.amountRequested}
+                                                                            onChange={e => setEditForm(f => ({ ...f, amountRequested: e.target.value }))}
+                                                                        />
                                                                     </div>
                                                                     <div>
-                                                                        <label className="block text-[10px] text-gray-500 mb-0.5">Amount Received</label>
-                                                                        <input type="number" step="0.01" className="w-full border border-gray-300 rounded px-2 py-1 text-xs" value={editForm.amountReceived} onChange={e => setEditForm(f => ({ ...f, amountReceived: e.target.value }))} />
+                                                                        <label className="block text-[10px] mb-0.5" style={{ color: 'var(--on-surface-variant)' }}>Amount Received</label>
+                                                                        <input
+                                                                            type="number"
+                                                                            step="0.01"
+                                                                            className="w-full border rounded px-2 py-1 text-xs focus:ring-1 focus:ring-primary-500"
+                                                                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
+                                                                            value={editForm.amountReceived}
+                                                                            onChange={e => setEditForm(f => ({ ...f, amountReceived: e.target.value }))}
+                                                                        />
                                                                     </div>
                                                                 </div>
                                                             ) : (
                                                                 <div className="space-y-1.5">
-                                                                    <div className="flex justify-between"><span className="text-[11px] text-gray-500">Status</span><Badge variant={pb.variant}><span className="text-[10px]">{currentMemo.paymentStatus}</span></Badge></div>
-                                                                    <div className="flex justify-between"><span className="text-[11px] text-gray-500">Requested</span><span className="text-[11px] font-medium">{formatCurrency(currentMemo.amountRequested)}</span></div>
-                                                                    <div className="flex justify-between"><span className="text-[11px] text-gray-500">Received</span><span className="text-[11px] font-medium">{formatCurrency(currentMemo.amountReceived)}</span></div>
+                                                                    <div className="flex justify-between">
+                                                                        <span className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>Status</span>
+                                                                        <span style={pillStyle(pb.variant)}>{currentMemo.paymentStatus}</span>
+                                                                    </div>
+                                                                    <div className="flex justify-between"><span className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>Requested</span><span className="text-[11px] font-medium" style={{ color: 'var(--foreground)' }}>{formatCurrency(currentMemo.amountRequested)}</span></div>
+                                                                    <div className="flex justify-between"><span className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>Received</span><span className="text-[11px] font-medium" style={{ color: 'var(--foreground)' }}>{formatCurrency(currentMemo.amountReceived)}</span></div>
                                                                 </div>
                                                             )}
                                                         </div>
                                                     </div>
 
                                                     {/* Labeler + Destination Info */}
-                                                    <div className="bg-white rounded-lg shadow-sm px-3 py-2">
-                                                        <h4 className="text-[11px] font-semibold text-gray-700 mb-2">Memo Details</h4>
+                                                    <div className="rounded-lg shadow-sm px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                                                        <h4 className="text-[11px] font-semibold mb-2" style={{ color: 'var(--on-surface)' }}>Memo Details</h4>
                                                         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                                                             {[
                                                                 { label: 'Labeler ID', value: currentMemo.labelerId || '—', color: '' },
                                                                 { label: 'Labeler', value: currentMemo.labelerName || '—', color: '' },
                                                                 { label: 'Destination', value: currentMemo.destination || '—', color: '' },
-                                                                { label: 'Total Ask', value: formatCurrency(currentMemo.totalAskValue), color: 'text-green-700' },
-                                                                { label: 'Total Received', value: formatCurrency(currentMemo.totalReceivedValue), color: 'text-blue-700' },
+                                                                { label: 'Total Ask', value: formatCurrency(currentMemo.totalAskValue), color: '' },
+                                                                { label: 'Total Received', value: formatCurrency(currentMemo.totalReceivedValue), color: '' },
                                                             ].map(({ label, value, color }) => (
                                                                 <div key={label}>
-                                                                    <p className="text-[10px] text-gray-500">{label}</p>
-                                                                    <p className={`text-xs font-medium ${color}`}>{value}</p>
+                                                                    <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>{label}</p>
+                                                                    <p
+                                                                        className={`text-xs font-medium ${color}`}
+                                                                        style={{
+                                                                            color: label === 'Total Ask'
+                                                                                ? 'var(--secondary)'
+                                                                                : label === 'Total Received'
+                                                                                    ? 'var(--primary)'
+                                                                                    : 'var(--foreground)',
+                                                                        }}
+                                                                    >
+                                                                        {value}
+                                                                    </p>
                                                                 </div>
                                                             ))}
                                                         </div>
                                                     </div>
 
                                                     {/* Line Items */}
-                                                    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                                                        <div className="px-3 py-2 border-b border-gray-200">
-                                                            <h4 className="text-[11px] font-semibold text-gray-700">Line Items ({memoItems.length})</h4>
+                                                    <div className="rounded-lg shadow-sm overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                                                        <div className="px-3 py-2 border-b" style={{ borderColor: 'var(--outline-variant)' }}>
+                                                            <h4 className="text-[11px] font-semibold" style={{ color: 'var(--on-surface)' }}>Line Items ({memoItems.length})</h4>
                                                         </div>
                                                         {memoItems.length === 0 ? (
-                                                            <p className="text-center py-4 text-gray-500 text-xs">No line items.</p>
+                                                            <p className="text-center py-4 text-xs" style={{ color: 'var(--on-surface-variant)' }}>No line items.</p>
                                                         ) : (
                                                             <div className="overflow-x-auto">
                                                                 <table className="min-w-full">
                                                                     <thead>
-                                                                        <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                                                        <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
                                                                             <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">NDC</th>
                                                                             <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Product</th>
                                                                             <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Lot #</th>
@@ -469,14 +581,14 @@ export default function DebitMemosPage() {
                                                                             <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Received</th>
                                                                         </tr>
                                                                     </thead>
-                                                                    <tbody className="divide-y divide-gray-100">
+                                                                    <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                                                         {memoItems.map((item: DebitMemoItem) => (
-                                                                            <tr key={item.id} className="hover:bg-gray-50">
-                                                                                <td className="px-4 py-3 text-sm font-mono text-gray-900">{item.ndc || '—'}</td>
-                                                                                <td className="px-4 py-3 text-sm text-gray-700">{item.productName || '—'}</td>
-                                                                                <td className="px-4 py-3 text-sm text-gray-700">{item.lotNumber || '—'}</td>
-                                                                                <td className="px-4 py-3 text-sm text-gray-500">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
-                                                                                <td className="px-4 py-3 text-sm text-right text-gray-700">{item.quantity}</td>
+                                                                            <tr key={item.id} className="hover:bg-primary-50/40">
+                                                                                <td className="px-4 py-3 text-sm font-mono" style={{ color: 'var(--foreground)' }}>{item.ndc || '—'}</td>
+                                                                                <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{item.productName || '—'}</td>
+                                                                                <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{item.lotNumber || '—'}</td>
+                                                                                <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
+                                                                                <td className="px-4 py-3 text-sm text-right" style={{ color: 'var(--on-surface)' }}>{item.quantity}</td>
                                                                                 <td className="px-4 py-3 text-sm text-right font-medium">{item.askPrice != null ? formatCurrency(item.askPrice) : '—'}</td>
                                                                                 <td className="px-4 py-3 text-sm text-right font-medium">{item.receivedPrice != null ? formatCurrency(item.receivedPrice) : '—'}</td>
                                                                             </tr>
@@ -498,16 +610,26 @@ export default function DebitMemosPage() {
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                    <div className="flex items-center justify-between px-3 py-2 border-t border-gray-200">
-                        <p className="text-[10px] text-gray-500">
+                    <div className="flex items-center justify-between px-3 py-2 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                        <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>
                             Page {currentPage} of {totalPages}{memoPagination?.total != null && ` · ${memoPagination.total} memos`}
                         </p>
                         <div className="flex items-center gap-1.5">
-                            <button disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)} className="p-1 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-50">
-                                <ChevronLeft className="w-3.5 h-3.5 text-gray-600" />
+                            <button
+                                disabled={currentPage <= 1}
+                                onClick={() => setCurrentPage(p => p - 1)}
+                                className="p-1 rounded border disabled:opacity-40 hover:bg-primary-50/40"
+                                style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)' }}
+                            >
+                                <ChevronLeft className="w-3.5 h-3.5" style={{ color: 'var(--on-surface-variant)' }} />
                             </button>
-                            <button disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)} className="p-1 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-50">
-                                <ChevronRight className="w-3.5 h-3.5 text-gray-600" />
+                            <button
+                                disabled={currentPage >= totalPages}
+                                onClick={() => setCurrentPage(p => p + 1)}
+                                className="p-1 rounded border disabled:opacity-40 hover:bg-primary-50/40"
+                                style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)' }}
+                            >
+                                <ChevronRight className="w-3.5 h-3.5" style={{ color: 'var(--on-surface-variant)' }} />
                             </button>
                         </div>
                     </div>

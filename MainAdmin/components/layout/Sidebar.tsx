@@ -61,16 +61,23 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose }: SidebarProps) 
     return (
         <aside
             className={cn(
-                'bg-[#1e293b] text-slate-400 h-screen fixed left-0 top-16 transition-all duration-300 z-40',
+                'h-screen fixed left-0 top-16 transition-all duration-300 z-40',
                 isOpen ? 'translate-x-0' : '-translate-x-full',
                 'sm:translate-x-0',
                 'w-64 sm:w-auto',
                 isCollapsed ? 'sm:w-16' : 'sm:w-64'
             )}
+            style={{
+                backgroundColor: 'var(--sidebar-bg)',
+                color: 'var(--sidebar-text)',
+            }}
         >
             <div
                 className="h-full overflow-y-auto overflow-x-hidden p-4 pb-8"
-                style={{ scrollbarWidth: 'thin', scrollbarColor: '#334155 transparent' }}
+                style={{
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: 'var(--sidebar-hover) transparent',
+                }}
             >
                 <nav className="space-y-0.5">
                     {filteredLinks.map((link) => {
@@ -90,12 +97,13 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose }: SidebarProps) 
                                 onClick={handleLinkClick}
                                 className={cn(
                                     'flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all',
-                                    'hover:bg-[#334155] hover:text-white',
-                                    isActive
-                                        ? 'bg-[#334155] text-[#818cf8]'
-                                        : 'text-slate-400',
+                                    'hover:text-white',
                                     isCollapsed && 'justify-center'
                                 )}
+                                style={{
+                                    backgroundColor: isActive ? 'var(--sidebar-hover)' : 'transparent',
+                                    color: isActive ? 'var(--sidebar-active)' : 'var(--sidebar-text)',
+                                }}
                             >
                                 <Icon className="w-4 h-4 flex-shrink-0" />
                                 {!isCollapsed && (

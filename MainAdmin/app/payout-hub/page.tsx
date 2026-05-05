@@ -15,9 +15,9 @@ const payoutSections = [
         icon: DollarSign,
         label: 'Pharmacy Payments',
         description: 'Calculate and manage pharmacy payouts. Record payments, track payout status and history.',
-        color: 'text-green-600',
-        bg: 'bg-green-50',
-        border: 'border-green-100',
+        color: 'text-[var(--secondary)]',
+        bg: 'bg-[var(--secondary-container)]',
+        border: 'border-[color-mix(in_srgb,var(--secondary)_30%,var(--outline-variant))]',
         badge: null,
     },
     {
@@ -25,9 +25,9 @@ const payoutSections = [
         icon: CircleDollarSign,
         label: 'Memos',
         description: 'Track debit memos from manufacturers. View unpaid and paid memos, record payments, and send payment reminders.',
-        color: 'text-orange-600',
-        bg: 'bg-orange-50',
-        border: 'border-orange-100',
+        color: 'text-[var(--tertiary)]',
+        bg: 'bg-[var(--tertiary-fixed)]',
+        border: 'border-[color-mix(in_srgb,var(--tertiary)_30%,var(--outline-variant))]',
         badge: null,
     },
     {
@@ -35,9 +35,9 @@ const payoutSections = [
         icon: Landmark,
         label: 'GPO Payment',
         description: 'Manage Group Purchasing Organization payment allocations and settlements.',
-        color: 'text-purple-600',
-        bg: 'bg-purple-50',
-        border: 'border-purple-100',
+        color: 'text-[var(--primary)]',
+        bg: 'bg-[var(--primary-fixed)]',
+        border: 'border-[var(--outline-variant)]',
         badge: 'Coming Soon',
     },
 ];
@@ -48,8 +48,8 @@ export default function PayoutHubPage() {
         <div className="space-y-4">
             {/* Header */}
             <div>
-                <h1 className="text-lg font-bold text-gray-900">Payout Management</h1>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <h1 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>Payout Management</h1>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--on-surface-variant)' }}>
                     Manage pharmacy payouts, unpaid manufacturer memos, and GPO settlements.
                 </p>
             </div>
@@ -62,7 +62,8 @@ export default function PayoutHubPage() {
                         <Link
                             key={section.href}
                             href={section.href}
-                            className={`group flex flex-col gap-3 p-4 bg-white border ${section.border} rounded-lg hover:shadow-md transition-all duration-150`}
+                            className={`group flex flex-col gap-3 p-4 border ${section.border} rounded-lg hover:shadow-md transition-all duration-150`}
+                            style={{ backgroundColor: 'var(--surface-container-lowest)' }}
                         >
                             {/* Icon + label + badge */}
                             <div className="flex items-center justify-between">
@@ -70,20 +71,20 @@ export default function PayoutHubPage() {
                                     <div className={`p-2 rounded-lg ${section.bg}`}>
                                         <Icon className={`w-4 h-4 ${section.color}`} />
                                     </div>
-                                    <span className="text-sm font-semibold text-gray-800">{section.label}</span>
+                                    <span className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>{section.label}</span>
                                 </div>
                                 <div className="flex items-center gap-1.5">
                                     {section.badge && (
-                                        <span className="text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 bg-purple-100 text-purple-600 rounded">
+                                        <span className="text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded border" style={{ backgroundColor: 'var(--primary-fixed)', color: 'var(--primary)', borderColor: 'var(--outline-variant)' }}>
                                             {section.badge}
                                         </span>
                                     )}
-                                    <ArrowRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-gray-500 group-hover:translate-x-0.5 transition-all" />
+                                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-all" style={{ color: 'var(--outline)' }} />
                                 </div>
                             </div>
 
                             {/* Description */}
-                            <p className="text-xs text-gray-500 leading-relaxed">
+                            <p className="text-xs leading-relaxed" style={{ color: 'var(--on-surface-variant)' }}>
                                 {section.description}
                             </p>
                         </Link>

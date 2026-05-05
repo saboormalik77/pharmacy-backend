@@ -156,13 +156,17 @@ export default function WineCellarPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
-                    <Link href="/warehouse" className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-primary-600 mb-1.5 transition-colors">
+                    <Link
+                        href="/warehouse"
+                        className="inline-flex items-center gap-1 text-[11px] mb-1.5 transition-colors hover:underline"
+                        style={{ color: 'var(--outline)' }}
+                    >
                         <ChevronLeft className="w-3 h-3" /> Back to Warehouse
                     </Link>
-                    <h1 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                        <Archive className="w-6 h-6 text-purple-600" /> Wine Cellar
+                    <h1 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
+                        <Archive className="w-6 h-6" style={{ color: 'var(--tertiary)' }} /> Wine Cellar
                     </h1>
-                    <p className="text-sm text-gray-500 mt-1">Products stored for future return processing</p>
+                    <p className="text-sm mt-1" style={{ color: 'var(--on-surface-variant)' }}>Products stored for future return processing</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                     <Button variant="outline" size="sm" onClick={handleDueThisMonth}>
@@ -178,50 +182,52 @@ export default function WineCellarPage() {
             {/* Stats Cards */}
             {stats && (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                    <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
-                        <p className="text-xs font-medium text-gray-500 mb-1">Total Items</p>
-                        <p className="text-lg font-bold text-gray-900">{stats.totalItems}</p>
+                    <div className="rounded-lg shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                        <p className="text-xs font-medium mb-1" style={{ color: 'var(--on-surface-variant)' }}>Total Items</p>
+                        <p className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>{stats.totalItems}</p>
                     </div>
-                    <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
-                        <p className="text-xs font-medium text-blue-600 mb-1">Shelved</p>
-                        <p className="text-lg font-bold text-blue-700">{stats.shelved}</p>
+                    <div className="rounded-lg shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                        <p className="text-xs font-medium mb-1" style={{ color: 'var(--primary)' }}>Shelved</p>
+                        <p className="text-lg font-bold" style={{ color: 'var(--primary)' }}>{stats.shelved}</p>
                     </div>
-                    <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
-                        <p className="text-xs font-medium text-yellow-600 mb-1">Ready to Return</p>
-                        <p className="text-lg font-bold text-yellow-700">{stats.readyToReturn}</p>
+                    <div className="rounded-lg shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                        <p className="text-xs font-medium mb-1" style={{ color: 'var(--tertiary)' }}>Ready to Return</p>
+                        <p className="text-lg font-bold" style={{ color: 'var(--tertiary)' }}>{stats.readyToReturn}</p>
                     </div>
-                    <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
-                        <p className="text-xs font-medium text-green-600 mb-1">Returned</p>
-                        <p className="text-lg font-bold text-green-700">{stats.returned}</p>
+                    <div className="rounded-lg shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                        <p className="text-xs font-medium mb-1" style={{ color: 'var(--secondary)' }}>Returned</p>
+                        <p className="text-lg font-bold" style={{ color: 'var(--secondary)' }}>{stats.returned}</p>
                     </div>
-                    <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
-                        <p className="text-xs font-medium text-red-600 mb-1">Destroyed</p>
-                        <p className="text-lg font-bold text-red-700">{stats.destroyed}</p>
+                    <div className="rounded-lg shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                        <p className="text-xs font-medium mb-1" style={{ color: 'var(--error)' }}>Destroyed</p>
+                        <p className="text-lg font-bold" style={{ color: 'var(--error)' }}>{stats.destroyed}</p>
                     </div>
-                    <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
-                        <p className="text-xs font-medium text-purple-600 mb-1">Total Value</p>
-                        <p className="text-lg font-bold text-purple-700">{formatCurrency(stats.totalValue)}</p>
+                    <div className="rounded-lg shadow px-4 py-3 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                        <p className="text-xs font-medium mb-1" style={{ color: 'var(--secondary)' }}>Total Value</p>
+                        <p className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>{formatCurrency(stats.totalValue)}</p>
                     </div>
                 </div>
             )}
 
             {/* Filters */}
-            <div className="bg-white rounded-lg shadow-md p-4">
+            <div className="rounded-lg shadow-md p-4 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 <div className="flex flex-col sm:flex-row gap-3">
                     <div className="relative flex-1">
-                        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--outline)' }} />
                         <input
                             type="text"
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                             placeholder="Search by NDC, product name, manufacturer, lot, barcode..."
-                            className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            className="w-full pl-10 pr-4 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                         />
                     </div>
                     <select
                         value={statusFilter}
                         onChange={e => setStatusFilter(e.target.value)}
-                        className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className="px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                     >
                         <option value="">All Statuses</option>
                         <option value="shelved">Shelved</option>
@@ -233,7 +239,8 @@ export default function WineCellarPage() {
                         type="month"
                         value={expectedMonth}
                         onChange={e => setExpectedMonth(e.target.value)}
-                        className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className="px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }}
                         title="Filter by expected return month"
                     />
                     {(statusFilter || expectedMonth || search) && (
@@ -245,16 +252,16 @@ export default function WineCellarPage() {
             </div>
 
             {/* Items Table */}
-            <div className="bg-white rounded-lg shadow-md">
+            <div className="rounded-lg shadow-md border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 {isLoading ? (
                     <div className="flex justify-center py-16">
                         <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
                     </div>
                 ) : items.length === 0 ? (
                     <div className="text-center py-16">
-                        <Archive className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">No Wine Cellar Items</h3>
-                        <p className="text-gray-500 text-sm">
+                        <Archive className="w-16 h-16 mx-auto mb-4" style={{ color: 'var(--outline-variant)' }} />
+                        <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--foreground)' }}>No Wine Cellar Items</h3>
+                        <p className="text-sm" style={{ color: 'var(--on-surface-variant)' }}>
                             {search || statusFilter || expectedMonth
                                 ? 'No items match your filters. Try adjusting your search criteria.'
                                 : 'Items will appear here when products are shelved for future returns.'}
@@ -264,22 +271,22 @@ export default function WineCellarPage() {
                     <>
                         {/* Summary Bar */}
                         {summary && (
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 border-b border-gray-200">
-                                <div className="bg-gray-50 rounded-lg p-2.5 text-center">
-                                    <p className="text-xs text-gray-500">Showing</p>
-                                    <p className="text-sm font-bold text-gray-900">{summary.totalItems}</p>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 border-b" style={{ borderColor: 'var(--outline-variant)' }}>
+                                <div className="rounded-lg p-2.5 text-center border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
+                                    <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>Showing</p>
+                                    <p className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>{summary.totalItems}</p>
                                 </div>
-                                <div className="bg-blue-50 rounded-lg p-2.5 text-center">
-                                    <p className="text-xs text-blue-600">Shelved</p>
-                                    <p className="text-sm font-bold text-blue-800">{summary.totalShelved}</p>
+                                <div className="rounded-lg p-2.5 text-center border" style={{ backgroundColor: 'var(--primary-fixed)', borderColor: 'var(--outline-variant)' }}>
+                                    <p className="text-xs" style={{ color: 'var(--primary)' }}>Shelved</p>
+                                    <p className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>{summary.totalShelved}</p>
                                 </div>
-                                <div className="bg-yellow-50 rounded-lg p-2.5 text-center">
-                                    <p className="text-xs text-yellow-600">Ready</p>
-                                    <p className="text-sm font-bold text-yellow-800">{summary.totalReady}</p>
+                                <div className="rounded-lg p-2.5 text-center border" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}>
+                                    <p className="text-xs" style={{ color: 'var(--tertiary)' }}>Ready</p>
+                                    <p className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>{summary.totalReady}</p>
                                 </div>
-                                <div className="bg-purple-50 rounded-lg p-2.5 text-center">
-                                    <p className="text-xs text-purple-600">Value</p>
-                                    <p className="text-sm font-bold text-purple-800">{formatCurrency(summary.totalValue)}</p>
+                                <div className="rounded-lg p-2.5 text-center border" style={{ backgroundColor: 'var(--secondary-container)', borderColor: 'var(--outline-variant)' }}>
+                                    <p className="text-xs" style={{ color: 'var(--on-secondary-container)' }}>Value</p>
+                                    <p className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>{formatCurrency(summary.totalValue)}</p>
                                 </div>
                             </div>
                         )}
@@ -287,7 +294,7 @@ export default function WineCellarPage() {
                         <div className="overflow-x-auto">
                             <table className="w-full table-auto text-xs">
                                 <thead>
-                                    <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                    <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
                                         <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
                                         <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product</th>
                                         <th className="text-left px-4 py-3.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Pharmacy</th>
@@ -305,36 +312,36 @@ export default function WineCellarPage() {
                                     {items.map((item) => {
                                         const sBadge = getStatusBadge(item.status);
                                         return (
-                                            <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
-                                                <td className="px-4 py-3 text-sm font-mono text-gray-900">{item.ndc || '—'}</td>
-                                                <td className="px-4 py-3 text-sm text-gray-900 max-w-[160px] truncate" title={item.productName || ''}>
+                                            <tr key={item.id} className="border-b hover:bg-primary-50/40" style={{ borderColor: 'var(--outline-variant)' }}>
+                                                <td className="px-4 py-3 text-sm font-mono" style={{ color: 'var(--foreground)' }}>{item.ndc || '—'}</td>
+                                                <td className="px-4 py-3 text-sm max-w-[160px] truncate" style={{ color: 'var(--foreground)' }} title={item.productName || ''}>
                                                     <div>
                                                         <p className="truncate">{item.productName || '—'}</p>
                                                         {item.manufacturer && (
-                                                            <p className="text-gray-400 truncate text-[10px]">{item.manufacturer}</p>
+                                                            <p className="truncate text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>{item.manufacturer}</p>
                                                         )}
                                                     </div>
                                                 </td>
-                                                <td className="px-4 py-3 text-sm text-gray-600 max-w-[120px] truncate" title={item.pharmacyName || ''}>
+                                                <td className="px-4 py-3 text-sm max-w-[120px] truncate" style={{ color: 'var(--on-surface-variant)' }} title={item.pharmacyName || ''}>
                                                     {item.pharmacyName || '—'}
                                                 </td>
-                                                <td className="px-4 py-3 text-sm text-center text-gray-900">
-                                                    {item.quantity}{item.isPartial && <span className="text-yellow-600 ml-0.5">P</span>}
+                                                <td className="px-4 py-3 text-sm text-center" style={{ color: 'var(--foreground)' }}>
+                                                    {item.quantity}{item.isPartial && <span className="ml-0.5" style={{ color: 'var(--tertiary)' }}>P</span>}
                                                 </td>
-                                                <td className="px-4 py-3 text-sm text-right text-gray-900">
+                                                <td className="px-4 py-3 text-sm text-right" style={{ color: 'var(--foreground)' }}>
                                                     {item.standardPrice != null ? formatCurrency(item.standardPrice) : '—'}
                                                 </td>
-                                                <td className="px-4 py-3 text-sm text-right text-gray-900">
+                                                <td className="px-4 py-3 text-sm text-right" style={{ color: 'var(--foreground)' }}>
                                                     {item.estimatedStorePrice != null ? formatCurrency(item.estimatedStorePrice) : '—'}
                                                 </td>
-                                                <td className="px-4 py-3 text-sm text-gray-600">{formatDate(item.dateShelved)}</td>
-                                                <td className="px-4 py-3 text-sm text-gray-600">
+                                                <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{formatDate(item.dateShelved)}</td>
+                                                <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>
                                                     {item.expectedReturnableDate ? formatDate(item.expectedReturnableDate) : '—'}
                                                 </td>
-                                                <td className="px-4 py-3 text-sm text-gray-600">
+                                                <td className="px-4 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>
                                                     {item.physicalLocation || '—'}
                                                     {item.baggieBarcode && (
-                                                        <p className="text-[10px] text-gray-400 font-mono">{item.baggieBarcode}</p>
+                                                        <p className="text-[10px] font-mono" style={{ color: 'var(--on-surface-variant)' }}>{item.baggieBarcode}</p>
                                                     )}
                                                 </td>
                                                 <td className="px-4 py-3 text-sm">
@@ -345,7 +352,8 @@ export default function WineCellarPage() {
                                                         {(item.status === 'shelved' || item.status === 'ready_to_return') && (
                                                             <button
                                                                 onClick={() => setEditModal(item)}
-                                                                className="p-1 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded"
+                                                                className="p-1 rounded border hover:bg-primary-50/40"
+                                                                style={{ borderColor: 'var(--outline-variant)', color: 'var(--on-surface-variant)' }}
                                                                 title="Edit item"
                                                             >
                                                                 <Edit className="w-3.5 h-3.5" />
@@ -362,8 +370,8 @@ export default function WineCellarPage() {
 
                         {/* Pagination */}
                         {pagination && pagination.totalPages > 1 && (
-                            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200">
-                                <p className="text-xs text-gray-500">
+                            <div className="flex items-center justify-between px-4 py-3 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                                <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>
                                     Page {pagination.page} of {pagination.totalPages} ({pagination.total} total)
                                 </p>
                                 <div className="flex gap-2">
@@ -392,54 +400,54 @@ export default function WineCellarPage() {
 
             {/* ── Edit Modal ───────────────────────────────── */}
             {editModal && (
-                <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setEditModal(null)}>
-                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-lg font-semibold text-gray-900">Edit Wine Cellar Item</h2>
-                            <button onClick={() => setEditModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }} onClick={() => setEditModal(null)}>
+                    <div className="rounded-lg max-w-lg w-full shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                            <h2 className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>Edit Wine Cellar Item</h2>
+                            <button onClick={() => setEditModal(null)} style={{ color: 'var(--outline)' }}><X className="w-5 h-5" /></button>
                         </div>
                         <div className="p-5 space-y-4">
                             {/* Item info */}
-                            <div className="bg-gray-50 rounded-lg p-3 text-xs space-y-1">
-                                <p className="font-medium text-gray-900">{editModal.productName || editModal.ndc || 'Unknown item'}</p>
-                                <p className="text-gray-500">
+                            <div className="rounded-lg p-3 text-xs space-y-1 border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
+                                <p className="font-medium" style={{ color: 'var(--foreground)' }}>{editModal.productName || editModal.ndc || 'Unknown item'}</p>
+                                <p style={{ color: 'var(--on-surface-variant)' }}>
                                     NDC: <span className="font-mono">{editModal.ndc || '—'}</span> | Lot: {editModal.lotNumber || '—'} | Exp: {editModal.expirationDate ? formatDate(editModal.expirationDate) : '—'}
                                 </p>
-                                <p className="text-gray-500">Pharmacy: {editModal.pharmacyName || '—'} | Shelved: {formatDate(editModal.dateShelved)}</p>
+                                <p style={{ color: 'var(--on-surface-variant)' }}>Pharmacy: {editModal.pharmacyName || '—'} | Shelved: {formatDate(editModal.dateShelved)}</p>
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-1">Quantity</label>
-                                    <input type="number" min="1" value={editForm.quantity} onChange={e => setEditForm({ ...editForm, quantity: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--on-surface)' }}>Quantity</label>
+                                    <input type="number" min="1" value={editForm.quantity} onChange={e => setEditForm({ ...editForm, quantity: e.target.value })} className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }} />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-1">Price ($)</label>
-                                    <input type="number" step="0.01" min="0" value={editForm.standardPrice} onChange={e => setEditForm({ ...editForm, standardPrice: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--on-surface)' }}>Price ($)</label>
+                                    <input type="number" step="0.01" min="0" value={editForm.standardPrice} onChange={e => setEditForm({ ...editForm, standardPrice: e.target.value })} className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }} />
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Physical Location</label>
-                                <input type="text" value={editForm.physicalLocation} onChange={e => setEditForm({ ...editForm, physicalLocation: e.target.value })} placeholder="e.g. Shelf A3, Bin 12" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--on-surface)' }}>Physical Location</label>
+                                <input type="text" value={editForm.physicalLocation} onChange={e => setEditForm({ ...editForm, physicalLocation: e.target.value })} placeholder="e.g. Shelf A3, Bin 12" className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }} />
                             </div>
 
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Baggie Barcode</label>
-                                <input type="text" value={editForm.baggieBarcode} onChange={e => setEditForm({ ...editForm, baggieBarcode: e.target.value })} placeholder="Scan or enter barcode" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--on-surface)' }}>Baggie Barcode</label>
+                                <input type="text" value={editForm.baggieBarcode} onChange={e => setEditForm({ ...editForm, baggieBarcode: e.target.value })} placeholder="Scan or enter barcode" className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }} />
                             </div>
 
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Expected Returnable Date</label>
-                                <input type="date" value={editForm.expectedReturnableDate} onChange={e => setEditForm({ ...editForm, expectedReturnableDate: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--on-surface)' }}>Expected Returnable Date</label>
+                                <input type="date" value={editForm.expectedReturnableDate} onChange={e => setEditForm({ ...editForm, expectedReturnableDate: e.target.value })} className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }} />
                             </div>
 
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
-                                <textarea value={editForm.notes} onChange={e => setEditForm({ ...editForm, notes: e.target.value })} rows={2} placeholder="Optional notes" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none" />
+                                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--on-surface)' }}>Notes</label>
+                                <textarea value={editForm.notes} onChange={e => setEditForm({ ...editForm, notes: e.target.value })} rows={2} placeholder="Optional notes" className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--foreground)' }} />
                             </div>
                         </div>
-                        <div className="flex justify-end gap-2 p-5 border-t border-gray-200 bg-gray-50">
+                        <div className="flex justify-end gap-2 p-5 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                             <Button variant="outline" onClick={() => setEditModal(null)}>Cancel</Button>
                             <Button variant="primary" onClick={handleUpdate} disabled={isActionLoading}>
                                 {isActionLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Saving...</> : 'Save Changes'}

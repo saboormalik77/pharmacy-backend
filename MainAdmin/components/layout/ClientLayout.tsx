@@ -51,6 +51,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                         {sidebarOpen && (
                             <div
                                 className="fixed top-16 left-0 right-0 bottom-0 z-30 sm:hidden"
+                                style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
                                 onClick={handleCloseSidebar}
                             />
                         )}
