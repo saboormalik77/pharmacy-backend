@@ -605,7 +605,7 @@ export default function BuyingGroupsPage() {
             {/* Scrollable Body */}
             <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
               {formError && (
-                <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 px-3 py-2.5 rounded-[4px] text-sm">
+                <div className="flex items-start gap-2 px-3 py-2.5 rounded-[4px] text-sm border">
                   <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{formError}</span>
                 </div>

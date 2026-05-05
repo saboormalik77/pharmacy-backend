@@ -170,7 +170,7 @@ function SetupAccountPageContent() {
 
           <form onSubmit={handleSubmit} className="space-y-5" noValidate>
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[4px] text-sm">
+              <div style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
                 {error}
               </div>
             )}

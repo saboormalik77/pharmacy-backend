@@ -68,7 +68,7 @@ export default function DistributorProductsPage() {
             </div>
 
             {productsError && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                <div style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
                     {productsError}
                 </div>
             )}

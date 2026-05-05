@@ -76,9 +76,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-serif: var(--font-newsreader);
-  --font-sans: var(--font-manrope);
+  --color-font-serif: var(--font-newsreader);
+  --color-font-sans: var(--font-manrope);
 
+  /* Primary scale */
   --color-primary-50: var(--primary-50);
   --color-primary-100: var(--primary-100);
   --color-primary-200: var(--primary-200);
@@ -90,6 +91,60 @@
   --color-primary-800: var(--primary-800);
   --color-primary-900: var(--primary-900);
   --color-primary: var(--primary-500);
+
+  /* Error colors - Nordic palette */
+  --color-red-50: var(--error-container);
+  --color-red-100: var(--error-container);
+  --color-red-200: var(--outline-variant);
+  --color-red-300: var(--outline-variant);
+  --color-red-400: var(--error);
+  --color-red-500: var(--error);
+  --color-red-600: var(--error);
+  --color-red-700: var(--on-error-container);
+  --color-red-800: var(--on-error-container);
+
+  /* Success colors - Nordic palette */
+  --color-green-50: var(--secondary-container);
+  --color-green-100: var(--secondary-container);
+  --color-green-200: var(--secondary-container);
+  --color-green-300: var(--secondary);
+  --color-green-400: var(--secondary);
+  --color-green-500: var(--secondary);
+  --color-green-600: var(--secondary);
+  --color-green-700: var(--on-secondary-container);
+  --color-green-800: var(--on-secondary-fixed);
+
+  /* Warning colors - Nordic palette */
+  --color-amber-50: var(--tertiary-container);
+  --color-amber-100: var(--tertiary-container);
+  --color-amber-200: var(--tertiary-container);
+  --color-amber-300: var(--tertiary);
+  --color-amber-400: var(--tertiary);
+  --color-amber-500: var(--tertiary);
+  --color-amber-600: var(--on-tertiary-container);
+  --color-amber-700: var(--on-tertiary-container);
+  --color-amber-800: var(--on-tertiary-fixed);
+
+  /* Info colors - Nordic palette */
+  --color-blue-50: var(--primary-container);
+  --color-blue-100: var(--primary-container);
+  --color-blue-200: var(--primary-container);
+  --color-blue-300: var(--primary);
+  --color-blue-400: var(--primary);
+  --color-blue-500: var(--primary);
+  --color-blue-600: var(--on-primary-container);
+  --color-blue-700: var(--on-primary-container);
+  --color-blue-800: var(--on-primary-fixed);
+
+  /* Indigo (accent) - Nordic palette */
+  --color-indigo-50: var(--surface-container);
+  --color-indigo-100: var(--surface-container);
+  --color-indigo-200: var(--outline-variant);
+  --color-indigo-300: var(--surface-tint);
+  --color-indigo-400: var(--primary);
+  --color-indigo-500: var(--primary);
+  --color-indigo-600: var(--primary);
+  --color-indigo-700: var(--on-surface);
 }
 
 body {

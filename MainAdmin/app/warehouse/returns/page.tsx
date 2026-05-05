@@ -189,9 +189,9 @@ export default function ReturnsPage() {
     if (user?.role !== 'processor') {
         return (
             <PermissionGate permission="warehouse">
-            <div className="bg-red-50 border border-red-200 rounded-[4px] p-6 text-center">
-                <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-3" />
-                <p className="text-red-800 font-medium">Access denied. This page is for processors only.</p>
+            <div className="border rounded-[4px] p-6 text-center" style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
+                <AlertCircle className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--error)' }} />
+                <p className="font-medium" style={{ color: 'var(--on-error-container)' }}>Access denied. This page is for processors only.</p>
                 <Button variant="outline" className="mt-4" onClick={() => router.push('/')}>Go to Dashboard</Button>
             </div>
             </PermissionGate>

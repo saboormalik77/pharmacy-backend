@@ -203,7 +203,7 @@ export default function DistributorsPage() {
                 </div>
 
                 {error && (
-                    <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 px-3 py-2.5 rounded-[4px] text-sm">
+                    <div style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
                         <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />{error}
                     </div>
                 )}

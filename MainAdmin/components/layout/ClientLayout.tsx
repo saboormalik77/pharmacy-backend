@@ -42,7 +42,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             <ProtectedRoute>
                 {!isAuthPage && (
                     <>
-                        <Navbar onToggleSidebar={handleToggleSidebar} />
                         <Sidebar
                             isCollapsed={sidebarCollapsed}
                             isOpen={sidebarOpen}
@@ -50,8 +49,8 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                         />
                         {sidebarOpen && (
                             <div
-                                className="fixed top-16 left-0 right-0 bottom-0 z-30 sm:hidden"
-                                style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
+                                className="fixed top-0 left-0 right-0 bottom-0 z-30 sm:hidden"
+                                style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
                                 onClick={handleCloseSidebar}
                             />
                         )}
@@ -60,14 +59,16 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 <main
                     className={
                         !isAuthPage
-                            ? `pt-16 transition-all duration-300 min-h-screen ${sidebarCollapsed ? 'sm:ml-16' : 'sm:ml-64'}`
+                            ? `flex flex-col min-h-screen ${sidebarCollapsed ? 'sm:ml-16' : 'sm:ml-64'}`
                             : ''
                     }
                 >
-                    {!isAuthPage
-                        ? <div className="p-3 sm:p-4 md:p-6">{children}</div>
-                        : children
-                    }
+                    {!isAuthPage && (
+                        <Navbar onToggleSidebar={handleToggleSidebar} />
+                    )}
+                    <div className={!isAuthPage ? 'flex-1 p-3 sm:p-4 md:p-6' : ''}>
+                        {children}
+                    </div>
                 </main>
             </ProtectedRoute>
         </StoreProvider>

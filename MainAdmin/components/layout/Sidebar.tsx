@@ -61,22 +61,22 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose }: SidebarProps) 
     return (
         <aside
             className={cn(
-                'h-screen fixed left-0 top-16 transition-all duration-300 z-40',
+                'h-screen fixed left-0 top-0 transition-all duration-300 z-40',
                 isOpen ? 'translate-x-0' : '-translate-x-full',
                 'sm:translate-x-0',
                 'w-64 sm:w-auto',
                 isCollapsed ? 'sm:w-16' : 'sm:w-64'
             )}
             style={{
-                backgroundColor: 'var(--sidebar-bg)',
-                color: 'var(--sidebar-text)',
+                backgroundColor: 'var(--primary)',
+                color: 'var(--on-primary)',
             }}
         >
             <div
-                className="h-full overflow-y-auto overflow-x-hidden p-4 pb-8"
+                className="h-full overflow-y-auto overflow-x-hidden p-3"
                 style={{
                     scrollbarWidth: 'thin',
-                    scrollbarColor: 'var(--sidebar-hover) transparent',
+                    scrollbarColor: 'rgba(255,255,255,0.2) transparent',
                 }}
             >
                 <nav className="space-y-0.5">
@@ -96,18 +96,18 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose }: SidebarProps) 
                                 href={link.href}
                                 onClick={handleLinkClick}
                                 className={cn(
-                                    'flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all',
-                                    'hover:text-white',
+                                    'flex items-center gap-3 px-3 py-2.5 rounded-[4px] transition-all',
+                                    'hover:bg-white/10',
                                     isCollapsed && 'justify-center'
                                 )}
                                 style={{
-                                    backgroundColor: isActive ? 'var(--sidebar-hover)' : 'transparent',
-                                    color: isActive ? 'var(--sidebar-active)' : 'var(--sidebar-text)',
+                                    backgroundColor: isActive ? 'rgba(255,255,255,0.15)' : 'transparent',
+                                    color: isActive ? '#ffffff' : 'rgba(255,255,255,0.8)',
                                 }}
                             >
-                                <Icon className="w-4 h-4 flex-shrink-0" />
+                                <Icon className="w-5 h-5 flex-shrink-0" />
                                 {!isCollapsed && (
-                                    <span className={cn('text-sm', isActive ? 'font-semibold' : 'font-medium')}>
+                                    <span className={cn('text-sm', isActive ? 'font-semibold' : 'font-normal')}>
                                         {link.label}
                                     </span>
                                 )}

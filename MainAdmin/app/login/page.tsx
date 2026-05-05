@@ -65,7 +65,7 @@ export default function LoginPage() {
         <div className="rounded-[4px] shadow-md p-6" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
           <form onSubmit={handleSubmit} className="space-y-6" noValidate>
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[4px] text-sm">
+              <div style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
                 {error}
               </div>
             )}
