@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
+import WebSocket from 'ws';
 
 // Load environment variables
 // Vercel provides env vars directly, so only load .env.local in development
@@ -37,6 +38,10 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   global: {
     fetch: customFetch,
   },
+  realtime: {
+    // Node.js < 22 needs a WebSocket implementation for Supabase realtime
+    transport: WebSocket as unknown as any,
+  },
 });
 
 // Client with service role key (bypasses RLS - use for admin operations)
@@ -48,6 +53,9 @@ export const supabaseAdmin = supabaseServiceKey
       },
       global: {
         fetch: customFetch,
+      },
+      realtime: {
+        transport: WebSocket as unknown as any,
       },
     })
   : null;
