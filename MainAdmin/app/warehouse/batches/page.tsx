@@ -98,6 +98,7 @@ export default function BatchesPage() {
             setShowCreate(false);
             setNewBatch({ batchMonth: '', batchName: '' });
             loadBatches();
+            router.push(`/warehouse/batches/${result.payload.id}`);
         }
     };
 

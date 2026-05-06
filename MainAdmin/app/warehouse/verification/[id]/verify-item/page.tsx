@@ -329,7 +329,10 @@ export default function VerifyItemPage() {
                     : 'destruction';
         showToast(`Item verified and routed to ${dispositionLabel}`);
         
-        // Navigate back to verification page after save
+        // After save, return to the return's verification page and open batching.
+        try {
+            sessionStorage.setItem(`openBatchModal:${returnId}`, '1');
+        } catch { /* ignore */ }
         router.push(`/warehouse/verification/${returnId}`);
     };
 
@@ -342,16 +345,16 @@ export default function VerifyItemPage() {
 
     if (!verifyingItem) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6 px-4">
-                <div className="max-w-4xl mx-auto">
-                    <button onClick={handleBack} className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-indigo-600 mb-4 transition-colors cursor-pointer font-medium">
+            <div className="space-y-3">
+                <div className="w-full">
+                    <button onClick={handleBack} className="inline-flex items-center gap-2 text-sm mb-4 transition-colors cursor-pointer font-medium hover:underline" style={{ color: 'var(--outline)' }}>
                         <ArrowLeft className="w-4 h-4" />
                         Back to Verification
                     </button>
-                    <div className="bg-white rounded-[4px] border border-gray-200 shadow-sm p-12 text-center">
-                        <AlertTriangle className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                        <p className="text-gray-600 font-medium">Item not found</p>
-                        <p className="text-sm text-gray-500 mt-1">The item you're looking for could not be found.</p>
+                    <div className="rounded-[4px] border shadow-sm p-12 text-center" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                        <AlertTriangle className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--on-surface-variant)' }} />
+                        <p className="font-medium" style={{ color: 'var(--on-surface)' }}>Item not found</p>
+                        <p className="text-sm mt-1" style={{ color: 'var(--on-surface-variant)' }}>The item you're looking for could not be found.</p>
                     </div>
                 </div>
             </div>
@@ -359,25 +362,25 @@ export default function VerifyItemPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6 px-4">
+        <div className="space-y-3">
             <ToastContainer toasts={toasts} onClose={removeToast} />
             
-            <div className="max-w-4xl mx-auto">
+            <div className="w-full">
                 {/* Header */}
                 <div className="mb-5">
-                    <button onClick={handleBack} className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-indigo-600 mb-4 transition-colors cursor-pointer font-medium">
+                    <button onClick={handleBack} className="inline-flex items-center gap-2 text-sm mb-4 transition-colors cursor-pointer font-medium hover:underline" style={{ color: 'var(--outline)' }}>
                         <ArrowLeft className="w-4 h-4" />
                         Back to Verification
                     </button>
                     
-                    <div className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-[4px] p-3 shadow-lg">
+                    <div className="rounded-[4px] p-3 shadow-lg text-white" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
                         <div className="flex items-start gap-3">
                             <div className="p-2 bg-white/20 rounded-[4px]">
                                 <CheckCircle className="w-6 h-6 text-white" />
                             </div>
                             <div className="flex-1 min-w-0">
                                 <h1 className="font-heading text-headline font-bold text-white">Verify Item</h1>
-                                <p className="text-sm text-indigo-100 font-medium mt-1 truncate">
+                                <p className="text-sm font-medium mt-1 truncate" style={{ color: 'color-mix(in srgb, var(--on-primary) 82%, transparent)' }}>
                                     {verifyingItem.proprietaryName || verifyingItem.genericName || 'Unknown Item'}
                                 </p>
                             </div>
@@ -491,36 +494,38 @@ export default function VerifyItemPage() {
 
                         {/* Serial Number and Lot Number Verification */}
                         {verifyStatus === 'correct' && (
-                            <div className="space-y-3 p-4 rounded-[4px] border border-blue-300 bg-gradient-to-br from-blue-50 to-blue-100/50 shadow-sm">
+                            <div className="space-y-3 p-4 rounded-[4px] border shadow-sm" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                                 <div className="flex items-center gap-2">
-                                    <ShieldAlert className="w-4 h-4 text-blue-600" />
-                                    <h3 className="text-sm font-semibold text-blue-800">Product Verification</h3>
+                                    <ShieldAlert className="w-4 h-4" style={{ color: 'var(--primary)' }} />
+                                    <h3 className="text-sm font-semibold" style={{ color: 'var(--on-surface)' }}>Product Verification</h3>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                                     <div>
-                                        <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1.5 block">Serial Number</label>
+                                        <label className="text-xs font-semibold uppercase tracking-wide mb-1.5 block" style={{ color: 'var(--on-surface-variant)' }}>Serial Number</label>
                                         <input
                                             type="text"
                                             value={verifySerialNumber}
                                             onChange={e => setVerifySerialNumber(e.target.value)}
                                             placeholder="Scan or enter serial number"
-                                            className="w-full px-3 py-2 text-sm border border-blue-200 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                                            className="w-full px-3 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm"
+                                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}
                                         />
                                         {verifyingItem?.serialNumber && (
-                                            <p className="text-xs text-blue-600 mt-1.5 font-medium">Expected: {verifyingItem.serialNumber}</p>
+                                            <p className="text-xs mt-1.5 font-medium" style={{ color: 'var(--on-surface-variant)' }}>Expected: {verifyingItem.serialNumber}</p>
                                         )}
                                     </div>
                                     <div>
-                                        <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1.5 block">Lot Number</label>
+                                        <label className="text-xs font-semibold uppercase tracking-wide mb-1.5 block" style={{ color: 'var(--on-surface-variant)' }}>Lot Number</label>
                                         <input
                                             type="text"
                                             value={verifyLotNumber}
                                             onChange={e => setVerifyLotNumber(e.target.value)}
                                             placeholder="Scan or enter lot number"
-                                            className="w-full px-3 py-2 text-sm border border-blue-200 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                                            className="w-full px-3 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-sm"
+                                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}
                                         />
                                         {verifyingItem?.lotNumber && (
-                                            <p className="text-xs text-blue-600 mt-1.5 font-medium">Expected: {verifyingItem.lotNumber}</p>
+                                            <p className="text-xs mt-1.5 font-medium" style={{ color: 'var(--on-surface-variant)' }}>Expected: {verifyingItem.lotNumber}</p>
                                         )}
                                     </div>
                                 </div>

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, LogOut, Loader2 } from 'lucide-react';
+import { Menu, User, LogOut, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { logoutUser } from '@/lib/store/authSlice';
@@ -48,10 +48,20 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
     return (
         <>
             <nav
-                className="h-16 border-b flex items-center justify-end px-2 sm:px-4"
+                className="h-16 border-b flex items-center px-2 sm:px-4 gap-2"
                 style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
             >
-                <div className="relative" ref={profileRef}>
+                <button
+                    type="button"
+                    onClick={onToggleSidebar}
+                    className="sm:hidden p-2 rounded-[6px] transition-colors hover:bg-primary-50/40"
+                    style={{ color: 'var(--on-surface)' }}
+                    aria-label="Open menu"
+                    title="Menu"
+                >
+                    <Menu className="w-5 h-5" />
+                </button>
+                <div className="relative ml-auto" ref={profileRef}>
                     <button onClick={() => setShowProfile(!showProfile)} className="flex items-center gap-2 p-1.5 rounded-[4px] transition-colors hover:bg-primary-50/40">
                         <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'var(--primary)' }}>
                             <User className="w-4 h-4 text-white" />

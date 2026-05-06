@@ -591,7 +591,11 @@ export default function VerificationSessionPage() {
             if (assignReturnsToBatch.fulfilled.match(assignResult)) {
                 showToast('Return assigned to batch successfully!');
                 setBatchModal(false);
-                router.push('/warehouse/verification');
+                if (targetBatchId) {
+                    router.push(`/warehouse/batches/${targetBatchId}`);
+                } else {
+                    router.push('/warehouse/verification');
+                }
             } else {
                 showToast(assignResult.payload as string || 'Failed to assign to batch', 'error');
             }
@@ -599,6 +603,20 @@ export default function VerificationSessionPage() {
             setBatchAssigning(false);
         }
     };
+
+    // If a verify-item page asked us to open batching, do it once.
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const key = `openBatchModal:${returnId}`;
+        try {
+            if (sessionStorage.getItem(key) === '1') {
+                sessionStorage.removeItem(key);
+                void handleOpenBatchModal();
+            }
+        } catch {
+            // ignore
+        }
+    }, [returnId]);
 
     // ── Wine Cellar handlers ────────────────────────────────────
     const openWcModal = async () => {
@@ -725,29 +743,30 @@ export default function VerificationSessionPage() {
         return (
             <PermissionGate permission="warehouse">
                 <ToastContainer toasts={toasts} onClose={removeToast} />
-                <div className="max-w-2xl mx-auto mt-6 space-y-4">
-                    <div className="bg-white rounded-[4px] shadow p-6 space-y-4">
+                {/* Full-bleed within main content: cancel ClientLayout horizontal padding */}
+                <div className="w-full -mx-3 px-3 sm:-mx-4 sm:px-4 md:-mx-6 md:px-6 space-y-4">
+                    <div className="rounded-[4px] border shadow-sm p-4 sm:p-6 space-y-4 w-full" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-[4px] bg-green-50">
-                                <CheckCircle className="w-6 h-6 text-green-600" />
+                            <div className="p-2 rounded-[4px]" style={{ backgroundColor: 'var(--secondary-container)' }}>
+                                <CheckCircle className="w-6 h-6" style={{ color: 'var(--on-secondary-container)' }} />
                             </div>
                             <div>
-                                <h2 className="text-base font-bold text-gray-900">Verification Complete</h2>
-                                <p className="text-[11px] text-gray-500">Summary of verification results</p>
+                                <h2 className="text-base font-bold font-heading" style={{ color: 'var(--foreground)' }}>Verification Complete</h2>
+                                <p className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>Summary of verification results</p>
                             </div>
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            <div className="p-3 rounded-[4px] border border-gray-200 bg-gray-50">
-                                <p className="text-xs font-medium text-gray-500">Total Items</p>
-                                <p className="text-lg font-bold text-gray-900">{completedSummary.totalItems ?? 0}</p>
+                            <div className="p-3 rounded-[4px] border" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                                <p className="text-xs font-medium" style={{ color: 'var(--on-surface-variant)' }}>Total Items</p>
+                                <p className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>{completedSummary.totalItems ?? 0}</p>
                             </div>
-                            <div className="p-3 rounded-[4px] border border-emerald-200 bg-emerald-50">
-                                <p className="text-xs font-medium text-emerald-700">Returnable</p>
-                                <p className="text-lg font-bold text-emerald-700">{v2Summary ? policyCounts.returnable : completedSummary.correctItems ?? 0}</p>
+                            <div className="p-3 rounded-[4px] border" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--secondary-container)' }}>
+                                <p className="text-xs font-medium" style={{ color: 'var(--on-secondary-container)' }}>Returnable</p>
+                                <p className="text-lg font-bold" style={{ color: 'var(--on-secondary-container)' }}>{v2Summary ? policyCounts.returnable : completedSummary.correctItems ?? 0}</p>
                             </div>
-                            <div className="p-3 rounded-[4px] border border-rose-200 bg-rose-50">
-                                <p className="text-xs font-medium text-rose-700">Non-Returnable</p>
-                                <p className="text-lg font-bold text-rose-700">{v2Summary ? (policyCounts.nonReturnable + policyCounts.wineCellar + policyCounts.destruction) : ((completedSummary.damagedItems ?? 0) + (completedSummary.missingItems ?? 0) + (completedSummary.wrongItems ?? 0))}</p>
+                            <div className="p-3 rounded-[4px] border col-span-2 sm:col-span-1" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--error-container)' }}>
+                                <p className="text-xs font-medium" style={{ color: 'var(--on-error-container)' }}>Non-Returnable</p>
+                                <p className="text-lg font-bold" style={{ color: 'var(--on-error-container)' }}>{v2Summary ? (policyCounts.nonReturnable + policyCounts.wineCellar + policyCounts.destruction) : ((completedSummary.damagedItems ?? 0) + (completedSummary.missingItems ?? 0) + (completedSummary.wrongItems ?? 0))}</p>
                             </div>
                         </div>
                         {/* Hidden verification stats - showing only routing-focused summary now
@@ -768,26 +787,28 @@ export default function VerificationSessionPage() {
                         </div>
                         */}
                         {completedSummary.correctItemsValue != null && (
-                            <div className="p-3 rounded-[4px] bg-green-50 border border-green-200 text-center">
-                                <p className="text-xs font-medium text-green-700">Correct Items Value</p>
-                                <p className="text-lg font-bold text-green-900">{formatCurrency(completedSummary.correctItemsValue)}</p>
+                            <div className="p-3 rounded-[4px] border text-center" style={{ backgroundColor: 'var(--secondary-container)', borderColor: 'var(--outline-variant)' }}>
+                                <p className="text-xs font-medium" style={{ color: 'var(--on-secondary-container)' }}>Correct Items Value</p>
+                                <p className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>{formatCurrency(completedSummary.correctItemsValue)}</p>
                             </div>
                         )}
                         {(completedSummary.excludedFromBatch ?? 0) > 0 && (
-                            <div className="p-3 rounded-[4px] bg-blue-50 border border-blue-200 text-blue-800 text-xs flex items-start gap-2">
-                                <Package className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                            <div className="p-3 rounded-[4px] border text-xs flex items-start gap-2" style={{ backgroundColor: 'var(--primary-fixed)', borderColor: 'var(--outline-variant)', color: 'var(--on-surface)' }}>
+                                <Package className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--on-surface-variant)' }} />
                                 <span>{completedSummary.excludedFromBatch} non-correct item(s) have been excluded from batching and will not appear in debit memos.</span>
                             </div>
                         )}
                         {completedSummary.openDiscrepancies > 0 && (
-                            <div className="p-3 rounded-[4px] bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center gap-2">
-                                <AlertTriangle className="w-4 h-4" />
-                                {completedSummary.openDiscrepancies} open discrepancies remain.
+                            <div className="p-3 rounded-[4px] border text-xs flex items-center gap-2" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)', color: 'var(--on-surface)' }}>
+                                <AlertTriangle className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--error)' }} />
+                                <span>{completedSummary.openDiscrepancies} open discrepancies remain.</span>
                             </div>
                         )}
                         <button 
+                            type="button"
                             onClick={handleOpenBatchModal}
-                            className="w-full flex items-center justify-center gap-2 px-3 py-1.5 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-[4px] mt-2 transition"
+                            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium rounded-[4px] mt-2 transition text-white"
+                            style={{ backgroundColor: 'var(--primary)' }}
                         >
                             <Layers className="w-4 h-4" /> Create Batch
                         </button>

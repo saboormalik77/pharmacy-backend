@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, Warehouse, CircleDollarSign, FileText, DollarSign, AlertTriangle, Trash2, UserCog, Settings, Menu, PanelLeftClose, PanelLeft } from 'lucide-react';
+import { LayoutDashboard, Users, Warehouse, CircleDollarSign, FileText, DollarSign, AlertTriangle, Trash2, UserCog, Settings, Menu, PanelLeftClose } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePermissions } from '@/hooks/usePermissions';
 
@@ -77,22 +77,38 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose, onToggle }: Side
             <div className={cn(
                 'flex items-center justify-between px-3 py-4 border-b'
             )} style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-                <div className="flex flex-col">
-                    <span className="text-lg font-semibold tracking-wide leading-none" style={{ color: 'var(--on-primary)' }}>ADMIN</span>
-                    <span className="text-[11px] font-medium tracking-widest uppercase opacity-60 leading-none" style={{ color: 'var(--on-primary)' }}>Portal</span>
-                </div>
-                {onToggle && (
-                    <button
-                        onClick={onToggle}
-                        className="p-1.5 rounded-[4px] hover:bg-white/10 transition-colors"
-                        title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-                    >
-                        {isCollapsed ? (
-                            <PanelLeft className="w-4 h-4" />
-                        ) : (
-                            <PanelLeftClose className="w-4 h-4" />
+                {isCollapsed ? (
+                    <div className="flex items-center justify-center w-full">
+                        {onToggle && (
+                            <button
+                                type="button"
+                                onClick={onToggle}
+                                className="p-2 rounded-[6px] hover:bg-white/10 transition-colors"
+                                title="Open sidebar"
+                                aria-label="Open sidebar"
+                            >
+                                <Menu className="w-5 h-5" />
+                            </button>
                         )}
-                    </button>
+                    </div>
+                ) : (
+                    <>
+                        <div className="flex flex-col">
+                            <span className="text-lg font-semibold tracking-wide leading-none" style={{ color: 'var(--on-primary)' }}>ADMIN</span>
+                            <span className="text-[11px] font-medium tracking-widest uppercase opacity-60 leading-none" style={{ color: 'var(--on-primary)' }}>Portal</span>
+                        </div>
+                        {onToggle && (
+                            <button
+                                type="button"
+                                onClick={onToggle}
+                                className="p-1.5 rounded-[4px] hover:bg-white/10 transition-colors"
+                                title="Collapse sidebar"
+                                aria-label="Collapse sidebar"
+                            >
+                                <PanelLeftClose className="w-4 h-4" />
+                            </button>
+                        )}
+                    </>
                 )}
             </div>
 
