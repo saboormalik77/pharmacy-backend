@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '../config/supabase';
 import { AppError } from '../utils/appError';
+import { formatNonReturnableReason } from '../constants/nonReturnableReasons';
 // import { getOptimizationRecommendations } from './optimizationService';
 
 export interface DashboardSummary {
@@ -419,16 +420,11 @@ export const getReturnDetail = async (pharmacyId: string, returnId: string): Pro
     throw new AppError(`Failed to fetch return items: ${itemsError.message}`, 400);
   }
 
-  // Calculate non-returnable reasons
+  // Calculate non-returnable reasons using the canonical label lookup
   const reasonMap: Record<string, number> = {};
   (items || []).forEach((item: any) => {
     if (item.return_status === 'non_returnable') {
-      const reason = item.non_returnable_reason || 'other';
-      const reasonLabel = reason === 'date' ? 'Expired'
-        : reason === 'policy' ? 'Manufacturer Policy'
-        : reason === 'no_data' ? 'No Data'
-        : reason === 'manual' ? 'Manual'
-        : 'Other';
+      const reasonLabel = formatNonReturnableReason(item.non_returnable_reason) || 'Other';
       reasonMap[reasonLabel] = (reasonMap[reasonLabel] || 0) + (Number(item.estimated_value) || 0);
     }
   });
