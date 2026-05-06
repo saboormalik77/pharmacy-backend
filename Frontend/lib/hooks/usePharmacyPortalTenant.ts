@@ -76,6 +76,7 @@ async function loadPharmacyTenant(): Promise<TenantState> {
  * consumer share the same result without re-fetching.
  */
 export function usePharmacyPortalTenant() {
+  const [isLocalHost, setIsLocalHost] = useState(false)
   const [tenantChecked, setTenantChecked] = useState<boolean>(
     () => !!cachedState
   )
@@ -87,8 +88,10 @@ export function usePharmacyPortalTenant() {
   )
 
   useLayoutEffect(() => {
-    const h = typeof window !== 'undefined' ? window.location.hostname : ''
-    if (isLocalHostname(h)) {
+    const h = window.location.hostname
+    const local = isLocalHostname(h)
+    setIsLocalHost(local)
+    if (local) {
       setTenantChecked(true)
       return
     }
@@ -100,7 +103,7 @@ export function usePharmacyPortalTenant() {
   }, [])
 
   useEffect(() => {
-    const host = typeof window !== 'undefined' ? window.location.hostname : ''
+    const host = window.location.hostname
     if (isLocalHostname(host)) {
       setTenantChecked(true)
       setValidTenant(null)
@@ -124,10 +127,6 @@ export function usePharmacyPortalTenant() {
       mounted = false
     }
   }, [])
-
-  const loginHost =
-    typeof window !== 'undefined' ? window.location.hostname : ''
-  const isLocalHost = isLocalHostname(loginHost)
 
   return {
     tenantChecked,

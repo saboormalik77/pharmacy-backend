@@ -2,16 +2,18 @@
 
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
-import { ArrowLeft, CheckCircle, XCircle, AlertTriangle, ShieldAlert, X, Loader2, Archive, Ban } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, AlertTriangle, ShieldAlert, X, Loader2, Archive, Ban, DollarSign, Save } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import {
     updateTransactionItem,
+    updateTransactionItemPrice,
     moveItemToWineCellar,
     resolveTransactionItem,
 } from '@/lib/store/returnTransactionsSlice';
 import { verifyItemV2 } from '@/lib/store/warehouseSlice';
 import { checkReturnability } from '@/lib/store/policiesSlice';
-import type { VerificationV2Item, ReturnabilityCheckResult } from '@/lib/types';
+import { upsertNDCPricing } from '@/lib/store/ndcPricingSlice';
+import type { VerificationV2Item, ReturnabilityCheckResult, NDCPricingUpsertPayload } from '@/lib/types';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
 import {
     NON_RETURNABLE_REASONS,
@@ -21,6 +23,49 @@ import {
 // Helper functions
 const normalizeNdc = (ndc: string): string => ndc.replace(/\D/g, '');
 const normalizeDateKey = (date?: string): string => date?.slice(0, 10) || '';
+
+// ─── NDC Pricing Book (mirrors MainAdmin/app/ndc-pricing/page.tsx) ───────────
+const PRICE_SOURCES = [
+    'Avella 2016 Price List',
+    'Avella 2018 Price List',
+    'Good RX Retail',
+    'Labeler Credit Memo',
+    'Price Chopper 2016',
+    'Processor Added "PA"',
+    'Single Item DM',
+    'User Add During Close-Out',
+    'Westcliff 2017',
+    'Imported from Return Reports',
+    'Manual Entry',
+];
+
+const PRICE_DESTINATIONS = [
+    { value: 'inmar', label: 'Inmar' },
+    { value: 'qualanex', label: 'Qualanex' },
+    { value: 'pharmalink', label: 'PharmaLink' },
+    { value: 'other', label: 'Other' },
+];
+
+const estimatedStoreFromCurrent = (current: number | undefined): number | undefined => {
+    if (current == null || Number.isNaN(current) || current < 0) return undefined;
+    return Math.round(current * 0.7 * 100) / 100;
+};
+
+const buildProductNameFromItem = (item: VerificationV2Item): string => {
+    const prop = (item.proprietaryName || '').trim();
+    const gen = (item.genericName || '').trim();
+    if (prop && gen && prop.toLowerCase() !== gen.toLowerCase()) return `${prop} (${gen})`;
+    return prop || gen || '';
+};
+
+interface ResolvedPrice {
+    found: boolean;
+    currentPrice: number | null;
+    productName: string | null;
+    priceSource: string | null;
+    closeOutDestination: string | null;
+    estimatedStorePrice: number | null;
+}
 
 export default function VerifyItemPage() {
     const params = useParams();
@@ -55,6 +100,29 @@ export default function VerifyItemPage() {
     // Serial number and lot number for verification
     const [verifySerialNumber, setVerifySerialNumber] = useState('');
     const [verifyLotNumber, setVerifyLotNumber] = useState('');
+
+    // ─── NDC Pricing gate ────────────────────────────────────────────────
+    const [resolvedPrice, setResolvedPrice] = useState<ResolvedPrice | null>(null);
+    const [priceLookupLoading, setPriceLookupLoading] = useState(false);
+    const [priceLookupChecked, setPriceLookupChecked] = useState(false);
+    const [priceForm, setPriceForm] = useState<NDCPricingUpsertPayload>({
+        ndc: '',
+        productName: '',
+        currentPrice: undefined,
+        estimatedStorePrice: undefined,
+        lastReimbursement: undefined,
+        priceSource: '',
+        closeOutDestination: '',
+    });
+    const [savingPrice, setSavingPrice] = useState(false);
+
+    const hasNdc = !!verifyingItem?.ndc?.trim();
+    const priceAvailable =
+        !!resolvedPrice?.found &&
+        resolvedPrice.currentPrice != null &&
+        resolvedPrice.currentPrice > 0;
+    // Verification is gated on pricing only when the item has a usable NDC.
+    const priceGateActive = hasNdc && priceLookupChecked && !priceAvailable;
 
     const showToast = (msg: string, type: Toast['type'] = 'success') => {
         const id = Date.now().toString();
@@ -187,6 +255,147 @@ export default function VerifyItemPage() {
         };
     }, [dispatch, verifyingItem]); // Removed fetchReverseDistributors and verifyStatus
 
+    // ─── NDC Pricing lookup (runs once per item) ─────────────────────────
+    useEffect(() => {
+        if (!verifyingItem || priceLookupChecked) return;
+
+        const ndc = verifyingItem.ndc?.trim();
+        if (!ndc) {
+            // No NDC on the item — cannot look up; do not gate verification.
+            setPriceLookupChecked(true);
+            return;
+        }
+
+        let cancelled = false;
+        setPriceLookupLoading(true);
+
+        (async () => {
+            try {
+                const { apiClient } = await import('@/lib/api/apiClient');
+                const response = await apiClient.get<{
+                    status: string;
+                    data: ResolvedPrice;
+                }>(`/admin/ndc-pricing/resolve/${encodeURIComponent(ndc)}`, true);
+
+                if (cancelled) return;
+
+                const data = response?.data || null;
+                setResolvedPrice(data);
+
+                // Pre-fill the price-entry form so the admin only types the price.
+                if (!data?.found || !data.currentPrice || data.currentPrice <= 0) {
+                    setPriceForm({
+                        ndc,
+                        productName:
+                            data?.productName ||
+                            buildProductNameFromItem(verifyingItem),
+                        currentPrice: undefined,
+                        estimatedStorePrice: undefined,
+                        lastReimbursement: undefined,
+                        priceSource: '',
+                        closeOutDestination: '',
+                    });
+                }
+            } catch (err) {
+                if (!cancelled) {
+                    console.error('NDC price lookup failed:', err);
+                    setResolvedPrice({
+                        found: false,
+                        currentPrice: null,
+                        productName: null,
+                        priceSource: null,
+                        closeOutDestination: null,
+                        estimatedStorePrice: null,
+                    });
+                    setPriceForm({
+                        ndc,
+                        productName: buildProductNameFromItem(verifyingItem),
+                        currentPrice: undefined,
+                        estimatedStorePrice: undefined,
+                        lastReimbursement: undefined,
+                        priceSource: '',
+                        closeOutDestination: '',
+                    });
+                }
+            } finally {
+                if (!cancelled) {
+                    setPriceLookupLoading(false);
+                    setPriceLookupChecked(true);
+                }
+            }
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [verifyingItem, priceLookupChecked]);
+
+    const handleSaveNdcPrice = async () => {
+        if (!priceForm.ndc) {
+            showToast('NDC is required to save pricing', 'error');
+            return;
+        }
+        if (priceForm.currentPrice == null || !Number.isFinite(priceForm.currentPrice) || priceForm.currentPrice <= 0) {
+            showToast('Enter a valid current price (greater than 0)', 'error');
+            return;
+        }
+
+        setSavingPrice(true);
+        const payload: NDCPricingUpsertPayload = {
+            ndc: priceForm.ndc,
+            productName: priceForm.productName || undefined,
+            currentPrice: priceForm.currentPrice,
+            estimatedStorePrice:
+                priceForm.estimatedStorePrice ?? estimatedStoreFromCurrent(priceForm.currentPrice),
+            lastReimbursement: priceForm.lastReimbursement,
+            priceSource: priceForm.priceSource || 'Manual Entry',
+            closeOutDestination: priceForm.closeOutDestination || undefined,
+        };
+
+        const result = await dispatch(upsertNDCPricing(payload));
+
+        if (!upsertNDCPricing.fulfilled.match(result)) {
+            setSavingPrice(false);
+            showToast((result.payload as string) || 'Failed to save NDC price', 'error');
+            return;
+        }
+
+        const rec = result.payload;
+
+        // Back-propagate the new price onto this return-transaction item so
+        // downstream surfaces (close-out batch, debit memos, totals, etc.)
+        // see the value instead of $0. Uses the dedicated /price endpoint
+        // because the standard PATCH is blocked for "core fields" on a
+        // locked/received return.
+        if (verifyingItem && rec.currentPrice != null && rec.currentPrice > 0) {
+            const updateResult = await dispatch(updateTransactionItemPrice({
+                transactionId: returnId,
+                itemId: verifyingItem.id,
+                standardPrice: rec.currentPrice,
+            }));
+            if (!updateTransactionItemPrice.fulfilled.match(updateResult)) {
+                setSavingPrice(false);
+                showToast(
+                    (updateResult.payload as string) ||
+                        'Saved to NDC book but failed to update item price on this return',
+                    'error',
+                );
+                return;
+            }
+        }
+
+        setSavingPrice(false);
+        setResolvedPrice({
+            found: true,
+            currentPrice: rec.currentPrice,
+            productName: rec.productName,
+            priceSource: rec.priceSource,
+            closeOutDestination: rec.closeOutDestination,
+            estimatedStorePrice: rec.estimatedStorePrice,
+        });
+        showToast('Price saved to NDC Pricing Book and applied to this item');
+    };
+
     const runPhysicalVerification = async (
         itemId: string,
         verificationStatus: string,
@@ -211,6 +420,13 @@ export default function VerifyItemPage() {
 
     const handleVerifyItem = async () => {
         if (!verifyStatus || !verifyingItem) return;
+
+        // FCR: NDC Pricing gate — items with an NDC must have a price in the
+        // pricing book before verification is allowed.
+        if (priceGateActive) {
+            showToast('Enter and save the NDC price before verifying this item.', 'error');
+            return;
+        }
 
         const parsedQty = verifyActualQty !== '' ? Number(verifyActualQty) : undefined;
         const actualQty = parsedQty != null && Number.isFinite(parsedQty) ? parsedQty : undefined;
@@ -439,6 +655,202 @@ export default function VerifyItemPage() {
                         </div>
                     </div>
                 </div>
+
+                {/* NDC Pricing — gates verification until a price exists in the book */}
+                {hasNdc && (
+                    <div className="bg-white rounded-[4px] border border-gray-200 shadow-sm mb-5">
+                        <div className="px-5 py-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+                            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide flex items-center gap-2">
+                                <DollarSign className="w-4 h-4 text-amber-600" />
+                                NDC Pricing
+                            </h2>
+                            {priceLookupLoading && <Loader2 className="w-4 h-4 animate-spin text-gray-500" />}
+                        </div>
+
+                        <div className="p-5 space-y-4">
+                            {priceLookupLoading && !priceLookupChecked ? (
+                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    Looking up price for NDC <span className="font-mono font-semibold">{verifyingItem.ndc}</span>...
+                                </div>
+                            ) : priceAvailable && resolvedPrice ? (
+                                <div className="rounded-[4px] border border-green-300 bg-gradient-to-br from-green-50 to-green-100/60 p-4">
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="flex items-start gap-2">
+                                            <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                                            <div>
+                                                <p className="text-sm font-semibold text-green-800">
+                                                    Price found in NDC Pricing Book
+                                                </p>
+                                                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 text-xs">
+                                                    <div className="flex justify-between sm:block">
+                                                        <span className="text-gray-600">Current Price:</span>
+                                                        <span className="ml-2 font-mono font-bold text-green-900">
+                                                            ${resolvedPrice.currentPrice!.toFixed(2)}
+                                                        </span>
+                                                    </div>
+                                                    {resolvedPrice.estimatedStorePrice != null && (
+                                                        <div className="flex justify-between sm:block">
+                                                            <span className="text-gray-600">Est. Store Price:</span>
+                                                            <span className="ml-2 font-mono text-gray-800">
+                                                                ${resolvedPrice.estimatedStorePrice.toFixed(2)}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                    {resolvedPrice.priceSource && (
+                                                        <div className="flex justify-between sm:block">
+                                                            <span className="text-gray-600">Source:</span>
+                                                            <span className="ml-2 text-gray-800">{resolvedPrice.priceSource}</span>
+                                                        </div>
+                                                    )}
+                                                    {resolvedPrice.closeOutDestination && (
+                                                        <div className="flex justify-between sm:block">
+                                                            <span className="text-gray-600">Destination:</span>
+                                                            <span className="ml-2 text-gray-800 capitalize">{resolvedPrice.closeOutDestination}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="rounded-[4px] border border-amber-300 bg-gradient-to-br from-amber-50 to-amber-100/60 p-3 flex items-start gap-2">
+                                        <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                                        <div>
+                                            <p className="text-sm font-semibold text-amber-800">
+                                                No price found for NDC <span className="font-mono">{verifyingItem.ndc}</span>
+                                            </p>
+                                            <p className="text-xs text-amber-700 mt-0.5">
+                                                Verification is blocked until you enter the price below — it will be saved to the NDC Pricing Book and reused next time.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-[11px] font-semibold text-gray-700 uppercase tracking-wide mb-1">NDC</label>
+                                            <input
+                                                type="text"
+                                                value={priceForm.ndc}
+                                                disabled
+                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] bg-gray-100 text-gray-700 font-mono"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[11px] font-semibold text-gray-700 uppercase tracking-wide mb-1">
+                                                Product Name <span className="text-gray-400 font-normal normal-case">(optional)</span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={priceForm.productName || ''}
+                                                onChange={e => setPriceForm(d => ({ ...d, productName: e.target.value }))}
+                                                placeholder="Auto-filled from item"
+                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        <div>
+                                            <label className="block text-[11px] font-semibold text-gray-700 uppercase tracking-wide mb-1">
+                                                Current Price ($) <span className="text-red-500 normal-case">*</span>
+                                            </label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                value={priceForm.currentPrice ?? ''}
+                                                placeholder="e.g. 16.80"
+                                                onChange={e => {
+                                                    const v = e.target.value;
+                                                    const cp = v === '' ? undefined : parseFloat(v);
+                                                    const parsed = cp != null && !Number.isNaN(cp) ? cp : undefined;
+                                                    setPriceForm(d => ({
+                                                        ...d,
+                                                        currentPrice: parsed,
+                                                        estimatedStorePrice: estimatedStoreFromCurrent(parsed),
+                                                    }));
+                                                }}
+                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[11px] font-semibold text-gray-700 uppercase tracking-wide mb-1">Est. Store Price ($)</label>
+                                            <input
+                                                type="text"
+                                                readOnly
+                                                value={priceForm.estimatedStorePrice != null ? priceForm.estimatedStorePrice.toFixed(2) : ''}
+                                                placeholder="—"
+                                                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-[4px] bg-gray-50 text-gray-700"
+                                            />
+                                            <p className="text-[10px] text-gray-400 mt-0.5">70% of current (30% less)</p>
+                                        </div>
+                                        <div>
+                                            <label className="block text-[11px] font-semibold text-gray-700 uppercase tracking-wide mb-1">Last Reimbursement ($)</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                value={priceForm.lastReimbursement ?? ''}
+                                                placeholder="e.g. 12.50"
+                                                onChange={e => {
+                                                    const v = e.target.value;
+                                                    const n = v === '' ? undefined : parseFloat(v);
+                                                    setPriceForm(d => ({ ...d, lastReimbursement: n != null && !Number.isNaN(n) ? n : undefined }));
+                                                }}
+                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-[11px] font-semibold text-gray-700 uppercase tracking-wide mb-1">Price Source</label>
+                                            <select
+                                                value={priceForm.priceSource || ''}
+                                                onChange={e => setPriceForm(d => ({ ...d, priceSource: e.target.value }))}
+                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+                                            >
+                                                <option value="">— Select source —</option>
+                                                {PRICE_SOURCES.map(s => <option key={s} value={s}>{s}</option>)}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-[11px] font-semibold text-gray-700 uppercase tracking-wide mb-1">Close-Out Destination</label>
+                                            <select
+                                                value={priceForm.closeOutDestination || ''}
+                                                onChange={e => setPriceForm(d => ({ ...d, closeOutDestination: e.target.value }))}
+                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+                                            >
+                                                <option value="">— Select destination —</option>
+                                                {PRICE_DESTINATIONS.map(d => <option key={d.value} value={d.value}>{d.label}</option>)}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex justify-end pt-1">
+                                        <button
+                                            type="button"
+                                            onClick={handleSaveNdcPrice}
+                                            disabled={
+                                                savingPrice
+                                                || priceForm.currentPrice == null
+                                                || !Number.isFinite(priceForm.currentPrice)
+                                                || priceForm.currentPrice <= 0
+                                            }
+                                            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-amber-600 hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-[4px] transition-colors shadow-sm"
+                                        >
+                                            {savingPrice ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                            Save Price &amp; Unblock Verification
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
 
                 {/* Verification Form */}
                 <div className="bg-white rounded-[4px] border border-gray-200 shadow-sm">
@@ -875,7 +1287,15 @@ export default function VerifyItemPage() {
 
                     {/* Footer */}
                     <div className="border-t bg-gray-50 px-5 py-4 rounded-b-xl flex items-center justify-between gap-3">
-                        <p className="text-xs text-gray-500">* indicates required field</p>
+                        <div className="flex flex-col gap-1">
+                            <p className="text-xs text-gray-500">* indicates required field</p>
+                            {priceGateActive && (
+                                <p className="text-xs text-amber-700 font-medium flex items-center gap-1">
+                                    <AlertTriangle className="w-3.5 h-3.5" />
+                                    Save the NDC price above to enable verification.
+                                </p>
+                            )}
+                        </div>
                         <div className="flex gap-2.5">
                             <button 
                                 onClick={handleBack} 
@@ -887,6 +1307,8 @@ export default function VerifyItemPage() {
                                 disabled={
                                     !verifyStatus
                                     || isActionLoading
+                                    || priceLookupLoading
+                                    || priceGateActive
                                     || (verifyStatus === 'correct' && isPolicyChecking)
                                     || (verifyStatus === 'correct' && returnStatus === 'non_returnable' && nonReturnableRoute === 'wine_cellar' && !wineCellarDate)
                                     || (verifyStatus === 'correct' && returnStatus === 'non_returnable' && nonReturnableRoute !== 'wine_cellar' && !isValidNonReturnableReason(nonReturnableReason))
