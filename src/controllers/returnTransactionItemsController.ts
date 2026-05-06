@@ -399,6 +399,31 @@ export const deleteItemHandler = catchAsync(
 );
 
 // ============================================================
+// PATCH /api/return-transactions/:id/items/:itemId/price
+// Set the item's standardPrice — bypasses the locked-return guard so the
+// verification flow can back-propagate a freshly-added NDC Pricing Book price
+// onto the item row (so close-out totals are correct).
+// ============================================================
+export const setItemPriceHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { itemId } = req.params;
+    const raw = (req.body || {}).standardPrice;
+
+    if (raw == null || raw === '') {
+      throw new AppError('standardPrice is required', 400);
+    }
+
+    const price = Number(raw);
+    if (!Number.isFinite(price) || price < 0) {
+      throw new AppError('standardPrice must be a non-negative number', 400);
+    }
+
+    const item = await itemsService.setItemPrice(itemId, price);
+    res.status(200).json({ status: 'success', data: item });
+  }
+);
+
+// ============================================================
 // POST /api/return-transactions/:id/items/:itemId/wine-cellar
 // Manually move an existing item to wine cellar
 // ============================================================

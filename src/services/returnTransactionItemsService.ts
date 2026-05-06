@@ -186,6 +186,38 @@ export const updateItem = async (
   return data.data as ReturnTransactionItem;
 };
 
+/**
+ * Set the standard_price on a return-transaction item.
+ *
+ * Calls the SECURITY DEFINER RPC `admin_set_item_standard_price`, which is
+ * the one audited entry point that's allowed to bypass the locked-return
+ * trigger for this specific operation. The RPC also recomputes
+ * estimated_value / estimated_store_price / estimated_store_value and
+ * refreshes the parent transaction's totals — so close-out, dashboards
+ * and debit memos see the correct numbers immediately.
+ *
+ * Used by the verification flow after the admin adds a missing price to
+ * the NDC Pricing Book.
+ */
+export const setItemPrice = async (
+  itemId: string,
+  newPrice: number
+): Promise<ReturnTransactionItem> => {
+  const sb = ensureAdmin();
+
+  if (!Number.isFinite(newPrice) || newPrice < 0) {
+    throw new AppError('A non-negative numeric standardPrice is required', 400);
+  }
+
+  const { data, error } = await sb.rpc('admin_set_item_standard_price', {
+    p_item_id: itemId,
+    p_price: newPrice,
+  });
+
+  handleRpcError(data, error, 'Failed to set item price');
+  return data.data as ReturnTransactionItem;
+};
+
 export const deleteItem = async (itemId: string): Promise<void> => {
   const sb = ensureAdmin();
 

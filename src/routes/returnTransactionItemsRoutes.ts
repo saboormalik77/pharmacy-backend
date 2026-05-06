@@ -7,6 +7,7 @@ import {
   deleteItemHandler,
   resolveItemHandler,
   moveToWineCellarHandler,
+  setItemPriceHandler,
 } from '../controllers/returnTransactionItemsController';
 import { catchAsync } from '../utils/catchAsync';
 import * as itemsService from '../services/returnTransactionItemsService';
@@ -192,6 +193,47 @@ router.get('/:itemId', authenticateAny, getItemHandler);
  *         description: Updated item
  */
 router.patch('/:itemId', authenticateAny, updateItemHandler);
+
+/**
+ * @swagger
+ * /api/return-transactions/{transactionId}/items/{itemId}/price:
+ *   patch:
+ *     summary: Set the item's standardPrice (bypasses locked-return guard)
+ *     description: |
+ *       Used by the verification workflow to back-propagate a price added to
+ *       the NDC Pricing Book onto the item row, so close-out totals reflect
+ *       the correct value. Recalculates estimatedValue, estimatedStorePrice,
+ *       estimatedStoreValue and the parent return's totals automatically.
+ *     tags: [Return Transaction Items]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: transactionId
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *       - in: path
+ *         name: itemId
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [standardPrice]
+ *             properties:
+ *               standardPrice: { type: number, minimum: 0 }
+ *     responses:
+ *       200:
+ *         description: Updated item
+ *       400:
+ *         description: Invalid price
+ *       404:
+ *         description: Item not found
+ */
+router.patch('/:itemId/price', authenticateAny, setItemPriceHandler);
 
 /**
  * @swagger

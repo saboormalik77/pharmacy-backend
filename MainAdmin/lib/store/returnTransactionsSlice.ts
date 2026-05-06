@@ -535,6 +535,35 @@ export const updateTransactionItem = createAsyncThunk(
     }
 );
 
+/**
+ * Set the standard_price on a return-transaction item via the dedicated
+ * /price endpoint. Used by the verification flow to back-propagate a price
+ * added to the NDC Pricing Book onto a "received" return — the regular
+ * update endpoint blocks core-field writes on locked returns.
+ */
+export const updateTransactionItemPrice = createAsyncThunk(
+    'returnTransactions/updateItemPrice',
+    async (
+        { transactionId, itemId, standardPrice }: { transactionId: string; itemId: string; standardPrice: number },
+        { rejectWithValue }
+    ) => {
+        try {
+            const { apiClient } = await import('@/lib/api/apiClient');
+            const { cookieUtils } = await import('@/lib/utils/cookies');
+            if (!cookieUtils.getAuthToken()) return rejectWithValue('Authentication required.');
+
+            const response = await apiClient.patch<{ status: string; data: ReturnTransactionItem }>(
+                `/return-transactions/${transactionId}/items/${itemId}/price`,
+                { standardPrice },
+                true
+            );
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error?.message || 'Failed to update item price');
+        }
+    }
+);
+
 export const resolveTransactionItem = createAsyncThunk(
     'returnTransactions/resolveItem',
     async ({ transactionId, itemId, payload }: {
@@ -783,6 +812,16 @@ const returnTransactionsSlice = createSlice({
                 }
             })
             .addCase(updateTransactionItem.rejected, (state, action) => { state.isItemActionLoading = false; state.error = action.payload as string; })
+
+            // updateTransactionItemPrice
+            .addCase(updateTransactionItemPrice.pending, (state) => { state.isItemActionLoading = true; state.error = null; })
+            .addCase(updateTransactionItemPrice.fulfilled, (state, action) => {
+                state.isItemActionLoading = false;
+                if (action.payload) {
+                    state.items = state.items.map(i => i.id === action.payload.id ? action.payload : i);
+                }
+            })
+            .addCase(updateTransactionItemPrice.rejected, (state, action) => { state.isItemActionLoading = false; state.error = action.payload as string; })
 
             // resolveTransactionItem
             .addCase(resolveTransactionItem.pending, (state) => { state.isItemActionLoading = true; state.error = null; })
