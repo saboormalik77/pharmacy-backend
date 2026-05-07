@@ -132,7 +132,7 @@ function ResetPasswordForm() {
   // Loading state while verifying token
   if (isVerifying) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-8">
+      <div className="bg-white rounded-[4px] shadow-md p-8">
         <div className="flex flex-col items-center justify-center space-y-4">
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-500"></div>
           <p className="text-gray-600">Verifying reset link...</p>
@@ -144,7 +144,7 @@ function ResetPasswordForm() {
   // Success state
   if (success) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-8">
+      <div className="bg-white rounded-[4px] shadow-md p-8">
         <div className="text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
             <CheckCircle className="w-8 h-8 text-green-600" />
@@ -166,7 +166,7 @@ function ResetPasswordForm() {
   // Invalid token state
   if (!tokenValid) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-8">
+      <div className="bg-white rounded-[4px] shadow-md p-8">
         <div className="text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
             <AlertTriangle className="w-8 h-8 text-red-600" />
@@ -198,7 +198,7 @@ function ResetPasswordForm() {
 
   // Reset password form
   return (
-    <div className="bg-white rounded-lg shadow-md p-8">
+    <div className="bg-white rounded-[4px] shadow-md p-8">
       <div className="text-center mb-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-2">Reset Password</h2>
         {userEmail ? (
@@ -215,7 +215,7 @@ function ResetPasswordForm() {
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[4px] text-sm">
             {error}
           </div>
         )}
@@ -232,7 +232,7 @@ function ResetPasswordForm() {
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               placeholder="Enter new password"
               required
               minLength={8}
@@ -257,7 +257,7 @@ function ResetPasswordForm() {
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               placeholder="Confirm new password"
               required
               minLength={8}
@@ -308,7 +308,7 @@ export default function ResetPasswordPage() {
       <div className="w-full max-w-md">
         {/* Logo and Branding */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-500 rounded-xl mb-4 shadow-lg">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-500 rounded-[4px] mb-4 shadow-lg">
             <Shield className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">PharmAdmin</h1>
@@ -316,7 +316,7 @@ export default function ResetPasswordPage() {
         </div>
 
         <Suspense fallback={
-          <div className="bg-white rounded-lg shadow-md p-8">
+          <div className="bg-white rounded-[4px] shadow-md p-8">
             <div className="flex flex-col items-center justify-center space-y-4">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-500"></div>
               <p className="text-gray-600">Loading...</p>

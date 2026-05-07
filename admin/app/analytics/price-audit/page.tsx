@@ -39,13 +39,13 @@ export default function PriceAuditPage() {
             <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="bg-white rounded-lg shadow-md p-4 animate-pulse">
+                        <div key={i} className="bg-white rounded-[4px] shadow-md p-4 animate-pulse">
                             <div className="h-3 bg-gray-200 rounded w-24 mb-2" />
                             <div className="h-6 bg-gray-200 rounded w-32" />
                         </div>
                     ))}
                 </div>
-                <div className="bg-white rounded-lg shadow-md p-4 h-80 animate-pulse" />
+                <div className="bg-white rounded-[4px] shadow-md p-4 h-80 animate-pulse" />
             </div>
         );
     }
@@ -96,28 +96,28 @@ export default function PriceAuditPage() {
 
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-white rounded-lg shadow-md p-3">
+                <div className="bg-white rounded-[4px] shadow-md p-3">
                     <div className="flex justify-between items-center mb-1">
                         <p className="text-xs text-gray-600">Total Changes</p>
                         <Database className="w-4 h-4 text-blue-500" />
                     </div>
                     <p className="text-base font-bold">{formatNumber(data.summary?.totalChanges || 0)}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow-md p-3">
+                <div className="bg-white rounded-[4px] shadow-md p-3">
                     <div className="flex justify-between items-center mb-1">
                         <p className="text-xs text-gray-600">Unique NDCs</p>
                         <Hash className="w-4 h-4 text-purple-500" />
                     </div>
                     <p className="text-base font-bold text-purple-600">{formatNumber(data.summary?.uniqueNdcs || 0)}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow-md p-3">
+                <div className="bg-white rounded-[4px] shadow-md p-3">
                     <div className="flex justify-between items-center mb-1">
                         <p className="text-xs text-gray-600">Unique Sources</p>
                         <Database className="w-4 h-4 text-green-500" />
                     </div>
                     <p className="text-base font-bold text-green-600">{formatNumber(data.summary?.uniqueSources || 0)}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow-md p-3">
+                <div className="bg-white rounded-[4px] shadow-md p-3">
                     <div className="flex justify-between items-center mb-1">
                         <p className="text-xs text-gray-600">Avg Price Change</p>
                         {(data.summary?.avgPriceIncrease || 0) >= 0 ? (
@@ -133,7 +133,7 @@ export default function PriceAuditPage() {
             </div>
 
             {/* Price Audit Table */}
-            <div className="bg-white rounded-lg shadow-md p-4">
+            <div className="bg-white rounded-[4px] shadow-md p-4">
                 <h2 className="text-sm font-semibold text-gray-900 mb-3">Price Change History</h2>
                 <div className="overflow-x-auto">
                     <table className="w-full table-auto">

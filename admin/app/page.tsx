@@ -36,17 +36,17 @@ return (
         <div className="grid grid-cols-2 gap-4">
           <button
             onClick={() => router.push('/warehouse/returns/create')}
-            className="flex flex-col items-center gap-2 p-4 border border-[#516057] rounded-[4px] hover:bg-[#516057] hover:text-white transition-all"
+            className="flex flex-col items-center gap-2 p-4 border border-[#516057] rounded-[4px] hover:bg-[#516057] hover:text-white transition-all group"
           >
-            <Scan className="w-5 h-5 text-[#516057]" />
-            <span className="text-sm font-medium text-gray-800">Create Return</span>
+            <Scan className="w-5 h-5 text-[#516057] group-hover:text-white" />
+            <span className="text-sm font-medium text-gray-800 group-hover:text-white">Create Return</span>
           </button>
           <button
             onClick={() => router.push('/warehouse/returns')}
-            className="flex flex-col items-center gap-2 p-4 border border-[#516057] rounded-[4px] hover:bg-[#516057] hover:text-white transition-all"
+            className="flex flex-col items-center gap-2 p-4 border border-[#516057] rounded-[4px] hover:bg-[#516057] hover:text-white transition-all group"
           >
-            <ClipboardList className="w-5 h-5 text-[#516057]" />
-            <span className="text-sm font-medium text-gray-800">View Returns</span>
+            <ClipboardList className="w-5 h-5 text-[#516057] group-hover:text-white" />
+            <span className="text-sm font-medium text-gray-800 group-hover:text-white">View Returns</span>
           </button>
         </div>
       </div>

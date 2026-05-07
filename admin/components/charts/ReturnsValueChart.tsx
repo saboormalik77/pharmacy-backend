@@ -48,7 +48,7 @@ export function ReturnsValueChart() {
                         id="pharmacy-select"
                         value={selectedPharmacyId || ''}
                         onChange={handlePharmacyChange}
-                        className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                     >
                         <option value="">All Pharmacies</option>
                         {data?.pharmacies.map((pharmacy) => (
@@ -66,7 +66,7 @@ export function ReturnsValueChart() {
                         id="period-type-select"
                         value={selectedPeriodType}
                         onChange={handlePeriodTypeChange}
-                        className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                     >
                         <option value="monthly">Monthly</option>
                         <option value="yearly">Yearly</option>

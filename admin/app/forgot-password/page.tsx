@@ -40,14 +40,14 @@ export default function ForgotPasswordPage() {
         <div className="w-full max-w-md">
           {/* Logo and Branding */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-500 rounded-xl mb-4 shadow-lg">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-500 rounded-[4px] mb-4 shadow-lg">
               <Shield className="w-8 h-8 text-white" />
             </div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Buying group</h1>
           </div>
 
           {/* Success Card */}
-          <div className="bg-white rounded-lg shadow-md p-8">
+          <div className="bg-white rounded-[4px] shadow-md p-8">
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
                 <CheckCircle className="w-8 h-8 text-green-600" />
@@ -83,7 +83,7 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-md">
         {/* Logo and Branding */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-500 rounded-xl mb-4 shadow-lg">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-500 rounded-[4px] mb-4 shadow-lg">
             <Shield className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Buying group</h1>
@@ -91,7 +91,7 @@ export default function ForgotPasswordPage() {
         </div>
 
         {/* Forgot Password Card */}
-        <div className="bg-white rounded-lg shadow-md p-8">
+        <div className="bg-white rounded-[4px] shadow-md p-8">
           <div className="text-center mb-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Forgot Password?</h2>
             <p className="text-gray-600 text-sm">
@@ -102,7 +102,7 @@ export default function ForgotPasswordPage() {
           <form onSubmit={handleSubmit} className="space-y-6" noValidate>
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[4px] text-sm">
                 {error}
               </div>
             )}
@@ -119,7 +119,7 @@ export default function ForgotPasswordPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   placeholder="admin@buyinggroup.com"
                   required
                   autoComplete="email"

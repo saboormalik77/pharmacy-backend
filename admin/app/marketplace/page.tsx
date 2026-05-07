@@ -426,25 +426,25 @@ export default function MarketplacePage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-white rounded-lg shadow-md p-3">
+                <div className="bg-white rounded-[4px] shadow-md p-3">
                     <div className="flex justify-between items-center">
                         <p className="text-xs text-gray-600">Total Deals</p>
                         <p className="text-sm font-bold text-gray-900">{isLoadingDeals ? '...' : deals.length}</p>
                     </div>
                 </div>
-                <div className="bg-white rounded-lg shadow-md p-3">
+                <div className="bg-white rounded-[4px] shadow-md p-3">
                     <div className="flex justify-between items-center">
                         <p className="text-xs text-gray-600">Active Deals</p>
                         <p className="text-sm font-bold text-green-600">{isLoadingDeals ? '...' : deals.filter(d => d.status === 'active').length}</p>
                     </div>
                 </div>
-                <div className="bg-white rounded-lg shadow-md p-3">
+                <div className="bg-white rounded-[4px] shadow-md p-3">
                     <div className="flex justify-between items-center">
                         <p className="text-xs text-gray-600">Sold Deals</p>
                         <p className="text-sm font-bold text-blue-600">{isLoadingDeals ? '...' : deals.filter(d => d.status === 'sold').length}</p>
                     </div>
                 </div>
-                <div className="bg-white rounded-lg shadow-md p-3">
+                <div className="bg-white rounded-[4px] shadow-md p-3">
                     <div className="flex justify-between items-center">
                         <p className="text-xs text-gray-600">Total Items</p>
                         <p className="text-sm font-bold text-gray-900">{isLoadingDeals ? '...' : deals.reduce((sum, d) => sum + d.quantity, 0)}</p>
@@ -452,7 +452,7 @@ export default function MarketplacePage() {
                 </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-[4px] shadow-md p-6">
                 <div className="flex flex-col sm:flex-row gap-3 items-center mb-6">
                     <div className="relative w-full sm:w-56">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -461,13 +461,13 @@ export default function MarketplacePage() {
                             placeholder="Search deals..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                         />
                     </div>
                     <select
                         value={categoryFilter}
                         onChange={(e) => setCategoryFilter(e.target.value)}
-                        className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 w-full sm:w-auto min-w-[150px]"
+                        className="px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 w-full sm:w-auto min-w-[150px]"
                         disabled={isLoadingCategories}
                     >
                         <option value="all">All Categories</option>
@@ -478,7 +478,7 @@ export default function MarketplacePage() {
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'sold' | 'expired')}
-                        className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 w-full sm:w-auto min-w-[130px]"
+                        className="px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 w-full sm:w-auto min-w-[130px]"
                     >
                         <option value="all">All Status</option>
                         <option value="active">Active</option>
@@ -490,7 +490,7 @@ export default function MarketplacePage() {
                         <select
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                            className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 min-w-[140px]"
+                            className="px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 min-w-[140px]"
                         >
                             <option value="posted_date">Posted Date</option>
                             <option value="product_name">Product Name</option>
@@ -507,7 +507,7 @@ export default function MarketplacePage() {
                         <select
                             value={sortOrder}
                             onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
-                            className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 min-w-[120px]"
+                            className="px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 min-w-[120px]"
                         >
                             <option value="desc">Descending</option>
                             <option value="asc">Ascending</option>
@@ -526,9 +526,9 @@ export default function MarketplacePage() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {deals.map((deal) => (
-                        <div key={deal.id} className="border border-gray-200 rounded-lg p-3 sm:p-5 hover:shadow-lg transition-shadow">
+                        <div key={deal.id} className="border border-gray-200 rounded-[4px] p-3 sm:p-5 hover:shadow-lg transition-shadow">
                             {deal.imageUrl && (
-                                <div className="mb-4 rounded-lg overflow-hidden">
+                                <div className="mb-4 rounded-[4px] overflow-hidden">
                                     <img 
                                         src={deal.imageUrl} 
                                         alt={deal.productName}
@@ -718,7 +718,7 @@ export default function MarketplacePage() {
                     onClick={() => setViewModal(null)}
                 >
                     <div 
-                        className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+                        className="bg-white rounded-[4px] shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
@@ -729,7 +729,7 @@ export default function MarketplacePage() {
                         </div>
                         <div className="p-6">
                             {viewModal.imageUrl && (
-                                <div className="mb-6 rounded-lg overflow-hidden">
+                                <div className="mb-6 rounded-[4px] overflow-hidden">
                                     <img 
                                         src={viewModal.imageUrl} 
                                         alt={viewModal.productName}
@@ -821,7 +821,7 @@ export default function MarketplacePage() {
                     onClick={() => !isUpdatingDeal && setEditModal(null)}
                 >
                     <div 
-                        className="bg-white rounded-lg shadow-xl max-w-3xl w-full"
+                        className="bg-white rounded-[4px] shadow-xl max-w-3xl w-full"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
@@ -846,7 +846,7 @@ export default function MarketplacePage() {
                                                 <img 
                                                     src={editImagePreview} 
                                                     alt="Preview" 
-                                                    className="w-full h-32 object-cover rounded-lg border border-gray-300"
+                                                    className="w-full h-32 object-cover rounded-[4px] border border-gray-300"
                                                 />
                                                 <button
                                                     type="button"
@@ -861,7 +861,7 @@ export default function MarketplacePage() {
                                                 </button>
                                             </div>
                                         ) : (
-                                            <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                                            <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-[4px] cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
                                                 <div className="flex flex-col items-center justify-center pt-3 pb-4">
                                                     <svg className="w-6 h-6 mb-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -888,7 +888,7 @@ export default function MarketplacePage() {
                                         type="text"
                                         value={editModal.productName || ''}
                                         onChange={(e) => setEditModal({ ...editModal, productName: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                         placeholder="e.g., Ibuprofen 200mg"
                                     />
                                 </div>
@@ -900,7 +900,7 @@ export default function MarketplacePage() {
                                             list="category-list-edit"
                                             value={editModal.category || ''}
                                             onChange={(e) => setEditModal({ ...editModal, category: e.target.value })}
-                                            className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                            className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                             placeholder="Select or type a new category"
                                             disabled={isLoadingCategories}
                                         />
@@ -918,7 +918,7 @@ export default function MarketplacePage() {
                                         type="text"
                                         value={editModal.distributor || ''}
                                         onChange={(e) => setEditModal({ ...editModal, distributor: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                         placeholder="Distributor name"
                                     />
                                 </div>
@@ -929,7 +929,7 @@ export default function MarketplacePage() {
                                         min="1"
                                         value={editModal.minimumBuyQuantity || ''}
                                         onChange={(e) => setEditModal({ ...editModal, minimumBuyQuantity: Number(e.target.value) })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                         placeholder="0"
                                     />
                                 </div>
@@ -940,7 +940,7 @@ export default function MarketplacePage() {
                                         min="1"
                                         value={editModal.quantity || ''}
                                         onChange={(e) => setEditModal({ ...editModal, quantity: Number(e.target.value) })}
-                                        className={`w-full px-2.5 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 ${
+                                        className={`w-full px-2.5 py-1.5 text-sm border rounded-[4px] focus:outline-none focus:ring-2 ${
                                             editModal.minimumBuyQuantity > 0 && editModal.quantity > 0 && editModal.quantity < editModal.minimumBuyQuantity
                                                 ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                                                 : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500'
@@ -956,7 +956,7 @@ export default function MarketplacePage() {
                                     <select
                                         value={editModal.unit || 'bottles'}
                                         onChange={(e) => setEditModal({ ...editModal, unit: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                     >
                                         <option value="bottles">Bottles</option>
                                         <option value="boxes">Boxes</option>
@@ -971,7 +971,7 @@ export default function MarketplacePage() {
                                         step="0.01"
                                         value={editModal.originalPrice || ''}
                                         onChange={(e) => setEditModal({ ...editModal, originalPrice: Number(e.target.value) })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                         placeholder="0.00"
                                     />
                                 </div>
@@ -982,7 +982,7 @@ export default function MarketplacePage() {
                                         step="0.01"
                                         value={editModal.dealPrice || ''}
                                         onChange={(e) => setEditModal({ ...editModal, dealPrice: Number(e.target.value) })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                         placeholder="0.00"
                                     />
                                 </div>
@@ -992,7 +992,7 @@ export default function MarketplacePage() {
                                         type="date"
                                         value={editModal.expiryDate || ''}
                                         onChange={(e) => setEditModal({ ...editModal, expiryDate: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                     />
                                 </div>
                             </div>
@@ -1049,7 +1049,7 @@ export default function MarketplacePage() {
                     onClick={() => !isCreatingDeal && setAddModal(false)}
                 >
                     <div 
-                        className="bg-white rounded-lg shadow-xl max-w-3xl w-full"
+                        className="bg-white rounded-[4px] shadow-xl max-w-3xl w-full"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
@@ -1068,7 +1068,7 @@ export default function MarketplacePage() {
                                                 <img 
                                                     src={imagePreview} 
                                                     alt="Preview" 
-                                                    className="w-full h-32 object-cover rounded-lg border border-gray-300"
+                                                    className="w-full h-32 object-cover rounded-[4px] border border-gray-300"
                                                 />
                                                 <button
                                                     type="button"
@@ -1083,7 +1083,7 @@ export default function MarketplacePage() {
                                                 </button>
                                             </div>
                                         ) : (
-                                            <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                                            <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-[4px] cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
                                                 <div className="flex flex-col items-center justify-center pt-3 pb-4">
                                                     <svg className="w-6 h-6 mb-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -1110,7 +1110,7 @@ export default function MarketplacePage() {
                                         type="text"
                                         value={newDeal.productName}
                                         onChange={(e) => setNewDeal({ ...newDeal, productName: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                         placeholder="e.g., Ibuprofen 200mg"
                                     />
                                 </div>
@@ -1122,7 +1122,7 @@ export default function MarketplacePage() {
                                             list="category-list"
                                             value={newDeal.category}
                                             onChange={(e) => setNewDeal({ ...newDeal, category: e.target.value })}
-                                            className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                            className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                             placeholder="Select or type a new category"
                                             disabled={isLoadingCategories}
                                         />
@@ -1140,7 +1140,7 @@ export default function MarketplacePage() {
                                         type="text"
                                         value={newDeal.distributor}
                                         onChange={(e) => setNewDeal({ ...newDeal, distributor: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                         placeholder="Distributor name"
                                     />
                                 </div>
@@ -1151,7 +1151,7 @@ export default function MarketplacePage() {
                                         min="1"
                                         value={newDeal.minimumBuyQuantity || ''}
                                         onChange={(e) => setNewDeal({ ...newDeal, minimumBuyQuantity: Number(e.target.value) })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                         placeholder="0"
                                     />
                                 </div>
@@ -1162,7 +1162,7 @@ export default function MarketplacePage() {
                                         min="1"
                                         value={newDeal.quantity || ''}
                                         onChange={(e) => setNewDeal({ ...newDeal, quantity: Number(e.target.value) })}
-                                        className={`w-full px-2.5 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 ${
+                                        className={`w-full px-2.5 py-1.5 text-sm border rounded-[4px] focus:outline-none focus:ring-2 ${
                                             newDeal.minimumBuyQuantity > 0 && newDeal.quantity > 0 && newDeal.quantity < newDeal.minimumBuyQuantity
                                                 ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                                                 : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500'
@@ -1178,7 +1178,7 @@ export default function MarketplacePage() {
                                     <select
                                         value={newDeal.unit}
                                         onChange={(e) => setNewDeal({ ...newDeal, unit: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                     >
                                         <option value="bottles">Bottles</option>
                                         <option value="boxes">Boxes</option>
@@ -1193,7 +1193,7 @@ export default function MarketplacePage() {
                                         step="0.01"
                                         value={newDeal.originalPrice || ''}
                                         onChange={(e) => setNewDeal({ ...newDeal, originalPrice: Number(e.target.value) })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                         placeholder="0.00"
                                     />
                                 </div>
@@ -1204,7 +1204,7 @@ export default function MarketplacePage() {
                                         step="0.01"
                                         value={newDeal.dealPrice || ''}
                                         onChange={(e) => setNewDeal({ ...newDeal, dealPrice: Number(e.target.value) })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                         placeholder="0.00"
                                     />
                                 </div>
@@ -1214,7 +1214,7 @@ export default function MarketplacePage() {
                                         type="date"
                                         value={newDeal.expiryDate}
                                         onChange={(e) => setNewDeal({ ...newDeal, expiryDate: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                     />
                                 </div>
                             </div>
@@ -1263,7 +1263,7 @@ export default function MarketplacePage() {
                     onClick={() => !isDeletingDeal && setDeleteModal(null)}
                 >
                     <div 
-                        className="bg-white rounded-lg shadow-xl max-w-md w-full"
+                        className="bg-white rounded-[4px] shadow-xl max-w-md w-full"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
@@ -1318,7 +1318,7 @@ export default function MarketplacePage() {
                     onClick={() => localSettingLoading === null && setDealOfTheDayModal(null)}
                 >
                     <div 
-                        className="bg-white rounded-lg shadow-xl max-w-md w-full"
+                        className="bg-white rounded-[4px] shadow-xl max-w-md w-full"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
@@ -1411,7 +1411,7 @@ export default function MarketplacePage() {
                             
                             {/* Show active promotions */}
                             {(dealOfTheDayModal.isDealOfTheDay || dealOfTheDayModal.isDealOfTheWeek || dealOfTheDayModal.isDealOfTheMonth) && (
-                                <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                                <div className="mt-4 p-3 bg-blue-50 rounded-[4px]">
                                     <p className="text-xs text-blue-700 font-medium mb-1">Active Promotions:</p>
                                     <div className="flex flex-wrap gap-2">
                                         {dealOfTheDayModal.isDealOfTheDay && (

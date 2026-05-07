@@ -48,13 +48,13 @@ if (loading) {
             <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6 animate-pulse">
+                        <div key={i} className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6 animate-pulse">
                             <div className="h-4 bg-gray-200 rounded w-32 mb-3" />
                             <div className="h-8 bg-gray-200 rounded w-40" />
                         </div>
                     ))}
                 </div>
-                <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6 h-80 animate-pulse">
+                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6 h-80 animate-pulse">
                     <div className="h-5 bg-gray-200 rounded w-40 mb-4" />
                     <div className="h-72 bg-gray-100 rounded" />
                 </div>
@@ -64,7 +64,7 @@ if (loading) {
 
     if (error) {
         return (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[4px]">
                 {error}
                 <button onClick={fetchData} className="ml-2 underline">Retry</button>
             </div>
@@ -84,7 +84,7 @@ if (loading) {
                 <select
                     value={groupBy}
                     onChange={(e) => setGroupBy(e.target.value)}
-                    className="text-sm border border-[#e2e2e2] rounded-lg px-3 py-2 bg-white"
+                    className="text-sm border border-[#e2e2e2] rounded-[4px] px-3 py-2 bg-white"
                 >
                     <option value="month">Month</option>
                     <option value="week">Week</option>
@@ -95,7 +95,7 @@ if (loading) {
 
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                     <div className="flex justify-between items-center mb-3">
                         <p className="text-sm text-gray-500">Total Returns</p>
                         <Package className="w-5 h-5 text-blue-500" />
@@ -104,7 +104,7 @@ if (loading) {
                     <p className="text-sm text-gray-500 mt-2">{overall.uniquePharmacies} pharmacies</p>
                 </div>
 
-                <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                     <div className="flex justify-between items-center mb-3">
                         <p className="text-sm text-gray-500">Total Returnable Value</p>
                         <DollarSign className="w-5 h-5 text-green-500" />
@@ -113,7 +113,7 @@ if (loading) {
                     <p className="text-sm text-gray-500 mt-2">Non-returnable: {formatCurrency(overall.totalNonReturnableValue)}</p>
                 </div>
 
-                <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                     <div className="flex justify-between items-center mb-3">
                         <p className="text-sm text-gray-500">Average Return Value</p>
                         <TrendingUp className="w-5 h-5 text-purple-500" />
@@ -122,7 +122,7 @@ if (loading) {
                     <p className="text-sm text-gray-500 mt-2">{overall.avgItemsPerReturn} avg items/return</p>
                 </div>
 
-                <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                     <div className="flex justify-between items-center mb-3">
                         <p className="text-sm text-gray-500">Total Items</p>
                         <BarChart3 className="w-5 h-5 text-orange-500" />
@@ -134,7 +134,7 @@ if (loading) {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Trend Chart */}
-                <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                     <h2 className="text-base font-semibold text-gray-900 mb-4">Returns Trend</h2>
                     <div className="h-72">
                         {trend && trend.length > 0 ? (
@@ -178,7 +178,7 @@ if (loading) {
                 </div>
 
                 {/* Status Breakdown Chart */}
-                <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                     <h2 className="text-base font-semibold text-gray-900 mb-4">Status Distribution</h2>
                     <div className="h-72">
                         {byStatus && byStatus.length > 0 ? (
@@ -216,7 +216,7 @@ if (loading) {
 
             {/* Status Table */}
             {byStatus && byStatus.length > 0 && (
-                <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                     <h2 className="text-base font-semibold text-gray-900 mb-4">Status Breakdown</h2>
                     <div className="overflow-x-auto">
                         <table className="w-full table-auto">

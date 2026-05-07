@@ -19,7 +19,7 @@ export function StatCard({ title, value, change, icon, tooltip, isCurrency = fal
     const isPositive = change >= 0;
 
     return (
-        <div className="bg-white rounded-lg shadow-sm px-4 py-3 border border-[#e2e2e2]">
+        <div className="bg-white rounded-[4px] shadow-sm px-4 py-3 border border-[#e2e2e2]">
             <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-1.5">
                     <h3 className="text-xs font-medium text-gray-500">{title}</h3>
@@ -38,7 +38,7 @@ export function StatCard({ title, value, change, icon, tooltip, isCurrency = fal
                         )}
                     </div>
                 </div>
-                <div className="bg-[#f5f2f1] rounded-lg p-2">
+                <div className="bg-[#f5f2f1] rounded-[4px] p-2">
                     <div className="text-[#516057]">{icon}</div>
                 </div>
             </div>

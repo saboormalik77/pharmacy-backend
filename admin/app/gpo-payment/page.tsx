@@ -15,7 +15,7 @@ export default function GpoPaymentPage() {
             </Link>
 
             {/* Coming Soon card */}
-            <div className="flex flex-col items-center justify-center py-20 bg-white border border-gray-200 rounded-lg shadow-sm">
+            <div className="flex flex-col items-center justify-center py-20 bg-white border border-gray-200 rounded-[4px] shadow-sm">
                 <div className="p-4 bg-purple-50 rounded-full mb-4">
                     <Landmark className="w-8 h-8 text-purple-400" />
                 </div>

@@ -294,7 +294,7 @@ export default function NDCPricingPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-primary-50 rounded-lg">
+                    <div className="p-1.5 bg-primary-50 rounded-[4px]">
                         <DollarSign className="w-5 h-5 text-primary-600" />
                     </div>
                     <div>
@@ -306,7 +306,7 @@ export default function NDCPricingPage() {
                 </div>
                 <button
                     onClick={openAdd}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-[4px] bg-primary-600 text-white hover:bg-primary-700 transition-colors"
                 >
                     <Plus className="w-3.5 h-3.5" /> Add NDC Price
                 </button>
@@ -320,19 +320,19 @@ export default function NDCPricingPage() {
                     placeholder="Search by NDC or product name..."
                     value={search}
                     onChange={e => setSearch(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 text-xs border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-primary-500 placeholder:text-gray-400"
+                    className="w-full pl-9 pr-4 py-2 text-xs border border-gray-300 rounded-[4px] bg-white focus:outline-none focus:ring-1 focus:ring-primary-500 placeholder:text-gray-400"
                 />
             </div>
 
             {/* Error */}
             {error && (
-                <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-xs">
+                <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-[4px] text-red-700 text-xs">
                     <AlertCircle className="w-4 h-4 flex-shrink-0" /> {error}
                 </div>
             )}
 
             {/* Table */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="bg-white rounded-[4px] shadow overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
@@ -434,7 +434,7 @@ export default function NDCPricingPage() {
             {/* ── Add / Edit Modal ─────────────────────────── */}
             {formModal && (
                 <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setFormModal(false)}>
-                    <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50 rounded-t-lg">
                             <h2 className="text-sm font-semibold text-gray-900">
                                 {editingRecord ? 'Edit NDC Pricing' : 'Add NDC Pricing'}
@@ -447,7 +447,7 @@ export default function NDCPricingPage() {
                         <div className="p-4 space-y-4">
                             {/* Barcode / NDC scan (add only — same flow as return scan screen) */}
                             {!editingRecord && (
-                                <div className="rounded-lg border border-gray-200 bg-gray-50/80 px-3 py-2.5 space-y-2">
+                                <div className="rounded-[4px] border border-gray-200 bg-gray-50/80 px-3 py-2.5 space-y-2">
                                     <p className="text-[10px] font-semibold text-gray-600 uppercase tracking-wide">Scan barcode or NDC</p>
                                     <div className="flex gap-1.5 flex-wrap">
                                         {([
@@ -475,7 +475,7 @@ export default function NDCPricingPage() {
                                                 type="button"
                                                 onClick={() => setNdcCameraOpen(true)}
                                                 disabled={ndcScanLoading}
-                                                className="w-full flex items-center justify-center gap-2 px-3 py-2 border border-dashed border-primary-300 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors disabled:opacity-60"
+                                                className="w-full flex items-center justify-center gap-2 px-3 py-2 border border-dashed border-primary-300 bg-primary-50 hover:bg-primary-100 rounded-[4px] transition-colors disabled:opacity-60"
                                             >
                                                 {ndcScanLoading ? (
                                                     <>
@@ -504,7 +504,7 @@ export default function NDCPricingPage() {
                                                     onKeyDown={onNdcUsbScanKeyDown}
                                                     disabled={ndcScanLoading}
                                                     placeholder="Scan with USB/Bluetooth — press Enter after scan"
-                                                    className="w-full pl-8 pr-9 py-2 text-xs border-2 border-primary-200 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                    className="w-full pl-8 pr-9 py-2 text-xs border-2 border-primary-200 bg-white rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                                 />
                                                 {ndcScanLoading && (
                                                     <div className="absolute right-2.5 top-1/2 -translate-y-1/2">
@@ -524,13 +524,13 @@ export default function NDCPricingPage() {
                                                 onKeyDown={e => e.key === 'Enter' && void handleNdcBarcodeScan(ndcManualLookup)}
                                                 disabled={ndcScanLoading}
                                                 placeholder="Type NDC (e.g. 00093-4175-73) and Lookup"
-                                                className="flex-1 px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                                className="flex-1 px-2.5 py-1.5 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500"
                                             />
                                             <button
                                                 type="button"
                                                 onClick={() => void handleNdcBarcodeScan(ndcManualLookup)}
                                                 disabled={ndcScanLoading || !ndcManualLookup.trim()}
-                                                className="px-3 py-1.5 text-xs rounded-lg bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50"
+                                                className="px-3 py-1.5 text-xs rounded-[4px] bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50"
                                             >
                                                 {ndcScanLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Lookup'}
                                             </button>
@@ -554,13 +554,13 @@ export default function NDCPricingPage() {
                                     value={formData.ndc}
                                     onChange={e => setFormData(d => ({ ...d, ndc: e.target.value }))}
                                     disabled={!!editingRecord}
-                                    className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                    className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                                 />
                             </div>
 
                             {/* Suggested Price banner */}
                             {!editingRecord && (suggestedPrice?.loading || suggestedPrice?.price) && (
-                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                <div className="bg-blue-50 border border-blue-200 rounded-[4px] p-3">
                                     {suggestedPrice.loading ? (
                                         <div className="flex items-center gap-2 text-blue-700 text-xs">
                                             <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -596,7 +596,7 @@ export default function NDCPricingPage() {
                                     value={formData.productName || ''}
                                     onChange={e => setFormData(d => ({ ...d, productName: e.target.value }))}
                                     placeholder="Filled automatically after scan / lookup — edit if needed"
-                                    className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                    className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500"
                                 />
                                 <p className="text-[10px] text-gray-400 mt-0.5">
                                     Uses the same <span className="font-medium">/barcode/scan</span> lookup as the return scan screen (openFDA / product DB). Scan or use Manual NDC Lookup above.
@@ -625,7 +625,7 @@ export default function NDCPricingPage() {
                                                 estimatedStorePrice: estimatedStoreFromCurrent(parsed),
                                             }));
                                         }}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500"
                                     />
                                 </div>
                                 <div>
@@ -635,7 +635,7 @@ export default function NDCPricingPage() {
                                         readOnly
                                         value={formData.estimatedStorePrice != null ? formData.estimatedStorePrice.toFixed(2) : ''}
                                         placeholder="—"
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-gray-50 text-gray-700"
+                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-[4px] bg-gray-50 text-gray-700"
                                     />
                                     <p className="text-[10px] text-gray-400 mt-0.5">70% of current (30% less)</p>
                                 </div>
@@ -643,7 +643,7 @@ export default function NDCPricingPage() {
                                     <label className="block text-[11px] font-medium text-gray-700 mb-1">Last Reimbursement ($)</label>
                                     <input type="number" step="0.01" value={formData.lastReimbursement ?? ''} placeholder="e.g. 12.50"
                                         onChange={e => setFormData(d => ({ ...d, lastReimbursement: e.target.value ? parseFloat(e.target.value) : undefined }))}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500" />
                                 </div>
                             </div>
 
@@ -654,7 +654,7 @@ export default function NDCPricingPage() {
                                     <select
                                         value={formData.priceSource || ''}
                                         onChange={e => setFormData(d => ({ ...d, priceSource: e.target.value }))}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500"
                                     >
                                         <option value="">— Select source —</option>
                                         {PRICE_SOURCES.map(s => <option key={s} value={s}>{s}</option>)}
@@ -665,7 +665,7 @@ export default function NDCPricingPage() {
                                     <select
                                         value={formData.closeOutDestination || ''}
                                         onChange={e => setFormData(d => ({ ...d, closeOutDestination: e.target.value }))}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500"
                                     >
                                         <option value="">— Select destination —</option>
                                         {DESTINATIONS.map(d => <option key={d.value} value={d.value}>{d.label}</option>)}
@@ -675,7 +675,7 @@ export default function NDCPricingPage() {
 
                             {/* Previous price (edit mode only) */}
                             {editingRecord && editingRecord.lastPrice != null && (
-                                <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-600">
+                                <div className="bg-gray-50 border border-gray-200 rounded-[4px] px-3 py-2 text-xs text-gray-600">
                                     Previous Price: <span className="font-mono font-semibold text-yellow-700">{fmt(editingRecord.lastPrice)}</span>
                                     <span className="ml-3">Last Updated: {fmtDate(editingRecord.lastPriceUpdate)}</span>
                                 </div>
@@ -702,7 +702,7 @@ export default function NDCPricingPage() {
             {/* ── Delete Confirmation Modal ─────────────────── */}
             {deleteModal && (
                 <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setDeleteModal(null)}>
-                    <div className="bg-white rounded-lg max-w-sm w-full shadow-2xl" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] max-w-sm w-full shadow-2xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50 rounded-t-lg">
                             <h3 className="text-sm font-semibold text-gray-900">Delete NDC Pricing</h3>
                             <button onClick={() => setDeleteModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>

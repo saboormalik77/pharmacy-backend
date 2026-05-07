@@ -206,19 +206,19 @@ export default function DistributorsPage() {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white rounded-lg shadow-md p-3">
+                <div className="bg-white rounded-[4px] shadow-md p-3">
                     <div className="flex justify-between items-center">
                         <p className="text-xs text-gray-600">Total Distributors</p>
                         <p className="text-sm font-bold text-gray-900">{stats?.totalDistributors ?? 0}</p>
                     </div>
                 </div>
-                <div className="bg-white rounded-lg shadow-md p-3">
+                <div className="bg-white rounded-[4px] shadow-md p-3">
                     <div className="flex justify-between items-center">
                         <p className="text-xs text-gray-600">Active</p>
                         <p className="text-sm font-bold text-green-600">{stats?.activeDistributors ?? 0}</p>
                     </div>
                 </div>
-                <div className="bg-white rounded-lg shadow-md p-3">
+                <div className="bg-white rounded-[4px] shadow-md p-3">
                     <div className="flex justify-between items-center">
                         <p className="text-xs text-gray-600">Inactive</p>
                         <p className="text-sm font-bold text-gray-600">{stats?.inactiveDistributors ?? 0}</p>
@@ -226,7 +226,7 @@ export default function DistributorsPage() {
                 </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-[4px] shadow-md p-6">
                 <div className="flex flex-col sm:flex-row gap-4 mb-6">
                     <div className="flex-1 relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -235,13 +235,13 @@ export default function DistributorsPage() {
                             placeholder="Search distributors..."
                             value={searchTerm}
                             onChange={(e) => handleSearchChange(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                         />
                     </div>
                     <select
                         value={statusFilter}
                         onChange={(e) => handleStatusFilterChange(e.target.value as typeof statusFilter)}
-                        className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className="px-4 py-2 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                     >
                         <option value="all">All Status</option>
                         <option value="active">Active</option>
@@ -351,7 +351,7 @@ export default function DistributorsPage() {
                                     <button
                                         onClick={() => handlePageChange(currentPage - 1)}
                                         disabled={currentPage === 1}
-                                        className="p-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                                        className="p-2 border border-gray-300 rounded-[4px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                                     >
                                         <ChevronLeft className="w-5 h-5" />
                                     </button>
@@ -361,7 +361,7 @@ export default function DistributorsPage() {
                                     <button
                                         onClick={() => handlePageChange(currentPage + 1)}
                                         disabled={currentPage === pagination.totalPages}
-                                        className="p-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                                        className="p-2 border border-gray-300 rounded-[4px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                                     >
                                         <ChevronRight className="w-5 h-5" />
                                     </button>
@@ -379,7 +379,7 @@ export default function DistributorsPage() {
                     onClick={() => setViewModal(null)}
                 >
                     <div 
-                        className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-xl"
+                        className="bg-white rounded-[4px] max-w-2xl w-full max-h-[90vh] flex flex-col shadow-xl"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 flex-shrink-0">
@@ -472,7 +472,7 @@ export default function DistributorsPage() {
                     onClick={() => { setEditModal(null); setEditFormData({}); }}
                 >
                     <div 
-                        className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-xl"
+                        className="bg-white rounded-[4px] max-w-2xl w-full max-h-[90vh] flex flex-col shadow-xl"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 flex-shrink-0">
@@ -489,7 +489,7 @@ export default function DistributorsPage() {
                                         type="text"
                                         value={editFormData.companyName || ''}
                                         onChange={(e) => setEditFormData({ ...editFormData, companyName: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     />
                                 </div>
                                 <div>
@@ -498,7 +498,7 @@ export default function DistributorsPage() {
                                         type="text"
                                         value={editFormData.contactPerson || ''}
                                         onChange={(e) => setEditFormData({ ...editFormData, contactPerson: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     />
                                 </div>
                                 <div>
@@ -507,7 +507,7 @@ export default function DistributorsPage() {
                                         type="text"
                                         value={editFormData.licenseNumber || ''}
                                         onChange={(e) => setEditFormData({ ...editFormData, licenseNumber: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     />
                                 </div>
                                 <div>
@@ -516,7 +516,7 @@ export default function DistributorsPage() {
                                         type="email"
                                         value={editFormData.email || ''}
                                         onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     />
                                 </div>
                                 <div>
@@ -525,7 +525,7 @@ export default function DistributorsPage() {
                                         type="tel"
                                         value={editFormData.phone || ''}
                                         onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     />
                                 </div>
                                 <div className="col-span-2">
@@ -534,7 +534,7 @@ export default function DistributorsPage() {
                                         type="text"
                                         value={editFormData.address || ''}
                                         onChange={(e) => setEditFormData({ ...editFormData, address: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     />
                                 </div>
                                 <div>
@@ -543,7 +543,7 @@ export default function DistributorsPage() {
                                         type="text"
                                         value={editFormData.city || ''}
                                         onChange={(e) => setEditFormData({ ...editFormData, city: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     />
                                 </div>
                                 <div>
@@ -552,7 +552,7 @@ export default function DistributorsPage() {
                                         type="text"
                                         value={editFormData.state || ''}
                                         onChange={(e) => setEditFormData({ ...editFormData, state: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     />
                                 </div>
                                 <div>
@@ -561,7 +561,7 @@ export default function DistributorsPage() {
                                         type="text"
                                         value={editFormData.zipCode || ''}
                                         onChange={(e) => setEditFormData({ ...editFormData, zipCode: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     />
                                 </div>
                                 {/* <div className="col-span-2">
@@ -573,7 +573,7 @@ export default function DistributorsPage() {
                                             ...editFormData,
                                             specializations: e.target.value.split(',').map(s => s.trim()).filter(s => s)
                                         })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         placeholder="e.g., Antibiotics, Pain Relief, Cardiovascular"
                                     />
                                 </div> */}
@@ -596,7 +596,7 @@ export default function DistributorsPage() {
                     onClick={() => setDeactivateModal(null)}
                 >
                     <div 
-                        className="bg-white rounded-lg max-w-md w-full"
+                        className="bg-white rounded-[4px] max-w-md w-full"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -628,7 +628,7 @@ export default function DistributorsPage() {
                     onClick={() => setActivateModal(null)}
                 >
                     <div 
-                        className="bg-white rounded-lg max-w-md w-full"
+                        className="bg-white rounded-[4px] max-w-md w-full"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -660,7 +660,7 @@ export default function DistributorsPage() {
                     onClick={() => setAddModal(false)}
                 >
                     <div 
-                        className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-xl"
+                        className="bg-white rounded-[4px] max-w-2xl w-full max-h-[90vh] flex flex-col shadow-xl"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 flex-shrink-0">
@@ -677,7 +677,7 @@ export default function DistributorsPage() {
                                         type="text"
                                         value={newDistributor.companyName}
                                         onChange={(e) => setNewDistributor({ ...newDistributor, companyName: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         placeholder="Enter company name"
                                     />
                                 </div>
@@ -687,7 +687,7 @@ export default function DistributorsPage() {
                                         type="text"
                                         value={newDistributor.contactPerson}
                                         onChange={(e) => setNewDistributor({ ...newDistributor, contactPerson: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         placeholder="Enter contact person name"
                                     />
                                 </div>
@@ -697,7 +697,7 @@ export default function DistributorsPage() {
                                         type="text"
                                         value={newDistributor.licenseNumber}
                                         onChange={(e) => setNewDistributor({ ...newDistributor, licenseNumber: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         placeholder="e.g., MA-DIST-001"
                                     />
                                 </div>
@@ -707,7 +707,7 @@ export default function DistributorsPage() {
                                         type="email"
                                         value={newDistributor.email}
                                         onChange={(e) => setNewDistributor({ ...newDistributor, email: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         placeholder="email@example.com"
                                     />
                                 </div>
@@ -717,7 +717,7 @@ export default function DistributorsPage() {
                                         type="tel"
                                         value={newDistributor.phone}
                                         onChange={(e) => setNewDistributor({ ...newDistributor, phone: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         placeholder="(555) 123-4567"
                                     />
                                 </div>
@@ -727,7 +727,7 @@ export default function DistributorsPage() {
                                         type="text"
                                         value={newDistributor.address}
                                         onChange={(e) => setNewDistributor({ ...newDistributor, address: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         placeholder="Enter street address"
                                     />
                                 </div>
@@ -737,7 +737,7 @@ export default function DistributorsPage() {
                                         type="text"
                                         value={newDistributor.city}
                                         onChange={(e) => setNewDistributor({ ...newDistributor, city: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         placeholder="Enter city"
                                     />
                                 </div>
@@ -747,7 +747,7 @@ export default function DistributorsPage() {
                                         type="text"
                                         value={newDistributor.state}
                                         onChange={(e) => setNewDistributor({ ...newDistributor, state: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         placeholder="e.g., CA"
                                     />
                                 </div>
@@ -757,7 +757,7 @@ export default function DistributorsPage() {
                                         type="text"
                                         value={newDistributor.zipCode}
                                         onChange={(e) => setNewDistributor({ ...newDistributor, zipCode: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         placeholder="Enter ZIP code"
                                     />
                                 </div>
@@ -770,7 +770,7 @@ export default function DistributorsPage() {
                                             ...newDistributor,
                                             specializations: e.target.value.split(',').map(s => s.trim()).filter(s => s)
                                         })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         placeholder="e.g., Antibiotics, Pain Relief, Cardiovascular"
                                     />
                                 </div> */}

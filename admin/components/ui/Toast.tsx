@@ -50,7 +50,7 @@ export function ToastComponent({ toast, onClose }: ToastProps) {
     return (
         <div
             onClick={() => onClose(toast.id)}
-            className={`${style} border rounded-lg shadow-lg p-4 mb-3 flex items-center gap-3 min-w-[300px] max-w-[500px] animate-in slide-in-from-right cursor-pointer select-none`}
+            className={`${style} border rounded-[4px] shadow-lg p-4 mb-3 flex items-center gap-3 min-w-[300px] max-w-[500px] animate-in slide-in-from-right cursor-pointer select-none`}
         >
             <Icon className="w-5 h-5 flex-shrink-0" />
             <p className="flex-1 text-sm font-medium">{toast.message}</p>

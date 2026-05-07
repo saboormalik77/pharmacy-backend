@@ -73,13 +73,13 @@ export default function PerformancePage() {
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6 animate-pulse">
+                    <div key={i} className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6 animate-pulse">
                         <div className="h-4 bg-gray-200 rounded w-32 mb-3" />
                         <div className="h-8 bg-gray-200 rounded w-40" />
                     </div>
                 ))}
             </div>
-            <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6 h-80 animate-pulse" />
+            <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6 h-80 animate-pulse" />
         </div>
     );
 
@@ -89,13 +89,13 @@ export default function PerformancePage() {
             <div className="flex gap-3">
                 <button
                     onClick={() => setActiveSection('pharmacy')}
-                    className={`px-4 py-2.5 text-sm font-medium rounded-lg ${activeSection === 'pharmacy' ? 'bg-[#516057] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                    className={`px-4 py-2.5 text-sm font-medium rounded-[4px] ${activeSection === 'pharmacy' ? 'bg-[#516057] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                 >
                     Pharmacy Performance
                 </button>
                 <button
                     onClick={() => setActiveSection('gpo')}
-                    className={`px-4 py-2.5 text-sm font-medium rounded-lg ${activeSection === 'gpo' ? 'bg-[#516057] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                    className={`px-4 py-2.5 text-sm font-medium rounded-[4px] ${activeSection === 'gpo' ? 'bg-[#516057] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                 >
                     GPO Summary
                 </button>
@@ -114,13 +114,13 @@ export default function PerformancePage() {
                                 value={pharmSearch}
                                 onChange={(e) => setPharmSearch(e.target.value)}
                                 onKeyDown={(e) => { if (e.key === 'Enter') { setPharmPage(1); fetchPharmacy(); } }}
-                                className="w-full pl-10 pr-4 py-2.5 text-base border border-[#e2e2e2] rounded-lg bg-white"
+                                className="w-full pl-10 pr-4 py-2.5 text-base border border-[#e2e2e2] rounded-[4px] bg-white"
                             />
                         </div>
                         <select
                             value={pharmSort}
                             onChange={(e) => { setPharmSort(e.target.value); setPharmPage(1); }}
-                            className="text-base border border-[#e2e2e2] rounded-lg px-3 py-2.5 bg-white"
+                            className="text-base border border-[#e2e2e2] rounded-[4px] px-3 py-2.5 bg-white"
                         >
                             <option value="totalValue">Sort by Value</option>
                             <option value="returns">Sort by Returns</option>
@@ -128,14 +128,14 @@ export default function PerformancePage() {
                         </select>
                         <button
                             onClick={() => { setPharmPage(1); fetchPharmacy(); }}
-                            className="px-5 py-2.5 text-base bg-[#516057] text-white rounded-lg hover:opacity-90"
+                            className="px-5 py-2.5 text-base bg-[#516057] text-white rounded-[4px] hover:opacity-90"
                         >
                             Search
                         </button>
                     </div>
 
                     {pharmLoading ? <LoadingSkeleton /> : pharmError ? (
-                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-base">
+                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[4px] text-base">
                             {pharmError}
                             <button onClick={fetchPharmacy} className="ml-2 underline">Retry</button>
                         </div>
@@ -143,23 +143,23 @@ export default function PerformancePage() {
                         <div className="space-y-6">
                             {/* Overall Summary */}
                             <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-                                <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                                     <p className="text-sm text-gray-500 mb-2">Pharmacies</p>
                                     <p className="text-base font-bold text-blue-600">{formatNumber(pharmData.overall?.totalPharmacies || 0)}</p>
                                 </div>
-                                <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                                     <p className="text-sm text-gray-500 mb-2">Total Returns</p>
                                     <p className="text-base font-bold text-gray-900">{formatNumber(pharmData.overall?.totalReturns || 0)}</p>
                                 </div>
-                                <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                                     <p className="text-sm text-gray-500 mb-2">Total Value</p>
                                     <p className="text-base font-bold text-green-600">{formatCurrency(pharmData.overall?.totalReturnableValue || 0)}</p>
                                 </div>
-                                <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                                     <p className="text-sm text-gray-500 mb-2">Total Items</p>
                                     <p className="text-base font-bold text-gray-900">{formatNumber(pharmData.overall?.totalItems || 0)}</p>
                                 </div>
-                                <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                                     <p className="text-sm text-gray-500 mb-2">Total Payout</p>
                                     <p className="text-base font-bold text-purple-600">{formatCurrency(pharmData.overall?.totalPayout || 0)}</p>
                                 </div>
@@ -167,7 +167,7 @@ export default function PerformancePage() {
 
                             {/* Top Pharmacies Chart */}
                             {pharmData.data.length > 0 && (
-                                <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                                     <h2 className="text-base font-semibold text-gray-900 mb-4">Top Pharmacies by Value</h2>
                                     <div className="h-80">
                                         <ResponsiveContainer width="100%" height="100%">
@@ -196,7 +196,7 @@ export default function PerformancePage() {
                             )}
 
                             {/* Pharmacy Performance Table */}
-                            <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                            <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                                 <h2 className="text-base font-semibold text-gray-900 mb-4">Pharmacy Details</h2>
                                 <div className="overflow-x-auto">
                                     <table className="w-full table-auto">
@@ -244,14 +244,14 @@ export default function PerformancePage() {
                                             <button
                                                 onClick={() => setPharmPage(Math.max(1, pharmPage - 1))}
                                                 disabled={pharmPage <= 1}
-                                                className="px-4 py-2 text-sm border border-[#e2e2e2] rounded-lg disabled:opacity-50"
+                                                className="px-4 py-2 text-sm border border-[#e2e2e2] rounded-[4px] disabled:opacity-50"
                                             >
                                                 Previous
                                             </button>
                                             <button
                                                 onClick={() => setPharmPage(Math.min(pharmData.pagination.totalPages, pharmPage + 1))}
                                                 disabled={pharmPage >= pharmData.pagination.totalPages}
-                                                className="px-4 py-2 text-sm border border-[#e2e2e2] rounded-lg disabled:opacity-50"
+                                                className="px-4 py-2 text-sm border border-[#e2e2e2] rounded-[4px] disabled:opacity-50"
                                             >
                                                 Next
                                             </button>
@@ -268,7 +268,7 @@ export default function PerformancePage() {
             {activeSection === 'gpo' && (
                 <>
                     {gpoLoading ? <LoadingSkeleton /> : gpoError ? (
-                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-base">
+                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[4px] text-base">
                             {gpoError}
                             <button onClick={fetchGpo} className="ml-2 underline">Retry</button>
                         </div>
@@ -276,7 +276,7 @@ export default function PerformancePage() {
                         <div className="space-y-6">
                             {/* GPO Chart */}
                             {gpoData.data.length > 0 && (
-                                <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                                     <h2 className="text-base font-semibold text-gray-900 mb-4">GPO Comparison</h2>
                                     <div className="h-80">
                                         <ResponsiveContainer width="100%" height="100%">
@@ -306,7 +306,7 @@ export default function PerformancePage() {
                             )}
 
                             {/* GPO Table */}
-                            <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                            <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                                 <h2 className="text-base font-semibold text-gray-900 mb-4">GPO Details</h2>
                                 <div className="overflow-x-auto">
                                     <table className="w-full table-auto">

@@ -54,7 +54,7 @@ export default function DistributorProductsPage() {
             <div className="flex items-center gap-4">
                 <button
                     onClick={() => router.back()}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+                    className="p-2 hover:bg-gray-100 rounded-[4px] transition-colors cursor-pointer"
                     title="Back to Distributors"
                 >
                     <ArrowLeft className="w-5 h-5 text-gray-600" />
@@ -73,7 +73,7 @@ export default function DistributorProductsPage() {
                 </div>
             )}
 
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-[4px] shadow-md p-6">
                 {productsLoading ? (
                     <div className="text-center py-12">
                         <p className="text-gray-500">Loading products...</p>
@@ -131,7 +131,7 @@ export default function DistributorProductsPage() {
                                             <button
                                                 onClick={() => handlePageChange(productsPagination.page - 1)}
                                                 disabled={productsPagination.page === 1}
-                                                className="p-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                                                className="p-2 border border-gray-300 rounded-[4px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                                             >
                                                 <ChevronLeft className="w-5 h-5" />
                                             </button>
@@ -141,7 +141,7 @@ export default function DistributorProductsPage() {
                                             <button
                                                 onClick={() => handlePageChange(productsPagination.page + 1)}
                                                 disabled={productsPagination.page === productsPagination.totalPages}
-                                                className="p-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                                                className="p-2 border border-gray-300 rounded-[4px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                                             >
                                                 <ChevronRight className="w-5 h-5" />
                                             </button>

@@ -86,25 +86,25 @@ export default function ShipmentsPage() {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                <div className="bg-white rounded-[4px] shadow px-4 py-3 border border-gray-100">
                     <p className="text-xs font-medium text-gray-500 mb-1">Total Shipments</p>
                     <p className="text-lg font-bold text-gray-900">{shipments.length}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                <div className="bg-white rounded-[4px] shadow px-4 py-3 border border-gray-100">
                     <p className="text-xs font-medium text-gray-500 mb-1">In Transit</p>
                     <p className="text-lg font-bold text-blue-700">{shipments.filter(s => s.status === 'in_transit').length}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                <div className="bg-white rounded-[4px] shadow px-4 py-3 border border-gray-100">
                     <p className="text-xs font-medium text-gray-500 mb-1">Delivered</p>
                     <p className="text-lg font-bold text-green-700">{shipments.filter(s => s.status === 'delivered').length}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                <div className="bg-white rounded-[4px] shadow px-4 py-3 border border-gray-100">
                     <p className="text-xs font-medium text-gray-500 mb-1">Total Value</p>
                     <p className="text-lg font-bold text-gray-900">{formatCurrency(shipments.reduce((sum, s) => sum + s.value, 0))}</p>
                 </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-[4px] shadow-md p-6">
                 <div className="flex flex-col sm:flex-row gap-4 mb-6">
                     <div className="flex-1 relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -113,13 +113,13 @@ export default function ShipmentsPage() {
                             placeholder="Search shipments..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                         />
                     </div>
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className="px-4 py-2 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                     >
                         <option value="all">All Status</option>
                         <option value="pending">Pending</option>
@@ -209,7 +209,7 @@ export default function ShipmentsPage() {
             {/* Tracking Modal */}
             {showTrackingModal && selectedShipment && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4">
+                    <div className="bg-white rounded-[4px] p-6 max-w-2xl w-full mx-4">
                         <div className="flex items-center justify-between mb-6">
                             <div>
                                 <h3 className="text-lg font-semibold text-gray-900">Track Shipment</h3>
@@ -223,7 +223,7 @@ export default function ShipmentsPage() {
                             </button>
                         </div>
 
-                        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                        <div className="mb-6 p-4 bg-gray-50 rounded-[4px]">
                             <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div>
                                     <p className="text-gray-600">From</p>
@@ -286,7 +286,7 @@ export default function ShipmentsPage() {
             {/* View Details Modal */}
             {viewModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div className="bg-white rounded-[4px] max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between p-6 border-b border-gray-200">
                             <h2 className="text-xl font-semibold text-gray-900">Shipment Details</h2>
                             <button onClick={() => setViewModal(null)} className="text-gray-400 hover:text-gray-600">
@@ -365,7 +365,7 @@ export default function ShipmentsPage() {
             {/* Update Status Modal */}
             {updateStatusModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-lg max-w-md w-full">
+                    <div className="bg-white rounded-[4px] max-w-md w-full">
                         <div className="flex items-center justify-between p-6 border-b border-gray-200">
                             <h2 className="text-xl font-semibold text-gray-900">Update Shipment Status</h2>
                             <button onClick={() => setUpdateStatusModal(null)} className="text-gray-400 hover:text-gray-600">
@@ -420,7 +420,7 @@ export default function ShipmentsPage() {
             {/* Receipt Modal */}
             {receiptModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div className="bg-white rounded-[4px] max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between p-6 border-b border-gray-200">
                             <h2 className="text-xl font-semibold text-gray-900">Delivery Receipt</h2>
                             <button onClick={() => setReceiptModal(null)} className="text-gray-400 hover:text-gray-600">
@@ -490,7 +490,7 @@ export default function ShipmentsPage() {
                             </div>
 
                             {/* Signature/Confirmation */}
-                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div className="bg-green-50 border border-green-200 rounded-[4px] p-4">
                                 <div className="flex items-center gap-2 text-green-700">
                                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />

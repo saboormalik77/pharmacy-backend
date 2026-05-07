@@ -208,7 +208,7 @@ export default function QrScannerModal({ onScan, onClose }: QrScannerModalProps)
                     </h2>
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-gray-700 transition-colors p-1 rounded-lg hover:bg-gray-100"
+                        className="text-gray-400 hover:text-gray-700 transition-colors p-1 rounded-[4px] hover:bg-gray-100"
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -227,7 +227,7 @@ export default function QrScannerModal({ onScan, onClose }: QrScannerModalProps)
                                 <p className="text-sm font-semibold text-red-700">Camera unavailable</p>
                                 <p className="text-xs text-gray-500 mt-1">{errorMsg}</p>
                             </div>
-                            <p className="text-xs text-gray-400 bg-gray-50 rounded-lg px-3 py-2">
+                            <p className="text-xs text-gray-400 bg-gray-50 rounded-[4px] px-3 py-2">
                                 Use USB scanner input or Manual NDC entry instead.
                             </p>
                         </div>
@@ -295,7 +295,7 @@ export default function QrScannerModal({ onScan, onClose }: QrScannerModalProps)
                 <div className="px-5 py-3 border-t border-gray-100 flex-shrink-0">
                     <button
                         onClick={onClose}
-                        className="w-full py-2 text-sm text-gray-500 hover:text-gray-800 transition-colors font-medium rounded-lg hover:bg-gray-50"
+                        className="w-full py-2 text-sm text-gray-500 hover:text-gray-800 transition-colors font-medium rounded-[4px] hover:bg-gray-50"
                     >
                         Cancel
                     </button>

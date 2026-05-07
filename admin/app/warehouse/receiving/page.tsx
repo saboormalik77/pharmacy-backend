@@ -205,12 +205,12 @@ export default function WarehouseReceivingPage() {
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+            <div className="flex gap-1 bg-gray-100 rounded-[4px] p-1">
                 {tabs.map(t => (
                     <button
                         key={t.key}
                         onClick={() => setTab(t.key)}
-                        className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                        className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-[4px] transition-colors ${
                             tab === t.key ? 'bg-white text-primary-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'
                         }`}
                     >
@@ -223,7 +223,7 @@ export default function WarehouseReceivingPage() {
             {tab === 'scan' && (
                 <div className="space-y-3">
                     {/* Scanner: camera (same modal as return add-items) or USB / keyboard */}
-                    <div className="bg-white rounded-lg shadow px-4 py-3 space-y-2">
+                    <div className="bg-white rounded-[4px] shadow px-4 py-3 space-y-2">
                         <div className="flex items-center justify-between gap-2 flex-wrap">
                             <label className="block text-xs font-medium text-gray-700">
                                 <Truck className="w-3.5 h-3.5 inline mr-1" />
@@ -259,7 +259,7 @@ export default function WarehouseReceivingPage() {
                                     type="button"
                                     onClick={() => setCameraOpen(true)}
                                     disabled={isActionLoading || (scanProgress?.allScanned ?? false)}
-                                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-dashed border-primary-300 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-dashed border-primary-300 bg-primary-50 hover:bg-primary-100 rounded-[4px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {isActionLoading ? (
                                         <>
@@ -293,7 +293,7 @@ export default function WarehouseReceivingPage() {
                                             ? 'Scan next box tracking number…'
                                             : 'USB wedge: scan barcode — or type — then Enter'
                                         }
-                                        className="w-full pl-9 pr-3 py-2 text-sm border-2 border-primary-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-primary-50 font-mono"
+                                        className="w-full pl-9 pr-3 py-2 text-sm border-2 border-primary-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-primary-50 font-mono"
                                         autoFocus
                                         disabled={isActionLoading || (scanProgress?.allScanned ?? false)}
                                     />
@@ -335,7 +335,7 @@ export default function WarehouseReceivingPage() {
 
                     {/* Error */}
                     {scanError && (
-                        <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-2.5 flex items-start gap-2.5">
+                        <div className="bg-red-50 border border-red-200 rounded-[4px] px-4 py-2.5 flex items-start gap-2.5">
                             <XCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
                             <div>
                                 <p className="text-xs font-medium text-red-800">Could not scan box</p>
@@ -346,7 +346,7 @@ export default function WarehouseReceivingPage() {
 
                     {/* Scan Progress Card */}
                     {scannedReturn && scanProgress && (
-                        <div className={`border-2 rounded-lg overflow-hidden ${
+                        <div className={`border-2 rounded-[4px] overflow-hidden ${
                             scanProgress.allScanned
                                 ? 'bg-green-50 border-green-300'
                                 : 'bg-blue-50 border-blue-300'
@@ -426,7 +426,7 @@ export default function WarehouseReceivingPage() {
                                                 return (
                                                     <div
                                                         key={idx}
-                                                        className={`flex items-center justify-between px-3 py-1.5 rounded-md border ${
+                                                        className={`flex items-center justify-between px-3 py-1.5 rounded-[4px] border ${
                                                             isScanned
                                                                 ? 'bg-green-50 border-green-200'
                                                                 : 'bg-white border-gray-200'
@@ -490,7 +490,7 @@ export default function WarehouseReceivingPage() {
             {/* ── Tab: Pending ────────────────────────────── */}
             {tab === 'pending' && (
                 <div className="space-y-2">
-                    <div className="bg-white rounded-lg shadow px-3 py-2">
+                    <div className="bg-white rounded-[4px] shadow px-3 py-2">
                         <div className="relative">
                             <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                             <input
@@ -506,12 +506,12 @@ export default function WarehouseReceivingPage() {
                     {isLoading ? (
                         <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 animate-spin text-primary-600" /></div>
                     ) : pendingReturns.length === 0 ? (
-                        <div className="bg-white rounded-lg shadow p-10 text-center">
+                        <div className="bg-white rounded-[4px] shadow p-10 text-center">
                             <Package className="w-10 h-10 text-gray-300 mx-auto mb-2" />
                             <p className="text-xs text-gray-500">No finalized returns awaiting check-in</p>
                         </div>
                     ) : (
-                        <div className="bg-white rounded-lg shadow overflow-hidden">
+                        <div className="bg-white rounded-[4px] shadow overflow-hidden">
                             <table className="w-full">
                                 <thead>
                                     <tr className="bg-gray-50 border-b border-gray-200">
@@ -623,7 +623,7 @@ export default function WarehouseReceivingPage() {
             {/* ── Tab: Received ───────────────────────────── */}
             {tab === 'received' && (
                 <div className="space-y-2">
-                    <div className="bg-white rounded-lg shadow px-3 py-2 space-y-2">
+                    <div className="bg-white rounded-[4px] shadow px-3 py-2 space-y-2">
                         <div className="relative">
                             <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                             <input
@@ -674,7 +674,7 @@ export default function WarehouseReceivingPage() {
                     {isLoading ? (
                         <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 animate-spin text-primary-600" /></div>
                     ) : receivedReturns.length === 0 ? (
-                        <div className="bg-white rounded-lg shadow p-10 text-center">
+                        <div className="bg-white rounded-[4px] shadow p-10 text-center">
                             <CheckCircle className="w-10 h-10 text-gray-300 mx-auto mb-2" />
                             <p className="text-xs text-gray-500">
                                 {verificationFilter === 'verified' ? 'No verified returns found' :
@@ -683,7 +683,7 @@ export default function WarehouseReceivingPage() {
                             </p>
                         </div>
                     ) : (
-                        <div className="bg-white rounded-lg shadow overflow-hidden">
+                        <div className="bg-white rounded-[4px] shadow overflow-hidden">
                             <table className="w-full">
                                 <thead>
                                     <tr className="bg-gray-50 border-b border-gray-200">

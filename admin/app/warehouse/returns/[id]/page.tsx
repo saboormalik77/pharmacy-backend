@@ -711,7 +711,7 @@ export default function ReturnDetailPage() {
                 <button onClick={handleBackNavigation} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800">
                     <ArrowLeft className="w-4 h-4" /> Back
                 </button>
-                <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+                <div className="bg-red-50 border border-red-200 rounded-[4px] p-6 text-center">
                     <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-3" />
                     <p className="text-red-800 font-medium">{error || 'Return transaction not found.'}</p>
                     <Button variant="outline" className="mt-4" onClick={() => router.push('/warehouse/returns')}>Go Back</Button>
@@ -728,7 +728,7 @@ export default function ReturnDetailPage() {
 
             {/* Lock Status Warning */}
             {isLocked && (
-                <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                <div className="bg-amber-50 border border-amber-200 rounded-[4px] px-3 py-2">
                     <div className="flex items-center gap-2">
                         <Lock className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
                         <div>
@@ -805,7 +805,7 @@ export default function ReturnDetailPage() {
                 /* Layout with Shipping & Processing: 2x2 grid */
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 {/* General Info */}
-                <div className="bg-white rounded-lg shadow px-4 py-3">
+                <div className="bg-white rounded-[4px] shadow px-4 py-3">
                     <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                         <ClipboardList className="w-3.5 h-3.5" /> General Information
                     </h2>
@@ -847,7 +847,7 @@ export default function ReturnDetailPage() {
                 </div>
 
                 {/* Store & Processor */}
-                <div className="bg-white rounded-lg shadow px-4 py-3">
+                <div className="bg-white rounded-[4px] shadow px-4 py-3">
                     <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                         <Building2 className="w-3.5 h-3.5" /> Store & Processor
                     </h2>
@@ -864,9 +864,9 @@ export default function ReturnDetailPage() {
                 /* Layout without Shipping & Processing: 3 cards in one row */
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                     {/* General Information */}
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-sm border border-blue-100 px-5 py-4 hover:shadow-md transition-shadow">
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-[4px] shadow-sm border border-blue-100 px-5 py-4 hover:shadow-md transition-shadow">
                         <h2 className="text-xs font-bold text-blue-800 uppercase tracking-wider mb-3 flex items-center gap-2">
-                            <div className="p-1.5 bg-blue-100 rounded-lg">
+                            <div className="p-1.5 bg-blue-100 rounded-[4px]">
                                 <ClipboardList className="w-4 h-4 text-blue-600" />
                             </div>
                             General Information
@@ -909,9 +909,9 @@ export default function ReturnDetailPage() {
                     </div>
 
                     {/* Store & Processor */}
-                    <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl shadow-sm border border-emerald-100 px-5 py-4 hover:shadow-md transition-shadow">
+                    <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-[4px] shadow-sm border border-emerald-100 px-5 py-4 hover:shadow-md transition-shadow">
                         <h2 className="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-3 flex items-center gap-2">
-                            <div className="p-1.5 bg-emerald-100 rounded-lg">
+                            <div className="p-1.5 bg-emerald-100 rounded-[4px]">
                                 <Building2 className="w-4 h-4 text-emerald-600" />
                             </div>
                             Store & Processor
@@ -925,9 +925,9 @@ export default function ReturnDetailPage() {
                     </div>
 
                     {/* Items & Values */}
-                    {/* <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl shadow-sm border border-amber-100 px-5 py-4 hover:shadow-md transition-shadow">
+                    {/* <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-[4px] shadow-sm border border-amber-100 px-5 py-4 hover:shadow-md transition-shadow">
                         <h2 className="text-xs font-bold text-amber-800 uppercase tracking-wider mb-3 flex items-center gap-2">
-                            <div className="p-1.5 bg-amber-100 rounded-lg">
+                            <div className="p-1.5 bg-amber-100 rounded-[4px]">
                                 <Package className="w-4 h-4 text-amber-600" />
                             </div>
                             Items & Values
@@ -956,7 +956,7 @@ export default function ReturnDetailPage() {
 
             {/* ── Documents Section (post-finalization) ──────── */}
             {isFinalized && (
-                <div className="bg-white rounded-lg shadow px-4 py-3">
+                <div className="bg-white rounded-[4px] shadow px-4 py-3">
                     <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                         <FileText className="w-3.5 h-3.5" /> Documents
                     </h2>
@@ -1001,7 +1001,7 @@ export default function ReturnDetailPage() {
             )}
 
             {/* ── Items Section ──────────────────────────────── */}
-            <div className="bg-white rounded-lg shadow px-4 py-3">
+            <div className="bg-white rounded-[4px] shadow px-4 py-3">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2">
                     <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
                         <ScanLine className="w-3.5 h-3.5" /> Products ({nonWcItems.length})
@@ -1097,19 +1097,16 @@ export default function ReturnDetailPage() {
                         <table className="w-full table-auto">
                             <thead>
                                 <tr className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">NDC</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Name</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Manufacturer</th>
-                                    <th className="text-center px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Pkg Size</th>
-                                    <th className="text-center px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Qty Returned</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Serial#</th>
-                                    {/* <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Price</th>
-                                    <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Est. Value</th> */}
-                                    {/* <th className="text-right px-2 py-1.5 text-[10px] font-semibold text-gray-500 uppercase">Est. Store Value</th> */}
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Expires</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Status</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Destination</th>
-                                    <th className="text-right px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Actions</th>
+                                    <th className="text-left px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">NDC</th>
+                                    <th className="text-left px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">Name</th>
+                                    <th className="text-left px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">Manufacturer</th>
+                                    <th className="text-center px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">Pkg Size</th>
+                                    <th className="text-center px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">Qty Returned</th>
+                                    <th className="text-left px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">Serial#</th>
+                                    <th className="text-left px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">Expires</th>
+                                    <th className="text-left px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th className="text-left px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">Destination</th>
+                                    <th className="text-right px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1206,7 +1203,7 @@ export default function ReturnDetailPage() {
             {/* ── Edit Item Modal ───────────────────────────── */}
             {editItemModal && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setEditItemModal(null)}>
-                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">Edit Item</h2>
                             <button onClick={() => setEditItemModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
@@ -1268,7 +1265,7 @@ export default function ReturnDetailPage() {
             {/* ── Delete Item Modal ────────────────────────── */}
             {deleteItemModal && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setDeleteItemModal(null)}>
-                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">Delete Item</h2>
                             <button onClick={() => setDeleteItemModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
@@ -1292,7 +1289,7 @@ export default function ReturnDetailPage() {
             {/* ── Edit Modal ────────────────────────────────── */}
             {editModal && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setEditModal(false)}>
-                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">Edit Return — {tx.licensePlate}</h2>
                             <button onClick={() => setEditModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
@@ -1329,7 +1326,7 @@ export default function ReturnDetailPage() {
             {/* ── Status Action Modal ──────────────────────── */}
             {actionModal && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setActionModal(null)}>
-                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">
                                 {actionModal === 'pause' && 'Pause Return'}
@@ -1356,7 +1353,7 @@ export default function ReturnDetailPage() {
             {/* ── Delete Modal ─────────────────────────────── */}
             {deleteModal && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setDeleteModal(false)}>
-                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">Delete Return</h2>
                             <button onClick={() => setDeleteModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
@@ -1379,7 +1376,7 @@ export default function ReturnDetailPage() {
             {/* ── Wine Cellar Items Modal ─────────────────────── */}
             {wcModal && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setWcModal(false)}>
-                    <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col shadow-xl" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] max-w-4xl w-full max-h-[90vh] flex flex-col shadow-xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50 flex-shrink-0">
                             <div>
                                 <h2 className="text-sm font-semibold text-gray-900">Wine Cellar Items</h2>

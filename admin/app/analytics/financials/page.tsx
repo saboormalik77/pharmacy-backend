@@ -72,13 +72,13 @@ export default function FinancialsPage() {
         <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[1, 2, 3].map((i) => (
-                    <div key={i} className="bg-white rounded-lg shadow-md p-4 animate-pulse">
+                    <div key={i} className="bg-white rounded-[4px] shadow-md p-4 animate-pulse">
                         <div className="h-3 bg-gray-200 rounded w-24 mb-2" />
                         <div className="h-6 bg-gray-200 rounded w-32" />
                     </div>
                 ))}
             </div>
-            <div className="bg-white rounded-lg shadow-md p-4 h-80 animate-pulse">
+            <div className="bg-white rounded-[4px] shadow-md p-4 h-80 animate-pulse">
                 <div className="h-64 bg-gray-100 rounded" />
             </div>
         </div>
@@ -90,13 +90,13 @@ export default function FinancialsPage() {
             <div className="flex gap-3">
                 <button
                     onClick={() => setActiveSection('ask-vs-received')}
-                    className={`px-4 py-2.5 text-sm font-medium rounded-lg ${activeSection === 'ask-vs-received' ? 'bg-[#516057] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                    className={`px-4 py-2.5 text-sm font-medium rounded-[4px] ${activeSection === 'ask-vs-received' ? 'bg-[#516057] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                 >
                     Ask vs Received
                 </button>
                 <button
                     onClick={() => setActiveSection('unpaid-memos')}
-                    className={`px-4 py-2.5 text-sm font-medium rounded-lg ${activeSection === 'unpaid-memos' ? 'bg-[#516057] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                    className={`px-4 py-2.5 text-sm font-medium rounded-[4px] ${activeSection === 'unpaid-memos' ? 'bg-[#516057] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                 >
                     Unpaid Memos
                 </button>
@@ -110,7 +110,7 @@ export default function FinancialsPage() {
                         <select
                             value={avrGroupBy}
                             onChange={(e) => setAvrGroupBy(e.target.value)}
-                            className="text-sm border border-[#e2e2e2] rounded-lg px-3 py-2 bg-white"
+                            className="text-sm border border-[#e2e2e2] rounded-[4px] px-3 py-2 bg-white"
                         >
                             <option value="manufacturer">Manufacturer</option>
                             <option value="ndc">NDC</option>
@@ -119,7 +119,7 @@ export default function FinancialsPage() {
                     </div>
 
                     {avrLoading ? <LoadingSkeleton /> : avrError ? (
-                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-base">
+                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[4px] text-base">
                             {avrError}
                             <button onClick={fetchAskVsReceived} className="ml-2 underline">Retry</button>
                         </div>
@@ -127,19 +127,19 @@ export default function FinancialsPage() {
                         <div className="space-y-6">
                             {/* Totals Cards */}
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                                     <p className="text-sm text-gray-500 mb-2">Total Ask Value</p>
                                     <p className="text-base font-bold text-blue-600">{formatCurrency(avrData.totals?.totalAskValue || 0)}</p>
                                 </div>
-                                <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                                     <p className="text-sm text-gray-500 mb-2">Total Received</p>
                                     <p className="text-base font-bold text-green-600">{formatCurrency(avrData.totals?.totalReceived || 0)}</p>
                                 </div>
-                                <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                                     <p className="text-sm text-gray-500 mb-2">Difference</p>
                                     <p className="text-base font-bold text-red-600">{formatCurrency(avrData.totals?.totalDifference || 0)}</p>
                                 </div>
-                                <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                                     <p className="text-sm text-gray-500 mb-2">Pay Rate</p>
                                     <p className="text-base font-bold text-purple-600">{avrData.totals?.overallPayPercent || 0}%</p>
                                 </div>
@@ -147,7 +147,7 @@ export default function FinancialsPage() {
 
                             {/* Bar Chart */}
                             {avrData.data.length > 0 && (
-                                <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                                     <h2 className="text-base font-semibold text-gray-900 mb-4">Ask vs Received Comparison</h2>
                                     <div className="h-80">
                                         <ResponsiveContainer width="100%" height="100%">
@@ -176,7 +176,7 @@ export default function FinancialsPage() {
                             )}
 
                             {/* Data Table */}
-                            <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                            <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                                 <h2 className="text-base font-semibold text-gray-900 mb-4">Details</h2>
                                 <div className="overflow-x-auto">
                                     <table className="w-full table-auto">
@@ -228,16 +228,16 @@ export default function FinancialsPage() {
                                 value={unpaidSearch}
                                 onChange={(e) => setUnpaidSearch(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && fetchUnpaidMemos()}
-                                className="w-full pl-10 pr-4 py-2.5 text-base border border-[#e2e2e2] rounded-lg bg-white"
+                                className="w-full pl-10 pr-4 py-2.5 text-base border border-[#e2e2e2] rounded-[4px] bg-white"
                             />
                         </div>
-                        <button onClick={fetchUnpaidMemos} className="px-5 py-2.5 text-base bg-[#516057] text-white rounded-lg hover:opacity-90">
+                        <button onClick={fetchUnpaidMemos} className="px-5 py-2.5 text-base bg-[#516057] text-white rounded-[4px] hover:opacity-90">
                             Search
                         </button>
                     </div>
 
                     {unpaidLoading ? <LoadingSkeleton /> : unpaidError ? (
-                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-base">
+                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[4px] text-base">
                             {unpaidError}
                             <button onClick={fetchUnpaidMemos} className="ml-2 underline">Retry</button>
                         </div>
@@ -245,19 +245,19 @@ export default function FinancialsPage() {
                         <div className="space-y-6">
                             {/* Summary Cards */}
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                                     <p className="text-sm text-gray-500 mb-2">Unpaid Memos</p>
                                     <p className="text-base font-bold text-gray-900">{formatNumber(unpaidData.summary?.totalUnpaidMemos || 0)}</p>
                                 </div>
-                                <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                                     <p className="text-sm text-gray-500 mb-2">Total Outstanding</p>
                                     <p className="text-base font-bold text-red-600">{formatCurrency(unpaidData.summary?.totalOutstanding || 0)}</p>
                                 </div>
-                                <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                                     <p className="text-sm text-gray-500 mb-2">Amount Requested</p>
                                     <p className="text-base font-bold text-blue-600">{formatCurrency(unpaidData.summary?.totalAmountRequested || 0)}</p>
                                 </div>
-                                <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                                     <p className="text-sm text-gray-500 mb-2">Avg Days Outstanding</p>
                                     <p className="text-base font-bold text-orange-600">{unpaidData.summary?.avgDaysOutstanding || 0} days</p>
                                 </div>
@@ -265,7 +265,7 @@ export default function FinancialsPage() {
 
                             {/* Aging Buckets */}
                             {unpaidData.agingBuckets && (
-                                <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                                     <h2 className="text-base font-semibold text-gray-900 mb-4">Aging Buckets</h2>
                                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                                         {[
@@ -275,7 +275,7 @@ export default function FinancialsPage() {
                                             { label: '181-365 Days', data: unpaidData.agingBuckets.days181to365, color: 'red' },
                                             { label: '> 365 Days', data: unpaidData.agingBuckets.over365Days, color: 'red' },
                                         ].map((bucket) => (
-                                            <div key={bucket.label} className={`p-4 rounded-lg border-2 border-${bucket.color}-200 bg-${bucket.color}-50`}>
+                                            <div key={bucket.label} className={`p-4 rounded-[4px] border-2 border-${bucket.color}-200 bg-${bucket.color}-50`}>
                                                 <p className="text-sm font-medium text-gray-700 mb-1">{bucket.label}</p>
                                                 <p className="text-base font-bold">{bucket.data?.count || 0} memos</p>
                                                 <p className="text-sm text-gray-600">{formatCurrency(bucket.data?.outstanding || 0)}</p>
@@ -286,7 +286,7 @@ export default function FinancialsPage() {
                             )}
 
                             {/* Unpaid Memos Table */}
-                            <div className="bg-white rounded-lg shadow border border-[#e2e2e2] p-6">
+                            <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                                 <h2 className="text-base font-semibold text-gray-900 mb-4">Unpaid Memo Details</h2>
                                 <div className="overflow-x-auto">
                                     <table className="w-full table-auto">

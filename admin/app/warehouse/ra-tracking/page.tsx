@@ -514,14 +514,14 @@ export default function RATrackingPage() {
                 <button
                     type="button"
                     onClick={() => setRaView('memos')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${raView === 'memos' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`}
+                    className={`px-3 py-1.5 rounded-[4px] text-xs font-medium border transition-colors ${raView === 'memos' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`}
                 >
                     All debit memos
                 </button>
                 <button
                     type="button"
                     onClick={() => { setRaView('group-shipments'); setShippedGroupsPage(1); }}
-                    className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${raView === 'group-shipments' ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`}
+                    className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-[4px] text-xs font-medium border transition-colors ${raView === 'group-shipments' ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`}
                 >
                     <Package className="w-3.5 h-3.5" /> Group shipments
                 </button>
@@ -538,7 +538,7 @@ export default function RATrackingPage() {
                         { icon: <Truck className="w-3.5 h-3.5 text-purple-500" />, label: 'Shipped', value: summary.shipped,   color: 'text-purple-700', bg: 'bg-purple-50' },
                         { icon: <AlertTriangle className="w-3.5 h-3.5 text-red-500" />, label: 'Overdue', value: summary.overdue, color: 'text-red-700',  bg: 'bg-red-50'   },
                     ].map(card => (
-                        <div key={card.label} className={`${card.bg} rounded-lg border border-gray-100 px-3 py-2 flex items-center gap-2`}>
+                        <div key={card.label} className={`${card.bg} rounded-[4px] border border-gray-100 px-3 py-2 flex items-center gap-2`}>
                             {card.icon}
                             <div>
                                 <p className="text-[10px] text-gray-500 leading-none">{card.label}</p>
@@ -550,7 +550,7 @@ export default function RATrackingPage() {
             )}
 
             {/* Filters — single compact row */}
-            <div className="bg-white rounded-lg shadow px-3 py-2">
+            <div className="bg-white rounded-[4px] shadow px-3 py-2">
                 <div className="flex flex-wrap items-center gap-2">
                     <div className="relative flex-1 min-w-[160px]">
                         <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -576,7 +576,7 @@ export default function RATrackingPage() {
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="bg-white rounded-[4px] shadow overflow-hidden">
                 {isLoading ? (
                     <div className="flex items-center justify-center py-12">
                         <Loader2 className="w-6 h-6 animate-spin text-primary-500" />
@@ -712,7 +712,7 @@ export default function RATrackingPage() {
 
             {raView === 'group-shipments' && (
                 <>
-                    <div className="bg-white rounded-lg shadow px-3 py-2">
+                    <div className="bg-white rounded-[4px] shadow px-3 py-2">
                         <p className="text-xs text-gray-600 mb-2">
                             Shipments where multiple debit memos were sent together (one FedEx tracking). Use destination to narrow the list.
                         </p>
@@ -724,7 +724,7 @@ export default function RATrackingPage() {
                             {DESTINATION_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                         </select>
                     </div>
-                    <div className="bg-white rounded-lg shadow overflow-hidden">
+                    <div className="bg-white rounded-[4px] shadow overflow-hidden">
                         {isGroupLoading ? (
                             <div className="flex items-center justify-center py-12">
                                 <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
@@ -789,7 +789,7 @@ export default function RATrackingPage() {
                                                         <tr className="bg-purple-50/40">
                                                             <td colSpan={7} className="px-4 py-3">
                                                                 <p className="text-[10px] font-semibold text-gray-500 uppercase mb-2">Debit memos in this shipment</p>
-                                                                <div className="overflow-x-auto border border-gray-200 rounded-lg bg-white">
+                                                                <div className="overflow-x-auto border border-gray-200 rounded-[4px] bg-white">
                                                                     <table className="min-w-full text-xs">
                                                                         <thead className="bg-gray-50 border-b border-gray-200">
                                                                             <tr>
@@ -853,7 +853,7 @@ export default function RATrackingPage() {
             {/* ── Request RA Modal (Task 11.6) ──────────────────── */}
             {activeModal === 'request' && selectedMemo && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={closeModal}>
-                    <div className="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] shadow-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="p-6 border-b border-gray-200">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-lg font-bold text-gray-900">Send RA Request</h2>
@@ -862,7 +862,7 @@ export default function RATrackingPage() {
                         </div>
                         <div className="p-6 space-y-4">
                             {/* Memo Details */}
-                            <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-1">
+                            <div className="bg-gray-50 rounded-[4px] p-4 text-sm space-y-1">
                                 <div className="flex justify-between"><span className="text-gray-500">Memo</span><span className="font-medium">{selectedMemo.memoNumber}</span></div>
                                 <div className="flex justify-between"><span className="text-gray-500">Pharmacy</span><span>{selectedMemo.pharmacyName}</span></div>
                                 <div className="flex justify-between"><span className="text-gray-500">Destination</span><span>{selectedMemo.destination || '—'}</span></div>
@@ -895,7 +895,7 @@ export default function RATrackingPage() {
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Email Override (optional)</label>
                                 <input
                                     type="email"
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
+                                    className="w-full border border-gray-300 rounded-[4px] px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
                                     placeholder="Override destination email..."
                                     value={requestEmail}
                                     onChange={e => setRequestEmail(e.target.value)}
@@ -917,7 +917,7 @@ export default function RATrackingPage() {
             {/* ── Resend RA Modal ────────────────────────────────── */}
             {activeModal === 'resend' && selectedMemo && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={closeModal}>
-                    <div className="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] shadow-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="p-6 border-b border-gray-200">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-lg font-bold text-gray-900">Resend RA Reminder</h2>
@@ -925,7 +925,7 @@ export default function RATrackingPage() {
                             </div>
                         </div>
                         <div className="p-6 space-y-4">
-                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-800">
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-[4px] p-3 text-sm text-yellow-800">
                                 <p>Original request sent: <strong>{selectedMemo.raRequestedAt ? formatDate(selectedMemo.raRequestedAt) : 'N/A'}</strong></p>
                                 {selectedMemo.ticklerDate && (
                                     <p>Tickler date: <strong className={isOverdue(selectedMemo) ? 'text-red-600' : ''}>{formatDate(selectedMemo.ticklerDate)}</strong>
@@ -933,7 +933,7 @@ export default function RATrackingPage() {
                                 )}
                             </div>
 
-                            <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-1">
+                            <div className="bg-gray-50 rounded-[4px] p-4 text-sm space-y-1">
                                 <div className="flex justify-between"><span className="text-gray-500">Memo</span><span className="font-medium">{selectedMemo.memoNumber}</span></div>
                                 <div className="flex justify-between"><span className="text-gray-500">Labeler</span><span>{selectedMemo.labelerName || '—'}</span></div>
                                 <div className="flex justify-between"><span className="text-gray-500">Ask Value</span><span className="font-medium">{formatCurrency(selectedMemo.totalAskValue)}</span></div>
@@ -952,7 +952,7 @@ export default function RATrackingPage() {
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Email Override (optional)</label>
                                 <input
                                     type="email"
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                                    className="w-full border border-gray-300 rounded-[4px] px-3 py-2 text-sm"
                                     placeholder="Override destination email..."
                                     value={requestEmail}
                                     onChange={e => setRequestEmail(e.target.value)}
@@ -973,7 +973,7 @@ export default function RATrackingPage() {
             {/* ── Receive RA Modal (Task 11.7) ──────────────────── */}
             {activeModal === 'receive' && selectedMemo && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={closeModal}>
-                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] shadow-xl max-w-md w-full mx-4" onClick={e => e.stopPropagation()}>
                         <div className="p-6 border-b border-gray-200">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-lg font-bold text-gray-900">Record RA Received</h2>
@@ -981,7 +981,7 @@ export default function RATrackingPage() {
                             </div>
                         </div>
                         <div className="p-6 space-y-4">
-                            <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-1">
+                            <div className="bg-gray-50 rounded-[4px] p-4 text-sm space-y-1">
                                 <div className="flex justify-between"><span className="text-gray-500">Memo</span><span className="font-medium">{selectedMemo.memoNumber}</span></div>
                                 <div className="flex justify-between"><span className="text-gray-500">Labeler</span><span>{selectedMemo.labelerName || '—'}</span></div>
                                 <div className="flex justify-between"><span className="text-gray-500">Destination</span><span>{selectedMemo.destination || '—'}</span></div>
@@ -991,7 +991,7 @@ export default function RATrackingPage() {
                                 <label className="block text-sm font-medium text-gray-700 mb-1">RA Number *</label>
                                 <input
                                     type="text"
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
+                                    className="w-full border border-gray-300 rounded-[4px] px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
                                     placeholder="Enter RA number..."
                                     value={receiveRaNumber}
                                     onChange={e => setReceiveRaNumber(e.target.value)}
@@ -1003,7 +1003,7 @@ export default function RATrackingPage() {
                                 <label className="block text-sm font-medium text-gray-700 mb-1">PDF URL (optional)</label>
                                 <input
                                     type="url"
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                                    className="w-full border border-gray-300 rounded-[4px] px-3 py-2 text-sm"
                                     placeholder="https://..."
                                     value={receivePdfUrl}
                                     onChange={e => setReceivePdfUrl(e.target.value)}
@@ -1031,7 +1031,7 @@ export default function RATrackingPage() {
                     }}
                 >
                     <div
-                        className="bg-white rounded-xl shadow-xl max-w-2xl w-full mx-4 max-h-[85vh] overflow-y-auto relative"
+                        className="bg-white rounded-[4px] shadow-xl max-w-2xl w-full mx-4 max-h-[85vh] overflow-y-auto relative"
                         onClick={e => e.stopPropagation()}
                     >
                         {groupFedexLoading && (
@@ -1072,7 +1072,7 @@ export default function RATrackingPage() {
                                 <div className="space-y-4">
                                     <div>
                                         <h3 className="text-sm font-bold text-gray-900 mb-2">Group shipment</h3>
-                                        <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-2 max-h-40 overflow-y-auto">
+                                        <div className="bg-gray-50 rounded-[4px] p-4 text-sm space-y-2 max-h-40 overflow-y-auto">
                                             <div className="flex justify-between text-gray-500"><span>Memos</span><span className="font-medium text-gray-900">{groupShippedMemos.length}</span></div>
                                             <div className="flex justify-between text-gray-500"><span>Destination</span><span className="font-medium capitalize text-gray-900">{groupShippedMemos[0]?.destination || '—'}</span></div>
                                             <ul className="text-xs text-gray-700 border-t border-gray-200 pt-2 mt-2 space-y-1">
@@ -1087,11 +1087,11 @@ export default function RATrackingPage() {
                                             </ul>
                                         </div>
                                     </div>
-                                    <div className="bg-blue-600 rounded-lg px-4 py-3 flex items-center justify-between">
+                                    <div className="bg-blue-600 rounded-[4px] px-4 py-3 flex items-center justify-between">
                                         <p className="text-sm font-bold text-white">FedEx API Shipment</p>
                                         <span className="text-sm font-bold text-white underline font-mono">{groupFedexResult.masterTrackingNumber}</span>
                                     </div>
-                                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-3">
+                                    <div className="bg-green-50 border border-green-200 rounded-[4px] p-4 space-y-3">
                                         <div className="flex items-center gap-2">
                                             <CheckCircle className="w-5 h-5 text-green-600" />
                                             <p className="text-sm font-semibold text-green-800">Shipment Created Successfully</p>
@@ -1120,7 +1120,7 @@ export default function RATrackingPage() {
                                                 Print Labels
                                             </button>
                                         </div>
-                                        <div className="border border-gray-200 rounded-lg overflow-hidden divide-y divide-gray-100">
+                                        <div className="border border-gray-200 rounded-[4px] overflow-hidden divide-y divide-gray-100">
                                             {groupFedexResult.packages.map((pkg, i) => (
                                                 <div key={i} className="flex items-center justify-between text-xs bg-white px-4 py-2.5">
                                                     <div className="flex items-center gap-2">
@@ -1142,7 +1142,7 @@ export default function RATrackingPage() {
                                     <div className="border-t border-gray-200 pt-4 space-y-3">
                                         <p className="text-sm font-medium text-gray-700">Schedule FedEx Pickup (Optional)</p>
                                         {groupPickupConfirmation ? (
-                                            <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
+                                            <div className="bg-green-50 border border-green-200 rounded-[4px] p-3 flex items-center gap-2">
                                                 <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
                                                 <div className="text-xs">
                                                     <span className="text-green-800 font-medium">Pickup scheduled!</span>
@@ -1151,7 +1151,7 @@ export default function RATrackingPage() {
                                             </div>
                                         ) : (
                                             <>
-                                                <div className="bg-amber-50 border border-amber-200 rounded-md p-3">
+                                                <div className="bg-amber-50 border border-amber-200 rounded-[4px] p-3">
                                                     <p className="text-xs text-amber-800">
                                                         <strong>Note:</strong> Pickup scheduling may not work in sandbox/test mode.
                                                         You can also call FedEx directly at <strong>1-800-463-3339</strong> and say &quot;Ground Return Pickup&quot;.
@@ -1164,7 +1164,7 @@ export default function RATrackingPage() {
                                                             type="date"
                                                             value={groupPickupForm.pickupDate}
                                                             onChange={e => setGroupPickupForm(prev => ({ ...prev, pickupDate: e.target.value }))}
-                                                            className="block w-36 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                                            className="block w-36 px-2 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-purple-500"
                                                             disabled={groupPickupLoading}
                                                         />
                                                     </div>
@@ -1174,7 +1174,7 @@ export default function RATrackingPage() {
                                                             type="time"
                                                             value={groupPickupForm.readyTime}
                                                             onChange={e => setGroupPickupForm(prev => ({ ...prev, readyTime: e.target.value }))}
-                                                            className="block w-28 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                                            className="block w-28 px-2 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-purple-500"
                                                             disabled={groupPickupLoading}
                                                         />
                                                     </div>
@@ -1184,7 +1184,7 @@ export default function RATrackingPage() {
                                                             type="time"
                                                             value={groupPickupForm.closeTime}
                                                             onChange={e => setGroupPickupForm(prev => ({ ...prev, closeTime: e.target.value }))}
-                                                            className="block w-28 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                                            className="block w-28 px-2 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-purple-500"
                                                             disabled={groupPickupLoading}
                                                         />
                                                     </div>
@@ -1212,7 +1212,7 @@ export default function RATrackingPage() {
                                                                 }
                                                             }}
                                                             disabled={groupPickupLoading}
-                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white text-xs font-medium rounded-md transition-colors"
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white text-xs font-medium rounded-[4px] transition-colors"
                                                         >
                                                             {groupPickupLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Truck className="w-3.5 h-3.5" />}
                                                             Schedule Pickup
@@ -1226,13 +1226,13 @@ export default function RATrackingPage() {
                             ) : fedexResult ? (
                                 <div className="space-y-4">
                                     {/* Shipment header banner */}
-                                    <div className="bg-blue-600 rounded-lg px-4 py-3 flex items-center justify-between">
+                                    <div className="bg-blue-600 rounded-[4px] px-4 py-3 flex items-center justify-between">
                                         <p className="text-sm font-bold text-white">FedEx API Shipment</p>
                                         <span className="text-sm font-bold text-white underline font-mono">{fedexResult.masterTrackingNumber}</span>
                                     </div>
 
                                     {/* Success info */}
-                                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-3">
+                                    <div className="bg-green-50 border border-green-200 rounded-[4px] p-4 space-y-3">
                                         <div className="flex items-center gap-2">
                                             <CheckCircle className="w-5 h-5 text-green-600" />
                                             <p className="text-sm font-semibold text-green-800">Shipment Created Successfully</p>
@@ -1267,7 +1267,7 @@ export default function RATrackingPage() {
                                                 </button>
                                             )}
                                         </div>
-                                        <div className="border border-gray-200 rounded-lg overflow-hidden divide-y divide-gray-100">
+                                        <div className="border border-gray-200 rounded-[4px] overflow-hidden divide-y divide-gray-100">
                                             {fedexResult.packages.map((pkg, i) => (
                                                 <div key={i} className="flex items-center justify-between text-xs bg-white px-4 py-2.5">
                                                     <div className="flex items-center gap-2">
@@ -1296,7 +1296,7 @@ export default function RATrackingPage() {
                                     <div className="border-t border-gray-200 pt-4 space-y-3">
                                         <p className="text-sm font-medium text-gray-700">Schedule FedEx Pickup (Optional)</p>
                                         {pickupConfirmation ? (
-                                            <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
+                                            <div className="bg-green-50 border border-green-200 rounded-[4px] p-3 flex items-center gap-2">
                                                 <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
                                                 <div className="text-xs">
                                                     <span className="text-green-800 font-medium">Pickup scheduled!</span>
@@ -1305,7 +1305,7 @@ export default function RATrackingPage() {
                                             </div>
                                         ) : (
                                             <>
-                                                <div className="bg-amber-50 border border-amber-200 rounded-md p-3">
+                                                <div className="bg-amber-50 border border-amber-200 rounded-[4px] p-3">
                                                     <p className="text-xs text-amber-800">
                                                         <strong>Note:</strong> Pickup scheduling may not work in sandbox/test mode.
                                                         You can also call FedEx directly at <strong>1-800-463-3339</strong> and say &quot;Ground Return Pickup&quot;.
@@ -1318,7 +1318,7 @@ export default function RATrackingPage() {
                                                             type="date"
                                                             value={pickupForm.pickupDate}
                                                             onChange={e => setPickupForm(prev => ({ ...prev, pickupDate: e.target.value }))}
-                                                            className="block w-36 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                            className="block w-36 px-2 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                             disabled={pickupLoading}
                                                         />
                                                     </div>
@@ -1328,7 +1328,7 @@ export default function RATrackingPage() {
                                                             type="time"
                                                             value={pickupForm.readyTime}
                                                             onChange={e => setPickupForm(prev => ({ ...prev, readyTime: e.target.value }))}
-                                                            className="block w-28 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                            className="block w-28 px-2 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                             disabled={pickupLoading}
                                                         />
                                                     </div>
@@ -1338,7 +1338,7 @@ export default function RATrackingPage() {
                                                             type="time"
                                                             value={pickupForm.closeTime}
                                                             onChange={e => setPickupForm(prev => ({ ...prev, closeTime: e.target.value }))}
-                                                            className="block w-28 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                            className="block w-28 px-2 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                             disabled={pickupLoading}
                                                         />
                                                     </div>
@@ -1365,7 +1365,7 @@ export default function RATrackingPage() {
                                                                 }
                                                             }}
                                                             disabled={pickupLoading}
-                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white text-xs font-medium rounded-md transition-colors"
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white text-xs font-medium rounded-[4px] transition-colors"
                                                         >
                                                             {pickupLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Truck className="w-3.5 h-3.5" />}
                                                             Schedule Pickup
@@ -1378,14 +1378,14 @@ export default function RATrackingPage() {
                                 </div>
                             ) : (
                                 <>
-                                    <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-1">
+                                    <div className="bg-gray-50 rounded-[4px] p-4 text-sm space-y-1">
                                         <div className="flex justify-between"><span className="text-gray-500">Memo</span><span className="font-medium">{selectedMemo.memoNumber}</span></div>
                                         <div className="flex justify-between"><span className="text-gray-500">RA #</span><span className="font-medium text-green-700">{selectedMemo.raNumber}</span></div>
                                         <div className="flex justify-between"><span className="text-gray-500">Destination</span><span className="capitalize font-medium">{selectedMemo.destination || '—'}</span></div>
                                         <div className="flex justify-between"><span className="text-gray-500">Items</span><span>{selectedMemo.totalItems}</span></div>
                                     </div>
 
-                                    <div className="border border-purple-200 bg-purple-50/70 rounded-lg p-4 space-y-3">
+                                    <div className="border border-purple-200 bg-purple-50/70 rounded-[4px] p-4 space-y-3">
                                         <div className="flex items-start gap-2">
                                             <Layers className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
                                             <div>
@@ -1450,7 +1450,7 @@ export default function RATrackingPage() {
                                                 <button
                                                     type="button"
                                                     onClick={() => setShipMode('fedex')}
-                                                    className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all"
+                                                    className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-[4px] hover:border-blue-500 hover:bg-blue-50 transition-all"
                                                 >
                                                     <Truck className="w-6 h-6 text-blue-600" />
                                                     <span className="text-sm font-semibold text-gray-900">Create FedEx Shipment</span>
@@ -1459,7 +1459,7 @@ export default function RATrackingPage() {
                                                 <button
                                                     type="button"
                                                     onClick={() => setShipMode('manual')}
-                                                    className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-lg hover:border-gray-500 hover:bg-gray-50 transition-all"
+                                                    className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-[4px] hover:border-gray-500 hover:bg-gray-50 transition-all"
                                                 >
                                                     <Edit className="w-6 h-6 text-gray-600" />
                                                     <span className="text-sm font-semibold text-gray-900">Enter Manually</span>
@@ -1489,13 +1489,13 @@ export default function RATrackingPage() {
                                                         max="99"
                                                         value={fedexBoxCount}
                                                         onChange={e => setFedexBoxCount(e.target.value)}
-                                                        className="ml-2 w-20 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+                                                        className="ml-2 w-20 px-3 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
                                                         disabled={fedexLoading || groupFedexLoading}
                                                     />
                                                 </div>
                                             </div>
 
-                                            <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-xs text-blue-800 text-center space-y-1">
+                                            <div className="bg-blue-50 border border-blue-200 rounded-[4px] p-3 text-xs text-blue-800 text-center space-y-1">
                                                 <p>Shipment: <strong>Warehouse</strong> → <strong className="capitalize">{selectedMemo.destination}</strong></p>
                                                 <p>Ensure the warehouse address and reverse distributor address are configured.</p>
                                             </div>
@@ -1544,7 +1544,7 @@ export default function RATrackingPage() {
                                                         }
                                                     }}
                                                     disabled={fedexLoading || groupFedexLoading || !fedexBoxCount}
-                                                    className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-medium rounded-lg transition-colors"
+                                                    className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-medium rounded-[4px] transition-colors"
                                                 >
                                                     {(fedexLoading || groupFedexLoading) ? (
                                                         <><Loader2 className="w-4 h-4 animate-spin" /> Creating Shipment...</>
@@ -1564,7 +1564,7 @@ export default function RATrackingPage() {
                                     {shipMode === 'manual' && (
                                         <div className="space-y-4">
                                             {selectedMemosForGroup.length > 1 && (
-                                                <p className="text-xs text-amber-800 bg-amber-50 border border-amber-100 rounded-md p-2">
+                                                <p className="text-xs text-amber-800 bg-amber-50 border border-amber-100 rounded-[4px] p-2">
                                                     Manual tracking applies to this memo only. Other checked memos are not updated on this step.
                                                 </p>
                                             )}
@@ -1572,7 +1572,7 @@ export default function RATrackingPage() {
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Outbound Tracking # *</label>
                                                 <input
                                                     type="text"
-                                                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
+                                                    className="w-full border border-gray-300 rounded-[4px] px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
                                                     placeholder="FedEx/UPS tracking number..."
                                                     value={shipTracking}
                                                     onChange={e => setShipTracking(e.target.value)}

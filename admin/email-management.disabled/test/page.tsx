@@ -84,32 +84,32 @@ export default function TestEmailPage() {
       </div>
 
       {/* Configuration Status */}
-      <div className="bg-white shadow rounded-lg p-6">
+      <div className="bg-white shadow rounded-[4px] p-6">
         <div className="flex items-center mb-4">
           <Settings className="h-5 w-5 text-gray-400 mr-2" />
           <h3 className="text-lg font-medium text-gray-900">Configuration Status</h3>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-[4px]">
             <span className="text-sm text-gray-600">Resend API</span>
             <CheckCircle className="h-5 w-5 text-green-500" />
           </div>
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-[4px]">
             <span className="text-sm text-gray-600">Email Templates</span>
             <CheckCircle className="h-5 w-5 text-green-500" />
           </div>
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-[4px]">
             <span className="text-sm text-gray-600">Database Connection</span>
             <CheckCircle className="h-5 w-5 text-green-500" />
           </div>
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-[4px]">
             <span className="text-sm text-gray-600">Environment Variables</span>
             <CheckCircle className="h-5 w-5 text-green-500" />
           </div>
         </div>
         
-        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-[4px]">
           <div className="flex items-start">
             <AlertTriangle className="h-5 w-5 text-blue-400 mt-0.5 mr-3 flex-shrink-0" />
             <div>
@@ -124,7 +124,7 @@ export default function TestEmailPage() {
       </div>
 
       {/* Test Email Form */}
-      <div className="bg-white shadow rounded-lg p-6">
+      <div className="bg-white shadow rounded-[4px] p-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Send Test Email</h3>
         
         <div className="space-y-4">
@@ -138,7 +138,7 @@ export default function TestEmailPage() {
               value={formData.to}
               onChange={(e) => handleInputChange('to', e.target.value)}
               placeholder="test@example.com"
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
+              className="w-full border border-gray-300 rounded-[4px] px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
               required
             />
             <p className="mt-1 text-xs text-gray-500">
@@ -153,7 +153,7 @@ export default function TestEmailPage() {
             </label>
             <div className="space-y-2">
               {emailTemplates.map((template) => (
-                <label key={template.id} className="flex items-start p-3 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-50">
+                <label key={template.id} className="flex items-start p-3 border border-gray-200 rounded-[4px] cursor-pointer hover:bg-gray-50">
                   <input
                     type="radio"
                     name="templateType"
@@ -199,7 +199,7 @@ export default function TestEmailPage() {
             <button
               onClick={handleSendTest}
               disabled={!formData.to.trim() || isActionLoading}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-[4px] text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isActionLoading ? (
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
@@ -214,13 +214,13 @@ export default function TestEmailPage() {
 
       {/* Success Result */}
       {lastSentResult && (
-        <div className="bg-white shadow rounded-lg p-6">
+        <div className="bg-white shadow rounded-[4px] p-6">
           <div className="flex items-center mb-4">
             <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
             <h3 className="text-lg font-medium text-gray-900">Email Sent Successfully</h3>
           </div>
           
-          <div className="bg-green-50 border border-green-200 rounded-md p-4">
+          <div className="bg-green-50 border border-green-200 rounded-[4px] p-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div>
                 <span className="font-medium text-green-800">Email ID:</span>
@@ -251,13 +251,13 @@ export default function TestEmailPage() {
 
       {/* Error Display */}
       {actionError && (
-        <div className="bg-white shadow rounded-lg p-6">
+        <div className="bg-white shadow rounded-[4px] p-6">
           <div className="flex items-center mb-4">
             <AlertTriangle className="h-5 w-5 text-red-500 mr-2" />
             <h3 className="text-lg font-medium text-gray-900">Email Send Failed</h3>
           </div>
           
-          <div className="bg-red-50 border border-red-200 rounded-md p-4">
+          <div className="bg-red-50 border border-red-200 rounded-[4px] p-4">
             <p className="text-sm text-red-700">{actionError}</p>
             <button
               onClick={() => dispatch(clearErrors())}
@@ -270,7 +270,7 @@ export default function TestEmailPage() {
       )}
 
       {/* Testing Instructions */}
-      <div className="bg-white shadow rounded-lg p-6">
+      <div className="bg-white shadow rounded-[4px] p-6">
         <div className="flex items-center mb-4">
           <Code className="h-5 w-5 text-gray-400 mr-2" />
           <h3 className="text-lg font-medium text-gray-900">Testing Instructions</h3>

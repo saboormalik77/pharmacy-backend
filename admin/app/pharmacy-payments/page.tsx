@@ -81,7 +81,7 @@ function CalculatePayoutModal({
 
   return (
     <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-lg w-full shadow-xl flex flex-col max-h-[90vh]">
+      <div className="bg-white rounded-[4px] max-w-lg w-full shadow-xl flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
           <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
@@ -400,7 +400,7 @@ function PharmacyPaymentsPageContent() {
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+      <div className="bg-white rounded-[4px] shadow-sm border border-gray-200">
         {/* Filters */}
         <div className="flex flex-col lg:flex-row gap-2 px-3 py-2 border-b border-gray-100">
           <div className="flex-1 relative">
@@ -577,7 +577,7 @@ function PharmacyPaymentsPageContent() {
           onClick={() => setViewModal(null)}
         >
           <div
-            className="bg-white rounded-lg max-w-lg w-full shadow-xl flex flex-col max-h-[90vh]"
+            className="bg-white rounded-[4px] max-w-lg w-full shadow-xl flex flex-col max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">

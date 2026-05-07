@@ -171,7 +171,7 @@ export default function ServiceRequestsPage() {
             </div>
 
             {/* Filters */}
-            <div className="bg-white rounded-lg shadow px-4 py-3 flex flex-wrap gap-3 items-center">
+            <div className="bg-white rounded-[4px] shadow px-4 py-3 flex flex-wrap gap-3 items-center">
                 <div className="flex gap-1 flex-wrap">
                     {STATUS_FILTERS.map((s) => (
                         <button
@@ -204,7 +204,7 @@ export default function ServiceRequestsPage() {
             </div>
 
             {/* List */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="bg-white rounded-[4px] shadow overflow-hidden">
                 {isLoading ? (
                     <div className="py-16 flex justify-center text-gray-400">
                         <Loader2 className="w-6 h-6 animate-spin" />
@@ -394,7 +394,7 @@ function DetailModal({
 }) {
     return (
         <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto">
+            <div className="bg-white rounded-[4px] max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto">
                 <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                     <div>
                         <h2 className="text-sm font-semibold text-gray-900">Service Request</h2>
@@ -582,7 +582,7 @@ function CompleteModal({ request, isActing, onClose, onSubmit }: {
 
     return (
         <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto">
+            <div className="bg-white rounded-[4px] max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto">
                 <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
                     <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                         <CheckSquare className="w-4 h-4 text-green-600" />

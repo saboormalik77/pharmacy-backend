@@ -161,7 +161,7 @@ export default function DebitMemosPage() {
             </div>
 
             {/* Filters */}
-            <div className="bg-white rounded-lg shadow px-3 py-2">
+            <div className="bg-white rounded-[4px] shadow px-3 py-2">
                 <div className="flex flex-wrap items-center gap-2">
                     <div className="relative flex-1 min-w-[180px]">
                         <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -191,7 +191,7 @@ export default function DebitMemosPage() {
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="bg-white rounded-[4px] shadow overflow-hidden">
                 {isLoading ? (
                     <div className="flex items-center justify-center py-14">
                         <Loader2 className="w-6 h-6 animate-spin text-primary-500" />
@@ -275,7 +275,7 @@ export default function DebitMemosPage() {
                                                     {/* Detail Cards */}
                                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                                                         {/* RA Info */}
-                                                        <div className="bg-white rounded-lg shadow-sm px-3 py-2">
+                                                        <div className="bg-white rounded-[4px] shadow-sm px-3 py-2">
                                                             <h4 className="text-[11px] font-semibold text-gray-700 mb-2 flex items-center gap-1"><FileText className="w-3.5 h-3.5" /> RA Info</h4>
                                                             {editing ? (
                                                                 <div className="space-y-2">
@@ -309,7 +309,7 @@ export default function DebitMemosPage() {
                                                         </div>
 
                                                         {/* Shipping */}
-                                                        <div className="bg-white rounded-lg shadow-sm px-3 py-2">
+                                                        <div className="bg-white rounded-[4px] shadow-sm px-3 py-2">
                                                             <h4 className="text-[11px] font-semibold text-gray-700 mb-2 flex items-center gap-1"><Truck className="w-3.5 h-3.5" /> Shipping</h4>
                                                             {editing ? (
                                                                 <div className="space-y-2">
@@ -341,7 +341,7 @@ export default function DebitMemosPage() {
                                                         </div>
 
                                                         {/* Payment */}
-                                                        <div className="bg-white rounded-lg shadow-sm px-3 py-2">
+                                                        <div className="bg-white rounded-[4px] shadow-sm px-3 py-2">
                                                             <h4 className="text-[11px] font-semibold text-gray-700 mb-2 flex items-center gap-1"><DollarSign className="w-3.5 h-3.5" /> Payment</h4>
                                                             {editing ? (
                                                                 <div className="space-y-2">
@@ -374,7 +374,7 @@ export default function DebitMemosPage() {
                                                     </div>
 
                                                     {/* Labeler + Destination Info */}
-                                                    <div className="bg-white rounded-lg shadow-sm px-3 py-2">
+                                                    <div className="bg-white rounded-[4px] shadow-sm px-3 py-2">
                                                         <h4 className="text-[11px] font-semibold text-gray-700 mb-2">Memo Details</h4>
                                                         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                                                             {[
@@ -393,7 +393,7 @@ export default function DebitMemosPage() {
                                                     </div>
 
                                                     {/* Line Items */}
-                                                    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                                                    <div className="bg-white rounded-[4px] shadow-sm overflow-hidden">
                                                         <div className="px-3 py-2 border-b border-gray-200">
                                                             <h4 className="text-[11px] font-semibold text-gray-700">Line Items ({memoItems.length})</h4>
                                                         </div>

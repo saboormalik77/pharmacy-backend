@@ -72,12 +72,12 @@ export function Navbar({ onToggleSidebar, sidebarCollapsed }: NavbarProps) {
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             const target = event.target as HTMLElement;
-            
+
             // Close notifications if click is outside
             if (showNotifications && notificationsRef.current && !notificationsRef.current.contains(target)) {
                 setShowNotifications(false);
             }
-            
+
             // Close profile if click is outside
             if (showProfile && profileRef.current && !profileRef.current.contains(target)) {
                 setShowProfile(false);
@@ -100,7 +100,7 @@ export function Navbar({ onToggleSidebar, sidebarCollapsed }: NavbarProps) {
     const formatActivityMessage = (activity: Activity): string => {
         const pharmacyName = activity.pharmacy?.pharmacyName || activity.pharmacy?.name || 'Unknown Pharmacy';
         const entityName = activity.entityName || '';
-        
+
         // Convert activity type to readable format
         const activityTypeMap: Record<string, string> = {
             'pharmacy_registered': 'registered a new pharmacy',
@@ -155,7 +155,7 @@ export function Navbar({ onToggleSidebar, sidebarCollapsed }: NavbarProps) {
             'product_updated': 'Product Updated',
         };
 
-        return titleMap[activityType] || activityType.split('_').map(word => 
+        return titleMap[activityType] || activityType.split('_').map(word =>
             word.charAt(0).toUpperCase() + word.slice(1)
         ).join(' ');
     };
@@ -191,10 +191,10 @@ export function Navbar({ onToggleSidebar, sidebarCollapsed }: NavbarProps) {
     const getProcessorNotificationTitle = (n: ProcessorNotification): string => {
         if (n.title) return n.title;
         switch (n.type) {
-            case 'service_request_new':        return 'New on-site service request';
-            case 'service_request_cancelled':  return 'Service request cancelled';
+            case 'service_request_new': return 'New on-site service request';
+            case 'service_request_cancelled': return 'Service request cancelled';
             case 'service_request_reassigned': return 'Service request reassigned';
-            default:                           return 'Notification';
+            default: return 'Notification';
         }
     };
 
@@ -242,14 +242,14 @@ export function Navbar({ onToggleSidebar, sidebarCollapsed }: NavbarProps) {
                 {/* Right side - Notifications & Profile */}
                 <div className="flex items-center gap-2 sm:gap-3 ml-auto">
                     <div className="relative" ref={notificationsRef}>
-                        <button onClick={() => { setShowNotifications(!showNotifications); setShowProfile(false); }} className="relative p-2 sm:p-2.5 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center">
+                        <button onClick={() => { setShowNotifications(!showNotifications); setShowProfile(false); }} className="relative p-2 sm:p-2.5 rounded-[4px] hover:bg-gray-100 transition-colors flex items-center justify-center">
                             <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
                             {unreadCount > 0 && (
                                 <span className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 w-4 h-4 sm:w-5 sm:h-5 bg-red-500 text-white text-[10px] sm:text-xs rounded-full flex items-center justify-center font-semibold">{unreadCount > 99 ? '99+' : unreadCount}</span>
                             )}
                         </button>
                         {showNotifications && (
-                            <div className="absolute right-0 mt-2 w-[280px] sm:w-72 md:w-80 max-w-[calc(100vw-1rem)] bg-white rounded-lg shadow-lg border border-[#e2e2e2] overflow-hidden z-50">
+                            <div className="absolute right-0 mt-2 w-[280px] sm:w-72 md:w-80 max-w-[calc(100vw-1rem)] bg-white rounded-[4px] shadow-lg border border-[#e2e2e2] overflow-hidden z-50">
                                 <div className="px-4 py-3 border-b border-[#e2e2e2]">
                                     <h3 className="font-semibold text-gray-900">Notifications</h3>
                                 </div>
@@ -303,11 +303,11 @@ export function Navbar({ onToggleSidebar, sidebarCollapsed }: NavbarProps) {
                                         notifications.map((activity) => {
                                             const isRead = activity.isRead || false;
                                             return (
-                                                <div 
-                                                    key={activity.id} 
-                                                    onClick={() => handleNotificationClick(activity)} 
+                                                <div
+                                                    key={activity.id}
+                                                    onClick={() => handleNotificationClick(activity)}
                                                     className={cn(
-                                                        'px-4 py-3 border-b border-gray-100 hover:bg-white cursor-pointer transition-colors', 
+                                                        'px-4 py-3 border-b border-gray-100 hover:bg-white cursor-pointer transition-colors',
                                                         !isRead && 'bg-blue-50'
                                                     )}
                                                 >
@@ -337,14 +337,14 @@ export function Navbar({ onToggleSidebar, sidebarCollapsed }: NavbarProps) {
                     </div>
 
                     <div className="relative" ref={profileRef}>
-                        <button onClick={() => { setShowProfile(!showProfile); setShowNotifications(false); }} className="flex items-center gap-1.5 sm:gap-2 p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                        <button onClick={() => { setShowProfile(!showProfile); setShowNotifications(false); }} className="flex items-center gap-1.5 sm:gap-2 p-1.5 sm:p-2 rounded-[4px] hover:bg-gray-100 transition-colors">
                             <div className="w-8 h-8 sm:w-9 sm:h-9 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0">
                                 <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                             </div>
                             <span className="text-xs sm:text-sm font-medium text-gray-700 hidden sm:inline">{user?.name || 'Admin User'}</span>
                         </button>
                         {showProfile && (
-                            <div className="absolute right-0 mt-2 w-48 sm:w-56 bg-white rounded-lg shadow-lg border border-[#e2e2e2] overflow-hidden z-50">
+                            <div className="absolute right-0 mt-2 w-48 sm:w-56 bg-white rounded-[4px] shadow-lg border border-[#e2e2e2] overflow-hidden z-50">
                                 <div className="px-4 py-3 border-b border-[#e2e2e2]">
                                     <p className="font-medium text-gray-900">{user?.name || 'Admin User'}</p>
                                     <p className="text-sm text-gray-500">{user?.email || 'admin@pharmadmin.com'}</p>
@@ -353,7 +353,7 @@ export function Navbar({ onToggleSidebar, sidebarCollapsed }: NavbarProps) {
                                     <button onClick={() => {
                                         router.push('/settings')
                                         setShowProfile(false)
-                                        }} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                                    }} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
                                         <Settings className="w-4 h-4" />Settings
                                     </button>
                                     <button onClick={handleLogout} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">

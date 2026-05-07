@@ -186,7 +186,7 @@ export default function DestructionPage() {
 
       <div className="grid grid-cols-5 gap-2">
         {summary.map((s) => (
-          <div key={s.label} className="bg-white rounded-lg border border-gray-200 px-3 py-2 flex items-center gap-2">
+          <div key={s.label} className="bg-white rounded-[4px] border border-gray-200 px-3 py-2 flex items-center gap-2">
             {s.icon}
             <div>
               <p className="text-[10px] text-gray-500">{s.label}</p>
@@ -196,7 +196,7 @@ export default function DestructionPage() {
         ))}
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 px-3 py-2 flex gap-2 items-center">
+      <div className="bg-white rounded-[4px] border border-gray-200 px-3 py-2 flex gap-2 items-center">
         <div className="relative flex-1">
           <Search className="w-3.5 h-3.5 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2" />
           <input
@@ -220,7 +220,7 @@ export default function DestructionPage() {
         </select>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-[4px] border border-gray-200 overflow-hidden">
         {loading ? (
           <div className="py-12 flex justify-center">
             <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
@@ -287,7 +287,7 @@ export default function DestructionPage() {
 
       {selected && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setSelected(null)}>
-          <div className="bg-white rounded-lg w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-[4px] w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
             <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
               <h2 className="font-semibold text-gray-900">Update Destruction Record</h2>
               <button className="text-gray-500 text-sm" onClick={() => setSelected(null)}>

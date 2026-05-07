@@ -284,25 +284,25 @@ export default function AdminsPage() {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-white rounded-lg shadow-md p-3">
+                <div className="bg-white rounded-[4px] shadow-md p-3">
                     <div className="flex justify-between items-center">
                         <p className="text-xs text-gray-600">Total Admins</p>
                         <p className="text-sm font-bold text-gray-900">{stats?.totalAdmins ?? 0}</p>
                     </div>
                 </div>
-                <div className="bg-white rounded-lg shadow-md p-3">
+                <div className="bg-white rounded-[4px] shadow-md p-3">
                     <div className="flex justify-between items-center">
                         <p className="text-xs text-gray-600">Active</p>
                         <p className="text-sm font-bold text-green-600">{stats?.activeAdmins ?? 0}</p>
                     </div>
                 </div>
-                <div className="bg-white rounded-lg shadow-md p-3">
+                <div className="bg-white rounded-[4px] shadow-md p-3">
                     <div className="flex justify-between items-center">
                         <p className="text-xs text-gray-600">Inactive</p>
                         <p className="text-sm font-bold text-gray-600">{stats?.inactiveAdmins ?? 0}</p>
                     </div>
                 </div>
-                <div className="bg-white rounded-lg shadow-md p-3">
+                <div className="bg-white rounded-[4px] shadow-md p-3">
                     <div className="flex justify-between items-center">
                         <p className="text-xs text-gray-600">Super Admins</p>
                         <p className="text-sm font-bold text-red-600">{stats?.superAdmins ?? stats?.byRole?.super_admin ?? 0}</p>
@@ -313,19 +313,19 @@ export default function AdminsPage() {
             {/* Additional Role Stats */}
             {stats && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-white rounded-lg shadow-md p-3">
+                    <div className="bg-white rounded-[4px] shadow-md p-3">
                         <div className="flex justify-between items-center">
                             <p className="text-xs text-gray-600">Managers</p>
                             <p className="text-sm font-bold text-yellow-600">{stats.managers ?? stats.byRole?.manager ?? 0}</p>
                         </div>
                     </div>
-                    <div className="bg-white rounded-lg shadow-md p-3">
+                    <div className="bg-white rounded-[4px] shadow-md p-3">
                         <div className="flex justify-between items-center">
                             <p className="text-xs text-gray-600">Reviewers</p>
                             <p className="text-sm font-bold text-blue-600">{stats.reviewers ?? stats.byRole?.reviewer ?? 0}</p>
                         </div>
                     </div>
-                    <div className="bg-white rounded-lg shadow-md p-3">
+                    <div className="bg-white rounded-[4px] shadow-md p-3">
                         <div className="flex justify-between items-center">
                             <p className="text-xs text-gray-600">Support</p>
                             <p className="text-sm font-bold text-gray-600">{stats.support ?? stats.byRole?.support ?? 0}</p>
@@ -334,7 +334,7 @@ export default function AdminsPage() {
                 </div>
             )}
 
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-[4px] shadow-md p-6">
                 <div className="flex flex-col sm:flex-row gap-4 mb-6">
                     <div className="flex-1 relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -343,13 +343,13 @@ export default function AdminsPage() {
                             placeholder="Search by name or email"
                             value={searchTerm}
                             onChange={(e) => handleSearchChange(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                         />
                     </div>
                     <select
                         value={roleFilter}
                         onChange={(e) => handleRoleFilterChange(e.target.value as typeof roleFilter)}
-                        className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className="px-4 py-2 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                     >
                         <option value="all">All Roles</option>
                         <option value="super_admin">Super Admin</option>
@@ -360,7 +360,7 @@ export default function AdminsPage() {
                     <select
                         value={statusFilter}
                         onChange={(e) => handleStatusFilterChange(e.target.value as typeof statusFilter)}
-                        className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className="px-4 py-2 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                     >
                         <option value="all">All Status</option>
                         <option value="active">Active</option>
@@ -497,7 +497,7 @@ export default function AdminsPage() {
                                     <button
                                         onClick={() => handlePageChange(currentPage - 1)}
                                         disabled={!pagination.hasPreviousPage || pagination.page <= 1}
-                                        className="p-2 sm:p-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                                        className="p-2 sm:p-2 border border-gray-300 rounded-[4px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
                                     >
                                         <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                                     </button>
@@ -507,7 +507,7 @@ export default function AdminsPage() {
                                     <button
                                         onClick={() => handlePageChange(currentPage + 1)}
                                         disabled={!pagination.hasNextPage || pagination.page >= pagination.totalPages}
-                                        className="p-2 sm:p-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                                        className="p-2 sm:p-2 border border-gray-300 rounded-[4px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
                                     >
                                         <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
                                     </button>
@@ -525,7 +525,7 @@ export default function AdminsPage() {
                     onClick={() => setViewModal(null)}
                 >
                     <div 
-                        className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-xl"
+                        className="bg-white rounded-[4px] max-w-2xl w-full max-h-[90vh] flex flex-col shadow-xl"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 flex-shrink-0">
@@ -599,7 +599,7 @@ export default function AdminsPage() {
                     onClick={() => setAddModal(false)}
                 >
                     <div 
-                        className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-xl"
+                        className="bg-white rounded-[4px] max-w-2xl w-full max-h-[90vh] flex flex-col shadow-xl"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50 flex-shrink-0">
@@ -616,7 +616,7 @@ export default function AdminsPage() {
                                         type="text"
                                         value={newAdmin.name}
                                         onChange={(e) => setNewAdmin({ ...newAdmin, name: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         placeholder="Enter full name"
                                     />
                                 </div>
@@ -626,7 +626,7 @@ export default function AdminsPage() {
                                         type="email"
                                         value={newAdmin.email}
                                         onChange={(e) => setNewAdmin({ ...newAdmin, email: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         placeholder="email@example.com"
                                     />
                                 </div>
@@ -636,7 +636,7 @@ export default function AdminsPage() {
                                         type="password"
                                         value={newAdmin.password}
                                         onChange={(e) => setNewAdmin({ ...newAdmin, password: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         placeholder="Enter secure password"
                                     />
                                 </div>
@@ -645,7 +645,7 @@ export default function AdminsPage() {
                                     <select
                                         value={newAdmin.role}
                                         onChange={(e) => setNewAdmin({ ...newAdmin, role: e.target.value as AdminCreatePayload['role'] })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     >
                                         <option value="super_admin">Super Admin</option>
                                         <option value="manager">Manager</option>
@@ -658,7 +658,7 @@ export default function AdminsPage() {
                                     {newAdmin.role === 'super_admin' ? (
                                         <p className="text-xs text-green-600 font-medium py-1">Full Access (all permissions)</p>
                                     ) : (
-                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 mt-1 p-2 border border-gray-200 rounded-md max-h-48 overflow-y-auto">
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 mt-1 p-2 border border-gray-200 rounded-[4px] max-h-48 overflow-y-auto">
                                             {ASSIGNABLE_PERMISSIONS.map(({ key, label }) => (
                                                 <label key={key} className="flex items-center gap-1.5 text-xs cursor-pointer hover:bg-gray-50 rounded px-1 py-0.5">
                                                     <input
@@ -705,7 +705,7 @@ export default function AdminsPage() {
                     onClick={() => { setEditModal(null); setEditFormData({}); }}
                 >
                     <div 
-                        className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-xl"
+                        className="bg-white rounded-[4px] max-w-2xl w-full max-h-[90vh] flex flex-col shadow-xl"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50 flex-shrink-0">
@@ -722,7 +722,7 @@ export default function AdminsPage() {
                                         type="text"
                                         value={editFormData.name || ''}
                                         onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         placeholder="Enter full name"
                                     />
                                 </div>
@@ -732,7 +732,7 @@ export default function AdminsPage() {
                                         type="email"
                                         value={editFormData.email || ''}
                                         onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         placeholder="email@example.com"
                                     />
                                 </div>
@@ -741,7 +741,7 @@ export default function AdminsPage() {
                                     <select
                                         value={editFormData.role || 'manager'}
                                         onChange={(e) => setEditFormData({ ...editFormData, role: e.target.value as AdminUpdatePayload['role'] })}
-                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     >
                                         <option value="super_admin">Super Admin</option>
                                         <option value="manager">Manager</option>
@@ -754,7 +754,7 @@ export default function AdminsPage() {
                                     {editFormData.role === 'super_admin' ? (
                                         <p className="text-xs text-green-600 font-medium py-1">Full Access (all permissions)</p>
                                     ) : (
-                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 mt-1 p-2 border border-gray-200 rounded-md max-h-48 overflow-y-auto">
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 mt-1 p-2 border border-gray-200 rounded-[4px] max-h-48 overflow-y-auto">
                                             {ASSIGNABLE_PERMISSIONS.map(({ key, label }) => (
                                                 <label key={key} className="flex items-center gap-1.5 text-xs cursor-pointer hover:bg-gray-50 rounded px-1 py-0.5">
                                                     <input
@@ -812,7 +812,7 @@ export default function AdminsPage() {
                     onClick={() => setDeleteModal(null)}
                 >
                     <div 
-                        className="bg-white rounded-lg max-w-md w-full"
+                        className="bg-white rounded-[4px] max-w-md w-full"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -827,7 +827,7 @@ export default function AdminsPage() {
                                 This action cannot be undone.
                             </p>
                             {!canDeleteAdmin(deleteModal) && (
-                                <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-3">
+                                <div className="mt-4 bg-red-50 border border-red-200 rounded-[4px] p-3">
                                     <p className="text-sm text-red-700">
                                         <strong>Warning:</strong> {
                                             user && user.id === deleteModal.id 

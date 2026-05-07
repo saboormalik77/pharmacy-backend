@@ -550,19 +550,19 @@ export default function BatchDetailPage() {
 
             {/* Batch Info Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                <div className="bg-white rounded-lg shadow px-3 py-2">
+                <div className="bg-white rounded-[4px] shadow px-3 py-2">
                     <p className="text-[10px] text-gray-500 uppercase font-medium">Returns</p>
                     <p className="text-lg font-bold mt-0.5">{batch.totalReturns}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow px-3 py-2">
+                <div className="bg-white rounded-[4px] shadow px-3 py-2">
                     <p className="text-[10px] text-gray-500 uppercase font-medium">Debit Memos</p>
                     <p className="text-lg font-bold mt-0.5">{batch.totalDebitMemos}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow px-3 py-2">
+                <div className="bg-white rounded-[4px] shadow px-3 py-2">
                     <p className="text-[10px] text-gray-500 uppercase font-medium">Total Value</p>
                     <p className="text-lg font-bold mt-0.5 text-green-700">{formatCurrency(batch.totalValue)}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow px-3 py-2">
+                <div className="bg-white rounded-[4px] shadow px-3 py-2">
                     <p className="text-[10px] text-gray-500 uppercase font-medium">Cardinal Status</p>
                     <div className="mt-0.5">
                         {batch.cardinalSubmittedAt ? (
@@ -580,7 +580,7 @@ export default function BatchDetailPage() {
             </div>
 
             {/* Batch Metadata */}
-            <div className="bg-white rounded-lg shadow px-4 py-3">
+            <div className="bg-white rounded-[4px] shadow px-4 py-3">
                 <h2 className="text-xs font-semibold text-gray-900 mb-2">Batch Details</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div>
@@ -612,7 +612,7 @@ export default function BatchDetailPage() {
             </div>
 
             {/* Returns in Batch */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="bg-white rounded-[4px] shadow overflow-hidden">
                 <button
                     onClick={() => setReturnsExpanded(e => !e)}
                     className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 transition-colors"
@@ -665,7 +665,7 @@ export default function BatchDetailPage() {
             {/* ── Workflow Stepper Modal ──────────────────────────────── */}
             {showStepper && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
                         {/* Modal header */}
                         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
                             <div>
@@ -721,7 +721,7 @@ export default function BatchDetailPage() {
                                 return (
                                     <div
                                         key={step.key}
-                                        className={`rounded-lg border-2 p-3.5 transition-all ${
+                                        className={`rounded-[4px] border-2 p-3.5 transition-all ${
                                             done
                                                 ? 'border-green-200 bg-green-50'
                                                 : isActive
@@ -731,7 +731,7 @@ export default function BatchDetailPage() {
                                     >
                                         <div className="flex items-start gap-3">
                                             {/* Step icon */}
-                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                                            <div className={`w-8 h-8 rounded-[4px] flex items-center justify-center flex-shrink-0 ${
                                                 done
                                                     ? 'bg-green-500'
                                                     : isActive
@@ -760,7 +760,7 @@ export default function BatchDetailPage() {
                                                             <button
                                                                 onClick={handleGenerateCardinal}
                                                                 disabled={isActionLoading}
-                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors font-medium"
+                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors font-medium"
                                                             >
                                                                 {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
                                                                 Generate Cardinal Invoice
@@ -772,7 +772,7 @@ export default function BatchDetailPage() {
                                                             <div className="space-y-2">
                                                                 <div
                                                                     onClick={() => fileInputRef.current?.click()}
-                                                                    className="flex items-center gap-2 px-3 py-2 border-2 border-dashed border-blue-300 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors"
+                                                                    className="flex items-center gap-2 px-3 py-2 border-2 border-dashed border-blue-300 rounded-[4px] cursor-pointer hover:bg-blue-50 transition-colors"
                                                                 >
                                                                     <Upload className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
                                                                     <span className="text-[11px] text-blue-600 truncate">
@@ -788,7 +788,7 @@ export default function BatchDetailPage() {
                                                                 <button
                                                                     onClick={handleSendCardinal}
                                                                     disabled={isActionLoading || !cardinalFile}
-                                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 transition-colors font-medium"
+                                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 transition-colors font-medium"
                                                                 >
                                                                     {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                                                                     Send Cardinal Invoice
@@ -808,7 +808,7 @@ export default function BatchDetailPage() {
                                                                         <button
                                                                             onClick={handleCreateDebitMemos}
                                                                             disabled={isActionLoading}
-                                                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50 transition-colors font-medium"
+                                                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50 transition-colors font-medium"
                                                                         >
                                                                             {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
                                                                             Create Debit Memos
@@ -838,7 +838,7 @@ export default function BatchDetailPage() {
                                                                             <button
                                                                                 onClick={handleConfirmDebitMemos}
                                                                                 disabled={isActionLoading}
-                                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50 transition-colors font-medium"
+                                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50 transition-colors font-medium"
                                                                             >
                                                                                 {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
                                                                                 Confirm &amp; Next Step
@@ -945,7 +945,7 @@ export default function BatchDetailPage() {
                                                                                 onClick={handleCompleteRAStep}
                                                                                 disabled={isActionLoading || !anyRaSent}
                                                                                 title={!anyRaSent ? 'Send at least one RA request before completing this step' : undefined}
-                                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                                                                             >
                                                                                 {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
                                                                                 Complete Step
@@ -954,7 +954,7 @@ export default function BatchDetailPage() {
                                                                                 <button
                                                                                     onClick={handleSendAllRA}
                                                                                     disabled={isSendingAllRA || !!raSendingGroup}
-                                                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-green-700 text-white hover:bg-green-800 disabled:opacity-50 transition-colors font-medium"
+                                                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-green-700 text-white hover:bg-green-800 disabled:opacity-50 transition-colors font-medium"
                                                                                 >
                                                                                     {isSendingAllRA ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                                                                                     Send All RA
@@ -1012,7 +1012,7 @@ export default function BatchDetailPage() {
             {/* ── Assign Returns Modal ──────────────────────────────── */}
             {showAssign && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowAssign(false)}>
-                    <div className="bg-white rounded-lg shadow-xl max-w-xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] shadow-xl max-w-xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
                         <div className="px-4 py-3 border-b border-gray-200">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-sm font-bold text-gray-900">Assign Returns to Batch</h2>
@@ -1040,7 +1040,7 @@ export default function BatchDetailPage() {
                                         return (
                                             <label
                                                 key={rt.id}
-                                                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border-2 cursor-pointer transition-colors ${
+                                                className={`flex items-center gap-2.5 px-3 py-2 rounded-[4px] border-2 cursor-pointer transition-colors ${
                                                     selected ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-gray-300'
                                                 }`}
                                             >
@@ -1079,7 +1079,7 @@ export default function BatchDetailPage() {
             {/* ── Close Batch Confirm ──────────────────────────────── */}
             {showClose && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowClose(false)}>
-                    <div className="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 p-4" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] shadow-xl max-w-sm w-full mx-4 p-4" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center gap-2.5 mb-3">
                             <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
                                 <Lock className="w-4 h-4 text-yellow-600" />
@@ -1089,7 +1089,7 @@ export default function BatchDetailPage() {
                                 <p className="text-xs text-gray-500">This will generate debit memos and cannot be undone.</p>
                             </div>
                         </div>
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2.5 text-xs text-yellow-800 mb-3">
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-[4px] p-2.5 text-xs text-yellow-800 mb-3">
                             <p className="font-medium mb-1">This action will:</p>
                             <ul className="list-disc ml-4 space-y-0.5">
                                 <li>Lock the batch from further changes</li>
@@ -1111,7 +1111,7 @@ export default function BatchDetailPage() {
             {/* ── Submit Cardinal Confirm ──────────────────────────── */}
             {showSubmit && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowSubmit(false)}>
-                    <div className="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 p-4" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] shadow-xl max-w-sm w-full mx-4 p-4" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center gap-2.5 mb-3">
                             <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
                                 <Send className="w-4 h-4 text-green-600" />
@@ -1138,7 +1138,7 @@ export default function BatchDetailPage() {
             {/* ── Delete Batch Confirm ──────────────────────────── */}
             {showDelete && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowDelete(false)}>
-                    <div className="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 p-4" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] shadow-xl max-w-sm w-full mx-4 p-4" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center gap-2.5 mb-3">
                             <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
                                 <Trash2 className="w-4 h-4 text-red-600" />
@@ -1166,7 +1166,7 @@ export default function BatchDetailPage() {
             {/* ── Unassign Returns Modal ──────────────────────────────── */}
             {showUnassign && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowUnassign(false)}>
-                    <div className="bg-white rounded-lg shadow-xl max-w-xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] shadow-xl max-w-xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
                         <div className="px-4 py-3 border-b border-gray-200">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-sm font-bold text-gray-900">Unassign Returns from Batch</h2>
