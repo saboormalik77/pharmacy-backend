@@ -52,6 +52,9 @@ export interface SearchParams {
 
 export interface PriceResolution {
   found: boolean;
+  /** Average ask price computed from real payment history (FCR-56). Preferred over currentPrice when present. */
+  avgAskPrice: number | null;
+  /** Manually-entered price from the NDC pricing book. Used as fallback when avgAskPrice is absent. */
   currentPrice: number | null;
   estimatedStorePrice: number | null;
   priceSource: string | null;

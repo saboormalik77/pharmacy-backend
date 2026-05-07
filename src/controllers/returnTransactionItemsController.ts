@@ -665,16 +665,25 @@ export const scanBarcodeHandler = catchAsync(
           console.error('Pricing intelligence lookup failed (non-blocking):', intErr.message);
         }
 
-        if (ndcPricing.found && ndcPricing.currentPrice && ndcPricing.currentPrice > 0) {
+        // FCR-56d: prefer avg_ask_price (from payment history) over the
+        // manually-entered current_price as the canonical "ask" price.
+        const bookAvgAsk = (ndcPricing.avgAskPrice ?? 0) > 0 ? ndcPricing.avgAskPrice! : null;
+        const bookCurrent = (ndcPricing.currentPrice ?? 0) > 0 ? ndcPricing.currentPrice! : null;
+        const bookPrice = bookAvgAsk ?? bookCurrent;
+        const bookSource = bookAvgAsk
+          ? 'Historical Avg Ask'
+          : ndcPricing.priceSource || 'NDC Pricing Book';
+
+        if (ndcPricing.found && bookPrice != null) {
           // Also fetch return_reports quantities even when NDC pricing book has a price
           const pricingResult = await getPricingForSingleNDC(resolvedNdc);
           pricing = {
-            suggestedPrice: ndcPricing.currentPrice,
-            bestFullPrice: ndcPricing.currentPrice,
-            bestPartialPrice: ndcPricing.currentPrice,
+            suggestedPrice: bookPrice,
+            bestFullPrice: bookPrice,
+            bestPartialPrice: bookPrice,
             fullQuantity: pricingResult?.totalFullQuantity || null,
             partialQuantity: pricingResult?.totalPartialQuantity || null,
-            priceSource: ndcPricing.priceSource || 'NDC Pricing Book',
+            priceSource: bookSource,
             distributorPricing: null,
             estimatedStorePrice: ndcPricing.estimatedStorePrice,
             closeOutDestination: ndcPricing.closeOutDestination,

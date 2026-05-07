@@ -82,7 +82,7 @@ Important:
 - If no RA number is found, set ra_number to null
 - If the email is not related to Return Authorization at all, set ra_number to null
 - Be precise - only extract what is clearly an RA/RMA number
-- Do NOT confuse debit memo numbers (DM-XXXX) with RA numbers
+- Do NOT confuse debit memo numbers (formats: DM-XXXX-XXXX or DELMMYYxxxNNNNN) with RA numbers
 
 Respond ONLY with valid JSON (no markdown, no code fences, no explanation):
 {
@@ -179,9 +179,13 @@ async function extractRAFromEmail(
 // ── Memo Number Extraction from Subject ──────────────────────
 
 function extractMemoNumber(subject: string): string | null {
-  // Match DM-XXXX-XXXX pattern (our debit memo format)
-  const match = subject.match(/DM-\d{4}-\d{4}/i);
-  return match ? match[0].toUpperCase() : null;
+  // New format: DEL + MMYY (4 digits) + 3 alpha chars + labeler_id (3-10 digits)
+  // e.g. DEL0127AAA29300
+  const newFmt = subject.match(/\bDEL\d{4}[A-Z]{3}\d{3,10}\b/i);
+  if (newFmt) return newFmt[0].toUpperCase();
+  // Legacy format: DM-XXXX-XXXX
+  const oldFmt = subject.match(/DM-\d{4}-\d{4}/i);
+  return oldFmt ? oldFmt[0].toUpperCase() : null;
 }
 
 // ── Strip HTML to plain text ─────────────────────────────────
@@ -382,7 +386,9 @@ async function processEmailsWithTimeout(maxEmails = 10, markAsRead = true): Prom
           if (!result.memoNumber) {
             // Try to find memo number in the email body
             const bodyText = parsed.text || (parsed.html ? htmlToText(parsed.html) : '');
-            const bodyMatch = bodyText.match(/DM-\d{4}-\d{4}/i);
+            const bodyNewFmt = bodyText.match(/\bDEL\d{4}[A-Z]{3}\d{3,10}\b/i);
+            const bodyOldFmt = bodyText.match(/DM-\d{4}-\d{4}/i);
+            const bodyMatch = bodyNewFmt ?? bodyOldFmt;
             result.memoNumber = bodyMatch ? bodyMatch[0].toUpperCase() : null;
           }
 

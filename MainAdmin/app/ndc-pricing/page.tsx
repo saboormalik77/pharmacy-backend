@@ -144,10 +144,15 @@ export default function NDCPricingPage() {
             try {
                 const response = await apiClient.get<{
                     status: string;
-                    data: { found: boolean; currentPrice?: number; priceSource?: string };
+                    data: { found: boolean; avgAskPrice?: number | null; currentPrice?: number | null; priceSource?: string };
                 }>(`/admin/ndc-pricing/resolve/${encodeURIComponent(ndc)}`, true);
-                if (response.data.found && response.data.currentPrice) {
-                    setSuggestedPrice({ price: response.data.currentPrice, source: response.data.priceSource || 'NDC Pricing Book', loading: false });
+                // Prefer avgAskPrice (historical data) when it is a real positive number;
+                // fall back to currentPrice (manual entry) otherwise.
+                const avg = (response.data.avgAskPrice ?? 0) > 0 ? response.data.avgAskPrice! : null;
+                const resolvedPrice = avg ?? ((response.data.currentPrice ?? 0) > 0 ? response.data.currentPrice! : null);
+                if (response.data.found && resolvedPrice) {
+                    const source = avg ? 'Historical Avg Ask' : (response.data.priceSource || 'NDC Pricing Book');
+                    setSuggestedPrice({ price: resolvedPrice, source, loading: false });
                     return;
                 }
             } catch { /* fallthrough */ }

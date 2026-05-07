@@ -60,6 +60,9 @@ const buildProductNameFromItem = (item: VerificationV2Item): string => {
 
 interface ResolvedPrice {
     found: boolean;
+    /** Historical average ask price from payment history (FCR-56). Preferred over currentPrice. */
+    avgAskPrice?: number | null;
+    /** Manually-entered price from the NDC Pricing Book. */
     currentPrice: number | null;
     productName: string | null;
     priceSource: string | null;
@@ -117,10 +120,16 @@ export default function VerifyItemPage() {
     const [savingPrice, setSavingPrice] = useState(false);
 
     const hasNdc = !!verifyingItem?.ndc?.trim();
-    const priceAvailable =
-        !!resolvedPrice?.found &&
-        resolvedPrice.currentPrice != null &&
-        resolvedPrice.currentPrice > 0;
+    // A price is considered available if either the historical avg ask price
+    // (preferred, from payment history) or the manually-entered current price
+    // is a real positive number.
+    const resolvedEffectivePrice =
+        (resolvedPrice?.avgAskPrice ?? 0) > 0
+            ? resolvedPrice!.avgAskPrice!
+            : (resolvedPrice?.currentPrice ?? 0) > 0
+                ? resolvedPrice!.currentPrice!
+                : null;
+    const priceAvailable = !!resolvedPrice?.found && resolvedEffectivePrice != null;
     // Verification is gated on pricing only when the item has a usable NDC.
     const priceGateActive = hasNdc && priceLookupChecked && !priceAvailable;
 
@@ -282,17 +291,27 @@ export default function VerifyItemPage() {
                 const data = response?.data || null;
                 setResolvedPrice(data);
 
-                // Pre-fill the price-entry form so the admin only types the price.
-                if (!data?.found || !data.currentPrice || data.currentPrice <= 0) {
+                // Pre-fill the price-entry form so the admin only needs to
+                // confirm or adjust. Prefer avgAskPrice (historical data) over
+                // currentPrice when currentPrice is absent.
+                const prefillPrice =
+                    (data?.currentPrice ?? 0) > 0
+                        ? data!.currentPrice!
+                        : (data?.avgAskPrice ?? 0) > 0
+                            ? data!.avgAskPrice!
+                            : undefined;
+                if (!data?.found || !prefillPrice) {
                     setPriceForm({
                         ndc,
                         productName:
                             data?.productName ||
                             buildProductNameFromItem(verifyingItem),
-                        currentPrice: undefined,
-                        estimatedStorePrice: undefined,
+                        currentPrice: prefillPrice,
+                        estimatedStorePrice: prefillPrice
+                            ? estimatedStoreFromCurrent(prefillPrice)
+                            : undefined,
                         lastReimbursement: undefined,
-                        priceSource: '',
+                        priceSource: (data?.avgAskPrice ?? 0) > 0 ? 'Historical Avg Ask' : '',
                         closeOutDestination: '',
                     });
                 }
@@ -301,6 +320,7 @@ export default function VerifyItemPage() {
                     console.error('NDC price lookup failed:', err);
                     setResolvedPrice({
                         found: false,
+                        avgAskPrice: null,
                         currentPrice: null,
                         productName: null,
                         priceSource: null,
@@ -362,16 +382,24 @@ export default function VerifyItemPage() {
 
         const rec = result.payload;
 
-        // Back-propagate the new price onto this return-transaction item so
-        // downstream surfaces (close-out batch, debit memos, totals, etc.)
-        // see the value instead of $0. Uses the dedicated /price endpoint
-        // because the standard PATCH is blocked for "core fields" on a
-        // locked/received return.
-        if (verifyingItem && rec.currentPrice != null && rec.currentPrice > 0) {
+        // FCR-56d: prefer the freshly-computed avg_ask_price as the canonical
+        // standard_price for this item. The SQL upsert_ndc_pricing now seeds
+        // ndc_payment_history and calls recompute, so rec.avgAskPrice may
+        // already be updated. Fall back to currentPrice if avg is absent.
+        const effectiveStandardPrice =
+            (rec.avgAskPrice ?? 0) > 0
+                ? rec.avgAskPrice!
+                : (rec.currentPrice ?? 0) > 0
+                    ? rec.currentPrice!
+                    : null;
+
+        // Back-propagate onto this return-transaction item so downstream
+        // surfaces (close-out batch, debit memos, totals) see the value.
+        if (verifyingItem && effectiveStandardPrice != null && effectiveStandardPrice > 0) {
             const updateResult = await dispatch(updateTransactionItemPrice({
                 transactionId: returnId,
                 itemId: verifyingItem.id,
-                standardPrice: rec.currentPrice,
+                standardPrice: effectiveStandardPrice,
             }));
             if (!updateTransactionItemPrice.fulfilled.match(updateResult)) {
                 setSavingPrice(false);
@@ -387,6 +415,7 @@ export default function VerifyItemPage() {
         setSavingPrice(false);
         setResolvedPrice({
             found: true,
+            avgAskPrice: rec.avgAskPrice ?? null,
             currentPrice: rec.currentPrice,
             productName: rec.productName,
             priceSource: rec.priceSource,
@@ -545,10 +574,6 @@ export default function VerifyItemPage() {
                     : 'destruction';
         showToast(`Item verified and routed to ${dispositionLabel}`);
         
-        // After save, return to the return's verification page and open batching.
-        try {
-            sessionStorage.setItem(`openBatchModal:${returnId}`, '1');
-        } catch { /* ignore */ }
         router.push(`/warehouse/verification/${returnId}`);
     };
 
@@ -687,9 +712,11 @@ export default function VerifyItemPage() {
                                                 </p>
                                                 <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 text-xs">
                                                     <div className="flex justify-between sm:block">
-                                                        <span className="text-gray-600">Current Price:</span>
+                                                        <span className="text-gray-600">
+                                                            {(resolvedPrice.avgAskPrice ?? 0) > 0 ? 'Avg Ask Price:' : 'Current Price:'}
+                                                        </span>
                                                         <span className="ml-2 font-mono font-bold text-green-900">
-                                                            ${resolvedPrice.currentPrice!.toFixed(2)}
+                                                            ${resolvedEffectivePrice!.toFixed(2)}
                                                         </span>
                                                     </div>
                                                     {resolvedPrice.estimatedStorePrice != null && (
