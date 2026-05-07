@@ -2,11 +2,17 @@
 
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { NewDashboardUI } from '@/components/dashboard/NewDashboardUI';
+import { usePharmacyContextStore } from '@/lib/store/pharmacyContextStore';
+import { authService } from '@/lib/api/services/authService';
 
 export default function DashboardPage() {
+  const pharmacyNameFromContext = usePharmacyContextStore((s) => s.pharmacyName);
+  const pharmacyNameFromAuth = authService.getCurrentUser()?.pharmacy_name;
+  const pharmacyName = pharmacyNameFromContext || pharmacyNameFromAuth || '';
+
   return (
     <DashboardLayout>
-      <NewDashboardUI />
+      <NewDashboardUI pharmacyName={pharmacyName} />
     </DashboardLayout>
   );
 }

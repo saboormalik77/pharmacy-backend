@@ -132,7 +132,7 @@ function CreditTypeCard({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export function NewDashboardUI({ pharmacyName = "PRIME PHARMACY INC" }: { pharmacyName?: string }) {
+export function NewDashboardUI({ pharmacyName = "" }: { pharmacyName?: string }) {
   const router = useRouter();
 
   // Return stats (top cards)
