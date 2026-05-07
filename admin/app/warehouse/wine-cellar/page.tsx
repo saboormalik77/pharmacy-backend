@@ -174,27 +174,27 @@ export default function WineCellarPage() {
             {/* Stats Cards */}
             {stats && (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                    <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                    <div className="bg-white rounded-[4px] shadow px-4 py-3 border border-gray-100">
                         <p className="text-xs font-medium text-gray-500 mb-1">Total Items</p>
                         <p className="text-lg font-bold text-gray-900">{stats.totalItems}</p>
                     </div>
-                    <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                    <div className="bg-white rounded-[4px] shadow px-4 py-3 border border-gray-100">
                         <p className="text-xs font-medium text-gray-500 mb-1">Shelved</p>
                         <p className="text-lg font-bold text-blue-700">{stats.shelved}</p>
                     </div>
-                    <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                    <div className="bg-white rounded-[4px] shadow px-4 py-3 border border-gray-100">
                         <p className="text-xs font-medium text-gray-500 mb-1">Ready to Return</p>
                         <p className="text-lg font-bold text-yellow-700">{stats.readyToReturn}</p>
                     </div>
-                    <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                    <div className="bg-white rounded-[4px] shadow px-4 py-3 border border-gray-100">
                         <p className="text-xs font-medium text-gray-500 mb-1">Returned</p>
                         <p className="text-lg font-bold text-green-700">{stats.returned}</p>
                     </div>
-                    <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                    <div className="bg-white rounded-[4px] shadow px-4 py-3 border border-gray-100">
                         <p className="text-xs font-medium text-gray-500 mb-1">Destroyed</p>
                         <p className="text-lg font-bold text-red-700">{stats.destroyed}</p>
                     </div>
-                    <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                    <div className="bg-white rounded-[4px] shadow px-4 py-3 border border-gray-100">
                         <p className="text-xs font-medium text-gray-500 mb-1">Total Value</p>
                         <p className="text-lg font-bold text-purple-700">{formatCurrency(stats.totalValue)}</p>
                     </div>
@@ -202,7 +202,7 @@ export default function WineCellarPage() {
             )}
 
             {/* Filters */}
-            <div className="bg-white rounded-lg shadow-md p-4">
+            <div className="bg-white rounded-[4px] shadow-md p-4">
                 <div className="flex flex-col sm:flex-row gap-3">
                     <div className="relative flex-1">
                         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -211,13 +211,13 @@ export default function WineCellarPage() {
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                             placeholder="Search by NDC, product name, manufacturer, lot, barcode..."
-                            className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                         />
                     </div>
                     <select
                         value={statusFilter}
                         onChange={e => setStatusFilter(e.target.value)}
-                        className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className="px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                     >
                         <option value="">All Statuses</option>
                         <option value="shelved">Shelved</option>
@@ -229,7 +229,7 @@ export default function WineCellarPage() {
                         type="month"
                         value={expectedMonth}
                         onChange={e => setExpectedMonth(e.target.value)}
-                        className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className="px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                         title="Filter by expected return month"
                     />
                     {(statusFilter || expectedMonth || search) && (
@@ -241,7 +241,7 @@ export default function WineCellarPage() {
             </div>
 
             {/* Items Table */}
-            <div className="bg-white rounded-lg shadow-md">
+            <div className="bg-white rounded-[4px] shadow-md">
                 {isLoading ? (
                     <div className="flex justify-center py-16">
                         <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
@@ -261,19 +261,19 @@ export default function WineCellarPage() {
                         {/* Summary Bar */}
                         {summary && (
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 border-b border-gray-200">
-                                <div className="bg-gray-50 rounded-lg p-2.5 text-center">
+                                <div className="bg-gray-50 rounded-[4px] p-2.5 text-center">
                                     <p className="text-xs text-gray-500">Showing</p>
                                     <p className="text-sm font-bold text-gray-900">{summary.totalItems}</p>
                                 </div>
-                                <div className="bg-blue-50 rounded-lg p-2.5 text-center">
+                                <div className="bg-blue-50 rounded-[4px] p-2.5 text-center">
                                     <p className="text-xs text-blue-600">Shelved</p>
                                     <p className="text-sm font-bold text-blue-800">{summary.totalShelved}</p>
                                 </div>
-                                <div className="bg-yellow-50 rounded-lg p-2.5 text-center">
+                                <div className="bg-yellow-50 rounded-[4px] p-2.5 text-center">
                                     <p className="text-xs text-yellow-600">Ready</p>
                                     <p className="text-sm font-bold text-yellow-800">{summary.totalReady}</p>
                                 </div>
-                                <div className="bg-purple-50 rounded-lg p-2.5 text-center">
+                                <div className="bg-purple-50 rounded-[4px] p-2.5 text-center">
                                     <p className="text-xs text-purple-600">Value</p>
                                     <p className="text-sm font-bold text-purple-800">{formatCurrency(summary.totalValue)}</p>
                                 </div>
@@ -389,14 +389,14 @@ export default function WineCellarPage() {
             {/* ── Edit Modal ───────────────────────────────── */}
             {editModal && (
                 <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setEditModal(null)}>
-                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] max-w-lg w-full shadow-xl" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-lg font-semibold text-gray-900">Edit Wine Cellar Item</h2>
                             <button onClick={() => setEditModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
                         </div>
                         <div className="p-5 space-y-4">
                             {/* Item info */}
-                            <div className="bg-gray-50 rounded-lg p-3 text-xs space-y-1">
+                            <div className="bg-gray-50 rounded-[4px] p-3 text-xs space-y-1">
                                 <p className="font-medium text-gray-900">{editModal.productName || editModal.ndc || 'Unknown item'}</p>
                                 <p className="text-gray-500">
                                     NDC: <span className="font-mono">{editModal.ndc || '—'}</span> | Lot: {editModal.lotNumber || '—'} | Exp: {editModal.expirationDate ? formatDate(editModal.expirationDate) : '—'}
@@ -407,32 +407,32 @@ export default function WineCellarPage() {
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Quantity</label>
-                                    <input type="number" min="1" value={editForm.quantity} onChange={e => setEditForm({ ...editForm, quantity: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    <input type="number" min="1" value={editForm.quantity} onChange={e => setEditForm({ ...editForm, quantity: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Price ($)</label>
-                                    <input type="number" step="0.01" min="0" value={editForm.standardPrice} onChange={e => setEditForm({ ...editForm, standardPrice: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                    <input type="number" step="0.01" min="0" value={editForm.standardPrice} onChange={e => setEditForm({ ...editForm, standardPrice: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
                                 </div>
                             </div>
 
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">Physical Location</label>
-                                <input type="text" value={editForm.physicalLocation} onChange={e => setEditForm({ ...editForm, physicalLocation: e.target.value })} placeholder="e.g. Shelf A3, Bin 12" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                <input type="text" value={editForm.physicalLocation} onChange={e => setEditForm({ ...editForm, physicalLocation: e.target.value })} placeholder="e.g. Shelf A3, Bin 12" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
                             </div>
 
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">Baggie Barcode</label>
-                                <input type="text" value={editForm.baggieBarcode} onChange={e => setEditForm({ ...editForm, baggieBarcode: e.target.value })} placeholder="Scan or enter barcode" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                <input type="text" value={editForm.baggieBarcode} onChange={e => setEditForm({ ...editForm, baggieBarcode: e.target.value })} placeholder="Scan or enter barcode" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
                             </div>
 
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">Expected Returnable Date</label>
-                                <input type="date" value={editForm.expectedReturnableDate} onChange={e => setEditForm({ ...editForm, expectedReturnableDate: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                <input type="date" value={editForm.expectedReturnableDate} onChange={e => setEditForm({ ...editForm, expectedReturnableDate: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
                             </div>
 
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
-                                <textarea value={editForm.notes} onChange={e => setEditForm({ ...editForm, notes: e.target.value })} rows={2} placeholder="Optional notes" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none" />
+                                <textarea value={editForm.notes} onChange={e => setEditForm({ ...editForm, notes: e.target.value })} rows={2} placeholder="Optional notes" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none" />
                             </div>
                         </div>
                         <div className="flex justify-end gap-2 p-5 border-t border-gray-200 bg-gray-50">

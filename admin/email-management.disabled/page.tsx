@@ -121,7 +121,7 @@ export default function EmailLogsPage() {
 
   if (logsError) {
     return (
-      <div className="rounded-md bg-red-50 p-4">
+      <div className="rounded-[4px] bg-red-50 p-4">
         <div className="flex">
           <AlertTriangle className="h-5 w-5 text-red-400" />
           <div className="ml-3">
@@ -152,14 +152,14 @@ export default function EmailLogsPage() {
               placeholder="Search emails..."
               value={filters.search}
               onChange={(e) => handleFilterChange('search', e.target.value)}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="pl-10 pr-4 py-2 border border-gray-300 rounded-[4px] focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           {/* Filter Toggle */}
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-[4px] text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
           >
             <Filter className="w-4 h-4 mr-2" />
             Filters
@@ -180,7 +180,7 @@ export default function EmailLogsPage() {
         <button
           onClick={handleRefresh}
           disabled={logsLoading}
-          className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+          className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-[4px] text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
         >
           <RefreshCw className={`w-4 h-4 mr-2 ${logsLoading ? 'animate-spin' : ''}`} />
           Refresh
@@ -189,7 +189,7 @@ export default function EmailLogsPage() {
 
       {/* Filters Panel */}
       {showFilters && (
-        <div className="bg-gray-50 p-4 rounded-md space-y-4">
+        <div className="bg-gray-50 p-4 rounded-[4px] space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Status Filter */}
             <div>
@@ -197,7 +197,7 @@ export default function EmailLogsPage() {
               <select
                 value={filters.status}
                 onChange={(e) => handleFilterChange('status', e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                className="w-full border border-gray-300 rounded-[4px] px-3 py-2 text-sm"
               >
                 <option value="">All statuses</option>
                 <option value="sent">Sent</option>
@@ -214,7 +214,7 @@ export default function EmailLogsPage() {
               <select
                 value={filters.emailType}
                 onChange={(e) => handleFilterChange('emailType', e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                className="w-full border border-gray-300 rounded-[4px] px-3 py-2 text-sm"
               >
                 <option value="">All types</option>
                 <option value="ra-request">RA Request</option>
@@ -230,7 +230,7 @@ export default function EmailLogsPage() {
                 type="date"
                 value={filters.dateFrom}
                 onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                className="w-full border border-gray-300 rounded-[4px] px-3 py-2 text-sm"
               />
             </div>
 
@@ -241,7 +241,7 @@ export default function EmailLogsPage() {
                 type="date"
                 value={filters.dateTo}
                 onChange={(e) => handleFilterChange('dateTo', e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                className="w-full border border-gray-300 rounded-[4px] px-3 py-2 text-sm"
               />
             </div>
           </div>
@@ -249,7 +249,7 @@ export default function EmailLogsPage() {
       )}
 
       {/* Email Logs Table */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
+      <div className="bg-white shadow overflow-hidden sm:rounded-[4px]">
         {logsLoading ? (
           <div className="p-8 text-center">
             <RefreshCw className="w-8 h-8 animate-spin mx-auto text-gray-400" />
@@ -351,14 +351,14 @@ export default function EmailLogsPage() {
                   <button
                     onClick={() => handlePageChange(logsPagination.page - 1)}
                     disabled={logsPagination.page <= 1}
-                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-[4px] text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
                   >
                     Previous
                   </button>
                   <button
                     onClick={() => handlePageChange(logsPagination.page + 1)}
                     disabled={logsPagination.page >= logsPagination.totalPages}
-                    className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                    className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-[4px] text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
                   >
                     Next
                   </button>
@@ -378,7 +378,7 @@ export default function EmailLogsPage() {
                     </p>
                   </div>
                   <div>
-                    <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                    <nav className="relative z-0 inline-flex rounded-[4px] shadow-sm -space-x-px">
                       <button
                         onClick={() => handlePageChange(logsPagination.page - 1)}
                         disabled={logsPagination.page <= 1}
@@ -424,7 +424,7 @@ export default function EmailLogsPage() {
       {/* Email Details Modal */}
       {selectedLog && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+          <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-[4px] bg-white">
             <div className="mt-3">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-medium text-gray-900">Email Details</h3>
@@ -522,7 +522,7 @@ export default function EmailLogsPage() {
                     <button
                       onClick={() => handleRetry(selectedLog.id)}
                       disabled={isActionLoading}
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-[4px] text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
                     >
                       <RotateCcw className="w-4 h-4 mr-2" />
                       Retry Email
@@ -533,13 +533,13 @@ export default function EmailLogsPage() {
                         placeholder="Resolution notes (optional)"
                         value={resolveNotes}
                         onChange={(e) => setResolveNotes(e.target.value)}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                        className="w-full border border-gray-300 rounded-[4px] px-3 py-2 text-sm"
                         rows={2}
                       />
                       <button
                         onClick={() => handleResolve(selectedLog.id)}
                         disabled={isActionLoading}
-                        className="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:opacity-50"
+                        className="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-[4px] text-white bg-green-600 hover:bg-green-700 disabled:opacity-50"
                       >
                         <CheckCircle className="w-4 h-4 mr-2" />
                         Mark Resolved
@@ -550,7 +550,7 @@ export default function EmailLogsPage() {
                 
                 <button
                   onClick={() => setSelectedLog(null)}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-[4px] text-gray-700 bg-white hover:bg-gray-50"
                 >
                   Close
                 </button>
@@ -562,7 +562,7 @@ export default function EmailLogsPage() {
 
       {/* Action Error */}
       {actionError && (
-        <div className="fixed bottom-4 right-4 bg-red-50 border border-red-200 rounded-md p-4 max-w-md">
+        <div className="fixed bottom-4 right-4 bg-red-50 border border-red-200 rounded-[4px] p-4 max-w-md">
           <div className="flex">
             <AlertTriangle className="h-5 w-5 text-red-400" />
             <div className="ml-3">

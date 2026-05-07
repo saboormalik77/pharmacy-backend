@@ -42,10 +42,9 @@ export function ReturnsValueTrendChart() {
                 <Line
                     type="monotone"
                     dataKey="value"
-                    stroke="#4CAF50"
-                    strokeWidth={3}
-                    name="Returns Value"
-                    dot={{ fill: '#4CAF50', r: 4 }}
+stroke="#516057"
+
+                    dot={{ fill: '#516057', r: 4 }}
                     activeDot={{ r: 6 }}
                 />
             </LineChart>

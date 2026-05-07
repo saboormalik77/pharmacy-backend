@@ -392,9 +392,9 @@ export default function VerificationSessionPage() {
                     <Link href="/warehouse/verification" className="inline-flex items-center gap-1 text-xs text-primary-600 hover:underline">
                         <ArrowLeft className="w-3.5 h-3.5" /> Back to list
                     </Link>
-                    <div className="bg-white rounded-lg shadow p-6 space-y-4">
+                    <div className="bg-white rounded-[4px] shadow p-6 space-y-4">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-primary-50">
+                            <div className="p-2 rounded-[4px] bg-primary-50">
                                 <BoxIcon className="w-5 h-5 text-primary-600" />
                             </div>
                             <div>
@@ -414,10 +414,10 @@ export default function VerificationSessionPage() {
                             placeholder="Enter box count..."
                             value={boxCount}
                             onChange={e => setBoxCount(e.target.value)}
-                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500"
                         />
                         {boxResult && !boxResult.boxCountMatch && (
-                            <div className="p-3 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-start gap-2">
+                            <div className="p-3 rounded-[4px] bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-start gap-2">
                                 <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                                 <span>Expected {boxResult.expectedBoxes} boxes, you received {boxResult.receivedBoxes} — a discrepancy has been automatically recorded.</span>
                             </div>
@@ -425,7 +425,7 @@ export default function VerificationSessionPage() {
                         <button
                             disabled={isActionLoading || !boxCount}
                             onClick={handleStartVerification}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md disabled:opacity-50 transition"
+                            className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-[4px] disabled:opacity-50 transition"
                         >
                             {isActionLoading && <Loader2 className="w-4 h-4 animate-spin" />}
                             Start Verification
@@ -442,9 +442,9 @@ export default function VerificationSessionPage() {
             <PermissionGate permission="warehouse">
                 <ToastContainer toasts={toasts} onClose={removeToast} />
                 <div className="max-w-2xl mx-auto mt-6 space-y-4">
-                    <div className="bg-white rounded-lg shadow p-6 space-y-4">
+                    <div className="bg-white rounded-[4px] shadow p-6 space-y-4">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-green-50">
+                            <div className="p-2 rounded-[4px] bg-green-50">
                                 <CheckCircle className="w-6 h-6 text-green-600" />
                             </div>
                             <div>
@@ -453,15 +453,15 @@ export default function VerificationSessionPage() {
                             </div>
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
+                            <div className="bg-white rounded-[4px] shadow px-4 py-3 border border-gray-100">
                                 <p className="text-xs font-medium text-gray-500 mb-1">Total Items</p>
                                 <p className="text-lg font-bold text-gray-900">{completedSummary.totalItems ?? 0}</p>
                             </div>
-                            <div className="bg-white rounded-lg shadow px-4 py-3 border border-emerald-100">
+                            <div className="bg-white rounded-[4px] shadow px-4 py-3 border border-emerald-100">
                                 <p className="text-xs font-medium text-emerald-700 mb-1">Returnable</p>
                                 <p className="text-lg font-bold text-emerald-700">{completedSummary.correctItems ?? 0}</p>
                             </div>
-                            <div className="bg-white rounded-lg shadow px-4 py-3 border border-rose-100">
+                            <div className="bg-white rounded-[4px] shadow px-4 py-3 border border-rose-100">
                                 <p className="text-xs font-medium text-rose-700 mb-1">Non-Returnable</p>
                                 <p className="text-lg font-bold text-rose-700">{(completedSummary.damagedItems ?? 0) + (completedSummary.missingItems ?? 0) + (completedSummary.wrongItems ?? 0)}</p>
                             </div>
@@ -476,7 +476,7 @@ export default function VerificationSessionPage() {
                                 { label: 'Wrong Items', value: completedSummary.wrongItems, color: 'text-orange-700' },
                                 { label: 'Surplus', value: completedSummary.surplusItems, color: 'text-blue-700' },
                             ]).map(s => (
-                                <div key={s.label} className="p-3 rounded-md border border-gray-200 bg-gray-50">
+                                <div key={s.label} className="p-3 rounded-[4px] border border-gray-200 bg-gray-50">
                                     <p className="text-[10px] text-gray-500">{s.label}</p>
                                     <p className={`text-xl font-bold ${s.color}`}>{s.value ?? 0}</p>
                                 </div>
@@ -484,26 +484,26 @@ export default function VerificationSessionPage() {
                         </div>
                         */}
                         {completedSummary.correctItemsValue != null && (
-                            <div className="bg-white rounded-lg shadow px-4 py-3 border border-green-100">
+                            <div className="bg-white rounded-[4px] shadow px-4 py-3 border border-green-100">
                                 <p className="text-xs font-medium text-green-700 mb-1">Correct Items Value</p>
                                 <p className="text-lg font-bold text-green-900">{formatCurrency(completedSummary.correctItemsValue)}</p>
                             </div>
                         )}
                         {(completedSummary.excludedFromBatch ?? 0) > 0 && (
-                            <div className="p-3 rounded-md bg-blue-50 border border-blue-200 text-blue-800 text-xs flex items-start gap-2">
+                            <div className="p-3 rounded-[4px] bg-blue-50 border border-blue-200 text-blue-800 text-xs flex items-start gap-2">
                                 <Package className="w-4 h-4 flex-shrink-0 mt-0.5" />
                                 <span>{completedSummary.excludedFromBatch} non-correct item(s) have been excluded from batching and will not appear in debit memos.</span>
                             </div>
                         )}
                         {completedSummary.openDiscrepancies > 0 && (
-                            <div className="p-3 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center gap-2">
+                            <div className="p-3 rounded-[4px] bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center gap-2">
                                 <AlertTriangle className="w-4 h-4" />
                                 {completedSummary.openDiscrepancies} open discrepancies remain.
                             </div>
                         )}
                         <button 
                             onClick={handleOpenBatchModal}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md mt-2 transition"
+                            className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-[4px] mt-2 transition"
                         >
                             <Layers className="w-4 h-4" /> Create Batch
                         </button>
@@ -513,7 +513,7 @@ export default function VerificationSessionPage() {
                 {/* ── Batch Assignment Modal ──────────────────── */}
                 {batchModal && (
                     <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setBatchModal(false)}>
-                        <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                        <div className="bg-white rounded-[4px] max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
                             <div className="flex items-center justify-between p-5 border-b bg-gray-50">
                                 <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                                     <Layers className="w-5 h-5 text-primary-600" />
@@ -536,13 +536,13 @@ export default function VerificationSessionPage() {
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={() => setCreateNewBatch(false)}
-                                                className={`flex-1 py-2 text-sm rounded-lg border font-medium transition-colors ${!createNewBatch ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                                                className={`flex-1 py-2 text-sm rounded-[4px] border font-medium transition-colors ${!createNewBatch ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
                                             >
                                                 Existing Batch
                                             </button>
                                             <button
                                                 onClick={() => setCreateNewBatch(true)}
-                                                className={`flex-1 py-2 text-sm rounded-lg border font-medium transition-colors ${createNewBatch ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                                                className={`flex-1 py-2 text-sm rounded-[4px] border font-medium transition-colors ${createNewBatch ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
                                             >
                                                 <PlusCircle className="w-4 h-4 inline mr-1" />Create New
                                             </button>
@@ -552,14 +552,14 @@ export default function VerificationSessionPage() {
                                             <div>
                                                 <label className="block text-xs font-medium text-gray-700 mb-1">Select Open Batch</label>
                                                 {openBatches.length === 0 ? (
-                                                    <div className="text-sm text-gray-500 bg-gray-50 rounded-lg p-3 text-center">
+                                                    <div className="text-sm text-gray-500 bg-gray-50 rounded-[4px] p-3 text-center">
                                                         No open batches found. Switch to "Create New" to start one.
                                                     </div>
                                                 ) : (
                                                     <select
                                                         value={selectedBatchId}
                                                         onChange={e => setSelectedBatchId(e.target.value)}
-                                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                                     >
                                                         <option value="">— Choose a batch —</option>
                                                         {openBatches.map(b => (
@@ -579,14 +579,14 @@ export default function VerificationSessionPage() {
                                                             <Loader2 className="w-4 h-4 animate-spin text-primary-600" /> Loading months…
                                                         </div>
                                                     ) : availableNewBatchMonths.length === 0 ? (
-                                                        <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+                                                        <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-[4px] px-3 py-2">
                                                             No open month slots in the allowed range. Create a batch from Warehouse → Monthly Batches or free a month by deleting an unused open batch.
                                                         </p>
                                                     ) : (
                                                         <select
                                                             value={newBatchMonth}
                                                             onChange={e => setNewBatchMonth(e.target.value)}
-                                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
                                                         >
                                                             {availableNewBatchMonths.map(o => (
                                                                 <option key={o.value} value={o.value}>{o.label}</option>
@@ -601,7 +601,7 @@ export default function VerificationSessionPage() {
                                                         value={newBatchName}
                                                         onChange={e => setNewBatchName(e.target.value)}
                                                         placeholder="e.g. March 2026 Batch"
-                                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500"
                                                     />
                                                 </div>
                                             </div>
@@ -677,7 +677,7 @@ export default function VerificationSessionPage() {
                         <ChevronLeft className="w-3 h-3" /> Back to Warehouse
                     </Link>
                     <div className="flex items-center gap-3">
-                        <Link href="/warehouse/verification" className="p-1.5 rounded-md hover:bg-gray-100 transition">
+                        <Link href="/warehouse/verification" className="p-1.5 rounded-[4px] hover:bg-gray-100 transition">
                             <ArrowLeft className="w-4 h-4 text-gray-500" />
                         </Link>
                         <div>
@@ -691,7 +691,7 @@ export default function VerificationSessionPage() {
                 </div>
 
                 {/* Progress */}
-                <div className="bg-white rounded-lg shadow p-3">
+                <div className="bg-white rounded-[4px] shadow p-3">
                     <div className="flex items-center gap-3">
                         <BarChart3 className="w-4 h-4 text-primary-600 flex-shrink-0" />
                         <div className="flex-1">
@@ -714,7 +714,7 @@ export default function VerificationSessionPage() {
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+                <div className="flex gap-1 bg-gray-100 rounded-[4px] p-1">
                     {([
                         { key: 'items' as ActiveTab, label: 'Items', count: counts.totalItems },
                         { key: 'surplus' as ActiveTab, label: 'Surplus', count: surplus.length },
@@ -723,7 +723,7 @@ export default function VerificationSessionPage() {
                         <button
                             key={tab.key}
                             onClick={() => setActiveTab(tab.key)}
-                            className={`px-3 py-1.5 text-[11px] font-medium rounded-md transition-all ${
+                            className={`px-3 py-1.5 text-[11px] font-medium rounded-[4px] transition-all ${
                                 activeTab === tab.key
                                     ? 'bg-white text-primary-700 shadow-sm'
                                     : 'text-gray-500 hover:text-gray-700'
@@ -736,7 +736,7 @@ export default function VerificationSessionPage() {
 
                 {/* ITEMS TAB */}
                 {activeTab === 'items' && (
-                    <div className="bg-white rounded-lg shadow overflow-hidden">
+                    <div className="bg-white rounded-[4px] shadow overflow-hidden">
                         {items.length === 0 ? (
                             <div className="text-center py-12 text-gray-400 text-xs">No items found</div>
                         ) : (
@@ -776,7 +776,7 @@ export default function VerificationSessionPage() {
                                                     <button
                                                         type="button"
                                                         onClick={() => openVerifyItem(item)}
-                                                        className="px-2 py-1 text-[10px] font-medium rounded-md transition text-white bg-primary-600 hover:bg-primary-700"
+                                                        className="px-2 py-1 text-[10px] font-medium rounded-[4px] transition text-white bg-primary-600 hover:bg-primary-700"
                                                     >
                                                         Verify
                                                     </button>
@@ -796,7 +796,7 @@ export default function VerificationSessionPage() {
                 {/* VERIFY ITEM MODAL */}
                 {verifyingItem && (
                     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-                        <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-5 space-y-4">
+                        <div className="bg-white rounded-[4px] shadow-xl w-full max-w-md p-5 space-y-4">
                             <h3 className="font-bold text-sm text-gray-900">Verify Item</h3>
                             <p className="text-[11px] text-gray-500">{verifyingItem.proprietaryName || verifyingItem.genericName}</p>
 
@@ -813,7 +813,7 @@ export default function VerificationSessionPage() {
                                             key={opt.value}
                                             type="button"
                                             onClick={() => { setVerifyStatus(opt.value); if (opt.value === 'missing') setVerifyActualQty('0'); }}
-                                            className={`flex items-center gap-2 p-2.5 rounded-md border-2 text-xs font-medium transition-all ${verifyStatus === opt.value ? opt.active : opt.base}`}
+                                            className={`flex items-center gap-2 p-2.5 rounded-[4px] border-2 text-xs font-medium transition-all ${verifyStatus === opt.value ? opt.active : opt.base}`}
                                         >
                                             <Icon className="w-4 h-4" /> {opt.label}
                                         </button>
@@ -825,7 +825,7 @@ export default function VerificationSessionPage() {
                                 <div>
                                     <label className="text-[10px] font-medium text-gray-700">Actual Quantity (if different)</label>
                                     <input type="number" min="0" value={verifyActualQty} onChange={e => setVerifyActualQty(e.target.value)}
-                                        className="mt-1 w-full px-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                        className="mt-1 w-full px-3 py-1.5 text-sm border border-gray-200 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500" />
                                 </div>
                             )} */}
 
@@ -833,14 +833,14 @@ export default function VerificationSessionPage() {
                                 <div>
                                     <label className="text-[10px] font-medium text-gray-700">Condition Notes</label>
                                     <textarea rows={2} placeholder="Describe the issue..." value={verifyNotes} onChange={e => setVerifyNotes(e.target.value)}
-                                        className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none" />
+                                        className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none" />
                                 </div>
                             )}
 
                             {/* FCR-52: Required reason when item is marked non-returnable
                                 (damaged / missing / wrong_item). */}
                             {STATUSES_FLIP_NON_RETURNABLE.has(verifyStatus) && (
-                                <div className="p-3 rounded-md border border-red-200 bg-red-50">
+                                <div className="p-3 rounded-[4px] border border-red-200 bg-red-50">
                                     <label className="block text-[11px] font-semibold text-red-800 mb-1">
                                         Non-Returnable Reason <span className="text-red-600">*</span>
                                     </label>
@@ -850,7 +850,7 @@ export default function VerificationSessionPage() {
                                     <select
                                         value={verifyNonReturnableReason}
                                         onChange={e => setVerifyNonReturnableReason(e.target.value)}
-                                        className="w-full px-2 py-1.5 text-xs border border-red-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-red-500"
+                                        className="w-full px-2 py-1.5 text-xs border border-red-300 rounded-[4px] bg-white focus:outline-none focus:ring-1 focus:ring-red-500"
                                     >
                                         <option value="">— Select a reason —</option>
                                         {NON_RETURNABLE_REASONS.map(r => (
@@ -861,7 +861,7 @@ export default function VerificationSessionPage() {
                             )}
 
                             <div className="flex gap-2 justify-end">
-                                <button onClick={() => setVerifyingItem(null)} className="px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-md hover:bg-gray-50">Cancel</button>
+                                <button onClick={() => setVerifyingItem(null)} className="px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-[4px] hover:bg-gray-50">Cancel</button>
                                 <button
                                     disabled={
                                         !verifyStatus
@@ -869,7 +869,7 @@ export default function VerificationSessionPage() {
                                         || (STATUSES_FLIP_NON_RETURNABLE.has(verifyStatus) && !isValidNonReturnableReason(verifyNonReturnableReason))
                                     }
                                     onClick={handleVerifyItem}
-                                    className="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md disabled:opacity-50 flex items-center gap-1 transition"
+                                    className="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-[4px] disabled:opacity-50 flex items-center gap-1 transition"
                                 >
                                     {isActionLoading && <Loader2 className="w-3 h-3 animate-spin" />} Save
                                 </button>
@@ -884,14 +884,14 @@ export default function VerificationSessionPage() {
                         <div className="flex justify-end">
                             <button
                                 onClick={() => setShowSurplusForm(!showSurplusForm)}
-                                className="inline-flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md transition"
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-[4px] transition"
                             >
                                 <Plus className="w-3 h-3" /> Add Surplus Item
                             </button>
                         </div>
 
                         {showSurplusForm && (
-                            <div className="bg-white rounded-lg shadow p-4 space-y-3">
+                            <div className="bg-white rounded-[4px] shadow p-4 space-y-3">
                                 <div className="flex items-center justify-between">
                                     <h3 className="font-bold text-xs text-gray-900">Add Surplus Item</h3>
                                     {/* Entry mode toggle */}
@@ -918,7 +918,7 @@ export default function VerificationSessionPage() {
 
                                 {/* Scanner panel */}
                                 {surplusEntryMode === 'scanner' && (
-                                    <div className="space-y-2 p-3 rounded-md bg-gray-50 border border-gray-200">
+                                    <div className="space-y-2 p-3 rounded-[4px] bg-gray-50 border border-gray-200">
                                         <div className="flex items-center justify-between flex-wrap gap-2">
                                             <span className="text-[11px] font-medium text-gray-700">Scan product barcode to pre-fill fields</span>
                                             <div className="flex gap-1">
@@ -947,7 +947,7 @@ export default function VerificationSessionPage() {
                                                 type="button"
                                                 onClick={() => setSurplusCameraOpen(true)}
                                                 disabled={isSurplusScanning}
-                                                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-dashed border-primary-300 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors disabled:opacity-50"
+                                                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-dashed border-primary-300 bg-primary-50 hover:bg-primary-100 rounded-[4px] transition-colors disabled:opacity-50"
                                             >
                                                 {isSurplusScanning ? (
                                                     <>
@@ -974,7 +974,7 @@ export default function VerificationSessionPage() {
                                                         onChange={e => setSurplusScanInput(e.target.value)}
                                                         onKeyDown={handleSurplusScanKeyDown}
                                                         placeholder="Scan barcode or type and press Enter…"
-                                                        className="w-full pl-8 pr-3 py-1.5 text-xs border-2 border-primary-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 bg-primary-50 font-mono"
+                                                        className="w-full pl-8 pr-3 py-1.5 text-xs border-2 border-primary-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500 bg-primary-50 font-mono"
                                                         disabled={isSurplusScanning}
                                                         autoFocus
                                                     />
@@ -983,7 +983,7 @@ export default function VerificationSessionPage() {
                                                     type="button"
                                                     disabled={isSurplusScanning || !surplusScanInput.trim()}
                                                     onClick={() => void handleSurplusScan(surplusScanInput.trim())}
-                                                    className="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md disabled:opacity-50 flex items-center gap-1 transition"
+                                                    className="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-[4px] disabled:opacity-50 flex items-center gap-1 transition"
                                                 >
                                                     {isSurplusScanning ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Scan'}
                                                 </button>
@@ -1020,7 +1020,7 @@ export default function VerificationSessionPage() {
                                                 placeholder={f.placeholder || undefined}
                                                 value={surplusForm[f.key as keyof typeof surplusForm]}
                                                 onChange={e => setSurplusForm(prev => ({ ...prev, [f.key]: e.target.value }))}
-                                                className="mt-1 w-full px-3 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                                className="mt-1 w-full px-3 py-1.5 text-xs border border-gray-200 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500"
                                             />
                                         </div>
                                     ))}
@@ -1029,7 +1029,7 @@ export default function VerificationSessionPage() {
                                         <select
                                             value={surplusForm.condition}
                                             onChange={e => setSurplusForm(prev => ({ ...prev, condition: e.target.value }))}
-                                            className="mt-1 w-full px-3 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                            className="mt-1 w-full px-3 py-1.5 text-xs border border-gray-200 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500"
                                         >
                                             <option value="good">Good</option>
                                             <option value="damaged">Damaged</option>
@@ -1040,14 +1040,14 @@ export default function VerificationSessionPage() {
                                 <div>
                                     <label className="text-[10px] font-medium text-gray-700">Notes</label>
                                     <textarea rows={2} value={surplusForm.notes} onChange={e => setSurplusForm(prev => ({ ...prev, notes: e.target.value }))} placeholder="Any additional notes..."
-                                        className="mt-1 w-full px-3 py-2 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none" />
+                                        className="mt-1 w-full px-3 py-2 text-xs border border-gray-200 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none" />
                                 </div>
                                 <div className="flex gap-2 justify-end">
-                                    <button onClick={() => setShowSurplusForm(false)} className="px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-md hover:bg-gray-50">Cancel</button>
+                                    <button onClick={() => setShowSurplusForm(false)} className="px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-[4px] hover:bg-gray-50">Cancel</button>
                                     <button
                                         disabled={isActionLoading}
                                         onClick={handleAddSurplus}
-                                        className="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md disabled:opacity-50 flex items-center gap-1 transition"
+                                        className="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-[4px] disabled:opacity-50 flex items-center gap-1 transition"
                                     >
                                         {isActionLoading && <Loader2 className="w-3 h-3 animate-spin" />} Add Surplus
                                     </button>
@@ -1055,7 +1055,7 @@ export default function VerificationSessionPage() {
                             </div>
                         )}
 
-                        <div className="bg-white rounded-lg shadow overflow-hidden">
+                        <div className="bg-white rounded-[4px] shadow overflow-hidden">
                             {surplus.length === 0 ? (
                                 <div className="text-center py-12 text-gray-400 text-xs">No surplus items recorded yet</div>
                             ) : (
@@ -1096,7 +1096,7 @@ export default function VerificationSessionPage() {
 
                 {/* DISCREPANCIES TAB */}
                 {activeTab === 'discrepancies' && (
-                    <div className="bg-white rounded-lg shadow overflow-hidden">
+                    <div className="bg-white rounded-[4px] shadow overflow-hidden">
                         {discrepancies.filter(d => d.status === 'open').length === 0 ? (
                             <div className="text-center py-12 text-gray-400 text-xs">No open discrepancies</div>
                         ) : (
@@ -1126,7 +1126,7 @@ export default function VerificationSessionPage() {
                                                                 placeholder="Resolution notes..."
                                                                 value={resolveNotes}
                                                                 onChange={e => setResolveNotes(e.target.value)}
-                                                                className="w-full px-2 py-1 text-[10px] border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none"
+                                                                className="w-full px-2 py-1 text-[10px] border border-gray-200 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none"
                                                             />
                                                             <div className="flex gap-1">
                                                                 <button disabled={isActionLoading} onClick={() => handleResolve(d.id, 'resolved')}
@@ -1139,7 +1139,7 @@ export default function VerificationSessionPage() {
                                                         </div>
                                                     ) : (
                                                         <button onClick={() => setResolvingId(d.id)}
-                                                            className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-amber-700 border border-amber-200 rounded-md hover:bg-amber-50 transition">
+                                                            className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-amber-700 border border-amber-200 rounded-[4px] hover:bg-amber-50 transition">
                                                             <ShieldAlert className="w-3 h-3" /> Resolve
                                                         </button>
                                                     )}
@@ -1155,14 +1155,14 @@ export default function VerificationSessionPage() {
 
                 {/* COMPLETE VERIFICATION — hidden when return already finalized */}
                 {verificationAlreadyCompleted ? (
-                    <div className="bg-white rounded-lg shadow p-4 border border-green-200">
+                    <div className="bg-white rounded-[4px] shadow p-4 border border-green-200">
                         <p className="text-[11px] text-green-800 flex items-center gap-2">
                             <CheckCircle className="w-4 h-4 flex-shrink-0" />
                             Verification for this return is already completed.
                         </p>
                     </div>
                 ) : (
-                    <div className="bg-white rounded-lg shadow p-4">
+                    <div className="bg-white rounded-[4px] shadow p-4">
                         {showCompleteConfirm ? (
                             <div className="space-y-3">
                                 <h3 className="font-bold text-xs text-gray-900">Confirm Complete Verification</h3>
@@ -1174,14 +1174,14 @@ export default function VerificationSessionPage() {
                                 <div>
                                     <label className="text-[10px] font-medium text-gray-700">Completion Notes (optional)</label>
                                     <textarea rows={2} value={completeNotes} onChange={e => setCompleteNotes(e.target.value)} placeholder="Summary notes..."
-                                        className="mt-1 w-full px-3 py-2 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none" />
+                                        className="mt-1 w-full px-3 py-2 text-xs border border-gray-200 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none" />
                                 </div>
                                 <div className="flex gap-2 justify-end">
-                                    <button onClick={() => setShowCompleteConfirm(false)} className="px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-md hover:bg-gray-50">Cancel</button>
+                                    <button onClick={() => setShowCompleteConfirm(false)} className="px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-[4px] hover:bg-gray-50">Cancel</button>
                                     <button
                                         disabled={isActionLoading}
                                         onClick={handleCompleteVerification}
-                                        className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-md disabled:opacity-50 flex items-center gap-1 transition"
+                                        className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-[4px] disabled:opacity-50 flex items-center gap-1 transition"
                                     >
                                         {isActionLoading && <Loader2 className="w-3 h-3 animate-spin" />} Complete Verification
                                     </button>
@@ -1195,7 +1195,7 @@ export default function VerificationSessionPage() {
                                 <button
                                     disabled={counts.unverified > 0}
                                     onClick={() => setShowCompleteConfirm(true)}
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-md disabled:opacity-40 transition"
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-[4px] disabled:opacity-40 transition"
                                 >
                                     <ClipboardCheck className="w-3.5 h-3.5" /> Complete Verification
                                 </button>
@@ -1207,7 +1207,7 @@ export default function VerificationSessionPage() {
                 {/* ── Batch Assignment Modal ──────────────────── */}
                 {batchModal && (
                     <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setBatchModal(false)}>
-                        <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                        <div className="bg-white rounded-[4px] max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
                             <div className="flex items-center justify-between p-5 border-b bg-gray-50">
                                 <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                                     <Layers className="w-5 h-5 text-primary-600" />
@@ -1231,13 +1231,13 @@ export default function VerificationSessionPage() {
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={() => setCreateNewBatch(false)}
-                                                className={`flex-1 py-2 text-sm rounded-lg border font-medium transition-colors ${!createNewBatch ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                                                className={`flex-1 py-2 text-sm rounded-[4px] border font-medium transition-colors ${!createNewBatch ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
                                             >
                                                 Existing Batch
                                             </button>
                                             <button
                                                 onClick={() => setCreateNewBatch(true)}
-                                                className={`flex-1 py-2 text-sm rounded-lg border font-medium transition-colors ${createNewBatch ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                                                className={`flex-1 py-2 text-sm rounded-[4px] border font-medium transition-colors ${createNewBatch ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
                                             >
                                                 <PlusCircle className="w-4 h-4 inline mr-1" />Create New
                                             </button>
@@ -1247,14 +1247,14 @@ export default function VerificationSessionPage() {
                                             <div>
                                                 <label className="block text-xs font-medium text-gray-700 mb-1">Select Open Batch</label>
                                                 {openBatches.length === 0 ? (
-                                                    <div className="text-sm text-gray-500 bg-gray-50 rounded-lg p-3 text-center">
+                                                    <div className="text-sm text-gray-500 bg-gray-50 rounded-[4px] p-3 text-center">
                                                         No open batches found. Switch to "Create New" to start one.
                                                     </div>
                                                 ) : (
                                                     <select
                                                         value={selectedBatchId}
                                                         onChange={e => setSelectedBatchId(e.target.value)}
-                                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                                     >
                                                         <option value="">— Choose a batch —</option>
                                                         {openBatches.map(b => (
@@ -1274,14 +1274,14 @@ export default function VerificationSessionPage() {
                                                             <Loader2 className="w-4 h-4 animate-spin text-primary-600" /> Loading months…
                                                         </div>
                                                     ) : availableNewBatchMonths.length === 0 ? (
-                                                        <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+                                                        <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-[4px] px-3 py-2">
                                                             No open month slots in the allowed range. Create a batch from Warehouse → Monthly Batches or free a month by deleting an unused open batch.
                                                         </p>
                                                     ) : (
                                                         <select
                                                             value={newBatchMonth}
                                                             onChange={e => setNewBatchMonth(e.target.value)}
-                                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
                                                         >
                                                             {availableNewBatchMonths.map(o => (
                                                                 <option key={o.value} value={o.value}>{o.label}</option>
@@ -1296,7 +1296,7 @@ export default function VerificationSessionPage() {
                                                         value={newBatchName}
                                                         onChange={e => setNewBatchName(e.target.value)}
                                                         placeholder="e.g. March 2026 Batch"
-                                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500"
                                                     />
                                                 </div>
                                             </div>

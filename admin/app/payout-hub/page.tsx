@@ -62,12 +62,12 @@ export default function PayoutHubPage() {
                         <Link
                             key={section.href}
                             href={section.href}
-                            className={`group flex flex-col gap-3 p-4 bg-white border ${section.border} rounded-lg hover:shadow-md transition-all duration-150`}
+                            className={`group flex flex-col gap-3 p-4 bg-white border ${section.border} rounded-[4px] hover:shadow-md transition-all duration-150`}
                         >
                             {/* Icon + label + badge */}
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2.5">
-                                    <div className={`p-2 rounded-lg ${section.bg}`}>
+                                    <div className={`p-2 rounded-[4px] ${section.bg}`}>
                                         <Icon className={`w-4 h-4 ${section.color}`} />
                                     </div>
                                     <span className="text-sm font-semibold text-gray-800">{section.label}</span>

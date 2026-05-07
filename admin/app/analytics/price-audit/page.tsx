@@ -39,13 +39,13 @@ export default function PriceAuditPage() {
             <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="bg-white rounded-lg shadow-md p-4 animate-pulse">
+                        <div key={i} className="bg-white rounded-[4px] shadow-md p-4 animate-pulse">
                             <div className="h-3 bg-gray-200 rounded w-24 mb-2" />
                             <div className="h-6 bg-gray-200 rounded w-32" />
                         </div>
                     ))}
                 </div>
-                <div className="bg-white rounded-lg shadow-md p-4 h-80 animate-pulse" />
+                <div className="bg-white rounded-[4px] shadow-md p-4 h-80 animate-pulse" />
             </div>
         );
     }
@@ -88,7 +88,7 @@ export default function PriceAuditPage() {
                 </select>
                 <button
                     onClick={() => { setPage(1); fetchData(); }}
-                    className="px-3 py-1.5 text-xs bg-[#1e293b] text-white rounded hover:bg-[#334155]"
+                    className="px-3 py-1.5 text-xs bg-[#1d2222] text-white rounded hover:bg-[#3d4343]"
                 >
                     Search
                 </button>
@@ -96,28 +96,28 @@ export default function PriceAuditPage() {
 
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-white rounded-lg shadow-md p-3">
+                <div className="bg-white rounded-[4px] shadow-md p-3">
                     <div className="flex justify-between items-center mb-1">
                         <p className="text-xs text-gray-600">Total Changes</p>
                         <Database className="w-4 h-4 text-blue-500" />
                     </div>
-                    <p className="text-lg font-bold">{formatNumber(data.summary?.totalChanges || 0)}</p>
+                    <p className="text-base font-bold">{formatNumber(data.summary?.totalChanges || 0)}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow-md p-3">
+                <div className="bg-white rounded-[4px] shadow-md p-3">
                     <div className="flex justify-between items-center mb-1">
                         <p className="text-xs text-gray-600">Unique NDCs</p>
                         <Hash className="w-4 h-4 text-purple-500" />
                     </div>
-                    <p className="text-lg font-bold text-purple-600">{formatNumber(data.summary?.uniqueNdcs || 0)}</p>
+                    <p className="text-base font-bold text-purple-600">{formatNumber(data.summary?.uniqueNdcs || 0)}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow-md p-3">
+                <div className="bg-white rounded-[4px] shadow-md p-3">
                     <div className="flex justify-between items-center mb-1">
                         <p className="text-xs text-gray-600">Unique Sources</p>
                         <Database className="w-4 h-4 text-green-500" />
                     </div>
-                    <p className="text-lg font-bold text-green-600">{formatNumber(data.summary?.uniqueSources || 0)}</p>
+                    <p className="text-base font-bold text-green-600">{formatNumber(data.summary?.uniqueSources || 0)}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow-md p-3">
+                <div className="bg-white rounded-[4px] shadow-md p-3">
                     <div className="flex justify-between items-center mb-1">
                         <p className="text-xs text-gray-600">Avg Price Change</p>
                         {(data.summary?.avgPriceIncrease || 0) >= 0 ? (
@@ -126,18 +126,18 @@ export default function PriceAuditPage() {
                             <TrendingDown className="w-4 h-4 text-green-500" />
                         )}
                     </div>
-                    <p className={`text-lg font-bold ${(data.summary?.avgPriceIncrease || 0) >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                    <p className={`text-base font-bold ${(data.summary?.avgPriceIncrease || 0) >= 0 ? 'text-red-600' : 'text-green-600'}`}>
                         {data.summary?.avgPriceIncrease || 0}%
                     </p>
                 </div>
             </div>
 
             {/* Price Audit Table */}
-            <div className="bg-white rounded-lg shadow-md p-4">
+            <div className="bg-white rounded-[4px] shadow-md p-4">
                 <h2 className="text-sm font-semibold text-gray-900 mb-3">Price Change History</h2>
                 <div className="overflow-x-auto">
                     <table className="w-full table-auto">
-                        <thead className="bg-gradient-to-r from-[#1e293b] to-[#334155] border-b-2 border-slate-700">
+                        <thead className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
                             <tr>
                                 <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider">NDC</th>
                                 <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">Old Price</th>

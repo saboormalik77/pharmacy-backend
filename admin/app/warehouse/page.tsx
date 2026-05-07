@@ -82,7 +82,7 @@ export default function WarehouseHubPage() {
             </div>
 
             {/* Flow indicator */}
-            <div className="flex items-center gap-1.5 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg overflow-x-auto">
+            <div className="flex items-center gap-1.5 px-3 py-2 bg-gray-50 border border-gray-200 rounded-[4px] overflow-x-auto">
                 {warehouseSections.map((section, idx) => (
                     <div key={section.href} className="flex items-center gap-1.5 whitespace-nowrap">
                         <span className="text-[10px] font-medium text-gray-500">{section.label}</span>
@@ -101,12 +101,12 @@ export default function WarehouseHubPage() {
                         <Link
                             key={section.href}
                             href={section.href}
-                            className={`group flex flex-col gap-3 p-4 bg-white border ${section.border} rounded-lg hover:shadow-md transition-all duration-150 hover:border-opacity-60`}
+                            className={`group flex flex-col gap-3 p-4 bg-white border ${section.border} rounded-[4px] hover:shadow-md transition-all duration-150 hover:border-opacity-60`}
                         >
                             {/* Icon + label */}
                             <div className="flex items-center justify-between">
                                 <div className={`flex items-center gap-2.5`}>
-                                    <div className={`p-2 rounded-lg ${section.bg}`}>
+                                    <div className={`p-2 rounded-[4px] ${section.bg}`}>
                                         <Icon className={`w-4 h-4 ${section.color}`} />
                                     </div>
                                     <span className="text-sm font-semibold text-gray-800">{section.label}</span>
