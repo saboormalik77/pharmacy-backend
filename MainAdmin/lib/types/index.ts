@@ -984,6 +984,24 @@ export interface BarcodeScanResponse {
             partialPrice: number;
             reportDate: string | null;
         }[] | null;
+        /** FCR-56: ask/received intelligence for the resolved NDC (null when no history) */
+        intelligence?: {
+            avgAskPrice: number | null;
+            avgReceivedPrice: number | null;
+            askReceivedRatio: number | null;
+            paymentSampleCount: number;
+            aiConfidence: number | null;
+            manufacturerReliability: ManufacturerReliability;
+            minReceivedPrice: number | null;
+            maxReceivedPrice: number | null;
+            last5Payments: NDCPaymentRecord[];
+            lastAskReceivedUpdate: string | null;
+            suggestedAskPrice?: number;
+            expectedReceivedPrice?: number;
+            riskLevel?: 'low' | 'medium' | 'high';
+            priceReasoning?: string;
+            priceRange?: { minExpected: number; maxExpected: number };
+        } | null;
     };
     autoFill: {
         ndc: string | null;
@@ -1676,6 +1694,7 @@ export interface NDCPricingRecord {
     ndc: string;
     ndcNormalized: string;
     productName: string | null; // Optional: for display purposes only
+    manufacturer?: string | null;
     currentPrice: number | null;
     lastPrice: number | null;
     estimatedStorePrice: number | null;
@@ -1687,6 +1706,83 @@ export interface NDCPricingRecord {
     updatedBy: string | null;
     createdAt: string;
     updatedAt: string;
+    // FCR-56: ask/received intelligence
+    avgAskPrice?: number | null;
+    avgReceivedPrice?: number | null;
+    askReceivedRatio?: number | null;
+    paymentSampleCount?: number;
+    aiConfidence?: number | null;
+    manufacturerReliability?: ManufacturerReliability;
+    lastAskReceivedUpdate?: string | null;
+    minReceivedPrice?: number | null;
+    maxReceivedPrice?: number | null;
+    last5Payments?: NDCPaymentRecord[];
+}
+
+// ── FCR-56: NDC Pricing Intelligence ────────────────────────
+
+export type ManufacturerReliability =
+    | 'excellent'
+    | 'good'
+    | 'average'
+    | 'poor'
+    | 'unknown';
+
+export interface NDCPaymentRecord {
+    askPrice: number;
+    receivedPrice: number;
+    ratio: number | null;
+    manufacturer?: string | null;
+    productName?: string | null;
+    pharmacyName?: string | null;
+    askDate?: string | null;
+    receiveDate?: string | null;
+    aiExtracted?: boolean;
+    createdAt?: string;
+}
+
+export interface NDCPricingIntelligence {
+    found: boolean;
+    ndc: string | null;
+    ndcNormalized: string | null;
+    productName?: string | null;
+    manufacturer?: string | null;
+    currentPrice?: number | null;
+    estimatedStorePrice?: number | null;
+    priceSource?: string | null;
+    closeOutDestination?: string | null;
+    avgAskPrice?: number | null;
+    avgReceivedPrice?: number | null;
+    askReceivedRatio?: number | null;
+    paymentSampleCount: number;
+    aiConfidence?: number | null;
+    manufacturerReliability: ManufacturerReliability;
+    lastAskReceivedUpdate?: string | null;
+    minReceivedPrice?: number | null;
+    maxReceivedPrice?: number | null;
+    last5Payments: NDCPaymentRecord[];
+}
+
+export interface OptimalAskResult {
+    optimalAskPrice: number;
+    expectedReceivedPrice: number;
+    confidence: number;
+    reasoning: string;
+    riskLevel: 'low' | 'medium' | 'high';
+    priceRange: { minExpected: number; maxExpected: number };
+}
+
+export interface CreditMemoAnalysisResult {
+    analysisId: string | null;
+    status: 'completed' | 'failed' | 'manual_review' | 'pending' | 'processing';
+    confidence: number;
+    itemsExtracted: number;
+    itemsInserted: number;
+    itemsSkipped: number;
+    manufacturerName: string | null;
+    totalAmount: number | null;
+    distinctNdcs: string[];
+    errorMessage?: string | null;
 }
 
 export interface NDCPricingUpsertPayload {

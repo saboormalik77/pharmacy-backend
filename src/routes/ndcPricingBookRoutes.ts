@@ -6,6 +6,7 @@ import {
   deleteHandler,
   resolveHandler,
   importHandler,
+  intelligenceHandler,
 } from '../controllers/ndcPricingBookController';
 import { authenticateAdmin, requirePermission } from '../middleware/adminAuth';
 import { authenticateProcessor } from '../middleware/processorAuth';
@@ -35,6 +36,7 @@ router.use((req, res, next) => {
 
 router.get('/search', searchHandler);
 router.get('/resolve/:ndc', resolveHandler);
+router.get('/:ndc/intelligence', intelligenceHandler);
 router.get('/:ndc', getByNdcHandler);
 router.post('/', upsertHandler);
 router.post('/import', importHandler);

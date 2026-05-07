@@ -3,6 +3,86 @@ import { catchAsync } from '../utils/catchAsync';
 import { AppError } from '../utils/appError';
 import { supabaseAdmin } from '../config/supabase';
 import * as paymentTrackingService from '../services/paymentTrackingService';
+import { analyzeAndMatchCreditMemo } from '../services/creditMemoMatchingService';
+import { recordCreditMemoAnalysis } from '../services/ndcPricingIntelligenceService';
+
+/**
+ * Best-effort AI analysis of a credit memo PDF after a payment is recorded.
+ * Always resolves — never throws — so the user-facing payment flow is not
+ * blocked by Azure outages or document-parse edge cases.
+ *
+ * Returns a small summary the frontend can display alongside the payment
+ * confirmation, e.g. "AI extracted 12 NDC line items (94% confidence)".
+ */
+async function analyzeAndPersistCreditMemo(input: {
+  debitMemoId: string;
+  creditMemoUrl: string | null;
+  pdfBuffer: Buffer;
+  filename?: string;
+  pharmacyName?: string | null;
+}): Promise<{
+  analysisId: string | null;
+  status: string;
+  confidence: number;
+  itemsExtracted: number;
+  itemsInserted: number;
+  itemsSkipped: number;
+  manufacturerName: string | null;
+  totalAmount: number | null;
+  distinctNdcs: string[];
+  errorMessage?: string | null;
+}> {
+  try {
+    const result = await analyzeAndMatchCreditMemo({
+      debitMemoId: input.debitMemoId,
+      pdfBuffer:   input.pdfBuffer,
+      filename:    input.filename,
+      pharmacyName: input.pharmacyName,
+    });
+
+    const itemsForRpc = result.lineItems.map(it => ({
+      ...it,
+      pharmacyName: it.pharmacyName ?? input.pharmacyName ?? null,
+    }));
+
+    const persisted = await recordCreditMemoAnalysis({
+      debitMemoId: input.debitMemoId,
+      creditMemoUrl: input.creditMemoUrl,
+      status: result.status,
+      confidence: result.confidence,
+      extractedTotal: result.totalAmount,
+      items: itemsForRpc,
+      errorMessage: result.errorMessage ?? null,
+    });
+
+    return {
+      analysisId: persisted.analysisId,
+      status: result.status,
+      confidence: result.confidence,
+      itemsExtracted: result.lineItems.length,
+      itemsInserted: persisted.inserted,
+      itemsSkipped: persisted.skipped,
+      manufacturerName: result.manufacturerName,
+      totalAmount: result.totalAmount,
+      distinctNdcs: persisted.distinctNdcs,
+      errorMessage: result.errorMessage ?? null,
+    };
+  } catch (err: any) {
+    console.error('Credit memo AI analysis failed (non-blocking):', err?.message || err);
+    return {
+      analysisId: null,
+      status: 'failed',
+      confidence: 0,
+      itemsExtracted: 0,
+      itemsInserted: 0,
+      itemsSkipped: 0,
+      manufacturerName: null,
+      totalAmount: null,
+      distinctNdcs: [],
+      errorMessage: err?.message || 'Unknown error during AI analysis',
+    };
+  }
+}
 
 // ============================================================
 // GET /api/admin/debit-memos/unpaid — List unpaid debit memos
@@ -83,7 +163,17 @@ export const recordPaymentHandler = catchAsync(
       creditMemoUrl
     );
 
-    res.status(200).json({ status: 'success', data: result });
+    // FCR-56: Best-effort AI extraction of ask/received pairs from the credit
+    // memo. Failures here are logged but do not roll back the payment record.
+    const aiAnalysis = await analyzeAndPersistCreditMemo({
+      debitMemoId: req.params.id,
+      creditMemoUrl: creditMemoUrl ?? null,
+      pdfBuffer: file.buffer,
+      filename: file.originalname,
+      pharmacyName: result?.pharmacyName ?? null,
+    });
+
+    res.status(200).json({ status: 'success', data: result, aiAnalysis });
   }
 );
 
@@ -139,7 +229,20 @@ export const updatePaymentHandler = catchAsync(
       creditMemoUrl
     );
 
-    res.status(200).json({ status: 'success', data: result });
+    // FCR-56: Re-run AI extraction only if a NEW credit memo PDF was uploaded
+    // during the update; otherwise we already have an analysis on file.
+    let aiAnalysis = null;
+    if (file && file.buffer) {
+      aiAnalysis = await analyzeAndPersistCreditMemo({
+        debitMemoId: req.params.id,
+        creditMemoUrl: creditMemoUrl ?? null,
+        pdfBuffer: file.buffer,
+        filename: file.originalname,
+        pharmacyName: result?.pharmacyName ?? null,
+      });
+    }
+
+    res.status(200).json({ status: 'success', data: result, aiAnalysis });
   }
 );
 

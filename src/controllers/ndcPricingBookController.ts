@@ -2,6 +2,10 @@ import { Request, Response, NextFunction } from 'express';
 import { catchAsync } from '../utils/catchAsync';
 import { AppError } from '../utils/appError';
 import * as svc from '../services/ndcPricingBookService';
+import {
+  getNDCPricingIntelligence,
+  calculateOptimalAskPrice,
+} from '../services/ndcPricingIntelligenceService';
 
 // ============================================================
 // POST /api/admin/ndc-pricing — Upsert (create or update)
@@ -84,5 +88,33 @@ export const importHandler = catchAsync(
     const userId = (req as any).adminId || (req as any).processorId;
     const result = await svc.importFromReports(userId);
     res.status(200).json({ status: 'success', data: result });
+  }
+);
+
+// ============================================================
+// GET /api/admin/ndc-pricing/:ndc/intelligence — Pricing intelligence + optimal ask
+// (FCR-56)
+// ============================================================
+export const intelligenceHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { ndc } = req.params;
+    if (!ndc) throw new AppError('NDC code is required', 400);
+
+    const targetParam = (req.query.target as string) || '';
+    const target = targetParam ? Number(targetParam) : NaN;
+
+    const intelligence = await getNDCPricingIntelligence(ndc);
+
+    let optimal = null;
+    if (Number.isFinite(target) && target > 0) {
+      optimal = calculateOptimalAskPrice(intelligence, target);
+    } else if (intelligence.currentPrice && intelligence.currentPrice > 0) {
+      optimal = calculateOptimalAskPrice(intelligence, intelligence.currentPrice);
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: { intelligence, optimal },
+    });
   }
 );

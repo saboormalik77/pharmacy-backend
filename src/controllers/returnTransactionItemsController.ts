@@ -6,6 +6,11 @@ import { parseGS1 } from '../services/gs1ParserService';
 import { lookupNDC, lookupNDCFromCandidates, extractPackageSizeFromDescription } from '../services/ndcLookupService';
 import { getPricingForSingleNDC } from '../services/pricingService';
 import { resolveNDCPrice } from '../services/ndcPricingBookService';
+import {
+  getNDCPricingIntelligence,
+  calculateOptimalAskPrice,
+  type NDCPricingIntelligence,
+} from '../services/ndcPricingIntelligenceService';
 import * as wcService from '../services/wineCellarService';
 import * as destructionService from '../services/destructionService';
 import { getReturnTransactionById } from '../services/returnTransactionService';
@@ -646,11 +651,20 @@ export const scanBarcodeHandler = catchAsync(
       closeOutDestination: null,
     };
 
+    let intelligence: NDCPricingIntelligence | null = null;
+
     if (resolvedNdc) {
       try {
         // First, try NDC pricing book (our new system)
         const ndcPricing = await resolveNDCPrice(resolvedNdc);
-        
+
+        // FCR-56: also fetch ask/received intelligence (non-blocking)
+        try {
+          intelligence = await getNDCPricingIntelligence(resolvedNdc);
+        } catch (intErr: any) {
+          console.error('Pricing intelligence lookup failed (non-blocking):', intErr.message);
+        }
+
         if (ndcPricing.found && ndcPricing.currentPrice && ndcPricing.currentPrice > 0) {
           // Also fetch return_reports quantities even when NDC pricing book has a price
           const pricingResult = await getPricingForSingleNDC(resolvedNdc);
@@ -694,6 +708,40 @@ export const scanBarcodeHandler = catchAsync(
       }
     }
 
+    // FCR-56: derive optimal ask price from intelligence (non-breaking)
+    let optimalAsk = null;
+    let pricingIntelligenceBlock = null;
+    if (intelligence && intelligence.found) {
+      const target =
+        (typeof pricing.suggestedPrice === 'number' && pricing.suggestedPrice > 0
+          ? pricing.suggestedPrice
+          : intelligence.currentPrice) ?? 0;
+      if (target > 0) {
+        optimalAsk = calculateOptimalAskPrice(intelligence, target);
+      }
+      pricingIntelligenceBlock = {
+        avgAskPrice: intelligence.avgAskPrice ?? null,
+        avgReceivedPrice: intelligence.avgReceivedPrice ?? null,
+        askReceivedRatio: intelligence.askReceivedRatio ?? null,
+        paymentSampleCount: intelligence.paymentSampleCount ?? 0,
+        aiConfidence: intelligence.aiConfidence ?? null,
+        manufacturerReliability: intelligence.manufacturerReliability ?? 'unknown',
+        minReceivedPrice: intelligence.minReceivedPrice ?? null,
+        maxReceivedPrice: intelligence.maxReceivedPrice ?? null,
+        last5Payments: intelligence.last5Payments ?? [],
+        lastAskReceivedUpdate: intelligence.lastAskReceivedUpdate ?? null,
+        ...(optimalAsk
+          ? {
+              suggestedAskPrice: optimalAsk.optimalAskPrice,
+              expectedReceivedPrice: optimalAsk.expectedReceivedPrice,
+              riskLevel: optimalAsk.riskLevel,
+              priceReasoning: optimalAsk.reasoning,
+              priceRange: optimalAsk.priceRange,
+            }
+          : {}),
+      };
+    }
+
     // 4. Build unified response
     const result: Record<string, any> = {
       scan: {
@@ -720,7 +768,10 @@ export const scanBarcodeHandler = catchAsync(
         activeIngredients: productInfo.activeIngredients,
         source: productInfo.source,
       } : null,
-      pricing,
+      pricing: {
+        ...pricing,
+        intelligence: pricingIntelligenceBlock,
+      },
       autoFill: {
         ndc: resolvedNdc,
         ndc10: gs1.ndc10 || null,

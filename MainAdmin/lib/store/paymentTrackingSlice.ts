@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { DebitMemo, UnpaidSummary, AskVsReceivedRow, ManufacturerPaymentSummary } from '@/lib/types';
+import { DebitMemo, UnpaidSummary, AskVsReceivedRow, ManufacturerPaymentSummary, CreditMemoAnalysisResult } from '@/lib/types';
 
 // ── State ─────────────────────────────────────────────────────
 
@@ -16,6 +16,8 @@ export interface PaymentTrackingState {
     isLoading: boolean;
     isActionLoading: boolean;
     error: string | null;
+    /** FCR-56: latest AI-driven credit-memo analysis result (per record-payment / update-payment call) */
+    lastAiAnalysis: CreditMemoAnalysisResult | null;
 }
 
 const initialState: PaymentTrackingState = {
@@ -31,6 +33,7 @@ const initialState: PaymentTrackingState = {
     isLoading: false,
     isActionLoading: false,
     error: null,
+    lastAiAnalysis: null,
 };
 
 // ── Thunks ────────────────────────────────────────────────────
@@ -58,7 +61,7 @@ export const fetchUnpaidMemos = createAsyncThunk<
 });
 
 export const recordPayment = createAsyncThunk<
-    DebitMemo,
+    { memo: DebitMemo; aiAnalysis: CreditMemoAnalysisResult | null },
     { memoId: string; amountReceived: number; paymentDate: string; reference: string; notes: string; creditMemoFile: File },
     { rejectValue: string }
 >('paymentTracking/recordPayment', async ({ memoId, creditMemoFile, paymentDate, reference, notes, amountReceived }, { rejectWithValue }) => {
@@ -70,17 +73,17 @@ export const recordPayment = createAsyncThunk<
         formData.append('reference', reference);
         formData.append('notes', notes);
         formData.append('creditMemo', creditMemoFile);
-        const res = await apiClient.postFormData<{ status: string; data: DebitMemo }>(
+        const res = await apiClient.postFormData<{ status: string; data: DebitMemo; aiAnalysis: CreditMemoAnalysisResult | null }>(
             `/admin/debit-memos/${memoId}/record-payment`, formData, true
         );
-        return res.data;
+        return { memo: res.data, aiAnalysis: res.aiAnalysis ?? null };
     } catch (err: any) {
         return rejectWithValue(err?.message || 'Failed to record payment');
     }
 });
 
 export const updatePayment = createAsyncThunk<
-    DebitMemo,
+    { memo: DebitMemo; aiAnalysis: CreditMemoAnalysisResult | null },
     { memoId: string; amountReceived: number; paymentDate: string; reference: string; notes: string; creditMemoFile?: File },
     { rejectValue: string }
 >('paymentTracking/updatePayment', async ({ memoId, creditMemoFile, paymentDate, reference, notes, amountReceived }, { rejectWithValue }) => {
@@ -94,10 +97,10 @@ export const updatePayment = createAsyncThunk<
         if (creditMemoFile) {
             formData.append('creditMemo', creditMemoFile);
         }
-        const res = await apiClient.patchFormData<{ status: string; data: DebitMemo }>(
+        const res = await apiClient.patchFormData<{ status: string; data: DebitMemo; aiAnalysis: CreditMemoAnalysisResult | null }>(
             `/admin/debit-memos/${memoId}/update-payment`, formData, true
         );
-        return res.data;
+        return { memo: res.data, aiAnalysis: res.aiAnalysis ?? null };
     } catch (err: any) {
         return rejectWithValue(err?.message || 'Failed to update payment');
     }
@@ -186,6 +189,7 @@ const paymentTrackingSlice = createSlice({
     initialState,
     reducers: {
         clearError: (state) => { state.error = null; },
+        clearAiAnalysis: (state) => { state.lastAiAnalysis = null; },
     },
     extraReducers: (builder) => {
         builder
@@ -206,22 +210,26 @@ const paymentTrackingSlice = createSlice({
             })
             .addCase(fetchPaidMemos.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; })
 
-            .addCase(recordPayment.pending, (state) => { state.isActionLoading = true; state.error = null; })
+            .addCase(recordPayment.pending, (state) => { state.isActionLoading = true; state.error = null; state.lastAiAnalysis = null; })
             .addCase(recordPayment.fulfilled, (state, action) => {
                 state.isActionLoading = false;
+                const memo = action.payload.memo;
+                state.lastAiAnalysis = action.payload.aiAnalysis;
                 state.unpaidMemos = state.unpaidMemos.filter(m => {
-                    if (m.id === action.payload.id) {
-                        return action.payload.paymentStatus !== 'paid';
+                    if (m.id === memo.id) {
+                        return memo.paymentStatus !== 'paid';
                     }
                     return true;
-                }).map(m => m.id === action.payload.id ? { ...action.payload, daysOutstanding: m.daysOutstanding, outstandingAmount: action.payload.amountRequested - action.payload.amountReceived } : m);
+                }).map(m => m.id === memo.id ? { ...memo, daysOutstanding: m.daysOutstanding, outstandingAmount: memo.amountRequested - memo.amountReceived } : m);
             })
             .addCase(recordPayment.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
 
-            .addCase(updatePayment.pending, (state) => { state.isActionLoading = true; state.error = null; })
+            .addCase(updatePayment.pending, (state) => { state.isActionLoading = true; state.error = null; state.lastAiAnalysis = null; })
             .addCase(updatePayment.fulfilled, (state, action) => {
                 state.isActionLoading = false;
-                state.paidMemos = state.paidMemos.map(m => m.id === action.payload.id ? action.payload : m);
+                const memo = action.payload.memo;
+                state.lastAiAnalysis = action.payload.aiAnalysis;
+                state.paidMemos = state.paidMemos.map(m => m.id === memo.id ? memo : m);
             })
             .addCase(updatePayment.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
 
@@ -247,5 +255,5 @@ const paymentTrackingSlice = createSlice({
     },
 });
 
-export const { clearError } = paymentTrackingSlice.actions;
+export const { clearError, clearAiAnalysis } = paymentTrackingSlice.actions;
 export default paymentTrackingSlice.reducer;

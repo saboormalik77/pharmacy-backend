@@ -17,7 +17,7 @@ import {
     upsertNDCPricing,
     deleteNDCPricing,
 } from '@/lib/store/ndcPricingSlice';
-import { NDCPricingRecord, NDCPricingUpsertPayload, BarcodeScanResponse } from '@/lib/types';
+import { NDCPricingRecord, NDCPricingUpsertPayload, BarcodeScanResponse, ManufacturerReliability } from '@/lib/types';
 
 const QrScannerModal = dynamic(() => import('@/components/scanner/QrScannerModal'), { ssr: false });
 
@@ -73,6 +73,32 @@ const EMPTY_FORM: NDCPricingUpsertPayload = {
 function estimatedStoreFromCurrent(current: number | undefined): number | undefined {
     if (current == null || Number.isNaN(current) || current < 0) return undefined;
     return Math.round(current * 0.7 * 100) / 100;
+}
+
+// FCR-56: visual badges for the ask/received intelligence columns
+function payRateColor(ratio: number | null | undefined): string {
+    if (ratio == null) return 'var(--on-surface-variant)';
+    if (ratio >= 85) return 'var(--secondary)';
+    if (ratio >= 65) return 'var(--tertiary)';
+    return 'var(--error)';
+}
+
+function reliabilityBadgeColors(r: ManufacturerReliability | undefined | null): {
+    bg: string;
+    fg: string;
+} {
+    switch (r) {
+        case 'excellent':
+            return { bg: 'var(--secondary-container)', fg: 'var(--secondary)' };
+        case 'good':
+            return { bg: 'var(--secondary-container)', fg: 'var(--secondary)' };
+        case 'average':
+            return { bg: 'var(--tertiary-fixed)', fg: 'var(--tertiary)' };
+        case 'poor':
+            return { bg: 'var(--error-container)', fg: 'var(--error)' };
+        default:
+            return { bg: 'var(--surface-container-low)', fg: 'var(--on-surface-variant)' };
+    }
 }
 
 export default function NDCPricingPage() {
@@ -341,6 +367,11 @@ export default function NDCPricingPage() {
                                 <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
                                 <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product Name</th>
                                 <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Current Price</th>
+                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap" title="Average ask price across observed credit memos">Avg Ask</th>
+                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap" title="Average received / credited price across observed credit memos">Avg Recv</th>
+                                <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap" title="Historical pay rate = avg received / avg ask">Pay %</th>
+                                <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap" title="Number of historical ask/received observations">Samples</th>
+                                <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap" title="Manufacturer reliability bucket derived from pay rate + sample size">Reliability</th>
                                 <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Est. Store Price</th>
                                 <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Source</th>
                                 <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Destination</th>
@@ -351,17 +382,22 @@ export default function NDCPricingPage() {
                         <tbody>
                             {isLoading ? (
                                 <tr>
-                                    <td colSpan={8} className="text-center py-12">
+                                    <td colSpan={14} className="text-center py-12">
                                         <Loader2 className="w-5 h-5 animate-spin text-gray-400 mx-auto" />
                                     </td>
                                 </tr>
                             ) : items.length === 0 ? (
                                 <tr>
-                                    <td colSpan={8} className="text-center py-12 text-xs text-gray-400">
+                                    <td colSpan={14} className="text-center py-12 text-xs text-gray-400">
                                         {debouncedSearch ? 'No results found' : 'No NDC pricing entries yet. Click "Add NDC Price" to get started.'}
                                     </td>
                                 </tr>
-                            ) : items.map(row => (
+                            ) : items.map(row => {
+                                const samples = row.paymentSampleCount ?? 0;
+                                const ratio = row.askReceivedRatio ?? null;
+                                const reliab = (row.manufacturerReliability ?? 'unknown') as ManufacturerReliability;
+                                const reliabColors = reliabilityBadgeColors(reliab);
+                                return (
                                 <tr key={row.id} className="border-b hover:bg-primary-50/40 transition-colors" style={{ borderColor: 'var(--outline-variant)' }}>
                                     <td className="px-3 py-3">
                                         <span className="font-mono text-sm font-semibold text-primary-600">{row.ndc}</span>
@@ -370,6 +406,26 @@ export default function NDCPricingPage() {
                                         <span className="text-sm truncate block max-w-[200px]" style={{ color: 'var(--foreground)' }}>{row.productName || '—'}</span>
                                     </td>
                                     <td className="px-3 py-3 text-right font-mono text-sm font-medium" style={{ color: 'var(--foreground)' }}>{fmt(row.currentPrice)}</td>
+                                    <td className="px-3 py-3 text-right font-mono text-sm" style={{ color: 'var(--on-surface-variant)' }}>
+                                        {row.avgAskPrice != null ? fmt(row.avgAskPrice) : '—'}
+                                    </td>
+                                    <td className="px-3 py-3 text-right font-mono text-sm" style={{ color: 'var(--on-surface-variant)' }}>
+                                        {row.avgReceivedPrice != null ? fmt(row.avgReceivedPrice) : '—'}
+                                    </td>
+                                    <td className="px-3 py-3 text-center text-xs font-semibold" style={{ color: payRateColor(ratio) }}>
+                                        {ratio != null ? `${ratio.toFixed(1)}%` : '—'}
+                                    </td>
+                                    <td className="px-3 py-3 text-center text-xs" style={{ color: samples > 0 ? 'var(--foreground)' : 'var(--on-surface-variant)' }}>
+                                        {samples}
+                                    </td>
+                                    <td className="px-3 py-3 text-center">
+                                        <span
+                                            className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium capitalize"
+                                            style={{ backgroundColor: reliabColors.bg, color: reliabColors.fg }}
+                                        >
+                                            {reliab}
+                                        </span>
+                                    </td>
                                     <td className="px-3 py-3 text-right font-mono text-sm" style={{ color: 'var(--foreground)' }}>{fmt(row.estimatedStorePrice)}</td>
                                     <td className="px-3 py-3">
                                         {row.priceSource
@@ -403,7 +459,8 @@ export default function NDCPricingPage() {
                                         </div>
                                     </td>
                                 </tr>
-                            ))}
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>

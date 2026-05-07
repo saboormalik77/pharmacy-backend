@@ -6,6 +6,7 @@ import {
     Search, Loader2, ChevronLeft, ChevronRight, X,
     DollarSign, Clock, AlertCircle, Send, CreditCard,
     TrendingUp, TrendingDown, BarChart3, CheckCircle, FileText, Upload,
+    Sparkles, AlertTriangle,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
@@ -13,7 +14,7 @@ import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { useDebounce } from '@/lib/hooks/useDebounce';
 import {
     fetchUnpaidMemos, recordPayment, updatePayment, sendPaymentReminder,
-    fetchAskVsReceived, fetchManufacturerSummary, fetchPaidMemos, clearError,
+    fetchAskVsReceived, fetchManufacturerSummary, fetchPaidMemos, clearError, clearAiAnalysis,
 } from '@/lib/store/paymentTrackingSlice';
 import { DebitMemo, AskVsReceivedRow, ManufacturerPaymentSummary } from '@/lib/types';
 
@@ -52,6 +53,7 @@ export default function UnpaidMemosPage() {
         askVsReceived, askVsReceivedTotals,
         manufacturerSummary, manufacturerPagination,
         isLoading, isActionLoading, error,
+        lastAiAnalysis,
     } = useAppSelector(s => s.paymentTracking);
 
     const [activeTab, setActiveTab] = useState<TabKey>('unpaid');
@@ -230,6 +232,71 @@ export default function UnpaidMemosPage() {
     return (
         <div className="space-y-3">
             <ToastContainer toasts={toasts} onClose={removeToast} />
+
+            {/* FCR-56: AI Credit Memo Analysis Banner */}
+            {lastAiAnalysis && (
+                <div
+                    className="rounded-[4px] border px-4 py-3 flex items-start gap-3"
+                    style={{
+                        backgroundColor:
+                            lastAiAnalysis.status === 'completed'
+                                ? 'var(--secondary-container)'
+                                : lastAiAnalysis.status === 'manual_review'
+                                    ? 'var(--tertiary-fixed)'
+                                    : 'var(--error-container)',
+                        borderColor: 'var(--outline-variant)',
+                    }}
+                >
+                    <div className="p-1.5 rounded flex-shrink-0" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
+                        {lastAiAnalysis.status === 'completed' ? (
+                            <Sparkles className="w-4 h-4" style={{ color: 'var(--secondary)' }} />
+                        ) : lastAiAnalysis.status === 'manual_review' ? (
+                            <AlertTriangle className="w-4 h-4" style={{ color: 'var(--tertiary)' }} />
+                        ) : (
+                            <AlertCircle className="w-4 h-4" style={{ color: 'var(--error)' }} />
+                        )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-xs font-semibold" style={{ color: 'var(--foreground)' }}>
+                                {lastAiAnalysis.status === 'completed'
+                                    ? 'AI extracted ask/received pairs from credit memo'
+                                    : lastAiAnalysis.status === 'manual_review'
+                                        ? 'AI parsed the memo but found no usable NDC pairs'
+                                        : 'AI extraction failed (payment was still recorded)'}
+                            </p>
+                            {lastAiAnalysis.confidence > 0 && (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface-variant)' }}>
+                                    {lastAiAnalysis.confidence.toFixed(0)}% confidence
+                                </span>
+                            )}
+                        </div>
+                        {lastAiAnalysis.status === 'completed' && (
+                            <p className="text-[11px] mt-1" style={{ color: 'var(--on-surface-variant)' }}>
+                                Inserted <strong>{lastAiAnalysis.itemsInserted}</strong> payment record{lastAiAnalysis.itemsInserted === 1 ? '' : 's'} across{' '}
+                                <strong>{lastAiAnalysis.distinctNdcs.length}</strong> NDC{lastAiAnalysis.distinctNdcs.length === 1 ? '' : 's'}
+                                {lastAiAnalysis.itemsSkipped > 0 ? ` (skipped ${lastAiAnalysis.itemsSkipped} incomplete row${lastAiAnalysis.itemsSkipped === 1 ? '' : 's'})` : ''}
+                                {lastAiAnalysis.manufacturerName ? ` — manufacturer: ${lastAiAnalysis.manufacturerName}` : ''}
+                                {lastAiAnalysis.totalAmount != null ? ` — total: ${fmt(lastAiAnalysis.totalAmount)}` : ''}.
+                                Pricing intelligence has been refreshed.
+                            </p>
+                        )}
+                        {lastAiAnalysis.errorMessage && (
+                            <p className="text-[11px] mt-1" style={{ color: 'var(--on-surface-variant)' }}>
+                                {lastAiAnalysis.errorMessage}
+                            </p>
+                        )}
+                    </div>
+                    <button
+                        onClick={() => dispatch(clearAiAnalysis())}
+                        className="p-1 rounded hover:bg-black/10"
+                        title="Dismiss"
+                        style={{ color: 'var(--on-surface-variant)' }}
+                    >
+                        <X className="w-3.5 h-3.5" />
+                    </button>
+                </div>
+            )}
 
             {/* Header */}
             <div>
