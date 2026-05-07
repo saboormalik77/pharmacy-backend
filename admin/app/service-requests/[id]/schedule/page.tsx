@@ -131,7 +131,7 @@ export default function ScheduleServiceRequestPage() {
                         </Button>
                     </div>
                     <h1 className="text-lg font-bold flex items-center gap-2">
-                        <CalendarClock className="w-3.5 h-3.5 text-[#1e293b]" />
+                        <CalendarClock className="w-3.5 h-3.5 text-[#1d2222]" />
                         {request?.status === 'scheduled' ? 'Reschedule Visit' : 'Schedule Visit'}
                     </h1>
                     <p className="text-xs text-gray-500 mt-0.5">

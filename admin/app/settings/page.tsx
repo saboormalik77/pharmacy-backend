@@ -168,45 +168,45 @@ export default function SettingsPage() {
     // Processors get a simplified settings page without permission gate
     if (isProcessor) {
         return (
-            <div className="space-y-3">
+            <div className="space-y-6 p-8">
                 <div>
-                    <h1 className="text-lg font-bold text-gray-900">Settings</h1>
-                    <p className="text-xs text-gray-500">Manage your account settings</p>
+                    <h1 className="text-xl font-medium text-gray-900" style={{ fontFamily: 'var(--font-newsreader), serif' }}>Settings</h1>
+                    <p className="text-xs text-gray-500 mt-1">Manage your account settings</p>
                 </div>
 
                 {/* Profile Info for Processor */}
-                <div className="bg-white rounded-lg shadow px-4 py-3">
-                    <div className="flex items-center gap-2 mb-3">
-                        <Building2 className="w-4 h-4 text-[#1e293b]" />
-                        <h2 className="text-sm font-semibold text-gray-900">Profile Information</h2>
+                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] px-6 py-5">
+                    <div className="flex items-center gap-2 mb-4">
+                        <Building2 className="w-5 h-5 text-[#516057]" />
+                        <h2 className="text-base font-semibold text-gray-900">Profile Information</h2>
                     </div>
-                    <div className="space-y-2.5">
+                    <div className="space-y-4">
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-0.5">Name</label>
-                            <input type="text" value={user?.name || ''} readOnly className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded bg-gray-50 text-gray-600 cursor-not-allowed" />
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                            <input type="text" value={user?.name || ''} readOnly className="w-full px-4 py-3 text-base border border-gray-300 rounded-[4px] bg-gray-50 text-gray-600 cursor-not-allowed" />
                         </div>
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-0.5">Email</label>
-                            <input type="email" value={user?.email || ''} readOnly className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded bg-gray-50 text-gray-600 cursor-not-allowed" />
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input type="email" value={user?.email || ''} readOnly className="w-full px-4 py-3 text-base border border-gray-300 rounded-[4px] bg-gray-50 text-gray-600 cursor-not-allowed" />
                         </div>
                     </div>
                 </div>
 
                 {/* Security Settings - Reset Password */}
-                <div className="bg-white rounded-lg shadow px-4 py-3">
-                    <div className="flex items-center gap-2 mb-3">
-                        <Shield className="w-4 h-4 text-[#1e293b]" />
-                        <h2 className="text-sm font-semibold text-gray-900">Security Settings</h2>
+                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] px-6 py-5">
+                    <div className="flex items-center gap-2 mb-4">
+                        <Shield className="w-5 h-5 text-[#516057]" />
+                        <h2 className="text-base font-semibold text-gray-900">Security Settings</h2>
                     </div>
 
-                    <div className="space-y-2.5 max-w-md">
+                    <div className="space-y-4 max-w-md">
                         {[
                             { key: 'currentPassword' as const, label: 'Current Password', hint: '' },
                             { key: 'newPassword' as const, label: 'New Password', hint: 'Minimum 8 characters' },
                             { key: 'confirmPassword' as const, label: 'Confirm New Password', hint: '' },
                         ].map(({ key, label, hint }) => (
                             <div key={key}>
-                                <label className="block text-xs font-medium text-gray-700 mb-0.5">{label}</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
                                 <div className="relative">
                                     <input
                                         type={showPasswords[key] ? 'text' : 'password'}
@@ -218,31 +218,31 @@ export default function SettingsPage() {
                                                 setPasswordErrors(prev => ({ ...prev, confirmPassword: '' }));
                                             }
                                         }}
-                                        className={`w-full px-2.5 py-1.5 pr-8 text-xs border rounded focus:outline-none focus:ring-1 ${
-                                            passwordErrors[key] ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-slate-500'
+                                        className={`w-full px-4 py-3 pr-10 text-base border rounded-[4px] focus:outline-none focus:ring-2 ${
+                                            passwordErrors[key] ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-[#516057]'
                                         }`}
                                         disabled={isResettingPassword}
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowPasswords({ ...showPasswords, [key]: !showPasswords[key] })}
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                                         disabled={isResettingPassword}
                                     >
-                                        {showPasswords[key] ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                        {showPasswords[key] ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                     </button>
                                 </div>
-                                {passwordErrors[key] && <p className="mt-0.5 text-[10px] text-red-600">{passwordErrors[key]}</p>}
-                                {hint && !passwordErrors[key] && <p className="mt-0.5 text-[10px] text-gray-400">{hint}</p>}
+                                {passwordErrors[key] && <p className="mt-1 text-sm text-red-600">{passwordErrors[key]}</p>}
+                                {hint && !passwordErrors[key] && <p className="mt-1 text-sm text-gray-400">{hint}</p>}
                             </div>
                         ))}
 
-                        <div className="flex justify-end pt-1">
-                            <Button variant="primary" size="sm" onClick={handleResetPassword} disabled={isResettingPassword}>
+                        <div className="flex justify-end pt-2">
+                            <Button variant="primary" size="md" onClick={handleResetPassword} disabled={isResettingPassword}>
                                 {isResettingPassword ? (
-                                    <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Resetting...</>
+                                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Resetting...</>
                                 ) : (
-                                    <><Save className="w-3.5 h-3.5 mr-1.5" />Reset Password</>
+                                    <><Save className="w-4 h-4 mr-2" />Reset Password</>
                                 )}
                             </Button>
                         </div>
@@ -256,10 +256,10 @@ export default function SettingsPage() {
 
     return (
         <PermissionGate permission="settings">
-        <div className="space-y-3">
+        <div className="space-y-6 p-8">
             <div>
-                <h1 className="text-lg font-bold text-gray-900">Settings</h1>
-                <p className="text-xs text-gray-500">
+                <h1 className="text-xl font-medium text-gray-900" style={{ fontFamily: 'var(--font-newsreader), serif' }}>Settings</h1>
+                <p className="text-xs text-gray-500 mt-1">
                     {isMainAdmin 
                         ? "Manage system configuration and preferences" 
                         : "Manage your business profile and security settings"
@@ -269,13 +269,13 @@ export default function SettingsPage() {
 
             {/* Info message for buying group admins - removed heading per requirements */}
             {isBuyingGroupAdmin && !isProcessor && (
-                <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
-                    <div className="flex items-start gap-3">
-                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center mt-0.5">
-                            <Building2 className="w-3 h-3 text-blue-600" />
+                <div className="bg-[#f5f2f1] border border-[#e2e2e2] rounded-[4px] p-5">
+                    <div className="flex items-start gap-4">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center mt-0.5">
+                            <Building2 className="w-4 h-4 text-blue-600" />
                         </div>
                         <div>
-                            <p className="text-xs text-blue-700">
+                            <p className="text-sm text-blue-700">
                                 You can manage your business profile (company name and logo) and security settings. 
                                 System-wide settings are managed by the platform administrator.
                             </p>
@@ -286,25 +286,25 @@ export default function SettingsPage() {
 
             {/* General Settings - Only visible to MainAdmin */}
             {isMainAdmin && (
-                <div className="bg-white rounded-lg shadow px-4 py-3">
-                    <div className="flex items-center gap-2 mb-3">
-                        <Globe className="w-4 h-4 text-[#1e293b]" />
-                        <h2 className="text-sm font-semibold text-gray-900">General Settings</h2>
+                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] px-6 py-5">
+                    <div className="flex items-center gap-2 mb-4">
+                        <Globe className="w-5 h-5 text-[#516057]" />
+                        <h2 className="text-base font-semibold text-gray-900">General Settings</h2>
                     </div>
                     {isLoading && !settings ? (
-                        <div className="flex items-center justify-center py-8">
-                            <Loader2 className="w-6 h-6 animate-spin text-[#1e293b] mr-2" />
-                            <p className="text-xs text-gray-500">Loading settings...</p>
+                        <div className="flex items-center justify-center py-10">
+                            <Loader2 className="w-6 h-6 animate-spin text-[#516057] mr-3" />
+                            <p className="text-base text-gray-500">Loading settings...</p>
                         </div>
                     ) : (
-                        <div className="space-y-2.5">
+                        <div className="space-y-4">
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-0.5">Site Name</label>
-                                <input type="text" value={settings?.siteName || ''} readOnly className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded bg-gray-50 text-gray-600 cursor-not-allowed" />
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Site Name</label>
+                                <input type="text" value={settings?.siteName || ''} readOnly className="w-full px-4 py-3 text-base border border-gray-300 rounded-[4px] bg-gray-50 text-gray-600 cursor-not-allowed" />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-0.5">Site Email</label>
-                                <input type="email" value={settings?.siteEmail || ''} readOnly className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded bg-gray-50 text-gray-600 cursor-not-allowed" />
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Site Email</label>
+                                <input type="email" value={settings?.siteEmail || ''} readOnly className="w-full px-4 py-3 text-base border border-gray-300 rounded-[4px] bg-gray-50 text-gray-600 cursor-not-allowed" />
                             </div>
                         </div>
                     )}
@@ -312,42 +312,42 @@ export default function SettingsPage() {
             )}
 
             {/* Business Settings */}
-            <div className="bg-white rounded-lg shadow px-4 py-3">
-                <div className="flex items-center gap-2 mb-3">
-                    <Building2 className="w-4 h-4 text-[#1e293b]" />
-                    <h2 className="text-sm font-semibold text-gray-900">Business Settings</h2>
+            <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] px-6 py-5">
+                <div className="flex items-center gap-2 mb-4">
+                    <Building2 className="w-5 h-5 text-[#516057]" />
+                    <h2 className="text-base font-semibold text-gray-900">Business Settings</h2>
                 </div>
 
                 {isLoading && !settings ? (
-                    <div className="flex items-center justify-center py-8">
-                        <Loader2 className="w-6 h-6 animate-spin text-[#1e293b] mr-2" />
-                        <p className="text-xs text-gray-500">Loading settings...</p>
+                    <div className="flex items-center justify-center py-10">
+                        <Loader2 className="w-6 h-6 animate-spin text-[#516057] mr-3" />
+                        <p className="text-base text-gray-500">Loading settings...</p>
                     </div>
                 ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-5">
                         {/* Logo Upload */}
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-2">Company Logo</label>
-                            <div className="flex items-start gap-5">
+                            <label className="block text-sm font-medium text-gray-700 mb-3">Company Logo</label>
+                            <div className="flex items-start gap-6">
                                 {/* Preview box */}
-                                <div className="relative w-32 h-32 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center overflow-hidden bg-gray-50 flex-shrink-0">
+                                <div className="relative w-40 h-40 border-2 border-dashed border-gray-300 rounded-[4px]-xl flex flex-col items-center justify-center overflow-hidden bg-gray-50 flex-shrink-0">
                                     {isUploadingLogo ? (
-                                        <div className="flex flex-col items-center gap-1">
-                                            <Loader2 className="w-7 h-7 animate-spin text-[#1e293b]" />
-                                            <span className="text-[10px] text-gray-400">Uploading...</span>
+                                        <div className="flex flex-col items-center gap-2">
+                                            <Loader2 className="w-8 h-8 animate-spin text-[#516057]" />
+                                            <span className="text-xs text-gray-400">Uploading...</span>
                                         </div>
                                     ) : logoPreview ? (
-                                        <img src={logoPreview} alt="Logo" className="w-full h-full object-contain p-2" />
+                                        <img src={logoPreview} alt="Logo" className="w-full h-full object-contain p-3" />
                                     ) : (
-                                        <div className="flex flex-col items-center gap-1 text-gray-300">
-                                            <ImagePlus className="w-8 h-8" />
-                                            <span className="text-[10px]">No logo</span>
+                                        <div className="flex flex-col items-center gap-2 text-gray-300">
+                                            <ImagePlus className="w-10 h-10" />
+                                            <span className="text-xs">No logo</span>
                                         </div>
                                     )}
                                 </div>
 
                                 {/* Upload controls */}
-                                <div className="flex flex-col gap-2 justify-center h-32">
+                                <div className="flex flex-col gap-3 justify-center h-40">
                                     <input
                                         ref={fileInputRef}
                                         type="file"
@@ -356,34 +356,34 @@ export default function SettingsPage() {
                                         className="hidden"
                                         id="logo-upload"
                                     />
-                                    <label htmlFor="logo-upload" className={`inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md border border-gray-300 text-gray-700 cursor-pointer hover:bg-gray-50 transition-colors ${isUploadingLogo ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}`}>
-                                        <ImagePlus className="w-4 h-4" />
+                                    <label htmlFor="logo-upload" className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 text-base font-medium rounded-[4px] border border-gray-300 text-gray-700 cursor-pointer hover:bg-gray-50 transition-all ${isUploadingLogo ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}`}>
+                                        <ImagePlus className="w-5 h-5" />
                                         {logoPreview ? 'Change Logo' : 'Upload Logo'}
                                     </label>
-                                    <p className="text-[11px] text-gray-400">PNG, JPG, SVG up to 5MB</p>
+                                    <p className="text-sm text-gray-400">PNG, JPG, SVG up to 5MB</p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Business Name */}
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-0.5">Business Name</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Business Name</label>
                             <input
                                 type="text"
                                 value={businessForm.businessName}
                                 onChange={(e) => setBusinessForm({ businessName: e.target.value })}
                                 placeholder="Enter your business name"
-                                className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-slate-500"
+                                className="w-full px-4 py-3 text-base border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
                                 disabled={isUpdating}
                             />
                         </div>
 
-                        <div className="flex justify-end pt-1">
-                            <Button variant="primary" size="sm" onClick={handleSaveBusinessSettings} disabled={isUpdating || isUploadingLogo}>
+                        <div className="flex justify-end pt-2">
+                            <Button variant="primary" size="md" onClick={handleSaveBusinessSettings} disabled={isUpdating || isUploadingLogo}>
                                 {isUpdating ? (
-                                    <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Saving...</>
+                                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</>
                                 ) : (
-                                    <><Save className="w-3.5 h-3.5 mr-1.5" />Save Business Settings</>
+                                    <><Save className="w-4 h-4 mr-2" />Save Business Settings</>
                                 )}
                             </Button>
                         </div>
@@ -393,11 +393,11 @@ export default function SettingsPage() {
 
             {/* Warehouse / Shipping Address - Only visible to MainAdmin */}
             {isMainAdmin && (
-                <div className="bg-white rounded-lg shadow-md p-6">
-                    <div className="flex items-center gap-3 mb-6">
-                        <Warehouse className="w-5 h-5 text-[#1e293b]" />
+                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] px-6 py-5">
+                    <div className="flex items-center gap-3 mb-5">
+                        <Warehouse className="w-5 h-5 text-[#516057]" />
                         <div>
-                            <h2 className="text-lg font-semibold text-gray-900">Warehouse / Shipping Address</h2>
+                            <h2 className="text-base font-semibold text-gray-900">Warehouse / Shipping Address</h2>
                             <p className="text-sm text-gray-500">All pharmacy returns are shipped to this address via FedEx</p>
                         </div>
                     </div>
@@ -405,99 +405,99 @@ export default function SettingsPage() {
                     {isLoading && !settings ? (
                         <div className="flex items-center justify-center py-12">
                             <div className="flex flex-col items-center gap-3">
-                                <Loader2 className="w-8 h-8 animate-spin text-[#1e293b]" />
-                                <p className="text-sm text-gray-600">Loading settings...</p>
+                                <Loader2 className="w-8 h-8 animate-spin text-[#516057]" />
+                                <p className="text-base text-gray-600">Loading settings...</p>
                             </div>
                         </div>
                     ) : (
-                        <div className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-5">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Warehouse Name</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Warehouse Name</label>
                                     <input
                                         type="text"
                                         value={warehouseForm.warehouseName}
                                         onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseName: e.target.value })}
                                         placeholder="e.g. FCR Returns Warehouse"
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500"
+                                        className="w-full px-4 py-3 text-base border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
                                         disabled={isUpdating}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Contact Name</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Contact Name</label>
                                     <input
                                         type="text"
                                         value={warehouseForm.warehouseContactName}
                                         onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseContactName: e.target.value })}
                                         placeholder="Receiving Department"
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500"
+                                        className="w-full px-4 py-3 text-base border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
                                         disabled={isUpdating}
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Street Address</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Street Address</label>
                                 <input
                                     type="text"
                                     value={warehouseForm.warehouseStreet}
                                     onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseStreet: e.target.value })}
                                     placeholder="123 Warehouse Blvd"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500"
+                                    className="w-full px-4 py-3 text-base border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
                                     disabled={isUpdating}
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
                                     <input
                                         type="text"
                                         value={warehouseForm.warehouseCity}
                                         onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseCity: e.target.value })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500"
+                                        className="w-full px-4 py-3 text-base border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
                                         disabled={isUpdating}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
                                     <input
                                         type="text"
                                         value={warehouseForm.warehouseState}
                                         onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseState: e.target.value.toUpperCase().slice(0, 2) })}
                                         placeholder="TX"
                                         maxLength={2}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500"
+                                        className="w-full px-4 py-3 text-base border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
                                         disabled={isUpdating}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">ZIP Code</label>
                                     <input
                                         type="text"
                                         value={warehouseForm.warehouseZip}
                                         onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseZip: e.target.value.replace(/\D/g, '').slice(0, 5) })}
                                         placeholder="75001"
                                         maxLength={5}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500"
+                                        className="w-full px-4 py-3 text-base border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
                                         disabled={isUpdating}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
                                     <input
                                         type="text"
                                         value={warehouseForm.warehouseCountry}
                                         onChange={(e) => setWarehouseForm({ ...warehouseForm, warehouseCountry: e.target.value.toUpperCase().slice(0, 2) })}
                                         maxLength={2}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500"
+                                        className="w-full px-4 py-3 text-base border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
                                         disabled={isUpdating}
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
                                 <input
                                     type="tel"
                                     value={warehouseForm.warehousePhone}
@@ -506,22 +506,22 @@ export default function SettingsPage() {
                                         setWarehouseForm({ ...warehouseForm, warehousePhone: cleaned });
                                     }}
                                     placeholder="4695557890"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 md:w-1/2"
+                                    className="w-full px-4 py-3 text-base border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent md:w-1/2"
                                     disabled={isUpdating}
                                 />
                             </div>
 
-                            <div className="flex justify-end pt-4">
+                            <div className="flex justify-end pt-2">
                                 <Button
                                     variant="primary"
-                                    size="sm"
+                                    size="md"
                                     onClick={handleSaveWarehouseAddress}
                                     disabled={isUpdating || (isLoading && !settings)}
                                 >
                                     {isUpdating ? (
-                                        <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Saving...</>
+                                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</>
                                     ) : (
-                                        <><Save className="w-3.5 h-3.5 mr-1.5" />Save Warehouse Address</>
+                                        <><Save className="w-4 h-4 mr-2" />Save Warehouse Address</>
                                     )}
                                 </Button>
                             </div>
@@ -531,20 +531,20 @@ export default function SettingsPage() {
             )}
 
             {/* Security Settings - Reset Password */}
-            <div className="bg-white rounded-lg shadow px-4 py-3">
-                <div className="flex items-center gap-2 mb-3">
-                    <Shield className="w-4 h-4 text-[#1e293b]" />
-                    <h2 className="text-sm font-semibold text-gray-900">Security Settings</h2>
+            <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] px-6 py-5">
+                <div className="flex items-center gap-2 mb-4">
+                    <Shield className="w-5 h-5 text-[#516057]" />
+                    <h2 className="text-base font-semibold text-gray-900">Security Settings</h2>
                 </div>
 
-                <div className="space-y-2.5 max-w-md">
+                <div className="space-y-4 max-w-md">
                     {[
                         { key: 'currentPassword' as const, label: 'Current Password', hint: '' },
                         { key: 'newPassword' as const, label: 'New Password', hint: 'Minimum 8 characters' },
                         { key: 'confirmPassword' as const, label: 'Confirm New Password', hint: '' },
                     ].map(({ key, label, hint }) => (
                         <div key={key}>
-                            <label className="block text-xs font-medium text-gray-700 mb-0.5">{label}</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
                             <div className="relative">
                                 <input
                                     type={showPasswords[key] ? 'text' : 'password'}
@@ -556,31 +556,31 @@ export default function SettingsPage() {
                                             setPasswordErrors(prev => ({ ...prev, confirmPassword: '' }));
                                         }
                                     }}
-                                    className={`w-full px-2.5 py-1.5 pr-8 text-xs border rounded focus:outline-none focus:ring-1 ${
-                                        passwordErrors[key] ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-slate-500'
+                                    className={`w-full px-4 py-3 pr-10 text-base border rounded-[4px] focus:outline-none focus:ring-2 ${
+                                        passwordErrors[key] ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-[#516057]'
                                     }`}
                                     disabled={isResettingPassword}
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPasswords({ ...showPasswords, [key]: !showPasswords[key] })}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                                     disabled={isResettingPassword}
                                 >
-                                    {showPasswords[key] ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                    {showPasswords[key] ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                 </button>
                             </div>
-                            {passwordErrors[key] && <p className="mt-0.5 text-[10px] text-red-600">{passwordErrors[key]}</p>}
-                            {hint && !passwordErrors[key] && <p className="mt-0.5 text-[10px] text-gray-400">{hint}</p>}
+                            {passwordErrors[key] && <p className="mt-1 text-sm text-red-600">{passwordErrors[key]}</p>}
+                            {hint && !passwordErrors[key] && <p className="mt-1 text-sm text-gray-400">{hint}</p>}
                         </div>
                     ))}
 
-                    <div className="flex justify-end pt-1">
-                        <Button variant="primary" size="sm" onClick={handleResetPassword} disabled={isResettingPassword}>
+                    <div className="flex justify-end pt-2">
+                        <Button variant="primary" size="md" onClick={handleResetPassword} disabled={isResettingPassword}>
                             {isResettingPassword ? (
-                                <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Resetting...</>
+                                <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Resetting...</>
                             ) : (
-                                <><Save className="w-3.5 h-3.5 mr-1.5" />Reset Password</>
+                                <><Save className="w-4 h-4 mr-2" />Reset Password</>
                             )}
                         </Button>
                     </div>

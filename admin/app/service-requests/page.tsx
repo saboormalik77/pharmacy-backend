@@ -159,7 +159,7 @@ export default function ServiceRequestsPage() {
             <div className="flex items-start justify-between flex-wrap gap-3">
                 <div>
                     <h1 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                        <Truck className="w-5 h-5 text-[#1e293b]" />
+                        <Truck className="w-5 h-5 text-[#1d2222]" />
                         Service Requests
                     </h1>
                     <p className="text-xs text-gray-500 mt-0.5">
@@ -179,7 +179,7 @@ export default function ServiceRequestsPage() {
                             onClick={() => dispatch(setStatusFilter(s.value))}
                             className={`px-3 py-1 text-xs rounded border transition-colors ${
                                 statusFilter === s.value
-                                    ? 'bg-[#1e293b] text-white border-[#1e293b]'
+                                    ? 'bg-[#1d2222] text-white border-[#1d2222]'
                                     : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
                             }`}
                         >
@@ -217,7 +217,7 @@ export default function ServiceRequestsPage() {
                     <div className="overflow-x-auto">
                         <table className="w-full table-auto">
                             <thead>
-                                <tr className="bg-gradient-to-r from-[#1e293b] to-[#334155] border-b-2 border-slate-700">
+                                <tr className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
                                     <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Pharmacy</th>
                                     <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Requested</th>
                                     <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Scheduled</th>
@@ -341,7 +341,7 @@ function ActionButtons({
     if (isProcessor) {
         if (r.status === 'pending') {
             return (
-                <button onClick={() => router.push(`/service-requests/${r.id}/schedule`)} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title="Claim and Schedule">
+                <button onClick={() => router.push(`/service-requests/${r.id}/schedule`)} className="p-1.5 text-gray-400 hover:text-[#516057] hover:bg-[#516057]/10 rounded transition-colors" title="Claim and Schedule">
                     <Play className="w-3.5 h-3.5" />
                 </button>
             );
@@ -349,13 +349,13 @@ function ActionButtons({
         if (r.status === 'scheduled' && r.is_claimed_by_me) {
             return (
                 <div className="flex justify-end gap-1">
-                    <button onClick={() => router.push(`/service-requests/${r.id}/schedule`)} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title="Reschedule">
+                    <button onClick={() => router.push(`/service-requests/${r.id}/schedule`)} className="p-1.5 text-gray-400 hover:text-[#516057] hover:bg-[#516057]/10 rounded transition-colors" title="Reschedule">
                         <Calendar className="w-3.5 h-3.5" />
                     </button>
-                    <button onClick={onComplete} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title="Mark as Complete">
+                    <button onClick={onComplete} className="p-1.5 text-gray-400 hover:text-[#516057] hover:bg-[#516057]/10 rounded transition-colors" title="Mark as Complete">
                         <CheckSquare className="w-3.5 h-3.5" />
                     </button>
-                    <button onClick={onRelease} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title="Release back to queue">
+                    <button onClick={onRelease} className="p-1.5 text-gray-400 hover:text-[#516057] hover:bg-[#516057]/10 rounded transition-colors" title="Release back to queue">
                         <RotateCcw className="w-3.5 h-3.5" />
                     </button>
                 </div>
@@ -366,7 +366,7 @@ function ActionButtons({
     // Admin
     if (r.status === 'pending' || r.status === 'scheduled') {
         return (
-            <button onClick={onReassign} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title="Reassign Processor">
+            <button onClick={onReassign} className="p-1.5 text-gray-400 hover:text-[#516057] hover:bg-[#516057]/10 rounded transition-colors" title="Reassign Processor">
                 <User className="w-3.5 h-3.5" />
             </button>
         );
@@ -417,14 +417,14 @@ function DetailModal({
                         </Row>
                         {r.pharmacy_email && (
                             <Row label="Email" icon={<Mail className="w-3.5 h-3.5" />}>
-                                <a href={`mailto:${r.pharmacy_email}`} className="text-[#1e293b] hover:underline">
+                                <a href={`mailto:${r.pharmacy_email}`} className="text-[#1d2222] hover:underline">
                                     {r.pharmacy_email}
                                 </a>
                             </Row>
                         )}
                         {r.pharmacy_phone && (
                             <Row label="Phone" icon={<Phone className="w-3.5 h-3.5" />}>
-                                <a href={`tel:${r.pharmacy_phone}`} className="text-[#1e293b] hover:underline">
+                                <a href={`tel:${r.pharmacy_phone}`} className="text-[#1d2222] hover:underline">
                                     {r.pharmacy_phone}
                                 </a>
                             </Row>
@@ -521,7 +521,7 @@ function DetailModal({
                         <>
                             {r.status === 'pending' && (
                                 <button onClick={() => router.push(`/service-requests/${r.id}/schedule`)} disabled={isActing}
-                                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">
+                                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1d2222] text-white hover:bg-[#3d4343] disabled:opacity-50 transition-colors">
                                     <Play className="w-3.5 h-3.5" /> Claim & Schedule
                                 </button>
                             )}
@@ -536,7 +536,7 @@ function DetailModal({
                                         <Calendar className="w-3.5 h-3.5 mr-1 inline" /> Reschedule
                                     </button>
                                     <button onClick={onComplete} disabled={isActing}
-                                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">
+                                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1d2222] text-white hover:bg-[#3d4343] disabled:opacity-50 transition-colors">
                                         <CheckSquare className="w-3.5 h-3.5" /> Complete
                                     </button>
                                 </>
@@ -617,7 +617,7 @@ function CompleteModal({ request, isActing, onClose, onSubmit }: {
                             Cancel
                         </button>
                         <button type="submit" disabled={isActing}
-                                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">
+                                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1d2222] text-white hover:bg-[#3d4343] disabled:opacity-50 transition-colors">
                             {isActing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Mark Complete'}
                         </button>
                     </div>

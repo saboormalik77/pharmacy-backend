@@ -776,7 +776,7 @@ export default function ReturnDetailPage() {
                                     return;
                                 }
                                 checkActionWithToast('complete return', () => setActionModal('complete'));
-                            }} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-[#1e293b] text-white hover:bg-[#334155] transition-colors">
+                            }} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-[#1d2222] text-white hover:bg-[#3d4343] transition-colors">
                                 <CheckCircle className="w-3 h-3" /> Complete
                             </button>
                         )}
@@ -1008,7 +1008,7 @@ export default function ReturnDetailPage() {
                     </h2>
                     {isProcessor && canAddDeleteItems && (
                         <div className="flex gap-1.5">
-                            <button onClick={() => router.push(`/warehouse/returns/${id}/add-items`)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-[#1e293b] text-white hover:bg-[#334155] transition-colors">
+                            <button onClick={() => router.push(`/warehouse/returns/${id}/add-items`)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-[#1d2222] text-white hover:bg-[#3d4343] transition-colors">
                                 <Plus className="w-3 h-3" /> Add Items
                             </button>
                             {/* Wine Cellar Items functionality moved to MainAdmin warehouse verification */}
@@ -1082,7 +1082,7 @@ export default function ReturnDetailPage() {
                         <Package className="w-10 h-10 text-gray-300 mx-auto mb-2" />
                         <p className="text-gray-500 text-xs font-medium">No items yet</p>
                         {isProcessor && canAddDeleteItems && (
-                            <button onClick={() => router.push(`/warehouse/returns/${id}/add-items`)} className="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-[#1e293b] text-white hover:bg-[#334155] transition-colors">
+                            <button onClick={() => router.push(`/warehouse/returns/${id}/add-items`)} className="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-[#1d2222] text-white hover:bg-[#3d4343] transition-colors">
                                 <Plus className="w-3 h-3" /> Start Scanning
                             </button>
                         )}
@@ -1096,7 +1096,7 @@ export default function ReturnDetailPage() {
                     <div className="overflow-x-auto">
                         <table className="w-full table-auto">
                             <thead>
-                                <tr className="bg-gradient-to-r from-[#1e293b] to-[#334155] border-b-2 border-slate-700">
+                                <tr className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
                                     <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">NDC</th>
                                     <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Name</th>
                                     <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Manufacturer</th>
@@ -1178,17 +1178,17 @@ export default function ReturnDetailPage() {
                                             <td className="px-4 py-3">
                                                 <div className="flex items-center justify-end gap-0.5">
                                                     {canAddDeleteItems && item.nonReturnableReason === 'date' && !item.wineCellarId && (
-                                                        <button onClick={() => handleMoveToWineCellar(item)} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title="Move to Wine Cellar">
+                                                        <button onClick={() => handleMoveToWineCellar(item)} className="p-1.5 text-gray-400 hover:text-[#516057] hover:bg-[#516057]/10 rounded transition-colors" title="Move to Wine Cellar">
                                                             <Archive className="w-3 h-3" />
                                                         </button>
                                                     )}
                                                     {canAddDeleteItems && (
-                                                        <button onClick={() => setEditItemModal(item)} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title={isLocked ? 'Edit classification' : 'Edit item'}>
+                                                        <button onClick={() => setEditItemModal(item)} className="p-1.5 text-gray-400 hover:text-[#516057] hover:bg-[#516057]/10 rounded transition-colors" title={isLocked ? 'Edit classification' : 'Edit item'}>
                                                             <Edit className="w-3 h-3" />
                                                         </button>
                                                     )}
                                                     {canAddDeleteItems && (
-                                                        <button onClick={() => setDeleteItemModal(item)} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title="Delete item">
+                                                        <button onClick={() => setDeleteItemModal(item)} className="p-1.5 text-gray-400 hover:text-[#516057] hover:bg-[#516057]/10 rounded transition-colors" title="Delete item">
                                                             <Trash2 className="w-3 h-3" />
                                                         </button>
                                                     )}
@@ -1257,7 +1257,7 @@ export default function ReturnDetailPage() {
                         </div>
                         <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
                             <button onClick={() => setEditItemModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleUpdateItem} disabled={isItemActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">
+                            <button onClick={handleUpdateItem} disabled={isItemActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1d2222] text-white hover:bg-[#3d4343] disabled:opacity-50 transition-colors">
                                 {isItemActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Saving...</> : 'Save'}
                             </button>
                         </div>
@@ -1318,7 +1318,7 @@ export default function ReturnDetailPage() {
                         </div>
                         <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
                             <button onClick={() => setEditModal(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleUpdate} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">
+                            <button onClick={handleUpdate} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1d2222] text-white hover:bg-[#3d4343] disabled:opacity-50 transition-colors">
                                 {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Saving...</> : 'Save Changes'}
                             </button>
                         </div>
@@ -1345,7 +1345,7 @@ export default function ReturnDetailPage() {
                         </div>
                         <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
                             <button onClick={() => setActionModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleStatusAction} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">
+                            <button onClick={handleStatusAction} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1d2222] text-white hover:bg-[#3d4343] disabled:opacity-50 transition-colors">
                                 {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Processing...</> : 'Confirm'}
                             </button>
                         </div>
@@ -1516,7 +1516,7 @@ export default function ReturnDetailPage() {
                                         setWcAdding(false);
                                     }}
                                     disabled={wcSelected.size === 0 || wcAdding}
-                                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors"
+                                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1d2222] text-white hover:bg-[#3d4343] disabled:opacity-50 transition-colors"
                                 >
                                     {wcAdding ? (
                                         <>

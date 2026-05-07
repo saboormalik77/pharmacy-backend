@@ -119,10 +119,9 @@ export function ReturnsValueChart() {
                             <Line
                                 type="monotone"
                                 dataKey="value"
-                                stroke="#4CAF50"
-                                strokeWidth={2}
-                                name="Returns Value"
-                                dot={{ fill: '#4CAF50', r: 3 }}
+stroke="#516057"
+
+                                dot={{ fill: '#516057', r: 3 }}
                                 activeDot={{ r: 5 }}
                             />
                         </LineChart>

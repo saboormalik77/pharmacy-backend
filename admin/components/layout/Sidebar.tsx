@@ -12,10 +12,14 @@ import {
     ClipboardList,
     Scan,
     Truck,
+    ChevronLeft,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppSelector } from '@/lib/store/hooks';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useEffect } from 'react';
+import { fetchSettings } from '@/lib/store/settingsSlice';
+import { useAppDispatch } from '@/lib/store/hooks';
 
 // Warehouse sub-routes that activate the Warehouse sidebar link (when that tab is uncommented)
 const warehouseSubRoutes = [
@@ -74,12 +78,19 @@ interface SidebarProps {
     isCollapsed: boolean;
     isOpen?: boolean;
     onClose?: () => void;
+    onToggleCollapse?: () => void;
 }
 
-export function Sidebar({ isCollapsed, isOpen = false, onClose }: SidebarProps) {
+export function Sidebar({ isCollapsed, isOpen = false, onClose, onToggleCollapse }: SidebarProps) {
     const pathname = usePathname();
+    const dispatch = useAppDispatch();
     const { user } = useAppSelector((state) => state.auth);
     const { hasPermission, isSuperAdmin } = usePermissions();
+    const { settings } = useAppSelector((state) => state.settings);
+
+    useEffect(() => {
+        dispatch(fetchSettings());
+    }, [dispatch]);
 
     // Choose navigation links based on user role, filtered by permissions
     const rawLinks = user?.role === 'processor' ? processorSidebarLinks : adminSidebarLinks;
@@ -105,18 +116,43 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose }: SidebarProps) 
     return (
         <aside
             className={cn(
-                'bg-[#1e293b] text-slate-400 h-screen fixed left-0 top-16 transition-all duration-300 z-40',
+                'bg-[#1d2222] text-[#9ca3af] h-screen fixed left-0 top-0 transition-all duration-300 z-50',
                 isOpen ? 'translate-x-0' : '-translate-x-full',
                 'sm:translate-x-0',
                 'w-64 sm:w-auto',
                 isCollapsed ? 'sm:w-16' : 'sm:w-64'
             )}
         >
+            {/* Sidebar Header with Brand & Collapse */}
+            <div className="flex items-center justify-between px-4 py-4 border-b border-[#3d4343]">
+                <div className="flex items-center gap-2">
+                    {settings?.logoUrl ? (
+                        <img src={settings.logoUrl} alt="Logo" className="w-8 h-8 rounded-[4px] object-contain" />
+                    ) : (
+                        <div className="w-8 h-8 bg-[#516057] rounded-[4px] flex items-center justify-center">
+                            <span className="text-white font-bold text-xs">PA</span>
+                        </div>
+                    )}
+                    {!isCollapsed && (
+                        <span className="text-sm font-bold text-white">{settings?.businessName || 'PharmAdmin'}</span>
+                    )}
+                </div>
+                <button 
+                    onClick={() => {
+                        if (onClose) onClose();
+                        if (onToggleCollapse) onToggleCollapse();
+                    }}
+                    className="p-1.5 text-[#9ca3af] hover:text-white hover:bg-[#3d4343] rounded-[4px] transition-colors"
+                >
+                    <ChevronLeft className={cn('w-4 h-4', isCollapsed && 'rotate-180')} />
+                </button>
+            </div>
+            
             <div
-                className="h-full overflow-y-auto overflow-x-hidden p-4 pb-8"
-                style={{ scrollbarWidth: 'thin', scrollbarColor: '#334155 transparent' }}
+                className="h-full overflow-y-auto overflow-x-hidden p-4 pb-10"
+                style={{ scrollbarWidth: 'thin', scrollbarColor: '#3d4343 transparent' }}
             >
-                <nav className="space-y-0.5">
+                <nav className="space-y-1">
                     {sidebarLinks.map((link) => {
                         const Icon = link.icon;
                         const isActive =
@@ -132,17 +168,17 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose }: SidebarProps) 
                                 href={link.href}
                                 onClick={handleLinkClick}
                                 className={cn(
-                                    'flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all',
-                                    'hover:bg-[#334155] hover:text-white',
+                                    'flex items-center gap-3 px-3 py-2.5 rounded transition-all',
+                                    'hover:bg-[#516057] hover:text-white',
                                     isActive
-                                        ? 'bg-[#334155] text-[#4CAF50]'
-                                        : 'text-slate-400',
+                                        ? 'bg-[#516057] text-white border-l-3 border-[#7fb399]'
+                                        : 'text-[#9ca3af]',
                                     isCollapsed && 'justify-center'
                                 )}
                             >
-                                <Icon className="w-4 h-4 flex-shrink-0" />
+                                <Icon className="w-4.5 h-4.5 flex-shrink-0" />
                                 {!isCollapsed && (
-                                    <span className={cn('text-sm', isActive ? 'font-semibold' : 'font-medium')}>
+                                    <span className={cn('text-xs', isActive ? 'font-semibold' : 'font-medium')}>
                                         {link.label}
                                     </span>
                                 )}

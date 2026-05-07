@@ -26,6 +26,10 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         }
     };
 
+    const handleToggleSidebarCollapse = () => {
+        setSidebarCollapsed(prev => !prev);
+    };
+
     const handleCloseSidebar = () => setSidebarOpen(false);
 
     useEffect(() => {
@@ -43,15 +47,19 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 <ProtectedRoute>
                     {!isAuthPage && (
                         <>
-                            <Navbar onToggleSidebar={handleToggleSidebar} />
+                            <Navbar 
+                                onToggleSidebar={handleToggleSidebar}
+                                sidebarCollapsed={sidebarCollapsed} 
+                            />
                             <Sidebar
                                 isCollapsed={sidebarCollapsed}
                                 isOpen={sidebarOpen}
                                 onClose={handleCloseSidebar}
+                                onToggleCollapse={handleToggleSidebarCollapse}
                             />
                             {sidebarOpen && (
                                 <div
-                                    className="fixed top-16 left-0 right-0 bottom-0 z-30 sm:hidden"
+                                    className="fixed top-0 left-0 right-0 bottom-0 z-40 sm:hidden"
                                     onClick={handleCloseSidebar}
                                 />
                             )}
@@ -60,7 +68,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                     <main
                         className={
                             !isAuthPage
-                                ? `pt-16 transition-all duration-300 min-h-screen ${sidebarCollapsed ? 'sm:ml-16' : 'sm:ml-64'}`
+                                ? `pt-14 transition-all duration-300 min-h-screen ${sidebarCollapsed ? 'sm:ml-16' : 'sm:ml-64'}`
                                 : ''
                         }
                     >

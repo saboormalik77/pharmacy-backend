@@ -86,13 +86,13 @@ export default function InventoryPage() {
             <div className="flex gap-2">
                 <button
                     onClick={() => setActiveSection('aging')}
-                    className={`px-3 py-1.5 text-xs font-medium rounded ${activeSection === 'aging' ? 'bg-[#1e293b] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                    className={`px-3 py-1.5 text-xs font-medium rounded ${activeSection === 'aging' ? 'bg-[#1d2222] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                 >
                     Aging Inventory
                 </button>
                 <button
                     onClick={() => setActiveSection('outstanding-ra')}
-                    className={`px-3 py-1.5 text-xs font-medium rounded ${activeSection === 'outstanding-ra' ? 'bg-[#1e293b] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                    className={`px-3 py-1.5 text-xs font-medium rounded ${activeSection === 'outstanding-ra' ? 'bg-[#1d2222] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                 >
                     Outstanding RA
                 </button>
@@ -127,19 +127,19 @@ export default function InventoryPage() {
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 <div className="bg-white rounded-lg shadow-md p-3">
                                     <p className="text-xs text-gray-600 mb-1">Total Items</p>
-                                    <p className="text-lg font-bold">{formatNumber(agingData.summary?.totalItems || 0)}</p>
+                                    <p className="text-base font-bold">{formatNumber(agingData.summary?.totalItems || 0)}</p>
                                 </div>
                                 <div className="bg-white rounded-lg shadow-md p-3">
                                     <p className="text-xs text-gray-600 mb-1">Total Value</p>
-                                    <p className="text-lg font-bold text-green-600">{formatCurrency(agingData.summary?.totalValue || 0)}</p>
+                                    <p className="text-base font-bold text-green-600">{formatCurrency(agingData.summary?.totalValue || 0)}</p>
                                 </div>
                                 <div className="bg-white rounded-lg shadow-md p-3">
                                     <p className="text-xs text-gray-600 mb-1">Shelved</p>
-                                    <p className="text-lg font-bold text-blue-600">{formatNumber(agingData.summary?.shelvedCount || 0)}</p>
+                                    <p className="text-base font-bold text-blue-600">{formatNumber(agingData.summary?.shelvedCount || 0)}</p>
                                 </div>
                                 <div className="bg-white rounded-lg shadow-md p-3">
                                     <p className="text-xs text-gray-600 mb-1">Avg Days Shelved</p>
-                                    <p className="text-lg font-bold text-orange-600">{agingData.summary?.avgDaysShelved || 0} days</p>
+                                    <p className="text-base font-bold text-orange-600">{agingData.summary?.avgDaysShelved || 0} days</p>
                                 </div>
                             </div>
 
@@ -172,7 +172,7 @@ export default function InventoryPage() {
                                 <h2 className="text-sm font-semibold text-gray-900 mb-3">Inventory Items</h2>
                                 <div className="overflow-x-auto">
                                     <table className="w-full table-auto">
-                                        <thead className="bg-gradient-to-r from-[#1e293b] to-[#334155] border-b-2 border-slate-700">
+                                        <thead className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
                                             <tr>
                                                 <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider">NDC</th>
                                                 <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider">Product</th>
@@ -235,7 +235,7 @@ export default function InventoryPage() {
                                 className="w-full pl-8 pr-3 py-1.5 text-xs border rounded bg-white"
                             />
                         </div>
-                        <button onClick={fetchRA} className="px-3 py-1.5 text-xs bg-[#1e293b] text-white rounded hover:bg-[#334155]">
+                        <button onClick={fetchRA} className="px-3 py-1.5 text-xs bg-[#1d2222] text-white rounded hover:bg-[#3d4343]">
                             Search
                         </button>
                     </div>
@@ -251,15 +251,15 @@ export default function InventoryPage() {
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div className="bg-white rounded-lg shadow-md p-3">
                                     <p className="text-xs text-gray-600 mb-1">Outstanding RAs</p>
-                                    <p className="text-lg font-bold text-red-600">{formatNumber(raData.summary?.totalOutstanding || 0)}</p>
+                                    <p className="text-base font-bold text-red-600">{formatNumber(raData.summary?.totalOutstanding || 0)}</p>
                                 </div>
                                 <div className="bg-white rounded-lg shadow-md p-3">
                                     <p className="text-xs text-gray-600 mb-1">Total Ask Value</p>
-                                    <p className="text-lg font-bold text-blue-600">{formatCurrency(raData.summary?.totalAskValue || 0)}</p>
+                                    <p className="text-base font-bold text-blue-600">{formatCurrency(raData.summary?.totalAskValue || 0)}</p>
                                 </div>
                                 <div className="bg-white rounded-lg shadow-md p-3">
                                     <p className="text-xs text-gray-600 mb-1">Avg Days Waiting</p>
-                                    <p className="text-lg font-bold text-orange-600">{raData.summary?.avgDaysWaiting || 0} days</p>
+                                    <p className="text-base font-bold text-orange-600">{raData.summary?.avgDaysWaiting || 0} days</p>
                                 </div>
                                 <div className="bg-white rounded-lg shadow-md p-3">
                                     <p className="text-xs text-gray-600 mb-1">Oldest Request</p>
@@ -295,7 +295,7 @@ export default function InventoryPage() {
                                 <h2 className="text-sm font-semibold text-gray-900 mb-3">Outstanding RA Details</h2>
                                 <div className="overflow-x-auto">
                                     <table className="w-full table-auto">
-                                        <thead className="bg-gradient-to-r from-[#1e293b] to-[#334155] border-b-2 border-slate-700">
+                                        <thead className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
                                             <tr>
                                                 <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider">Memo #</th>
                                                 <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider">Manufacturer</th>

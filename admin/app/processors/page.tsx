@@ -416,66 +416,66 @@ export default function ProcessorsPage() {
     // ── Render ─────────────────────────────────────────────────
     return (
         <PermissionGate permission="processors">
-        <div className="space-y-3">
+        <div className="space-y-6 p-8">
             <ToastContainer toasts={toasts} onClose={removeToast} />
 
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-lg font-bold text-gray-900">Processors</h1>
-                    <p className="text-xs text-gray-500">Manage field processors and their store assignments</p>
+                    <h1 className="text-lg font-medium text-gray-900" style={{ fontFamily: 'var(--font-newsreader), serif' }}>Processors</h1>
+                    <p className="text-xs text-gray-500 mt-1">Manage field processors and their store assignments</p>
                 </div>
                 <button
                     onClick={() => setAddModal(true)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded text-xs font-medium bg-[#1e293b] text-white hover:bg-[#334155] transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-medium bg-[#516057] text-white hover:opacity-90 transition-all"
                 >
-                    <UserPlus className="w-3.5 h-3.5" /> Add Processor
+                    <UserPlus className="w-4 h-4" /> Add Processor
                 </button>
             </div>
 
             {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-xs flex items-center gap-2">
-                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                <div className="bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-lg text-sm flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
                     {error}
                 </div>
             )}
 
             {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 {[
-                    { icon: <UserCog className="w-3.5 h-3.5 text-gray-400" />,      label: 'Total',    value: pagination?.totalCount ?? processors.length, color: 'text-gray-900'  },
-                    { icon: <CheckCircle className="w-3.5 h-3.5 text-green-500" />, label: 'Active',   value: totalActive,   color: 'text-green-700' },
-                    { icon: <Power className="w-3.5 h-3.5 text-gray-400" />,        label: 'Inactive', value: totalInactive, color: 'text-gray-900'  },
-                    { icon: <Store className="w-3.5 h-3.5 text-blue-500" />,        label: 'Stores',   value: totalStores,   color: 'text-blue-700'  },
+                    { icon: <UserCog className="w-5 h-5 text-gray-400" />,      label: 'Total',    value: pagination?.totalCount ?? processors.length, color: 'text-gray-900'  },
+                    { icon: <CheckCircle className="w-5 h-5 text-green-500" />, label: 'Active',   value: totalActive,   color: 'text-green-700' },
+                    { icon: <Power className="w-5 h-5 text-gray-400" />,        label: 'Inactive', value: totalInactive, color: 'text-gray-900'  },
+                    { icon: <Store className="w-5 h-5 text-blue-500" />,        label: 'Stores',   value: totalStores,   color: 'text-blue-700'  },
                 ].map(card => (
-                    <div key={card.label} className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100">
-                        <div className="flex items-center justify-between mb-1.5">
+                    <div key={card.label} className="bg-white rounded-lg shadow border border-[#e2e2e2] px-5 py-4">
+                        <div className="flex items-center justify-between mb-2">
                             <span className="text-xs font-medium text-gray-500">{card.label}</span>
                             {card.icon}
                         </div>
-                        <p className={`text-lg font-bold ${card.color}`}>{card.value}</p>
+                        <p className={`text-xl font-bold ${card.color}`}>{card.value}</p>
                     </div>
                 ))}
             </div>
 
             {/* Table Card */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="bg-white rounded-lg shadow border border-[#e2e2e2] overflow-hidden">
                 {/* Filters */}
-                <div className="px-3 py-2 border-b border-gray-100 flex gap-2">
+                <div className="px-5 py-4 border-b border-gray-100 flex gap-3">
                     <div className="flex-1 relative">
-                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                         <input
                             type="text"
                             placeholder="Search by name or email"
                             value={searchTerm}
                             onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                            className="w-full pl-8 pr-3 py-1.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-primary-500"
+                            className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
                         />
                     </div>
                     <select
                         value={statusFilter}
                         onChange={(e) => { setStatusFilter(e.target.value as typeof statusFilter); setCurrentPage(1); }}
-                        className="px-2 py-1.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-primary-500"
+                        className="px-5 py-4 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
                     >
                         <option value="all">All Status</option>
                         <option value="active">Active</option>
@@ -484,14 +484,14 @@ export default function ProcessorsPage() {
                 </div>
 
                 {isLoading ? (
-                    <div className="text-center py-10">
-                        <Loader2 className="w-5 h-5 animate-spin text-primary-500 mx-auto mb-1" />
-                        <p className="text-gray-400 text-xs">Loading processors...</p>
+                    <div className="text-center py-12">
+                        <Loader2 className="w-6 h-6 animate-spin text-[#516057] mx-auto mb-2" />
+                        <p className="text-gray-500 text-sm">Loading processors...</p>
                     </div>
                 ) : processors.length === 0 ? (
-                    <div className="text-center py-10">
-                        <UserCog className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-                        <p className="text-gray-500 text-sm font-medium">No processors found</p>
+                    <div className="text-center py-12">
+                        <UserCog className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                        <p className="text-gray-600 text-sm font-medium">No processors found</p>
                         <p className="text-gray-400 text-xs mt-1">Add your first processor using the button above</p>
                     </div>
                 ) : (
@@ -499,80 +499,80 @@ export default function ProcessorsPage() {
                         <div className="overflow-x-auto">
                             <table className="w-full table-auto">
                                 <thead>
-                                    <tr className="bg-gradient-to-r from-[#1e293b] to-[#334155] border-b-2 border-slate-700">
-                                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Name</th>
-                                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Email</th>
-                                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Phone</th>
-                                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Status</th>
-                                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Stores</th>
-                                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Returns</th>
-                                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Created</th>
-                                        <th className="text-center px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Actions</th>
+                                    <tr className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
+                                        <th className="text-left px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</th>
+                                        <th className="text-left px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
+                                        <th className="text-left px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Phone</th>
+                                        <th className="text-left px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th className="text-left px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Stores</th>
+                                        <th className="text-left px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Returns</th>
+                                        <th className="text-left px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Created</th>
+                                        <th className="text-center px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {processors.map((processor, idx) => (
-                                        <tr key={processor.id} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'} hover:bg-slate-50 transition-colors border-b border-gray-100`}>
-                                            <td className="px-4 py-3 whitespace-nowrap">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
+                                        <tr key={processor.id} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]'} hover:bg-[#fafafa] transition-all border-b border-gray-100`}>
+                                            <td className="px-5 py-4 whitespace-nowrap">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                                                         {getInitials(processor.name)}
                                                     </div>
-                                                    <span className="text-sm font-medium text-gray-900 truncate max-w-[120px]" title={processor.name}>{processor.name}</span>
+                                                    <span className="text-sm font-medium text-gray-900 truncate max-w-[140px]" title={processor.name}>{processor.name}</span>
                                                 </div>
                                             </td>
-                                            <td className="px-4 py-3 whitespace-nowrap" title={processor.email || ''}>
-                                                <span className="text-sm text-gray-600 truncate max-w-[160px]">
+                                            <td className="px-5 py-4 whitespace-nowrap" title={processor.email || ''}>
+                                                <span className="text-sm text-gray-600 truncate max-w-[180px]">
                                                     {processor.email || <span className="text-gray-400 italic">—</span>}
                                                 </span>
                                             </td>
-                                            <td className="px-4 py-3 whitespace-nowrap">
+                                            <td className="px-5 py-4 whitespace-nowrap">
                                                 <span className="text-sm text-gray-600">
                                                     {processor.phone || <span className="text-gray-400 italic">—</span>}
                                                 </span>
                                             </td>
-                                            <td className="px-4 py-3 whitespace-nowrap">
+                                            <td className="px-5 py-4 whitespace-nowrap">
                                                 <Badge variant={processor.status === 'active' ? 'success' : 'default'}>
-                                                    <span className="text-[10px]">{processor.status}</span>
+                                                    <span className="text-xs">{processor.status}</span>
                                                 </Badge>
                                             </td>
-                                            <td className="px-4 py-3 whitespace-nowrap">
+                                            <td className="px-5 py-4 whitespace-nowrap">
                                                 <button
                                                     onClick={() => openStoresModal(processor)}
-                                                    className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 font-medium"
+                                                    className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-medium"
                                                 >
                                                     <Store className="w-3 h-3" />
                                                     {processor.assignedStoresCount ?? 0}
                                                 </button>
                                             </td>
-                                            <td className="px-4 py-3 whitespace-nowrap">
-                                                <span className="text-sm text-gray-900 font-medium">
+                                            <td className="px-5 py-4 whitespace-nowrap">
+                                                <span className="text-xs text-gray-900 font-medium">
                                                     {processor.totalReturns ?? 0}
                                                 </span>
                                             </td>
-                                            <td className="px-4 py-3 whitespace-nowrap">
-                                                <span className="text-sm text-gray-600">
+                                            <td className="px-5 py-4 whitespace-nowrap">
+                                                <span className="text-xs text-gray-600">
                                                     {processor.createdAt ? formatDate(processor.createdAt) : '—'}
                                                 </span>
                                             </td>
-                                            <td className="px-4 py-3 whitespace-nowrap">
+                                            <td className="px-5 py-4 whitespace-nowrap">
                                                 <div className="flex items-center gap-1 justify-center">
-                                                    <button onClick={() => handleView(processor)} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title="View">
+                                                    <button onClick={() => handleView(processor)} className="p-1.5 text-gray-400 hover:text-[#516057] hover:bg-[#516057]/10 rounded-lg transition-colors" title="View">
                                                         <Eye className="w-3.5 h-3.5" />
                                                     </button>
-                                                    <button onClick={() => handleEdit(processor)} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title="Edit">
+                                                    <button onClick={() => handleEdit(processor)} className="p-1.5 text-gray-400 hover:text-[#516057] hover:bg-[#516057]/10 rounded-lg transition-colors" title="Edit">
                                                         <Edit className="w-3.5 h-3.5" />
                                                     </button>
-                                                    <button onClick={() => openAssignModal(processor)} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title="Assign Stores">
+                                                    <button onClick={() => openAssignModal(processor)} className="p-1.5 text-gray-400 hover:text-[#516057] hover:bg-[#516057]/10 rounded-lg transition-colors" title="Assign Stores">
                                                         <Building2 className="w-3.5 h-3.5" />
                                                     </button>
                                                     {processor.status === 'active' && (
-                                                        <button onClick={() => setDeactivateModal(processor)} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title="Deactivate">
+                                                        <button onClick={() => setDeactivateModal(processor)} className="p-1.5 text-gray-400 hover:text-[#516057] hover:bg-[#516057]/10 rounded-lg transition-colors" title="Deactivate">
                                                             <Power className="w-3.5 h-3.5" />
                                                         </button>
                                                     )}
                                                     {processor.status === 'inactive' && (
-                                                        <button onClick={() => setActivateModal(processor)} className="p-1.5 text-gray-400 hover:text-[#4CAF50] hover:bg-green-50 rounded transition-colors" title="Activate">
+                                                        <button onClick={() => setActivateModal(processor)} className="p-1.5 text-gray-400 hover:text-[#516057] hover:bg-[#516057]/10 rounded-lg transition-colors" title="Activate">
                                                             <CheckCircle className="w-3.5 h-3.5" />
                                                         </button>
                                                     )}
@@ -586,25 +586,25 @@ export default function ProcessorsPage() {
 
                         {/* Pagination */}
                         {pagination && pagination.totalPages > 1 && (
-                            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50">
+                            <div className="flex items-center justify-between px-5 py-4 border-t border-gray-100 bg-gray-50">
                                 <p className="text-sm text-gray-600 font-medium">
                                     {((pagination.page - 1) * pagination.limit) + 1}–{Math.min(pagination.page * pagination.limit, pagination.totalCount)} of {pagination.totalCount}
                                 </p>
-                                <div className="flex items-center gap-1.5">
+                                <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                         disabled={!pagination.hasPreviousPage}
-                                        className="p-1.5 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                                        className="p-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                                     >
-                                        <ChevronLeft className="w-3.5 h-3.5" />
+                                        <ChevronLeft className="w-4 h-4" />
                                     </button>
                                     <span className="text-xs text-gray-600">Page {pagination.page} of {pagination.totalPages}</span>
                                     <button
                                         onClick={() => setCurrentPage(p => p + 1)}
                                         disabled={!pagination.hasNextPage}
-                                        className="p-1.5 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                                        className="p-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                                     >
-                                        <ChevronRight className="w-3.5 h-3.5" />
+                                        <ChevronRight className="w-4 h-4" />
                                     </button>
                                 </div>
                             </div>
@@ -617,52 +617,52 @@ export default function ProcessorsPage() {
             {viewModal && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setViewModal(null)}>
                     <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-sm font-semibold text-gray-900">Processor Details</h2>
+                        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 bg-gray-50">
+                            <h2 className="text-base font-semibold text-gray-900">Processor Details</h2>
                             <button onClick={() => setViewModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
                         </div>
-                        <div className="px-4 py-3 space-y-3">
-                            <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center text-white text-lg font-bold">
+                        <div className="px-6 py-5 space-y-4">
+                            <div className="flex items-center gap-4">
+                                <div className="w-14 h-14 bg-indigo-500 rounded-lg flex items-center justify-center text-white text-xl font-bold">
                                     {getInitials(viewModal.name)}
                                 </div>
                                 <div>
-                                    <p className="font-bold text-gray-900">{viewModal.name}</p>
+                                    <p className="text-base font-bold text-gray-900">{viewModal.name}</p>
                                     <Badge variant={viewModal.status === 'active' ? 'success' : 'default'}>{viewModal.status}</Badge>
                                 </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-3 text-sm">
+                            <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div>
                                     <p className="text-xs text-gray-500 font-medium">Email</p>
-                                    <p className="text-gray-900 flex items-center gap-1 mt-0.5">
-                                        <Mail className="w-3.5 h-3.5 text-gray-400" />
+                                    <p className="text-gray-900 flex items-center gap-2 mt-1">
+                                        <Mail className="w-4 h-4 text-gray-400" />
                                         {viewModal.email || '—'}
                                     </p>
                                 </div>
                                 <div>
                                     <p className="text-xs text-gray-500 font-medium">Phone</p>
-                                    <p className="text-gray-900 flex items-center gap-1 mt-0.5">
-                                        <Phone className="w-3.5 h-3.5 text-gray-400" />
+                                    <p className="text-gray-900 flex items-center gap-2 mt-1">
+                                        <Phone className="w-4 h-4 text-gray-400" />
                                         {viewModal.phone || '—'}
                                     </p>
                                 </div>
                                 <div>
                                     <p className="text-xs text-gray-500 font-medium">Assigned Stores</p>
-                                    <p className="text-gray-900 flex items-center gap-1 mt-0.5">
-                                        <Store className="w-3.5 h-3.5 text-gray-400" />
+                                    <p className="text-gray-900 flex items-center gap-2 mt-1">
+                                        <Store className="w-4 h-4 text-gray-400" />
                                         {viewModal.assignedStoresCount ?? 0}
                                     </p>
                                 </div>
                                 <div>
                                     <p className="text-xs text-gray-500 font-medium">Total Returns</p>
-                                    <p className="text-gray-900 flex items-center gap-1 mt-0.5">
-                                        <UserCog className="w-3.5 h-3.5 text-gray-400" />
+                                    <p className="text-gray-900 flex items-center gap-2 mt-1">
+                                        <UserCog className="w-4 h-4 text-gray-400" />
                                         {viewModal.totalReturns ?? 0}
                                     </p>
                                 </div>
                                 <div>
                                     <p className="text-xs text-gray-500 font-medium">Created</p>
-                                    <p className="text-gray-900 mt-0.5">{viewModal.createdAt ? formatDate(viewModal.createdAt) : 'N/A'}</p>
+                                    <p className="text-gray-900 mt-1">{viewModal.createdAt ? formatDate(viewModal.createdAt) : 'N/A'}</p>
                                 </div>
                                 <div className="col-span-2">
                                     <p className="text-xs text-gray-500 font-medium">Permissions</p>
@@ -671,7 +671,7 @@ export default function ProcessorsPage() {
                                             {(viewModal as any).permissions.map((p: string) => {
                                                 const perm = ASSIGNABLE_PERMISSIONS.find(ap => ap.key === p);
                                                 return (
-                                                    <span key={p} className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-full">
+                                                    <span key={p} className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-lg">
                                                         {perm?.label || p}
                                                     </span>
                                                 );
@@ -689,9 +689,9 @@ export default function ProcessorsPage() {
                                 )}
                             </div>
                         </div>
-                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
-                            <button onClick={() => setViewModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Close</button>
-                            <button onClick={() => { setEditModal(viewModal); setViewModal(null); }} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] transition-colors">
+                        <div className="flex justify-end gap-2 px-5 py-4 border-t border-gray-200 bg-gray-50">
+                            <button onClick={() => setViewModal(null)} className="px-3 py-1.5 text-xs rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Close</button>
+                            <button onClick={() => { setEditModal(viewModal); setViewModal(null); }} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg bg-[#1d2222] text-white hover:bg-[#3d4343] transition-colors">
                                 <Edit className="w-4 h-4" /> Edit
                             </button>
                         </div>
@@ -707,7 +707,7 @@ export default function ProcessorsPage() {
                     setNewProcessor({ name: '', email: '', password: '', phone: '', notes: '', permissions: [] });
                 }}>
                     <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
+                        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 bg-gray-50">
                             <h2 className="text-sm font-semibold text-gray-900">Add New Processor</h2>
                             <button onClick={() => { 
                                 setAddModal(false); 
@@ -715,57 +715,57 @@ export default function ProcessorsPage() {
                                 setNewProcessor({ name: '', email: '', password: '', phone: '', notes: '', permissions: [] });
                             }} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
                         </div>
-                        <div className="px-4 py-3 space-y-3">
+                        <div className="px-5 py-4 space-y-3">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-1">Name <span className="text-red-500">*</span></label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Name <span className="text-red-500">*</span></label>
                                     <input
                                         type="text"
                                         value={newProcessor.name}
                                         onChange={e => setNewProcessor({ ...newProcessor, name: e.target.value })}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
                                         placeholder="Full name"
                                         autoComplete="off"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-1">Phone</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone</label>
                                     <input
                                         type="tel"
                                         value={newProcessor.phone}
                                         onChange={e => setNewProcessor({ ...newProcessor, phone: e.target.value })}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
                                         placeholder="(555) 000-0000"
                                     />
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Email <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1.5">Email <span className="text-red-500">*</span></label>
                                 <input
                                     type="email"
                                     value={newProcessor.email}
                                     onChange={e => setNewProcessor({ ...newProcessor, email: e.target.value })}
-                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                    className="w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
                                     placeholder="email@example.com"
                                     autoComplete="off"
                                 />
-                                <p className="text-xs text-gray-500 mt-1">Used as the login email for the admin panel.</p>
+                                <p className="text-xs text-gray-500 mt-1.5">Used as the login email for the admin panel.</p>
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Password <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1.5">Password <span className="text-red-500">*</span></label>
                                 <div className="relative">
                                     <input
                                         type={showPassword ? 'text' : 'password'}
                                         value={newProcessor.password}
                                         onChange={e => setNewProcessor({ ...newProcessor, password: e.target.value })}
-                                        className="w-full px-3 py-2 pr-10 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-3.5 py-2.5 pr-12 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
                                         placeholder="Min. 8 characters"
                                         autoComplete="new-password"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(p => !p)}
-                                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                                        className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 hover:text-gray-600"
                                     >
                                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                     </button>
@@ -773,25 +773,25 @@ export default function ProcessorsPage() {
                                 <p className="text-xs text-gray-500 mt-1">Processor will use this to log in. Min. 8 characters.</p>
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1.5">Notes</label>
                                 <textarea
                                     value={newProcessor.notes}
                                     onChange={e => setNewProcessor({ ...newProcessor, notes: e.target.value })}
-                                    rows={2}
-                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+                                    rows={3}
+                                    className="w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent resize-none"
                                     placeholder="Optional notes"
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-2">Permissions</label>
-                                <div className="grid grid-cols-3 gap-2 p-4 border border-gray-200 rounded-md max-h-48 overflow-y-auto bg-gray-50">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Permissions</label>
+                                <div className="grid grid-cols-3 gap-2 p-4 border border-gray-200 rounded-lg max-h-48 overflow-y-auto bg-gray-50">
                                     {ASSIGNABLE_PERMISSIONS.map(({ key, label }) => (
-                                        <label key={key} className="flex items-center gap-2 text-xs cursor-pointer hover:bg-white rounded px-2 py-1.5 transition-colors">
+                                        <label key={key} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-white rounded-lg px-2.5 py-2 transition-colors">
                                             <input
                                                 type="checkbox"
                                                 checked={(newProcessor.permissions || []).includes(key)}
                                                 onChange={() => togglePermission(newProcessor.permissions, key, (perms) => setNewProcessor({ ...newProcessor, permissions: perms }))}
-                                                className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                                                className="w-4 h-4 text-[#516057] border-gray-300 rounded-lg focus:ring-[#516057]"
                                             />
                                             <span className="font-medium text-gray-700">{label}</span>
                                         </label>
@@ -802,13 +802,13 @@ export default function ProcessorsPage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
+                        <div className="flex justify-end gap-2 px-6 py-5 border-t border-gray-200 bg-gray-50">
                             <button onClick={() => { 
                                 setAddModal(false); 
                                 setShowPassword(false); 
                                 setNewProcessor({ name: '', email: '', password: '', phone: '', notes: '', permissions: [] });
-                            }} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleAdd} disabled={isLoading || !newProcessor.name.trim() || !newProcessor.email.trim() || !newProcessor.password} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">
+                            }} className="px-3 py-1.5 text-xs rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button onClick={handleAdd} disabled={isLoading || !newProcessor.name.trim() || !newProcessor.email.trim() || !newProcessor.password} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg bg-[#1d2222] text-white hover:bg-[#3d4343] disabled:opacity-50 transition-colors">
                                 {isLoading ? <><Loader2 className="w-4 h-4 animate-spin" />Adding...</> : 'Add Processor'}
                             </button>
                         </div>
@@ -820,11 +820,11 @@ export default function ProcessorsPage() {
             {editModal && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setEditModal(null)}>
                     <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-sm font-semibold text-gray-900">Edit Processor</h2>
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 bg-gray-50">
+                            <h2 className="text-xs font-semibold text-gray-900">Edit Processor</h2>
                             <button onClick={() => setEditModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
                         </div>
-                        <div className="px-4 py-3 space-y-3">
+                        <div className="px-5 py-4 space-y-3">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Name <span className="text-red-500">*</span></label>
@@ -832,7 +832,7 @@ export default function ProcessorsPage() {
                                         type="text"
                                         value={editForm.name || ''}
                                         onChange={e => setEditForm({ ...editForm, name: e.target.value })}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     />
                                 </div>
                                 <div>
@@ -841,7 +841,7 @@ export default function ProcessorsPage() {
                                         type="tel"
                                         value={editForm.phone || ''}
                                         onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     />
                                 </div>
                             </div>
@@ -852,7 +852,7 @@ export default function ProcessorsPage() {
                                         type="email"
                                         value={editForm.email || ''}
                                         onChange={e => setEditForm({ ...editForm, email: e.target.value })}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     />
                                 </div>
                                 <div>
@@ -860,7 +860,7 @@ export default function ProcessorsPage() {
                                     <select
                                         value={editForm.status || 'active'}
                                         onChange={e => setEditForm({ ...editForm, status: e.target.value as 'active' | 'inactive' })}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     >
                                         <option value="active">Active</option>
                                         <option value="inactive">Inactive</option>
@@ -873,19 +873,19 @@ export default function ProcessorsPage() {
                                     value={editForm.notes || ''}
                                     onChange={e => setEditForm({ ...editForm, notes: e.target.value })}
                                     rows={2}
-                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+                                    className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
                                 />
                             </div>
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-2">Permissions</label>
-                                <div className="grid grid-cols-3 gap-2 p-4 border border-gray-200 rounded-md max-h-48 overflow-y-auto bg-gray-50">
+                                <div className="grid grid-cols-3 gap-2 p-4 border border-gray-200 rounded-lg max-h-48 overflow-y-auto bg-gray-50">
                                     {ASSIGNABLE_PERMISSIONS.map(({ key, label }) => (
-                                        <label key={key} className="flex items-center gap-2 text-xs cursor-pointer hover:bg-white rounded px-2 py-1.5 transition-colors">
+                                        <label key={key} className="flex items-center gap-2 text-xs cursor-pointer hover:bg-white rounded-lg px-2 py-1.5 transition-colors">
                                             <input
                                                 type="checkbox"
                                                 checked={(editForm.permissions || []).includes(key)}
                                                 onChange={() => togglePermission(editForm.permissions, key, (perms) => setEditForm({ ...editForm, permissions: perms }))}
-                                                className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                                                className="w-4 h-4 text-primary-600 border-gray-300 rounded-lg focus:ring-primary-500"
                                             />
                                             <span className="font-medium text-gray-700">{label}</span>
                                         </label>
@@ -896,9 +896,9 @@ export default function ProcessorsPage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
-                            <button onClick={() => setEditModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleUpdate} disabled={isLoading || !editForm.name?.trim()} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">
+                        <div className="flex justify-end gap-2 px-5 py-4 border-t border-gray-200 bg-gray-50">
+                            <button onClick={() => setEditModal(null)} className="px-3 py-1.5 text-xs rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button onClick={handleUpdate} disabled={isLoading || !editForm.name?.trim()} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg bg-[#1d2222] text-white hover:bg-[#3d4343] disabled:opacity-50 transition-colors">
                                 {isLoading ? <><Loader2 className="w-4 h-4 animate-spin" />Saving...</> : 'Save Changes'}
                             </button>
                         </div>
@@ -910,28 +910,28 @@ export default function ProcessorsPage() {
             {storesModal && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => { setStoresModal(null); dispatch(clearSelectedStores()); }}>
                     <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 bg-gray-50">
                             <div>
-                                <h2 className="text-sm font-semibold text-gray-900">Assigned Stores</h2>
+                                <h2 className="text-xs font-semibold text-gray-900">Assigned Stores</h2>
                                 <p className="text-xs text-gray-500 mt-0.5">{storesModal.name}</p>
                             </div>
                             <div className="flex items-center gap-2">
-                                <button onClick={() => { setStoresModal(null); openAssignModal(storesModal); }} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] transition-colors">
+                                <button onClick={() => { setStoresModal(null); openAssignModal(storesModal); }} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg bg-[#1d2222] text-white hover:bg-[#3d4343] transition-colors">
                                     <Building2 className="w-3.5 h-3.5" /> Assign More
                                 </button>
                                 <button onClick={() => { setStoresModal(null); dispatch(clearSelectedStores()); }} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
                             </div>
                         </div>
-                        <div className="px-4 py-3 space-y-3">
+                        <div className="px-5 py-4 space-y-3">
                             {isStoresLoading ? (
                                 <div className="text-center py-8">
                                     <Loader2 className="w-6 h-6 animate-spin text-primary-500 mx-auto mb-2" />
-                                    <p className="text-sm text-gray-500">Loading stores...</p>
+                                    <p className="text-xs text-gray-500">Loading stores...</p>
                                 </div>
                             ) : selectedProcessorStores.length === 0 ? (
                                 <div className="text-center py-8">
                                     <Store className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-                                    <p className="text-gray-500 font-medium text-sm">No stores assigned yet</p>
+                                    <p className="text-gray-500 font-medium text-xs">No stores assigned yet</p>
                                     <p className="text-gray-400 text-xs mt-1">Click "Assign More" to add stores</p>
                                 </div>
                             ) : (
@@ -939,11 +939,11 @@ export default function ProcessorsPage() {
                                     {selectedProcessorStores.map((store) => (
                                         <div key={store.assignmentId} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                                                     <Building2 className="w-4 h-4 text-blue-600" />
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-medium text-gray-900">{store.businessName}</p>
+                                                    <p className="text-xs font-medium text-gray-900">{store.businessName}</p>
                                                     <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
                                                         <MapPin className="w-3 h-3" />
                                                         {[store.city, store.state].filter(Boolean).join(', ') || 'Location N/A'}
@@ -957,7 +957,7 @@ export default function ProcessorsPage() {
                                                 )}
                                                 <button
                                                     onClick={() => handleUnassignStore(storesModal, store.pharmacyId)}
-                                                    className="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors"
+                                                    className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                                                     title="Unassign store"
                                                 >
                                                     <X className="w-3.5 h-3.5" />
@@ -968,8 +968,8 @@ export default function ProcessorsPage() {
                                 </div>
                             )}
                         </div>
-                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
-                            <button onClick={() => { setStoresModal(null); dispatch(clearSelectedStores()); }} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Close</button>
+                        <div className="flex justify-end gap-2 px-5 py-4 border-t border-gray-200 bg-gray-50">
+                            <button onClick={() => { setStoresModal(null); dispatch(clearSelectedStores()); }} className="px-3 py-1.5 text-xs rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Close</button>
                         </div>
                     </div>
                 </div>
@@ -979,9 +979,9 @@ export default function ProcessorsPage() {
             {assignModal && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setAssignModal(null)}>
                     <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 bg-gray-50">
                             <div>
-                                <h2 className="text-sm font-semibold text-gray-900">Manage Store Assignments</h2>
+                                <h2 className="text-xs font-semibold text-gray-900">Manage Store Assignments</h2>
                                 <p className="text-xs text-gray-500 mt-0.5">Manage pharmacy assignments for {assignModal.name}</p>
                             </div>
                             <button onClick={() => setAssignModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
@@ -995,14 +995,14 @@ export default function ProcessorsPage() {
                                     setSelectedPharmacyIds([]);
                                     setAssignSearch('');
                                 }}
-                                className={`flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                                className={`flex-1 px-5 py-4 text-xs font-medium border-b-2 transition-colors ${
                                     activeTab === 'assign'
                                         ? 'border-indigo-500 text-indigo-600 bg-indigo-50'
                                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                                 }`}
                             >
                                 Assign Stores
-                                <span className="ml-2 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                                <span className="ml-2 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-lg">
                                     {availablePharmacies.filter(p => !p.isAssigned).length}
                                 </span>
                             </button>
@@ -1012,14 +1012,14 @@ export default function ProcessorsPage() {
                                     setSelectedPharmacyIds([]);
                                     setAssignSearch('');
                                 }}
-                                className={`flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                                className={`flex-1 px-5 py-4 text-xs font-medium border-b-2 transition-colors ${
                                     activeTab === 'unassign'
                                         ? 'border-indigo-500 text-indigo-600 bg-indigo-50'
                                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                                 }`}
                             >
                                 Unassign Stores
-                                <span className="ml-2 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                                <span className="ml-2 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-lg">
                                     {availablePharmacies.filter(p => p.isAssigned).length}
                                 </span>
                             </button>
@@ -1032,7 +1032,7 @@ export default function ProcessorsPage() {
                                     placeholder={activeTab === 'assign' ? 'Search unassigned pharmacies...' : 'Search assigned pharmacies...'}
                                     value={assignSearch}
                                     onChange={e => setAssignSearch(e.target.value)}
-                                    className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                    className="w-full pl-9 pr-4 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                                 />
                             </div>
                             {selectedPharmacyIds.length > 0 && (
@@ -1046,11 +1046,11 @@ export default function ProcessorsPage() {
                             {loadingPharmacies ? (
                                 <div className="text-center py-8">
                                     <Loader2 className="w-6 h-6 animate-spin text-primary-500 mx-auto mb-2" />
-                                    <p className="text-sm text-gray-500">Loading pharmacies...</p>
+                                    <p className="text-xs text-gray-500">Loading pharmacies...</p>
                                 </div>
                             ) : filteredPharmacies.length === 0 ? (
                                 <div className="text-center py-8">
-                                    <p className="text-gray-500 text-sm">
+                                    <p className="text-gray-500 text-xs">
                                         {activeTab === 'assign' 
                                             ? 'No unassigned pharmacies found' 
                                             : 'No assigned pharmacies found'
@@ -1073,12 +1073,12 @@ export default function ProcessorsPage() {
                                                 }`}
                                             >
                                                 <div className="flex items-center gap-2">
-                                                    <div className={`w-6 h-6 rounded border-2 flex items-center justify-center flex-shrink-0 ${
+                                                    <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 ${
                                                         isSelected ? 'bg-indigo-500 border-indigo-500' : 'border-gray-300'
                                                     }`}>
                                                         {isSelected && <CheckCircle className="w-4 h-4 text-white" />}
                                                     </div>
-                                                    <span className="text-sm text-gray-900">{pharmacy.name}</span>
+                                                    <span className="text-xs text-gray-900">{pharmacy.name}</span>
                                                 </div>
                                             </button>
                                         );
@@ -1086,8 +1086,8 @@ export default function ProcessorsPage() {
                                 </div>
                             )}
                         </div>
-                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
-                            <button onClick={() => setAssignModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                        <div className="flex justify-end gap-2 px-5 py-4 border-t border-gray-200 bg-gray-50">
+                            <button onClick={() => setAssignModal(null)} className="px-3 py-1.5 text-xs rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
                             <button
                                 onClick={(e) => {
                                     e.preventDefault();
@@ -1096,7 +1096,7 @@ export default function ProcessorsPage() {
                                 }}
                                 disabled={selectedPharmacyIds.length === 0 || isLoading || isAssigning}
                                 type="button"
-                                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors"
+                                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg bg-[#1d2222] text-white hover:bg-[#3d4343] disabled:opacity-50 transition-colors"
                             >
                                 {isAssigning
                                     ? <><Loader2 className="w-4 h-4 animate-spin" />{activeTab === 'assign' ? 'Assigning...' : 'Unassigning...'}</>
@@ -1112,26 +1112,26 @@ export default function ProcessorsPage() {
             {deactivateModal && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setDeactivateModal(null)}>
                     <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-sm font-semibold text-gray-900">Deactivate Processor</h2>
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 bg-gray-50">
+                            <h2 className="text-xs font-semibold text-gray-900">Deactivate Processor</h2>
                             <button onClick={() => setDeactivateModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
                         </div>
-                        <div className="px-4 py-3">
+                        <div className="px-5 py-4">
                             <div className="flex items-start gap-3 mb-4">
-                                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
                                     <Power className="w-5 h-5 text-red-600" />
                                 </div>
                                 <div>
                                     <p className="text-gray-800 font-medium">Are you sure you want to deactivate <strong>{deactivateModal.name}</strong>?</p>
-                                    <p className="text-sm text-gray-500 mt-1">
+                                    <p className="text-xs text-gray-500 mt-1">
                                         This processor will no longer be able to access the system. Their store assignments will remain intact.
                                     </p>
                                 </div>
                             </div>
                         </div>
-                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
-                            <button onClick={() => setDeactivateModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleDeactivate} disabled={isLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors">
+                        <div className="flex justify-end gap-2 px-5 py-4 border-t border-gray-200 bg-gray-50">
+                            <button onClick={() => setDeactivateModal(null)} className="px-3 py-1.5 text-xs rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button onClick={handleDeactivate} disabled={isLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors">
                                 {isLoading ? <><Loader2 className="w-4 h-4 animate-spin" />Deactivating...</> : 'Deactivate'}
                             </button>
                         </div>
@@ -1143,26 +1143,26 @@ export default function ProcessorsPage() {
             {activateModal && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setActivateModal(null)}>
                     <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-sm font-semibold text-gray-900">Activate Processor</h2>
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 bg-gray-50">
+                            <h2 className="text-xs font-semibold text-gray-900">Activate Processor</h2>
                             <button onClick={() => setActivateModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
                         </div>
-                        <div className="px-4 py-3">
+                        <div className="px-5 py-4">
                             <div className="flex items-start gap-3 mb-4">
-                                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
                                     <CheckCircle className="w-5 h-5 text-green-600" />
                                 </div>
                                 <div>
                                     <p className="text-gray-800 font-medium">Are you sure you want to activate <strong>{activateModal.name}</strong>?</p>
-                                    <p className="text-sm text-gray-500 mt-1">
+                                    <p className="text-xs text-gray-500 mt-1">
                                         This processor will regain access to the system and be able to log in again.
                                     </p>
                                 </div>
                             </div>
                         </div>
-                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
-                            <button onClick={() => setActivateModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleActivate} disabled={isLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">
+                        <div className="flex justify-end gap-2 px-5 py-4 border-t border-gray-200 bg-gray-50">
+                            <button onClick={() => setActivateModal(null)} className="px-3 py-1.5 text-xs rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button onClick={handleActivate} disabled={isLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg bg-[#1d2222] text-white hover:bg-[#3d4343] disabled:opacity-50 transition-colors">
                                 {isLoading ? <><Loader2 className="w-4 h-4 animate-spin" />Activating...</> : 'Activate'}
                             </button>
                         </div>

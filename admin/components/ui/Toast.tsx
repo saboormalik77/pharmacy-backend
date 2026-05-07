@@ -24,10 +24,10 @@ const toastIcons = {
 };
 
 const toastStyles = {
-    success: 'bg-green-50 border-green-200 text-green-800',
+    success: 'bg-[#516057]/10 border-[#516057]/20 text-[#516057]',
     error: 'bg-red-50 border-red-200 text-red-800',
     info: 'bg-blue-50 border-blue-200 text-blue-800',
-    warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+    warning: 'bg-[#ad916a]/20 border-[#ad916a]/30 text-[#6b5a3f]',
 };
 
 export function ToastComponent({ toast, onClose }: ToastProps) {

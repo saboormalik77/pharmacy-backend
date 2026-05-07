@@ -218,7 +218,7 @@ export default function CreateReturnPage() {
                         </div>
                         <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
                             <button onClick={() => setConfirmModal(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleConfirmCreate} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">
+                            <button onClick={handleConfirmCreate} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1d2222] text-white hover:bg-[#3d4343] disabled:opacity-50 transition-colors">
                                 {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Creating...</> : 'Confirm & Create'}
                             </button>
                         </div>

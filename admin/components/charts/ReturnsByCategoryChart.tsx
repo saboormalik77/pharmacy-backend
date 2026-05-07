@@ -3,9 +3,9 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
 const data = [
-    { name: 'Pain Relief', value: 1450, color: '#4CAF50' },
-    { name: 'Antibiotics', value: 1125, color: '#2196F3' },
-    { name: 'Cardiovascular', value: 890, color: '#FFC107' },
+{ name: 'Pain Relief', value: 1450, color: '#516057' },
+
+    { name: 'Cardiovascular', value: 890, color: '#ad916a' },
     { name: 'Diabetes', value: 756, color: '#FF5722' },
     { name: 'Vitamins', value: 637, color: '#9C27B0' },
 ];

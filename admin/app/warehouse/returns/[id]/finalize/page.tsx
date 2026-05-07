@@ -360,14 +360,14 @@ export default function FinalizeReturnPage() {
                     <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
                         <div className="flex items-center justify-between mb-3">
                             <span className="text-sm font-semibold text-gray-700">Progress</span>
-                            <span className="text-sm font-bold text-slate-600">
+                            <span className="text-sm font-bold text-[#5f5f5f]">
                                 {[finalizeStepsDone.printManifest, finalizeStepsDone.fedexEntered, finalizeStepsDone.printJobSheets].filter(Boolean).length} / 3 steps completed
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
                             <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                                 <div 
-                                    className="h-full bg-gradient-to-r from-slate-600 to-slate-700 rounded-full transition-all duration-500"
+                                    className="h-full bg-gradient-to-r from-[#516057] to-[#3d7a3d] rounded-full transition-all duration-500"
                                     style={{ 
                                         width: `${([finalizeStepsDone.printManifest, finalizeStepsDone.fedexEntered, finalizeStepsDone.printJobSheets].filter(Boolean).length / 3) * 100}%` 
                                     }}

@@ -191,7 +191,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--surface)] px-4">
       <div className="w-full max-w-md">
         {/* Logo and Branding */}
         <div className="text-center mb-8">
@@ -202,7 +202,7 @@ export default function LoginPage() {
               className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-contain mx-auto mb-4 block"
             />
           ) : (
-            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-[#1e293b] rounded-lg mb-4 mx-auto">
+            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-[#1d2222] rounded-lg mb-4 mx-auto">
               <Shield className="w-8 h-8 text-white" />
             </div>
           )}
@@ -279,13 +279,13 @@ export default function LoginPage() {
               <label className="flex items-center">
                 <input
                   type="checkbox"
-                  className="w-4 h-4 text-[#1e293b] border-gray-300 rounded focus:ring-slate-500"
+                  className="w-4 h-4 text-[#1d2222] border-gray-300 rounded focus:ring-slate-500"
                 />
                 <span className="ml-2 text-sm text-gray-600">Remember me</span>
               </label>
               <Link
                 href="/forgot-password"
-                className="text-sm text-[#1e293b] hover:text-[#334155] font-medium"
+                className="text-sm text-[#1d2222] hover:text-[#516057] font-medium"
               >
                 Forgot password?
               </Link>

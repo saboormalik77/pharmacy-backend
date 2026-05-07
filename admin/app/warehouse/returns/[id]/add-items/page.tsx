@@ -838,7 +838,7 @@ export default function AddItemsPage() {
                                 if (checkActionAllowed('lookup NDC')) {
                                     handleManualLookup();
                                 }
-                            }} disabled={isScanLoading || !manualNdc.trim() || !canEdit} className="px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">
+                            }} disabled={isScanLoading || !manualNdc.trim() || !canEdit} className="px-3 py-1.5 text-xs rounded bg-[#1d2222] text-white hover:bg-[#3d4343] disabled:opacity-50 transition-colors">
                                 {isScanLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Lookup'}
                             </button>
                         </div>
@@ -1120,7 +1120,7 @@ export default function AddItemsPage() {
                 {/* Action Buttons */}
                 <div className="mt-3 pt-3 border-t border-gray-100">
                     <div className="flex flex-wrap gap-1.5">
-                        <button onClick={() => handleSave()} disabled={isItemActionLoading || (!form.ndc && !form.proprietaryName) || !canEdit} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-50 transition-colors">
+                        <button onClick={() => handleSave()} disabled={isItemActionLoading || (!form.ndc && !form.proprietaryName) || !canEdit} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1d2222] text-white hover:bg-[#3d4343] disabled:opacity-50 transition-colors">
                             {isItemActionLoading
                                 ? <><Loader2 className="w-3 h-3 animate-spin" />Saving...</>
                                 : <><CheckCircle className="w-3 h-3" />Save &amp; Scan Next</>}

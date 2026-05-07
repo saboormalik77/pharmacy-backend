@@ -1,7 +1,7 @@
 'use client';
 
-import { ArrowUpIcon, ArrowDownIcon, HelpCircle } from 'lucide-react';
-import { formatCurrency, formatNumber, cn } from '@/lib/utils';
+import { HelpCircle } from 'lucide-react';
+import { formatCurrency, formatNumber } from '@/lib/utils';
 import { useState } from 'react';
 
 interface StatCardProps {
@@ -19,7 +19,7 @@ export function StatCard({ title, value, change, icon, tooltip, isCurrency = fal
     const isPositive = change >= 0;
 
     return (
-        <div className="bg-white rounded-lg shadow px-4 py-3 border border-gray-100 hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-lg shadow-sm px-4 py-3 border border-[#e2e2e2]">
             <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-1.5">
                     <h3 className="text-xs font-medium text-gray-500">{title}</h3>
@@ -38,7 +38,9 @@ export function StatCard({ title, value, change, icon, tooltip, isCurrency = fal
                         )}
                     </div>
                 </div>
-                <div className="text-[#1e293b]">{icon}</div>
+                <div className="bg-[#f5f2f1] rounded-lg p-2">
+                    <div className="text-[#516057]">{icon}</div>
+                </div>
             </div>
 
             <div className="flex items-end justify-between">
@@ -48,16 +50,14 @@ export function StatCard({ title, value, change, icon, tooltip, isCurrency = fal
                     </p>
                     <div className="flex items-center gap-1 mt-1 flex-wrap">
                         {isPositive ? (
-                            <ArrowUpIcon className="w-3 h-3 text-green-600 flex-shrink-0" />
+                            <span className="text-green-600 text-xs font-medium bg-green-50 px-1.5 py-0.5 rounded">
+                                +{Math.abs(change)}%
+                            </span>
                         ) : (
-                            <ArrowDownIcon className="w-3 h-3 text-red-600 flex-shrink-0" />
+                            <span className="text-red-600 text-xs font-medium bg-red-50 px-1.5 py-0.5 rounded">
+                                {Math.abs(change)}%
+                            </span>
                         )}
-                        <span className={cn(
-                            'text-xs font-medium',
-                            isPositive ? 'text-green-600' : 'text-red-600'
-                        )}>
-                            {Math.abs(change)}%
-                        </span>
                         <span className="text-gray-500 text-xs whitespace-nowrap">{changeLabel}</span>
                     </div>
                 </div>

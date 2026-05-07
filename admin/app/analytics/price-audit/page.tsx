@@ -88,7 +88,7 @@ export default function PriceAuditPage() {
                 </select>
                 <button
                     onClick={() => { setPage(1); fetchData(); }}
-                    className="px-3 py-1.5 text-xs bg-[#1e293b] text-white rounded hover:bg-[#334155]"
+                    className="px-3 py-1.5 text-xs bg-[#1d2222] text-white rounded hover:bg-[#3d4343]"
                 >
                     Search
                 </button>
@@ -101,21 +101,21 @@ export default function PriceAuditPage() {
                         <p className="text-xs text-gray-600">Total Changes</p>
                         <Database className="w-4 h-4 text-blue-500" />
                     </div>
-                    <p className="text-lg font-bold">{formatNumber(data.summary?.totalChanges || 0)}</p>
+                    <p className="text-base font-bold">{formatNumber(data.summary?.totalChanges || 0)}</p>
                 </div>
                 <div className="bg-white rounded-lg shadow-md p-3">
                     <div className="flex justify-between items-center mb-1">
                         <p className="text-xs text-gray-600">Unique NDCs</p>
                         <Hash className="w-4 h-4 text-purple-500" />
                     </div>
-                    <p className="text-lg font-bold text-purple-600">{formatNumber(data.summary?.uniqueNdcs || 0)}</p>
+                    <p className="text-base font-bold text-purple-600">{formatNumber(data.summary?.uniqueNdcs || 0)}</p>
                 </div>
                 <div className="bg-white rounded-lg shadow-md p-3">
                     <div className="flex justify-between items-center mb-1">
                         <p className="text-xs text-gray-600">Unique Sources</p>
                         <Database className="w-4 h-4 text-green-500" />
                     </div>
-                    <p className="text-lg font-bold text-green-600">{formatNumber(data.summary?.uniqueSources || 0)}</p>
+                    <p className="text-base font-bold text-green-600">{formatNumber(data.summary?.uniqueSources || 0)}</p>
                 </div>
                 <div className="bg-white rounded-lg shadow-md p-3">
                     <div className="flex justify-between items-center mb-1">
@@ -126,7 +126,7 @@ export default function PriceAuditPage() {
                             <TrendingDown className="w-4 h-4 text-green-500" />
                         )}
                     </div>
-                    <p className={`text-lg font-bold ${(data.summary?.avgPriceIncrease || 0) >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                    <p className={`text-base font-bold ${(data.summary?.avgPriceIncrease || 0) >= 0 ? 'text-red-600' : 'text-green-600'}`}>
                         {data.summary?.avgPriceIncrease || 0}%
                     </p>
                 </div>
@@ -137,7 +137,7 @@ export default function PriceAuditPage() {
                 <h2 className="text-sm font-semibold text-gray-900 mb-3">Price Change History</h2>
                 <div className="overflow-x-auto">
                     <table className="w-full table-auto">
-                        <thead className="bg-gradient-to-r from-[#1e293b] to-[#334155] border-b-2 border-slate-700">
+                        <thead className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
                             <tr>
                                 <th className="px-4 py-3.5 text-left text-xs font-semibold text-white uppercase tracking-wider">NDC</th>
                                 <th className="px-4 py-3.5 text-right text-xs font-semibold text-white uppercase tracking-wider">Old Price</th>
