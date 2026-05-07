@@ -26,8 +26,10 @@
  *            Wait CALL_INTERVAL_MS between consecutive calls.
  *
  *   Step 6 — Merge match results from all chunks.  When the same NDC appears
- *            in multiple chunks, keep the instance with the highest confidence
- *            score, then by specificity (ndc_exact > ndc_partial > product_name).
+ *            in more than one chunk, keep the single best match (highest
+ *            confidence, then by specificity: ndc_exact > ndc_partial >
+ *            product_name).  Received amounts are NOT summed — each credit line
+ *            is one dollar figure and summing would inflate the value.
  *
  *   Step 7 — Return a CreditMemoAnalysisResult that the controller can pass
  *            straight to recordCreditMemoAnalysis (the SQL RPC).
@@ -62,10 +64,10 @@ import type {
 
 /**
  * Max characters of credit memo text included in a single OpenAI call.
- * ≈ 25 000 tokens — keeps well within GPT-4 Turbo's 128k window when
- * combined with the debit-item context and expected response size.
+ * Kept at 30 000 chars (≈7 500 tokens) so the model has focused context
+ * and a typical short credit memo gets at least 2 passes if needed.
  */
-const CHUNK_SIZE_CHARS = 100_000;
+const CHUNK_SIZE_CHARS = 30_000;
 
 /** Minimum pause between consecutive OpenAI calls (milliseconds). */
 const CALL_INTERVAL_MS = 5_000;
@@ -143,7 +145,7 @@ const METHOD_RANK: Record<string, number> = {
 
 function rankMethod(method: string | null | undefined): number {
   if (!method) return 99;
-  return METHOD_RANK[method] ?? 99;
+  return METHOD_RANK[method.toLowerCase().replace(/\s+/g, '_')] ?? 99;
 }
 
 // ============================================================
@@ -243,7 +245,8 @@ function buildDebitItemsSection(ctx: DebitMemoContext): string {
     const name = it.productName ?? '(unknown)';
     const ask = it.askPrice != null ? `$${it.askPrice.toFixed(2)}` : '(unknown)';
     const qty = it.quantity;
-    return `${i + 1}. NDC: ${ndc} | Product: ${name} | Ask: ${ask} | Qty: ${qty}`;
+    const lot = it.lotNumber ?? '-';
+    return `${i + 1}. NDC: ${ndc} | Product: ${name} | Lot: ${lot} | Ask: ${ask} | Qty: ${qty}`;
   });
   return rows.join('\n');
 }
@@ -257,28 +260,62 @@ DEBIT MEMO (our return request):
   Total Asked : ${'{totalAsked}'}
   Items       : {itemCount} items
 
-DEBIT MEMO ITEMS (NDC | Product | Ask Price | Qty):
+DEBIT MEMO ITEMS (NDC | Product | Lot | Ask Price | Qty):
 {itemsSection}
 
 TASK
 ====
 Read the credit memo text chunk supplied in the user message and find the received / credited amount for every matching debit memo item.
+Credit memos come in MANY formats — tables, lists, plain text, multi-column layouts. OCR text may be messy with broken spacing. Look CAREFULLY at every line.
 
-MATCHING RULES
---------------
-1. Match by NDC code FIRST (exact, ignoring dashes/spaces).
-   matchMethod = "ndc_exact"
-2. If the credit memo has no NDC for an entry, match by product name (partial OK, case-insensitive).
-   matchMethod = "product_name"
-3. If only a partial NDC match (e.g. labeler-code only): matchMethod = "ndc_partial"
-4. The received price = the amount the manufacturer credited / paid / allowed for that item.
-5. If the same NDC appears multiple times in the chunk, SUM the credited amounts.
-6. ONLY include items where you found a real positive credited dollar amount.
-   Never invent numbers.
-7. Skip items whose credited amount is zero or absent.
+MATCHING RULES (try these in order — use whatever matches first)
+----------------------------------------------------------------
+A. NDC EXACT — same digits, ignoring dashes/spaces/leading zeros.
+   matchMethod = "ndc_exact", confidence 95.
+   IMPORTANT EXAMPLE: debit memo NDC "29300-0289-13" and credit memo NDC "29300-289-13"
+   are the SAME — a leading zero may be dropped in the middle segment. Always strip
+   dashes and compare raw digit strings before deciding they differ.
+B. NDC PARTIAL — labeler segment matches OR first 9–10 digits match.
+   matchMethod = "ndc_partial", confidence 75.
+C. LOT NUMBER — credit memo line shows the same lot number as a debit item.
+   matchMethod = "ndc_exact" (lot is unique enough), confidence 90.
+D. PRODUCT NAME — brand or generic name matches partially (case-insensitive,
+   ignore words like "TABLET", "CAPSULE", "TAB", "MG", numbers/dosage).
+   Examples that should match:
+     "ATORVASTATIN 40MG"  ↔ "Atorvastatin Calcium 40 mg Tab"
+     "OMEPRAZOLE DR 20MG" ↔ "Omeprazole 20mg Cap"
+   matchMethod = "product_name", confidence 60.
+
+WHAT TO EXTRACT
+---------------
+For each match, extract the RECEIVED PRICE = the dollar amount the manufacturer
+credited / paid / allowed / approved / accepted for that item.
+Common column / label names: "Credit Amount", "Credit", "Allowed", "Approved",
+"Net Credit", "Amount", "Total", "Payment", "Paid", "Reimbursement", "Settlement".
+
+If a line has multiple dollar columns, pick the FINAL credited amount
+(usually the rightmost number in the row, after qty × unit price).
+
+RULES
+-----
+1. ONLY include items with a real positive credited dollar amount. Never invent.
+2. Skip items whose credited amount is zero or absent.
+3. Use ONLY the first matching line per NDC — do NOT sum across rows.
+4. Each NDC must appear AT MOST ONCE in matches.
+5. Process EVERY row in any table — do not stop early.
+6. Be GENEROUS — if you are 50% sure an item matches, include it with low
+   confidence rather than skipping it. We would rather over-extract than miss data.
+7. If the credit memo has line items but you cannot confidently link them to
+   debit items, still include them with the NDC / product name as written
+   in the credit memo and matchMethod = "product_name" with confidence 40.
 
 OUTPUT FORMAT
 -------------
+CRITICAL: For the "ndc" field always use the NDC EXACTLY as it appears in the
+DEBIT MEMO ITEMS list above — NOT the NDC from the credit memo text.
+The credit memo may print the NDC with fewer digits or different dashes; ignore
+that and always output the debit memo NDC.
+
 Return ONLY valid JSON — no extra text, no markdown fences:
 
 {
@@ -350,7 +387,11 @@ async function callOpenAIForChunk(
 // ============================================================
 
 function mergeMatches(allMatches: RawMatch[]): CreditMemoLineItem[] {
-  // Map from normalised NDC (no dashes, uppercase) → accumulated entry
+  // Map from normalised NDC (no dashes, uppercase) → single best match entry.
+  // When the same NDC appears in multiple chunks we keep only the one match
+  // with the highest confidence / most specific match method.  We do NOT sum
+  // received amounts: each credit line is a single dollar figure, and the AI
+  // may surface the same line in more than one chunk — summing would inflate it.
   const best = new Map<string, RawMatch & { _normNdc: string; receivedPrice: number }>();
 
   for (const raw of allMatches) {
@@ -366,23 +407,26 @@ function mergeMatches(allMatches: RawMatch[]): CreditMemoLineItem[] {
     if (!existing) {
       best.set(normNdc, { ...raw, ndc, _normNdc: normNdc, receivedPrice: recv, askPrice: ask, confidence: conf });
     } else {
-      // SUM received amounts — the same credit line can span PDF pages / chunks.
-      const summedRecv = existing.receivedPrice + recv;
-
-      // Update metadata (confidence, matchMethod) to the more specific entry.
+      // Keep whichever match has higher confidence; break ties by match method specificity.
       const existingConf = existing.confidence ?? 0;
       const existingRank = rankMethod(existing.matchMethod);
       const incomingRank = rankMethod(raw.matchMethod);
       const incomingIsBetter =
         conf > existingConf || (conf === existingConf && incomingRank < existingRank);
 
-      best.set(normNdc, {
-        ...(incomingIsBetter ? { ...raw, ndc } : existing),
-        _normNdc: normNdc,
-        receivedPrice: summedRecv,
-        askPrice: ask ?? existing.askPrice,
-        confidence: incomingIsBetter ? conf : existingConf,
-      });
+      if (incomingIsBetter) {
+        best.set(normNdc, {
+          ...raw, ndc,
+          _normNdc: normNdc,
+          receivedPrice: recv,
+          askPrice: ask ?? existing.askPrice,
+          confidence: conf,
+        });
+      } else if (ask != null && (existing.askPrice == null || (existing.askPrice as number) <= 0)) {
+        // Incoming is not better overall, but can still fill a missing askPrice
+        // on the existing entry without displacing its received amount or confidence.
+        best.set(normNdc, { ...existing, askPrice: ask });
+      }
     }
   }
 
@@ -526,6 +570,18 @@ const _analyzeAndMatchCreditMemoInner = async (input: {
     `chunks=${chunks.length}`
   );
 
+  // Log the debit memo items we are trying to match against the credit memo
+  console.log(`[CreditMemoMatching] Debit memo items to match (memo=${debitMemo.memoNumber}):`);
+  debitMemo.items.forEach((it, idx) => {
+    console.log(
+      `  [${idx + 1}] NDC: ${it.ndc ?? '(none)'} | ` +
+      `Product: ${it.productName ?? '(unknown)'} | ` +
+      `Lot: ${it.lotNumber ?? '-'} | ` +
+      `Ask: ${it.askPrice != null ? `$${it.askPrice.toFixed(2)}` : '(unknown)'} | ` +
+      `Qty: ${it.quantity}`
+    );
+  });
+
   // ── Step 5: Call OpenAI for each chunk ───────────────────────────────────
   const systemPrompt = buildSystemPrompt(debitMemo);
   const allRawMatches: RawMatch[] = [];
@@ -553,6 +609,19 @@ const _analyzeAndMatchCreditMemoInner = async (input: {
         `[CreditMemoMatching] chunk ${i + 1}/${chunks.length}: ` +
         `found ${matches.length} raw match(es)`
       );
+      if (matches.length > 0) {
+        matches.forEach((m, mi) => {
+          console.log(
+            `    match[${mi + 1}] NDC: ${m.ndc ?? '(none)'} | ` +
+            `Product: ${m.productName ?? '-'} | ` +
+            `Ask: ${m.askPrice != null ? `$${m.askPrice}` : '-'} | ` +
+            `Received: ${m.receivedPrice != null ? `$${m.receivedPrice}` : '-'} | ` +
+            `Method: ${m.matchMethod ?? '-'} | Confidence: ${m.confidence ?? '-'}`
+          );
+        });
+      } else {
+        console.log(`    (no matches in this chunk)`);
+      }
     } catch (oaiErr: any) {
       console.error(
         `[CreditMemoMatching] OpenAI call failed for chunk ${i + 1}:`,
@@ -565,10 +634,45 @@ const _analyzeAndMatchCreditMemoInner = async (input: {
   // ── Step 6: Merge and deduplicate ────────────────────────────────────────
   const lineItems = mergeMatches(allRawMatches);
 
-  // Backfill pharmacyName on each item (the RPC expects it)
+  // Build a digits-only lookup from debit memo NDCs.
+  // Used to replace whatever NDC the AI returned with the exact NDC from our DB.
+  const debitNdcDigits = debitMemo.items
+    .filter(it => !!it.ndc)
+    .map(it => ({ canonical: it.ndc as string, digits: it.ndc!.replace(/\D/g, '') }));
+
+  /** Find the debit-memo NDC whose digit string contains or is contained by
+   *  the AI-returned NDC's digit string (handles dropped leading zeros, etc.) */
+  function findDebitNdc(aiNdc: string): string | null {
+    const aiDigits = aiNdc.replace(/\D/g, '');
+    if (!aiDigits) return null;
+    // 1. Exact digit match
+    const exact = debitNdcDigits.find(d => d.digits === aiDigits);
+    if (exact) return exact.canonical;
+    // 2. One contains the other (handles leading-zero differences in segments)
+    const contained = debitNdcDigits.find(
+      d => d.digits.includes(aiDigits) || aiDigits.includes(d.digits)
+    );
+    if (contained) return contained.canonical;
+    return null;
+  }
+
+  // Backfill pharmacyName, manufacturer, and canonical NDC on each item
   lineItems.forEach(it => {
     it.pharmacyName = input.pharmacyName ?? null;
     it.manufacturer = collectedManufacturerName ?? debitMemo!.labelerName ?? null;
+
+    // Always replace the AI-returned NDC with the exact debit memo NDC
+    if (it.ndc) {
+      const canonical = findDebitNdc(it.ndc);
+      if (canonical && canonical !== it.ndc) {
+        console.log(
+          `[CreditMemoMatching] NDC replaced: credit="${it.ndc}" → debit="${canonical}"`
+        );
+        it.ndc = canonical;
+      } else if (canonical) {
+        it.ndc = canonical; // already correct, keep it
+      }
+    }
   });
 
   const sumFromItems = lineItems.reduce((acc, it) => acc + (it.receivedPrice || 0), 0);
