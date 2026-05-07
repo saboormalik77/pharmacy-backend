@@ -211,36 +211,48 @@ export async function generateDebitMemoPdf(data: DebitMemoPdfData): Promise<Buff
   
   const colX = {
     num: 32,
-    ndc: 50,
-    drugName: 140,
-    lot: 280,
-    exp: 330,
-    pkg: 380,
-    full: 425,
-    partial: 460,
-    price: 500,
-    value: 540,
+    ndc: 48,
+    drugName: 120,
+    lot: 250,
+    exp: 310,
+    pkg: 358,
+    full: 400,
+    partial: 435,
+    price: 478,
+    value: 530,
+  };
+
+  const colW = {
+    num: 14,
+    ndc: 70,
+    drugName: 128,
+    lot: 58,
+    exp: 46,
+    pkg: 40,
+    full: 33,
+    partial: 40,
+    price: 50,
+    value: 52,
   };
   
   yPos = tableTop + 5;
-  doc.text(' ', colX.num, yPos, { width: 15 });
-  doc.text('NDC', colX.ndc, yPos, { width: 85 });
-  doc.text('Drug Name', colX.drugName, yPos, { width: 135 });
-  doc.text('Lot #', colX.lot, yPos, { width: 45 });
-  doc.text('Exp Date', colX.exp, yPos, { width: 45 });
-  doc.text('Pkg Size', colX.pkg, yPos, { width: 40 });
-  doc.text('Full Qty', colX.full, yPos, { width: 30, align: 'right' });
-  doc.text('Partial', colX.partial, yPos, { width: 35, align: 'right' });
-  doc.text('Price', colX.price, yPos, { width: 35, align: 'right' });
-  doc.text('Value', colX.value, yPos, { width: 42, align: 'right' });
+  doc.text('#', colX.num, yPos, { width: colW.num });
+  doc.text('NDC', colX.ndc, yPos, { width: colW.ndc });
+  doc.text('Drug Name', colX.drugName, yPos, { width: colW.drugName });
+  doc.text('Lot #', colX.lot, yPos, { width: colW.lot });
+  doc.text('Exp', colX.exp, yPos, { width: colW.exp });
+  doc.text('Pkg', colX.pkg, yPos, { width: colW.pkg, align: 'right' });
+  doc.text('Full', colX.full, yPos, { width: colW.full, align: 'right' });
+  doc.text('Partial', colX.partial, yPos, { width: colW.partial, align: 'right' });
+  doc.text('Price', colX.price, yPos, { width: colW.price, align: 'right' });
+  doc.text('Value', colX.value, yPos, { width: colW.value, align: 'right' });
   
   yPos = tableTop + 20;
   
   // Table Rows
-  doc.font('Helvetica').fontSize(9);
+  doc.font('Helvetica').fontSize(8);
   
   data.items.forEach((item, idx) => {
-    // Check for page break
     if (yPos > 720) {
       doc.addPage();
       yPos = 30;
@@ -248,48 +260,33 @@ export async function generateDebitMemoPdf(data: DebitMemoPdfData): Promise<Buff
     
     const rowHeight = 14;
     
-    // Alternating row background
     if (idx % 2 === 0) {
       doc.rect(30, yPos - 2, pageWidth, rowHeight).fill('#fafafa');
     }
     
     doc.fillColor('#000000');
     
-    // Row number
-    doc.text(String(idx + 1) + '.', colX.num, yPos, { width: 15 });
-    
-    // NDC
-    doc.text(item.ndc || '—', colX.ndc, yPos, { width: 85 });
-    
-    // Drug Name (truncate if too long)
-    const drugName = (item.drugName || 'Unknown').substring(0, 35);
-    doc.text(drugName, colX.drugName, yPos, { width: 135 });
-    
-    // Lot Number
-    doc.text(item.lotNumber || '—', colX.lot, yPos, { width: 45 });
-    
-    // Expiration Date (shorter format: MM/YY)
-    const expDate = item.expirationDate ? new Date(item.expirationDate).toLocaleDateString('en-US', { month: '2-digit', year: '2-digit' }).replace('/', '/') : '—';
-    doc.text(expDate, colX.exp, yPos, { width: 45 });
-    
-    // Package Size
-    doc.text(item.packageSize || '—', colX.pkg, yPos, { width: 40 });
-    
-    // Full Quantity
-    doc.text(String(item.fullQuantity || 0), colX.full, yPos, { width: 30, align: 'right' });
-    
-    // Partial Quantity
-    doc.text(String(item.partialQuantity || 0), colX.partial, yPos, { width: 35, align: 'right' });
-    
-    // Price
-    doc.text(fmt$(item.askPrice), colX.price, yPos, { width: 35, align: 'right' });
-    
-    // Value
-    doc.text(fmt$(item.askValue), colX.value, yPos, { width: 42, align: 'right' });
+    doc.text(String(idx + 1), colX.num, yPos, { width: colW.num });
+    doc.text(item.ndc || '—', colX.ndc, yPos, { width: colW.ndc, ellipsis: true });
+
+    const drugName = (item.drugName || 'Unknown').substring(0, 28);
+    doc.text(drugName, colX.drugName, yPos, { width: colW.drugName, ellipsis: true });
+
+    doc.text((item.lotNumber || '—').substring(0, 12), colX.lot, yPos, { width: colW.lot, ellipsis: true });
+
+    const expDate = item.expirationDate
+      ? new Date(item.expirationDate).toLocaleDateString('en-US', { month: '2-digit', year: '2-digit' })
+      : '—';
+    doc.text(expDate, colX.exp, yPos, { width: colW.exp });
+
+    doc.text(String(item.packageSize || '—'), colX.pkg, yPos, { width: colW.pkg, align: 'right' });
+    doc.text(String(item.fullQuantity || 0), colX.full, yPos, { width: colW.full, align: 'right' });
+    doc.text(String(item.partialQuantity || 0), colX.partial, yPos, { width: colW.partial, align: 'right' });
+    doc.text(fmt$(item.askPrice), colX.price, yPos, { width: colW.price, align: 'right' });
+    doc.text(fmt$(item.askValue), colX.value, yPos, { width: colW.value, align: 'right' });
     
     yPos += rowHeight;
     
-    // Row bottom border
     doc.strokeColor('#dddddd').lineWidth(0.5)
       .moveTo(30, yPos - 2).lineTo(582, yPos - 2).stroke();
   });

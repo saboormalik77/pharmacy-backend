@@ -545,8 +545,8 @@ export default function BuyingGroupsPage() {
       {/* Delete Confirm Dialog */}
       {deleteConfirm && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm"
-          style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 45%, transparent)' }}
+          className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm"
+          style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
         >
           <div
             className="rounded-[4px] shadow-xl max-w-sm w-full mx-4 p-6 border"
@@ -571,39 +571,54 @@ export default function BuyingGroupsPage() {
       {/* Create / Edit Modal */}
       {(modalMode === 'create' || modalMode === 'edit') && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm overflow-y-auto py-6 px-4"
+          className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm overflow-y-auto py-6 px-4"
           style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
+          onClick={closeModal}
+          role="presentation"
         >
           <div
-            className="rounded-[4px] shadow-xl w-full max-w-xl max-h-[92vh] flex flex-col border"
+            className="rounded-[4px] shadow-xl w-full max-w-xl max-h-[92vh] flex flex-col border min-h-0"
             style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
+            onClick={e => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="buying-group-modal-title"
           >
 
-            {/* Modal Header */}
+            {/* Modal Header — same shell as warehouse modals (readable on all themes) */}
             <div
-              className="rounded-t-xl px-6 py-4 flex items-center justify-between shrink-0"
-              style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}
+              className="px-4 py-3 flex items-center justify-between gap-2 shrink-0 border-b"
+              style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
             >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-white/20 rounded-[4px] flex items-center justify-center">
-                  <Users className="w-4 h-4 text-white" />
+              <div className="flex items-center gap-3 min-w-0">
+                <div
+                  className="w-8 h-8 rounded-[4px] flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: 'var(--surface-container-high)' }}
+                >
+                  <Users className="w-4 h-4" style={{ color: 'var(--primary)' }} />
                 </div>
-                <div>
-                  <h3 className="font-heading text-body font-semibold text-white">
+                <div className="min-w-0">
+                  <h3 id="buying-group-modal-title" className="text-sm font-bold leading-tight" style={{ color: 'var(--foreground)' }}>
                     {modalMode === 'create' ? 'Add Buying Group' : 'Edit Buying Group'}
                   </h3>
-                  <p className="text-xs mt-0.5" style={{ color: 'var(--inverse-on-surface)' }}>
+                  <p className="text-xs mt-0.5 leading-snug" style={{ color: 'var(--on-surface-variant)' }}>
                     {modalMode === 'create' ? 'Fill in the details to create a new buying group' : 'Update the buying group information'}
                   </p>
                 </div>
               </div>
-              <button onClick={closeModal} className="p-1.5 rounded-[4px] hover:bg-white/20 text-white/80 hover:text-white transition-colors cursor-pointer">
+              <button
+                type="button"
+                onClick={closeModal}
+                className="p-1 rounded hover:bg-primary-50/40 cursor-pointer shrink-0"
+                style={{ color: 'var(--outline)' }}
+                aria-label="Close"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Scrollable Body */}
-            <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
+            <div className="overflow-y-auto flex-1 min-h-0 px-6 py-5 space-y-5">
               {formError && (
                 <div className="flex items-start gap-2 px-3 py-2.5 rounded-[4px] text-sm border">
                   <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -803,7 +818,14 @@ export default function BuyingGroupsPage() {
                       <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wider px-2 bg-indigo-50 rounded-full py-0.5">Buying Group Admin Credentials</span>
                       <div className="h-px flex-1 bg-gray-100" />
                     </div>
-                    <p className="text-xs text-gray-600 -mt-1 bg-amber-50 border border-amber-100 rounded-[4px] px-3 py-2">
+                    <p
+                      className="text-xs -mt-1 rounded-[4px] px-3 py-2 border leading-snug"
+                      style={{
+                        backgroundColor: 'var(--secondary-container)',
+                        borderColor: 'var(--outline-variant)',
+                        color: 'var(--on-secondary-container)',
+                      }}
+                    >
                       These credentials will be used by the buying group admin to log in to the Buying Group Portal.
                     </p>
 
@@ -861,7 +883,14 @@ export default function BuyingGroupsPage() {
                       </span>
                       <div className="h-px flex-1 bg-gray-100" />
                     </div>
-                    <p className="text-xs text-gray-500 bg-blue-50 border border-blue-100 rounded-[4px] px-3 py-2">
+                    <p
+                      className="text-xs rounded-[4px] px-3 py-2 border leading-snug"
+                      style={{
+                        backgroundColor: 'var(--surface-container-low)',
+                        borderColor: 'var(--outline-variant)',
+                        color: 'var(--on-surface)',
+                      }}
+                    >
                       You can add domains now or later from the edit view.
                     </p>
 
@@ -929,7 +958,7 @@ export default function BuyingGroupsPage() {
 
             {/* Modal Footer */}
             <div
-              className="flex items-center justify-end gap-3 px-6 py-4 border-t rounded-b-xl shrink-0"
+              className="flex items-center justify-end gap-3 px-4 py-3 border-t shrink-0"
               style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
             >
               <Button variant="outline" onClick={closeModal} disabled={isSubmitting}>
@@ -958,29 +987,48 @@ export default function BuyingGroupsPage() {
       {/* View Modal */}
       {modalMode === 'view' && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm overflow-y-auto py-6 px-4"
+          className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm overflow-y-auto py-6 px-4"
           style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
+          onClick={closeModal}
+          role="presentation"
         >
           <div
-            className="rounded-[4px] shadow-xl w-full max-w-xl max-h-[92vh] flex flex-col border"
+            className="rounded-[4px] shadow-xl w-full max-w-xl max-h-[92vh] flex flex-col border min-h-0"
             style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
+            onClick={e => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="buying-group-view-modal-title"
           >
 
             {/* Header */}
             <div
-              className="rounded-t-xl px-6 py-4 flex items-center justify-between shrink-0"
-              style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}
+              className="px-4 py-3 flex items-center justify-between gap-2 shrink-0 border-b"
+              style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
             >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-white/20 rounded-[4px] flex items-center justify-center">
-                  <Eye className="w-4 h-4 text-white" />
+              <div className="flex items-center gap-3 min-w-0">
+                <div
+                  className="w-8 h-8 rounded-[4px] flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: 'var(--surface-container-high)' }}
+                >
+                  <Eye className="w-4 h-4" style={{ color: 'var(--primary)' }} />
                 </div>
-                <div>
-                  <h3 className="font-heading text-body font-semibold text-white">Buying Group Details</h3>
-                  <p className="text-xs mt-0.5" style={{ color: 'var(--inverse-on-surface)' }}>View group information and linked accounts</p>
+                <div className="min-w-0">
+                  <h3 id="buying-group-view-modal-title" className="text-sm font-bold leading-tight" style={{ color: 'var(--foreground)' }}>
+                    Buying Group Details
+                  </h3>
+                  <p className="text-xs mt-0.5 leading-snug" style={{ color: 'var(--on-surface-variant)' }}>
+                    View group information and linked accounts
+                  </p>
                 </div>
               </div>
-              <button onClick={closeModal} className="p-1.5 rounded-[4px] hover:bg-white/20 text-white/80 hover:text-white transition-colors cursor-pointer">
+              <button
+                type="button"
+                onClick={closeModal}
+                className="p-1 rounded hover:bg-primary-50/40 cursor-pointer shrink-0"
+                style={{ color: 'var(--outline)' }}
+                aria-label="Close"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -991,7 +1039,7 @@ export default function BuyingGroupsPage() {
                 <span className="ml-2 text-sm text-gray-500">Loading...</span>
               </div>
             ) : selectedGroup ? (
-              <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
+              <div className="overflow-y-auto flex-1 min-h-0 px-6 py-5 space-y-5">
 
                 {/* Group Name + Status Banner */}
                 <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-[4px] border border-indigo-100 p-4 flex items-center justify-between gap-3">
@@ -1111,7 +1159,7 @@ export default function BuyingGroupsPage() {
             )}
 
             <div
-              className="flex justify-end px-6 py-4 border-t rounded-b-xl shrink-0"
+              className="flex justify-end px-4 py-3 border-t shrink-0"
               style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
             >
               <Button variant="outline" onClick={closeModal}>Close</Button>

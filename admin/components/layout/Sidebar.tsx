@@ -13,6 +13,7 @@ import {
     Scan,
     Truck,
     ChevronLeft,
+    Menu,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppSelector } from '@/lib/store/hooks';
@@ -125,27 +126,43 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose, onToggleCollapse
         >
             {/* Sidebar Header with Brand & Collapse */}
             <div className="flex items-center justify-between px-4 py-4 border-b border-[#3d4343]">
-                <div className="flex items-center gap-2">
-                    {settings?.logoUrl ? (
-                        <img src={settings.logoUrl} alt="Logo" className="w-8 h-8 rounded-[4px] object-contain" />
-                    ) : (
-                        <div className="w-8 h-8 bg-[#516057] rounded-[4px] flex items-center justify-center">
-                            <span className="text-white font-bold text-xs">PA</span>
+                {!isCollapsed ? (
+                    <>
+                        <div className="flex items-center gap-2">
+                            {settings?.logoUrl ? (
+                                <img src={settings.logoUrl} alt="Logo" className="w-8 h-8 rounded-[4px] object-contain" />
+                            ) : (
+                                <div className="w-8 h-8 bg-[#516057] rounded-[4px] flex items-center justify-center">
+                                    <span className="text-white font-bold text-xs">PA</span>
+                                </div>
+                            )}
+                            <span className="text-sm font-bold text-white">{settings?.businessName || 'PharmAdmin'}</span>
                         </div>
-                    )}
-                    {!isCollapsed && (
-                        <span className="text-sm font-bold text-white">{settings?.businessName || 'PharmAdmin'}</span>
-                    )}
-                </div>
-                <button 
-                    onClick={() => {
-                        if (onClose) onClose();
-                        if (onToggleCollapse) onToggleCollapse();
-                    }}
-                    className="p-1.5 text-[#9ca3af] hover:text-white hover:bg-[#3d4343] rounded-[4px] transition-colors"
-                >
-                    <ChevronLeft className={cn('w-4 h-4', isCollapsed && 'rotate-180')} />
-                </button>
+                        <button
+                            onClick={() => {
+                                // On mobile the sidebar is an overlay. "Collapse" should act like close.
+                                if (onClose && typeof window !== 'undefined' && window.innerWidth < 640) onClose();
+                                if (onToggleCollapse) onToggleCollapse();
+                            }}
+                            className="p-1.5 text-[#9ca3af] hover:text-white hover:bg-[#3d4343] rounded-[4px] transition-colors"
+                            aria-label="Collapse sidebar"
+                            type="button"
+                        >
+                            <ChevronLeft className="w-4 h-4" />
+                        </button>
+                    </>
+                ) : (
+                    <button
+                        onClick={() => {
+                            if (onToggleCollapse) onToggleCollapse();
+                        }}
+                        className="p-1.5 text-[#9ca3af] hover:text-white hover:bg-[#3d4343] rounded-[4px] transition-colors w-full flex items-center justify-center"
+                        aria-label="Open sidebar"
+                        type="button"
+                    >
+                        <Menu className="w-5 h-5" />
+                    </button>
+                )}
             </div>
             
             <div

@@ -466,7 +466,7 @@ export const getDebitMemoPdfData = async (memoId: string): Promise<any> => {
   if (itemIds.length > 0) {
     const { data: transactionItemsData, error: transactionItemsError } = await sb
       .from('return_transaction_items')
-      .select('id, ndc, quantity_full, quantity_partial, package_size, proprietary_name, generic_name')
+      .select('id, ndc, full_package_size, proprietary_name, generic_name')
       .in('id', itemIds);
 
     if (transactionItemsError) {
@@ -517,19 +517,18 @@ export const getDebitMemoPdfData = async (memoId: string): Promise<any> => {
     },
     items: items.map(item => {
       const transactionItem = item.transactionItemId ? transactionItemsMap.get(item.transactionItemId) : null;
-      
-      // Use quantity from debit memo item if transaction item not available
       const totalQty = item.quantity || 0;
       const isPartial = transactionItem?.is_partial || false;
-      
+      const pkgSizeRaw = transactionItem?.full_package_size ?? null;
+
       return {
         ndc: item.ndc,
         drugName: item.productName || transactionItem?.proprietary_name || transactionItem?.generic_name,
         lotNumber: item.lotNumber,
         expirationDate: item.expirationDate,
-        packageSize: transactionItem?.full_package_size || transactionItem?.package_size || '1',
-        fullQuantity: isPartial ? 0 : (transactionItem?.quantity || totalQty),
-        partialQuantity: isPartial ? (transactionItem?.quantity || totalQty) : 0,
+        packageSize: pkgSizeRaw != null ? String(pkgSizeRaw) : '—',
+        fullQuantity: isPartial ? 0 : totalQty,
+        partialQuantity: isPartial ? totalQty : 0,
         askPrice: item.askPrice,
         askValue: item.askPrice ? item.askPrice * totalQty : null,
       };
