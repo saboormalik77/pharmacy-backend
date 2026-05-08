@@ -1,76 +1,84 @@
 @import "tailwindcss";
 
 :root {
-  /* Nordic Healthcare — exact palette from DESIGN.md */
-  --background: #fcf9f8;
-  --foreground: #1c1b1b;
+  /* Nordic Healthcare — Revised Spec Palette */
+  --background: #ebe8e7;
+  --foreground: #000000;
 
-  --surface: #fcf9f8;
+  --surface: #ebe8e7;
   --surface-dim: #dcd9d9;
-  --surface-bright: #fcf9f8;
+  --surface-bright: #f5f2f1;
   --surface-container-lowest: #ffffff;
-  --surface-container-low: #f6f3f2;
-  --surface-container: #f0edec;
-  --surface-container-high: #ebe7e7;
-  --surface-container-highest: #e5e2e1;
+  --surface-container-low: #f5f2f1;
+  --surface-container: #ebe8e7;
+  --surface-container-high: #e5e2e1;
+  --surface-container-highest: #dcd9d9;
   --surface-variant: #e5e2e1;
 
-  --on-surface: #1c1b1b;
-  --on-surface-variant: #434847;
-  --inverse-surface: #313030;
-  --inverse-on-surface: #f3f0ef;
-  --outline: #747878;
-  --outline-variant: #c3c7c7;
-  --surface-tint: #5a5f5f;
+  --on-surface: #000000;
+  --on-surface-variant: #505454;
+  --inverse-surface: #3d4343;
+  --inverse-on-surface: #ffffff;
+  --outline: #9ca3af;
+  --outline-variant: #e2e2e2;
+  --surface-tint: #516057;
 
-  --primary: #171c1c;
+  --primary: #1d2222;
   --on-primary: #ffffff;
-  --primary-container: #2c3131;
-  --on-primary-container: #949998;
+  --primary-container: #3d4343;
+  --on-primary-container: #9ca3af;
   --inverse-primary: #c3c7c7;
 
-  --secondary: #516257;
+  --secondary: #516057;
   --on-secondary: #ffffff;
-  --secondary-container: #d1e4d5;
-  --on-secondary-container: #55675b;
+  --secondary-container: rgba(81, 96, 87, 0.15);
+  --on-secondary-container: #516057;
 
-  --tertiary: #281801;
+  --tertiary: #ad916a;
   --on-tertiary: #ffffff;
-  --tertiary-container: #3f2d11;
-  --on-tertiary-container: #af9470;
+  --tertiary-container: rgba(173, 145, 106, 0.15);
+  --on-tertiary-container: #6b5a3f;
 
-  /*
-   * Fixed tints (used by some pages as subtle highlights).
-   * These weren't in DESIGN.md explicitly, but we derive them as light tints
-   * from the core tokens to keep page styles consistent.
-   */
-  --primary-fixed: color-mix(in srgb, var(--primary) 12%, var(--surface-container-lowest));
-  --tertiary-fixed: color-mix(in srgb, var(--tertiary) 12%, var(--surface-container-lowest));
-
-  --error: #ba1a1a;
+  --error: #f97316;
   --on-error: #ffffff;
-  --error-container: #ffdad6;
-  --on-error-container: #93000a;
+  --error-container: rgba(249, 115, 22, 0.1);
+  --on-error-container: #ffffff;
 
-  /*
-   * Tailwind `primary-*` scale used across MainAdmin pages.
-   * Keep the same names, but map them into the Nordic palette.
-   */
-  --primary-50: var(--surface-container-low);
-  --primary-100: var(--surface-container);
-  --primary-200: var(--surface-container-high);
-  --primary-300: var(--outline-variant);
-  --primary-400: var(--surface-tint);
-  --primary-500: var(--primary);
-  --primary-600: var(--primary-container);
-  --primary-700: var(--inverse-surface);
-  --primary-800: #1c1b1b; /* on-surface */
-  --primary-900: #0f1111; /* deeper charcoal for emphasis */
+  /* Status */
+  --status-success: #516057;
+  --status-success-bg: rgba(81, 96, 87, 0.1);
+  --status-warning: #ad916a;
+  --status-warning-bg: rgba(173, 145, 106, 0.2);
+  --status-danger: #f97316;
+  --status-danger-bg: rgba(249, 115, 22, 0.15);
+  --status-info-bg: #dbeafe;
+  --status-info-text: #1e40af;
 
-  --sidebar-bg: var(--primary);
-  --sidebar-text: var(--inverse-on-surface);
-  --sidebar-hover: var(--primary-container);
-  --sidebar-active: var(--secondary);
+  /* Special badges */
+  --badge-controlled-bg: #f97316;
+  --badge-controlled-text: #ffffff;
+  --badge-nonc-bg: #f3f4f6;
+  --badge-nonc-text: #374151;
+
+  /* Chart */
+  --chart-tertiary: #7fb399;
+
+  /* Scrollbar */
+  --scrollbar-track: var(--surface-container-low);
+  --scrollbar-thumb: #e2e2e2;
+  --scrollbar-thumb-hover: #9ca3af;
+
+  --sidebar-bg: #1d2222;
+  --sidebar-text: #9ca3af;
+  --sidebar-text-active: #ffffff;
+  --sidebar-hover: #516057;
+  --sidebar-active: #516057;
+  --sidebar-active-border: #7fb399;
+  --sidebar-border: #3d4343;
+
+  /* Fixed tints (used by existing pages) */
+  --primary-fixed: rgba(29, 34, 34, 0.08);
+  --tertiary-fixed: rgba(173, 145, 106, 0.12);
 }
 
 @theme inline {
@@ -80,30 +88,36 @@
   --color-font-sans: var(--font-manrope);
 
   /* Primary scale */
-  --color-primary-50: var(--primary-50);
-  --color-primary-100: var(--primary-100);
-  --color-primary-200: var(--primary-200);
-  --color-primary-300: var(--primary-300);
-  --color-primary-400: var(--primary-400);
-  --color-primary-500: var(--primary-500);
-  --color-primary-600: var(--primary-600);
-  --color-primary-700: var(--primary-700);
-  --color-primary-800: var(--primary-800);
-  --color-primary-900: var(--primary-900);
+  --color-primary-50: var(--surface-container-low);
+  --color-primary-100: var(--surface-container);
+  --color-primary-200: var(--surface-container-high);
+  --color-primary-300: var(--outline-variant);
+  --color-primary-400: var(--surface-tint);
+  --color-primary-500: var(--primary);
+  --color-primary-600: var(--primary-container);
+  --color-primary-700: var(--inverse-surface);
+  --color-primary-800: var(--on-surface);
+  --color-primary-900: var(--primary);
   --color-primary: var(--primary-500);
 
-  /* Error colors - Nordic palette */
+  /* Surface containers */
+  --color-surface-lowest: var(--surface-container-lowest);
+  --color-surface-low: var(--surface-container-low);
+  --color-surface: var(--surface-container);
+  --color-surface-high: var(--surface-container-high);
+
+  /* Error colors - Spec uses #f97316 orange */
   --color-red-50: var(--error-container);
   --color-red-100: var(--error-container);
-  --color-red-200: var(--outline-variant);
-  --color-red-300: var(--outline-variant);
+  --color-red-200: rgba(249, 115, 22, 0.2);
+  --color-red-300: rgba(249, 115, 22, 0.3);
   --color-red-400: var(--error);
   --color-red-500: var(--error);
   --color-red-600: var(--error);
   --color-red-700: var(--on-error-container);
   --color-red-800: var(--on-error-container);
 
-  /* Success colors - Nordic palette */
+  /* Success colors - Spec uses #516057 sage green */
   --color-green-50: var(--secondary-container);
   --color-green-100: var(--secondary-container);
   --color-green-200: var(--secondary-container);
@@ -112,9 +126,9 @@
   --color-green-500: var(--secondary);
   --color-green-600: var(--secondary);
   --color-green-700: var(--on-secondary-container);
-  --color-green-800: var(--on-secondary-fixed);
+  --color-green-800: var(--on-secondary-container);
 
-  /* Warning colors - Nordic palette */
+  /* Warning colors - Spec uses #ad916a tan/gold */
   --color-amber-50: var(--tertiary-container);
   --color-amber-100: var(--tertiary-container);
   --color-amber-200: var(--tertiary-container);
@@ -123,20 +137,18 @@
   --color-amber-500: var(--tertiary);
   --color-amber-600: var(--on-tertiary-container);
   --color-amber-700: var(--on-tertiary-container);
-  --color-amber-800: var(--on-tertiary-fixed);
 
-  /* Info colors - Nordic palette */
-  --color-blue-50: var(--primary-container);
-  --color-blue-100: var(--primary-container);
-  --color-blue-200: var(--primary-container);
+  /* Info colors */
+  --color-blue-50: var(--status-info-bg);
+  --color-blue-100: var(--status-info-bg);
+  --color-blue-200: var(--status-info-bg);
   --color-blue-300: var(--primary);
   --color-blue-400: var(--primary);
   --color-blue-500: var(--primary);
   --color-blue-600: var(--on-primary-container);
   --color-blue-700: var(--on-primary-container);
-  --color-blue-800: var(--on-primary-fixed);
 
-  /* Indigo (accent) - Nordic palette */
+  /* Indigo (accent) */
   --color-indigo-50: var(--surface-container);
   --color-indigo-100: var(--surface-container);
   --color-indigo-200: var(--outline-variant);
@@ -145,6 +157,23 @@
   --color-indigo-500: var(--primary);
   --color-indigo-600: var(--primary);
   --color-indigo-700: var(--on-surface);
+
+  /* Sidebar */
+  --color-sidebar-bg: var(--sidebar-bg);
+  --color-sidebar-hover: var(--sidebar-hover);
+  --color-sidebar-active: var(--sidebar-active);
+
+  /* Gray scale — maps gray-* utility classes to design system */
+  --color-gray-50: var(--surface-container-low);
+  --color-gray-100: var(--surface-container-low);
+  --color-gray-200: var(--surface-container-high);
+  --color-gray-300: var(--outline-variant);
+  --color-gray-400: var(--surface-tint);
+  --color-gray-500: var(--primary);
+  --color-gray-600: var(--primary-container);
+  --color-gray-700: var(--inverse-surface);
+  --color-gray-800: var(--on-surface);
+  --color-gray-900: var(--primary);
 }
 
 body {
@@ -169,27 +198,18 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-manrope), -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-.text-display {
-  font-size: 32px;
-  line-height: 40px;
-}
+/* Typography Scale — Spec Section 2.2 */
+.text-display { font-size: 32px; line-height: 40px; font-weight: 700; }
+.text-headline { font-size: 24px; line-height: 32px; }
+.text-title { font-size: 20px; line-height: 28px; font-weight: 600; }
+.text-subtitle { font-size: 18px; line-height: 24px; font-weight: 600; }
+.text-body-lg { font-size: 16px; line-height: 24px; }
+.text-body { font-size: 14px; line-height: 20px; }
+.text-label { font-size: 12px; line-height: 16px; font-weight: 500; }
+.text-extra-small { font-size: 11px; line-height: 14px; }
+.text-tiny { font-size: 10px; line-height: 14px; font-weight: 500; }
 
-.text-headline {
-  font-size: 24px;
-  line-height: 32px;
-}
-
-.text-body {
-  font-size: 14px;
-  line-height: 20px;
-}
-
-.text-label {
-  font-size: 12px;
-  line-height: 16px;
-}
-
-/* Spacing System (8px grid) */
+/* Spacing System (8px grid) — Spec Section 3 */
 .space-xxs { gap: 4px; }
 .space-xs { gap: 8px; }
 .space-sm { gap: 16px; }
@@ -228,43 +248,26 @@ h1, h2, h3, h4, h5, h6 {
 .my-sm { margin-top: 16px; margin-bottom: 16px; }
 .my-md { margin-top: 24px; margin-bottom: 24px; }
 
-/* Table - Spec: 56px row height, 12px header */
-.table-row {
-  height: 56px;
-}
-.table-cell {
-  padding: 12px;
-}
+/* Table — Spec Section 5.6 */
+.table-row { height: 64px; }
+.table-cell { padding: 12px 16px; }
 .table-header {
   font-size: 12px;
   text-transform: uppercase;
-  font-weight: 700;
+  font-weight: 600;
+  letter-spacing: 0.05em;
 }
+.table-row-even { background-color: var(--surface-container-lowest); }
+.table-row-odd { background-color: var(--surface-container-low); }
+.table-hover:hover { background-color: #fafafa; }
 
-/* Icon - Spec: 20px within 24px box */
-.icon-sm {
-  width: 20px;
-  height: 20px;
-}
-.icon-md {
-  width: 24px;
-  height: 24px;
-}
+/* Icon sizes — Spec Section 6.1 */
+.icon-sm { width: 20px; height: 20px; }
+.icon-md { width: 24px; height: 24px; }
+.icon-lg { width: 32px; height: 32px; }
 
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
+/* Scrollbar — Spec */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }

@@ -318,8 +318,8 @@ export default function BatchWorkflowPage() {
         return (
             <div className="text-center py-20">
                 <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-3" />
-                <p className="text-lg font-medium text-gray-900">Batch not found</p>
-                <button onClick={() => router.back()} className="mt-4 inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900">
+                <p className="text-lg font-medium text-[var(--on-surface)]">Batch not found</p>
+                <button onClick={() => router.back()} className="mt-4 inline-flex items-center gap-1 text-sm text-[var(--on-primary-container)] hover:text-[var(--on-surface)]">
                     <ArrowLeft className="w-4 h-4" /> Go Back
                 </button>
             </div>
@@ -335,22 +335,22 @@ export default function BatchWorkflowPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <button onClick={() => router.back()} className="text-gray-400 hover:text-gray-600 p-0.5">
+                    <button onClick={() => router.back()} className="text-[var(--outline)] hover:text-[var(--on-primary-container)] p-0.5">
                         <ArrowLeft className="w-4 h-4" />
                     </button>
                     <div>
                         <div className="flex items-center gap-1.5">
-                            <Layers className="w-4 h-4 text-blue-600" />
-                            <h1 className="font-heading text-base font-bold text-gray-900">Post-Closeout Workflow</h1>
+                            <Layers className="w-4 h-4 text-[var(--primary)]" />
+                            <h1 className="font-heading text-base font-bold text-[var(--on-surface)]">Post-Closeout Workflow</h1>
                         </div>
-                        <p className="text-sm text-gray-500 mt-0.5">{batch.batchName} · {formatBatchMonth(batch.batchMonth)}</p>
+                        <p className="text-sm text-[var(--on-surface-variant)] mt-0.5">{batch.batchName} · {formatBatchMonth(batch.batchMonth)}</p>
                     </div>
                 </div>
                 <Badge variant={sb.variant}><span className="text-[10px]">{sb.label}</span></Badge>
             </div>
 
             {/* Progress bar */}
-            <div className="bg-white rounded-[4px] shadow px-5 pt-4 pb-3">
+            <div className="bg-[var(--surface-container-lowest)] rounded-[4px] shadow px-5 pt-4 pb-3">
                 <div className="flex items-center gap-0">
                     {WORKFLOW_STEPS.map((step, idx) => {
                         const done = workflowState?.[step.stateKey] ?? false;
@@ -359,15 +359,15 @@ export default function BatchWorkflowPage() {
                             <div key={step.key} className="flex items-center flex-1">
                                 <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold border-2 transition-colors ${
                                     done
-                                        ? 'bg-green-500 border-green-500 text-white'
+                                        ? 'bg-[var(--secondary)] border-[var(--secondary)] text-white'
                                         : idx === activeStepIndex
-                                            ? 'bg-blue-600 border-blue-600 text-white'
-                                            : 'bg-white border-gray-300 text-gray-400'
+                                            ? 'bg-[var(--primary)] border-[var(--primary)] text-white'
+                                            : 'bg-[var(--surface-container-lowest)] border-[var(--outline)] text-[var(--outline)]'
                                 }`}>
                                     {done ? <CheckCircle className="w-3.5 h-3.5" /> : idx + 1}
                                 </div>
                                 {!isLast && (
-                                    <div className={`flex-1 h-0.5 mx-1 transition-colors ${done ? 'bg-green-400' : 'bg-gray-200'}`} />
+                                    <div className={`flex-1 h-0.5 mx-1 transition-colors ${done ? 'bg-[var(--secondary)]' : 'bg-[var(--surface-container-high)]'}`} />
                                 )}
                             </div>
                         );
@@ -375,7 +375,7 @@ export default function BatchWorkflowPage() {
                 </div>
                 <div className="flex justify-between mt-1">
                     {WORKFLOW_STEPS.map((step) => (
-                        <span key={step.key} className="text-[9px] text-gray-500 text-center flex-1">{step.label}</span>
+                        <span key={step.key} className="text-[9px] text-[var(--on-surface-variant)] text-center flex-1">{step.label}</span>
                     ))}
                 </div>
             </div>
@@ -391,21 +391,21 @@ export default function BatchWorkflowPage() {
                     return (
                         <div
                             key={step.key}
-                            className={`bg-white rounded-[4px] shadow border-2 p-3.5 transition-all ${
+                            className={`bg-[var(--surface-container-lowest)] rounded-[4px] shadow border-2 p-3.5 transition-all ${
                                 done
-                                    ? 'border-green-200 bg-green-50'
+                                    ? 'border-[var(--secondary)] bg-[var(--secondary-container)]'
                                     : isActive
-                                        ? 'border-blue-300 bg-blue-50'
-                                        : 'border-gray-200 bg-gray-50 opacity-60'
+                                        ? 'border-[var(--primary)] bg-[var(--primary-container)]'
+                                        : 'border-[var(--outline-variant)] bg-[var(--surface-container-low)] opacity-60'
                             }`}
                         >
                             <div className="flex items-start gap-3">
                                 <div className={`w-8 h-8 rounded-[4px] flex items-center justify-center flex-shrink-0 ${
                                     done
-                                        ? 'bg-green-500'
+                                        ? 'bg-[var(--secondary)]'
                                         : isActive
-                                            ? 'bg-blue-600'
-                                            : 'bg-gray-300'
+                                            ? 'bg-[var(--primary)]'
+                                            : 'bg-[var(--outline-variant)]'
                                 }`}>
                                     {done
                                         ? <CheckCircle className="w-4 h-4 text-white" />
@@ -415,11 +415,11 @@ export default function BatchWorkflowPage() {
 
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-0.5">
-                                        <p className="text-xs font-semibold text-gray-900">{step.label}</p>
-                                        {done && <span className="text-[10px] font-medium text-green-600 bg-green-100 px-1.5 py-0.5 rounded">Done</span>}
-                                        {isLocked && !done && <span className="text-[10px] text-gray-400">Locked</span>}
+                                        <p className="text-xs font-semibold text-[var(--on-surface)]">{step.label}</p>
+                                        {done && <span className="text-[10px] font-medium text-[var(--secondary)] bg-[var(--secondary-container)] px-1.5 py-0.5 rounded">Done</span>}
+                                        {isLocked && !done && <span className="text-[10px] text-[var(--outline)]">Locked</span>}
                                     </div>
-                                    <p className="text-sm text-gray-500">{step.description}</p>
+                                    <p className="text-sm text-[var(--on-surface-variant)]">{step.description}</p>
 
                                     {isActive && !done && (
                                         <div className="mt-2.5">
@@ -428,7 +428,7 @@ export default function BatchWorkflowPage() {
                                                 <button
                                                     onClick={handleGenerateCardinal}
                                                     disabled={isActionLoading}
-                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors font-medium"
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-[var(--primary)] text-white hover:opacity-90 disabled:opacity-50 transition-colors font-medium"
                                                 >
                                                     {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
                                                     Generate Cardinal Invoice
@@ -440,10 +440,10 @@ export default function BatchWorkflowPage() {
                                                 <div className="space-y-2">
                                                     <div
                                                         onClick={() => fileInputRef.current?.click()}
-                                                        className="flex items-center gap-2 px-3 py-2 border-2 border-dashed border-blue-300 rounded-[4px] cursor-pointer hover:bg-blue-50 transition-colors"
+                                                        className="flex items-center gap-2 px-3 py-2 border-2 border-dashed border-[var(--primary)] rounded-[4px] cursor-pointer hover:bg-[var(--primary-container)] transition-colors"
                                                     >
-                                                        <Upload className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
-                                                        <span className="text-sm text-blue-600 truncate">
+                                                        <Upload className="w-3.5 h-3.5 text-[var(--primary)] flex-shrink-0" />
+                                                        <span className="text-sm text-[var(--primary)] truncate">
                                                             {cardinalFile ? cardinalFile.name : 'Click to select file'}
                                                         </span>
                                                         <input
@@ -456,7 +456,7 @@ export default function BatchWorkflowPage() {
                                                     <button
                                                         onClick={handleSendCardinal}
                                                         disabled={isActionLoading || !cardinalFile}
-                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 transition-colors font-medium"
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-[var(--tertiary)] text-white hover:opacity-90 disabled:opacity-50 transition-colors font-medium"
                                                     >
                                                         {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                                                         Send Cardinal Invoice
@@ -469,13 +469,13 @@ export default function BatchWorkflowPage() {
                                                 <div className="space-y-2.5">
                                                     {batchMemos.length === 0 ? (
                                                         <div className="space-y-1.5">
-                                                            <p className="text-sm text-gray-500">
+                                                            <p className="text-sm text-[var(--on-surface-variant)]">
                                                                 No debit memos created yet. Click below to generate them grouped by pharmacy, destination and labeler.
                                                             </p>
                                                             <button
                                                                 onClick={handleCreateDebitMemos}
                                                                 disabled={isActionLoading}
-                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50 transition-colors font-medium"
+                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-[var(--tertiary)] text-white hover:opacity-90 disabled:opacity-50 transition-colors font-medium"
                                                             >
                                                                 {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
                                                                 Create Debit Memos
@@ -483,19 +483,19 @@ export default function BatchWorkflowPage() {
                                                         </div>
                                                     ) : (
                                                         <div className="space-y-2">
-                                                            <p className="text-sm text-gray-600">
-                                                                <span className="font-semibold text-orange-600">{batchMemos.length}</span> debit memo{batchMemos.length !== 1 ? 's' : ''} created for this batch:
+                                                            <p className="text-sm text-[var(--on-primary-container)]">
+                                                                <span className="font-semibold text-[var(--tertiary)]">{batchMemos.length}</span> debit memo{batchMemos.length !== 1 ? 's' : ''} created for this batch:
                                                             </p>
                                                             <div className="max-h-36 overflow-y-auto space-y-1 pr-1">
                                                                 {batchMemos.map(m => (
-                                                                    <div key={m.id} className="flex items-center justify-between bg-white border border-gray-200 rounded px-4 py-3 text-sm">
+                                                                    <div key={m.id} className="flex items-center justify-between bg-[var(--surface-container-lowest)] border border-[var(--outline-variant)] rounded-[4px] px-4 py-3 text-sm">
                                                                         <div className="flex items-center gap-2 min-w-0">
-                                                                            <span className="font-semibold text-gray-900">{m.memoNumber}</span>
-                                                                            <span className="text-gray-500 truncate">{m.pharmacyName}</span>
+                                                                            <span className="font-semibold text-[var(--on-surface)]">{m.memoNumber}</span>
+                                                                            <span className="text-[var(--on-surface-variant)] truncate">{m.pharmacyName}</span>
                                                                         </div>
                                                                         <div className="flex items-center gap-2 flex-shrink-0">
-                                                                            <span className="text-gray-500">{m.destination || '—'}</span>
-                                                                            <span className="font-medium text-green-700">{formatCurrency(m.totalAskValue)}</span>
+                                                                            <span className="text-[var(--on-surface-variant)]">{m.destination || '—'}</span>
+                                                                            <span className="font-medium text-[var(--secondary)]">{formatCurrency(m.totalAskValue)}</span>
                                                                         </div>
                                                                     </div>
                                                                 ))}
@@ -504,7 +504,7 @@ export default function BatchWorkflowPage() {
                                                                 <button
                                                                     onClick={handleConfirmDebitMemos}
                                                                     disabled={isActionLoading}
-                                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50 transition-colors font-medium"
+                                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-[var(--tertiary)] text-white hover:opacity-90 disabled:opacity-50 transition-colors font-medium"
                                                                 >
                                                                     {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
                                                                     Confirm &amp; Next Step
@@ -513,7 +513,7 @@ export default function BatchWorkflowPage() {
                                                                     href={`/warehouse/debit-memos?batchId=${batchId}`}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
-                                                                    className="inline-flex items-center gap-1 text-sm text-orange-600 hover:underline"
+                                                                    className="inline-flex items-center gap-1 text-sm text-[var(--tertiary)] hover:underline"
                                                                 >
                                                                     View Details <ExternalLink className="w-3 h-3" />
                                                                 </a>
@@ -546,7 +546,7 @@ export default function BatchWorkflowPage() {
                                                         ).length;
                                                         return (
                                                             <div className="space-y-1.5">
-                                                                <p className="text-sm text-gray-600">
+                                                                <p className="text-sm text-[var(--on-primary-container)]">
                                                                     Send one RA request per reverse distributor ({distributorGroups.length} distributor{distributorGroups.length !== 1 ? 's' : ''}):
                                                                 </p>
                                                                 <div className="max-h-48 overflow-y-auto space-y-1 pr-1">
@@ -559,29 +559,29 @@ export default function BatchWorkflowPage() {
                                                                             m => m.raRequestedAt || m.raStatus === 'requested' || m.raStatus === 'received' || m.raStatus === 'shipped'
                                                                         ).length;
                                                                         return (
-                                                                            <div key={group.destination} className={`flex items-center justify-between rounded px-4 py-3 text-sm border ${allSent ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'}`}>
+                                                                            <div key={group.destination} className={`flex items-center justify-between rounded-[4px] px-4 py-3 text-sm border ${allSent ? 'bg-[var(--secondary-container)] border-[var(--secondary)]' : 'bg-[var(--surface-container-lowest)] border-[var(--outline-variant)]'}`}>
                                                                                 <div className="flex items-center gap-2 min-w-0">
                                                                                     {allSent ? (
-                                                                                        <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                                                                                        <CheckCircle className="w-3.5 h-3.5 text-[var(--secondary)] flex-shrink-0" />
                                                                                     ) : isSending ? (
-                                                                                        <Loader2 className="w-3.5 h-3.5 text-green-500 animate-spin flex-shrink-0" />
+                                                                                        <Loader2 className="w-3.5 h-3.5 text-[var(--secondary)] animate-spin flex-shrink-0" />
                                                                                     ) : (
-                                                                                        <Mail className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                                                                                        <Mail className="w-3.5 h-3.5 text-[var(--outline)] flex-shrink-0" />
                                                                                     )}
-                                                                                    <span className="font-semibold text-gray-900">{group.distributorName}</span>
-                                                                                    <span className="text-gray-400">
+                                                                                    <span className="font-semibold text-[var(--on-surface)]">{group.distributorName}</span>
+                                                                                    <span className="text-[var(--outline)]">
                                                                                         {group.memos.length} memo{group.memos.length !== 1 ? 's' : ''}
                                                                                         {sentCount > 0 && !allSent && ` · ${sentCount} sent`}
                                                                                     </span>
                                                                                 </div>
                                                                                 <div className="flex-shrink-0">
                                                                                     {allSent ? (
-                                                                                        <span className="text-[10px] font-medium text-green-600 bg-green-100 px-1.5 py-0.5 rounded">RA Sent</span>
+                                                                                        <span className="text-[10px] font-medium text-[var(--secondary)] bg-[var(--secondary-container)] px-1.5 py-0.5 rounded">RA Sent</span>
                                                                                     ) : (
                                                                                         <button
                                                                                             onClick={() => handleSendRAForGroup(group.destination, group.distributorName, group.memos)}
                                                                                             disabled={isSending || !!raSendingGroup || isSendingAllRA}
-                                                                                            className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors font-medium"
+                                                                                            className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] rounded bg-[var(--secondary)] text-white hover:opacity-90 disabled:opacity-50 transition-colors font-medium"
                                                                                         >
                                                                                             {isSending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
                                                                                             Send RA
@@ -595,7 +595,7 @@ export default function BatchWorkflowPage() {
                                                             </div>
                                                         );
                                                     })() : (
-                                                        <p className="text-sm text-gray-500">No debit memos to send RA requests for.</p>
+                                                        <p className="text-sm text-[var(--on-surface-variant)]">No debit memos to send RA requests for.</p>
                                                     )}
                                                     {(() => {
                                                         const anyRaSent = batchMemos.some(
@@ -610,7 +610,7 @@ export default function BatchWorkflowPage() {
                                                                     onClick={handleCompleteRAStep}
                                                                     disabled={isActionLoading || !anyRaSent}
                                                                     title={!anyRaSent ? 'Send at least one RA request before completing this step' : undefined}
-                                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-[var(--secondary)] text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                                                                 >
                                                                     {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
                                                                     Complete Step
@@ -619,7 +619,7 @@ export default function BatchWorkflowPage() {
                                                                     <button
                                                                         onClick={handleSendAllRA}
                                                                         disabled={isSendingAllRA || !!raSendingGroup}
-                                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-green-700 text-white hover:bg-green-800 disabled:opacity-50 transition-colors font-medium"
+                                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-[var(--secondary)] text-white hover:opacity-90 disabled:opacity-50 transition-colors font-medium"
                                                                     >
                                                                         {isSendingAllRA ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                                                                         Send All RA
@@ -634,7 +634,7 @@ export default function BatchWorkflowPage() {
                                                                     href="/warehouse/ra-tracking"
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
-                                                                    className="inline-flex items-center gap-1 text-sm text-green-700 hover:underline"
+                                                                    className="inline-flex items-center gap-1 text-sm text-[var(--secondary)] hover:underline"
                                                                 >
                                                                     Open RA Tracking <ExternalLink className="w-3 h-3" />
                                                                 </a>
@@ -653,19 +653,19 @@ export default function BatchWorkflowPage() {
             </div>
 
             {/* Footer */}
-            <div className="bg-white rounded-[4px] shadow px-5 py-3 flex items-center justify-between">
+            <div className="bg-[var(--surface-container-lowest)] rounded-[4px] shadow px-5 py-3 flex items-center justify-between">
                 {allDone ? (
-                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-green-700">
-                        <CheckCircle className="w-4 h-4 text-green-500" /> All steps completed
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--secondary)]">
+                        <CheckCircle className="w-4 h-4 text-[var(--secondary)]" /> All steps completed
                     </span>
                 ) : (
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-[var(--on-surface-variant)]">
                         Step {Math.min(activeStepIndex + 1, WORKFLOW_STEPS.length)} of {WORKFLOW_STEPS.length}
                     </span>
                 )}
                 <button
                     onClick={() => router.back()}
-                    className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="px-3 py-1.5 text-xs rounded-[4px] border border-[var(--outline-variant)] text-[var(--on-surface)] hover:bg-[var(--surface-container-low)] transition-colors"
                 >
                     Back to Batch
                 </button>

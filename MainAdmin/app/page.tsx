@@ -18,7 +18,7 @@ export default function DashboardPage() {
 
   const statCards = [
     { label: 'Total Buying Groups', value: stats.total, icon: Users, color: 'var(--primary)' },
-    { label: 'Active Groups', value: stats.active, icon: CheckCircle, color: 'bg-green-500' },
+    { label: 'Active Groups', value: stats.active, icon: CheckCircle, color: 'var(--secondary)' },
     { label: 'Total Returns', value: warehouseStats.totalReturns, icon: Package, color: 'var(--secondary)' },
     { label: 'Total Batches', value: warehouseStats.totalBatches, icon: Layers, color: 'var(--tertiary)' },
   ];
@@ -64,8 +64,8 @@ export default function DashboardPage() {
       {!warehouseStats.isLoading && !warehouseStats.error && (
         <div className="rounded-[4px] shadow-sm px-6 py-6 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-[4px] flex items-center justify-center" style={{ backgroundColor: 'var(--tertiary-container)' }}>
-              <Calendar className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-[4px] flex items-center justify-center" style={{ backgroundColor: 'var(--tertiary-fixed)' }}>
+              <Calendar className="w-5 h-5" style={{ color: 'var(--tertiary)' }} />
             </div>
             <div>
               <p className="text-xs font-medium" style={{ color: 'var(--on-surface-variant)' }}>Current Active Batch</p>
@@ -94,10 +94,10 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <Link
             href="/buying-groups"
-            className="flex items-center gap-3 p-6 rounded-[4px] border transition-colors"
+            className="flex items-center gap-3 p-6 rounded-[4px] border transition-all hover:shadow-md hover:border-[var(--primary)]"
             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)' }}
           >
-            <div className="w-10 h-10 rounded-[4px] flex items-center justify-center" style={{ backgroundColor: 'var(--primary-fixed)' }}>
+            <div className="w-10 h-10 rounded-[4px] flex items-center justify-center transition-transform hover:scale-110" style={{ backgroundColor: 'var(--primary-fixed)' }}>
               <Users className="w-5 h-5" style={{ color: 'var(--primary)' }} />
             </div>
             <div>
@@ -108,10 +108,10 @@ export default function DashboardPage() {
           
           <Link
             href="/warehouse"
-            className="flex items-center gap-3 p-6 rounded-[4px] border transition-colors"
+            className="flex items-center gap-3 p-6 rounded-[4px] border transition-all hover:shadow-md hover:border-[var(--secondary)]"
             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)' }}
           >
-            <div className="w-10 h-10 rounded-[4px] flex items-center justify-center" style={{ backgroundColor: 'var(--secondary-container)' }}>
+            <div className="w-10 h-10 rounded-[4px] flex items-center justify-center transition-transform hover:scale-110" style={{ backgroundColor: 'var(--secondary-container)' }}>
               <Package className="w-5 h-5" style={{ color: 'var(--secondary)' }} />
             </div>
             <div>
@@ -122,10 +122,10 @@ export default function DashboardPage() {
 
           <Link
             href="/warehouse/batches"
-            className="flex items-center gap-3 p-6 rounded-[4px] border transition-colors"
+            className="flex items-center gap-3 p-6 rounded-[4px] border transition-all hover:shadow-md hover:border-[var(--tertiary)]"
             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)' }}
           >
-            <div className="w-10 h-10 rounded-[4px] flex items-center justify-center" style={{ backgroundColor: 'var(--tertiary-fixed)' }}>
+            <div className="w-10 h-10 rounded-[4px] flex items-center justify-center transition-transform hover:scale-110" style={{ backgroundColor: 'var(--tertiary-fixed)' }}>
               <Layers className="w-5 h-5" style={{ color: 'var(--tertiary)' }} />
             </div>
             <div>

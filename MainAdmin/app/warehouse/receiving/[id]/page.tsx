@@ -469,23 +469,23 @@ export default function WarehouseVerificationPage() {
                     <div className="py-6 text-center text-xs text-gray-400">No items found</div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
-                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap w-10">✓</th>
-                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
-                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product</th>
-                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Manufacturer</th>
-                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Lot</th>
-                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Expires</th>
-                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Qty</th>
-                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Status</th>
-                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Destination</th>
+                        <table className="w-full border" style={{ borderColor: 'var(--outline)' }}>
+                            <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
+                                <tr className="bg-[var(--surface-container-low)]">
+                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap w-10">✓</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">NDC</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Product</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Manufacturer</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Lot</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Expires</th>
+                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Qty</th>
+                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Status</th>
+                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Destination</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100">
+                            <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                 {filteredItems.map(item => (
-                                    <tr key={item.id} className={`${item.verified ? 'bg-green-50/50' : 'hover:bg-gray-50'}`}>
+                                    <tr key={item.id} className="hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
                                         <td className="px-3 py-3 text-center">
                                             <input
                                                 type="checkbox"
@@ -495,10 +495,10 @@ export default function WarehouseVerificationPage() {
                                                 disabled={isActionLoading}
                                             />
                                         </td>
-                                        <td className="px-3 py-3 text-sm font-mono text-gray-900 whitespace-nowrap">{item.ndc || '—'}</td>
-                                        <td className="px-3 py-3 text-sm text-gray-900 max-w-[140px] truncate" title={item.proprietaryName || ''}>{item.proprietaryName || item.genericName || '—'}</td>
-                                        <td className="px-3 py-3 text-sm text-gray-600 max-w-[110px] truncate">{item.manufacturer || '—'}</td>
-                                        <td className="px-3 py-3 text-sm text-gray-600 font-mono whitespace-nowrap">{item.lotNumber || '—'}</td>
+                                        <td className="px-3 py-3 text-sm font-mono" style={{ color: 'var(--foreground)' }}>{item.ndc || '—'}</td>
+                                        <td className="px-3 py-3 text-sm max-w-[140px] truncate" style={{ color: 'var(--foreground)' }} title={item.proprietaryName || ''}>{item.proprietaryName || item.genericName || '—'}</td>
+                                        <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{item.manufacturer || '—'}</td>
+                                        <td className="px-3 py-3 text-sm font-mono whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>{item.lotNumber || '—'}</td>
                                         <td className="px-3 py-3 text-sm text-gray-600 whitespace-nowrap">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
                                         <td className="px-3 py-3 text-sm text-center text-gray-900 font-semibold">{item.quantity}</td>
                                         <td className="px-3 py-3 text-center">
@@ -524,24 +524,24 @@ export default function WarehouseVerificationPage() {
                         </h2>
                     </div>
                     <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
-                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Type</th>
-                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product</th>
-                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
-                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Expected</th>
-                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actual</th>
-                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Notes</th>
-                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Status</th>
-                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Reported</th>
+                        <table className="w-full border" style={{ borderColor: 'var(--outline)' }}>
+                            <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
+                                <tr className="bg-[var(--surface-container-low)]">
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Type</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Product</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">NDC</th>
+                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Expected</th>
+                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Actual</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Notes</th>
+                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Status</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Reported</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100">
+                            <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                 {discrepancies.map(d => (
-                                    <tr key={d.id} className="hover:bg-gray-50">
+                                    <tr key={d.id} className="hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
                                         <td className="px-3 py-3">{discTypeBadge(d.type)}</td>
-                                        <td className="px-3 py-3 text-sm text-gray-900 max-w-[130px] truncate">{d.productName || '—'}</td>
+                                        <td className="px-3 py-3 text-sm max-w-[130px] truncate" style={{ color: 'var(--foreground)' }}>{d.productName || '—'}</td>
                                         <td className="px-3 py-3 text-sm font-mono text-gray-600">{d.ndc || '—'}</td>
                                         <td className="px-3 py-3 text-sm text-center text-gray-900">{d.expectedQuantity ?? '—'}</td>
                                         <td className="px-3 py-3 text-sm text-center text-gray-900">{d.actualQuantity ?? '—'}</td>

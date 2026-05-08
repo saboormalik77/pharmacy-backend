@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { X, CheckCircle, XCircle, Info, AlertCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -24,33 +25,34 @@ const toastIcons = {
 };
 
 const toastStyles = {
-    success: 'bg-[var(--secondary-container)] text-[var(--on-secondary-container)] border-[var(--outline-variant)]',
-    error: 'bg-[var(--error-container)] text-[var(--on-error-container)] border-[var(--outline-variant)]',
-    info: 'bg-[var(--primary-fixed)] text-[var(--on-surface)] border-[var(--outline-variant)]',
-    warning: 'bg-[var(--tertiary-fixed)] text-[var(--on-tertiary-container)] border-[var(--outline-variant)]',
+    success: 'bg-[var(--status-success-bg)] text-[var(--status-success)] border-[var(--secondary)]/20',
+    error: 'bg-red-50 border-red-200 text-red-800',
+    info: 'bg-blue-50 border-blue-200 text-blue-800',
+    warning: 'bg-[var(--status-warning-bg)] text-[var(--on-tertiary-container)] border-[var(--tertiary)]/30',
 };
 
 export function ToastComponent({ toast, onClose }: ToastProps) {
     const Icon = toastIcons[toast.type];
     const style = toastStyles[toast.type];
 
-    // Keep a ref to onClose so the timer never resets when the parent re-renders
-    // and recreates the removeToast function (which would reset the countdown).
     const onCloseRef = useRef(onClose);
     useEffect(() => { onCloseRef.current = onClose; });
 
     useEffect(() => {
         const timer = setTimeout(() => {
             onCloseRef.current(toast.id);
-        }, 10000); // Auto-close after 10 seconds
+        }, 10000);
 
         return () => clearTimeout(timer);
-    }, [toast.id]); // Only re-run when a NEW toast appears, not on every render
+    }, [toast.id]);
 
     return (
         <div
             onClick={() => onClose(toast.id)}
-            className={`${style} border rounded-lg shadow-lg p-4 mb-3 flex items-center gap-3 min-w-[300px] max-w-[500px] animate-in slide-in-from-right cursor-pointer select-none`}
+            className={cn(
+                'border rounded-[4px] shadow-lg p-4 mb-3 flex items-center gap-3 min-w-[300px] max-w-[500px] animate-in slide-in-from-right cursor-pointer select-none',
+                style
+            )}
         >
             <Icon className="w-5 h-5 flex-shrink-0" />
             <p className="flex-1 text-sm font-medium">{toast.message}</p>
@@ -75,4 +77,3 @@ export function ToastContainer({ toasts, onClose }: ToastContainerProps) {
         </div>
     );
 }
-

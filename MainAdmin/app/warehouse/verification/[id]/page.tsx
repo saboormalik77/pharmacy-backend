@@ -679,7 +679,7 @@ export default function VerificationSessionPage() {
             <PermissionGate permission="warehouse">
                 <div className="flex flex-col items-center justify-center py-24 gap-3">
                     <Loader2 className="h-6 w-6 animate-spin text-primary-500" />
-                    <span className="text-xs text-gray-400">Loading verification session…</span>
+                    <span className="text-xs" style={{ color: 'var(--outline)' }}>Loading verification session…</span>
                 </div>
             </PermissionGate>
         );
@@ -716,7 +716,8 @@ export default function VerificationSessionPage() {
                             placeholder="Enter box count..."
                             value={boxCount}
                             onChange={e => setBoxCount(e.target.value)}
-                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500"
+                            className="w-full px-3 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500"
+                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}
                         />
                         {boxResult && !boxResult.boxCountMatch && (
                             <div className="p-3 rounded-[4px] bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-start gap-2">
@@ -976,18 +977,18 @@ export default function VerificationSessionPage() {
         <PermissionGate permission="warehouse">
             <ToastContainer toasts={toasts} onClose={removeToast} />
             <div className="space-y-3">
-                {/* Header */}
+{/* Header */}
                 <div>
-                    <Link href="/warehouse" className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-primary-600 mb-1.5 transition-colors">
+                    <Link href="/warehouse/verification" className="inline-flex items-center gap-1 text-[11px] mb-1.5 transition-colors" style={{ color: 'var(--outline)' }}>
                         <ChevronLeft className="w-3 h-3" /> Back to Warehouse
                     </Link>
                     <div className="flex items-center gap-3">
-                        <Link href="/warehouse/verification" className="p-1.5 rounded-[4px] hover:bg-gray-100 transition">
-                            <ArrowLeft className="w-4 h-4 text-gray-500" />
+                        <Link href="/warehouse/verification" className="p-1.5 rounded-[4px] transition" style={{ backgroundColor: 'var(--surface-container-low)' }}>
+                            <ArrowLeft className="w-4 h-4" style={{ color: 'var(--on-surface-variant)' }} />
                         </Link>
                         <div>
-                            <h1 className="font-heading text-base font-bold text-gray-900">Verification Session</h1>
-                            <p className="text-[11px] text-gray-500">
+                            <h1 className="font-heading text-base font-bold" style={{ color: 'var(--on-surface)' }}>Verification Session</h1>
+                            <p className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>
                                 {v2Summary.transaction?.licensePlate || returnId}
                                 {v2Summary.transaction?.pharmacyName && ` — ${v2Summary.transaction.pharmacyName}`}
                             </p>
@@ -996,33 +997,26 @@ export default function VerificationSessionPage() {
                 </div>
 
                 {/* Progress */}
-                <div className="bg-white rounded-[4px] shadow p-3">
+                <div className="bg-[var(--surface-container-lowest)] rounded-[4px] shadow p-3">
                     <div className="flex items-center gap-3">
                         <BarChart3 className="w-4 h-4 text-primary-600 flex-shrink-0" />
                         <div className="flex-1">
                             <div className="flex justify-between text-[11px] mb-1">
-                                <span className="font-medium text-gray-700">{verified} / {counts.totalItems} items verified</span>
-                                <span className="font-bold text-primary-700">{progressPct}%</span>
+                                <span className="font-medium" style={{ color: 'var(--on-surface)' }}>{verified} / {counts.totalItems} items verified</span>
+                                <span className="font-bold" style={{ color: 'var(--primary)' }}>{progressPct}%</span>
                             </div>
-                            <div className="w-full bg-gray-200 rounded-full h-1.5">
-                                <div className="bg-primary-500 h-1.5 rounded-full transition-all duration-300" style={{ width: `${progressPct}%` }} />
+                            <div className="w-full rounded-full h-1.5" style={{ backgroundColor: 'var(--surface-container-high)' }}>
+                                <div className="h-1.5 rounded-full transition-all duration-300" style={{ width: `${progressPct}%`, backgroundColor: 'var(--primary)' }} />
                             </div>
                         </div>
                     </div>
-                    {/* <div className="flex gap-3 mt-2 text-[10px] font-medium">
-                        <span className="text-green-700">{counts.correct} correct</span>
-                        <span className="text-red-700">{counts.damaged} damaged</span>
-                        <span className="text-gray-500">{counts.missing} missing</span>
-                        <span className="text-orange-700">{counts.wrongItem} wrong</span>
-                        <span className="text-blue-700">{counts.surplus} surplus</span>
-                    </div> */}
                     <div className="flex gap-3 mt-2 text-[10px] font-medium">
                         <span className="text-emerald-700">{policyCounts.returnable} returnable</span>
                         <span className="text-rose-700">{policyCounts.nonReturnable} non-returnable</span>
                         <span className="text-amber-700">{policyCounts.wineCellar} wine cellar</span>
                         <span className="text-orange-700">{policyCounts.destruction} destruction</span>
-                        <span className="text-gray-500">{counts.missing} missing</span>
-                        <span className="text-gray-400">{policyCounts.pending} pending policy</span>
+                        <span style={{ color: 'var(--on-surface-variant)' }}>{counts.missing} missing</span>
+                        <span style={{ color: 'var(--outline)' }}>{policyCounts.pending} pending policy</span>
                     </div>
                 </div>
 
@@ -1040,7 +1034,7 @@ export default function VerificationSessionPage() {
                 )}
 
                 {/* Tabs */}
-                <div className="flex gap-1 bg-gray-100 rounded-[4px] p-1">
+                <div className="flex gap-1 rounded-[4px] p-1" style={{ backgroundColor: 'var(--surface-container)' }}>
                     {([
                         { key: 'items' as ActiveTab, label: 'Items', count: counts.totalItems },
                         { key: 'surplus' as ActiveTab, label: 'Surplus', count: surplus.length },
@@ -1052,8 +1046,9 @@ export default function VerificationSessionPage() {
                             className={`px-3 py-1.5 text-[11px] font-medium rounded-[4px] transition-all ${
                                 activeTab === tab.key
                                     ? 'bg-white text-primary-700 shadow-sm'
-                                    : 'text-gray-500 hover:text-gray-700'
+                                    : 'hover:text-primary-700'
                             }`}
+                            style={activeTab === tab.key ? { color: 'var(--primary)' } : { color: 'var(--on-surface-variant)' }}
                         >
                             {tab.label} <span className="font-bold">({tab.count})</span>
                         </button>
@@ -1063,11 +1058,11 @@ export default function VerificationSessionPage() {
                 {/* ITEMS TAB */}
                 {activeTab === 'items' && (
                     <div className="space-y-3">
-                        <div className="bg-white rounded-[4px] shadow p-3 space-y-2">
+                        <div className="bg-[var(--surface-container-lowest)] rounded-[4px] shadow p-3 space-y-2">
                             <div className="flex items-center justify-between gap-2 flex-wrap">
                                 <div>
-                                    <p className="text-xs font-semibold text-gray-800">Scan item during verification</p>
-                                    <p className="text-[10px] text-gray-500">Scan barcode and auto-open the matching return item.</p>
+                                    <p className="text-xs font-semibold" style={{ color: 'var(--on-surface)' }}>Scan item during verification</p>
+                                    <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Scan barcode and auto-open the matching return item.</p>
                                 </div>
                                 <div className="flex gap-1">
                                     <button
@@ -1076,7 +1071,7 @@ export default function VerificationSessionPage() {
                                         className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium transition-colors ${
                                             itemScanMode === 'input'
                                                 ? 'bg-primary-100 text-primary-700 ring-1 ring-primary-300'
-                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                : 'bg-[var(--surface-container)] text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)]'
                                         }`}
                                     >
                                         <Keyboard className="w-3 h-3" /> USB / Keyboard
@@ -1087,7 +1082,7 @@ export default function VerificationSessionPage() {
                                         className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium transition-colors ${
                                             itemScanMode === 'camera'
                                                 ? 'bg-primary-100 text-primary-700 ring-1 ring-primary-300'
-                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                : 'bg-[var(--surface-container)] text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-high)]'
                                         }`}
                                     >
                                         <Camera className="w-3 h-3" /> Camera
@@ -1098,7 +1093,7 @@ export default function VerificationSessionPage() {
                             {itemScanMode === 'input' && (
                                 <div className="flex gap-2">
                                     <div className="relative flex-1">
-                                        <ScanLine className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                                        <ScanLine className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--outline)' }} />
                                         <input
                                             ref={itemScanInputRef}
                                             type="text"
@@ -1106,7 +1101,8 @@ export default function VerificationSessionPage() {
                                             onChange={e => setItemScanInput(e.target.value)}
                                             onKeyDown={handleItemScanKeyDown}
                                             placeholder="Scan item barcode and press Enter..."
-                                            className="w-full pl-8 pr-3 py-2 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500 font-mono"
+                                            className="w-full pl-8 pr-3 py-2 text-xs border rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500 font-mono"
+                                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}
                                             disabled={isItemScanning}
                                         />
                                     </div>
@@ -1114,7 +1110,8 @@ export default function VerificationSessionPage() {
                                         type="button"
                                         disabled={isItemScanning || !itemScanInput.trim()}
                                         onClick={() => void handleItemScan(itemScanInput)}
-                                        className="px-3 py-2 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-[4px] disabled:opacity-50 flex items-center gap-1"
+                                        className="px-3 py-2 text-xs font-medium text-white rounded-[4px] disabled:opacity-50 flex items-center gap-1 transition"
+                                        style={{ backgroundColor: 'var(--primary)' }}
                                     >
                                         {isItemScanning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ScanLine className="w-3.5 h-3.5" />}
                                         Scan
@@ -1150,46 +1147,47 @@ export default function VerificationSessionPage() {
                             )}
                         </div>
 
-                        <div className="bg-white rounded-[4px] shadow overflow-hidden">
+                        <div className="bg-[var(--surface-container-lowest)] rounded-[4px] shadow overflow-hidden">
                             {items.length === 0 ? (
-                                <div className="text-center py-12 text-gray-400 text-xs">No items found</div>
+                                <div className="text-center py-12 text-xs" style={{ color: 'var(--outline)' }}>No items found</div>
                             ) : (
                             <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead>
-                                        <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Product</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3 w-28">NDC</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3 w-28">Serial #</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Lot</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3 w-20">Exp</th>
-                                            <th className="text-center text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-2 py-3 w-14">Full Qty</th>
-                                            <th className="text-center text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-2 py-3 w-16">Partial Qty</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Verification</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Return Status</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3 w-28">Action</th>
+                                <table className="w-full border" style={{ borderColor: 'var(--outline)' }}>
+                                    <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
+                                        <tr className="bg-[var(--surface-container-low)]">
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Product</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3 w-28">NDC</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3 w-28">Serial #</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Lot</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3 w-20">Exp</th>
+                                            <th className="text-center text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-2 py-3 w-14">Full Qty</th>
+                                            <th className="text-center text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-2 py-3 w-16">Partial Qty</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Verification</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Return Status</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3 w-28">Action</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-100">
+                                    <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                         {items.map(item => (
-                                            <tr key={item.id} className="hover:bg-gray-50">
+                                            <tr key={item.id} className="hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
                                                 <td className="px-3 py-3">
-                                                    <div className="text-sm font-medium text-gray-900">{item.proprietaryName || item.genericName}</div>
-                                                    {item.manufacturer && <div className="text-xs text-gray-400">{item.manufacturer}</div>}
+                                                    <div className="text-sm font-medium" style={{ color: 'var(--on-surface)' }}>{item.proprietaryName || item.genericName}</div>
+                                                    {item.manufacturer && <div className="text-xs" style={{ color: 'var(--outline)' }}>{item.manufacturer}</div>}
                                                 </td>
                                                 <td className="px-3 py-3 w-28 max-w-[7rem]">
-                                                    <span className="block text-xs font-mono text-gray-600 whitespace-nowrap">{item.ndc}</span>
+                                                    <span className="block text-xs font-mono whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>{item.ndc}</span>
                                                 </td>
                                                 <td className="px-3 py-3 w-28 max-w-[7rem]">
                                                     <span
-                                                        className="block text-xs font-mono text-gray-600 truncate"
+                                                        className="block text-xs font-mono truncate"
+                                                        style={{ color: 'var(--on-surface-variant)' }}
                                                         title={item.serialNumber || ''}
                                                     >
                                                         {item.serialNumber || '—'}
                                                     </span>
                                                 </td>
-                                                <td className="px-3 py-3 text-xs text-gray-600 whitespace-nowrap">{item.lotNumber || '—'}</td>
-                                                <td className="px-3 py-3 w-20 text-xs text-gray-600 whitespace-nowrap">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
+                                                <td className="px-3 py-3 text-xs whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>{item.lotNumber || '—'}</td>
+                                                <td className="px-3 py-3 w-20 text-xs whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
                                                 <td className="px-2 py-3 w-14 text-xs font-medium text-center">
                                                     {item.isPartial ? '—' : (item.fullPackageQtyReturned ?? item.quantity ?? '—')}
                                                 </td>
@@ -1238,7 +1236,8 @@ export default function VerificationSessionPage() {
                                                             type="button"
                                                             disabled={markingMissingId === item.id}
                                                             onClick={() => handleMarkAsMissing(item.id)}
-                                                            className="px-2 py-1 text-[10px] font-medium rounded-[4px] transition text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                                                            className="px-2 py-1 text-[10px] font-medium rounded-[4px] border cursor-pointer transition-all hover:scale-105 hover:shadow-sm whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none"
+                                                            style={{ backgroundColor: 'var(--tertiary-fixed)', color: 'var(--tertiary)', borderColor: 'var(--tertiary)' }}
                                                         >
                                                             {markingMissingId === item.id ? (
                                                                 <span className="flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" />Marking...</span>
@@ -1250,7 +1249,8 @@ export default function VerificationSessionPage() {
                                                         <button
                                                             type="button"
                                                             disabled
-                                                            className="px-2 py-1 text-[10px] font-medium rounded-[4px] bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed whitespace-nowrap"
+                                                            className="px-2 py-1 text-[10px] font-medium rounded-[4px] border cursor-not-allowed whitespace-nowrap"
+                                                            style={{ backgroundColor: 'var(--surface-container-low)', color: 'var(--outline)' }}
                                                         >
                                                             Mark as Missing
                                                         </button>
@@ -1456,19 +1456,19 @@ export default function VerificationSessionPage() {
                                 <div className="overflow-x-auto">
                                     <table className="w-full">
                                         <thead>
-                                            <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
-                                                <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Product</th>
-                                                <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">NDC</th>
-                                                <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Lot</th>
-                                                <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Qty</th>
-                                                <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Location</th>
-                                                <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Condition</th>
+                                            <tr className="bg-[var(--surface-container-low)]">
+                                                <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Product</th>
+                                                <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">NDC</th>
+                                                <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Lot</th>
+                                                <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Qty</th>
+                                                <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Location</th>
+                                                <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Condition</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-gray-100">
+                                        <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                             {surplus.map(s => (
-                                                <tr key={s.id} className="hover:bg-gray-50">
-                                                    <td className="px-3 py-3 text-sm font-medium text-gray-900">{s.productName || '—'}</td>
+                                                <tr key={s.id} className="hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
+                                                    <td className="px-3 py-3 text-sm font-medium" style={{ color: 'var(--foreground)' }}>{s.productName || '—'}</td>
                                                     <td className="px-3 py-3 text-sm font-mono text-gray-600">{s.ndc || '—'}</td>
                                                     <td className="px-3 py-3 text-sm text-gray-600">{s.lotNumber || '—'}</td>
                                                     <td className="px-3 py-3 text-sm font-medium">{s.quantity}</td>
@@ -1495,20 +1495,20 @@ export default function VerificationSessionPage() {
                             <div className="text-center py-12 text-gray-400 text-xs">No open discrepancies</div>
                         ) : (
                             <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead>
-                                        <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Type</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Product</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Expected</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Actual</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Actions</th>
+                                <table className="w-full border" style={{ borderColor: 'var(--outline)' }}>
+                                    <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
+                                        <tr className="bg-[var(--surface-container-low)]">
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Type</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Product</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Expected</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Actual</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-100">
-                                        {discrepancies.filter(d => d.status === 'open').map(d => (
-                                            <tr key={d.id} className="hover:bg-gray-50">
-                                                <td className="px-3 py-3"><Badge className={`text-[10px] ${discrepancyColor(d.type)}`}>{d.type}</Badge></td>
+<tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
+                                            {discrepancies.filter(d => d.status === 'open').map(d => (
+                                                <tr key={d.id} className="hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
+                                                    <td className="px-3 py-3"><Badge className={`text-[10px] ${discrepancyColor(d.type)}`}>{d.type}</Badge></td>
                                                 <td className="px-3 py-3 text-sm text-gray-900">{d.productName || d.ndc || '—'}</td>
                                                 <td className="px-3 py-3 text-sm font-medium">{d.expectedQuantity ?? '—'}</td>
                                                 <td className="px-3 py-3 text-sm font-medium">{d.actualQuantity ?? '—'}</td>
@@ -1759,9 +1759,9 @@ export default function VerificationSessionPage() {
                                     </div>
                                 ) : (
                                     <div className="overflow-x-auto">
-                                        <table className="w-full table-auto text-xs">
-                                            <thead>
-                                                <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
+                                        <table className="w-full table-auto text-xs border" style={{ borderColor: 'var(--outline)' }}>
+                                            <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
+                                                <tr className="bg-[var(--surface-container-low)]">
                                                     <th className="text-left px-3 py-3 w-8">
                                                         <input
                                                             type="checkbox"
@@ -1776,17 +1776,17 @@ export default function VerificationSessionPage() {
                                                             className="text-primary-600 focus:ring-primary-500"
                                                         />
                                                     </th>
-                                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
-                                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product</th>
-                                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">QTY</th>
-                                                    <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Value</th>
-                                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Shelved</th>
-                                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Expected Return</th>
+                                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">NDC</th>
+                                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Product</th>
+                                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">QTY</th>
+                                                    <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Value</th>
+                                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Shelved</th>
+                                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Expected Return</th>
                                                 </tr>
                                             </thead>
-                                            <tbody>
+                                            <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                                 {wcItems.map((item) => (
-                                                    <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                                    <tr key={item.id} className="hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
                                                         <td className="px-3 py-3">
                                                             <input
                                                                 type="checkbox"

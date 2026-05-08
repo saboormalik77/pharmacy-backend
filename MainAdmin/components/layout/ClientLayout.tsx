@@ -67,7 +67,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                     {!isAuthPage && (
                         <Navbar onToggleSidebar={handleToggleSidebar} />
                     )}
-                    <div className={!isAuthPage ? 'flex-1 p-3 sm:p-4 md:p-6' : ''}>
+                    <div className={!isAuthPage ? 'flex-1 p-4 sm:p-6 lg:p-8' : ''}>
                         {children}
                     </div>
                 </main>

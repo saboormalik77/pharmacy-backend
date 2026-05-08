@@ -99,7 +99,6 @@ export default function DestructionPage() {
   const save = async () => {
     if (!selected) return;
     
-    // Validate required fields based on status
     const missingFields: string[] = [];
     
     if (form.status === 'scheduled') {
@@ -139,10 +138,8 @@ export default function DestructionPage() {
   };
 
   const quickMove = async (r: DestructionRecord, next: Status) => {
-    // For transitions to 'scheduled' that require additional data, open the modal
-    // Validation will occur when user clicks "Save Changes" in the modal
     if (next === 'scheduled' && (!r.destructionCompany || !r.scheduledDate)) {
-      openEdit(r, next); // Open edit modal pre-filled with the target status
+      openEdit(r, next);
       return;
     }
     
@@ -198,19 +195,19 @@ export default function DestructionPage() {
         style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
       >
         <div className="relative flex-1">
-          <Search className="w-3.5 h-3.5 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2" />
+          <Search className="w-3.5 h-3.5 absolute left-2 top-1/2 -translate-y-1/2" style={{ color: 'var(--outline)' }} />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by NDC, product, manufacturer"
-            className="w-full pl-7 pr-2 py-1.5 border rounded text-xs focus:outline-none focus:ring-1 focus:ring-primary-500"
+            className="w-full pl-7 pr-2 py-1.5 border rounded-[4px] text-xs focus:outline-none focus:ring-1 focus:ring-primary-500"
             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
           />
         </div>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-2 py-1.5 border rounded text-xs focus:outline-none focus:ring-1 focus:ring-primary-500"
+          className="px-2 py-1.5 border rounded-[4px] text-xs focus:outline-none focus:ring-1 focus:ring-primary-500"
           style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
         >
           <option value="">All statuses</option>
@@ -225,30 +222,30 @@ export default function DestructionPage() {
       <div className="rounded-[4px] border overflow-hidden" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
         {loading ? (
           <div className="py-12 flex justify-center">
-            <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
+            <Loader2 className="w-6 h-6 animate-spin" style={{ color: 'var(--outline)' }} />
           </div>
         ) : rows.length === 0 ? (
           <div className="py-12 text-center text-sm" style={{ color: 'var(--on-surface-variant)' }}>No destruction records found.</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full">
-              <thead>
-                <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                  <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Item</th>
-                  <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Pharmacy</th>
-                  <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Status</th>
-                  <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Company</th>
-                  <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Scheduled</th>
-                  <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Destroyed</th>
-                  <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
+            <table className="min-w-full text-sm border" style={{ borderColor: 'var(--outline)' }}>
+              <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
+                <tr className="bg-[var(--surface-container-low)]">
+                  <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Item</th>
+                  <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Pharmacy</th>
+                  <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Status</th>
+                  <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Company</th>
+                  <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Scheduled</th>
+                  <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Destroyed</th>
+                  <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                 {rows.map((r) => (
-                  <tr key={r.id} className="hover:bg-primary-50/40 transition-colors">
+                  <tr key={r.id} className="h-16 transition-colors hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
                     <td className="px-3 py-3 text-sm">
-                      <p className="font-medium" style={{ color: 'var(--foreground)' }}>{r.productName || 'Unknown item'}</p>
-                      <p style={{ color: 'var(--on-surface-variant)' }}>NDC: {r.ndc || '—'} | Lot: {r.lotNumber || '—'}</p>
+                      <p className="font-medium text-xs" style={{ color: 'var(--foreground)' }}>{r.productName || 'Unknown item'}</p>
+                      <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>NDC: {r.ndc || '—'} | Lot: {r.lotNumber || '—'}</p>
                     </td>
                     <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{r.pharmacyId}</td>
                     <td className="px-3 py-3 text-sm">
@@ -324,7 +321,7 @@ export default function DestructionPage() {
               </div>
               <button
                 type="button"
-                className="p-1 rounded hover:bg-primary-50/40 cursor-pointer shrink-0"
+                className="p-1 rounded-[4px] cursor-pointer shrink-0"
                 style={{ color: 'var(--outline)' }}
                 onClick={() => setSelected(null)}
                 aria-label="Close"
@@ -349,16 +346,16 @@ export default function DestructionPage() {
                 </select>
               </label>
               <label className="text-xs font-medium col-span-1" style={{ color: 'var(--on-surface-variant)' }}>
-                Company {form.status === 'scheduled' && <span className="text-red-500">*</span>}
+                Company {form.status === 'scheduled' && <span style={{ color: 'var(--error)' }}>*</span>}
                 <input
                   className={`mt-1.5 w-full border rounded-[4px] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
                     form.status === 'scheduled' && !form.destructionCompany.trim()
-                      ? 'border-red-300 bg-red-50'
+                      ? ''
                       : ''
                   }`}
                   style={
                     form.status === 'scheduled' && !form.destructionCompany.trim()
-                      ? undefined
+                      ? { borderColor: 'var(--error)', backgroundColor: 'var(--surface-container-low)' }
                       : { borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }
                   }
                   value={form.destructionCompany}
@@ -367,17 +364,17 @@ export default function DestructionPage() {
                 />
               </label>
               <label className="text-xs font-medium col-span-1" style={{ color: 'var(--on-surface-variant)' }}>
-                Scheduled date {form.status === 'scheduled' && <span className="text-red-500">*</span>}
+                Scheduled date {form.status === 'scheduled' && <span style={{ color: 'var(--error)' }}>*</span>}
                 <input
                   type="date"
                   className={`mt-1.5 w-full border rounded-[4px] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
                     form.status === 'scheduled' && !form.scheduledDate
-                      ? 'border-red-300 bg-red-50'
+                      ? ''
                       : ''
                   }`}
                   style={
                     form.status === 'scheduled' && !form.scheduledDate
-                      ? undefined
+                      ? { borderColor: 'var(--error)', backgroundColor: 'var(--surface-container-low)' }
                       : { borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }
                   }
                   value={form.scheduledDate}

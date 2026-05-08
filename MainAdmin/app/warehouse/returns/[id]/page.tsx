@@ -1313,22 +1313,22 @@ export default function ReturnDetailPage() {
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full table-auto">
-                            <thead>
-                                <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-white w-28">NDC</th>
-                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-white">Name</th>
-                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-white">Manufacturer</th>
-                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider text-white w-16">Pkg Size</th>
-                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider text-white w-20">Qty Returned</th>
-                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-white w-28">Serial#</th>
+                        <table className="w-full table-auto text-sm border" style={{ borderColor: 'var(--outline)' }}>
+                            <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
+                                <tr className="bg-[var(--surface-container-low)]">
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] w-28">NDC</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)]">Name</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)]">Manufacturer</th>
+                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] w-16">Pkg Size</th>
+                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] w-20">Qty Returned</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] w-28">Serial#</th>
                                     {/* <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Price</th>
                                     <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Est. Value</th> */}
                                     {/* <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Est. Store Value</th> */}
-                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Expires</th>
-                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Status</th>
-                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Destination</th>
-                                    <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Actions</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Expires</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Status</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Destination</th>
+                                    <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
@@ -1894,9 +1894,9 @@ export default function ReturnDetailPage() {
                                         Select items to add to this return. {wcSelected.size > 0 && <strong>{wcSelected.size} selected</strong>}
                                     </p>
                                     <div className="overflow-x-auto">
-                                        <table className="w-full table-auto text-xs">
-                                            <thead>
-                                                <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
+<table className="w-full table-auto text-xs border" style={{ borderColor: 'var(--outline)' }}>
+                                            <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
+                                                <tr className="bg-[var(--surface-container-low)]">
                                                     <th className="px-3 py-3 w-8">
                                                         <input
                                                             type="checkbox"
@@ -1912,12 +1912,12 @@ export default function ReturnDetailPage() {
                                                             style={{ color: 'var(--primary)' }}
                                                         />
                                                     </th>
-                                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
-                                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product</th>
-                                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">QTY</th>
-                                                    <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Price</th>
-                                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Shelved</th>
-                                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Location</th>
+                                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">NDC</th>
+                                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Product</th>
+                                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">QTY</th>
+                                                    <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Price</th>
+                                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Shelved</th>
+                                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Location</th>
                                                 </tr>
                                             </thead>
                                             <tbody>

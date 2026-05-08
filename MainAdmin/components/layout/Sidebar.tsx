@@ -68,26 +68,21 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose, onToggle }: Side
                 'w-64 sm:w-auto',
                 isCollapsed ? 'sm:w-16' : 'sm:w-64'
             )}
-            style={{
-                backgroundColor: 'var(--primary)',
-                color: 'var(--on-primary)',
-            }}
+            style={{ backgroundColor: 'var(--sidebar-bg)' }}
         >
-            {/* Brand Header */}
-            <div className={cn(
-                'flex items-center justify-between px-3 py-4 border-b'
-            )} style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+            <div className="flex items-center justify-between px-3 py-4 border-b" style={{ borderColor: 'var(--sidebar-border)' }}>
                 {isCollapsed ? (
                     <div className="flex items-center justify-center w-full">
                         {onToggle && (
                             <button
                                 type="button"
                                 onClick={onToggle}
-                                className="p-2 rounded-[6px] hover:bg-white/10 transition-colors"
+                                className="p-2 rounded-[4px] hover:opacity-80 transition-opacity"
+                                style={{ color: 'var(--sidebar-text)' }}
                                 title="Open sidebar"
                                 aria-label="Open sidebar"
                             >
-                                <Menu className="w-5 h-5" />
+                                <Menu className="w-4.5 h-4.5 w-[18px] h-[18px]" />
                             </button>
                         )}
                     </div>
@@ -95,17 +90,18 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose, onToggle }: Side
                     <>
                         <div className="flex flex-col">
                             <span className="text-lg font-semibold tracking-wide leading-none" style={{ color: 'var(--on-primary)' }}>ADMIN</span>
-                            <span className="text-[11px] font-medium tracking-widest uppercase opacity-60 leading-none" style={{ color: 'var(--on-primary)' }}>Portal</span>
+                            <span className="text-[11px] font-medium tracking-widest uppercase" style={{ color: 'var(--on-primary)', opacity: 0.6 }}>Portal</span>
                         </div>
                         {onToggle && (
                             <button
                                 type="button"
                                 onClick={onToggle}
-                                className="p-1.5 rounded-[4px] hover:bg-white/10 transition-colors"
+                                className="p-1.5 rounded-[4px] hover:opacity-80 transition-opacity"
+                                style={{ color: 'var(--sidebar-text)' }}
                                 title="Collapse sidebar"
                                 aria-label="Collapse sidebar"
                             >
-                                <PanelLeftClose className="w-4 h-4" />
+                                <PanelLeftClose className="w-4.5 h-[18px]" />
                             </button>
                         )}
                     </>
@@ -116,7 +112,7 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose, onToggle }: Side
                 className="h-full overflow-y-auto overflow-x-hidden p-3"
                 style={{
                     scrollbarWidth: 'thin',
-                    scrollbarColor: 'rgba(255,255,255,0.2) transparent',
+                    scrollbarColor: 'var(--sidebar-border) transparent',
                 }}
             >
                 <nav className="space-y-0.5">
@@ -136,16 +132,16 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose, onToggle }: Side
                                 href={link.href}
                                 onClick={handleLinkClick}
                                 className={cn(
-                                    'flex items-center gap-3 px-3 py-2.5 rounded-[4px] transition-all',
-                                    'hover:bg-white/10',
+                                    'flex items-center gap-3 px-3 py-2.5 rounded-[4px] transition-all border-l-[3px]',
                                     isCollapsed && 'justify-center'
                                 )}
                                 style={{
-                                    backgroundColor: isActive ? 'rgba(255,255,255,0.15)' : 'transparent',
-                                    color: isActive ? '#ffffff' : 'rgba(255,255,255,0.8)',
+                                    backgroundColor: isActive ? 'var(--sidebar-active)' : 'transparent',
+                                    color: isActive ? 'var(--sidebar-text-active)' : 'var(--sidebar-text)',
+                                    borderLeftColor: isActive ? 'var(--sidebar-active-border)' : 'transparent',
                                 }}
                             >
-                                <Icon className="w-5 h-5 flex-shrink-0" />
+                                <Icon className="w-4.5 h-[18px] flex-shrink-0" />
                                 {!isCollapsed && (
                                     <span className={cn('text-sm', isActive ? 'font-semibold' : 'font-normal')}>
                                         {link.label}

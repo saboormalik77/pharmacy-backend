@@ -569,21 +569,21 @@ export default function DebitMemosPage() {
                                                             <p className="text-center py-4 text-xs" style={{ color: 'var(--on-surface-variant)' }}>No line items.</p>
                                                         ) : (
                                                             <div className="overflow-x-auto">
-                                                                <table className="min-w-full">
-                                                                    <thead>
-                                                                        <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                                                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">NDC</th>
-                                                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Product</th>
-                                                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Lot #</th>
-                                                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Expires</th>
-                                                                            <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Qty</th>
-                                                                            <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Ask Price</th>
-                                                                            <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Received</th>
+                                                                <table className="min-w-full text-sm border" style={{ borderColor: 'var(--outline)' }}>
+                                                                    <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
+                                                                        <tr className="bg-[var(--surface-container-low)]">
+                                                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">NDC</th>
+                                                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Product</th>
+                                                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Lot #</th>
+                                                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Expires</th>
+                                                                            <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Qty</th>
+                                                                            <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Ask Price</th>
+                                                                            <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Received</th>
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                                                         {memoItems.map((item: DebitMemoItem) => (
-                                                                            <tr key={item.id} className="hover:bg-primary-50/40">
+                                                                            <tr key={item.id} className="hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
                                                                                 <td className="px-3 py-3 text-sm font-mono" style={{ color: 'var(--foreground)' }}>{item.ndc || '—'}</td>
                                                                                 <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{item.productName || '—'}</td>
                                                                                 <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{item.lotNumber || '—'}</td>
