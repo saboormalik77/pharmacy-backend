@@ -690,17 +690,17 @@ function PharmacyPaymentsPageContent() {
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full table-auto">
-                <thead>
-                  <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
+              <table className="w-full table-auto text-sm border" style={{ borderColor: 'var(--outline)' }}>
+                <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
+                  <tr className="bg-[var(--surface-container-low)]">
                     {['Payment ID', 'Check #', 'Pharmacy', 'Batch', 'Total Credit', 'Payout Amount', 'Type', 'Status', 'Created', 'Actions'].map(h => (
-                      <th key={h} className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">{h}</th>
+                      <th key={h} className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-100">
+                <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                   {payments.map((payment) => (
-                    <tr key={payment.id} className="hover:bg-primary-50/40 transition-colors">
+                    <tr key={payment.id} className="hover:bg-[var(--surface-container)] transition-colors" style={{ borderColor: 'var(--outline-variant)' }}>
                       <td className="px-3 py-3 whitespace-nowrap text-sm font-mono text-gray-500">
                         #{payment.id.slice(0, 8)}…
                       </td>

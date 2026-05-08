@@ -310,20 +310,20 @@ export default function PolicyDetailPage() {
                     <p className="text-xs text-center py-4" style={{ color: 'var(--on-surface-variant)' }}>No return policies defined yet.</p>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="text-white" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                                <tr>
-                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Destination</th>
-                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Window</th>
-                                <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Win. mode</th>
-                                <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Partials</th>
-                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Discount</th>
-                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Description</th>
-                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Actions</th>
+                        <table className="w-full border" style={{ borderColor: 'var(--outline)' }}>
+                            <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
+                                <tr className="bg-[var(--surface-container-low)]">
+                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Destination</th>
+                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Window</th>
+                                <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Win. mode</th>
+                                <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Partials</th>
+                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Discount</th>
+                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Description</th>
+                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Actions</th>
                             </tr></thead>
                             <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                 {rps.map(rp => (
-                                    <tr key={rp.id} className="transition-colors hover:bg-primary-50/40">
+                                    <tr key={rp.id} className="transition-colors hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
                                         <td className="px-3 py-3"><Badge variant={destBadge(rp.destination)}><span className="text-[10px]">{rp.destination}</span></Badge></td>
                                         <td className="px-3 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface)' }}>{rp.monthsBeforeExpiration ?? '?'}mo before – {rp.monthsAfterExpiration ?? '?'}mo after</td>
                                         <td className="px-3 py-3 text-center">
@@ -362,17 +362,17 @@ export default function PolicyDetailPage() {
                     <p className="text-xs text-center py-4" style={{ color: 'var(--on-surface-variant)' }}>No exceptions defined.</p>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="text-white" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                                <tr>
-                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">NDC</th>
-                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Product Name</th>
-                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Reason</th>
-                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Actions</th>
+                        <table className="w-full border" style={{ borderColor: 'var(--outline)' }}>
+                            <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
+                                <tr className="bg-[var(--surface-container-low)]">
+                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">NDC</th>
+                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Product Name</th>
+                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Reason</th>
+                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Actions</th>
                             </tr></thead>
-                            <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
+                            <tbody className="divide-y" style={{ borderColor: 'var(--outline)' }}>
                                 {excs.map(e => (
-                                    <tr key={e.id} className="transition-colors hover:bg-primary-50/40">
+                                    <tr key={e.id} className="transition-colors hover:bg-[var(--surface-container-low)]" style={{ borderColor: 'var(--outline)' }}>
                                         <td className="px-3 py-3 text-sm font-mono whitespace-nowrap" style={{ color: 'var(--foreground)' }}>{e.ndc}</td>
                                         <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{e.productName || '—'}</td>
                                         <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{e.reason || '—'}</td>

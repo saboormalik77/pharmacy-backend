@@ -66,7 +66,6 @@ export default function DistributorsPage() {
         if (!hasMatchingData) {
             dispatch(fetchDistributors({ page: currentPage, limit: 20, search: debouncedSearch || undefined, status: statusFilter }));
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dispatch, currentPage, debouncedSearch, statusFilter]);
 
     useEffect(() => {
@@ -132,14 +131,13 @@ export default function DistributorsPage() {
                 'px-2.5 py-0.5 rounded-full text-xs font-semibold border',
                 normalized === 'active'
                     ? 'bg-green-50 text-green-700 border-green-200'
-                    : 'bg-gray-100 text-gray-600 border-gray-200'
+                    : 'bg-[var(--surface-container)] text-[var(--on-primary-container)] border-[var(--outline-variant)]'
             )}>
                 {normalized.charAt(0).toUpperCase() + normalized.slice(1)}
             </span>
         );
     };
 
-    /* ─── Shared modal header (matches buying-groups / warehouse modals) ─── */
     const ModalHeader = ({ title, subtitle, onClose, id }: { title: string; subtitle?: string; onClose: () => void; id?: string }) => (
         <div
             className="px-4 py-3 flex items-center justify-between gap-2 shrink-0 border-b"
@@ -162,7 +160,7 @@ export default function DistributorsPage() {
             <button
                 type="button"
                 onClick={onClose}
-                className="p-1 rounded hover:bg-primary-50/40 cursor-pointer shrink-0"
+                className="p-1 rounded-[4px] hover:bg-primary-50/40 cursor-pointer shrink-0"
                 style={{ color: 'var(--outline)' }}
                 aria-label="Close"
             >
@@ -224,7 +222,7 @@ export default function DistributorsPage() {
                     {[
                         { label: 'Total Distributors', value: stats?.totalDistributors ?? 0, icon: Building2, color: 'text-primary-700 bg-primary-100' },
                         { label: 'Active', value: stats?.activeDistributors ?? 0, icon: CheckCircle, color: 'text-green-600 bg-green-100' },
-                        { label: 'Inactive', value: stats?.inactiveDistributors ?? 0, icon: Ban, color: 'text-gray-600 bg-gray-100' },
+                        { label: 'Inactive', value: stats?.inactiveDistributors ?? 0, icon: Ban, color: 'text-gray-600 bg-[var(--surface-container)]' },
                     ].map((s) => {
                         const Icon = s.icon;
                         return (
@@ -249,7 +247,7 @@ export default function DistributorsPage() {
                 <div className="rounded-[4px] border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                     <div className="flex flex-col sm:flex-row gap-3 p-4 border-b" style={{ borderColor: 'var(--outline-variant)' }}>
                         <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--outline)]" />
                             <input
                                 type="text"
                                 placeholder="Search distributors..."
@@ -274,12 +272,12 @@ export default function DistributorsPage() {
                     {isLoading ? (
                         <div className="flex items-center justify-center py-16">
                             <Loader2 className="w-6 h-6 animate-spin text-indigo-400" />
-                            <span className="ml-2 text-sm text-gray-500">Loading...</span>
+                            <span className="ml-2 text-sm text-[var(--on-surface-variant)]">Loading...</span>
                         </div>
                     ) : distributors.length === 0 ? (
                         <div className="text-center py-16">
-                            <Building2 className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                            <p className="text-sm text-gray-500">No distributors found</p>
+                            <Building2 className="w-12 h-12 text-[var(--outline-variant)] mx-auto mb-3" />
+                            <p className="text-sm text-[var(--on-surface-variant)]">No distributors found</p>
                             <Button variant="primary" size="sm" className="mt-4" onClick={() => setAddModal(true)}>
                                 <Plus className="w-4 h-4 mr-1" /> Add First Distributor
                             </Button>
@@ -287,9 +285,9 @@ export default function DistributorsPage() {
                     ) : (
                         <>
                             <div className="overflow-x-auto">
-                                <table className="w-full text-sm">
-                                    <thead className="text-white" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                                        <tr>
+                                <table className="w-full text-sm border" style={{ borderColor: 'var(--outline)' }}>
+                                    <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
+                                        <tr className="bg-[var(--surface-container-low)]">
                                             <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Company Name</th>
                                             <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden md:table-cell">Contact</th>
                                             <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">Contact Info</th>
@@ -302,7 +300,7 @@ export default function DistributorsPage() {
                                     </thead>
                                     <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                         {distributors.map((d) => (
-                                            <tr key={d.id} className="transition-colors hover:bg-[var(--surface-container)]">
+                                            <tr key={d.id} className="transition-colors hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
                                                 <td className="px-3 py-3 text-sm font-medium max-w-[180px] truncate" style={{ color: 'var(--foreground)' }} title={d.companyName}>{d.companyName}</td>
                                                 <td className="px-3 py-3 text-sm hidden md:table-cell max-w-[140px] truncate" style={{ color: 'var(--on-surface-variant)' }} title={d.contactPerson}>{d.contactPerson}</td>
                                                 <td className="px-3 py-3 text-sm hidden lg:table-cell" style={{ color: 'var(--on-surface-variant)' }}>
@@ -323,18 +321,18 @@ export default function DistributorsPage() {
                                                 <td className="px-3 py-3 text-center">{statusPill(d.status)}</td>
                                                 <td className="px-3 py-3">
                                                     <div className="flex items-center justify-center gap-1">
-                                                        <button onClick={() => setViewModal(d)} className="p-1.5 rounded hover:bg-primary-50 cursor-pointer transition-colors" style={{ color: 'var(--on-surface-variant)' }} title="View">
+                                                        <button onClick={() => setViewModal(d)} className="p-1.5 rounded-[4px] hover:bg-primary-50 cursor-pointer transition-colors" style={{ color: 'var(--on-surface-variant)' }} title="View">
                                                             <Eye className="w-3.5 h-3.5" />
                                                         </button>
-                                                        <button onClick={() => setEditModal(d)} className="p-1.5 rounded hover:bg-yellow-50 text-gray-500 hover:text-yellow-600 cursor-pointer transition-colors" title="Edit">
+                                                        <button onClick={() => setEditModal(d)} className="p-1.5 rounded-[4px] hover:bg-yellow-50 text-[var(--on-surface-variant)] hover:text-yellow-600 cursor-pointer transition-colors" title="Edit">
                                                             <Edit className="w-3.5 h-3.5" />
                                                         </button>
                                                         {d.status === 'active' ? (
-                                                            <button onClick={() => setDeactivateModal(d)} className="p-1.5 rounded hover:bg-red-50 text-gray-500 hover:text-red-600 cursor-pointer transition-colors" title="Deactivate">
+                                                            <button onClick={() => setDeactivateModal(d)} className="p-1.5 rounded-[4px] hover:bg-red-50 text-[var(--on-surface-variant)] hover:text-red-600 cursor-pointer transition-colors" title="Deactivate">
                                                                 <Ban className="w-3.5 h-3.5" />
                                                             </button>
                                                         ) : (
-                                                            <button onClick={() => setActivateModal(d)} className="p-1.5 rounded hover:bg-green-50 text-gray-500 hover:text-green-600 cursor-pointer transition-colors" title="Activate">
+                                                            <button onClick={() => setActivateModal(d)} className="p-1.5 rounded-[4px] hover:bg-green-50 text-[var(--on-surface-variant)] hover:text-green-600 cursor-pointer transition-colors" title="Activate">
                                                                 <CheckCircle className="w-3.5 h-3.5" />
                                                             </button>
                                                         )}
@@ -353,11 +351,11 @@ export default function DistributorsPage() {
                                         Showing {((pagination.page - 1) * pagination.limit) + 1}–{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
                                     </p>
                                     <div className="flex items-center gap-1">
-                                        <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="p-1.5 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+                                        <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="p-1.5 rounded-[4px] hover:bg-[var(--surface-container-high)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
                                             <ChevronLeft className="w-4 h-4" />
                                         </button>
                                         <span className="px-2 text-xs" style={{ color: 'var(--on-surface-variant)' }}>Page {pagination.page} of {pagination.totalPages}</span>
-                                        <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === pagination.totalPages} className="p-1.5 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+                                        <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === pagination.totalPages} className="p-1.5 rounded-[4px] hover:bg-[var(--surface-container-high)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
                                             <ChevronRight className="w-4 h-4" />
                                         </button>
                                     </div>
@@ -367,7 +365,7 @@ export default function DistributorsPage() {
                     )}
                 </div>
 
-                {/* ─── View Modal ─── */}
+                {/* View Modal */}
                 {viewModal && (
                     <div
                         className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm p-4 overflow-y-auto"
@@ -385,7 +383,6 @@ export default function DistributorsPage() {
                         >
                             <ModalHeader id="distributor-view-title" title="Distributor Details" subtitle="View distributor information" onClose={() => setViewModal(null)} />
                             <div className="overflow-y-auto flex-1 min-h-0 px-5 py-4 space-y-4">
-                                {/* Banner */}
                                 <div
                                     className="rounded-[4px] border p-3 flex items-center justify-between gap-3"
                                     style={{ background: 'linear-gradient(90deg, var(--surface-container-low) 0%, var(--secondary-container) 100%)', borderColor: 'var(--outline-variant)' }}
@@ -398,7 +395,6 @@ export default function DistributorsPage() {
                                     {statusPill(viewModal.status)}
                                 </div>
 
-                                {/* Info grid */}
                                 <div className="grid grid-cols-2 gap-2.5">
                                     <InfoField label="Email" value={viewModal.email} full />
                                     <InfoField label="Phone" value={viewModal.phone} />
@@ -423,7 +419,7 @@ export default function DistributorsPage() {
                     </div>
                 )}
 
-                {/* ─── Add Modal ─── */}
+                {/* Add Modal */}
                 {addModal && (
                     <div
                         className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm p-4 overflow-y-auto"
@@ -506,7 +502,7 @@ export default function DistributorsPage() {
                     </div>
                 )}
 
-                {/* ─── Edit Modal ─── */}
+                {/* Edit Modal */}
                 {editModal && (
                     <div
                         className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm p-4 overflow-y-auto"
@@ -582,7 +578,7 @@ export default function DistributorsPage() {
                     </div>
                 )}
 
-                {/* ─── Deactivate Confirm ─── */}
+                {/* Deactivate Confirm */}
                 {deactivateModal && (
                     <div
                         className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm px-4"
@@ -613,7 +609,7 @@ export default function DistributorsPage() {
                     </div>
                 )}
 
-                {/* ─── Activate Confirm ─── */}
+                {/* Activate Confirm */}
                 {activateModal && (
                     <div
                         className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm px-4"

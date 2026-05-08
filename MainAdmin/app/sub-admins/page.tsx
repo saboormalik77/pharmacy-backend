@@ -325,9 +325,9 @@ export default function SubAdminsPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-white" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                <tr>
+            <table className="w-full text-sm border" style={{ borderColor: 'var(--outline)' }}>
+              <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
+                <tr className="bg-[var(--surface-container-low)]">
                   <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Name</th>
                   <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap hidden md:table-cell">Email</th>
                   <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap">Invite</th>

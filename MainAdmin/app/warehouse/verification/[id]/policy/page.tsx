@@ -4,8 +4,6 @@ import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, CheckCircle, Ban, AlertTriangle, ShieldAlert, X } from 'lucide-react';
 import { useAppSelector } from '@/lib/store/hooks';
 
-// ── Policy detail row ──────────────────────────────────────────
-
 function PolicyDetail({ label, value, capitalize, highlight }: {
     label: string;
     value: string;
@@ -15,11 +13,11 @@ function PolicyDetail({ label, value, capitalize, highlight }: {
     const valueClass = highlight === 'green' ? 'text-green-700 font-semibold'
         : highlight === 'red' ? 'text-red-700 font-semibold'
         : highlight === 'purple' ? 'text-purple-700 font-semibold'
-        : 'text-gray-900';
+        : 'text-[var(--on-surface)]';
     
     return (
         <div className="text-sm">
-            <p className="font-medium text-gray-500 mb-1">{label}</p>
+            <p className="font-medium text-[var(--on-surface-variant)] mb-1">{label}</p>
             <p className={`${valueClass} ${capitalize ? 'capitalize' : ''}`}>{value}</p>
         </div>
     );
@@ -30,7 +28,6 @@ export default function PolicyPage() {
     const router = useRouter();
     const returnId = params.id as string;
     
-    // Get policy result from query params or session storage
     const policyResult = typeof window !== 'undefined' 
         ? JSON.parse(sessionStorage.getItem('policyResult') || 'null')
         : null;
@@ -41,18 +38,18 @@ export default function PolicyPage() {
 
     if (!policyResult) {
         return (
-            <div className="min-h-screen bg-gray-50 p-4">
+            <div className="min-h-screen bg-[var(--surface-container-low)] p-4">
                 <div className="max-w-2xl mx-auto">
                     <button 
                         onClick={handleBack}
-                        className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 mb-4"
+                        className="inline-flex items-center gap-2 text-sm text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] mb-4"
                     >
                         <ArrowLeft className="w-4 h-4" />
                         Back to Verification
                     </button>
                     
-                    <div className="bg-white rounded-[4px] shadow p-8 text-center">
-                        <p className="text-gray-500">No policy data available</p>
+                    <div className="bg-[var(--surface-container-lowest)] rounded-[4px] shadow p-8 text-center">
+                        <p className="text-[var(--on-surface-variant)]">No policy data available</p>
                     </div>
                 </div>
             </div>
@@ -60,13 +57,12 @@ export default function PolicyPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 p-4">
+        <div className="min-h-screen bg-[var(--surface-container-low)] p-4">
             <div className="max-w-2xl mx-auto">
-                {/* Header */}
                 <div className="mb-6">
                     <button 
                         onClick={handleBack}
-                        className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 mb-4"
+                        className="inline-flex items-center gap-2 text-sm text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] mb-4"
                     >
                         <ArrowLeft className="w-4 h-4" />
                         Back to Verification
@@ -75,16 +71,14 @@ export default function PolicyPage() {
                     <div className="flex items-center gap-3">
                         <ShieldAlert className="w-6 h-6 text-blue-600" />
                         <div>
-                            <h1 className="font-heading text-headline text-gray-900">Manufacturer Return Policy</h1>
-                            <p className="text-sm text-gray-500">Policy details for this item</p>
+                            <h1 className="font-heading text-headline text-[var(--on-surface)]">Manufacturer Return Policy</h1>
+                            <p className="text-sm text-[var(--on-surface-variant)]">Policy details for this item</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Policy Content */}
-                <div className="bg-white rounded-[4px] shadow">
+                <div className="bg-[var(--surface-container-lowest)] rounded-[4px] shadow">
                     <div className="p-6 space-y-6">
-                        {/* Status Banner */}
                         <div className={`flex items-center gap-3 rounded-[4px] px-4 py-3 ${
                             policyResult.status === 'returnable' ? 'bg-green-100 border border-green-300' :
                             policyResult.status === 'non_returnable' ? 'bg-red-100 border border-red-300' :
@@ -107,14 +101,13 @@ export default function PolicyPage() {
                                      policyResult.status === 'non_returnable' ? 'NON-RETURNABLE' : 'TBD — No Policy Found'}
                                 </p>
                                 {policyResult.reason && (
-                                    <p className="text-sm text-gray-600 mt-1 capitalize">
+                                    <p className="text-sm text-[var(--on-surface-variant)] mt-1 capitalize">
                                         {policyResult.reason.replace(/_/g, ' ')}
                                     </p>
                                 )}
                             </div>
                         </div>
 
-                        {/* Policy Details Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {policyResult.manufacturerName && <PolicyDetail label="Manufacturer" value={policyResult.manufacturerName} />}
                             {policyResult.destination && <PolicyDetail label="Destination" value={policyResult.destination} capitalize />}
@@ -135,12 +128,11 @@ export default function PolicyPage() {
                             {policyResult.autoRaEmail && <PolicyDetail label="RA Email" value={policyResult.autoRaEmail} />}
                         </div>
 
-                        {/* Policy Description */}
                         {policyResult.policyDescription && (
                             <div>
-                                <h3 className="text-sm font-medium text-gray-900 mb-2">Policy Notes</h3>
-                                <div className="bg-gray-50 rounded-[4px] p-4 border">
-                                    <p className="text-sm text-gray-700 leading-relaxed">
+                                <h3 className="text-sm font-medium text-[var(--on-surface)] mb-2">Policy Notes</h3>
+                                <div className="bg-[var(--surface-container-low)] rounded-[4px] p-4 border" style={{ borderColor: 'var(--outline-variant)' }}>
+                                    <p className="text-sm text-[var(--on-surface)] leading-relaxed">
                                         {policyResult.policyDescription}
                                     </p>
                                 </div>
@@ -148,15 +140,14 @@ export default function PolicyPage() {
                         )}
                     </div>
 
-                    {/* Footer */}
-                    <div className="border-t bg-gray-50 px-6 py-4 rounded-b-lg">
+                    <div className="border-t bg-[var(--surface-container-low)] px-6 py-4 rounded-b-lg">
                         <div className="flex justify-between items-center">
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-[var(--on-surface-variant)]">
                                 Policy information is read-only and cannot be modified
                             </p>
                             <button 
                                 onClick={handleBack}
-                                className="px-4 py-2 text-sm font-medium bg-gray-600 text-white rounded-[4px] hover:bg-gray-700 transition-colors"
+                                className="px-4 py-2 text-sm font-medium bg-[var(--primary-container)] text-[var(--on-primary-container)] rounded-[4px] hover:bg-[var(--surface-container-high)] transition-colors"
                             >
                                 Back to Verification
                             </button>

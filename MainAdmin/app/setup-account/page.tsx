@@ -94,10 +94,10 @@ function SetupAccountPageContent() {
 
   if (step === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--surface-container)]">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-indigo-600 mx-auto" />
-          <p className="mt-4 text-gray-600">Validating your invitation...</p>
+          <Loader2 className="w-8 h-8 animate-spin mx-auto" style={{ color: 'var(--primary)' }} />
+          <p className="mt-4 text-sm" style={{ color: 'var(--on-surface-variant)' }}>Validating your invitation...</p>
         </div>
       </div>
     );
@@ -105,16 +105,16 @@ function SetupAccountPageContent() {
 
   if (step === 'error') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--surface-container)] px-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-[4px] mb-4">
-              <AlertTriangle className="w-8 h-8 text-red-600" />
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-[4px] mb-4" style={{ backgroundColor: 'var(--error-container)' }}>
+              <AlertTriangle className="w-8 h-8" style={{ color: 'var(--error)' }} />
             </div>
-            <h1 className="font-heading text-headline text-gray-900 mb-2">Invalid Invitation</h1>
+            <h1 className="font-heading text-headline mb-2" style={{ color: 'var(--on-surface)' }}>Invalid Invitation</h1>
           </div>
-          <div className="bg-white rounded-[4px] shadow-md p-8 text-center">
-            <p className="text-gray-600 mb-6">{error}</p>
+          <div className="rounded-[4px] shadow-md p-8 text-center" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
+            <p className="mb-6 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{error}</p>
             <Button variant="primary" onClick={() => router.push('/login')}>
               Go to Login
             </Button>
@@ -126,16 +126,16 @@ function SetupAccountPageContent() {
 
   if (step === 'success') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--surface-container)] px-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-[4px] mb-4">
-              <CheckCircle className="w-8 h-8 text-green-600" />
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-[4px] mb-4" style={{ backgroundColor: 'var(--secondary-container)' }}>
+              <CheckCircle className="w-8 h-8" style={{ color: 'var(--on-secondary-container)' }} />
             </div>
-            <h1 className="font-heading text-headline text-gray-900 mb-2">Account Setup Complete</h1>
+            <h1 className="font-heading text-headline mb-2" style={{ color: 'var(--on-surface)' }}>Account Setup Complete</h1>
           </div>
-          <div className="bg-white rounded-[4px] shadow-md p-8 text-center">
-            <p className="text-gray-600 mb-6">
+          <div className="rounded-[4px] shadow-md p-8 text-center" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
+            <p className="mb-6 text-sm" style={{ color: 'var(--on-surface-variant)' }}>
               Your account has been set up successfully. You can now log in with your email and the password you just created.
             </p>
             <Button variant="primary" onClick={() => router.push('/login')}>
@@ -148,23 +148,23 @@ function SetupAccountPageContent() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--surface-container)] px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-[4px] mb-4 shadow-lg">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-[4px] mb-4 shadow-lg" style={{ backgroundColor: 'var(--primary)' }}>
             <Shield className="w-8 h-8 text-white" />
           </div>
-          <h1 className="font-heading text-headline text-gray-900 mb-2">Set Up Your Account</h1>
-          <p className="text-gray-600">Admin Portal</p>
+          <h1 className="font-heading text-headline mb-2" style={{ color: 'var(--on-surface)' }}>Set Up Your Account</h1>
+          <p className="text-sm" style={{ color: 'var(--on-surface-variant)' }}>Admin Portal</p>
         </div>
 
-        <div className="bg-white rounded-[4px] shadow-md p-8">
+        <div className="rounded-[4px] shadow-md p-8" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
           {adminInfo && (
-            <div className="mb-6 p-3 bg-indigo-50 rounded-[4px]">
-              <p className="text-sm text-gray-700">
+            <div className="mb-6 p-3 rounded-[4px]" style={{ backgroundColor: 'var(--primary-container)' }}>
+              <p className="text-sm" style={{ color: 'var(--on-primary-container)' }}>
                 Welcome, <strong>{adminInfo.name}</strong>
               </p>
-              <p className="text-xs text-gray-500 mt-1">{adminInfo.email}</p>
+              <p className="text-xs mt-1" style={{ color: 'var(--on-surface-variant)' }}>{adminInfo.email}</p>
             </div>
           )}
 
@@ -176,17 +176,18 @@ function SetupAccountPageContent() {
             )}
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium mb-2" style={{ color: 'var(--on-surface)' }}>
                 Create Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--outline)' }} />
                 <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full pl-10 pr-12 py-2.5 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+                  style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface)' }}
                   placeholder="Min 8 characters"
                   required
                   minLength={8}
@@ -195,7 +196,8 @@ function SetupAccountPageContent() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 focus:outline-none rounded-[4px]"
+                  style={{ color: 'var(--outline)' }}
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -203,17 +205,18 @@ function SetupAccountPageContent() {
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2" style={{ color: 'var(--on-surface)' }}>
                 Confirm Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--outline)' }} />
                 <input
                   id="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full pl-10 pr-12 py-2.5 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+                  style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface)' }}
                   placeholder="Re-enter your password"
                   required
                   minLength={8}
@@ -222,7 +225,8 @@ function SetupAccountPageContent() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 focus:outline-none rounded-[4px]"
+                  style={{ color: 'var(--outline)' }}
                 >
                   {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -248,7 +252,7 @@ function SetupAccountPageContent() {
           </form>
         </div>
 
-        <p className="text-center text-sm text-gray-500 mt-6" suppressHydrationWarning>
+        <p className="text-center text-sm mt-6" style={{ color: 'var(--on-surface-variant)' }} suppressHydrationWarning>
           &copy; {new Date().getFullYear()} Admin Portal. All rights reserved.
         </p>
       </div>
@@ -260,10 +264,10 @@ export default function SetupAccountPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="min-h-screen flex items-center justify-center bg-[var(--surface-container)]">
           <div className="text-center">
-            <Loader2 className="w-8 h-8 animate-spin text-indigo-600 mx-auto" />
-            <p className="mt-4 text-gray-600">Loading...</p>
+            <Loader2 className="w-8 h-8 animate-spin mx-auto" style={{ color: 'var(--primary)' }} />
+            <p className="mt-4 text-sm" style={{ color: 'var(--on-surface-variant)' }}>Loading...</p>
           </div>
         </div>
       }

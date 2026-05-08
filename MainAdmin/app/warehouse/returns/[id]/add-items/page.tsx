@@ -697,7 +697,7 @@ export default function AddItemsPage() {
     if (!tx) {
         return (
             <div className="flex items-center justify-center min-h-64">
-                <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+                <Loader2 className="w-8 h-8 animate-spin text-[var(--primary)]" />
             </div>
         );
     }
@@ -732,15 +732,15 @@ export default function AddItemsPage() {
                 <div>
                     <button
                         onClick={() => router.push(`/warehouse/returns/${transactionId}`)}
-                        className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 mb-1"
+                        className="flex items-center gap-1 text-xs text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] mb-1"
                     >
                         <ArrowLeft className="w-3.5 h-3.5" /> Back to Return
                     </button>
-                    <h1 className="font-heading text-headline text-gray-900 flex items-center gap-1.5">
-                        <ScanLine className="w-4 h-4 text-primary-600" /> Adding Products
+                    <h1 className="font-heading text-headline text-[var(--on-surface)] flex items-center gap-1.5">
+                        <ScanLine className="w-4 h-4 text-[var(--primary)]" /> Adding Products
                     </h1>
-                    <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-500">
-                        <span className="font-mono font-semibold text-gray-800">{tx.licensePlate}</span>
+                    <div className="flex items-center gap-2 mt-0.5 text-xs text-[var(--on-surface-variant)]">
+                        <span className="font-mono font-semibold text-[var(--on-surface)]">{tx.licensePlate}</span>
                         <span>·</span>
                         <span>{tx.pharmacyName}</span>
                         {itemCount > 0 && (
@@ -751,20 +751,20 @@ export default function AddItemsPage() {
                         )}
                     </div>
                 </div>
-                <button onClick={() => router.push(`/warehouse/returns/${transactionId}`)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                <button onClick={() => router.push(`/warehouse/returns/${transactionId}`)} className="px-3 py-1.5 text-xs rounded-[4px] border border-[var(--outline-variant)] text-[var(--on-surface)] hover:bg-[var(--surface-container-low)] transition-colors">
                     Done Adding
                 </button>
             </div>
 
             {/* Tabs - Only show when items exist */}
             {recentlyAddedItems.length > 0 && (
-                <div className="flex gap-2 border-b border-gray-200">
+                <div className="flex gap-2 border-b border-[var(--outline-variant)]">
                     <button
                         onClick={() => setActiveTab('list')}
                         className={`px-4 py-2 text-xs font-semibold transition-colors border-b-2 ${
                             activeTab === 'list'
                                 ? 'border-primary-600 text-primary-700 bg-primary-50'
-                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                : 'border-transparent text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-low)]'
                         }`}
                     >
                         <div className="flex items-center gap-1.5">
@@ -777,7 +777,7 @@ export default function AddItemsPage() {
                         className={`px-4 py-2 text-xs font-semibold transition-colors border-b-2 ${
                             activeTab === 'form'
                                 ? 'border-primary-600 text-primary-700 bg-primary-50'
-                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                : 'border-transparent text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] hover:bg-[var(--surface-container-low)]'
                         }`}
                     >
                         <div className="flex items-center gap-1.5">
@@ -790,17 +790,17 @@ export default function AddItemsPage() {
 
             {/* Tab Content: Product List */}
             {activeTab === 'list' && recentlyAddedItems.length > 0 && (
-                <div className="bg-white rounded-[4px] shadow px-4 py-3">
+                <div className="bg-[var(--surface-container-lowest)] rounded-[4px] shadow px-4 py-3">
                     <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-xs font-semibold text-gray-700">Products Added in This Session</h2>
-                        <p className="text-[10px] text-gray-500">{recentlyAddedItems.length} item{recentlyAddedItems.length !== 1 ? 's' : ''}</p>
+                        <h2 className="text-xs font-semibold text-[var(--on-surface)]">Products Added in This Session</h2>
+                        <p className="text-[10px] text-[var(--on-surface-variant)]">{recentlyAddedItems.length} item{recentlyAddedItems.length !== 1 ? 's' : ''}</p>
                     </div>
                     <div className="space-y-2 max-h-[500px] overflow-y-auto">
                         {recentlyAddedItems.map((item) => (
-                            <div key={item.id} className="flex items-start gap-2 p-3 border border-gray-200 rounded-[4px] hover:border-primary-300 hover:bg-primary-50/30 transition-all">
+                            <div key={item.id} className="flex items-start gap-2 p-3 border border-[var(--outline-variant)] rounded-[4px] hover:border-primary-300 hover:bg-[var(--surface-container-low)] transition-all">
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1.5">
-                                        <p className="text-sm font-bold text-gray-900 truncate">
+                                        <p className="text-sm font-bold text-[var(--on-surface)] truncate">
                                             {item.proprietaryName || item.genericName || 'Unknown Product'}
                                         </p>
                                         <Badge variant={
@@ -821,22 +821,22 @@ export default function AddItemsPage() {
                                         )}
                                     </div>
                                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-1 text-sm">
-                                        <div><span className="text-gray-500">NDC:</span> <span className="font-semibold text-gray-900 font-mono">{item.ndc || '—'}</span></div>
-                                        <div><span className="text-gray-500">Lot:</span> <span className="font-medium text-gray-800">{item.lotNumber || '—'}</span></div>
-                                        <div><span className="text-gray-500">Exp:</span> <span className="font-medium text-gray-800">{item.expirationDate ? new Date(item.expirationDate).toLocaleDateString() : '—'}</span></div>
-                                        {/* <div><span className="text-gray-500">Value:</span> <span className="font-bold text-green-600">${item.estimatedValue?.toFixed(2) || '0.00'}</span></div> */}
+                                        <div><span className="text-[var(--on-surface-variant)]">NDC:</span> <span className="font-semibold text-[var(--on-surface)] font-mono">{item.ndc || '—'}</span></div>
+                                        <div><span className="text-[var(--on-surface-variant)]">Lot:</span> <span className="font-medium text-[var(--on-surface)]">{item.lotNumber || '—'}</span></div>
+                                        <div><span className="text-[var(--on-surface-variant)]">Exp:</span> <span className="font-medium text-[var(--on-surface)]">{item.expirationDate ? new Date(item.expirationDate).toLocaleDateString() : '—'}</span></div>
+                                        {/* <div><span className="text-[var(--on-surface-variant)]">Value:</span> <span className="font-bold text-green-600">${item.estimatedValue?.toFixed(2) || '0.00'}</span></div> */}
                                         {item.manufacturer && (
-                                            <div className="col-span-2"><span className="text-gray-500">Manufacturer:</span> <span className="font-medium text-gray-800">{item.manufacturer}</span></div>
+                                            <div className="col-span-2"><span className="text-[var(--on-surface-variant)]">Manufacturer:</span> <span className="font-medium text-[var(--on-surface)]">{item.manufacturer}</span></div>
                                         )}
                                         {item.destination && (
-                                            <div className="col-span-2"><span className="text-gray-500">Destination:</span> <span className="font-medium text-gray-800 capitalize">{item.destination}</span></div>
+                                            <div className="col-span-2"><span className="text-[var(--on-surface-variant)]">Destination:</span> <span className="font-medium text-[var(--on-surface)] capitalize">{item.destination}</span></div>
                                         )}
                                     </div>
                                 </div>
                                 <button
                                     onClick={() => handleRemoveRecentItem(item.id)}
                                     disabled={isItemActionLoading}
-                                    className="flex-shrink-0 p-2 rounded border border-red-300 bg-red-50 text-red-600 hover:bg-red-100 hover:border-red-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex-shrink-0 p-2 rounded border border-[var(--error)] bg-[var(--error-container)] text-[var(--error)] hover:opacity-90 hover:border-[var(--error)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                     title="Remove this item"
                                 >
                                     <Trash2 className="w-4 h-4" />
@@ -851,7 +851,7 @@ export default function AddItemsPage() {
             {(activeTab === 'form' || recentlyAddedItems.length === 0) && (
                 <>
             {/* Scan / Manual Toggle */}
-            <div className="bg-white rounded-[4px] shadow px-4 py-3">
+            <div className="bg-[var(--surface-container-lowest)] rounded-[4px] shadow px-4 py-3">
                 {/* Mode tabs */}
                 <div className="flex gap-1.5 mb-3">
                     {([
@@ -862,10 +862,10 @@ export default function AddItemsPage() {
                         <button
                             key={key}
                             onClick={() => setMode(key)}
-                            className={`flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-colors ${
+                            className={`flex items-center gap-1 px-2.5 py-1 rounded-[4px] text-xs font-medium transition-colors ${
                                 mode === key
                                     ? 'bg-primary-100 text-primary-700 ring-1 ring-primary-300'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    : 'bg-[var(--surface-container)] text-[var(--on-primary-container)] hover:bg-[var(--surface-container-high)]'
                             }`}
                         >
                             <Icon className="w-3.5 h-3.5" /> {label}
@@ -883,26 +883,26 @@ export default function AddItemsPage() {
                                 }
                             }}
                             disabled={isScanLoading || !canEdit}
-                            className={`w-full flex items-center justify-center gap-2.5 px-4 py-2.5 border border-dashed rounded transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed ${
+                            className={`w-full flex items-center justify-center gap-2.5 px-4 py-2.5 border border-dashed rounded-[4px] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed ${
                                 !canEdit 
-                                    ? 'border-gray-300 bg-gray-100 text-gray-400' 
+                                    ? 'border-[var(--outline-variant)] bg-[var(--surface-container)] text-[var(--outline)]' 
                                     : 'border-primary-300 bg-primary-50 hover:bg-primary-100 hover:border-primary-400'
                             }`}
                         >
                             {isScanLoading ? (
                                 <>
                                     <Loader2 className="w-4 h-4 animate-spin text-primary-500 flex-shrink-0" />
-                                    <span className="text-xs font-medium text-primary-600">Looking up product...</span>
+                                    <span className="text-xs font-medium text-[var(--primary)]">Looking up product...</span>
                                 </>
                             ) : (
                                 <>
-                                    <Camera className="w-4 h-4 text-primary-600 flex-shrink-0" />
+                                    <Camera className="w-4 h-4 text-[var(--primary)] flex-shrink-0" />
                                     <span className="text-xs font-semibold text-primary-700">Open Camera Scanner</span>
                                     <span className="text-[10px] text-primary-400">— tap to scan QR / barcode</span>
                                 </>
                             )}
                         </button>
-                        <p className="text-[10px] text-gray-400 mt-1">Works with QR codes, GS1 barcodes, and standard barcodes</p>
+                        <p className="text-[10px] text-[var(--outline)] mt-1">Works with QR codes, GS1 barcodes, and standard barcodes</p>
                     </div>
                 )}
 
@@ -910,7 +910,7 @@ export default function AddItemsPage() {
                 {mode === 'usb' && (
                     <div>
                         <div className="relative">
-                            <ScanLine className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <ScanLine className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--outline)]" />
                             <input
                                 ref={scanInputRef}
                                 type="text"
@@ -919,20 +919,20 @@ export default function AddItemsPage() {
                                 onKeyDown={handleScanKeyDown}
                                 disabled={!canEdit}
                                 placeholder={!canEdit ? "Return is locked - cannot scan items" : "Scan with USB/Bluetooth scanner — press Enter after scan"}
-                                className={`w-full pl-8 pr-8 py-2 text-xs border-2 rounded focus:outline-none focus:ring-2 ${
+                                className={`w-full pl-8 pr-8 py-2 text-xs border-2 rounded-[4px] focus:outline-none focus:ring-2 ${
                                     !canEdit 
-                                        ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed' 
+                                        ? 'border-[var(--outline-variant)] bg-[var(--surface-container)] text-[var(--outline)] cursor-not-allowed' 
                                         : 'border-primary-300 bg-primary-50 focus:ring-primary-500 focus:border-primary-500'
                                 }`}
                                 autoFocus={canEdit}
                             />
                             {isScanLoading && (
                                 <div className="absolute right-2.5 top-1/2 -translate-y-1/2">
-                                    <Loader2 className="w-4 h-4 animate-spin text-primary-600" />
+                                    <Loader2 className="w-4 h-4 animate-spin text-[var(--primary)]" />
                                 </div>
                             )}
                         </div>
-                        <p className="text-[10px] text-gray-400 mt-1">Connect USB or Bluetooth barcode scanner — types code automatically and sends Enter.</p>
+                        <p className="text-[10px] text-[var(--outline)] mt-1">Connect USB or Bluetooth barcode scanner — types code automatically and sends Enter.</p>
                     </div>
                 )}
 
@@ -947,10 +947,10 @@ export default function AddItemsPage() {
                                 onKeyDown={e => e.key === 'Enter' && canEdit && handleManualLookup()}
                                 disabled={!canEdit}
                                 placeholder={!canEdit ? "Return is locked - cannot add items" : "Enter NDC (e.g. 43547-3250-06) and press Enter or Lookup..."}
-                                className={`flex-1 px-2.5 py-1.5 text-xs border rounded focus:outline-none focus:ring-1 ${
+                                className={`flex-1 px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-1 ${
                                     !canEdit 
-                                        ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed' 
-                                        : 'border-gray-300 focus:ring-primary-500'
+                                        ? 'border-[var(--outline-variant)] bg-[var(--surface-container)] text-[var(--outline)] cursor-not-allowed' 
+                                        : 'border-[var(--outline-variant)] focus:ring-primary-500'
                                 }`}
                                 autoFocus={canEdit}
                             />
@@ -958,11 +958,11 @@ export default function AddItemsPage() {
                                 if (checkActionAllowed('lookup NDC')) {
                                     handleManualLookup();
                                 }
-                            }} disabled={isScanLoading || !manualNdc.trim() || !canEdit} className="px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                            }} disabled={isScanLoading || !manualNdc.trim() || !canEdit} className="px-3 py-1.5 text-xs rounded-[4px] bg-[var(--primary)] text-white hover:bg-[var(--primary-container)] disabled:opacity-50 transition-colors">
                                 {isScanLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Lookup'}
                             </button>
                         </div>
-                        <p className="text-[10px] text-gray-400 mt-1">Enter the full NDC from the bottle label (e.g. <span className="font-mono">43547-3250-06</span>).</p>
+                        <p className="text-[10px] text-[var(--outline)] mt-1">Enter the full NDC from the bottle label (e.g. <span className="font-mono">43547-3250-06</span>).</p>
                     </div>
                 )}
 
@@ -984,9 +984,9 @@ export default function AddItemsPage() {
             {/* Classification Result (after save) */}
             {lastClassification && (
                 <div className={`rounded-[4px] border px-3 py-2 ${
-                    lastClassification.wineCellarItem ? 'bg-purple-50 border-purple-300' :
+                    lastClassification.wineCellarItem ? 'bg-[var(--tertiary-container)] border-[var(--tertiary)]' :
                     lastClassification.status === 'returnable' ? 'bg-green-50 border-green-300' :
-                    lastClassification.status === 'non_returnable' ? 'bg-red-50 border-red-300' :
+                    lastClassification.status === 'non_returnable' ? 'bg-[var(--error-container)] border-[var(--error)]' :
                     'bg-yellow-50 border-yellow-300'
                 }`}>
                     <div className="flex items-start justify-between gap-2">
@@ -996,16 +996,16 @@ export default function AddItemsPage() {
                                 lastClassification.status === 'returnable' ? 'bg-green-200' :
                                 lastClassification.status === 'non_returnable' ? 'bg-red-200' : 'bg-yellow-200'
                             }`}>
-                                {lastClassification.wineCellarItem ? <Archive className="w-3.5 h-3.5 text-purple-700" /> :
+                                {lastClassification.wineCellarItem ? <Archive className="w-3.5 h-3.5 text-[var(--tertiary)]" /> :
                                  lastClassification.status === 'returnable' ? <CheckCircle className="w-3.5 h-3.5 text-green-700" /> :
                                  lastClassification.status === 'non_returnable' ? <X className="w-3.5 h-3.5 text-red-700" /> :
                                  <AlertTriangle className="w-3.5 h-3.5 text-yellow-700" />}
                             </div>
                             <div>
                                 <p className={`text-xs font-bold ${
-                                    lastClassification.wineCellarItem ? 'text-purple-800' :
+                                    lastClassification.wineCellarItem ? 'text-[var(--on-tertiary-container)]' :
                                     lastClassification.status === 'returnable' ? 'text-green-800' :
-                                    lastClassification.status === 'non_returnable' ? 'text-red-800' : 'text-yellow-800'
+                                    lastClassification.status === 'non_returnable' ? 'text-[var(--on-error-container)]' : 'text-yellow-800'
                                 }`}>
                                     {lastClassification.item} — {
                                         lastClassification.wineCellarItem ? 'MOVED TO WINE CELLAR' :
@@ -1014,7 +1014,7 @@ export default function AddItemsPage() {
                                     }
                                 </p>
                                 {lastClassification.wineCellarItem && (
-                                    <div className="mt-0.5 text-[10px] space-y-0.5 text-purple-700">
+                                    <div className="mt-0.5 text-[10px] space-y-0.5 text-[var(--tertiary)]">
                                         <p className="font-medium">✓ Shelved in Wine Cellar</p>
                                         {lastClassification.policyCheck?.expectedReturnableDate && (
                                             <p>Returnable from: <span className="font-semibold">{lastClassification.policyCheck.expectedReturnableDate}</span></p>
@@ -1024,7 +1024,7 @@ export default function AddItemsPage() {
                                 {!lastClassification.wineCellarItem && lastClassification.policyCheck && (
                                     <div className="mt-0.5 text-[10px] space-y-0.5">
                                         {lastClassification.policyCheck.destination && (
-                                            <p className={lastClassification.status === 'returnable' ? 'text-green-700' : 'text-gray-600'}>
+                                            <p className={lastClassification.status === 'returnable' ? 'text-green-700' : 'text-[var(--on-primary-container)]'}>
                                                 Destination: <span className="font-semibold capitalize">{lastClassification.policyCheck.destination}</span>
                                             </p>
                                         )}
@@ -1034,7 +1034,7 @@ export default function AddItemsPage() {
                                             </p>
                                         )}
                                         {lastClassification.policyCheck.manufacturerName && (
-                                            <p className="text-gray-500">Policy: {lastClassification.policyCheck.manufacturerName}</p>
+                                            <p className="text-[var(--on-surface-variant)]">Policy: {lastClassification.policyCheck.manufacturerName}</p>
                                         )}
                                     </div>
                                 )}
@@ -1043,7 +1043,7 @@ export default function AddItemsPage() {
                                 )}
                             </div>
                         </div>
-                        <button onClick={() => setLastClassification(null)} className="text-gray-400 hover:text-gray-600 flex-shrink-0">
+                        <button onClick={() => setLastClassification(null)} className="text-[var(--outline)] hover:text-[var(--on-primary-container)] flex-shrink-0">
                             <X className="w-3.5 h-3.5" />
                         </button>
                     </div>
@@ -1051,8 +1051,8 @@ export default function AddItemsPage() {
             )}
 
             {/* Product Form */}
-            <div className="bg-white rounded-[4px] shadow px-4 py-3">
-                <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Product Information</h2>
+            <div className="bg-[var(--surface-container-lowest)] rounded-[4px] shadow px-4 py-3">
+                <h2 className="text-[10px] font-semibold text-[var(--outline)] uppercase tracking-wider mb-2">Product Information</h2>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                     <Field label="NDC" value={form.ndc} onChange={v => updateField('ndc', v)} placeholder="e.g. 43547-3250-06" required hasError={formErrors.has('ndc')} />
@@ -1064,22 +1064,22 @@ export default function AddItemsPage() {
 
                     {/* Strength */}
                     <div>
-                        <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Strength</label>
+                        <label className="block text-[10px] font-medium text-[var(--on-primary-container)] mb-0.5">Strength</label>
                         <div className="flex gap-1">
-                            <input type="text" value={form.strengthValue} onChange={e => updateField('strengthValue', e.target.value)} placeholder="500" className="w-1/2 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
-                            <input type="text" value={form.strengthUnit} onChange={e => updateField('strengthUnit', e.target.value)} placeholder="mg" className="w-1/2 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                            <input type="text" value={form.strengthValue} onChange={e => updateField('strengthValue', e.target.value)} placeholder="500" className="w-1/2 px-2 py-1 text-xs border border-[var(--outline-variant)] rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                            <input type="text" value={form.strengthUnit} onChange={e => updateField('strengthUnit', e.target.value)} placeholder="mg" className="w-1/2 px-2 py-1 text-xs border border-[var(--outline-variant)] rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
                         </div>
                     </div>
 
                     <Field label="Route" value={form.route} onChange={v => updateField('route', v)} placeholder="e.g. ORAL" />
                     <div>
-                        <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
+                        <label className="block text-[10px] font-medium text-[var(--on-primary-container)] mb-0.5">
                             DEA Schedule
                         </label>
                         <select
                             value={form.deaSchedule}
                             onChange={e => updateField('deaSchedule', e.target.value)}
-                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                            className="w-full px-2 py-1 text-xs border border-[var(--outline-variant)] rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
                         >
                             {DEA_SCHEDULE_OPTIONS.map(option => (
                                 <option key={option} value={option}>
@@ -1091,7 +1091,7 @@ export default function AddItemsPage() {
                     <Field label="Lot Number" value={form.lotNumber} onChange={v => updateField('lotNumber', v)} placeholder="Lot #" required hasError={formErrors.has('lotNumber')} />
                     <Field label="Serial Number" value={form.serialNumber} onChange={v => updateField('serialNumber', v)} placeholder="Serial #" />
                     <div>
-                        <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
+                        <label className="block text-[10px] font-medium text-[var(--on-primary-container)] mb-0.5">
                             Expiration Date<span className="text-red-500 ml-0.5">*</span>
                         </label>
                         <input
@@ -1100,8 +1100,8 @@ export default function AddItemsPage() {
                             onChange={e => { updateField('expirationDate', e.target.value); }}
                             className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
                                 formErrors.has('expirationDate')
-                                    ? 'border-red-400 bg-red-50 focus:ring-red-400'
-                                    : 'border-gray-300 focus:ring-primary-500'
+                                    ? 'border-[var(--error)] bg-[var(--error-container)] focus:ring-red-400'
+                                    : 'border-[var(--outline-variant)] focus:ring-primary-500'
                             }`}
                         />
                         {formErrors.has('expirationDate') && <p className="text-[10px] text-red-500 mt-0.5">Required</p>}
@@ -1126,20 +1126,20 @@ export default function AddItemsPage() {
                         <>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                             {/* <div>
-                                <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Price ($)</label>
-                                <input type="number" step="0.01" min="0" value={form.standardPrice} onChange={e => updateField('standardPrice', e.target.value)} placeholder="0.00" className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                <label className="block text-[10px] font-medium text-[var(--on-primary-container)] mb-0.5">Price ($)</label>
+                                <input type="number" step="0.01" min="0" value={form.standardPrice} onChange={e => updateField('standardPrice', e.target.value)} placeholder="0.00" className="w-full px-2 py-1 text-xs border border-[var(--outline-variant)] rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
                             </div> */}
                             <div>
-                                <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Pkg Size</label>
-                                <input type="number" min="1" value={form.fullPackageSize} onChange={e => updateField('fullPackageSize', e.target.value)} placeholder="e.g. 60" className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                <label className="block text-[10px] font-medium text-[var(--on-primary-container)] mb-0.5">Pkg Size</label>
+                                <input type="number" min="1" value={form.fullPackageSize} onChange={e => updateField('fullPackageSize', e.target.value)} placeholder="e.g. 60" className="w-full px-2 py-1 text-xs border border-[var(--outline-variant)] rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
                             </div>
                             <div>
-                                <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
+                                <label className="block text-[10px] font-medium text-[var(--on-primary-container)] mb-0.5">
                                     Qty Returned <span className="text-gray-400">({form.qtyMode === 'units' ? 'units' : '%'})</span>
                                 </label>
                                 <div className="flex gap-1">
-                                    <input type="number" min="0" step="any" value={form.fullPackageQtyReturned} onChange={e => updateField('fullPackageQtyReturned', e.target.value)} placeholder={form.qtyMode === 'units' ? '45' : '75'} className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
-                                    <button type="button" onClick={() => updateField('qtyMode', form.qtyMode === 'units' ? 'percent' : 'units')} className="px-1.5 text-[10px] font-semibold rounded border border-gray-300 bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors" title="Toggle units/percent">
+                                    <input type="number" min="0" step="any" value={form.fullPackageQtyReturned} onChange={e => updateField('fullPackageQtyReturned', e.target.value)} placeholder={form.qtyMode === 'units' ? '45' : '75'} className="flex-1 px-2 py-1 text-xs border border-[var(--outline-variant)] rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                    <button type="button" onClick={() => updateField('qtyMode', form.qtyMode === 'units' ? 'percent' : 'units')} className="px-1.5 text-[10px] font-semibold rounded border border-[var(--outline-variant)] bg-[var(--surface-container-low)] hover:bg-[var(--surface-container-high)] text-[var(--on-surface)] transition-colors" title="Toggle units/percent">
                                         {form.qtyMode === 'units' ? '#' : '%'}
                                     </button>
                                 </div>
@@ -1152,12 +1152,12 @@ export default function AddItemsPage() {
                         </div>
                         {/* <div className="grid grid-cols-2 gap-2 mt-2">
                             <div>
-                                <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Est. Value</label>
-                                <input type="text" readOnly value={`$${estimatedValue.toFixed(2)}`} className="w-full px-2 py-1 text-xs border border-gray-200 rounded bg-gray-50 text-gray-700 font-medium" />
+                                <label className="block text-[10px] font-medium text-[var(--on-primary-container)] mb-0.5">Est. Value</label>
+                                <input type="text" readOnly value={`$${estimatedValue.toFixed(2)}`} className="w-full px-2 py-1 text-xs border border-[var(--outline-variant)] rounded bg-[var(--surface-container-low)] text-[var(--on-surface)] font-medium" />
                             </div>
                             <div>
-                                <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Est. Store Value <span className="text-gray-400 font-normal">(−30%)</span></label>
-                                <input type="text" readOnly value={`$${estimatedStoreValue.toFixed(2)}`} className="w-full px-2 py-1 text-xs border border-gray-200 rounded bg-gray-50 text-gray-700 font-medium" />
+                                <label className="block text-[10px] font-medium text-[var(--on-primary-container)] mb-0.5">Est. Store Value <span className="text-gray-400 font-normal">(−30%)</span></label>
+                                <input type="text" readOnly value={`$${estimatedStoreValue.toFixed(2)}`} className="w-full px-2 py-1 text-xs border border-[var(--outline-variant)] rounded bg-[var(--surface-container-low)] text-[var(--on-surface)] font-medium" />
                             </div>
                         </div> */}
                         </>
@@ -1190,7 +1190,7 @@ export default function AddItemsPage() {
                 {!isPolicyChecking && policyAutoCheck && (
                     <div className={`mb-2 flex items-start gap-1.5 text-xs rounded px-2.5 py-1.5 border ${
                         policyAutoCheck.status === 'returnable' ? 'bg-green-50 border-green-200 text-green-800' :
-                        policyAutoCheck.status === 'non_returnable' ? 'bg-red-50 border-red-200 text-red-800' :
+                        policyAutoCheck.status === 'non_returnable' ? 'bg-[var(--error-container)] border-red-200 text-[var(--on-error-container)]' :
                         'bg-yellow-50 border-yellow-200 text-yellow-800'
                     }`}>
                         {policyAutoCheck.status === 'returnable' ? <CheckCircle className="w-3 h-3 mt-0.5 flex-shrink-0" /> :
@@ -1210,7 +1210,7 @@ export default function AddItemsPage() {
                         const isLocked = !isPolicyChecking && !!policyAutoCheck && policyAutoCheck.status !== 'tbd';
                         return (
                             <label key={status} className={`flex items-center gap-1.5 text-xs ${isLocked ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}>
-                                <input type="radio" name="returnStatus" value={status} checked={form.returnStatus === status} onChange={() => { if (!isLocked) updateField('returnStatus', status); }} disabled={isLocked} className="text-primary-600 focus:ring-primary-500" />
+                                <input type="radio" name="returnStatus" value={status} checked={form.returnStatus === status} onChange={() => { if (!isLocked) updateField('returnStatus', status); }} disabled={isLocked} className="text-[var(--primary)] focus:ring-primary-500" />
                                 <span className={`font-medium ${status === 'returnable' ? 'text-green-700' : status === 'non_returnable' ? 'text-red-700' : 'text-yellow-700'}`}>
                                     {status === 'tbd' ? 'TBD' : status === 'returnable' ? 'Returnable' : 'Non-Returnable'}
                                 </span>
@@ -1222,14 +1222,14 @@ export default function AddItemsPage() {
 
                 <div className="grid grid-cols-2 gap-2">
                     <div>
-                        <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Return Reason</label>
-                        <select value={form.returnReason} onChange={e => updateField('returnReason', e.target.value)} className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500">
+                        <label className="block text-[10px] font-medium text-[var(--on-primary-container)] mb-0.5">Return Reason</label>
+                        <select value={form.returnReason} onChange={e => updateField('returnReason', e.target.value)} className="w-full px-2 py-1 text-xs border border-[var(--outline-variant)] rounded focus:outline-none focus:ring-1 focus:ring-primary-500">
                             {RETURN_REASONS.map(r => <option key={r} value={r}>{r || '— Select reason —'}</option>)}
                         </select>
                     </div>
                     <div>
-                        <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Memo</label>
-                        <input type="text" value={form.memo} onChange={e => updateField('memo', e.target.value)} placeholder="Optional memo" className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                        <label className="block text-[10px] font-medium text-[var(--on-primary-container)] mb-0.5">Memo</label>
+                        <input type="text" value={form.memo} onChange={e => updateField('memo', e.target.value)} placeholder="Optional memo" className="w-full px-2 py-1 text-xs border border-[var(--outline-variant)] rounded focus:outline-none focus:ring-1 focus:ring-primary-500" />
                     </div>
                 </div>
 
@@ -1242,12 +1242,12 @@ export default function AddItemsPage() {
                         </div>
                         <div>
                             <label className="block text-[10px] font-medium text-amber-700 mb-0.5">
-                                Destination <span className="text-gray-500 font-normal">(optional)</span>
+                                Destination <span className="text-[var(--on-surface-variant)] font-normal">(optional)</span>
                             </label>
                             <select
                                 value={manualDestination}
                                 onChange={e => setManualDestination(e.target.value)}
-                                className="w-full px-2 py-1 text-xs border border-amber-300 rounded focus:outline-none focus:ring-1 focus:ring-amber-400 bg-white"
+                                className="w-full px-2 py-1 text-xs border border-[var(--tertiary)] rounded focus:outline-none focus:ring-1 focus:ring-amber-400 bg-[var(--surface-container-lowest)]"
                             >
                                 <option value="">— Select destination —</option>
                                 {reverseDistributors.map(d => (
@@ -1265,26 +1265,26 @@ export default function AddItemsPage() {
 
                 {/* Non-returnable route selector */}
                 {form.returnStatus === 'non_returnable' && (
-                    <div className="mt-2 p-2.5 bg-red-50 border border-red-200 rounded-[4px]">
-                        <p className="text-[10px] font-semibold text-red-800 mb-1.5">Non-Returnable Route</p>
+                    <div className="mt-2 p-2.5 bg-[var(--error-container)] border border-red-200 rounded-[4px]">
+                        <p className="text-[10px] font-semibold text-[var(--on-error-container)] mb-1.5">Non-Returnable Route</p>
                         <div className="grid grid-cols-2 gap-2">
-                            <label className={`flex items-center gap-2 px-2 py-1.5 border rounded cursor-pointer ${nonReturnableRoute === 'wine_cellar' ? 'border-purple-400 bg-purple-50' : 'border-gray-300 bg-white'}`}>
+                            <label className={`flex items-center gap-2 px-2 py-1.5 border rounded cursor-pointer ${nonReturnableRoute === 'wine_cellar' ? 'border-[var(--tertiary)] bg-[var(--tertiary-container)]' : 'border-[var(--outline-variant)] bg-[var(--surface-container-lowest)]'}`}>
                                 <input
                                     type="radio"
                                     checked={nonReturnableRoute === 'wine_cellar'}
                                     onChange={() => setNonReturnableRoute('wine_cellar')}
                                 />
                                 <Archive className="w-3.5 h-3.5 text-purple-600" />
-                                <span className="text-xs font-medium text-purple-800">Wine Cellar</span>
+                                <span className="text-xs font-medium text-[var(--on-tertiary-container)]">Wine Cellar</span>
                             </label>
-                            <label className={`flex items-center gap-2 px-2 py-1.5 border rounded cursor-pointer ${nonReturnableRoute === 'destruction' ? 'border-red-400 bg-red-50' : 'border-gray-300 bg-white'}`}>
+                            <label className={`flex items-center gap-2 px-2 py-1.5 border rounded cursor-pointer ${nonReturnableRoute === 'destruction' ? 'border-[var(--error)] bg-[var(--error-container)]' : 'border-[var(--outline-variant)] bg-[var(--surface-container-lowest)]'}`}>
                                 <input
                                     type="radio"
                                     checked={nonReturnableRoute === 'destruction'}
                                     onChange={() => setNonReturnableRoute('destruction')}
                                 />
-                                <Ban className="w-3.5 h-3.5 text-red-600" />
-                                <span className="text-xs font-medium text-red-800">Destruction</span>
+                                <Ban className="w-3.5 h-3.5 text-[var(--error)]" />
+                                <span className="text-xs font-medium text-[var(--on-error-container)]">Destruction</span>
                             </label>
                         </div>
                     </div>
@@ -1293,29 +1293,29 @@ export default function AddItemsPage() {
                 {/* Action Buttons */}
                 <div className="mt-3 pt-3 border-t border-gray-100">
                     {isPreChecking ? (
-                        <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                        <div className="flex items-center gap-1.5 text-xs text-[var(--on-surface-variant)]">
                             <Loader2 className="w-3.5 h-3.5 animate-spin" /> Checking return policy...
                         </div>
                     ) : preCheckResult?.expectedReturnableDate ? (
                         <>
-                            <div className="mb-2 bg-purple-50 border border-purple-200 rounded px-3 py-2 flex items-start gap-1.5">
+                            <div className="mb-2 bg-[var(--tertiary-container)] border border-purple-200 rounded px-3 py-2 flex items-start gap-1.5">
                                 <Archive className="w-3.5 h-3.5 text-purple-600 mt-0.5 flex-shrink-0" />
                                 <div>
-                                    <p className="text-xs font-semibold text-purple-800">
+                                    <p className="text-xs font-semibold text-[var(--on-tertiary-container)]">
                                         {preCheckResult.reason === 'deferred_inside_policy_period'
                                             ? 'Hold in Wine Cellar until after the policy window'
                                             : 'This product is too early to return'}
                                     </p>
-                                    <p className="text-[10px] text-purple-700 mt-0.5">
+                                    <p className="text-[10px] text-[var(--tertiary)] mt-0.5">
                                         Shelve in Wine Cellar. Eligible from: <span className="font-semibold">{preCheckResult.expectedReturnableDate}</span>
                                     </p>
                                 </div>
                             </div>
                             <div className="flex gap-1.5">
-                                <button onClick={() => handleSave(true)} disabled={isItemActionLoading || !canEdit} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                                <button onClick={() => handleSave(true)} disabled={isItemActionLoading || !canEdit} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[var(--primary)] text-white hover:bg-[var(--primary-container)] disabled:opacity-50 transition-colors">
                                     {isItemActionLoading ? <><Loader2 className="w-3 h-3 animate-spin" />Moving...</> : <><Archive className="w-3 h-3" />Move to Wine Cellar</>}
                                 </button>
-                                <button onClick={handleClearForm} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                                <button onClick={handleClearForm} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-[var(--outline-variant)] text-[var(--on-surface)] hover:bg-[var(--surface-container-low)] transition-colors">
                                     <X className="w-3 h-3" /> Cancel
                                 </button>
                             </div>
@@ -1327,18 +1327,18 @@ export default function AddItemsPage() {
                         return isManualNonReturnable ? (
                             <>
                                 {nonReturnableRoute === 'wine_cellar' && (
-                                    <div className="mb-2 bg-purple-50 border border-purple-200 rounded px-3 py-2 space-y-2">
+                                    <div className="mb-2 bg-[var(--tertiary-container)] border border-purple-200 rounded px-3 py-2 space-y-2">
                                         <div className="flex items-start gap-1.5">
                                             <Archive className="w-3.5 h-3.5 text-purple-600 mt-0.5 flex-shrink-0" />
                                             <div>
-                                                <p className="text-xs font-semibold text-purple-800">Wine Cellar route selected</p>
-                                                <p className="text-[10px] text-purple-700 mt-0.5">
+                                                <p className="text-xs font-semibold text-[var(--on-tertiary-container)]">Wine Cellar route selected</p>
+                                                <p className="text-[10px] text-[var(--tertiary)] mt-0.5">
                                                     Enter expected returnable date, then move item to Wine Cellar.
                                                 </p>
                                             </div>
                                         </div>
                                         <div>
-                                            <label className="block text-[10px] font-medium text-purple-700 mb-0.5">
+                                            <label className="block text-[10px] font-medium text-[var(--tertiary)] mb-0.5">
                                                 Expected Returnable Date <span className="text-red-500">*</span>
                                             </label>
                                             <input
@@ -1346,18 +1346,18 @@ export default function AddItemsPage() {
                                                 value={wineCellarDate}
                                                 onChange={e => setWineCellarDate(e.target.value)}
                                                 className={`w-44 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-purple-400 ${
-                                                    !wineCellarDate ? 'border-red-300 bg-red-50' : 'border-purple-300 bg-white'
+                                                    !wineCellarDate ? 'border-[var(--error)] bg-[var(--error-container)]' : 'border-[var(--tertiary)] bg-[var(--surface-container-lowest)]'
                                                 }`}
                                             />
                                         </div>
                                     </div>
                                 )}
                                 {nonReturnableRoute === 'destruction' && (
-                                    <div className="mb-2 bg-red-50 border border-red-200 rounded px-3 py-2">
+                                    <div className="mb-2 bg-[var(--error-container)] border border-red-200 rounded px-3 py-2">
                                         <div className="flex items-start gap-1.5">
-                                            <Ban className="w-3.5 h-3.5 text-red-600 mt-0.5 flex-shrink-0" />
+                                            <Ban className="w-3.5 h-3.5 text-[var(--error)] mt-0.5 flex-shrink-0" />
                                             <div>
-                                                <p className="text-xs font-semibold text-red-800">Destruction route selected</p>
+                                                <p className="text-xs font-semibold text-[var(--on-error-container)]">Destruction route selected</p>
                                                 <p className="text-[10px] text-red-700 mt-0.5">
                                                     Item will be saved as non-returnable and routed to destruction workflow.
                                                 </p>
@@ -1370,7 +1370,7 @@ export default function AddItemsPage() {
                                         <button
                                             onClick={handleMoveToWineCellarManual}
                                             disabled={isItemActionLoading || !wineCellarDate}
-                                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 transition-colors"
+                                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[var(--tertiary)] text-white hover:opacity-90 disabled:opacity-50 transition-colors"
                                         >
                                             {isItemActionLoading
                                                 ? <><Loader2 className="w-3 h-3 animate-spin" />Moving...</>
@@ -1380,29 +1380,29 @@ export default function AddItemsPage() {
                                         <button
                                             onClick={() => handleSave()}
                                             disabled={isItemActionLoading || isPreChecking || !canEdit}
-                                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
+                                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[var(--error)] text-white hover:opacity-90 disabled:opacity-50 transition-colors"
                                         >
                                             {isItemActionLoading || isPreChecking
                                                 ? <><Loader2 className="w-3 h-3 animate-spin" />Saving...</>
                                                 : <><Ban className="w-3 h-3" />Save to Destruction</>}
                                         </button>
                                     )}
-                                    <button onClick={handleClearForm} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <button onClick={handleClearForm} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-[var(--outline-variant)] text-[var(--on-surface)] hover:bg-[var(--surface-container-low)] transition-colors">
                                         <X className="w-3 h-3" /> Clear
                                     </button>
                                 </div>
                             </>
                         ) : (
                             <div className="flex flex-wrap gap-1.5">
-                                <button onClick={() => handleSave()} disabled={isItemActionLoading || isPreChecking || (!form.ndc && !form.proprietaryName) || !canEdit} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
+                                <button onClick={() => handleSave()} disabled={isItemActionLoading || isPreChecking || (!form.ndc && !form.proprietaryName) || !canEdit} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[var(--primary)] text-white hover:bg-[var(--primary-container)] disabled:opacity-50 transition-colors">
                                     {isItemActionLoading || isPreChecking
                                         ? <><Loader2 className="w-3 h-3 animate-spin" />{isPreChecking ? 'Checking...' : 'Saving...'}</>
                                         : <><CheckCircle className="w-3 h-3" />Save &amp; Scan Next</>}
                                 </button>
-                                <button onClick={handleClearForm} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                                <button onClick={handleClearForm} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-[var(--outline-variant)] text-[var(--on-surface)] hover:bg-[var(--surface-container-low)] transition-colors">
                                     <RotateCcw className="w-3 h-3" /> Clear
                                 </button>
-                                <button onClick={() => router.push(`/warehouse/returns/${transactionId}`)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded text-gray-500 hover:bg-gray-100 transition-colors">
+                                <button onClick={() => router.push(`/warehouse/returns/${transactionId}`)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded text-[var(--on-surface-variant)] hover:bg-[var(--surface-container-low)] transition-colors">
                                     <X className="w-3 h-3" /> Cancel
                                 </button>
                             </div>
@@ -1416,29 +1416,29 @@ export default function AddItemsPage() {
             {/* ── Policy Modal ─────────────────────────────── */}
             {policyModalOpen && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setPolicyModalOpen(false)}>
-                    <div className="bg-white rounded-[4px] max-w-md w-full shadow-2xl" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50 rounded-t-lg">
+                    <div className="bg-[var(--surface-container-lowest)] rounded-[4px] max-w-md w-full shadow-2xl" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b bg-[var(--surface-container-low)] rounded-t-lg">
                             <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-1.5">
                                 <ShieldCheck className="w-4 h-4 text-blue-600" /> Manufacturer Return Policy
                             </h2>
-                            <button onClick={() => setPolicyModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                            <button onClick={() => setPolicyModalOpen(false)} className="text-gray-400 hover:text-[var(--on-primary-container)]"><X className="w-4 h-4" /></button>
                         </div>
 
                         <div className="px-4 py-3">
                             {isPolicyChecking ? (
-                                <div className="flex flex-col items-center py-8 gap-2 text-gray-500">
+                                <div className="flex flex-col items-center py-8 gap-2 text-[var(--on-surface-variant)]">
                                     <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
                                     <p className="text-xs">Checking manufacturer policy...</p>
                                 </div>
                             ) : !policyAutoCheck ? (
-                                <div className="text-center py-6 text-gray-500">
+                                <div className="text-center py-6 text-[var(--on-surface-variant)]">
                                     <Info className="w-8 h-8 mx-auto mb-2 text-gray-300" />
                                     <p className="text-sm font-medium">No policy data available</p>
                                     <p className="text-xs text-gray-400 mt-1">
                                         {form.ndc || form.manufacturer ? 'No matching policy found in the system.' : 'Scan or enter a product first.'}
                                     </p>
                                     {(form.ndc && form.expirationDate) && (
-                                        <button onClick={async () => { await runPolicyCheck(form.ndc, form.expirationDate, form.dosageForm || undefined); }} className="mt-3 px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 inline-flex items-center gap-1 mx-auto">
+                                        <button onClick={async () => { await runPolicyCheck(form.ndc, form.expirationDate, form.dosageForm || undefined); }} className="mt-3 px-3 py-1.5 text-xs bg-[var(--primary)] text-white rounded hover:bg-[var(--primary-container)] inline-flex items-center gap-1 mx-auto">
                                             <ShieldCheck className="w-3.5 h-3.5" /> Check Now
                                         </button>
                                     )}
@@ -1447,7 +1447,7 @@ export default function AddItemsPage() {
                                 <div className="space-y-3">
                                     <div className={`flex items-center gap-2 rounded px-3 py-2 ${
                                         policyAutoCheck.status === 'returnable' ? 'bg-green-100 border border-green-300' :
-                                        policyAutoCheck.status === 'non_returnable' ? 'bg-red-100 border border-red-300' :
+                                        policyAutoCheck.status === 'non_returnable' ? 'bg-[var(--error-container)] border border-[var(--error)]' :
                                         'bg-yellow-100 border border-yellow-300'
                                     }`}>
                                         <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
@@ -1461,11 +1461,11 @@ export default function AddItemsPage() {
                                         <div>
                                             <p className={`text-xs font-bold ${
                                                 policyAutoCheck.status === 'returnable' ? 'text-green-800' :
-                                                policyAutoCheck.status === 'non_returnable' ? 'text-red-800' : 'text-yellow-800'
+                                                policyAutoCheck.status === 'non_returnable' ? 'text-[var(--on-error-container)]' : 'text-yellow-800'
                                             }`}>
                                                 {policyAutoCheck.status === 'returnable' ? 'RETURNABLE' : policyAutoCheck.status === 'non_returnable' ? 'NON-RETURNABLE' : 'TBD — No Policy Found'}
                                             </p>
-                                            {policyAutoCheck.reason && <p className="text-[10px] text-gray-600 mt-0.5 capitalize">{policyAutoCheck.reason.replace(/_/g, ' ')}</p>}
+                                            {policyAutoCheck.reason && <p className="text-[10px] text-[var(--on-primary-container)] mt-0.5 capitalize">{policyAutoCheck.reason.replace(/_/g, ' ')}</p>}
                                         </div>
                                     </div>
 
@@ -1491,8 +1491,8 @@ export default function AddItemsPage() {
 
                                     {policyAutoCheck.policyDescription && (
                                         <div>
-                                            <p className="text-[10px] font-medium text-gray-500 mb-1">Policy Notes</p>
-                                            <p className="text-sm text-gray-700 bg-gray-50 rounded p-2 border leading-relaxed">{policyAutoCheck.policyDescription}</p>
+                                            <p className="text-[10px] font-medium text-[var(--on-surface-variant)] mb-1">Policy Notes</p>
+                                            <p className="text-sm text-[var(--on-surface)] bg-[var(--surface-container-low)] rounded p-2 border leading-relaxed">{policyAutoCheck.policyDescription}</p>
                                         </div>
                                     )}
 
@@ -1506,8 +1506,8 @@ export default function AddItemsPage() {
                             )}
                         </div>
 
-                        <div className="flex justify-end px-4 py-3 border-t bg-gray-50 rounded-b-lg">
-                            <button onClick={() => setPolicyModalOpen(false)} className="px-3 py-1.5 text-xs font-medium bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors">Close</button>
+                        <div className="flex justify-end px-4 py-3 border-t bg-[var(--surface-container-low)] rounded-b-lg">
+                            <button onClick={() => setPolicyModalOpen(false)} className="px-3 py-1.5 text-xs font-medium bg-[var(--surface-container-high)] text-[var(--on-surface)] rounded hover:bg-gray-300 transition-colors">Close</button>
                         </div>
                     </div>
                 </div>
@@ -1528,7 +1528,7 @@ function Field({ label, value, onChange, placeholder, required, hasError }: {
 }) {
     return (
         <div>
-            <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
+            <label className="block text-[10px] font-medium text-[var(--on-primary-container)] mb-0.5">
                 {label}{required && <span className="text-red-500 ml-0.5">*</span>}
             </label>
             <input
@@ -1538,8 +1538,8 @@ function Field({ label, value, onChange, placeholder, required, hasError }: {
                 placeholder={placeholder}
                 className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
                     hasError
-                        ? 'border-red-400 bg-red-50 focus:ring-red-400'
-                        : 'border-gray-300 focus:ring-primary-500'
+                        ? 'border-[var(--error)] bg-[var(--error-container)] focus:ring-red-400'
+                        : 'border-[var(--outline-variant)] focus:ring-primary-500'
                 }`}
             />
             {hasError && <p className="text-[10px] text-red-500 mt-0.5">Required</p>}
@@ -1557,11 +1557,11 @@ function PolicyDetail({ label, value, capitalize, highlight }: {
 }) {
     const valueClass = highlight === 'green' ? 'text-green-700 font-semibold'
         : highlight === 'red' ? 'text-red-700 font-semibold'
-        : highlight === 'purple' ? 'text-purple-700 font-semibold'
+        : highlight === 'purple' ? 'text-[var(--tertiary)] font-semibold'
         : 'text-gray-900';
     return (
-        <div className="bg-gray-50 rounded p-2 border border-gray-100">
-            <p className="text-[10px] text-gray-500 mb-0.5">{label}</p>
+        <div className="bg-[var(--surface-container-low)] rounded p-2 border border-gray-100">
+            <p className="text-[10px] text-[var(--on-surface-variant)] mb-0.5">{label}</p>
             <p className={`text-sm ${valueClass} ${capitalize ? 'capitalize' : ''}`}>{value}</p>
         </div>
     );

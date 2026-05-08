@@ -116,7 +116,7 @@ export default function WarehouseVerificationListPage() {
             <div className="space-y-3">
                 {/* Header */}
                 <div>
-                    <Link href="/warehouse" className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-primary-600 mb-1.5 transition-colors">
+                    <Link href="/warehouse" className="inline-flex items-center gap-1 text-[11px] text-[var(--outline)] hover:text-primary-600 mb-1.5 transition-colors">
                         <ChevronLeft className="w-3 h-3" /> Back to Warehouse
                     </Link>
                     <h1 className="font-heading text-headline flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
@@ -137,7 +137,7 @@ export default function WarehouseVerificationListPage() {
                             type="text"
                             placeholder="Search by license plate or pharmacy name..."
                             className="w-full pl-8 pr-3 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
-                            style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}
+                            style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)', color: 'var(--on-surface)' }}
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                         />
@@ -187,22 +187,22 @@ export default function WarehouseVerificationListPage() {
                     ) : (
                         <>
                             <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead>
-                                        <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">License Plate</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Pharmacy</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Items</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Received</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Verification</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Action</th>
+                                <table className="w-full border" style={{ borderColor: 'var(--outline)' }}>
+                                    <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
+                                        <tr className="bg-[var(--surface-container-low)]">
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">License Plate</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Pharmacy</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Items</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Received</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Verification</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                         {receivedReturns.map(r => {
                                             const phase = deriveWarehouseVerificationUiStatus(r);
                                             return (
-                                            <tr key={r.id} className="hover:bg-primary-50/40" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
+                                            <tr key={r.id} className="hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
                                                 <td className="px-3 py-3 text-sm font-semibold" style={{ color: 'var(--primary)' }}>{r.licensePlate}</td>
                                                 <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{r.pharmacyName || '—'}</td>
                                                 <td className="px-3 py-3">

@@ -622,19 +622,19 @@ export default function RATrackingPage() {
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
-                            <thead>
-                                <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Memo #</th>
-                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Pharmacy</th>
-                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Dest.</th>
-                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Labeler</th>
-                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Ask</th>
-                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Requested</th>
-                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Tickler</th>
-                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">RA #</th>
-                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Status</th>
-                                    <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Actions</th>
+                        <table className="min-w-full text-sm border" style={{ borderColor: 'var(--outline)' }}>
+                            <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
+                                <tr className="bg-[var(--surface-container-low)]">
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Memo #</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Pharmacy</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Dest.</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Labeler</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Ask</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Requested</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Tickler</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">RA #</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Status</th>
+                                    <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
@@ -645,8 +645,8 @@ export default function RATrackingPage() {
                                     return (
                                         <tr
                                             key={memo.id}
-                                            className="transition-colors hover:bg-primary-50/40"
-                                            style={{ backgroundColor: overdue ? 'var(--error-container)' : undefined }}
+                                            className="transition-colors hover:bg-[var(--surface-container)]"
+                                            style={{ backgroundColor: overdue ? 'var(--error-container)' : undefined, borderColor: 'var(--outline-variant)' }}
                                         >
                                             <td className="px-3 py-3 text-sm font-semibold whitespace-nowrap" style={{ color: 'var(--primary)' }}>{memo.memoNumber}</td>
                                             <td className="px-3 py-3 text-sm max-w-[130px] truncate" style={{ color: 'var(--on-surface)' }}>{memo.pharmacyName}</td>
@@ -781,14 +781,14 @@ export default function RATrackingPage() {
                             <div className="overflow-x-auto">
                                 <table className="min-w-full divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                     <thead>
-                                        <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
+                                        <tr className="bg-[var(--surface-container-low)]">
                                             <th className="px-3 py-3 w-8" />
-                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Shipped</th>
-                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Destination</th>
-                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Tracking</th>
-                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Boxes</th>
-                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Memos</th>
-                                            <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Actions</th>
+                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Shipped</th>
+                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Destination</th>
+                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Tracking</th>
+                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Boxes</th>
+                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Memos</th>
+                                            <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
@@ -797,7 +797,7 @@ export default function RATrackingPage() {
                                             const open = expandedShippedGroupId === g.id;
                                             return (
                                                 <React.Fragment key={g.id}>
-                                                    <tr className="hover:bg-primary-50/40">
+                                                    <tr className="hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
                                                         <td className="px-3 py-3">
                                                             <button
                                                                 type="button"
@@ -834,20 +834,20 @@ export default function RATrackingPage() {
                                                             <td colSpan={7} className="px-4 py-3">
                                                                 <p className="text-[10px] font-semibold uppercase mb-2" style={{ color: 'var(--on-surface-variant)' }}>Debit memos in this shipment</p>
                                                                 <div className="overflow-x-auto border rounded-[4px]" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)' }}>
-                                                                    <table className="min-w-full text-xs">
-                                                                        <thead>
-                                                                            <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                                                                                <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Memo #</th>
-                                                                                <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Pharmacy</th>
-                                                                                <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">RA #</th>
-                                                                                <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Labeler</th>
-                                                                                <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Items</th>
-                                                                                <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Ask</th>
+                                                                    <table className="min-w-full text-xs border" style={{ borderColor: 'var(--outline)' }}>
+                                                                        <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
+                                                                            <tr className="bg-[var(--surface-container-low)]">
+                                                                                <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Memo #</th>
+                                                                                <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Pharmacy</th>
+                                                                                <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">RA #</th>
+                                                                                <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Labeler</th>
+                                                                                <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Items</th>
+                                                                                <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Ask</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                                                             {(row.memos || []).map((m: DebitMemo) => (
-                                                                                <tr key={m.id} className="hover:bg-primary-50/40">
+                                                                                <tr key={m.id} className="hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
                                                                                     <td className="px-3 py-3 text-sm font-medium" style={{ color: 'var(--primary)' }}>{m.memoNumber}</td>
                                                                                     <td className="px-3 py-3 text-sm max-w-[140px] truncate" style={{ color: 'var(--on-surface)' }}>{m.pharmacyName}</td>
                                                                                     <td className="px-3 py-3 text-sm font-mono" style={{ color: 'var(--foreground)' }}>{m.raNumber || '—'}</td>
