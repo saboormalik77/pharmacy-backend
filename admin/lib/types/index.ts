@@ -932,6 +932,7 @@ export interface PoliciesListResponse {
 export interface DestructionRecord {
     id: string;
     pharmacyId: string;
+    pharmacyName?: string;
     transactionItemId: string | null;
     ndc: string | null;
     productName: string | null;
