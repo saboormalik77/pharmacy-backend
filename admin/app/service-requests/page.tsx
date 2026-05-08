@@ -218,12 +218,12 @@ export default function ServiceRequestsPage() {
                         <table className="w-full table-auto">
                             <thead>
                                 <tr className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Pharmacy</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Requested</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Scheduled</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Status</th>
-                                    {!isProcessor && <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Rep</th>}
-                                    <th className="text-right px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Actions</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-[#1d2222] uppercase tracking-wider">Pharmacy</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-[#1d2222] uppercase tracking-wider">Requested</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-[#1d2222] uppercase tracking-wider">Scheduled</th>
+                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-[#1d2222] uppercase tracking-wider">Status</th>
+                                    {!isProcessor && <th className="text-left px-4 py-3.5 text-xs font-semibold text-[#1d2222] uppercase tracking-wider">Rep</th>}
+                                    <th className="text-right px-4 py-3.5 text-xs font-semibold text-[#1d2222] uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>

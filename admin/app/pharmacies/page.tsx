@@ -858,7 +858,7 @@ function PharmaciesPageContent() {
             {/* Create Pharmacy Modal */}
             {createModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-3" onClick={() => !isCreating && setCreateModal(false)}>
-                    <div className="bg-white rounded-[4px] max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-6 py-5 border-b border-[#e2e2e2] bg-gray-50">
                             <h2 className="text-xs font-medium text-gray-900" style={{ fontFamily: 'var(--font-newsreader), serif' }}>Add New Pharmacy</h2>
                             <button onClick={() => !isCreating && setCreateModal(false)} className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-[4px] transition-all">
@@ -866,7 +866,7 @@ function PharmaciesPageContent() {
                             </button>
                         </div>
 
-                        <div className="px-6 py-5 space-y-5">
+                        <div className="px-6 py-5 space-y-5 overflow-y-auto">
                             {createError && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-1 rounded-[4px] text-xs">{createError}</div>}
                             {createSuccess && <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-1 rounded-[4px] text-xs">{createSuccess}</div>}
 
@@ -975,7 +975,7 @@ function PharmaciesPageContent() {
                             </div>
                         </div>
 
-                        <div className="flex justify-end gap-3 px-6 py-5 border-t border-[#e2e2e2] bg-gray-50">
+                        <div className="flex justify-end gap-3 px-6 py-5 border-t border-[#e2e2e2] bg-gray-50 flex-shrink-0">
                             <button onClick={() => setCreateModal(false)} disabled={isCreating} className="px-4 py-1 text-xs rounded-[4px] border border-[#e2e2e2] text-gray-700 hover:bg-white transition-all">Cancel</button>
                             <button onClick={handleCreatePharmacy} disabled={isCreating || !createForm.pharmacyName.trim() || !createForm.email.trim()} className="inline-flex items-center gap-2 px-4 py-1 text-xs rounded-[4px] bg-[#516057] text-white hover:opacity-90 disabled:opacity-50 transition-all">
                                 {isCreating ? <><Loader2 className="w-4 h-4 animate-spin" />Creating...</> : 'Create & Send Invite'}

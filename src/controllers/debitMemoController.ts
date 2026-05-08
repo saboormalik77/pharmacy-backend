@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import { catchAsync } from '../utils/catchAsync';
 import * as batchService from '../services/batchService';
 import { generateDebitMemoPdf, generateDebitMemoSummaryPdf } from '../services/debitMemoPdfService';
+import { analyzeAndMatchCreditMemo } from '../services/creditMemoMatchingService';
+import { AppError } from '../utils/appError';
 
 // ============================================================
 // GET /api/admin/debit-memos — List debit memos
@@ -103,5 +105,39 @@ export const downloadDebitMemoSummaryHandler = catchAsync(
     res.setHeader('Content-Length', pdfBuffer.length);
 
     res.end(pdfBuffer);
+  }
+);
+
+// ============================================================
+// POST /api/admin/debit-memos/:id/analyze-credit-memo — Analyze credit memo PDF
+// ============================================================
+export const analyzeCreditMemoHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const memoId = req.params.id;
+    const file = req.file;
+
+    if (!file) {
+      throw new AppError('Credit memo PDF file is required', 400);
+    }
+
+    // Analyze the credit memo PDF and match NDCs with debit memo items
+    const analysisResult = await analyzeAndMatchCreditMemo({
+      debitMemoId: memoId,
+      pdfBuffer: file.buffer,
+      filename: file.originalname,
+    });
+
+    // Return the analysis result with total amount
+    res.status(200).json({
+      status: 'success',
+      data: {
+        totalAmount: analysisResult.totalAmount,
+        confidence: analysisResult.confidence,
+        analysisStatus: analysisResult.status,
+        manufacturerName: analysisResult.manufacturerName,
+        lineItemsCount: analysisResult.lineItems?.length || 0,
+        errorMessage: analysisResult.errorMessage,
+      },
+    });
   }
 );
