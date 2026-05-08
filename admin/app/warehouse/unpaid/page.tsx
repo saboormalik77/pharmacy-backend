@@ -266,8 +266,8 @@ export default function UnpaidMemosPage() {
                     {/* Summary cards */}
                     {unpaidSummary && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <div className="bg-white rounded-lg border border-gray-200 px-4 py-2.5 flex items-center gap-3">
-                                <div className="p-2 bg-red-50 rounded-lg flex-shrink-0">
+                            <div className="bg-white rounded-[4px] border border-gray-200 px-4 py-2.5 flex items-center gap-3">
+                                <div className="p-2 bg-red-50 rounded-[4px] flex-shrink-0">
                                     <AlertCircle className="w-4 h-4 text-red-500" />
                                 </div>
                                 <div>
@@ -275,8 +275,8 @@ export default function UnpaidMemosPage() {
                                     <p className="text-lg font-bold text-gray-900">{unpaidSummary.totalUnpaid}</p>
                                 </div>
                             </div>
-                            <div className="bg-white rounded-lg border border-gray-200 px-4 py-2.5 flex items-center gap-3">
-                                <div className="p-2 bg-orange-50 rounded-lg flex-shrink-0">
+                            <div className="bg-white rounded-[4px] border border-gray-200 px-4 py-2.5 flex items-center gap-3">
+                                <div className="p-2 bg-orange-50 rounded-[4px] flex-shrink-0">
                                     <DollarSign className="w-4 h-4 text-orange-500" />
                                 </div>
                                 <div>
@@ -288,7 +288,7 @@ export default function UnpaidMemosPage() {
                     )}
 
                     {/* Filters */}
-                    <div className="bg-white rounded-lg border border-gray-200 px-3 py-2 flex flex-wrap gap-2 items-center">
+                    <div className="bg-white rounded-[4px] border border-gray-200 px-3 py-2 flex flex-wrap gap-2 items-center">
                         <div className="relative flex-1 min-w-[180px]">
                             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
                             <input
@@ -312,7 +312,7 @@ export default function UnpaidMemosPage() {
                     </div>
 
                     {/* Table */}
-                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div className="bg-white rounded-[4px] border border-gray-200 overflow-hidden">
                         {isLoading ? (
                             <div className="flex items-center justify-center py-14">
                                 <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
@@ -414,8 +414,8 @@ export default function UnpaidMemosPage() {
                 <div className="space-y-2">
                     {/* Summary card */}
                     {paidPagination && (
-                        <div className="bg-white rounded-lg border border-gray-200 px-4 py-2.5 flex items-center gap-3 max-w-xs">
-                            <div className="p-2 bg-green-50 rounded-lg flex-shrink-0">
+                        <div className="bg-white rounded-[4px] border border-gray-200 px-4 py-2.5 flex items-center gap-3 max-w-xs">
+                            <div className="p-2 bg-green-50 rounded-[4px] flex-shrink-0">
                                 <CheckCircle className="w-4 h-4 text-green-500" />
                             </div>
                             <div>
@@ -426,7 +426,7 @@ export default function UnpaidMemosPage() {
                     )}
 
                     {/* Filters */}
-                    <div className="bg-white rounded-lg border border-gray-200 px-3 py-2 flex flex-wrap gap-2 items-center">
+                    <div className="bg-white rounded-[4px] border border-gray-200 px-3 py-2 flex flex-wrap gap-2 items-center">
                         <div className="relative flex-1 min-w-[180px]">
                             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
                             <input
@@ -450,7 +450,7 @@ export default function UnpaidMemosPage() {
                     </div>
 
                     {/* Table */}
-                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div className="bg-white rounded-[4px] border border-gray-200 overflow-hidden">
                         {isLoading ? (
                             <div className="flex items-center justify-center py-14">
                                 <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
@@ -540,7 +540,7 @@ export default function UnpaidMemosPage() {
                                 { label: 'Total Received', value: fmt(askVsReceivedTotals.totalReceived), color: 'text-green-600' },
                                 { label: 'Overall Pay %', value: pct(askVsReceivedTotals.overallPayPercent), color: '', extra: askVsReceivedTotals.overallPayPercent >= 80 ? <TrendingUp className="w-3.5 h-3.5 text-green-500 inline ml-1" /> : <TrendingDown className="w-3.5 h-3.5 text-red-500 inline ml-1" /> },
                             ].map(({ label, value, color, extra }) => (
-                                <div key={label} className="bg-white rounded-lg border border-gray-200 px-3 py-2">
+                                <div key={label} className="bg-white rounded-[4px] border border-gray-200 px-3 py-2">
                                     <p className="text-[10px] text-gray-500">{label}</p>
                                     <p className={`text-base font-bold text-gray-900 mt-0.5 ${color}`}>{value}{extra}</p>
                                 </div>
@@ -549,7 +549,7 @@ export default function UnpaidMemosPage() {
                     )}
 
                     {/* Group toggle */}
-                    <div className="bg-white rounded-lg border border-gray-200 px-3 py-2 flex items-center gap-2">
+                    <div className="bg-white rounded-[4px] border border-gray-200 px-3 py-2 flex items-center gap-2">
                         <span className="text-xs text-gray-600 font-medium">Group by:</span>
                         <div className="flex gap-0.5 bg-gray-100 rounded p-0.5">
                             <button onClick={() => setAnalyticsGroupBy('manufacturer')} className={`px-3 py-1 rounded text-xs font-medium transition-colors ${analyticsGroupBy === 'manufacturer' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>Manufacturer</button>
@@ -558,7 +558,7 @@ export default function UnpaidMemosPage() {
                     </div>
 
                     {/* Table */}
-                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div className="bg-white rounded-[4px] border border-gray-200 overflow-hidden">
                         {isLoading ? (
                             <div className="flex items-center justify-center py-14"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>
                         ) : askVsReceived.length === 0 ? (
@@ -604,7 +604,7 @@ export default function UnpaidMemosPage() {
             {activeTab === 'manufacturers' && (
                 <div className="space-y-2">
                     {/* Search */}
-                    <div className="bg-white rounded-lg border border-gray-200 px-3 py-2">
+                    <div className="bg-white rounded-[4px] border border-gray-200 px-3 py-2">
                         <div className="relative max-w-md">
                             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
                             <input
@@ -617,7 +617,7 @@ export default function UnpaidMemosPage() {
                     </div>
 
                     {/* Table */}
-                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div className="bg-white rounded-[4px] border border-gray-200 overflow-hidden">
                         {isLoading ? (
                             <div className="flex items-center justify-center py-14"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>
                         ) : manufacturerSummary.length === 0 ? (
@@ -690,7 +690,7 @@ export default function UnpaidMemosPage() {
             {/* ─── Record Payment Modal ────────────────────────── */}
             {paymentMemo && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-lg shadow-2xl w-full max-w-md">
+                    <div className="bg-white rounded-[4px] shadow-2xl w-full max-w-md">
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
                             <div>
                                 <h3 className="text-sm font-semibold text-gray-900">{isEditMode ? 'Update Payment' : 'Record Payment'}</h3>
@@ -808,7 +808,7 @@ export default function UnpaidMemosPage() {
             {/* ─── Send Reminder Modal ─────────────────────────── */}
             {reminderMemo && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-lg shadow-2xl w-full max-w-sm">
+                    <div className="bg-white rounded-[4px] shadow-2xl w-full max-w-sm">
                         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
                             <div>
                                 <h3 className="text-sm font-semibold text-gray-900">Send Payment Reminder</h3>

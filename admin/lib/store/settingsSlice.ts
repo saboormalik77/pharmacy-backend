@@ -90,13 +90,7 @@ export const fetchSettings = createAsyncThunk(
         return rejectWithValue('Authentication required. Please login again.');
       }
       
-      // Check if user is a processor - they don't need settings data
-      const state = getState() as any;
-      const user = state.auth?.user;
-      if (user?.role === 'processor') {
-        console.log('Skipping settings fetch for processor user');
-        return null; // Return null or empty settings for processors
-      }
+      
       
       const data: SettingsResponse = await apiClient.get<SettingsResponse>(
         '/admin/settings',

@@ -498,38 +498,63 @@ export default function NDCPricingPage() {
                 )}
             </div>
 
-            {/* ── Add / Edit Modal ─────────────────────────── */}
+            {/* ── Add / Edit Modal (same shell as Labeler Info / distributors) ── */}
             {formModal && (
                 <div
-                    className="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                    className="fixed inset-0 backdrop-blur-sm z-[100] flex items-center justify-center p-4 overflow-y-auto"
                     style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
                     onClick={() => setFormModal(false)}
+                    role="presentation"
                 >
-                    <div className="rounded-[4px] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={e => e.stopPropagation()}>
-                        <div className="rounded-t-xl px-4 py-3" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <div className="p-1.5 bg-white/20 rounded-[4px]">
-                                        <DollarSign className="w-4 h-4 text-white" />
-                                    </div>
-                                    <h2 className="text-sm font-bold text-white">
-                                        {editingRecord ? 'Edit NDC Pricing' : 'Add NDC Pricing'}
-                                    </h2>
-                                </div>
-                                <button 
-                                    onClick={() => setFormModal(false)} 
-                                    className="text-white/80 hover:text-white transition-colors cursor-pointer"
+                    <div
+                        className="rounded-[4px] w-full max-w-2xl max-h-[92vh] my-auto flex flex-col border min-h-0 shadow-xl"
+                        style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
+                        onClick={e => e.stopPropagation()}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="ndc-pricing-modal-title"
+                    >
+                        <div
+                            className="px-4 py-3 flex-shrink-0 border-b flex items-center justify-between gap-2"
+                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
+                        >
+                            <div className="flex items-center gap-3 min-w-0">
+                                <div
+                                    className="w-8 h-8 rounded-[4px] flex items-center justify-center shrink-0"
+                                    style={{ backgroundColor: 'var(--surface-container-high)' }}
                                 >
-                                    <X className="w-4 h-4" />
-                                </button>
+                                    <DollarSign className="w-4 h-4" style={{ color: 'var(--primary)' }} />
+                                </div>
+                                <div className="min-w-0">
+                                    <h2 id="ndc-pricing-modal-title" className="text-sm font-bold leading-tight" style={{ color: 'var(--foreground)' }}>
+                                        {editingRecord ? 'Edit NDC pricing' : 'Add NDC pricing'}
+                                    </h2>
+                                    <p className="text-xs mt-0.5 leading-snug" style={{ color: 'var(--on-surface-variant)' }}>
+                                        {editingRecord ? 'Update price and destination for this NDC' : 'Scan or enter NDC, then set pricing'}
+                                    </p>
+                                </div>
                             </div>
+                            <button
+                                type="button"
+                                onClick={() => setFormModal(false)}
+                                className="p-1 rounded hover:bg-primary-50/40 cursor-pointer shrink-0"
+                                style={{ color: 'var(--outline)' }}
+                                aria-label="Close"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
                         </div>
 
-                        <div className="p-4 space-y-4">
+                        <div className="p-4 space-y-4 overflow-y-auto flex-1 min-h-0">
                             {/* Barcode / NDC scan (add only — same flow as return scan screen) */}
                             {!editingRecord && (
-                                <div className="rounded-[4px] border border-gray-200 bg-gray-50/80 px-3 py-2.5 space-y-2">
-                                    <p className="text-[10px] font-semibold text-gray-600 uppercase tracking-wide">Scan barcode or NDC</p>
+                                <div
+                                    className="rounded-[4px] border px-3 py-2.5 space-y-2"
+                                    style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
+                                >
+                                    <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'var(--on-surface)' }}>
+                                        Scan barcode or NDC
+                                    </p>
                                     <div className="flex gap-1.5 flex-wrap">
                                         {([
                                             { key: 'camera' as const, icon: Camera, label: 'Camera QR' },
@@ -570,7 +595,7 @@ export default function NDCPricingPage() {
                                                     </>
                                                 )}
                                             </button>
-                                            <p className="text-[10px] text-gray-500 mt-1">QR, GS1, and standard barcodes — NDC and product name fill in below.</p>
+                                            <p className="text-[10px] mt-1 leading-snug" style={{ color: 'var(--on-surface-variant)' }}>QR, GS1, and standard barcodes — NDC and product name fill in below.</p>
                                         </div>
                                     )}
                                     {ndcScanMode === 'usb' && (
@@ -593,7 +618,7 @@ export default function NDCPricingPage() {
                                                     </div>
                                                 )}
                                             </div>
-                                            <p className="text-[10px] text-gray-500 mt-1">Same as the return add-items scan field.</p>
+                                            <p className="text-[10px] mt-1 leading-snug" style={{ color: 'var(--on-surface-variant)' }}>Same as the return add-items scan field.</p>
                                         </div>
                                     )}
                                     {ndcScanMode === 'manual' && (
@@ -618,7 +643,14 @@ export default function NDCPricingPage() {
                                         </div>
                                     )}
                                     {ndcScanError && (
-                                        <div className="flex items-start gap-1.5 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded px-2 py-1.5">
+                                        <div
+                                            className="flex items-start gap-1.5 text-xs rounded px-2 py-1.5 border"
+                                            style={{
+                                                backgroundColor: 'var(--error-container)',
+                                                borderColor: 'var(--outline-variant)',
+                                                color: 'var(--on-error-container)',
+                                            }}
+                                        >
                                             <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
                                             <span>{ndcScanError}</span>
                                         </div>
@@ -641,24 +673,39 @@ export default function NDCPricingPage() {
 
                             {/* Suggested Price banner */}
                             {!editingRecord && (suggestedPrice?.loading || suggestedPrice?.price) && (
-                                <div className="bg-blue-50 border border-blue-200 rounded-[4px] p-3">
+                                <div
+                                    className="rounded-[4px] p-3 border-l-4 border border-solid"
+                                    style={{
+                                        backgroundColor: 'var(--surface-container-low)',
+                                        borderColor: 'var(--outline-variant)',
+                                        borderLeftColor: 'var(--secondary)',
+                                    }}
+                                >
                                     {suggestedPrice.loading ? (
-                                        <div className="flex items-center gap-2 text-blue-700 text-xs">
-                                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                        <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--on-surface)' }}>
+                                            <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: 'var(--secondary)' }} />
                                             Looking up pricing...
                                         </div>
                                     ) : suggestedPrice.price ? (
                                         <div className="flex items-center justify-between gap-2">
-                                            <div className="flex items-center gap-2 text-blue-700 text-xs">
-                                                <Info className="w-3.5 h-3.5 flex-shrink-0" />
+                                            <div className="flex items-center gap-2 text-xs min-w-0" style={{ color: 'var(--on-surface)' }}>
+                                                <Info className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--secondary)' }} />
                                                 <div>
-                                                    <span className="font-medium">Suggested: <span className="font-mono text-blue-900">${suggestedPrice.price.toFixed(2)}</span></span>
-                                                    <div className="text-[10px] text-blue-600 mt-0.5">Source: {suggestedPrice.source}</div>
+                                                    <span className="font-medium">
+                                                        Suggested:{' '}
+                                                        <span className="font-mono" style={{ color: 'var(--foreground)' }}>
+                                                            ${suggestedPrice.price.toFixed(2)}
+                                                        </span>
+                                                    </span>
+                                                    <div className="text-[10px] mt-0.5" style={{ color: 'var(--on-surface-variant)' }}>
+                                                        Source: {suggestedPrice.source}
+                                                    </div>
                                                 </div>
                                             </div>
                                             <button
+                                                type="button"
                                                 onClick={applySuggestedPrice}
-                                                className="px-2.5 py-1 text-[10px] font-medium rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors flex-shrink-0"
+                                                className="px-2.5 py-1 text-[10px] font-medium rounded bg-primary-600 text-white hover:bg-primary-700 transition-colors flex-shrink-0 cursor-pointer"
                                             >
                                                 Apply Price
                                             </button>
@@ -684,8 +731,10 @@ export default function NDCPricingPage() {
                                 </p>
                             </div>
 
-                            <hr className="border-gray-100" />
-                            <p className="text-[10px] font-semibold text-primary-600 uppercase tracking-wider">Pricing Information</p>
+                            <hr style={{ borderColor: 'var(--outline-variant)' }} />
+                            <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--foreground)' }}>
+                                Pricing information
+                            </p>
 
                             {/* Price fields */}
                             <div className="grid grid-cols-3 gap-3">
@@ -756,18 +805,41 @@ export default function NDCPricingPage() {
 
                             {/* Previous price (edit mode only) */}
                             {editingRecord && editingRecord.lastPrice != null && (
-                                <div className="bg-gray-50 border border-gray-200 rounded-[4px] px-3 py-2 text-xs text-gray-600">
-                                    Previous Price: <span className="font-mono font-semibold text-yellow-700">{fmt(editingRecord.lastPrice)}</span>
-                                    <span className="ml-3">Last Updated: {fmtDate(editingRecord.lastPriceUpdate)}</span>
+                                <div
+                                    className="rounded-[4px] px-3 py-2 text-xs border"
+                                    style={{
+                                        backgroundColor: 'var(--surface-container-low)',
+                                        borderColor: 'var(--outline-variant)',
+                                        color: 'var(--on-surface-variant)',
+                                    }}
+                                >
+                                    Previous price:{' '}
+                                    <span className="font-mono font-semibold" style={{ color: 'var(--foreground)' }}>
+                                        {fmt(editingRecord.lastPrice)}
+                                    </span>
+                                    <span className="ml-3">Last updated: {fmtDate(editingRecord.lastPriceUpdate)}</span>
                                 </div>
                             )}
                         </div>
 
-                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50 rounded-b-lg">
-                            <button onClick={() => setFormModal(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors">
+                        <div
+                            className="flex justify-end gap-2 px-4 py-3 border-t flex-shrink-0"
+                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
+                        >
+                            <button
+                                type="button"
+                                onClick={() => setFormModal(false)}
+                                className="px-3 py-1.5 text-xs rounded border transition-colors hover:bg-primary-50/40 cursor-pointer"
+                                style={{ borderColor: 'var(--outline-variant)', color: 'var(--on-surface)', backgroundColor: 'var(--surface-container-lowest)' }}
+                            >
                                 Cancel
                             </button>
-                            <button onClick={handleSave} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors font-medium">
+                            <button
+                                type="button"
+                                onClick={handleSave}
+                                disabled={isActionLoading}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors font-medium cursor-pointer disabled:cursor-not-allowed"
+                            >
                                 {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                                 {editingRecord ? 'Update' : 'Save'}
                             </button>
@@ -783,7 +855,7 @@ export default function NDCPricingPage() {
             {/* ── Delete Confirmation Modal ─────────────────── */}
             {deleteModal && (
                 <div
-                    className="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                    className="fixed inset-0 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
                     style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
                     onClick={() => setDeleteModal(null)}
                 >

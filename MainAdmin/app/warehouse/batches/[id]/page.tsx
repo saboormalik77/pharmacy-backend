@@ -296,19 +296,33 @@ export default function BatchDetailPage() {
                 <div className="flex flex-wrap gap-1.5">
                     {batch.status === 'open' && (
                         <>
-                            <button onClick={openAssignModal} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors">
+                            <button
+                                onClick={openAssignModal}
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors cursor-pointer"
+                            >
                                 <Plus className="w-3.5 h-3.5" /> Assign Returns
                             </button>
                             {batchReturns.length > 0 && (
-                                <button onClick={openUnassignModal} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium border transition-colors hover:bg-primary-50/40" style={{ backgroundColor: 'var(--tertiary-fixed)', color: 'var(--on-tertiary-container)', borderColor: 'var(--outline-variant)' }}>
+                                <button
+                                    onClick={openUnassignModal}
+                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium border transition-colors hover:opacity-95 cursor-pointer bg-[var(--secondary-container)] text-[var(--on-secondary-container)] border-[var(--outline-variant)]"
+                                >
                                     <UserX className="w-3.5 h-3.5" /> Unassign Returns
                                 </button>
                             )}
-                            <button onClick={() => setShowClose(true)} disabled={batch.totalReturns === 0} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium border disabled:opacity-40 transition-colors hover:bg-primary-50/40" style={{ backgroundColor: 'var(--tertiary-fixed)', color: 'var(--on-tertiary-container)', borderColor: 'var(--outline-variant)' }}>
+                            <button
+                                onClick={() => setShowClose(true)}
+                                disabled={batch.totalReturns === 0}
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium border transition-colors hover:opacity-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed bg-[var(--tertiary)] text-[var(--on-tertiary)] border-[var(--outline-variant)]"
+                            >
                                 <Lock className="w-3.5 h-3.5" /> Close Batch
                             </button>
                             {batchPermissions?.canDelete && (
-                                <button onClick={() => setShowDelete(true)} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium border transition-colors hover:bg-primary-50/40" style={{ backgroundColor: 'var(--error-container)', color: 'var(--on-error-container)', borderColor: 'var(--outline-variant)' }}>
+                                <button
+                                    onClick={() => setShowDelete(true)}
+                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium border transition-colors hover:bg-primary-50/40 cursor-pointer"
+                                    style={{ backgroundColor: 'var(--error-container)', color: 'var(--on-error-container)', borderColor: 'var(--outline-variant)' }}
+                                >
                                     <Trash2 className="w-3.5 h-3.5" /> Delete Batch
                                 </button>
                             )}
@@ -549,9 +563,16 @@ export default function BatchDetailPage() {
                                 <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>This will generate debit memos and cannot be undone.</p>
                             </div>
                         </div>
-                        <div className="border rounded-[4px] p-2.5 text-xs mb-3" style={{ backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)', color: 'var(--on-tertiary-container)' }}>
-                            <p className="font-medium mb-1">This action will:</p>
-                            <ul className="list-disc ml-4 space-y-0.5">
+                        <div
+                            className="border rounded-[4px] p-2.5 text-xs mb-3"
+                            style={{
+                                backgroundColor: 'var(--secondary-container)',
+                                borderColor: 'var(--outline-variant)',
+                                color: 'var(--on-secondary-container)',
+                            }}
+                        >
+                            <p className="font-semibold mb-1.5" style={{ color: 'var(--on-surface)' }}>This action will:</p>
+                            <ul className="list-disc ml-4 space-y-0.5" style={{ color: 'var(--on-surface)' }}>
                                 <li>Lock the batch from further changes</li>
                                 <li>Generate debit memos grouped by pharmacy + destination + labeler</li>
                                 <li>Validate all items have destinations (no TBD items allowed)</li>

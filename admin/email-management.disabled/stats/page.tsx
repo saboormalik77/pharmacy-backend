@@ -49,11 +49,11 @@ const StatCard = ({
   const TrendIcon = trend ? trendIcons[trend] : null;
 
   return (
-    <div className="bg-white overflow-hidden shadow rounded-lg border">
+    <div className="bg-white overflow-hidden shadow rounded-[4px] border">
       <div className="p-5">
         <div className="flex items-center">
           <div className="flex-shrink-0">
-            <div className={`p-3 rounded-md border ${colorClasses[color]}`}>
+            <div className={`p-3 rounded-[4px] border ${colorClasses[color]}`}>
               <Icon className="h-6 w-6" />
             </div>
           </div>
@@ -124,7 +124,7 @@ export default function EmailStatsPage() {
 
   if (statsError) {
     return (
-      <div className="rounded-md bg-red-50 p-4">
+      <div className="rounded-[4px] bg-red-50 p-4">
         <div className="flex">
           <AlertTriangle className="h-5 w-5 text-red-400" />
           <div className="ml-3">
@@ -160,7 +160,7 @@ export default function EmailStatsPage() {
               <button
                 key={days}
                 onClick={() => handleQuickRange(days)}
-                className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50"
+                className="px-3 py-1 text-sm border border-gray-300 rounded-[4px] hover:bg-gray-50"
               >
                 {days}d
               </button>
@@ -174,14 +174,14 @@ export default function EmailStatsPage() {
               type="date"
               value={dateRange.from}
               onChange={(e) => handleDateRangeChange('from', e.target.value)}
-              className="border border-gray-300 rounded-md px-2 py-1 text-sm"
+              className="border border-gray-300 rounded-[4px] px-2 py-1 text-sm"
             />
             <span className="text-gray-500">to</span>
             <input
               type="date"
               value={dateRange.to}
               onChange={(e) => handleDateRangeChange('to', e.target.value)}
-              className="border border-gray-300 rounded-md px-2 py-1 text-sm"
+              className="border border-gray-300 rounded-[4px] px-2 py-1 text-sm"
             />
           </div>
           
@@ -189,7 +189,7 @@ export default function EmailStatsPage() {
           <button
             onClick={handleRefresh}
             disabled={statsLoading}
-            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-[4px] text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 mr-2 ${statsLoading ? 'animate-spin' : ''}`} />
             Refresh
@@ -245,7 +245,7 @@ export default function EmailStatsPage() {
           {/* Detailed Metrics */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Delivery Performance */}
-            <div className="bg-white shadow rounded-lg p-6">
+            <div className="bg-white shadow rounded-[4px] p-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Delivery Performance</h3>
               
               <div className="space-y-4">
@@ -294,7 +294,7 @@ export default function EmailStatsPage() {
             </div>
 
             {/* Status Breakdown */}
-            <div className="bg-white shadow rounded-lg p-6">
+            <div className="bg-white shadow rounded-[4px] p-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Status Breakdown</h3>
               
               <div className="space-y-3">
@@ -362,12 +362,12 @@ export default function EmailStatsPage() {
           </div>
 
           {/* Recommendations */}
-          <div className="bg-white shadow rounded-lg p-6">
+          <div className="bg-white shadow rounded-[4px] p-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Recommendations</h3>
             
             <div className="space-y-3">
               {stats.delivery_rate < 85 && (
-                <div className="flex items-start p-3 bg-red-50 rounded-md">
+                <div className="flex items-start p-3 bg-red-50 rounded-[4px]">
                   <AlertTriangle className="h-5 w-5 text-red-400 mt-0.5 mr-3 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-red-800">Low Delivery Rate</p>
@@ -380,7 +380,7 @@ export default function EmailStatsPage() {
               )}
 
               {stats.bounce_rate > 5 && (
-                <div className="flex items-start p-3 bg-yellow-50 rounded-md">
+                <div className="flex items-start p-3 bg-yellow-50 rounded-[4px]">
                   <AlertTriangle className="h-5 w-5 text-yellow-400 mt-0.5 mr-3 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-yellow-800">High Bounce Rate</p>
@@ -393,7 +393,7 @@ export default function EmailStatsPage() {
               )}
 
               {stats.failed > 0 && (
-                <div className="flex items-start p-3 bg-blue-50 rounded-md">
+                <div className="flex items-start p-3 bg-blue-50 rounded-[4px]">
                   <AlertTriangle className="h-5 w-5 text-blue-400 mt-0.5 mr-3 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-blue-800">Failed Emails Detected</p>
@@ -406,7 +406,7 @@ export default function EmailStatsPage() {
               )}
 
               {stats.delivery_rate >= 95 && stats.bounce_rate <= 2 && stats.failed === 0 && (
-                <div className="flex items-start p-3 bg-green-50 rounded-md">
+                <div className="flex items-start p-3 bg-green-50 rounded-[4px]">
                   <CheckCircle className="h-5 w-5 text-green-400 mt-0.5 mr-3 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-green-800">Excellent Email Performance</p>

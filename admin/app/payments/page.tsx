@@ -110,13 +110,13 @@ export default function PaymentsPage() {
 
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white rounded-lg shadow-md p-3">
+                <div className="bg-white rounded-[4px] shadow-md p-3">
                     <div className="flex justify-between items-center">
                         <p className="text-xs text-gray-600">Total Payments</p>
                         <p className="text-sm font-bold text-gray-900">{stats?.totalPayments ?? 0}</p>
                     </div>
                 </div>
-                <div className="bg-white rounded-lg shadow-md p-3">
+                <div className="bg-white rounded-[4px] shadow-md p-3">
                     <div className="flex justify-between items-center">
                         <p className="text-xs text-gray-600">Total Amount</p>
                         <p className="text-sm font-bold text-gray-900">{formatCurrency(stats?.totalAmount ?? 0)}</p>
@@ -124,7 +124,7 @@ export default function PaymentsPage() {
                 </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-[4px] shadow-md p-6">
                 <div className="flex flex-col gap-4 mb-6">
                     <div className="flex flex-col sm:flex-row gap-4">
                         <div className="flex-1 relative">
@@ -134,13 +134,13 @@ export default function PaymentsPage() {
                                 placeholder="Search payments..."
                                 value={searchTerm}
                                 onChange={(e) => handleSearchChange(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                             />
                         </div>
                         <select
                             value={pharmacyFilter}
                             onChange={(e) => handlePharmacyFilterChange(e.target.value)}
-                            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 min-w-[200px]"
+                            className="px-4 py-2 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 min-w-[200px]"
                         >
                             <option value="">All Pharmacies</option>
                             {pharmacies.map((pharmacy) => (
@@ -157,7 +157,7 @@ export default function PaymentsPage() {
                                 type="date"
                                 value={startDate}
                                 onChange={(e) => handleStartDateChange(e.target.value)}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                 placeholder="YYYY-MM-DD"
                             />
                         </div>
@@ -167,7 +167,7 @@ export default function PaymentsPage() {
                                 type="date"
                                 value={endDate}
                                 onChange={(e) => handleEndDateChange(e.target.value)}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                                 placeholder="YYYY-MM-DD"
                                 min={startDate || undefined}
                             />
@@ -248,7 +248,7 @@ export default function PaymentsPage() {
                                     <button
                                         onClick={() => handlePageChange(currentPage - 1)}
                                         disabled={!pagination.hasPreviousPage || pagination.page <= 1}
-                                        className="p-2 sm:p-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                                        className="p-2 sm:p-2 border border-gray-300 rounded-[4px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
                                     >
                                         <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                                     </button>
@@ -258,7 +258,7 @@ export default function PaymentsPage() {
                                     <button
                                         onClick={() => handlePageChange(currentPage + 1)}
                                         disabled={!pagination.hasNextPage || pagination.page >= pagination.totalPages}
-                                        className="p-2 sm:p-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                                        className="p-2 sm:p-2 border border-gray-300 rounded-[4px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
                                     >
                                         <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
                                     </button>
@@ -276,7 +276,7 @@ export default function PaymentsPage() {
                     onClick={() => setViewModal(null)}
                 >
                     <div 
-                        className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-xl"
+                        className="bg-white rounded-[4px] max-w-2xl w-full max-h-[90vh] flex flex-col shadow-xl"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50 flex-shrink-0">

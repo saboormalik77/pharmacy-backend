@@ -24,10 +24,10 @@ const toastIcons = {
 };
 
 const toastStyles = {
-    success: 'bg-green-50 border-green-200 text-green-800',
+    success: 'bg-[#516057]/10 border-[#516057]/20 text-[#516057]',
     error: 'bg-red-50 border-red-200 text-red-800',
     info: 'bg-blue-50 border-blue-200 text-blue-800',
-    warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+    warning: 'bg-[#ad916a]/20 border-[#ad916a]/30 text-[#6b5a3f]',
 };
 
 export function ToastComponent({ toast, onClose }: ToastProps) {
@@ -50,7 +50,7 @@ export function ToastComponent({ toast, onClose }: ToastProps) {
     return (
         <div
             onClick={() => onClose(toast.id)}
-            className={`${style} border rounded-lg shadow-lg p-4 mb-3 flex items-center gap-3 min-w-[300px] max-w-[500px] animate-in slide-in-from-right cursor-pointer select-none`}
+            className={`${style} border rounded-[4px] shadow-lg p-4 mb-3 flex items-center gap-3 min-w-[300px] max-w-[500px] animate-in slide-in-from-right cursor-pointer select-none`}
         >
             <Icon className="w-5 h-5 flex-shrink-0" />
             <p className="flex-1 text-sm font-medium">{toast.message}</p>

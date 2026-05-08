@@ -1,0 +1,202 @@
+[
+  {
+    "ndc": "0069-2587-68",
+    "gtin_14": "003000692587688",
+    "serial_number": "SN26042902589774CV",
+    "lot_number": "LOT2026A025",
+    "expiration_date": "281015",
+    "expiration_readable": "10/15/2028",
+    "gs1_datamatrix_content": "(01)003000692587688(21)SN26042902589774CV(17)281015(10)LOT2026A025",
+    "generated_timestamp": "2026-04-29T19:35:49.769198"
+  },
+  {
+    "ndc": "0781-1506-10",
+    "gtin_14": "003007811506100",
+    "serial_number": "SN26042924474514YB",
+    "lot_number": "LOT2026B365",
+    "expiration_date": "271021",
+    "expiration_readable": "10/21/2027",
+    "gs1_datamatrix_content": "(01)003007811506100(21)SN26042924474514YB(17)271021(10)LOT2026B365",
+    "generated_timestamp": "2026-04-29T19:35:49.770179"
+  },
+  {
+    "ndc": "0904-5739-61",
+    "gtin_14": "003009045739613",
+    "serial_number": "SN26042910202953NU",
+    "lot_number": "LOT2026E241",
+    "expiration_date": "281015",
+    "expiration_readable": "10/15/2028",
+    "gs1_datamatrix_content": "(01)003009045739613(21)SN26042910202953NU(17)281015(10)LOT2026E241",
+    "generated_timestamp": "2026-04-29T19:35:49.771106"
+  },
+  {
+    "ndc": "0071-0155-23",
+    "gtin_14": "003000710155233",
+    "serial_number": "SN26042930888717YS",
+    "lot_number": "LOT2026G642",
+    "expiration_date": "280418",
+    "expiration_readable": "04/18/2028",
+    "gs1_datamatrix_content": "(01)003000710155233(21)SN26042930888717YS(17)280418(10)LOT2026G642",
+    "generated_timestamp": "2026-04-29T19:35:49.772030"
+  },
+  {
+    "ndc": "0363-0181-01",
+    "gtin_14": "003003630181016",
+    "serial_number": "SN26042931173816BF",
+    "lot_number": "LOT2026B798",
+    "expiration_date": "280518",
+    "expiration_readable": "05/18/2028",
+    "gs1_datamatrix_content": "(01)003003630181016(21)SN26042931173816BF(17)280518(10)LOT2026B798",
+    "generated_timestamp": "2026-04-29T19:35:49.772948"
+  },
+  {
+    "ndc": "49348-0593-34",
+    "gtin_14": "003493480593341",
+    "serial_number": "SN26042989436907TI",
+    "lot_number": "LOT2026A224",
+    "expiration_date": "280617",
+    "expiration_readable": "06/17/2028",
+    "gs1_datamatrix_content": "(01)003493480593341(21)SN26042989436907TI(17)280617(10)LOT2026A224",
+    "generated_timestamp": "2026-04-29T19:35:49.773882"
+  },
+  {
+    "ndc": "0093-0058-01",
+    "gtin_14": "003000930058017",
+    "serial_number": "SN26042904708405OJ",
+    "lot_number": "LOT2026D039",
+    "expiration_date": "280218",
+    "expiration_readable": "02/18/2028",
+    "gs1_datamatrix_content": "(01)003000930058017(21)SN26042904708405OJ(17)280218(10)LOT2026D039",
+    "generated_timestamp": "2026-04-29T19:35:49.774944"
+  },
+  {
+    "ndc": "0172-4368-70",
+    "gtin_14": "003001724368701",
+    "serial_number": "SN26042962151928WJ",
+    "lot_number": "LOT2026E343",
+    "expiration_date": "280617",
+    "expiration_readable": "06/17/2028",
+    "gs1_datamatrix_content": "(01)003001724368701(21)SN26042962151928WJ(17)280617(10)LOT2026E343",
+    "generated_timestamp": "2026-04-29T19:35:49.775874"
+  },
+  {
+    "ndc": "65162-0406-10",
+    "gtin_14": "003651620406108",
+    "serial_number": "SN26042956415360YV",
+    "lot_number": "LOT2026C954",
+    "expiration_date": "280518",
+    "expiration_readable": "05/18/2028",
+    "gs1_datamatrix_content": "(01)003651620406108(21)SN26042956415360YV(17)280518(10)LOT2026C954",
+    "generated_timestamp": "2026-04-29T19:35:49.776772"
+  },
+  {
+    "ndc": "43063-0196-30",
+    "gtin_14": "003430630196304",
+    "serial_number": "SN26042991312855UH",
+    "lot_number": "LOT2026A596",
+    "expiration_date": "271120",
+    "expiration_readable": "11/20/2027",
+    "gs1_datamatrix_content": "(01)003430630196304(21)SN26042991312855UH(17)271120(10)LOT2026A596",
+    "generated_timestamp": "2026-04-29T19:35:49.777662"
+  },
+  {
+    "ndc": "0378-0221-01",
+    "gtin_14": "003003780221013",
+    "serial_number": "SN26042989333718SK",
+    "lot_number": "LOT2026G234",
+    "expiration_date": "271021",
+    "expiration_readable": "10/21/2027",
+    "gs1_datamatrix_content": "(01)003003780221013(21)SN26042989333718SK(17)271021(10)LOT2026G234",
+    "generated_timestamp": "2026-04-29T19:35:49.778552"
+  },
+  {
+    "ndc": "0591-0405-01",
+    "gtin_14": "003005910405010",
+    "serial_number": "SN26042972284003JW",
+    "lot_number": "LOT2026A722",
+    "expiration_date": "280915",
+    "expiration_readable": "09/15/2028",
+    "gs1_datamatrix_content": "(01)003005910405010(21)SN26042972284003JW(17)280915(10)LOT2026A722",
+    "generated_timestamp": "2026-04-29T19:35:49.779442"
+  },
+  {
+    "ndc": "0093-0127-01",
+    "gtin_14": "003000930127010",
+    "serial_number": "SN26042993950721AP",
+    "lot_number": "LOT2026E740",
+    "expiration_date": "280418",
+    "expiration_readable": "04/18/2028",
+    "gs1_datamatrix_content": "(01)003000930127010(21)SN26042993950721AP(17)280418(10)LOT2026E740",
+    "generated_timestamp": "2026-04-29T19:35:49.780334"
+  },
+  {
+    "ndc": "43063-0011-30",
+    "gtin_14": "003430630011300",
+    "serial_number": "SN26042902408163ZD",
+    "lot_number": "LOT2026A040",
+    "expiration_date": "280319",
+    "expiration_readable": "03/19/2028",
+    "gs1_datamatrix_content": "(01)003430630011300(21)SN26042902408163ZD(17)280319(10)LOT2026A040",
+    "generated_timestamp": "2026-04-29T19:35:49.781359"
+  },
+  {
+    "ndc": "0378-0827-91",
+    "gtin_14": "003003780827918",
+    "serial_number": "SN26042978010622BD",
+    "lot_number": "LOT2026C867",
+    "expiration_date": "281214",
+    "expiration_readable": "12/14/2028",
+    "gs1_datamatrix_content": "(01)003003780827918(21)SN26042978010622BD(17)281214(10)LOT2026C867",
+    "generated_timestamp": "2026-04-29T19:35:49.782508"
+  },
+  {
+    "ndc": "0093-2748-01",
+    "gtin_14": "003000932748015",
+    "serial_number": "SN26042959986315TJ",
+    "lot_number": "LOT2026F777",
+    "expiration_date": "281114",
+    "expiration_readable": "11/14/2028",
+    "gs1_datamatrix_content": "(01)003000932748015(21)SN26042959986315TJ(17)281114(10)LOT2026F777",
+    "generated_timestamp": "2026-04-29T19:35:49.783940"
+  },
+  {
+    "ndc": "0172-4339-70",
+    "gtin_14": "003001724339701",
+    "serial_number": "SN26042956957621KQ",
+    "lot_number": "LOT2026D766",
+    "expiration_date": "271021",
+    "expiration_readable": "10/21/2027",
+    "gs1_datamatrix_content": "(01)003001724339701(21)SN26042956957621KQ(17)271021(10)LOT2026D766",
+    "generated_timestamp": "2026-04-29T19:35:49.784842"
+  },
+  {
+    "ndc": "65862-0196-90",
+    "gtin_14": "003658620196909",
+    "serial_number": "SN26042973174277VE",
+    "lot_number": "LOT2026E860",
+    "expiration_date": "281015",
+    "expiration_readable": "10/15/2028",
+    "gs1_datamatrix_content": "(01)003658620196909(21)SN26042973174277VE(17)281015(10)LOT2026E860",
+    "generated_timestamp": "2026-04-29T19:35:49.785807"
+  },
+  {
+    "ndc": "43063-0239-30",
+    "gtin_14": "003430630239308",
+    "serial_number": "SN26042991067631OY",
+    "lot_number": "LOT2026C673",
+    "expiration_date": "280816",
+    "expiration_readable": "08/16/2028",
+    "gs1_datamatrix_content": "(01)003430630239308(21)SN26042991067631OY(17)280816(10)LOT2026C673",
+    "generated_timestamp": "2026-04-29T19:35:49.786710"
+  },
+  {
+    "ndc": "0378-1805-01",
+    "gtin_14": "003003781805014",
+    "serial_number": "SN26042914300119IW",
+    "lot_number": "LOT2026F242",
+    "expiration_date": "280717",
+    "expiration_readable": "07/17/2028",
+    "gs1_datamatrix_content": "(01)003003781805014(21)SN26042914300119IW(17)280717(10)LOT2026F242",
+    "generated_timestamp": "2026-04-29T19:35:49.788080"
+  }
+]

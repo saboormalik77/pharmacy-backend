@@ -382,38 +382,53 @@ export default function PoliciesPage() {
                 )}
             </div>
 
-            {/* ── Add Policy Modal ─────────────────────────── */}
+            {/* ── Add Policy Modal (shell matches buying-groups / distributors) ── */}
             {addModal && (
                 <div
-                    className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4"
+                    className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-[100] p-4 overflow-y-auto"
                     style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
                     onClick={() => setAddModal(false)}
+                    role="presentation"
                 >
                     <div
-                        className="rounded-[4px] max-w-3xl w-full shadow-xl max-h-[90vh] flex flex-col border"
+                        className="rounded-[4px] max-w-3xl w-full shadow-xl max-h-[92vh] flex flex-col border min-h-0 my-auto"
                         style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                         onClick={e => e.stopPropagation()}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="add-labeler-modal-title"
                     >
                         <div
-                            className="rounded-t-xl px-5 py-3 flex-shrink-0"
-                            style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}
+                            className="px-4 py-3 flex-shrink-0 border-b flex items-center justify-between gap-2"
+                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                         >
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <div className="p-1.5 bg-white/20 rounded-[4px]">
-                                        <Shield className="w-4 h-4 text-white" />
-                                    </div>
-                                    <h2 className="text-sm font-bold text-white">Master Labeler Information</h2>
-                                </div>
-                                <button 
-                                    onClick={() => setAddModal(false)} 
-                                    className="text-white/80 hover:text-white transition-colors cursor-pointer"
+                            <div className="flex items-center gap-3 min-w-0">
+                                <div
+                                    className="w-8 h-8 rounded-[4px] flex items-center justify-center shrink-0"
+                                    style={{ backgroundColor: 'var(--surface-container-high)' }}
                                 >
-                                    <X className="w-4 h-4" />
-                                </button>
+                                    <Shield className="w-4 h-4" style={{ color: 'var(--primary)' }} />
+                                </div>
+                                <div className="min-w-0">
+                                    <h2 id="add-labeler-modal-title" className="text-sm font-bold leading-tight" style={{ color: 'var(--foreground)' }}>
+                                        Add labeler
+                                    </h2>
+                                    <p className="text-xs mt-0.5 leading-snug" style={{ color: 'var(--on-surface-variant)' }}>
+                                        Master contact info and optional return policy details
+                                    </p>
+                                </div>
                             </div>
+                            <button
+                                type="button"
+                                onClick={() => setAddModal(false)}
+                                className="p-1 rounded hover:bg-primary-50/40 cursor-pointer shrink-0"
+                                style={{ color: 'var(--outline)' }}
+                                aria-label="Close"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
                         </div>
-                        <div className="px-5 py-4 overflow-y-auto flex-1 space-y-4">
+                        <div className="px-5 py-4 overflow-y-auto flex-1 min-h-0 space-y-4">
 
                             {/* Row 1: Labeler ID, Type, Avg Pay %, Avg Days */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -539,14 +554,26 @@ export default function PoliciesPage() {
                                 <textarea rows={3} value={newNote} onChange={e => setNewNote(e.target.value)} placeholder="e.g. 1/18/2022 - SB - norvir tricor humira creon depakote kaletra no credit per policy 1% synthroid credit if mfg s/dated" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none" />
                             </div>
 
-                            {/* ── Labeler Return Information ── */}
-                            <div className="border-2 border-blue-200 rounded-[4px] p-4 space-y-3 bg-blue-50/30">
-                                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider">Labeler Return Information</h3>
+                            {/* ── Labeler Return Information — explicit fg/on-surface (avoid low-contrast mint + Tailwind gray quirks) ── */}
+                            <div
+                                className="rounded-[4px] p-4 space-y-3 border-l-4 border border-solid"
+                                style={{
+                                    backgroundColor: 'var(--surface-container-low)',
+                                    borderColor: 'var(--outline-variant)',
+                                    borderLeftColor: 'var(--secondary)',
+                                }}
+                            >
+                                <h3
+                                    className="text-xs font-bold uppercase tracking-wider"
+                                    style={{ color: 'var(--foreground)' }}
+                                >
+                                    Labeler Return Information
+                                </h3>
 
                                 {/* Destination, Auto RA Email */}
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">Destination</label>
+                                        <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Destination</label>
                                         <div className="relative">
                                             <select
                                                 value={newReturnPolicy.destination}
@@ -558,7 +585,8 @@ export default function PoliciesPage() {
                                                         autoRaEmail: selected?.email || '',
                                                     });
                                                 }}
-                                                className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                                                className="w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border"
+                                                style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' }}
                                             >
                                                 <option value="">
                                                     {loadingDistributors ? 'Loading...' : 'Select'}
@@ -568,15 +596,15 @@ export default function PoliciesPage() {
                                                 ))}
                                             </select>
                                             {loadingDistributors && (
-                                                <Loader2 className="w-3 h-3 animate-spin absolute right-7 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                                <Loader2 className="w-3 h-3 animate-spin absolute right-7 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--outline)' }} />
                                             )}
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                                        <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>
                                             Auto RA E-Mail
                                             {newReturnPolicy.autoRaEmail && (
-                                                <span className="ml-1 text-[10px] text-blue-500 font-normal">(auto-filled)</span>
+                                                <span className="ml-1 text-[10px] font-normal" style={{ color: 'var(--secondary)' }}>(auto-filled)</span>
                                             )}
                                         </label>
                                         <input
@@ -584,7 +612,12 @@ export default function PoliciesPage() {
                                             value={newReturnPolicy.autoRaEmail}
                                             readOnly
                                             placeholder="Auto-filled from selected destination"
-                                            className="w-full px-2.5 py-1.5 text-xs border-gray-200 rounded-[4px] bg-gray-50 text-gray-600 cursor-not-allowed"
+                                            className="w-full px-2.5 py-1.5 text-xs rounded-[4px] cursor-not-allowed border"
+                                            style={{
+                                                borderColor: 'var(--outline-variant)',
+                                                backgroundColor: 'var(--surface-container-high)',
+                                                color: 'var(--foreground)',
+                                            }}
                                         />
                                     </div>
                                 </div>
@@ -592,21 +625,21 @@ export default function PoliciesPage() {
                                 {/* Policy #, Policy Description */}
                                 <div className="grid grid-cols-3 gap-3">
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">Policy #</label>
-                                        <input type="number" value={newReturnPolicy.policyNumber ?? ''} onChange={e => setNewReturnPolicy({ ...newReturnPolicy, policyNumber: e.target.value ? parseInt(e.target.value) : undefined })} placeholder="e.g. 1" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                        <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Policy #</label>
+                                        <input type="number" value={newReturnPolicy.policyNumber ?? ''} onChange={e => setNewReturnPolicy({ ...newReturnPolicy, policyNumber: e.target.value ? parseInt(e.target.value) : undefined })} placeholder="e.g. 1" className="w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' }} />
                                     </div>
                                     <div className="col-span-2">
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">Policy Description</label>
-                                        <input type="text" value={newReturnPolicy.policyDescription} onChange={e => setNewReturnPolicy({ ...newReturnPolicy, policyDescription: e.target.value })} placeholder="e.g. 6 Months Prior to 12 Months Post Drug Expiration" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                                        <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Policy Description</label>
+                                        <input type="text" value={newReturnPolicy.policyDescription} onChange={e => setNewReturnPolicy({ ...newReturnPolicy, policyDescription: e.target.value })} placeholder="e.g. 6 Months Prior to 12 Months Post Drug Expiration" className="w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' }} />
                                     </div>
                                 </div>
 
                                 {/* Discount Rate, Partials?, Reimbursement */}
                                 <div className="grid grid-cols-3 gap-3">
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                                        <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>
                                             Discount Rate
-                                            <span className="ml-1 text-[10px] text-gray-400 font-normal">0–1 fraction</span>
+                                            <span className="ml-1 text-[10px] font-normal" style={{ color: 'var(--on-surface-variant)' }}>0–1 fraction</span>
                                         </label>
                                         <input
                                             type="number"
@@ -619,10 +652,15 @@ export default function PoliciesPage() {
                                             className={`w-full px-2.5 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 ${
                                                 newReturnPolicy.discountRate != null && (newReturnPolicy.discountRate < 0 || newReturnPolicy.discountRate > 1)
                                                     ? 'border-red-400 focus:ring-red-400'
-                                                    : 'border-gray-300'
+                                                    : ''
                                             }`}
+                                            style={
+                                                newReturnPolicy.discountRate != null && (newReturnPolicy.discountRate < 0 || newReturnPolicy.discountRate > 1)
+                                                    ? undefined
+                                                    : { borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' }
+                                            }
                                         />
-                                        <p className="text-[10px] text-gray-400 mt-0.5">
+                                        <p className="text-[10px] mt-0.5" style={{ color: 'var(--on-surface-variant)' }}>
                                             {newReturnPolicy.discountRate != null && newReturnPolicy.discountRate >= 0 && newReturnPolicy.discountRate <= 1
                                                 ? `= ${(newReturnPolicy.discountRate * 100).toFixed(0)}%`
                                                 : newReturnPolicy.discountRate != null
@@ -631,27 +669,28 @@ export default function PoliciesPage() {
                                         </p>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">Partials?</label>
-                                        <select value={newReturnPolicy.partialsAccepted ? 'yes' : 'no'} onChange={e => setNewReturnPolicy({ ...newReturnPolicy, partialsAccepted: e.target.value === 'yes' })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white">
+                                        <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Partials?</label>
+                                        <select value={newReturnPolicy.partialsAccepted ? 'yes' : 'no'} onChange={e => setNewReturnPolicy({ ...newReturnPolicy, partialsAccepted: e.target.value === 'yes' })} className="w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' }}>
                                             <option value="yes">YES</option>
                                             <option value="no">NO</option>
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">Reimbursement</label>
-                                        <select value={newReturnPolicy.reimbursementType} onChange={e => setNewReturnPolicy({ ...newReturnPolicy, reimbursementType: e.target.value as 'batch' | 'per_item' })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white">
+                                        <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Reimbursement</label>
+                                        <select value={newReturnPolicy.reimbursementType} onChange={e => setNewReturnPolicy({ ...newReturnPolicy, reimbursementType: e.target.value as 'batch' | 'per_item' })} className="w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' }}>
                                             <option value="batch">BATCH</option>
                                             <option value="per_item">PER ITEM</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-1">Return window mode</label>
-                                    <p className="text-[10px] text-gray-500 mb-1">Standard: returnable inside the months-before/after window (too early → Wine Cellar). Inverted: returnable outside that window; inside → Wine Cellar until the day after the window ends.</p>
+                                    <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Return window mode</label>
+                                    <p className="text-[10px] mb-1 leading-snug" style={{ color: 'var(--on-surface-variant)' }}>Standard: returnable inside the months-before/after window (too early → Wine Cellar). Inverted: returnable outside that window; inside → Wine Cellar until the day after the window ends.</p>
                                     <select
                                         value={newReturnPolicy.returnableWithinPolicyPeriod ? 'yes' : 'no'}
                                         onChange={e => setNewReturnPolicy({ ...newReturnPolicy, returnableWithinPolicyPeriod: e.target.value === 'yes' })}
-                                        className="w-full max-w-xs px-2.5 py-1.5 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                                        className="w-full max-w-xs px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border"
+                                        style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' }}
                                     >
                                         <option value="yes">Standard — returnable in window</option>
                                         <option value="no">Inverted — Wine Cellar in window</option>
@@ -660,27 +699,38 @@ export default function PoliciesPage() {
 
                                 {/* Partial Policy Section — only when Partials = YES */}
                                 {newReturnPolicy.partialsAccepted && (
-                                    <div className="border-2 border-purple-200 rounded-[4px] p-3 space-y-3 bg-purple-50/40">
-                                        <h4 className="text-xs font-bold text-purple-800 uppercase tracking-wider">Partial Return Policy</h4>
-                                        <p className="text-[10px] text-purple-600">Configure separate policy details for partial returns</p>
+                                    <div
+                                        className="rounded-[4px] p-3 space-y-3 border"
+                                        style={{
+                                            backgroundColor: 'var(--surface-container-lowest)',
+                                            borderColor: 'var(--outline-variant)',
+                                        }}
+                                    >
+                                        <h4 className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--foreground)' }}>
+                                            Partial Return Policy
+                                        </h4>
+                                        <p className="text-[10px] leading-snug" style={{ color: 'var(--on-surface-variant)' }}>
+                                            Configure separate policy details for partial returns
+                                        </p>
 
                                         <div className="grid grid-cols-3 gap-3">
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700 mb-1">Policy #</label>
-                                                <input type="number" value={partialPolicy.policyNumber ?? ''} onChange={e => setPartialPolicy({ ...partialPolicy, policyNumber: e.target.value ? parseInt(e.target.value) : undefined })} placeholder="e.g. 2" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-purple-500" />
+                                                <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Policy #</label>
+                                                <input type="number" value={partialPolicy.policyNumber ?? ''} onChange={e => setPartialPolicy({ ...partialPolicy, policyNumber: e.target.value ? parseInt(e.target.value) : undefined })} placeholder="e.g. 2" className="w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' }} />
                                             </div>
                                             <div className="col-span-2">
-                                                <label className="block text-xs font-medium text-gray-700 mb-1">Policy Description</label>
-                                                <input type="text" value={partialPolicy.policyDescription} onChange={e => setPartialPolicy({ ...partialPolicy, policyDescription: e.target.value })} placeholder="e.g. Partial returns accepted for tablets only" className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-purple-500" />
+                                                <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Policy Description</label>
+                                                <input type="text" value={partialPolicy.policyDescription} onChange={e => setPartialPolicy({ ...partialPolicy, policyDescription: e.target.value })} placeholder="e.g. Partial returns accepted for tablets only" className="w-full px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' }} />
                                             </div>
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700 mb-1">Return window mode</label>
+                                            <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--on-surface)' }}>Return window mode</label>
                                             <select
                                                 value={partialPolicy.returnableWithinPolicyPeriod ? 'yes' : 'no'}
                                                 onChange={e => setPartialPolicy({ ...partialPolicy, returnableWithinPolicyPeriod: e.target.value === 'yes' })}
-                                                className="w-full max-w-xs px-2.5 py-1.5 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
+                                                className="w-full max-w-xs px-2.5 py-1.5 text-xs rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 border"
+                                                style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--foreground)' }}
                                             >
                                                 <option value="yes">Standard — returnable in window</option>
                                                 <option value="no">Inverted — Wine Cellar in window</option>
@@ -691,12 +741,12 @@ export default function PoliciesPage() {
                             </div>
                         </div>
                         <div
-                            className="flex justify-end gap-2 px-5 py-3 border-t flex-shrink-0"
+                            className="flex justify-end gap-2 px-4 py-3 border-t flex-shrink-0"
                             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                         >
-                            <button onClick={() => setAddModal(false)} className="px-3 py-1.5 text-xs font-medium bg-white border rounded-[4px] transition-colors" style={{ color: 'var(--on-surface)', borderColor: 'var(--outline-variant)' }}>Cancel</button>
-                            <button onClick={handleAdd} disabled={isActionLoading} className="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-[4px] disabled:opacity-50 transition-colors inline-flex items-center">
-                                {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />Creating...</> : 'Save Contact Info'}
+                            <button type="button" onClick={() => setAddModal(false)} className="px-3 py-1.5 text-xs font-medium bg-white border rounded-[4px] transition-colors hover:bg-primary-50/40 cursor-pointer" style={{ color: 'var(--on-surface)', borderColor: 'var(--outline-variant)' }}>Cancel</button>
+                            <button type="button" onClick={handleAdd} disabled={isActionLoading} className="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-[4px] disabled:opacity-50 transition-colors inline-flex items-center cursor-pointer disabled:cursor-not-allowed">
+                                {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />Creating...</> : 'Save labeler'}
                             </button>
                         </div>
                     </div>
@@ -706,7 +756,7 @@ export default function PoliciesPage() {
             {/* ── Delete Modal ──────────────────────────────── */}
             {deleteModal && (
                 <div
-                    className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4"
+                    className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-[100] p-4"
                     style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
                     onClick={() => setDeleteModal(null)}
                 >

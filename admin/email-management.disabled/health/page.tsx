@@ -62,7 +62,7 @@ export default function EmailHealthPage() {
 
   if (healthError) {
     return (
-      <div className="rounded-md bg-red-50 p-4">
+      <div className="rounded-[4px] bg-red-50 p-4">
         <div className="flex">
           <AlertTriangle className="h-5 w-5 text-red-400" />
           <div className="ml-3">
@@ -96,7 +96,7 @@ export default function EmailHealthPage() {
         <p className="mt-2 text-gray-500">No health data available</p>
         <button
           onClick={handleRefresh}
-          className="mt-4 inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+          className="mt-4 inline-flex items-center px-4 py-2 border border-gray-300 rounded-[4px] text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
         >
           <RefreshCw className="w-4 h-4 mr-2" />
           Load Health Report
@@ -121,7 +121,7 @@ export default function EmailHealthPage() {
         <button
           onClick={handleRefresh}
           disabled={healthLoading}
-          className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+          className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-[4px] text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
         >
           <RefreshCw className={`w-4 h-4 mr-2 ${healthLoading ? 'animate-spin' : ''}`} />
           Refresh
@@ -129,7 +129,7 @@ export default function EmailHealthPage() {
       </div>
 
       {/* Overall Health Status */}
-      <div className="bg-white shadow rounded-lg p-6">
+      <div className="bg-white shadow rounded-[4px] p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium text-gray-900">Overall System Health</h3>
           <HealthIndicator 
@@ -159,7 +159,7 @@ export default function EmailHealthPage() {
       </div>
 
       {/* Performance by Email Type */}
-      <div className="bg-white shadow rounded-lg p-6">
+      <div className="bg-white shadow rounded-[4px] p-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Performance by Email Type</h3>
         
         <div className="space-y-4">
@@ -167,7 +167,7 @@ export default function EmailHealthPage() {
             const typeStatus = getHealthStatus(stats.delivery_rate, stats.bounce_rate);
             
             return (
-              <div key={type} className="border border-gray-200 rounded-lg p-4">
+              <div key={type} className="border border-gray-200 rounded-[4px] p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-3">
                     <Mail className="h-5 w-5 text-gray-400" />
@@ -247,12 +247,12 @@ export default function EmailHealthPage() {
 
       {/* Recent Issues */}
       {health.recentIssues && health.recentIssues.length > 0 && (
-        <div className="bg-white shadow rounded-lg p-6">
+        <div className="bg-white shadow rounded-[4px] p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Issues</h3>
           
           <div className="space-y-3">
             {health.recentIssues.map((issue) => (
-              <div key={issue.id} className="flex items-start p-3 bg-red-50 border border-red-200 rounded-md">
+              <div key={issue.id} className="flex items-start p-3 bg-red-50 border border-red-200 rounded-[4px]">
                 <XCircle className="h-5 w-5 text-red-400 mt-0.5 mr-3 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
@@ -282,7 +282,7 @@ export default function EmailHealthPage() {
       )}
 
       {/* Recommendations */}
-      <div className="bg-white shadow rounded-lg p-6">
+      <div className="bg-white shadow rounded-[4px] p-6">
         <div className="flex items-center mb-4">
           <Lightbulb className="h-5 w-5 text-yellow-500 mr-2" />
           <h3 className="text-lg font-medium text-gray-900">Recommendations</h3>
@@ -291,7 +291,7 @@ export default function EmailHealthPage() {
         <div className="space-y-3">
           {health.recommendations && health.recommendations.length > 0 ? (
             health.recommendations.map((recommendation, index) => (
-              <div key={index} className="flex items-start p-3 bg-blue-50 border border-blue-200 rounded-md">
+              <div key={index} className="flex items-start p-3 bg-blue-50 border border-blue-200 rounded-[4px]">
                 <Lightbulb className="h-5 w-5 text-blue-400 mt-0.5 mr-3 flex-shrink-0" />
                 <p className="text-sm text-blue-800">{recommendation}</p>
               </div>
@@ -300,7 +300,7 @@ export default function EmailHealthPage() {
             <>
               {/* Generate recommendations based on stats */}
               {health.overall.delivery_rate < 85 && (
-                <div className="flex items-start p-3 bg-red-50 border border-red-200 rounded-md">
+                <div className="flex items-start p-3 bg-red-50 border border-red-200 rounded-[4px]">
                   <AlertTriangle className="h-5 w-5 text-red-400 mt-0.5 mr-3 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-red-800">Critical: Low Delivery Rate</p>
@@ -313,7 +313,7 @@ export default function EmailHealthPage() {
               )}
 
               {health.overall.bounce_rate > 5 && (
-                <div className="flex items-start p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                <div className="flex items-start p-3 bg-yellow-50 border border-yellow-200 rounded-[4px]">
                   <AlertTriangle className="h-5 w-5 text-yellow-400 mt-0.5 mr-3 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-yellow-800">Warning: High Bounce Rate</p>
@@ -326,7 +326,7 @@ export default function EmailHealthPage() {
               )}
 
               {health.overall.failed > 0 && (
-                <div className="flex items-start p-3 bg-orange-50 border border-orange-200 rounded-md">
+                <div className="flex items-start p-3 bg-orange-50 border border-orange-200 rounded-[4px]">
                   <AlertTriangle className="h-5 w-5 text-orange-400 mt-0.5 mr-3 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-orange-800">Action Required: Failed Emails</p>
@@ -339,7 +339,7 @@ export default function EmailHealthPage() {
               )}
 
               {health.overall.pending > 10 && (
-                <div className="flex items-start p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <div className="flex items-start p-3 bg-blue-50 border border-blue-200 rounded-[4px]">
                   <Clock className="h-5 w-5 text-blue-400 mt-0.5 mr-3 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-blue-800">Info: High Pending Count</p>
@@ -352,7 +352,7 @@ export default function EmailHealthPage() {
               )}
 
               {health.overall.delivery_rate >= 95 && health.overall.bounce_rate <= 2 && health.overall.failed === 0 && (
-                <div className="flex items-start p-3 bg-green-50 border border-green-200 rounded-md">
+                <div className="flex items-start p-3 bg-green-50 border border-green-200 rounded-[4px]">
                   <CheckCircle className="h-5 w-5 text-green-400 mt-0.5 mr-3 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-green-800">Excellent: System Performing Well</p>
@@ -364,7 +364,7 @@ export default function EmailHealthPage() {
               )}
 
               {/* General recommendations */}
-              <div className="flex items-start p-3 bg-gray-50 border border-gray-200 rounded-md">
+              <div className="flex items-start p-3 bg-gray-50 border border-gray-200 rounded-[4px]">
                 <Lightbulb className="h-5 w-5 text-gray-400 mt-0.5 mr-3 flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium text-gray-800">Best Practices</p>

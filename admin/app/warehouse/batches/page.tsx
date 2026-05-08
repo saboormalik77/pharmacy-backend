@@ -143,7 +143,7 @@ export default function BatchesPage() {
                     { icon: CheckCircle, bg: 'bg-blue-100', color: 'text-blue-600', label: 'Closed', value: stats.closed, valueColor: 'text-blue-600' },
                     { icon: Send, bg: 'bg-green-100', color: 'text-green-600', label: 'Submitted', value: stats.submitted, valueColor: 'text-green-600' },
                 ].map(({ icon: Icon, bg, color, label, value, valueColor }) => (
-                    <div key={label} className="bg-white rounded-lg shadow px-3 py-2">
+                    <div key={label} className="bg-white rounded-[4px] shadow px-3 py-2">
                         <div className="flex items-center gap-2">
                             <div className={`w-7 h-7 ${bg} rounded flex items-center justify-center flex-shrink-0`}><Icon className={`w-3.5 h-3.5 ${color}`} /></div>
                             <div><p className="text-[10px] text-gray-500">{label}</p><p className={`text-base font-bold ${valueColor}`}>{value}</p></div>
@@ -153,7 +153,7 @@ export default function BatchesPage() {
             </div>
 
             {/* Filters */}
-            <div className="bg-white rounded-lg shadow px-3 py-2">
+            <div className="bg-white rounded-[4px] shadow px-3 py-2">
                 <select
                     className="border border-gray-300 rounded px-2.5 py-1 text-xs focus:ring-1 focus:ring-primary-500 focus:border-transparent"
                     value={statusFilter}
@@ -164,7 +164,7 @@ export default function BatchesPage() {
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="bg-white rounded-[4px] shadow overflow-hidden">
                 {isLoading ? (
                     <div className="flex items-center justify-center py-14">
                         <Loader2 className="w-6 h-6 animate-spin text-primary-500" />
@@ -269,7 +269,7 @@ export default function BatchesPage() {
             {/* Create Batch Modal */}
             {showCreate && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowCreate(false)}>
-                    <div className="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 p-5" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] shadow-xl max-w-sm w-full mx-4 p-5" onClick={e => e.stopPropagation()}>
                         <h2 className="text-sm font-bold text-gray-900 mb-3">Create New Batch</h2>
 
                         <div className="space-y-3">

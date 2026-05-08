@@ -226,7 +226,7 @@ export default function PolicyDetailPage() {
     if (!policy) return (
         <div className="space-y-4">
             <button onClick={() => router.push('/policies')} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"><ArrowLeft className="w-4 h-4" /> Back</button>
-            <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+            <div className="bg-red-50 border border-red-200 rounded-[4px] p-6 text-center">
                 <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-3" />
                 <p className="text-red-800 font-medium">Policy not found.</p>
                 <Button variant="outline" className="mt-4" onClick={() => router.push('/policies')}>Go Back</Button>
@@ -267,7 +267,7 @@ export default function PolicyDetailPage() {
 
             {/* ── Basic Info + Metrics ──────────────────────── */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                <div className="bg-white rounded-lg shadow p-4">
+                <div className="bg-white rounded-[4px] shadow p-4">
                     <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5"><Shield className="w-3.5 h-3.5" /> Policy Info</h2>
                     <dl className="space-y-1.5 text-xs">
                         <Row label="Labeler ID" value={<span className="font-mono font-semibold">{policy.labelerId}</span>} />
@@ -279,14 +279,14 @@ export default function PolicyDetailPage() {
                     </dl>
                 </div>
 
-                <div className="bg-white rounded-lg shadow p-4">
+                <div className="bg-white rounded-[4px] shadow p-4">
                     <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> Metrics</h2>
                     <div className="grid grid-cols-2 gap-2 mb-3">
-                        <div className="bg-green-50 rounded-lg px-3 py-2 text-center">
+                        <div className="bg-green-50 rounded-[4px] px-3 py-2 text-center">
                             <p className="text-[10px] text-green-600">Avg Pay %</p>
                             <p className="text-lg font-bold text-green-800">{policy.averagePayPercent != null ? `${policy.averagePayPercent}%` : '—'}</p>
                         </div>
-                        <div className="bg-blue-50 rounded-lg px-3 py-2 text-center">
+                        <div className="bg-blue-50 rounded-[4px] px-3 py-2 text-center">
                             <p className="text-[10px] text-blue-600">Avg Days to Pay</p>
                             <p className="text-lg font-bold text-blue-800">{policy.averageDaysToPay ?? '—'}</p>
                         </div>
@@ -299,7 +299,7 @@ export default function PolicyDetailPage() {
             </div>
 
             {/* ── Return Policies ───────────────────────────── */}
-            <div className="bg-white rounded-lg shadow p-4">
+            <div className="bg-white rounded-[4px] shadow p-4">
                 <div className="flex items-center justify-between mb-3">
                     <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5" /> Return Policies ({rps.length})</h2>
                     <button onClick={() => { setRpForm({ destination: 'inmar', returnableWithinPolicyPeriod: true, partialsAccepted: false, reimbursementType: 'batch' }); setAddRPModal(true); }} className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-gray-300 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
@@ -350,7 +350,7 @@ export default function PolicyDetailPage() {
             </div>
 
             {/* ── Exceptions (Non-Returnable Products) ──────── */}
-            <div className="bg-white rounded-lg shadow p-4">
+            <div className="bg-white rounded-[4px] shadow p-4">
                 <div className="flex items-center justify-between mb-3">
                     <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5"><Ban className="w-3.5 h-3.5" /> Non-Returnable Exceptions ({excs.length})</h2>
                     <button onClick={() => setAddExcModal(true)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-gray-300 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
@@ -386,7 +386,7 @@ export default function PolicyDetailPage() {
             </div>
 
             {/* ── Notes ─────────────────────────────────────── */}
-            <div className="bg-white rounded-lg shadow p-4">
+            <div className="bg-white rounded-[4px] shadow p-4">
                 <div className="flex items-center justify-between mb-3">
                     <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5"><FileText className="w-3.5 h-3.5" /> Notes ({notes.length})</h2>
                     <button onClick={() => setAddNoteModal(true)} className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-gray-300 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
@@ -398,7 +398,7 @@ export default function PolicyDetailPage() {
                 ) : (
                     <div className="space-y-2">
                         {notes.map(n => (
-                            <div key={n.id} className="flex items-start gap-2 bg-gray-50 rounded-lg px-3 py-2">
+                            <div key={n.id} className="flex items-start gap-2 bg-gray-50 rounded-[4px] px-3 py-2">
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 text-[10px] text-gray-400 mb-0.5">
                                         <CalendarDays className="w-3 h-3" />
@@ -423,7 +423,7 @@ export default function PolicyDetailPage() {
                         <ModalField label="Labeler ID" value={editInfoForm.labelerId || ''} onChange={v => setEditInfoForm({ ...editInfoForm, labelerId: v })} />
                         <div>
                             <label className="block text-xs font-medium text-gray-700 mb-1">Type</label>
-                            <select value={editInfoForm.labelerType || 'generic'} onChange={e => setEditInfoForm({ ...editInfoForm, labelerType: e.target.value as 'generic' | 'brand' })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <select value={editInfoForm.labelerType || 'generic'} onChange={e => setEditInfoForm({ ...editInfoForm, labelerType: e.target.value as 'generic' | 'brand' })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500">
                                 <option value="generic">Generic</option><option value="brand">Brand</option>
                             </select>
                         </div>
@@ -436,10 +436,10 @@ export default function PolicyDetailPage() {
                     <ModalField label="Email" value={editInfoForm.creditRequestEmail || ''} onChange={v => setEditInfoForm({ ...editInfoForm, creditRequestEmail: v })} />
                     <div className="grid grid-cols-2 gap-3">
                         <div><label className="block text-xs font-medium text-gray-700 mb-1">Avg Pay %</label>
-                            <input type="number" step="0.1" value={editInfoForm.averagePayPercent ?? ''} onChange={e => setEditInfoForm({ ...editInfoForm, averagePayPercent: e.target.value ? parseFloat(e.target.value) : undefined })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                            <input type="number" step="0.1" value={editInfoForm.averagePayPercent ?? ''} onChange={e => setEditInfoForm({ ...editInfoForm, averagePayPercent: e.target.value ? parseFloat(e.target.value) : undefined })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
                         </div>
                         <div><label className="block text-xs font-medium text-gray-700 mb-1">Avg Days</label>
-                            <input type="number" value={editInfoForm.averageDaysToPay ?? ''} onChange={e => setEditInfoForm({ ...editInfoForm, averageDaysToPay: e.target.value ? parseInt(e.target.value) : undefined })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                            <input type="number" value={editInfoForm.averageDaysToPay ?? ''} onChange={e => setEditInfoForm({ ...editInfoForm, averageDaysToPay: e.target.value ? parseInt(e.target.value) : undefined })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
                         </div>
                     </div>
                 </div>
@@ -452,13 +452,13 @@ export default function PolicyDetailPage() {
                     <div className="grid grid-cols-2 gap-3">
                         <div>
                             <label className="block text-xs font-medium text-gray-700 mb-1">Destination <span className="text-red-500">*</span></label>
-                            <select value={rpForm.destination} onChange={e => setRpForm({ ...rpForm, destination: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <select value={rpForm.destination} onChange={e => setRpForm({ ...rpForm, destination: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500">
                                 <option value="inmar">Inmar</option><option value="qualanex">Qualanex</option><option value="pharmalink">PharmaLink</option><option value="other">Other</option>
                             </select>
                         </div>
                         <div>
                             <label className="block text-xs font-medium text-gray-700 mb-1">Reimbursement Type</label>
-                            <select value={rpForm.reimbursementType || ''} onChange={e => setRpForm({ ...rpForm, reimbursementType: (e.target.value || undefined) as any })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <select value={rpForm.reimbursementType || ''} onChange={e => setRpForm({ ...rpForm, reimbursementType: (e.target.value || undefined) as any })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500">
                                 <option value="">—</option><option value="batch">Batch</option><option value="per_item">Per Item</option>
                             </select>
                         </div>
@@ -466,10 +466,10 @@ export default function PolicyDetailPage() {
                     <ModalField label="Description" value={rpForm.policyDescription || ''} onChange={v => setRpForm({ ...rpForm, policyDescription: v })} placeholder="e.g. 6 Months Prior to 12 Months Post" />
                     <div className="grid grid-cols-3 gap-3">
                         <div><label className="block text-xs font-medium text-gray-700 mb-1">Months Before Exp.</label>
-                            <input type="number" min="0" value={rpForm.monthsBeforeExpiration ?? ''} onChange={e => setRpForm({ ...rpForm, monthsBeforeExpiration: e.target.value ? parseInt(e.target.value) : undefined })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                            <input type="number" min="0" value={rpForm.monthsBeforeExpiration ?? ''} onChange={e => setRpForm({ ...rpForm, monthsBeforeExpiration: e.target.value ? parseInt(e.target.value) : undefined })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
                         </div>
                         <div><label className="block text-xs font-medium text-gray-700 mb-1">Months After Exp.</label>
-                            <input type="number" min="0" value={rpForm.monthsAfterExpiration ?? ''} onChange={e => setRpForm({ ...rpForm, monthsAfterExpiration: e.target.value ? parseInt(e.target.value) : undefined })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                            <input type="number" min="0" value={rpForm.monthsAfterExpiration ?? ''} onChange={e => setRpForm({ ...rpForm, monthsAfterExpiration: e.target.value ? parseInt(e.target.value) : undefined })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
                         </div>
                         <div>
                             <label className="block text-xs font-medium text-gray-700 mb-1">
@@ -484,7 +484,7 @@ export default function PolicyDetailPage() {
                                 value={rpForm.discountRate ?? ''}
                                 onChange={e => setRpForm({ ...rpForm, discountRate: e.target.value ? parseFloat(e.target.value) : undefined })}
                                 placeholder="e.g. 0.30"
-                                className={`w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                                className={`w-full px-3 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 ${
                                     rpForm.discountRate != null && (rpForm.discountRate < 0 || rpForm.discountRate > 1)
                                         ? 'border-red-400 focus:ring-red-400'
                                         : 'border-gray-300'
@@ -505,7 +505,7 @@ export default function PolicyDetailPage() {
                         <select
                             value={rpForm.returnableWithinPolicyPeriod !== false ? 'yes' : 'no'}
                             onChange={e => setRpForm({ ...rpForm, returnableWithinPolicyPeriod: e.target.value === 'yes' })}
-                            className="w-full max-w-md px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            className="w-full max-w-md px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
                             <option value="yes">Standard — returnable in window</option>
                             <option value="no">Inverted — Wine Cellar in window</option>
@@ -543,7 +543,7 @@ export default function PolicyDetailPage() {
                 <div className="space-y-3">
                     <div>
                         <label className="block text-xs font-medium text-gray-700 mb-1">Note <span className="text-red-500">*</span></label>
-                        <textarea value={noteForm.noteText} onChange={e => setNoteForm({ ...noteForm, noteText: e.target.value })} rows={3} placeholder="Enter note..." className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none" />
+                        <textarea value={noteForm.noteText} onChange={e => setNoteForm({ ...noteForm, noteText: e.target.value })} rows={3} placeholder="Enter note..." className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none" />
                     </div>
                     <ModalField label="Author Initials" value={noteForm.authorInitials} onChange={v => setNoteForm({ ...noteForm, authorInitials: v })} placeholder="e.g. JD" />
                 </div>
@@ -573,7 +573,7 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
 function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
     return (
         <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={onClose}>
-            <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="bg-white rounded-[4px] max-w-lg w-full shadow-xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                 <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
                     <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
@@ -588,7 +588,7 @@ function ModalField({ label, value, onChange, placeholder, required }: { label: 
     return (
         <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">{label} {required && <span className="text-red-500">*</span>}</label>
-            <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" />
+            <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500" />
         </div>
     );
 }
@@ -607,7 +607,7 @@ function ModalFooter({ onCancel, onConfirm, loading, label }: { onCancel: () => 
 function ConfirmModal({ title, message, onCancel, onConfirm, loading }: { title: string; message: string; onCancel: () => void; onConfirm: () => void; loading: boolean }) {
     return (
         <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={onCancel}>
-            <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+            <div className="bg-white rounded-[4px] max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
                 <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
                     <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
                     <button onClick={onCancel} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>

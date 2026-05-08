@@ -80,13 +80,13 @@ export default function WarehouseSurplusPage() {
                 </div>
 
                 {/* Search */}
-                <div className="bg-white rounded-lg shadow p-3 flex gap-2">
+                <div className="bg-white rounded-[4px] shadow p-3 flex gap-2">
                     <div className="relative flex-1">
                         <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
                         <input
                             type="text"
                             placeholder="Search by NDC, product name, or location..."
-                            className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                         />
@@ -94,7 +94,7 @@ export default function WarehouseSurplusPage() {
                     {(search || statusFilter) && (
                         <button
                             onClick={() => { setSearch(''); setStatusFilter(''); }}
-                            className="px-2.5 py-1.5 text-[10px] font-medium text-gray-500 border border-gray-200 rounded-md hover:bg-gray-50"
+                            className="px-2.5 py-1.5 text-[10px] font-medium text-gray-500 border border-gray-200 rounded-[4px] hover:bg-gray-50"
                         >
                             Clear
                         </button>
@@ -102,7 +102,7 @@ export default function WarehouseSurplusPage() {
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+                <div className="flex gap-1 bg-gray-100 rounded-[4px] p-1">
                     {([
                         { label: 'All', value: '' as StatusFilter },
                         { label: 'Stored', value: 'stored' as StatusFilter },
@@ -112,7 +112,7 @@ export default function WarehouseSurplusPage() {
                         <button
                             key={tab.label}
                             onClick={() => setStatusFilter(tab.value)}
-                            className={`px-3 py-1.5 text-[11px] font-medium rounded-md transition-all ${
+                            className={`px-3 py-1.5 text-[11px] font-medium rounded-[4px] transition-all ${
                                 statusFilter === tab.value
                                     ? 'bg-white text-primary-700 shadow-sm'
                                     : 'text-gray-500 hover:text-gray-700'
@@ -124,7 +124,7 @@ export default function WarehouseSurplusPage() {
                 </div>
 
                 {/* Table */}
-                <div className="bg-white rounded-lg shadow overflow-hidden">
+                <div className="bg-white rounded-[4px] shadow overflow-hidden">
                     {isLoading ? (
                         <div className="flex items-center justify-center py-16">
                             <Loader2 className="h-5 w-5 animate-spin text-gray-400" />

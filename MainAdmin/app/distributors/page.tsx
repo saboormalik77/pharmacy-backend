@@ -139,22 +139,33 @@ export default function DistributorsPage() {
         );
     };
 
-    /* ─── Shared modal header ─── */
-    const ModalHeader = ({ title, subtitle, onClose }: { title: string; subtitle?: string; onClose: () => void }) => (
+    /* ─── Shared modal header (matches buying-groups / warehouse modals) ─── */
+    const ModalHeader = ({ title, subtitle, onClose, id }: { title: string; subtitle?: string; onClose: () => void; id?: string }) => (
         <div
-            className="rounded-t-xl px-6 py-4 flex items-center justify-between shrink-0"
-            style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}
+            className="px-4 py-3 flex items-center justify-between gap-2 shrink-0 border-b"
+            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
         >
-            <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-white/20 rounded-[4px] flex items-center justify-center">
-                    <Building2 className="w-4 h-4 text-white" />
+            <div className="flex items-center gap-3 min-w-0">
+                <div
+                    className="w-8 h-8 rounded-[4px] flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: 'var(--surface-container-high)' }}
+                >
+                    <Building2 className="w-4 h-4" style={{ color: 'var(--primary)' }} />
                 </div>
-                <div>
-                    <h3 className="font-heading text-body font-semibold text-white">{title}</h3>
-                    {subtitle && <p className="text-xs mt-0.5" style={{ color: 'var(--inverse-on-surface)' }}>{subtitle}</p>}
+                <div className="min-w-0">
+                    <h3 id={id} className="text-sm font-bold leading-tight" style={{ color: 'var(--foreground)' }}>{title}</h3>
+                    {subtitle && (
+                        <p className="text-xs mt-0.5 leading-snug" style={{ color: 'var(--on-surface-variant)' }}>{subtitle}</p>
+                    )}
                 </div>
             </div>
-            <button onClick={onClose} className="p-1.5 rounded-[4px] hover:bg-white/20 text-white/80 hover:text-white transition-colors cursor-pointer">
+            <button
+                type="button"
+                onClick={onClose}
+                className="p-1 rounded hover:bg-primary-50/40 cursor-pointer shrink-0"
+                style={{ color: 'var(--outline)' }}
+                aria-label="Close"
+            >
                 <X className="w-4 h-4" />
             </button>
         </div>
@@ -359,17 +370,21 @@ export default function DistributorsPage() {
                 {/* ─── View Modal ─── */}
                 {viewModal && (
                     <div
-                        className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-4 overflow-auto"
+                        className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm p-4 overflow-y-auto"
                         style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
                         onClick={() => setViewModal(null)}
+                        role="presentation"
                     >
                         <div
-                            className="rounded-[4px] shadow-xl w-full max-w-lg my-auto flex flex-col border"
+                            className="rounded-[4px] shadow-xl w-full max-w-lg max-h-[92vh] my-auto flex flex-col border min-h-0"
                             style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                             onClick={(e) => e.stopPropagation()}
+                            role="dialog"
+                            aria-modal="true"
+                            aria-labelledby="distributor-view-title"
                         >
-                            <ModalHeader title="Distributor Details" subtitle="View distributor information" onClose={() => setViewModal(null)} />
-                            <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4">
+                            <ModalHeader id="distributor-view-title" title="Distributor Details" subtitle="View distributor information" onClose={() => setViewModal(null)} />
+                            <div className="overflow-y-auto flex-1 min-h-0 px-5 py-4 space-y-4">
                                 {/* Banner */}
                                 <div
                                     className="rounded-[4px] border p-3 flex items-center justify-between gap-3"
@@ -399,7 +414,7 @@ export default function DistributorsPage() {
                                 </div>
                             </div>
                             <div
-                                className="flex justify-end px-5 py-3 border-t rounded-b-xl shrink-0"
+                                className="flex justify-end px-4 py-3 border-t shrink-0"
                                 style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
                             >
                                 <Button variant="outline" onClick={() => setViewModal(null)}>Close</Button>
@@ -411,17 +426,21 @@ export default function DistributorsPage() {
                 {/* ─── Add Modal ─── */}
                 {addModal && (
                     <div
-                        className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-4 overflow-auto"
+                        className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm p-4 overflow-y-auto"
                         style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
                         onClick={() => setAddModal(false)}
+                        role="presentation"
                     >
                         <div
-                            className="rounded-[4px] shadow-xl w-full max-w-xl my-auto flex flex-col border"
+                            className="rounded-[4px] shadow-xl w-full max-w-xl max-h-[92vh] my-auto flex flex-col border min-h-0"
                             style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                             onClick={(e) => e.stopPropagation()}
+                            role="dialog"
+                            aria-modal="true"
+                            aria-labelledby="distributor-add-title"
                         >
-                            <ModalHeader title="Add New Distributor" subtitle="Fill in the details to register a distributor" onClose={() => setAddModal(false)} />
-                            <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
+                            <ModalHeader id="distributor-add-title" title="Add New Distributor" subtitle="Fill in the details to register a distributor" onClose={() => setAddModal(false)} />
+                            <div className="overflow-y-auto flex-1 min-h-0 px-6 py-5 space-y-5">
                                 <div className="space-y-4">
                                     <SectionDivider label="Company Information" />
                                     <div>
@@ -461,23 +480,23 @@ export default function DistributorsPage() {
                                         <label className={labelCls} style={{ color: 'var(--on-surface-variant)' }}>Street Address <span className="text-red-500">*</span></label>
                                         <input type="text" value={newDistributor.address} onChange={(e) => setNewDistributor({ ...newDistributor, address: e.target.value })} className={inputCls} style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }} placeholder="Enter street address" />
                                     </div>
-                                    <div className="grid grid-cols-3 gap-3">
-                                        <div className="col-span-2">
+                                    <div className="grid grid-cols-1 sm:grid-cols-6 gap-3">
+                                        <div className="sm:col-span-3">
                                             <label className={labelCls} style={{ color: 'var(--on-surface-variant)' }}>City <span className="text-red-500">*</span></label>
                                             <input type="text" value={newDistributor.city} onChange={(e) => setNewDistributor({ ...newDistributor, city: e.target.value })} className={inputCls} style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }} placeholder="City" />
                                         </div>
-                                        <div>
+                                        <div className="sm:col-span-1">
                                             <label className={labelCls} style={{ color: 'var(--on-surface-variant)' }}>State <span className="text-red-500">*</span></label>
                                             <input type="text" value={newDistributor.state} onChange={(e) => setNewDistributor({ ...newDistributor, state: e.target.value })} className={inputCls} style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }} placeholder="CA" />
                                         </div>
-                                        <div>
+                                        <div className="sm:col-span-2">
                                             <label className={labelCls} style={{ color: 'var(--on-surface-variant)' }}>ZIP Code <span className="text-red-500">*</span></label>
                                             <input type="text" value={newDistributor.zipCode} onChange={(e) => setNewDistributor({ ...newDistributor, zipCode: e.target.value })} className={inputCls} style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }} placeholder="ZIP" />
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t rounded-b-xl shrink-0" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                            <div className="flex items-center justify-end gap-3 px-4 py-3 border-t shrink-0" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                                 <Button variant="outline" onClick={() => setAddModal(false)}>Cancel</Button>
                                 <Button variant="primary" onClick={handleAddDistributor} disabled={addDisabled} className="min-w-[140px]">
                                     {isLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-1.5" /> Adding...</> : <><Plus className="w-4 h-4 mr-1.5" /> Add Distributor</>}
@@ -490,17 +509,21 @@ export default function DistributorsPage() {
                 {/* ─── Edit Modal ─── */}
                 {editModal && (
                     <div
-                        className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-4 overflow-auto"
+                        className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm p-4 overflow-y-auto"
                         style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
                         onClick={() => { setEditModal(null); setEditFormData({}); }}
+                        role="presentation"
                     >
                         <div
-                            className="rounded-[4px] shadow-xl w-full max-w-xl my-auto flex flex-col border"
+                            className="rounded-[4px] shadow-xl w-full max-w-xl max-h-[92vh] my-auto flex flex-col border min-h-0"
                             style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
                             onClick={(e) => e.stopPropagation()}
+                            role="dialog"
+                            aria-modal="true"
+                            aria-labelledby="distributor-edit-title"
                         >
-                            <ModalHeader title="Edit Distributor" subtitle={`Updating: ${editModal.companyName}`} onClose={() => { setEditModal(null); setEditFormData({}); }} />
-                            <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
+                            <ModalHeader id="distributor-edit-title" title="Edit Distributor" subtitle={`Updating: ${editModal.companyName}`} onClose={() => { setEditModal(null); setEditFormData({}); }} />
+                            <div className="overflow-y-auto flex-1 min-h-0 px-6 py-5 space-y-5">
                                 <div className="space-y-4">
                                     <SectionDivider label="Company Information" />
                                     <div>
@@ -533,23 +556,23 @@ export default function DistributorsPage() {
                                         <label className={labelCls} style={{ color: 'var(--on-surface-variant)' }}>Street Address</label>
                                         <input type="text" value={editFormData.address || ''} onChange={(e) => setEditFormData({ ...editFormData, address: e.target.value })} className={inputCls} style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }} />
                                     </div>
-                                    <div className="grid grid-cols-3 gap-3">
-                                        <div className="col-span-2">
+                                    <div className="grid grid-cols-1 sm:grid-cols-6 gap-3">
+                                        <div className="sm:col-span-3">
                                             <label className={labelCls} style={{ color: 'var(--on-surface-variant)' }}>City</label>
                                             <input type="text" value={editFormData.city || ''} onChange={(e) => setEditFormData({ ...editFormData, city: e.target.value })} className={inputCls} style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }} />
                                         </div>
-                                        <div>
+                                        <div className="sm:col-span-1">
                                             <label className={labelCls} style={{ color: 'var(--on-surface-variant)' }}>State</label>
                                             <input type="text" value={editFormData.state || ''} onChange={(e) => setEditFormData({ ...editFormData, state: e.target.value })} className={inputCls} style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }} />
                                         </div>
-                                        <div>
+                                        <div className="sm:col-span-2">
                                             <label className={labelCls} style={{ color: 'var(--on-surface-variant)' }}>ZIP Code</label>
                                             <input type="text" value={editFormData.zipCode || ''} onChange={(e) => setEditFormData({ ...editFormData, zipCode: e.target.value })} className={inputCls} style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }} />
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t rounded-b-xl shrink-0" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                            <div className="flex items-center justify-end gap-3 px-4 py-3 border-t shrink-0" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                                 <Button variant="outline" onClick={() => { setEditModal(null); setEditFormData({}); }}>Cancel</Button>
                                 <Button variant="primary" onClick={handleEdit} disabled={isLoading} className="min-w-[130px]">
                                     {isLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-1.5" /> Saving...</> : 'Save Changes'}
@@ -562,7 +585,7 @@ export default function DistributorsPage() {
                 {/* ─── Deactivate Confirm ─── */}
                 {deactivateModal && (
                     <div
-                        className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm px-4"
+                        className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm px-4"
                         style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
                         onClick={() => setDeactivateModal(null)}
                     >
@@ -580,7 +603,7 @@ export default function DistributorsPage() {
                                     Are you sure you want to deactivate <strong>{deactivateModal.companyName}</strong>? This will temporarily suspend their access and deals.
                                 </p>
                             </div>
-                            <div className="flex justify-end gap-3 px-6 py-4 border-t rounded-b-xl" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                            <div className="flex justify-end gap-3 px-4 py-3 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                                 <Button variant="outline" onClick={() => setDeactivateModal(null)}>Cancel</Button>
                                 <Button variant="danger" onClick={handleDeactivate} disabled={isLoading}>
                                     {isLoading ? 'Processing...' : 'Deactivate'}
@@ -593,7 +616,7 @@ export default function DistributorsPage() {
                 {/* ─── Activate Confirm ─── */}
                 {activateModal && (
                     <div
-                        className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm px-4"
+                        className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm px-4"
                         style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
                         onClick={() => setActivateModal(null)}
                     >
@@ -611,7 +634,7 @@ export default function DistributorsPage() {
                                     Are you sure you want to activate <strong>{activateModal.companyName}</strong>? This will restore their access and allow them to create deals.
                                 </p>
                             </div>
-                            <div className="flex justify-end gap-3 px-6 py-4 border-t rounded-b-xl" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                            <div className="flex justify-end gap-3 px-4 py-3 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                                 <Button variant="outline" onClick={() => setActivateModal(null)}>Cancel</Button>
                                 <Button variant="success" onClick={handleActivate} disabled={isLoading}>
                                     {isLoading ? 'Processing...' : 'Activate'}

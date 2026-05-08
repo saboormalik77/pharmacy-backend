@@ -48,7 +48,7 @@ export function ReturnsValueChart() {
                         id="pharmacy-select"
                         value={selectedPharmacyId || ''}
                         onChange={handlePharmacyChange}
-                        className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                     >
                         <option value="">All Pharmacies</option>
                         {data?.pharmacies.map((pharmacy) => (
@@ -66,7 +66,7 @@ export function ReturnsValueChart() {
                         id="period-type-select"
                         value={selectedPeriodType}
                         onChange={handlePeriodTypeChange}
-                        className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
                     >
                         <option value="monthly">Monthly</option>
                         <option value="yearly">Yearly</option>
@@ -119,10 +119,9 @@ export function ReturnsValueChart() {
                             <Line
                                 type="monotone"
                                 dataKey="value"
-                                stroke="#4CAF50"
-                                strokeWidth={2}
-                                name="Returns Value"
-                                dot={{ fill: '#4CAF50', r: 3 }}
+stroke="#516057"
+
+                                dot={{ fill: '#516057', r: 3 }}
                                 activeDot={{ r: 5 }}
                             />
                         </LineChart>

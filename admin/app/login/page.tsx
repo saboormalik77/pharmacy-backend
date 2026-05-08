@@ -191,7 +191,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--surface)] px-4">
       <div className="w-full max-w-md">
         {/* Logo and Branding */}
         <div className="text-center mb-8">
@@ -199,10 +199,10 @@ export default function LoginPage() {
             <img
               src={branding.logoUrl}
               alt="Logo"
-              className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-contain mx-auto mb-4 block"
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-[4px] object-contain mx-auto mb-4 block"
             />
           ) : (
-            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-[#1e293b] rounded-lg mb-4 mx-auto">
+            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-[#1d2222] rounded-[4px] mb-4 mx-auto">
               <Shield className="w-8 h-8 text-white" />
             </div>
           )}
@@ -213,11 +213,11 @@ export default function LoginPage() {
         </div>
 
         {/* Login Card */}
-        <div className="bg-white rounded-lg shadow-md p-8">
+        <div className="bg-white rounded-[4px] shadow-md p-8">
           <form onSubmit={handleSubmit} className="space-y-6" noValidate>
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[4px] text-sm">
                 {error}
               </div>
             )}
@@ -234,7 +234,7 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                   placeholder="admin@buyinggroup.com"
                   required
                   autoComplete="email"
@@ -254,7 +254,7 @@ export default function LoginPage() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                  className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                   placeholder="Enter your password"
                   required
                   autoComplete="current-password"
@@ -279,13 +279,13 @@ export default function LoginPage() {
               <label className="flex items-center">
                 <input
                   type="checkbox"
-                  className="w-4 h-4 text-[#1e293b] border-gray-300 rounded focus:ring-slate-500"
+                  className="w-4 h-4 text-[#1d2222] border-gray-300 rounded focus:ring-slate-500"
                 />
                 <span className="ml-2 text-sm text-gray-600">Remember me</span>
               </label>
               <Link
                 href="/forgot-password"
-                className="text-sm text-[#1e293b] hover:text-[#334155] font-medium"
+                className="text-sm text-[#1d2222] hover:text-[#516057] font-medium"
               >
                 Forgot password?
               </Link>

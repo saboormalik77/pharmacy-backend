@@ -131,7 +131,7 @@ export default function ScheduleServiceRequestPage() {
                         </Button>
                     </div>
                     <h1 className="text-lg font-bold flex items-center gap-2">
-                        <CalendarClock className="w-3.5 h-3.5 text-[#1e293b]" />
+                        <CalendarClock className="w-3.5 h-3.5 text-[#1d2222]" />
                         {request?.status === 'scheduled' ? 'Reschedule Visit' : 'Schedule Visit'}
                     </h1>
                     <p className="text-xs text-gray-500 mt-0.5">
@@ -142,7 +142,7 @@ export default function ScheduleServiceRequestPage() {
 
             {/* Request Information */}
             {request && (
-                <div className="bg-white rounded-lg border p-6">
+                <div className="bg-white rounded-[4px] border p-6">
                     <h2 className="text-lg font-semibold mb-4">Request Details</h2>
                     <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -198,7 +198,7 @@ export default function ScheduleServiceRequestPage() {
             )}
 
             {/* Schedule Form */}
-            <div className="bg-white rounded-lg border p-6">
+            <div className="bg-white rounded-[4px] border p-6">
                 <h2 className="text-lg font-semibold mb-4">Visit Schedule</h2>
                 <div>
                     <form onSubmit={handleSubmit} className="space-y-6">
@@ -213,7 +213,7 @@ export default function ScheduleServiceRequestPage() {
                                 value={date}
                                 onChange={(e) => setDate(e.target.value)}
                                 required
-                                className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                className="w-full h-10 rounded-[4px] border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                             />
                             {request && (
                                 <div className="text-xs text-muted-foreground mt-1">
@@ -232,7 +232,7 @@ export default function ScheduleServiceRequestPage() {
                                 onChange={(e) => setNotes(e.target.value)}
                                 rows={5}
                                 maxLength={1000}
-                                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                className="w-full rounded-[4px] border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                                 placeholder="Anything the pharmacy should know..."
                             />
                             <div className="flex items-center justify-between mt-1">
@@ -247,7 +247,7 @@ export default function ScheduleServiceRequestPage() {
 
                         {/* Error Message */}
                         {err && (
-                            <div className="flex items-center gap-2 p-3 rounded-md border border-red-200 bg-red-50 text-red-800 text-sm">
+                            <div className="flex items-center gap-2 p-3 rounded-[4px] border border-red-200 bg-red-50 text-red-800 text-sm">
                                 <AlertCircle className="w-4 h-4" /> {err}
                             </div>
                         )}
@@ -282,7 +282,7 @@ export default function ScheduleServiceRequestPage() {
             </div>
 
             {/* Info */}
-            <div className="border border-teal-200 bg-teal-50/60 rounded-lg p-4">
+            <div className="border border-teal-200 bg-teal-50/60 rounded-[4px] p-4">
                 <div className="text-sm text-teal-900">
                     <strong>Note:</strong> Once you schedule this visit, the pharmacy will receive an email notification
                     with the confirmed date and any notes you've provided. The request will be marked as "scheduled" 

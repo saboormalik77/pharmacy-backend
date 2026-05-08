@@ -17,14 +17,14 @@ export default function AnalyticsLayout({ children }: { children: React.ReactNod
     const pathname = usePathname();
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-6 p-8">
             <div>
-                <h1 className="text-lg font-bold text-gray-900">Analytics & Reporting</h1>
-                <p className="text-gray-600 mt-1">Comprehensive insights, reports, and performance metrics</p>
+                <h1 className="text-lg font-medium text-gray-900" style={{ fontFamily: 'var(--font-newsreader), serif' }}>Analytics & Reporting</h1>
+                <p className="text-xs text-gray-500 mt-1">Comprehensive insights, reports, and performance metrics</p>
             </div>
 
             {/* Tab Navigation */}
-            <div className="flex gap-1 border-b overflow-x-auto pb-0">
+            <div className="flex gap-2 border-b overflow-x-auto pb-0">
                 {tabs.map((tab) => {
                     const Icon = tab.icon;
                     const isActive = pathname === tab.href;
@@ -32,13 +32,13 @@ export default function AnalyticsLayout({ children }: { children: React.ReactNod
                         <Link
                             key={tab.href}
                             href={tab.href}
-                            className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium border-b-2 transition-colors whitespace-nowrap ${
+                            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all whitespace-nowrap rounded-t-lg ${
                                 isActive
-                                    ? 'border-[#1e293b] text-[#1e293b] bg-slate-50'
+                                    ? 'border-[#516057] text-[#516057] bg-[#f5f2f1]'
                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                             }`}
                         >
-                            <Icon className="w-3.5 h-3.5" />
+                            <Icon className="w-4 h-4" />
                             {tab.label}
                         </Link>
                     );

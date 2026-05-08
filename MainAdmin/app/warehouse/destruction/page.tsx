@@ -289,28 +289,50 @@ export default function DestructionPage() {
 
       {selected && (
         <div
-          className="fixed inset-0 z-50 backdrop-blur-sm flex items-center justify-center p-4"
-          style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 45%, transparent)' }}
+          className="fixed inset-0 z-[100] backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+          style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
           onClick={() => setSelected(null)}
+          role="presentation"
         >
-          <div className="rounded-[4px] w-full max-w-lg shadow-xl border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }} onClick={(e) => e.stopPropagation()}>
-            <div className="rounded-t-xl px-4 py-3" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-white/20 rounded-[4px]">
-                    <AlertTriangle className="w-4 h-4 text-white" />
-                  </div>
-                  <h2 className="text-sm font-bold text-white">Update Destruction Record</h2>
-                </div>
-                <button 
-                  className="text-white/80 hover:text-white transition-colors cursor-pointer" 
-                  onClick={() => setSelected(null)}
+          <div
+            className="rounded-[4px] w-full max-w-lg max-h-[92vh] my-auto flex flex-col border min-h-0 shadow-xl"
+            style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="destruction-modal-title"
+          >
+            <div
+              className="px-4 py-3 flex-shrink-0 border-b flex items-center justify-between gap-2"
+              style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div
+                  className="w-8 h-8 rounded-[4px] flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: 'var(--surface-container-high)' }}
                 >
-                  <XCircle className="w-4 h-4" />
-                </button>
+                  <AlertTriangle className="w-4 h-4" style={{ color: 'var(--primary)' }} />
+                </div>
+                <div className="min-w-0">
+                  <h2 id="destruction-modal-title" className="text-sm font-bold leading-tight" style={{ color: 'var(--foreground)' }}>
+                    Update destruction record
+                  </h2>
+                  <p className="text-xs mt-0.5 leading-snug" style={{ color: 'var(--on-surface-variant)' }}>
+                    Status, vendor, schedule, and compliance fields
+                  </p>
+                </div>
               </div>
+              <button
+                type="button"
+                className="p-1 rounded hover:bg-primary-50/40 cursor-pointer shrink-0"
+                style={{ color: 'var(--outline)' }}
+                onClick={() => setSelected(null)}
+                aria-label="Close"
+              >
+                <XCircle className="w-4 h-4" />
+              </button>
             </div>
-            <div className="p-4 grid grid-cols-2 gap-3">
+            <div className="p-4 grid grid-cols-2 gap-3 overflow-y-auto flex-1 min-h-0">
               <label className="text-xs font-medium col-span-1" style={{ color: 'var(--on-surface-variant)' }}>
                 Status
                 <select
@@ -406,7 +428,7 @@ export default function DestructionPage() {
                 />
               </label>
             </div>
-            <div className="px-4 py-3 border-t rounded-b-xl flex justify-end gap-2" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+            <div className="px-4 py-3 border-t flex justify-end gap-2 flex-shrink-0" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
               <Button variant="outline" onClick={() => setSelected(null)}>
                 Cancel
               </Button>
