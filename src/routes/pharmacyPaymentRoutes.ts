@@ -23,7 +23,7 @@ const adminRouter = Router();
  * @swagger
  * tags:
  *   - name: Pharmacy Payments
- *     description: Pharmacy & GPO payout management (Module 13)
+ *     description: Pharmacy payout management (Module 13)
  */
 
 /**

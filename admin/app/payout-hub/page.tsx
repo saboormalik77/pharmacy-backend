@@ -5,7 +5,6 @@ import Link from 'next/link';
 import {
     DollarSign,
     CircleDollarSign,
-    Landmark,
     ArrowRight,
 } from 'lucide-react';
 
@@ -30,16 +29,6 @@ const payoutSections = [
         border: 'border-orange-100',
         badge: null,
     },
-    {
-        href: '/gpo-payment',
-        icon: Landmark,
-        label: 'GPO Payment',
-        description: 'Manage Group Purchasing Organization payment allocations and settlements.',
-        color: 'text-purple-600',
-        bg: 'bg-purple-50',
-        border: 'border-purple-100',
-        badge: 'Coming Soon',
-    },
 ];
 
 export default function PayoutHubPage() {
@@ -50,7 +39,7 @@ export default function PayoutHubPage() {
             <div>
                 <h1 className="text-lg font-bold text-gray-900">Payout Management</h1>
                 <p className="text-xs text-gray-500 mt-0.5">
-                    Manage pharmacy payouts, unpaid manufacturer memos, and GPO settlements.
+                    Manage pharmacy payouts and unpaid manufacturer memos.
                 </p>
             </div>
 

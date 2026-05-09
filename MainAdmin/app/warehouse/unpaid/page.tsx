@@ -644,7 +644,7 @@ export default function UnpaidMemosPage() {
                                                             type="button"
                                                             onClick={() => openEditModal(memo)}
                                                             className="inline-flex items-center gap-0.5 px-2 py-1 rounded text-[11px] font-medium border transition-colors whitespace-nowrap hover:bg-primary-50/40"
-                                                            style={{ backgroundColor: 'var(--primary-container)', color: 'var(--on-primary-container)', borderColor: 'var(--outline-variant)' }}
+                                                            style={{ backgroundColor: 'var(--primary-container)', color: 'white', borderColor: 'var(--outline-variant)' }}
                                                         >
                                                             <FileText className="w-3 h-3" /> Edit
                                                         </button>

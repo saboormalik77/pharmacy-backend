@@ -38,7 +38,6 @@ const warehouseSubRoutes = [
 const payoutSubRoutes = [
     '/pharmacy-payments',
     '/warehouse/unpaid',
-    '/gpo-payment',
 ];
 
 // Admin navigation (for super_admin, manager, reviewer, support)

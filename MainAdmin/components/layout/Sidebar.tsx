@@ -20,7 +20,6 @@ const warehouseSubRoutes = [
 const payoutSubRoutes = [
     '/pharmacy-payments',
     '/warehouse/unpaid',
-    '/gpo-payment',
 ];
 
 const sidebarLinks = [
