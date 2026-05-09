@@ -497,23 +497,23 @@ export default function ProcessorsPage() {
                 ) : (
                     <>
                         <div className="overflow-x-auto">
-                            <table className="w-full table-auto">
-                                <thead>
-                                    <tr className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
-                                        <th className="text-left px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</th>
-                                        <th className="text-left px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
-                                        <th className="text-left px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Phone</th>
-                                        <th className="text-left px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th className="text-left px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Stores</th>
-                                        <th className="text-left px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Returns</th>
-                                        <th className="text-left px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Created</th>
-                                        <th className="text-center px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                            <table className="w-full text-sm border" style={{ borderColor: '#9ca3af' }}>
+                                <thead className="bg-[#f4f5f5] border-b" style={{ borderColor: '#9ca3af', borderBottomWidth: '1.5px' }}>
+                                    <tr className="bg-[#f4f5f5]">
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Name</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Email</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Phone</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Status</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Stores</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Returns</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Created</th>
+                                        <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    {processors.map((processor, idx) => (
-                                        <tr key={processor.id} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]'} hover:bg-[#fafafa] transition-all border-b border-gray-100`}>
-                                            <td className="px-5 py-4 whitespace-nowrap">
+                                <tbody className="divide-y" style={{ borderColor: '#d1d5db' }}>
+                                    {processors.map((processor) => (
+                                        <tr key={processor.id} className="hover:bg-[#e9ebec] transition-colors" style={{ borderColor: '#d1d5db' }}>
+                                            <td className="px-3 py-3 whitespace-nowrap">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-8 h-8 bg-indigo-500 rounded-[4px] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                                                         {getInitials(processor.name)}
@@ -521,22 +521,22 @@ export default function ProcessorsPage() {
                                                     <span className="text-sm font-medium text-gray-900 truncate max-w-[140px]" title={processor.name}>{processor.name}</span>
                                                 </div>
                                             </td>
-                                            <td className="px-5 py-4 whitespace-nowrap" title={processor.email || ''}>
+                                            <td className="px-3 py-3 whitespace-nowrap" title={processor.email || ''}>
                                                 <span className="text-sm text-gray-600 truncate max-w-[180px]">
                                                     {processor.email || <span className="text-gray-400 italic">—</span>}
                                                 </span>
                                             </td>
-                                            <td className="px-5 py-4 whitespace-nowrap">
+                                            <td className="px-3 py-3 whitespace-nowrap">
                                                 <span className="text-sm text-gray-600">
                                                     {processor.phone || <span className="text-gray-400 italic">—</span>}
                                                 </span>
                                             </td>
-                                            <td className="px-5 py-4 whitespace-nowrap">
+                                            <td className="px-3 py-3 whitespace-nowrap">
                                                 <Badge variant={processor.status === 'active' ? 'success' : 'default'}>
                                                     <span className="text-xs">{processor.status}</span>
                                                 </Badge>
                                             </td>
-                                            <td className="px-5 py-4 whitespace-nowrap">
+                                            <td className="px-3 py-3 whitespace-nowrap">
                                                 <button
                                                     onClick={() => openStoresModal(processor)}
                                                     className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-medium"
@@ -545,17 +545,17 @@ export default function ProcessorsPage() {
                                                     {processor.assignedStoresCount ?? 0}
                                                 </button>
                                             </td>
-                                            <td className="px-5 py-4 whitespace-nowrap">
+                                            <td className="px-3 py-3 whitespace-nowrap">
                                                 <span className="text-xs text-gray-900 font-medium">
                                                     {processor.totalReturns ?? 0}
                                                 </span>
                                             </td>
-                                            <td className="px-5 py-4 whitespace-nowrap">
+                                            <td className="px-3 py-3 whitespace-nowrap">
                                                 <span className="text-xs text-gray-600">
                                                     {processor.createdAt ? formatDate(processor.createdAt) : '—'}
                                                 </span>
                                             </td>
-                                            <td className="px-5 py-4 whitespace-nowrap">
+                                            <td className="px-3 py-3 whitespace-nowrap">
                                                 <div className="flex items-center gap-1 justify-center">
                                                     <button onClick={() => handleView(processor)} className="p-1.5 text-gray-400 hover:text-[#516057] hover:bg-[#516057]/10 rounded-[4px] transition-colors" title="View">
                                                         <Eye className="w-3.5 h-3.5" />

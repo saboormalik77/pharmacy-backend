@@ -277,24 +277,24 @@ export default function AnalyticsPage() {
                         <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-4">
                             <h2 className="text-base font-semibold text-gray-900 mb-4">Distributor Breakdown</h2>
                             <div className="overflow-x-auto lg:overflow-x-visible">
-                                <table className="w-full table-auto">
-                                    <thead>
-                                        <tr className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
-                                            <th className="text-left px-4 py-3 text-sm font-semibold text-gray-500 uppercase tracking-wider">Distributor</th>
-                                            <th className="text-left px-4 py-3 text-sm font-semibold text-gray-500 uppercase tracking-wider">Pharmacies</th>
-                                            <th className="text-left px-4 py-3 text-sm font-semibold text-gray-500 uppercase tracking-wider">Total Returns</th>
-                                            <th className="text-left px-4 py-3 text-sm font-semibold text-gray-500 uppercase tracking-wider">Avg Return Value</th>
-                                            <th className="text-left px-4 py-3 text-sm font-semibold text-gray-500 uppercase tracking-wider">Total Value</th>
+                                <table className="w-full text-sm border" style={{ borderColor: '#9ca3af' }}>
+                                    <thead className="bg-[#f4f5f5] border-b" style={{ borderColor: '#9ca3af', borderBottomWidth: '1.5px' }}>
+                                        <tr className="bg-[#f4f5f5]">
+                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Distributor</th>
+                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Pharmacies</th>
+                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Total Returns</th>
+                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Avg Return Value</th>
+                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Total Value</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        {data.distributorBreakdown.map((distributor, idx) => (
-                                            <tr key={distributor.distributorId} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]'} hover:bg-[#fafafa] transition-all border-b border-[#e2e2e2]`}>
-                                                <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{distributor.distributorName}</td>
-                                                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{distributor.pharmaciesCount}</td>
-                                                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{formatNumber(distributor.totalReturns)}</td>
-                                                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{formatCurrency(distributor.avgReturnValue)}</td>
-                                                <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">{formatCurrency(distributor.totalValue)}</td>
+                                    <tbody className="divide-y" style={{ borderColor: '#d1d5db' }}>
+                                        {data.distributorBreakdown.map((distributor) => (
+                                            <tr key={distributor.distributorId} className="hover:bg-[#e9ebec] transition-colors" style={{ borderColor: '#d1d5db' }}>
+                                                <td className="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{distributor.distributorName}</td>
+                                                <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{distributor.pharmaciesCount}</td>
+                                                <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{formatNumber(distributor.totalReturns)}</td>
+                                                <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{formatCurrency(distributor.avgReturnValue)}</td>
+                                                <td className="px-3 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">{formatCurrency(distributor.totalValue)}</td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -308,24 +308,24 @@ export default function AnalyticsPage() {
                         <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-4">
                             <h2 className="text-base font-semibold text-gray-900 mb-4">State Breakdown</h2>
                             <div className="overflow-x-auto lg:overflow-x-visible">
-                                <table className="w-full table-auto">
-                                    <thead>
-                                        <tr className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
-                                            <th className="text-left px-4 py-3 text-sm font-semibold text-gray-500 uppercase tracking-wider">State</th>
-                                            <th className="text-left px-4 py-3 text-sm font-semibold text-gray-500 uppercase tracking-wider">Pharmacies</th>
-                                            <th className="text-left px-4 py-3 text-sm font-semibold text-gray-500 uppercase tracking-wider">Total Returns</th>
-                                            <th className="text-left px-4 py-3 text-sm font-semibold text-gray-500 uppercase tracking-wider">Avg Return Value</th>
-                                            <th className="text-left px-4 py-3 text-sm font-semibold text-gray-500 uppercase tracking-wider">Total Value</th>
+                                <table className="w-full text-sm border" style={{ borderColor: '#9ca3af' }}>
+                                    <thead className="bg-[#f4f5f5] border-b" style={{ borderColor: '#9ca3af', borderBottomWidth: '1.5px' }}>
+                                        <tr className="bg-[#f4f5f5]">
+                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">State</th>
+                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Pharmacies</th>
+                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Total Returns</th>
+                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Avg Return Value</th>
+                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Total Value</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        {data.stateBreakdown.map((state, idx) => (
-                                            <tr key={state.state} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]'} hover:bg-[#fafafa] transition-all border-b border-[#e2e2e2]`}>
-                                                <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{state.state}</td>
-                                                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{state.pharmacies}</td>
-                                                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{formatNumber(state.totalReturns)}</td>
-                                                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{formatCurrency(state.avgReturnValue)}</td>
-                                                <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">{formatCurrency(state.totalValue)}</td>
+                                    <tbody className="divide-y" style={{ borderColor: '#d1d5db' }}>
+                                        {data.stateBreakdown.map((state) => (
+                                            <tr key={state.state} className="hover:bg-[#e9ebec] transition-colors" style={{ borderColor: '#d1d5db' }}>
+                                                <td className="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{state.state}</td>
+                                                <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{state.pharmacies}</td>
+                                                <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{formatNumber(state.totalReturns)}</td>
+                                                <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{formatCurrency(state.avgReturnValue)}</td>
+                                                <td className="px-3 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">{formatCurrency(state.totalValue)}</td>
                                             </tr>
                                         ))}
                                     </tbody>

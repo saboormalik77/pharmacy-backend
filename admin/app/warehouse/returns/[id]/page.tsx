@@ -697,7 +697,8 @@ export default function ReturnDetailPage() {
 
     // ── Loading / Error States ─────────────────────────────────
 
-    if (isLoading) {
+    // Avoid flashing "not found" before the first fetch resolves.
+    if (isLoading || (!tx && !error)) {
         return (
             <div className="flex items-center justify-center min-h-96">
                 <Loader2 className="w-10 h-10 animate-spin text-primary-600" />
@@ -705,7 +706,7 @@ export default function ReturnDetailPage() {
         );
     }
 
-    if (error || !tx) {
+    if (error) {
         return (
             <div className="space-y-4">
                 <button onClick={handleBackNavigation} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800">
@@ -713,7 +714,22 @@ export default function ReturnDetailPage() {
                 </button>
                 <div className="bg-red-50 border border-red-200 rounded-[4px] p-6 text-center">
                     <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-3" />
-                    <p className="text-red-800 font-medium">{error || 'Return transaction not found.'}</p>
+                    <p className="text-red-800 font-medium">{error}</p>
+                    <Button variant="outline" className="mt-4" onClick={() => router.push('/warehouse/returns')}>Go Back</Button>
+                </div>
+            </div>
+        );
+    }
+    
+    if (!tx) {
+        return (
+            <div className="space-y-4">
+                <button onClick={handleBackNavigation} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800">
+                    <ArrowLeft className="w-4 h-4" /> Back
+                </button>
+                <div className="bg-red-50 border border-red-200 rounded-[4px] p-6 text-center">
+                    <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-3" />
+                    <p className="text-red-800 font-medium">Return transaction not found.</p>
                     <Button variant="outline" className="mt-4" onClick={() => router.push('/warehouse/returns')}>Go Back</Button>
                 </div>
             </div>
@@ -1094,37 +1110,37 @@ export default function ReturnDetailPage() {
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full table-auto">
-                            <thead>
-                                <tr className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
-                                    <th className="text-left px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">NDC</th>
-                                    <th className="text-left px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">Name</th>
-                                    <th className="text-left px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">Manufacturer</th>
-                                    <th className="text-center px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">Pkg Size</th>
-                                    <th className="text-center px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">Qty Returned</th>
-                                    <th className="text-left px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">Serial#</th>
-                                    <th className="text-left px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">Expires</th>
-                                    <th className="text-left px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th className="text-left px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">Destination</th>
-                                    <th className="text-right px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                        <table className="w-full text-sm border" style={{ borderColor: '#9ca3af' }}>
+                            <thead className="bg-[#f4f5f5] border-b" style={{ borderColor: '#9ca3af', borderBottomWidth: '1.5px' }}>
+                                <tr className="bg-[#f4f5f5]">
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">NDC</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Name</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Manufacturer</th>
+                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Pkg Size</th>
+                                    <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Qty Returned</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Serial#</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Expires</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Status</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Destination</th>
+                                    <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                {nonWcItems.map((item, idx) => {
+                            <tbody className="divide-y" style={{ borderColor: '#d1d5db' }}>
+                                {nonWcItems.map((item) => {
                                     const sBadge = getItemStatusBadge(item.returnStatus);
                                     return (
-                                        <tr key={item.id} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'} hover:bg-slate-50 transition-colors border-b border-gray-100`}>
-                                            <td className="px-4 py-3 text-sm font-mono text-gray-900">{item.ndc || '—'}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-900 max-w-[130px] truncate" title={item.proprietaryName || ''}>
+                                        <tr key={item.id} className="hover:bg-[#e9ebec] transition-colors" style={{ borderColor: '#d1d5db' }}>
+                                            <td className="px-3 py-3 text-sm font-mono text-gray-900">{item.ndc || '—'}</td>
+                                            <td className="px-3 py-3 text-sm text-gray-900 max-w-[130px] truncate" title={item.proprietaryName || ''}>
                                                 {item.proprietaryName || item.genericName || '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-gray-600 max-w-[110px] truncate" title={item.manufacturer || ''}>
+                                            <td className="px-3 py-3 text-sm text-gray-600 max-w-[110px] truncate" title={item.manufacturer || ''}>
                                                 {item.manufacturer || '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-center text-gray-900">
+                                            <td className="px-3 py-3 text-sm text-center text-gray-900">
                                                 {item.fullPackageSize || '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-center text-gray-900">
+                                            <td className="px-3 py-3 text-sm text-center text-gray-900">
                                                 {(() => {
                                                     const qtyReturned = item.fullPackageQtyReturned ?? item.quantityReturned ?? item.quantity;
                                                     const fullPkgQty = item.fullPackageQtyReturned ?? item.quantityReturned;

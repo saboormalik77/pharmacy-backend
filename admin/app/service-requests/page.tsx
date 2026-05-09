@@ -177,11 +177,10 @@ export default function ServiceRequestsPage() {
                         <button
                             key={s.value}
                             onClick={() => dispatch(setStatusFilter(s.value))}
-                            className={`px-3 py-1 text-xs rounded border transition-colors ${
-                                statusFilter === s.value
-                                    ? 'bg-[#1d2222] text-white border-[#1d2222]'
-                                    : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
-                            }`}
+                            className={`px-3 py-1 text-xs rounded border transition-colors ${statusFilter === s.value
+                                ? 'bg-[#1d2222] text-white border-[#1d2222]'
+                                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                                }`}
                         >
                             {s.label}
                         </button>
@@ -215,25 +214,26 @@ export default function ServiceRequestsPage() {
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full table-auto">
-                            <thead>
-                                <tr className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Pharmacy</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Requested</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Scheduled</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Status</th>
-                                    {!isProcessor && <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Rep</th>}
-                                    <th className="text-right px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Actions</th>
+                        <table className="w-full text-sm border" style={{ borderColor: '#9ca3af' }}>
+                            <thead className="bg-[#f4f5f5] border-b" style={{ borderColor: '#9ca3af', borderBottomWidth: '1.5px' }}>
+                                <tr className="bg-[#f4f5f5]">
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Pharmacy</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Requested</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Scheduled</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Status</th>
+                                    {!isProcessor && <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Rep</th>}
+                                    <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                {items.map((r, idx) => (
+                            <tbody className="divide-y" style={{ borderColor: '#d1d5db' }}>
+                                {items.map((r) => (
                                     <tr
                                         key={r.id}
-                                        className={`${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'} hover:bg-slate-50 transition-colors border-b border-gray-100 cursor-pointer`}
+                                        className="hover:bg-[#e9ebec] transition-colors cursor-pointer"
+                                        style={{ borderColor: '#d1d5db' }}
                                         onClick={() => setActive(r)}
                                     >
-                                        <td className="px-4 py-3">
+                                        <td className="px-3 py-3">
                                             <div className="text-sm text-gray-900 font-medium">
                                                 {r.pharmacy_business_name || r.pharmacy_name || '—'}
                                             </div>
@@ -243,17 +243,17 @@ export default function ServiceRequestsPage() {
                                                 </div>
                                             )}
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600">{formatDate(r.requested_date)}</td>
-                                        <td className="px-4 py-3 text-sm text-gray-600">
+                                        <td className="px-3 py-3 text-sm text-gray-600">{formatDate(r.requested_date)}</td>
+                                        <td className="px-3 py-3 text-sm text-gray-600">
                                             {r.scheduled_date ? formatDate(r.scheduled_date) : <span className="text-gray-400">—</span>}
                                         </td>
-                                        <td className="px-4 py-3">{getStatusBadge(r.status)}</td>
+                                        <td className="px-3 py-3">{getStatusBadge(r.status)}</td>
                                         {!isProcessor && (
-                                            <td className="px-4 py-3 text-sm text-gray-600">
+                                            <td className="px-3 py-3 text-sm text-gray-600">
                                                 {r.claimed_processor_name || <span className="text-gray-400">Unclaimed</span>}
                                             </td>
                                         )}
-                                        <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                                        <td className="px-3 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                                             <ActionButtons
                                                 r={r}
                                                 isProcessor={isProcessor}
@@ -476,7 +476,7 @@ function DetailModal({
                             <div className="flex flex-wrap gap-2">
                                 {r.assigned_processors.map((p) => (
                                     <span key={p.processor_id}
-                                          className="text-[11px] bg-gray-100 text-gray-700 rounded px-2 py-1">
+                                        className="text-[11px] bg-gray-100 text-gray-700 rounded px-2 py-1">
                                         {p.name || p.email || p.processor_id.slice(0, 6)}
                                     </span>
                                 ))}
@@ -521,29 +521,29 @@ function DetailModal({
                         <>
                             {r.status === 'pending' && (
                                 <button onClick={() => router.push(`/service-requests/${r.id}/schedule`)} disabled={isActing}
-                                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1d2222] text-white hover:bg-[#3d4343] disabled:opacity-50 transition-colors">
+                                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1d2222] text-white hover:bg-[#3d4343] disabled:opacity-50 transition-colors">
                                     <Play className="w-3.5 h-3.5" /> Claim & Schedule
                                 </button>
                             )}
                             {r.status === 'scheduled' && r.is_claimed_by_me && (
                                 <>
                                     <button onClick={onRelease} disabled={isActing}
-                                            className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                                        className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
                                         <RotateCcw className="w-3.5 h-3.5 mr-1 inline" /> Release
                                     </button>
                                     <button onClick={() => router.push(`/service-requests/${r.id}/schedule`)} disabled={isActing}
-                                            className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                                        className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
                                         <Calendar className="w-3.5 h-3.5 mr-1 inline" /> Reschedule
                                     </button>
                                     <button onClick={onComplete} disabled={isActing}
-                                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1d2222] text-white hover:bg-[#3d4343] disabled:opacity-50 transition-colors">
+                                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1d2222] text-white hover:bg-[#3d4343] disabled:opacity-50 transition-colors">
                                         <CheckSquare className="w-3.5 h-3.5" /> Complete
                                     </button>
                                 </>
                             )}
                             {!['completed', 'cancelled'].includes(r.status) && (r.is_claimed_by_me || r.status === 'pending') && (
                                 <button onClick={onCancel} disabled={isActing}
-                                        className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                                    className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
                                     <Ban className="w-3.5 h-3.5 mr-1 inline" /> Cancel
                                 </button>
                             )}
@@ -551,7 +551,7 @@ function DetailModal({
                     ) : (
                         !['completed', 'cancelled'].includes(r.status) && (
                             <button onClick={onReassign} disabled={isActing}
-                                    className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                                className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
                                 <User className="w-3.5 h-3.5 mr-1 inline" /> Reassign
                             </button>
                         )
@@ -613,11 +613,11 @@ function CompleteModal({ request, isActing, onClose, onSubmit }: {
                     </div>
                     <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50 -mx-4 -mb-3">
                         <button type="button" onClick={onClose} disabled={isActing}
-                                className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                            className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
                             Cancel
                         </button>
                         <button type="submit" disabled={isActing}
-                                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1d2222] text-white hover:bg-[#3d4343] disabled:opacity-50 transition-colors">
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1d2222] text-white hover:bg-[#3d4343] disabled:opacity-50 transition-colors">
                             {isActing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Mark Complete'}
                         </button>
                     </div>

@@ -357,33 +357,33 @@ function PharmaciesPageContent() {
 
                         {!invitesLoading && pendingInvites.length > 0 && (
                             <div className="overflow-x-auto">
-                                <table className="w-full table-auto">
-                                    <thead>
-                                        <tr className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
-                                            <th className="text-left px-3 py-2 font-semibold text-gray-500 uppercase tracking-wider">Pharmacy</th>
-                                            <th className="text-left px-3 py-2 font-semibold text-gray-500 uppercase tracking-wider">Email</th>
-                                            <th className="text-left px-3 py-2 font-semibold text-gray-500 uppercase tracking-wider">Contact</th>
-                                            <th className="text-left px-3 py-2 font-semibold text-gray-500 uppercase tracking-wider">Sent</th>
-                                            <th className="text-left px-3 py-2 font-semibold text-gray-500 uppercase tracking-wider">Expires</th>
-                                            <th className="text-left px-3 py-2 font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                                <table className="w-full text-sm border" style={{ borderColor: '#9ca3af' }}>
+                                    <thead className="bg-[#f4f5f5] border-b" style={{ borderColor: '#9ca3af', borderBottomWidth: '1.5px' }}>
+                                        <tr className="bg-[#f4f5f5]">
+                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Pharmacy</th>
+                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Email</th>
+                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Contact</th>
+                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Sent</th>
+                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Expires</th>
+                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        {pendingInvites.map((invite, index) => {
+                                    <tbody className="divide-y" style={{ borderColor: '#d1d5db' }}>
+                                        {pendingInvites.map((invite) => {
                                             const expiresAt = new Date(invite.expires_at);
                                             const isExpiringSoon = expiresAt.getTime() - Date.now() < 24 * 60 * 60 * 1000;
                                             return (
-                                                <tr key={invite.id} className={`${index % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]'} hover:bg-[#fafafa] transition-colors border-b border-[#e2e2e2]`}>
-                                                    <td className="px-3 py-2 text-xs font-medium text-gray-900">{invite.pharmacy_name}</td>
-                                                    <td className="px-3 py-2 text-xs text-gray-500">{invite.email}</td>
-                                                    <td className="px-3 py-2 text-xs text-gray-500">{invite.contact_name || '—'}</td>
-                                                    <td className="px-3 py-2 text-xs text-gray-500">{new Date(invite.created_at).toLocaleDateString()}</td>
-                                                    <td className="px-3 py-2">
-                                                        <span className={`text-xs flex items-center gap-1 ${isExpiringSoon ? 'text-orange-600' : 'text-gray-500'}`}>
+                                                <tr key={invite.id} className="hover:bg-[#e9ebec] transition-colors" style={{ borderColor: '#d1d5db' }}>
+                                                    <td className="px-3 py-3 text-sm font-medium text-gray-900">{invite.pharmacy_name}</td>
+                                                    <td className="px-3 py-3 text-sm text-gray-500">{invite.email}</td>
+                                                    <td className="px-3 py-3 text-sm text-gray-500">{invite.contact_name || '—'}</td>
+                                                    <td className="px-3 py-3 text-sm text-gray-500">{new Date(invite.created_at).toLocaleDateString()}</td>
+                                                    <td className="px-3 py-3">
+                                                        <span className={`text-sm flex items-center gap-1 ${isExpiringSoon ? 'text-orange-600' : 'text-gray-500'}`}>
                                                             <Clock className="w-3 h-3" />{expiresAt.toLocaleDateString()}
                                                         </span>
                                                     </td>
-                                                    <td className="px-3 py-2">
+                                                    <td className="px-3 py-3">
                                                         <button onClick={() => setCancelInviteModal(invite)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-[4px] transition-all" title="Cancel Invite">
                                                             <Trash2 className="w-4 h-4" />
                                                         </button>
@@ -432,33 +432,33 @@ function PharmaciesPageContent() {
                 ) : (
                     <>
                         <div className="overflow-x-auto lg:overflow-x-visible">
-                            <table className="w-full table-auto">
-                                <thead>
-                                    <tr className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
-                                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Business Name</th>
-                                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
-                                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Total Returns</th>
-                                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <table className="w-full text-sm border" style={{ borderColor: '#9ca3af' }}>
+                                <thead className="bg-[#f4f5f5] border-b" style={{ borderColor: '#9ca3af', borderBottomWidth: '1.5px' }}>
+                                    <tr className="bg-[#f4f5f5]">
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Business Name</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Owner</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Contact</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Location</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Status</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Total Returns</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    {pharmacies.map((pharmacy, index) => (
-                                        <tr key={pharmacy.id} className={`${index % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]'} hover:bg-[#fafafa] transition-all border-b border-[#e2e2e2]`}>
-                                            <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{pharmacy.businessName}</td>
-                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{pharmacy.owner}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-500">
+                                <tbody className="divide-y" style={{ borderColor: '#d1d5db' }}>
+                                    {pharmacies.map((pharmacy) => (
+                                        <tr key={pharmacy.id} className="hover:bg-[#e9ebec] transition-colors" style={{ borderColor: '#d1d5db' }}>
+                                            <td className="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{pharmacy.businessName}</td>
+                                            <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{pharmacy.owner}</td>
+                                            <td className="px-3 py-3 text-sm text-gray-500">
                                                 <div className="leading-normal">{pharmacy.email}</div>
                                                 <div className="text-gray-500 text-sm leading-normal">{pharmacy.phone}</div>
                                             </td>
-                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{pharmacy.city}, {pharmacy.state}</td>
-                                            <td className="px-4 py-3 whitespace-nowrap">
+                                            <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{pharmacy.city}, {pharmacy.state}</td>
+                                            <td className="px-3 py-3 whitespace-nowrap">
                                                 <Badge variant={getStatusVariant(pharmacy.status)}>{pharmacy.status}</Badge>
                                             </td>
-                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{pharmacy.totalReturns}</td>
-                                            <td className="px-4 py-3 whitespace-nowrap text-xs">
+                                            <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-900">{pharmacy.totalReturns}</td>
+                                            <td className="px-3 py-3 whitespace-nowrap text-xs">
                                                 <div className="flex items-center gap-1">
                                                     <button
                                                         onClick={() => setViewModal(pharmacy)}
@@ -858,7 +858,7 @@ function PharmaciesPageContent() {
             {/* Create Pharmacy Modal */}
             {createModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-3" onClick={() => !isCreating && setCreateModal(false)}>
-                    <div className="bg-white rounded-[4px] max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                    <div className="bg-white rounded-[4px] max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between px-6 py-5 border-b border-[#e2e2e2] bg-gray-50">
                             <h2 className="text-xs font-medium text-gray-900" style={{ fontFamily: 'var(--font-newsreader), serif' }}>Add New Pharmacy</h2>
                             <button onClick={() => !isCreating && setCreateModal(false)} className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-[4px] transition-all">
@@ -866,7 +866,7 @@ function PharmaciesPageContent() {
                             </button>
                         </div>
 
-                        <div className="px-6 py-5 space-y-5">
+                        <div className="px-6 py-5 space-y-5 overflow-y-auto">
                             {createError && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-1 rounded-[4px] text-xs">{createError}</div>}
                             {createSuccess && <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-1 rounded-[4px] text-xs">{createSuccess}</div>}
 
@@ -975,7 +975,7 @@ function PharmaciesPageContent() {
                             </div>
                         </div>
 
-                        <div className="flex justify-end gap-3 px-6 py-5 border-t border-[#e2e2e2] bg-gray-50">
+                        <div className="flex justify-end gap-3 px-6 py-5 border-t border-[#e2e2e2] bg-gray-50 flex-shrink-0">
                             <button onClick={() => setCreateModal(false)} disabled={isCreating} className="px-4 py-1 text-xs rounded-[4px] border border-[#e2e2e2] text-gray-700 hover:bg-white transition-all">Cancel</button>
                             <button onClick={handleCreatePharmacy} disabled={isCreating || !createForm.pharmacyName.trim() || !createForm.email.trim()} className="inline-flex items-center gap-2 px-4 py-1 text-xs rounded-[4px] bg-[#516057] text-white hover:opacity-90 disabled:opacity-50 transition-all">
                                 {isCreating ? <><Loader2 className="w-4 h-4 animate-spin" />Creating...</> : 'Create & Send Invite'}

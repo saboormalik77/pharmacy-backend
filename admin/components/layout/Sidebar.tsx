@@ -18,7 +18,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useAppSelector } from '@/lib/store/hooks';
 import { usePermissions } from '@/hooks/usePermissions';
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { fetchSettings } from '@/lib/store/settingsSlice';
 import { useAppDispatch } from '@/lib/store/hooks';
 
@@ -88,10 +88,40 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose, onToggleCollapse
     const { user } = useAppSelector((state) => state.auth);
     const { hasPermission, isSuperAdmin } = usePermissions();
     const { settings } = useAppSelector((state) => state.settings);
+    const [cachedBranding, setCachedBranding] = useState<{ businessName: string | null; logoUrl: string | null } | null>(null);
 
     useEffect(() => {
         dispatch(fetchSettings());
     }, [dispatch]);
+
+    // Processors may not have access to /admin/settings, but login flow stores
+    // buying-group branding in localStorage as "adminBranding".
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        try {
+            const stored = window.localStorage.getItem('adminBranding');
+            if (!stored) return;
+            const parsed = JSON.parse(stored);
+            setCachedBranding({
+                businessName: typeof parsed?.businessName === 'string' ? parsed.businessName : null,
+                logoUrl: typeof parsed?.logoUrl === 'string' ? parsed.logoUrl : null,
+            });
+        } catch {
+            // ignore
+        }
+    }, []);
+
+    const headerBusinessName = settings?.businessName ?? cachedBranding?.businessName ?? null;
+    const headerLogoUrl = settings?.logoUrl ?? cachedBranding?.logoUrl ?? null;
+    const headerInitials = useMemo(() => {
+        const name = headerBusinessName?.trim();
+        if (!name) return 'PA';
+        const parts = name.split(/\s+/).filter(Boolean);
+        const a = parts[0]?.[0] || '';
+        const b = parts.length > 1 ? (parts[1]?.[0] || '') : (parts[0]?.[1] || '');
+        const initials = (a + b).toUpperCase();
+        return initials || 'PA';
+    }, [headerBusinessName]);
 
     // Choose navigation links based on user role, filtered by permissions
     const rawLinks = user?.role === 'processor' ? processorSidebarLinks : adminSidebarLinks;
@@ -132,11 +162,17 @@ export function Sidebar({ isCollapsed, isOpen = false, onClose, onToggleCollapse
                             {settings?.logoUrl ? (
                                 <img src={settings.logoUrl} alt="Logo" className="w-8 h-8 rounded-[4px] object-contain" />
                             ) : (
-                                <div className="w-8 h-8 bg-[#516057] rounded-[4px] flex items-center justify-center">
-                                    <span className="text-white font-bold text-xs">PA</span>
-                                </div>
+                                <>
+                                    {headerLogoUrl ? (
+                                        <img src={headerLogoUrl} alt="Logo" className="w-8 h-8 rounded-[4px] object-contain" />
+                                    ) : (
+                                        <div className="w-8 h-8 bg-[#516057] rounded-[4px] flex items-center justify-center">
+                                            <span className="text-white font-bold text-xs">{headerInitials}</span>
+                                        </div>
+                                    )}
+                                </>
                             )}
-                            <span className="text-sm font-bold text-white">{settings?.businessName || 'PharmAdmin'}</span>
+                            <span className="text-sm font-bold text-white">{headerBusinessName || 'PharmAdmin'}</span>
                         </div>
                         <button
                             onClick={() => {

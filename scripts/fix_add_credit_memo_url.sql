@@ -8,36 +8,34 @@ ALTER TABLE debit_memos
 CREATE OR REPLACE FUNCTION _debit_memo_to_json(d debit_memos)
 RETURNS jsonb LANGUAGE sql STABLE AS $$
   SELECT jsonb_build_object(
-    'id',                  d.id,
-    'batchId',             d.batch_id,
-    'pharmacyId',          d.pharmacy_id,
-    'pharmacyName',        (SELECT pharmacy_name FROM pharmacy WHERE id = d.pharmacy_id),
-    'memoNumber',          d.memo_number,
-    'destination',         d.destination,
-    'labelerId',           d.labeler_id,
-    'labelerName',         d.labeler_name,
-    'totalItems',          d.total_items,
-    'totalAskValue',       d.total_ask_value,
-    'totalReceivedValue',  d.total_received_value,
-    'raNumber',            d.ra_number,
-    'raRequestedAt',       d.ra_requested_at,
-    'raReceivedAt',        d.ra_received_at,
-    'raStatus',            d.ra_status,
-    'ticklerDate',         d.tickler_date,
-    'baggieManifest',      d.baggie_manifest,
-    'outboundTracking',    d.outbound_tracking,
-    'shippedAt',           d.shipped_at,
-    'paymentStatus',       d.payment_status,
-    'amountRequested',     d.amount_requested,
-    'amountReceived',      d.amount_received,
-    'paymentReceivedAt',   d.payment_received_at,
-    'paymentReference',    d.payment_reference,
-    'paymentNotes',        d.payment_notes,
-    'fedexLabels',         d.fedex_labels,
-    'creditMemoUrl',       d.credit_memo_url,
-    'shipmentGroupId',     d.shipment_group_id,
-    'createdAt',           d.created_at,
-    'updatedAt',           d.updated_at
+    'id',                  $1.id,
+    'batchId',             $1.batch_id,
+    'pharmacyId',          $1.pharmacy_id,
+    'pharmacyName',        (SELECT pharmacy_name FROM pharmacy WHERE id = $1.pharmacy_id),
+    'memoNumber',          $1.memo_number,
+    'destination',         $1.destination,
+    'labelerId',           $1.labeler_id,
+    'labelerName',         $1.labeler_name,
+    'totalItems',          $1.total_items,
+    'totalAskValue',       $1.total_ask_value,
+    'totalReceivedValue',  $1.total_received_value,
+    'raNumber',            $1.ra_number,
+    'raRequestedAt',       $1.ra_requested_at,
+    'raReceivedAt',        $1.ra_received_at,
+    'raStatus',            $1.ra_status,
+    'ticklerDate',         $1.tickler_date,
+    'baggieManifest',      $1.baggie_manifest,
+    'outboundTracking',    $1.outbound_tracking,
+    'shippedAt',           $1.shipped_at,
+    'paymentStatus',       $1.payment_status,
+    'amountRequested',     $1.amount_requested,
+    'amountReceived',      $1.amount_received,
+    'paymentReceivedAt',   $1.payment_received_at,
+    'paymentReference',    $1.payment_reference,
+    'paymentNotes',        $1.payment_notes,
+    'creditMemoUrl',       $1.credit_memo_url,
+    'createdAt',           $1.created_at,
+    'updatedAt',           $1.updated_at
   );
 $$;
 
@@ -65,10 +63,9 @@ BEGIN
   END IF;
 
   -- Determine payment status based on amounts
-  IF p_amount_received >= v_memo.amount_requested AND v_memo.amount_requested > 0 THEN
+  -- Always mark as 'paid' if any amount is received, regardless of whether it matches the requested amount
+  IF p_amount_received > 0 THEN
     v_status := 'paid';
-  ELSIF p_amount_received > 0 THEN
-    v_status := 'partial';
   ELSE
     v_status := 'pending';
   END IF;

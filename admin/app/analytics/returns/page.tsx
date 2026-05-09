@@ -219,27 +219,27 @@ if (loading) {
                 <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                     <h2 className="text-base font-semibold text-gray-900 mb-4">Status Breakdown</h2>
                     <div className="overflow-x-auto">
-                        <table className="w-full table-auto">
-                            <thead className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
+                        <table className="w-full text-sm border" style={{ borderColor: '#9ca3af' }}>
+                            <thead className="bg-[#f4f5f5] border-b" style={{ borderColor: '#9ca3af', borderBottomWidth: '1.5px' }}>
                                 <tr>
-                                    <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th className="px-5 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Count</th>
-                                    <th className="px-5 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Value</th>
-                                    <th className="px-5 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">% of Total</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Status</th>
+                                    <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Count</th>
+                                    <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Total Value</th>
+                                    <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">% of Total</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {byStatus.map((row, idx) => (
-                                    <tr key={row.status} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]'} hover:bg-[#fafafa] transition-all`}>
-                                        <td className="px-5 py-4 text-base">
+                            <tbody className="divide-y" style={{ borderColor: '#d1d5db' }}>
+                                {byStatus.map((row) => (
+                                    <tr key={row.status} className="hover:bg-[#e9ebec] transition-colors" style={{ borderColor: '#d1d5db' }}>
+                                        <td className="px-3 py-3 text-sm">
                                             <span className="inline-flex items-center gap-2">
                                                 <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: STATUS_COLORS[row.status] || '#6b7280' }} />
                                                 {row.status.replace(/_/g, ' ')}
                                             </span>
                                         </td>
-                                        <td className="px-5 py-4 text-base text-right font-medium">{formatNumber(row.count)}</td>
-                                        <td className="px-5 py-4 text-base text-right">{formatCurrency(row.totalReturnableValue)}</td>
-                                        <td className="px-5 py-4 text-base text-right">
+                                        <td className="px-3 py-3 text-sm text-right font-medium">{formatNumber(row.count)}</td>
+                                        <td className="px-3 py-3 text-sm text-right">{formatCurrency(row.totalReturnableValue)}</td>
+                                        <td className="px-3 py-3 text-sm text-right">
                                             {overall.totalReturns > 0 ? ((row.count / overall.totalReturns) * 100).toFixed(1) : 0}%
                                         </td>
                                     </tr>

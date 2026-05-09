@@ -7,6 +7,7 @@ import {
   updateDebitMemoHandler,
   downloadDebitMemoPdfHandler,
   downloadDebitMemoSummaryHandler,
+  analyzeCreditMemoHandler,
 } from '../controllers/debitMemoController';
 import {
   requestRAHandler,
@@ -406,6 +407,54 @@ router.post('/:id/create-fedex-shipment', createDebitMemoFedexShipmentHandler);
  *         description: No shipment exists yet
  */
 router.post('/:id/schedule-pickup', scheduleDebitMemoPickupHandler);
+
+/**
+ * @swagger
+ * /api/admin/debit-memos/{id}/analyze-credit-memo:
+ *   post:
+ *     summary: Analyze credit memo PDF and calculate matched amount
+ *     tags: [Payment Tracking]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *         description: Debit memo ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required: [creditMemo]
+ *             properties:
+ *               creditMemo: { type: string, format: binary, description: Credit memo PDF file }
+ *     responses:
+ *       200:
+ *         description: Analysis result with total matched amount
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status: { type: string }
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     totalAmount: { type: number, nullable: true }
+ *                     confidence: { type: number }
+ *                     analysisStatus: { type: string }
+ *                     manufacturerName: { type: string, nullable: true }
+ *                     lineItemsCount: { type: number }
+ *                     errorMessage: { type: string, nullable: true }
+ *       400:
+ *         description: Credit memo file is required
+ *       404:
+ *         description: Debit memo not found
+ */
+router.post('/:id/analyze-credit-memo', upload.single('creditMemo') as any, analyzeCreditMemoHandler);
 
 /**
  * @swagger

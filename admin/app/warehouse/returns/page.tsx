@@ -349,34 +349,34 @@ export default function ReturnsPage() {
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full table-auto">
-                            <thead>
-                                <tr className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
-                                    <th className="text-left px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">License Plate</th>
-                                    <th className="text-left px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">Store</th>
-                                    <th className="text-left px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th className="text-left px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">Items</th>
-                                    <th className="text-left px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th className="text-right px-5 py-4 text-sm font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                        <table className="w-full text-sm border" style={{ borderColor: '#9ca3af' }}>
+                            <thead className="bg-[#f4f5f5] border-b" style={{ borderColor: '#9ca3af', borderBottomWidth: '1.5px' }}>
+                                <tr className="bg-[#f4f5f5]">
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">License Plate</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Store</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Status</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Items</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Date</th>
+                                    <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                {transactions.map((tx, idx) => {
+                            <tbody className="divide-y" style={{ borderColor: '#d1d5db' }}>
+                                {transactions.map((tx) => {
                                     const badge = getStatusBadge(tx.status);
                                     return (
-                                        <tr key={tx.id} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]'} hover:bg-[#fafafa] transition-all border-b border-gray-100 cursor-pointer`} onClick={() => router.push(`/warehouse/returns/${tx.id}`)}>
-                                            <td className="px-5 py-4">
+                                        <tr key={tx.id} className="hover:bg-[#e9ebec] transition-colors cursor-pointer" style={{ borderColor: '#d1d5db' }} onClick={() => router.push(`/warehouse/returns/${tx.id}`)}>
+                                            <td className="px-3 py-3">
                                                 <span className="text-base font-mono font-semibold text-gray-900">{tx.licensePlate}</span>
                                             </td>
-                                            <td className="px-5 py-4">
+                                            <td className="px-3 py-3">
                                                 <p className="text-base font-medium text-gray-900 truncate max-w-[160px]">{tx.pharmacyName || '—'}</p>
                                             </td>
-                                            <td className="px-5 py-4">
+                                            <td className="px-3 py-3">
                                                 <Badge variant={badge.variant}><span className="text-xs">{badge.label}</span></Badge>
                                             </td>
-                                            <td className="px-5 py-4 text-base text-gray-600">{tx.totalItems}</td>
-                                            <td className="px-5 py-4 text-base text-gray-600">{formatDate(tx.createdAt)}</td>
-                                            <td className="px-5 py-4" onClick={e => e.stopPropagation()}>
+                                            <td className="px-3 py-3 text-base text-gray-600">{tx.totalItems}</td>
+                                            <td className="px-3 py-3 text-base text-gray-600">{formatDate(tx.createdAt)}</td>
+                                            <td className="px-3 py-3" onClick={e => e.stopPropagation()}>
                                                 <div className="flex items-center justify-end gap-1">
                                                     <button onClick={() => setViewModal(tx)} className="p-2 text-gray-400 hover:text-[#516057] hover:bg-[#516057]/10 rounded transition-colors" title="View Details">
                                                         <Eye className="w-4 h-4" />
