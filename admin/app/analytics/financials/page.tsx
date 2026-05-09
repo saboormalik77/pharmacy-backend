@@ -179,28 +179,28 @@ export default function FinancialsPage() {
                             <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                                 <h2 className="text-base font-semibold text-gray-900 mb-4">Details</h2>
                                 <div className="overflow-x-auto">
-                                    <table className="w-full table-auto">
-                                        <thead className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
+                                    <table className="w-full text-sm border" style={{ borderColor: '#9ca3af' }}>
+                                        <thead className="bg-[#f4f5f5] border-b" style={{ borderColor: '#9ca3af', borderBottomWidth: '1.5px' }}>
                                             <tr>
-                                                <th className="px-5 py-4 text-left text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">
                                                     {avrGroupBy === 'ndc' ? 'NDC' : avrGroupBy === 'destination' ? 'Destination' : 'Manufacturer'}
                                                 </th>
-                                                <th className="px-5 py-4 text-right text-sm font-semibold text-gray-500 uppercase tracking-wider">Ask</th>
-                                                <th className="px-5 py-4 text-right text-sm font-semibold text-gray-500 uppercase tracking-wider">Received</th>
-                                                <th className="px-5 py-4 text-right text-sm font-semibold text-gray-500 uppercase tracking-wider">Difference</th>
-                                                <th className="px-5 py-4 text-right text-sm font-semibold text-gray-500 uppercase tracking-wider">Pay %</th>
+                                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Ask</th>
+                                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Received</th>
+                                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Difference</th>
+                                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Pay %</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-gray-100">
-                                            {avrData.data.map((row, idx) => (
-                                                <tr key={idx} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]'} hover:bg-[#fafafa] transition-all`}>
-                                                    <td className="px-5 py-4 text-base font-medium text-gray-900">
+                                        <tbody className="divide-y" style={{ borderColor: '#d1d5db' }}>
+                                            {avrData.data.map((row) => (
+                                                <tr key={row.labelerName || row.ndc || row.destination} className="hover:bg-[#e9ebec] transition-colors" style={{ borderColor: '#d1d5db' }}>
+                                                    <td className="px-3 py-3 text-sm font-medium text-gray-900">
                                                         {avrGroupBy === 'ndc' ? row.ndc : avrGroupBy === 'destination' ? row.destination : row.labelerName}
                                                     </td>
-                                                    <td className="px-5 py-4 text-base text-right">{formatCurrency(row.totalAsk ?? row.totalAskValue ?? 0)}</td>
-                                                    <td className="px-5 py-4 text-base text-right text-green-600">{formatCurrency(row.totalReceived)}</td>
-                                                    <td className="px-5 py-4 text-base text-right text-red-600">{formatCurrency(row.difference)}</td>
-                                                    <td className="px-5 py-4 text-base text-right">
+                                                    <td className="px-3 py-3 text-sm text-right">{formatCurrency(row.totalAsk ?? row.totalAskValue ?? 0)}</td>
+                                                    <td className="px-3 py-3 text-sm text-right text-green-600">{formatCurrency(row.totalReceived)}</td>
+                                                    <td className="px-3 py-3 text-sm text-right text-red-600">{formatCurrency(row.difference)}</td>
+                                                    <td className="px-3 py-3 text-sm text-right">
                                                         <span className={`font-medium ${row.payPercent >= 90 ? 'text-green-600' : row.payPercent >= 70 ? 'text-yellow-600' : 'text-red-600'}`}>
                                                             {row.payPercent}%
                                                         </span>
@@ -289,28 +289,28 @@ export default function FinancialsPage() {
                             <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
                                 <h2 className="text-base font-semibold text-gray-900 mb-4">Unpaid Memo Details</h2>
                                 <div className="overflow-x-auto">
-                                    <table className="w-full table-auto">
-                                        <thead className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
+                                    <table className="w-full text-sm border" style={{ borderColor: '#9ca3af' }}>
+                                        <thead className="bg-[#f4f5f5] border-b" style={{ borderColor: '#9ca3af', borderBottomWidth: '1.5px' }}>
                                             <tr>
-                                                <th className="px-5 py-4 text-left text-sm font-semibold text-gray-500 uppercase tracking-wider">Memo #</th>
-                                                <th className="px-5 py-4 text-left text-sm font-semibold text-gray-500 uppercase tracking-wider">Manufacturer</th>
-                                                <th className="px-5 py-4 text-left text-sm font-semibold text-gray-500 uppercase tracking-wider">Pharmacy</th>
-                                                <th className="px-5 py-4 text-right text-sm font-semibold text-gray-500 uppercase tracking-wider">Requested</th>
-                                                <th className="px-5 py-4 text-right text-sm font-semibold text-gray-500 uppercase tracking-wider">Received</th>
-                                                <th className="px-5 py-4 text-right text-sm font-semibold text-gray-500 uppercase tracking-wider">Outstanding</th>
-                                                <th className="px-5 py-4 text-right text-sm font-semibold text-gray-500 uppercase tracking-wider">Days</th>
+                                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Memo #</th>
+                                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Manufacturer</th>
+                                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Pharmacy</th>
+                                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Requested</th>
+                                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Received</th>
+                                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Outstanding</th>
+                                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Days</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-gray-100">
-                                            {unpaidData.data.map((item, idx) => (
-                                                <tr key={item.id} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'} hover:bg-slate-50`}>
-                                                    <td className="px-4 py-3 text-sm font-mono">{item.memoNumber}</td>
-                                                    <td className="px-4 py-3 text-sm">{item.labelerName}</td>
-                                                    <td className="px-4 py-3 text-sm">{item.pharmacyName}</td>
-                                                    <td className="px-4 py-3 text-sm text-right">{formatCurrency(item.amountRequested)}</td>
-                                                    <td className="px-4 py-3 text-sm text-right text-green-600">{formatCurrency(item.amountReceived)}</td>
-                                                    <td className="px-4 py-3 text-sm text-right text-red-600 font-medium">{formatCurrency(item.outstandingAmount)}</td>
-                                                    <td className="px-4 py-3 text-sm text-right">
+                                        <tbody className="divide-y" style={{ borderColor: '#d1d5db' }}>
+                                            {unpaidData.data.map((item) => (
+                                                <tr key={item.id} className="hover:bg-[#e9ebec] transition-colors" style={{ borderColor: '#d1d5db' }}>
+                                                    <td className="px-3 py-3 text-sm font-mono">{item.memoNumber}</td>
+                                                    <td className="px-3 py-3 text-sm">{item.labelerName}</td>
+                                                    <td className="px-3 py-3 text-sm">{item.pharmacyName}</td>
+                                                    <td className="px-3 py-3 text-sm text-right">{formatCurrency(item.amountRequested)}</td>
+                                                    <td className="px-3 py-3 text-sm text-right text-green-600">{formatCurrency(item.amountReceived)}</td>
+                                                    <td className="px-3 py-3 text-sm text-right text-red-600 font-medium">{formatCurrency(item.outstandingAmount)}</td>
+                                                    <td className="px-3 py-3 text-sm text-right">
                                                         <span className={`${item.daysOutstanding > 180 ? 'text-red-600 font-bold' : item.daysOutstanding > 90 ? 'text-orange-600' : ''}`}>
                                                             {item.daysOutstanding}
                                                         </span>

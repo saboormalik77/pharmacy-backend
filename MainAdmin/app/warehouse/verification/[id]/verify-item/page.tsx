@@ -909,7 +909,7 @@ export default function VerifyItemPage() {
                                             verifyStatus === status.value 
                                                 ? status.color === 'green' 
                                                     ? 'border-green-400 bg-green-50 shadow-sm' 
-                                                    : 'border-[var(--error)] bg-[var(--error-container)] shadow-sm'
+                                                    : 'border-red-400 bg-red-50 shadow-sm'
                                                 : 'border-[var(--outline-variant)] hover:border-[var(--outline-variant)] hover:bg-[var(--surface-container-low)]'
                                         }`}>
                                             <input 
@@ -918,16 +918,16 @@ export default function VerifyItemPage() {
                                                 value={status.value} 
                                                 checked={verifyStatus === status.value} 
                                                 onChange={() => setVerifyStatus(status.value)} 
-                                                className={status.color === 'green' ? 'text-[var(--status-success)]' : 'text-[var(--error)]'} 
+                                                className={status.color === 'green' ? 'text-green-600' : 'text-red-600'} 
                                             />
                                             <Icon className={`w-4 h-4 ${
                                                 verifyStatus === status.value 
-                                                    ? status.color === 'green' ? 'text-[var(--status-success)]' : 'text-[var(--error)]'
+                                                    ? status.color === 'green' ? 'text-green-600' : 'text-red-600'
                                                     : 'text-[var(--outline)]'
                                             }`} />
                                             <span className={`text-sm font-semibold ${
                                                 verifyStatus === status.value 
-                                                    ? status.color === 'green' ? 'text-[var(--on-secondary-container)]' : 'text-red-700'
+                                                    ? status.color === 'green' ? 'text-green-800' : 'text-red-800'
                                                     : 'text-[var(--on-surface)]'
                                             }`}>
                                                 {status.label}
@@ -1012,9 +1012,9 @@ export default function VerifyItemPage() {
                         {(verifyStatus === 'damaged' || verifyStatus === 'missing' || verifyStatus === 'wrong_item') && (
                             <div className="p-4 rounded-[4px] border border-red-300 bg-gradient-to-br from-red-50 to-red-100/50 shadow-sm">
                                 <div className="flex items-center gap-2 mb-2.5">
-                                    <AlertTriangle className="w-4 h-4 text-[var(--error)]" />
-                                    <label className="text-sm font-semibold text-[var(--on-error-container)]">
-                                        Non-Returnable Reason <span className="text-[var(--error)]">*</span>
+                                    <AlertTriangle className="w-4 h-4 text-red-600" />
+                                    <label className="text-sm font-semibold text-red-800">
+                                        Non-Returnable Reason <span className="text-red-600">*</span>
                                     </label>
                                 </div>
                                 <p className="text-xs text-red-700 mb-3 leading-relaxed">
@@ -1023,7 +1023,7 @@ export default function VerifyItemPage() {
                                 <select
                                     value={nonReturnableReason}
                                     onChange={e => setNonReturnableReason(e.target.value)}
-                                    className="w-full px-3 py-2.5 text-sm border border-red-300 rounded-[4px] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--error)] shadow-sm cursor-pointer"
+                                    className="w-full px-3 py-2.5 text-sm border border-red-300 rounded-[4px] bg-white focus:outline-none focus:ring-2 focus:ring-red-500 shadow-sm cursor-pointer"
                                 >
                                     <option value="">— Select a reason —</option>
                                     {NON_RETURNABLE_REASONS.map(r => (
@@ -1053,7 +1053,7 @@ export default function VerifyItemPage() {
                                         <div className="text-sm space-y-2" style={{ color: 'var(--on-surface)' }}>
                                             <p>
                                                 <span className="font-medium">Policy Status:</span>{' '}
-                                                <span className={policyResult.status === 'returnable' ? 'text-[var(--on-secondary-container)] font-semibold' : policyResult.status === 'non_returnable' ? 'text-red-700 font-semibold' : 'text-amber-700 font-semibold'}>
+                                                <span className={policyResult.status === 'returnable' ? 'text-green-800 font-semibold' : policyResult.status === 'non_returnable' ? 'text-red-800 font-semibold' : 'text-amber-800 font-semibold'}>
                                                     {policyResult.status.replace('_', ' ')}
                                                 </span>
                                             </p>
@@ -1082,13 +1082,13 @@ export default function VerifyItemPage() {
                                         <div className="grid grid-cols-2 gap-3">
                                             <div className={`p-4 border-2 rounded-[4px] ${policyResult.status === 'returnable' ? 'border-green-400 bg-green-50' : 'border-[var(--outline-variant)] bg-[var(--surface-container)]'}`}>
                                                 <input type="radio" checked={policyResult.status === 'returnable'} disabled className="mr-2" />
-                                                <span className={`text-sm font-medium ${policyResult.status === 'returnable' ? 'text-[var(--on-secondary-container)]' : 'text-[var(--on-surface-variant)]'}`}>
+                                                <span className={`text-sm font-medium ${policyResult.status === 'returnable' ? 'text-green-800' : 'text-gray-600'}`}>
                                                     ✓ Returnable
                                                 </span>
                                             </div>
-                                            <div className={`p-4 border-2 rounded-[4px] ${policyResult.status === 'non_returnable' ? 'border-[var(--error)] bg-[var(--error-container)]' : 'border-[var(--outline-variant)] bg-[var(--surface-container)]'}`}>
+                                            <div className={`p-4 border-2 rounded-[4px] ${policyResult.status === 'non_returnable' ? 'border-red-400 bg-red-50' : 'border-[var(--outline-variant)] bg-[var(--surface-container)]'}`}>
                                                 <input type="radio" checked={policyResult.status === 'non_returnable'} disabled className="mr-2" />
-                                                <span className={`text-sm font-medium ${policyResult.status === 'non_returnable' ? 'text-red-700' : 'text-[var(--on-surface-variant)]'}`}>
+                                                <span className={`text-sm font-medium ${policyResult.status === 'non_returnable' ? 'text-red-800' : 'text-gray-600'}`}>
                                                     ✗ Non-Returnable
                                                 </span>
                                             </div>
@@ -1140,7 +1140,7 @@ export default function VerifyItemPage() {
                                                 </div>
                                             </label>
                                             <label className={`flex items-center gap-2 p-4 border-2 rounded-[4px] cursor-pointer transition-colors ${
-                                                returnStatus === 'non_returnable' ? 'border-[var(--error)] bg-[var(--error-container)]' : 'border-[var(--outline-variant)] hover:border-[var(--outline-variant)]'
+                                                returnStatus === 'non_returnable' ? 'border-red-400 bg-red-50' : 'border-[var(--outline-variant)] hover:border-[var(--outline-variant)]'
                                             }`}>
                                                 <input 
                                                     type="radio" 
@@ -1151,10 +1151,10 @@ export default function VerifyItemPage() {
                                                         setReturnStatus('non_returnable');
                                                         setDisposition(nonReturnableRoute);
                                                     }} 
-                                                    className="text-[var(--error)] focus:ring-[var(--error)]" 
+                                                    className="text-red-600 focus:ring-red-500" 
                                                 />
                                                 <div>
-                                                    <p className="text-sm font-medium text-red-700">
+                                                    <p className="text-sm font-medium text-red-800">
                                                         <Ban className="w-4 h-4 inline mr-1" />Non-Returnable
                                                     </p>
                                                 </div>
@@ -1164,13 +1164,13 @@ export default function VerifyItemPage() {
                                         {returnStatus === 'returnable' && (
                                             <div>
                                                 <label className="block text-sm font-medium mb-2" style={{ color: 'var(--on-surface)' }}>
-                                                    Destination <span className="text-[var(--error)]">*</span>
+                                                    Destination <span className="text-red-600">*</span>
                                                 </label>
                                                 <select 
                                                     value={manualDestination} 
                                                     onChange={e => setManualDestination(e.target.value)} 
                                                     className={`w-full px-3 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                                                        !manualDestination.trim() ? 'border-red-300 bg-[var(--error-container)]' : 'border-[var(--outline-variant)]'
+                                                        !manualDestination.trim() ? 'border-red-300 bg-red-50' : 'border-[var(--outline-variant)]'
                                                     }`}
                                                     disabled={loadingDistributors}
                                                 >
@@ -1184,7 +1184,7 @@ export default function VerifyItemPage() {
                                                     ))}
                                                 </select>
                                                 {!manualDestination.trim() && (
-                                                    <p className="text-xs text-[var(--error)] mt-1">Destination is required to save this item.</p>
+                                                    <p className="text-xs text-red-600 mt-1">Destination is required to save this item.</p>
                                                 )}
                                             </div>
                                         )}
@@ -1210,7 +1210,7 @@ export default function VerifyItemPage() {
                                                             <span className="text-sm font-medium text-[var(--on-tertiary-container)]">Wine Cellar</span>
                                                         </label>
                                                         <label className={`flex items-center gap-2 p-3 border rounded-[4px] cursor-pointer ${
-                                                            nonReturnableRoute === 'destruction' ? 'border-[var(--error)] bg-[var(--error-container)]' : 'border-[var(--outline-variant)]'
+                                                            nonReturnableRoute === 'destruction' ? 'border-red-400 bg-red-50' : 'border-[var(--outline-variant)]'
                                                         }`}>
                                                             <input 
                                                                 type="radio" 
@@ -1223,15 +1223,15 @@ export default function VerifyItemPage() {
                                                                     }
                                                                 }} 
                                                             />
-                                                            <Ban className="w-4 h-4 text-[var(--error)]" />
-                                                            <span className="text-sm font-medium text-[var(--on-error-container)]">Destruction</span>
+                                                            <Ban className="w-4 h-4 text-red-600" />
+                                                            <span className="text-sm font-medium text-red-800">Destruction</span>
                                                         </label>
                                                     </div>
                                                 </div>
 
                                                 <div>
                                                     <label className="block text-sm font-medium mb-2" style={{ color: 'var(--on-surface)' }}>
-                                                        Non-Returnable Reason <span className="text-[var(--error)]">*</span>
+                                                        Non-Returnable Reason <span className="text-red-600">*</span>
                                                     </label>
                                                     {nonReturnableRoute === 'wine_cellar' ? (
                                                         <div className="p-3 rounded-[4px] border border-[var(--outline-variant)] bg-[var(--surface-container-low)]">
@@ -1246,7 +1246,7 @@ export default function VerifyItemPage() {
                                                         <select
                                                             value={nonReturnableReason}
                                                             onChange={e => setNonReturnableReason(e.target.value)}
-                                                            className="w-full px-3 py-2 text-sm border rounded-[4px] bg-[var(--surface-container-lowest)] focus:outline-none focus:ring-2 focus:ring-[var(--error)]"
+                                                            className="w-full px-3 py-2 text-sm border rounded-[4px] bg-[var(--surface-container-lowest)] focus:outline-none focus:ring-2 focus:ring-red-500"
                                                             style={{ borderColor: 'var(--outline-variant)', color: 'var(--on-surface)' }}
                                                         >
                                                             <option value="">— Select a reason —</option>
@@ -1277,7 +1277,7 @@ export default function VerifyItemPage() {
                                 {policyResult && policyResult.status === 'non_returnable' && (
                                     <div className="space-y-2 pt-2 border-t border-[var(--outline-variant)]">
                                         <label className="block text-sm font-medium" style={{ color: 'var(--on-surface)' }}>
-                                            Non-Returnable Reason <span className="text-[var(--error)]">*</span>
+                                            Non-Returnable Reason <span className="text-red-600">*</span>
                                         </label>
                                         {disposition === 'wine_cellar' ? (
                                             <div className="p-3 rounded-[4px] border border-[var(--outline-variant)] bg-[var(--surface-container-low)]">
@@ -1292,7 +1292,7 @@ export default function VerifyItemPage() {
                                             <select
                                                 value={nonReturnableReason}
                                                 onChange={e => setNonReturnableReason(e.target.value)}
-                                                className="w-full px-3 py-2 text-sm border rounded-[4px] bg-[var(--surface-container-lowest)] focus:outline-none focus:ring-2 focus:ring-[var(--error)]"
+                                                className="w-full px-3 py-2 text-sm border rounded-[4px] bg-[var(--surface-container-lowest)] focus:outline-none focus:ring-2 focus:ring-red-500"
                                                 style={{ borderColor: 'var(--outline-variant)', color: 'var(--on-surface)' }}
                                             >
                                                 <option value="">— Select a reason —</option>

@@ -215,25 +215,26 @@ export default function ServiceRequestsPage() {
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full table-auto">
-                            <thead>
-                                <tr className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Pharmacy</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Requested</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Scheduled</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Status</th>
-                                    {!isProcessor && <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Rep</th>}
-                                    <th className="text-right px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Actions</th>
+                        <table className="w-full text-sm border" style={{ borderColor: '#9ca3af' }}>
+                            <thead className="bg-[#f4f5f5] border-b" style={{ borderColor: '#9ca3af', borderBottomWidth: '1.5px' }}>
+                                <tr className="bg-[#f4f5f5]">
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Pharmacy</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Requested</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Scheduled</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Status</th>
+                                    {!isProcessor && <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Rep</th>}
+                                    <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                {items.map((r, idx) => (
+                            <tbody className="divide-y" style={{ borderColor: '#d1d5db' }}>
+                                {items.map((r) => (
                                     <tr
                                         key={r.id}
-                                        className={`${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'} hover:bg-slate-50 transition-colors border-b border-gray-100 cursor-pointer`}
+                                        className="hover:bg-[#e9ebec] transition-colors cursor-pointer"
+                                        style={{ borderColor: '#d1d5db' }}
                                         onClick={() => setActive(r)}
                                     >
-                                        <td className="px-4 py-3">
+                                        <td className="px-3 py-3">
                                             <div className="text-sm text-gray-900 font-medium">
                                                 {r.pharmacy_business_name || r.pharmacy_name || '—'}
                                             </div>
@@ -243,17 +244,17 @@ export default function ServiceRequestsPage() {
                                                 </div>
                                             )}
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600">{formatDate(r.requested_date)}</td>
-                                        <td className="px-4 py-3 text-sm text-gray-600">
+                                        <td className="px-3 py-3 text-sm text-gray-600">{formatDate(r.requested_date)}</td>
+                                        <td className="px-3 py-3 text-sm text-gray-600">
                                             {r.scheduled_date ? formatDate(r.scheduled_date) : <span className="text-gray-400">—</span>}
                                         </td>
-                                        <td className="px-4 py-3">{getStatusBadge(r.status)}</td>
+                                        <td className="px-3 py-3">{getStatusBadge(r.status)}</td>
                                         {!isProcessor && (
-                                            <td className="px-4 py-3 text-sm text-gray-600">
+                                            <td className="px-3 py-3 text-sm text-gray-600">
                                                 {r.claimed_processor_name || <span className="text-gray-400">Unclaimed</span>}
                                             </td>
                                         )}
-                                        <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                                        <td className="px-3 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                                             <ActionButtons
                                                 r={r}
                                                 isProcessor={isProcessor}
