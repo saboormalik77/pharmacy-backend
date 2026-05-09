@@ -386,8 +386,8 @@ function parseTablesForAskReceived(
       if (isTotalsRow(row)) continue;
 
       const ndc = sanitizeNdc(row[cols.ndc]);
-      const ask = parseMoney(row[cols.ask]);
-      const recv = parseMoney(row[cols.received]);
+      let ask = parseMoney(row[cols.ask]);
+      let recv = parseMoney(row[cols.received]);
 
       if (!ndc) continue;
       if (ask == null || recv == null) continue;
@@ -402,6 +402,14 @@ function parseTablesForAskReceived(
           ? (row[cols.product] || '').trim() || null
           : null;
       const qty = cols.qty != null ? parseQuantity(row[cols.qty]) : null;
+
+      // CRITICAL: Convert to unit prices if quantity > 1
+      // If the table shows extended prices (total = qty × unit_price), we need unit prices
+      // to match how askPrice and receivedPrice are stored in debit memo items
+      if (qty && qty > 1) {
+        ask = ask / qty;
+        recv = recv / qty;
+      }
 
       const ratio = ask > 0 ? Math.round((recv / ask) * 10000) / 100 : null;
 

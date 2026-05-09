@@ -288,13 +288,23 @@ D. PRODUCT NAME — brand or generic name matches partially (case-insensitive,
 
 WHAT TO EXTRACT
 ---------------
-For each match, extract the RECEIVED PRICE = the dollar amount the manufacturer
-credited / paid / allowed / approved / accepted for that item.
-Common column / label names: "Credit Amount", "Credit", "Allowed", "Approved",
-"Net Credit", "Amount", "Total", "Payment", "Paid", "Reimbursement", "Settlement".
+For each match, extract the RECEIVED PRICE = the UNIT PRICE (per-item price) the
+manufacturer credited / paid / allowed / approved / accepted for that item.
 
-If a line has multiple dollar columns, pick the FINAL credited amount
-(usually the rightmost number in the row, after qty × unit price).
+CRITICAL: Always extract the UNIT PRICE, NOT the extended/total line price.
+- If the credit memo shows "Qty: 5" and "Total Credit: $50.00", the receivedPrice is $10.00 (50÷5).
+- If the credit memo shows "Unit Price: $10.00" and "Extended: $50.00", use $10.00.
+- If only a total amount is shown with quantity, DIVIDE to get the unit price.
+- The receivedPrice must represent the credit for ONE unit, matching how askPrice is stored.
+
+Common column / label names for total: "Credit Amount", "Credit", "Allowed", "Approved",
+"Net Credit", "Amount", "Total", "Payment", "Paid", "Reimbursement", "Settlement", "Extended".
+Common column / label names for unit price: "Unit Price", "Price", "Unit Credit", "Each".
+
+If a line has multiple dollar columns:
+1. First look for a dedicated UNIT PRICE column — use that directly.
+2. If only TOTAL/EXTENDED is shown, DIVIDE by the quantity to get unit price.
+3. If quantity is 1 or not specified, the total equals the unit price.
 
 RULES
 -----
@@ -308,6 +318,8 @@ RULES
 7. If the credit memo has line items but you cannot confidently link them to
    debit items, still include them with the NDC / product name as written
    in the credit memo and matchMethod = "product_name" with confidence 40.
+8. ALWAYS return UNIT PRICE in receivedPrice, NOT total/extended price.
+   If credit memo shows Qty=10 and Total=$100, receivedPrice must be $10.00 (100÷10).
 
 OUTPUT FORMAT
 -------------
@@ -325,6 +337,7 @@ Return ONLY valid JSON — no extra text, no markdown fences:
     {
       "ndc": "45802-012-85",
       "productName": "Drug Name",
+      "quantity": 5,
       "askPrice": 12.50,
       "receivedPrice": 11.20,
       "confidence": 95,
@@ -332,6 +345,10 @@ Return ONLY valid JSON — no extra text, no markdown fences:
     }
   ]
 }
+
+IMPORTANT: receivedPrice and askPrice are ALWAYS the UNIT PRICE (per single item).
+If credit memo shows Qty=5 and Total Credit=$56.00, then receivedPrice = 56÷5 = $11.20.
+Never return the extended/total price as receivedPrice.
 
 confidence is 0-100. Use 95 for ndc_exact, 75 for ndc_partial, 60 for product_name.
 If no matches found in this chunk return: {"manufacturerName": null, "totalCredit": null, "matches": []}
@@ -675,8 +692,11 @@ const _analyzeAndMatchCreditMemoInner = async (input: {
     }
   });
 
+  // IMPORTANT: Always use sum of unit prices for totalAmount
+  // The AI's collectedTotalCredit is the document's extended total, but since
+  // we're extracting unit prices, we must sum those instead for consistency.
   const sumFromItems = lineItems.reduce((acc, it) => acc + (it.receivedPrice || 0), 0);
-  const totalAmount = collectedTotalCredit ?? (sumFromItems > 0 ? sumFromItems : null);
+  const totalAmount = sumFromItems > 0 ? sumFromItems : collectedTotalCredit;
 
   if (lineItems.length === 0) {
     return {
