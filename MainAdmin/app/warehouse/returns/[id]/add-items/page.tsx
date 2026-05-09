@@ -982,7 +982,7 @@ export default function AddItemsPage() {
             </div>
 
             {/* Classification Result (after save) */}
-            {lastClassification && (
+            {/* {lastClassification && (
                 <div className={`rounded-[4px] border px-3 py-2 ${
                     lastClassification.wineCellarItem ? 'bg-[var(--tertiary-container)] border-[var(--tertiary)]' :
                     lastClassification.status === 'returnable' ? 'bg-green-50 border-green-300' :
@@ -1048,7 +1048,7 @@ export default function AddItemsPage() {
                         </button>
                     </div>
                 </div>
-            )}
+            )} */}
 
             {/* Product Form */}
             <div className="bg-[var(--surface-container-lowest)] rounded-[4px] shadow px-4 py-3">

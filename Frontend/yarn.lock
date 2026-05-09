@@ -51,17 +51,17 @@
   resolved "https://registry.npmjs.org/@img/colour/-/colour-1.0.0.tgz"
   integrity sha512-A5P/LfWGFSl6nsckYtjw9da+19jB8hkJ6ACTGcDfEJ0aE+l2n2El7dsVM7UVHZQ9s2lmYMWlrS21YLy2IR1LUw==
 
-"@img/sharp-darwin-x64@0.34.5":
-  version "0.34.5"
-  resolved "https://registry.npmjs.org/@img/sharp-darwin-x64/-/sharp-darwin-x64-0.34.5.tgz"
-  integrity sha512-YNEFAF/4KQ/PeW0N+r+aVVsoIY0/qxxikF2SWdp+NRkmMB7y9LBZAVqQ4yhGCm/H3H270OSykqmQMKLBhBJDEw==
-  optionalDependencies:
-    "@img/sharp-libvips-darwin-x64" "1.2.4"
-
-"@img/sharp-libvips-darwin-x64@1.2.4":
+"@img/sharp-libvips-linux-x64@1.2.4":
   version "1.2.4"
-  resolved "https://registry.npmjs.org/@img/sharp-libvips-darwin-x64/-/sharp-libvips-darwin-x64-1.2.4.tgz"
-  integrity sha512-1IOd5xfVhlGwX+zXv2N93k0yMONvUlANylbJw1eTah8K/Jtpi15KC+WSiaX/nBmbm2HxRM1gZ0nSdjSsrZbGKg==
+  resolved "https://registry.npmjs.org/@img/sharp-libvips-linux-x64/-/sharp-libvips-linux-x64-1.2.4.tgz"
+  integrity sha512-tJxiiLsmHc9Ax1bz3oaOYBURTXGIRDODBqhveVHonrHJ9/+k89qbLl0bcJns+e4t4rvaNBxaEZsFtSfAdquPrw==
+
+"@img/sharp-linux-x64@0.34.5":
+  version "0.34.5"
+  resolved "https://registry.npmjs.org/@img/sharp-linux-x64/-/sharp-linux-x64-0.34.5.tgz"
+  integrity sha512-MEzd8HPKxVxVenwAa+JRPwEC7QFjoPWuS5NZnBt6B3pu7EG2Ge0id1oLHZpPJdn3OQK+BQDiw9zStiHBTJQQQQ==
+  optionalDependencies:
+    "@img/sharp-libvips-linux-x64" "1.2.4"
 
 "@isaacs/cliui@^8.0.2":
   version "8.0.2"
@@ -114,10 +114,10 @@
   resolved "https://registry.npmjs.org/@next/env/-/env-16.2.4.tgz"
   integrity sha512-dKkkOzOSwFYe5RX6y26fZgkSpVAlIOJKQHIiydQcrWH6y/97+RceSOAdjZ14Qa3zLduVUy0TXcn+EiM6t4rPgw==
 
-"@next/swc-darwin-x64@16.2.4":
+"@next/swc-linux-x64-gnu@16.2.4":
   version "16.2.4"
-  resolved "https://registry.npmjs.org/@next/swc-darwin-x64/-/swc-darwin-x64-16.2.4.tgz"
-  integrity sha512-XhpVnUfmYWvD3YrXu55XdcAkQtOnvaI6wtQa8fuF5fGoKoxIUZ0kWPtcOfqJEWngFF/lOS9l3+O9CcownhiQxQ==
+  resolved "https://registry.npmjs.org/@next/swc-linux-x64-gnu/-/swc-linux-x64-gnu-16.2.4.tgz"
+  integrity sha512-EZOvm1aQWgnI/N/xcWOlnS3RQBk0VtVav5Zo7n4p0A7UKyTDx047k8opDbXgBpHl4CulRqRfbw3QrX2w5UOXMQ==
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
@@ -204,10 +204,10 @@
     source-map-js "^1.2.1"
     tailwindcss "4.1.17"
 
-"@tailwindcss/oxide-darwin-x64@4.1.17":
+"@tailwindcss/oxide-linux-x64-gnu@4.1.17":
   version "4.1.17"
-  resolved "https://registry.npmjs.org/@tailwindcss/oxide-darwin-x64/-/oxide-darwin-x64-4.1.17.tgz"
-  integrity sha512-gdhEPLzke2Pog8s12oADwYu0IAw04Y2tlmgVzIN0+046ytcgx8uZmCzEg4VcQh+AHKiS7xaL8kGo/QTiNEGRog==
+  resolved "https://registry.npmjs.org/@tailwindcss/oxide-linux-x64-gnu/-/oxide-linux-x64-gnu-4.1.17.tgz"
+  integrity sha512-M3XZuORCGB7VPOEDH+nzpJ21XPvK5PyjlkSFkFziNHGLc5d6g3di2McAAblmaSUNl8IOmzYwLx9NsE7bplNkwQ==
 
 "@tailwindcss/oxide@4.1.17":
   version "4.1.17"
@@ -399,10 +399,10 @@ balanced-match@^1.0.0:
   resolved "https://registry.npmjs.org/balanced-match/-/balanced-match-1.0.2.tgz"
   integrity sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==
 
-baseline-browser-mapping@^2.10.27, baseline-browser-mapping@^2.8.19, baseline-browser-mapping@^2.9.19:
-  version "2.10.27"
-  resolved "https://registry.npmjs.org/baseline-browser-mapping/-/baseline-browser-mapping-2.10.27.tgz"
-  integrity sha512-zEs/ufmZoUd7WftKpKyXaT6RFxpQ5Qm9xytKRHvJfxFV9DFJkZph9RvJ1LcOUi0Z1ZVijMte65JbILeV+8QQEA==
+baseline-browser-mapping@^2.10.28, baseline-browser-mapping@^2.8.19, baseline-browser-mapping@^2.9.19:
+  version "2.10.28"
+  resolved "https://registry.npmjs.org/baseline-browser-mapping/-/baseline-browser-mapping-2.10.28.tgz"
+  integrity sha512-Ic44hnOtFIgravCunj1ifSoQPSUrkNiJuH9Mf6jr2jjoA74icqV8wU0KuadXeOR8zuIJMOoTv0GuQjZ9ZYNMeA==
 
 binary-extensions@^2.0.0:
   version "2.3.0"
@@ -439,10 +439,10 @@ camelcase-css@^2.0.1:
   resolved "https://registry.npmjs.org/camelcase-css/-/camelcase-css-2.0.1.tgz"
   integrity sha512-QOSvevhslijgYwRx6Rv7zKdMF8lbRmx+uQGx2+vDc+KI/eBnsy9kit5aj23AgGu3pa4t9AgwbnXWqS+iOY+2aA==
 
-caniuse-lite@^1.0.30001579, caniuse-lite@^1.0.30001702, caniuse-lite@^1.0.30001751:
-  version "1.0.30001754"
-  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001754.tgz"
-  integrity sha512-x6OeBXueoAceOmotzx3PO4Zpt4rzpeIFsSr6AAePTZxSkXiYDUmpypEl7e2+8NCd9bD7bXjqyef8CJYPC1jfxg==
+caniuse-lite@^1.0.30001579, caniuse-lite@^1.0.30001702, caniuse-lite@^1.0.30001751, caniuse-lite@^1.0.30001792:
+  version "1.0.30001792"
+  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001792.tgz"
+  integrity sha512-hVLMUZFgR4JJ6ACt1uEESvQN1/dBVqPAKY0hgrV70eN3391K6juAfTjKZLKvOMsx8PxA7gsY1/tLMMTcfFLLpw==
 
 cfb@~1.2.1:
   version "1.2.2"
@@ -710,11 +710,6 @@ fraction.js@^4.3.7:
   resolved "https://registry.npmjs.org/fraction.js/-/fraction.js-4.3.7.tgz"
   integrity sha512-ZsDfxO51wGAXREY55a7la9LScWpwv9RxIrYABrlvOFBlH/ShPnrtsXeuUIfXKKOVicNxQ+o8JTbJvjS4M89yew==
 
-fsevents@~2.3.2:
-  version "2.3.3"
-  resolved "https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz"
-  integrity sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==
-
 function-bind@^1.1.2:
   version "1.1.2"
   resolved "https://registry.npmjs.org/function-bind/-/function-bind-1.1.2.tgz"
@@ -860,10 +855,10 @@ jsbarcode@^3.12.1:
   resolved "https://registry.npmjs.org/jsbarcode/-/jsbarcode-3.12.1.tgz"
   integrity sha512-QZQSqIknC2Rr/YOUyOkCBqsoiBAOTYK+7yNN3JsqfoUtJtkazxNw1dmPpxuv7VVvqW13kA3/mKiLq+s/e3o9hQ==
 
-lightningcss-darwin-x64@1.30.2:
+lightningcss-linux-x64-gnu@1.30.2:
   version "1.30.2"
-  resolved "https://registry.npmjs.org/lightningcss-darwin-x64/-/lightningcss-darwin-x64-1.30.2.tgz"
-  integrity sha512-oBZgKchomuDYxr7ilwLcyms6BCyLn0z8J0+ZZmfpjwg9fRVZIR5/GMXd7r9RH94iDhld3UmSjBM6nXWM2TfZTQ==
+  resolved "https://registry.npmjs.org/lightningcss-linux-x64-gnu/-/lightningcss-linux-x64-gnu-1.30.2.tgz"
+  integrity sha512-Cfd46gdmj1vQ+lR6VRTTadNHu6ALuw2pKR9lYq4FnhvgBc4zWY1EtZcAc6EffShbb1MFrIPfLDXD6Xprbnni4w==
 
 lightningcss@1.30.2:
   version "1.30.2"

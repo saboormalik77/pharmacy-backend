@@ -715,7 +715,7 @@ export default function ReturnDetailPage() {
                 </div>
 
                 {/* ── Info Cards ──────────────────────────────────── */}
-                <div className={`grid grid-cols-1 gap-4 ${showShipping ? 'md:grid-cols-2 lg:grid-cols-2' : 'md:grid-cols-3'}`}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* General Information */}
                     <div className="bg-white rounded-lg shadow p-4">
                         <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">

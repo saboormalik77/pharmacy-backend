@@ -862,7 +862,7 @@ export default function AddItemsPage() {
             </div>
 
             {/* Classification Result (after save) */}
-            {lastClassification && (
+            {/* {lastClassification && (
                 <div className={`rounded-[4px] border px-3 py-2 ${
                     lastClassification.wineCellarItem ? 'bg-purple-50 border-purple-300' :
                     lastClassification.status === 'returnable' ? 'bg-green-50 border-green-300' :
@@ -905,7 +905,7 @@ export default function AddItemsPage() {
                         </button>
                     </div>
                 </div>
-            )}
+            )} */}
 
             {/* Product Form */}
             <div className="bg-white rounded-[4px] shadow px-4 py-3">

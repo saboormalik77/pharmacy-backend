@@ -877,8 +877,8 @@ export default function ReturnDetailPage() {
 
                 </div>
             ) : (
-                /* Layout without Shipping & Processing: 3 cards in one row */
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                /* Layout without Shipping & Processing: 2 cards in one row */
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     {/* General Information */}
                     <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-[4px] shadow-sm border border-blue-100 px-5 py-4 hover:shadow-md transition-shadow">
                         <h2 className="text-xs font-bold text-blue-800 uppercase tracking-wider mb-3 flex items-center gap-2">
