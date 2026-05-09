@@ -238,14 +238,14 @@ export const fetchBatchPharmacies = createAsyncThunk(
         for (const rt of returns) {
             if (rt.pharmacyId && !seen.has(rt.pharmacyId)) {
                 seen.add(rt.pharmacyId);
-                pharmacies.push({ id: rt.pharmacyId, name: rt.pharmacyName || rt.pharmacyId });
+                pharmacies.push({ id: rt.pharmacyId, name: rt.pharmacyName || 'Unknown Pharmacy' });
             }
         }
         for (const m of memos) {
             const pid = m.pharmacyId;
             if (pid && !seen.has(pid)) {
                 seen.add(pid);
-                pharmacies.push({ id: pid, name: m.pharmacyName || pid });
+                pharmacies.push({ id: pid, name: m.pharmacyName || 'Unknown Pharmacy' });
             }
         }
         const settledPharmacyIds = new Set(

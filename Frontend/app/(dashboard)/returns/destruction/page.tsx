@@ -17,6 +17,8 @@ interface DestructionRecord {
   manufacturer?: string;
   lotNumber?: string;
   pharmacyId?: string;
+  pharmacyName?: string;
+  pharmacyName?: string;
   quantity?: number;
   estimatedValue?: number;
   status: 'pending' | 'scheduled' | 'picked_up' | 'destroyed' | 'cancelled';
@@ -300,7 +302,7 @@ export default function DestructionPage() {
                         <p className="font-medium text-gray-900">{r.productName || 'Unknown item'}</p>
                         <p className="text-gray-500">NDC: {r.ndc || '—'} | Lot: {r.lotNumber || '—'}</p>
                       </td>
-                      <td className="px-3 py-2 text-xs text-gray-600">{r.pharmacyId}</td>
+                      <td className="px-3 py-2 text-xs text-gray-600">{r.pharmacyName || '—'}</td>
                       <td className="px-3 py-2 text-xs">
                         <Badge variant={statusBadge(r.status)}>{r.status.replace('_', ' ')}</Badge>
                       </td>

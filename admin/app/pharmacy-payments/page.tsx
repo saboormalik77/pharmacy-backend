@@ -457,7 +457,6 @@ function PharmacyPaymentsPageContent() {
                       </td>
                       <td className="px-3 py-1.5 whitespace-nowrap">
                         <div className="text-xs font-medium text-gray-900">{payment.pharmacyName || 'N/A'}</div>
-                        <div className="text-[10px] text-gray-400">{payment.pharmacyId.slice(0, 8)}…</div>
                       </td>
                       <td className="px-3 py-1.5 whitespace-nowrap">
                         <div className="text-xs text-gray-900">{payment.batchName || 'N/A'}</div>
@@ -593,7 +592,7 @@ function PharmacyPaymentsPageContent() {
                 {[
                   { label: 'Payment ID', value: `#${viewModal.id}`, mono: true },
                   { label: 'Status', isStatus: true },
-                  { label: 'Pharmacy', value: viewModal.pharmacyName || 'N/A', sub: viewModal.pharmacyId.slice(0,8) + '…' },
+                  { label: 'Pharmacy', value: viewModal.pharmacyName || 'N/A' },
                   { label: 'Batch', value: viewModal.batchName || 'N/A', sub: viewModal.batchId ? viewModal.batchId.slice(0,8) + '…' : '—' },
                   { label: 'Total Credit Received', value: `$${viewModal.totalCreditReceived?.toFixed(2) || '0.00'}`, bold: true },
                   { label: 'Payout Amount', value: `$${viewModal.pharmacyPayout?.toFixed(2) || '0.00'}`, bold: true, green: true },

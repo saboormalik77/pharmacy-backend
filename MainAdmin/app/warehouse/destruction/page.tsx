@@ -247,7 +247,7 @@ export default function DestructionPage() {
                       <p className="font-medium text-xs" style={{ color: 'var(--foreground)' }}>{r.productName || 'Unknown item'}</p>
                       <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>NDC: {r.ndc || '—'} | Lot: {r.lotNumber || '—'}</p>
                     </td>
-                    <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{r.pharmacyId}</td>
+                    <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{r.pharmacyName || '—'}</td>
                     <td className="px-3 py-3 text-sm">
                       <Badge variant={statusBadge(r.status)}>{r.status.replace('_', ' ')}</Badge>
                     </td>

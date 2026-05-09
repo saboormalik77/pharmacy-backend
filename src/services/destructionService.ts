@@ -15,6 +15,7 @@ import { AppError } from '../utils/appError';
 export interface DestructionRecord {
   id: string;
   pharmacyId: string;
+  pharmacyName: string;
   transactionItemId: string | null;
   ndc: string | null;
   productName: string | null;
@@ -127,9 +128,16 @@ function toSnakeCase(obj: Record<string, any>): Record<string, any> {
 }
 
 function toCamelCase(row: any): DestructionRecord {
+  const pharmacyJoin = row.pharmacy || row.pharmacies || null;
+  const resolvedPharmacyName: string =
+    (pharmacyJoin && (pharmacyJoin.pharmacy_name || pharmacyJoin.name)) ||
+    row.pharmacy_name ||
+    'Unknown Pharmacy';
+
   return {
     id: row.id,
     pharmacyId: row.pharmacy_id,
+    pharmacyName: resolvedPharmacyName,
     transactionItemId: row.transaction_item_id,
     ndc: row.ndc,
     productName: row.product_name,
@@ -165,7 +173,7 @@ export async function createDestructionRecord(
   const { data, error } = await sb
     .from('destruction_records')
     .insert(insertData)
-    .select('*')
+    .select('*, pharmacy:pharmacy_id(pharmacy_name, name)')
     .single();
 
   if (error) throw new AppError(`Failed to create destruction record: ${error.message}`, 400);
@@ -177,7 +185,7 @@ export async function getDestructionRecord(id: string): Promise<DestructionRecor
 
   const { data, error } = await sb
     .from('destruction_records')
-    .select('*')
+    .select('*, pharmacy:pharmacy_id(pharmacy_name, name)')
     .eq('id', id)
     .single();
 
@@ -195,7 +203,7 @@ export async function listDestructionRecords(
 
   let query = sb
     .from('destruction_records')
-    .select('*', { count: 'exact' })
+    .select('*, pharmacy:pharmacy_id(pharmacy_name, name)', { count: 'exact' })
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1);
 
@@ -229,7 +237,7 @@ export async function getPendingDestructionItems(
 
   let query = sb
     .from('destruction_records')
-    .select('*')
+    .select('*, pharmacy:pharmacy_id(pharmacy_name, name)')
     .in('status', ['pending', 'scheduled'])
     .order('created_at', { ascending: false });
 
@@ -261,7 +269,7 @@ export async function updateDestructionRecord(
     .from('destruction_records')
     .update(updateData)
     .eq('id', id)
-    .select('*')
+    .select('*, pharmacy:pharmacy_id(pharmacy_name, name)')
     .single();
 
   if (error || !data) throw new AppError(`Failed to update destruction record: ${error?.message}`, 400);

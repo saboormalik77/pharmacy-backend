@@ -722,7 +722,6 @@ function PharmacyPaymentsPageContent() {
                       </td>
                       <td className="px-3 py-3 whitespace-nowrap">
                         <div className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>{payment.pharmacyName || 'N/A'}</div>
-                        <div className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>{payment.pharmacyId.slice(0, 8)}…</div>
                       </td>
                       <td className="px-3 py-3 whitespace-nowrap">
                         <div className="text-sm" style={{ color: 'var(--foreground)' }}>{payment.batchName || 'N/A'}</div>
@@ -923,7 +922,6 @@ function PharmacyPaymentsPageContent() {
                   <div className="flex-1">
                     <p className="text-[10px] font-semibold uppercase mb-0.5" style={{ color: 'var(--on-surface-variant)' }}>Pharmacy</p>
                     <p className="text-base font-bold truncate" style={{ color: 'var(--foreground)' }}>{viewModal.pharmacyName || 'N/A'}</p>
-                    <p className="text-[10px] font-mono mt-0.5" style={{ color: 'var(--on-surface-variant)' }}>{viewModal.pharmacyId.slice(0, 8)}…</p>
                   </div>
                   <div className="text-right ml-3">
                     <p className="text-[10px] font-semibold uppercase mb-0.5" style={{ color: 'var(--on-surface-variant)' }}>Payout Amount</p>

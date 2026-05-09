@@ -697,7 +697,8 @@ export default function ReturnDetailPage() {
 
     // ── Loading / Error States ─────────────────────────────────
 
-    if (isLoading) {
+    // Avoid flashing "not found" before the first fetch resolves.
+    if (isLoading || (!tx && !error)) {
         return (
             <div className="flex items-center justify-center min-h-96">
                 <Loader2 className="w-10 h-10 animate-spin text-primary-600" />
@@ -705,7 +706,7 @@ export default function ReturnDetailPage() {
         );
     }
 
-    if (error || !tx) {
+    if (error) {
         return (
             <div className="space-y-4">
                 <button onClick={handleBackNavigation} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800">
@@ -713,7 +714,22 @@ export default function ReturnDetailPage() {
                 </button>
                 <div className="bg-red-50 border border-red-200 rounded-[4px] p-6 text-center">
                     <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-3" />
-                    <p className="text-red-800 font-medium">{error || 'Return transaction not found.'}</p>
+                    <p className="text-red-800 font-medium">{error}</p>
+                    <Button variant="outline" className="mt-4" onClick={() => router.push('/warehouse/returns')}>Go Back</Button>
+                </div>
+            </div>
+        );
+    }
+    
+    if (!tx) {
+        return (
+            <div className="space-y-4">
+                <button onClick={handleBackNavigation} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800">
+                    <ArrowLeft className="w-4 h-4" /> Back
+                </button>
+                <div className="bg-red-50 border border-red-200 rounded-[4px] p-6 text-center">
+                    <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-3" />
+                    <p className="text-red-800 font-medium">Return transaction not found.</p>
                     <Button variant="outline" className="mt-4" onClick={() => router.push('/warehouse/returns')}>Go Back</Button>
                 </div>
             </div>

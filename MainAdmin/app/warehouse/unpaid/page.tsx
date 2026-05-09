@@ -6,7 +6,7 @@ import {
     Search, Loader2, ChevronLeft, ChevronRight, X,
     DollarSign, Clock, AlertCircle, Send, CreditCard,
     TrendingUp, TrendingDown, BarChart3, CheckCircle, FileText, Upload,
-    Sparkles, AlertTriangle,
+    Sparkles, AlertTriangle, Info,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
@@ -17,6 +17,7 @@ import {
     fetchAskVsReceived, fetchManufacturerSummary, fetchPaidMemos, clearError, clearAiAnalysis,
 } from '@/lib/store/paymentTrackingSlice';
 import { DebitMemo, AskVsReceivedRow, ManufacturerPaymentSummary } from '@/lib/types';
+import { apiClient } from '@/lib/api/apiClient';
 
 type TabKey = 'unpaid' | 'paid' | 'askVsReceived' | 'manufacturers';
 
@@ -81,6 +82,8 @@ export default function UnpaidMemosPage() {
     const [paymentNotes, setPaymentNotes] = useState('');
     const [creditMemoFile, setCreditMemoFile] = useState<File | null>(null);
     const [existingCreditMemoUrl, setExistingCreditMemoUrl] = useState<string | null>(null);
+    const [isAnalyzingCreditMemo, setIsAnalyzingCreditMemo] = useState(false);
+    const [isAmountAutoCalculated, setIsAmountAutoCalculated] = useState(false);
 
     // Reminder modal
     const [reminderMemo, setReminderMemo] = useState<DebitMemo | null>(null);
@@ -146,12 +149,14 @@ export default function UnpaidMemosPage() {
     const openPaymentModal = (memo: DebitMemo & { outstandingAmount?: number }) => {
         setPaymentMemo(memo);
         setIsEditMode(false);
-        setPaymentAmount(String(memo.outstandingAmount ?? (memo.amountRequested - memo.amountReceived)));
+        setPaymentAmount('0'); // Start with 0, will be auto-populated from credit memo
         setPaymentDate(new Date().toISOString().split('T')[0]);
         setPaymentRef('');
         setPaymentNotes('');
         setCreditMemoFile(null);
         setExistingCreditMemoUrl(null);
+        setIsAnalyzingCreditMemo(false);
+        setIsAmountAutoCalculated(false);
     };
 
     const openEditModal = (memo: DebitMemo) => {
@@ -163,12 +168,63 @@ export default function UnpaidMemosPage() {
         setPaymentNotes(memo.paymentNotes || '');
         setCreditMemoFile(null);
         setExistingCreditMemoUrl(memo.creditMemoUrl || null);
+        setIsAnalyzingCreditMemo(false);
+        setIsAmountAutoCalculated(false);
     };
+
+    // Analyze credit memo when file is uploaded (for new payments only)
+    useEffect(() => {
+        if (!creditMemoFile || isEditMode || !paymentMemo) return;
+
+        const analyzeCreditMemo = async () => {
+            setIsAnalyzingCreditMemo(true);
+            setIsAmountAutoCalculated(false);
+
+            try {
+                const formData = new FormData();
+                formData.append('creditMemo', creditMemoFile);
+
+                const result = await apiClient.postFormData<{
+                    status: string;
+                    data: {
+                        totalAmount: number | null;
+                        confidence: number;
+                        analysisStatus: string;
+                        manufacturerName: string | null;
+                        lineItemsCount: number;
+                        errorMessage?: string | null;
+                    };
+                }>(`/admin/debit-memos/${paymentMemo.id}/analyze-credit-memo`, formData);
+                
+                if (result.data.totalAmount != null && result.data.totalAmount > 0) {
+                    setPaymentAmount(result.data.totalAmount.toFixed(2));
+                    setIsAmountAutoCalculated(true);
+                    addToast(`Amount auto-calculated: ${fmt(result.data.totalAmount)} (${result.data.lineItemsCount} NDCs matched)`, 'success');
+                } else {
+                    setPaymentAmount('0'); // Reset to 0 if no amount calculated
+                    addToast(`Could not calculate amount from credit memo: ${result.data.errorMessage || 'No matching NDCs found'}`, 'warning');
+                    setIsAmountAutoCalculated(false);
+                }
+            } catch (error: any) {
+                console.error('Credit memo analysis failed:', error);
+                setPaymentAmount('0'); // Reset to 0 on error
+                addToast(error.message || 'Failed to analyze credit memo. Please enter amount manually.', 'error');
+                setIsAmountAutoCalculated(false);
+            } finally {
+                setIsAnalyzingCreditMemo(false);
+            }
+        };
+
+        analyzeCreditMemo();
+    }, [creditMemoFile, isEditMode, paymentMemo, addToast]);
 
     const handleRecordPayment = async () => {
         if (!paymentMemo) return;
         const amt = parseFloat(paymentAmount);
-        if (isNaN(amt) || amt < 0) { addToast('Enter a valid amount', 'error'); return; }
+        if (isNaN(amt) || amt <= 0) { 
+            addToast('Please upload credit memo to calculate the amount received', 'error'); 
+            return; 
+        }
         
         if (isEditMode) {
             const result = await dispatch(updatePayment({
@@ -863,20 +919,66 @@ export default function UnpaidMemosPage() {
                                     <div><p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Outstanding</p><p className="text-xs font-semibold" style={{ color: 'var(--error)' }}>{fmt(paymentMemo.amountRequested - paymentMemo.amountReceived)}</p></div>
                                 </div>
                             ) : (
-                                <div className="p-2.5 border rounded" style={{ backgroundColor: 'var(--primary-container)', borderColor: 'var(--outline-variant)' }}>
-                                    <p className="text-xs mb-1.5" style={{ color: 'var(--on-primary-container)' }}><strong>Editing payment record</strong></p>
+                                <div className="p-2.5 border rounded" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
+                                    <p className="text-xs mb-1.5" style={{ color: 'var(--on-surface)' }}><strong>Editing payment record</strong></p>
                                     <div className="grid grid-cols-2 gap-2 text-center">
-                                        <div><p className="text-[10px]" style={{ color: 'var(--on-primary-container)' }}>Asked</p><p className="text-xs font-semibold" style={{ color: 'var(--on-primary-container)' }}>{fmt(paymentMemo.amountRequested)}</p></div>
-                                        <div><p className="text-[10px]" style={{ color: 'var(--on-primary-container)' }}>Currently Recorded</p><p className="text-xs font-semibold" style={{ color: 'var(--on-primary-container)' }}>{fmt(paymentMemo.amountReceived)}</p></div>
+                                        <div><p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Asked</p><p className="text-xs font-semibold" style={{ color: 'var(--on-surface)' }}>{fmt(paymentMemo.amountRequested)}</p></div>
+                                        <div><p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Currently Recorded</p><p className="text-xs font-semibold" style={{ color: 'var(--on-surface)' }}>{fmt(paymentMemo.amountReceived)}</p></div>
                                     </div>
                                 </div>
                             )}
                             <div>
-                                <label className="block text-xs font-medium mb-0.5" style={{ color: 'var(--on-surface)' }}>Amount Received <span style={{ color: 'var(--error)' }}>*</span></label>
+                                <label className="block text-xs font-medium mb-0.5 flex items-center gap-1.5" style={{ color: 'var(--on-surface)' }}>
+                                    Amount Received <span style={{ color: 'var(--error)' }}>*</span>
+                                    {isAnalyzingCreditMemo && <Loader2 className="w-3 h-3 animate-spin" style={{ color: 'var(--secondary)' }} />}
+                                    {!isEditMode && (
+                                        <div className="relative group">
+                                            <Info className="w-3 h-3 cursor-help" style={{ color: 'var(--outline)' }} />
+                                            <div className="absolute left-0 bottom-full mb-1 hidden group-hover:block z-50 w-64 px-2 py-1.5 text-[10px] rounded shadow-lg border" style={{ backgroundColor: 'var(--inverse-surface)', color: 'var(--inverse-on-surface)', borderColor: 'var(--outline-variant)' }}>
+                                                First upload your credit memo file to see amount received
+                                            </div>
+                                        </div>
+                                    )}
+                                    {isAmountAutoCalculated && !isEditMode && <Sparkles className="w-3 h-3" style={{ color: 'var(--secondary)' }} />}
+                                </label>
                                 <div className="relative">
                                     <DollarSign className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
-                                    <input type="number" step="0.01" min="0" value={paymentAmount} onChange={e => setPaymentAmount(e.target.value)} className="w-full pl-8 pr-3 py-1.5 border rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }} placeholder="0.00" />
+                                    <input 
+                                        type="number" 
+                                        step="0.01" 
+                                        min="0" 
+                                        value={paymentAmount} 
+                                        onChange={e => {
+                                            if (isEditMode) {
+                                                setPaymentAmount(e.target.value);
+                                                setIsAmountAutoCalculated(false);
+                                            }
+                                        }} 
+                                        readOnly={!isEditMode}
+                                        disabled={isAnalyzingCreditMemo}
+                                        className="w-full pl-8 pr-3 py-1.5 border rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-60 disabled:cursor-not-allowed" 
+                                        style={{ 
+                                            backgroundColor: (isAmountAutoCalculated && !isEditMode) ? 'var(--secondary-container)' : 'var(--surface-container-low)', 
+                                            borderColor: (isAmountAutoCalculated && !isEditMode) ? 'var(--secondary)' : 'var(--outline-variant)',
+                                            color: (isAmountAutoCalculated && !isEditMode) ? 'var(--on-secondary-container)' : 'var(--on-surface)',
+                                            fontWeight: (isAmountAutoCalculated && !isEditMode) ? '600' : 'normal',
+                                            cursor: !isEditMode ? 'not-allowed' : 'text',
+                                        }} 
+                                        placeholder={isAnalyzingCreditMemo ? 'Analyzing...' : '0.00'} 
+                                    />
                                 </div>
+                                {isAmountAutoCalculated && !isEditMode && (
+                                    <p className="text-[10px] mt-1 flex items-center gap-1" style={{ color: 'var(--secondary)' }}>
+                                        <Sparkles className="w-2.5 h-2.5" />
+                                        Auto-calculated from credit memo NDC matching
+                                    </p>
+                                )}
+                                {!isEditMode && !creditMemoFile && !isAmountAutoCalculated && (
+                                    <p className="text-[10px] mt-1 flex items-center gap-1" style={{ color: 'var(--outline)' }}>
+                                        <Info className="w-2.5 h-2.5" />
+                                        Upload credit memo to auto-calculate amount
+                                    </p>
+                                )}
                             </div>
                             <div>
                                 <label className="block text-xs font-medium mb-0.5" style={{ color: 'var(--on-surface)' }}>Payment Date</label>
@@ -898,11 +1000,11 @@ export default function UnpaidMemosPage() {
                                     <span className="ml-1 text-[10px] font-normal" style={{ color: 'var(--on-surface-variant)' }}>(PDF only)</span>
                                 </label>
                                 {isEditMode && existingCreditMemoUrl && !creditMemoFile && (
-                                    <div className="mb-2 p-2 border rounded flex items-center gap-2" style={{ backgroundColor: 'var(--primary-container)', borderColor: 'var(--outline-variant)' }}>
-                                        <FileText className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--primary)' }} />
+                                    <div className="mb-2 p-2 border rounded flex items-center gap-2" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
+                                        <FileText className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--on-surface-variant)' }} />
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-xs" style={{ color: 'var(--on-primary-container)' }}>Current credit memo on file</p>
-                                            <a href={existingCreditMemoUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] hover:underline truncate block" style={{ color: 'var(--primary)' }}>
+                                            <p className="text-xs" style={{ color: 'var(--on-surface)' }}>Current credit memo on file</p>
+                                            <a href={existingCreditMemoUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] hover:underline truncate block" style={{ color: 'var(--secondary)' }}>
                                                 View existing PDF
                                             </a>
                                         </div>
@@ -926,6 +1028,8 @@ export default function UnpaidMemosPage() {
                                                 return;
                                             }
                                             setCreditMemoFile(f);
+                                            // Reset auto-calculation state when a new file is selected
+                                            setIsAmountAutoCalculated(false);
                                         }}
                                     />
                                     {creditMemoFile ? (
@@ -937,7 +1041,12 @@ export default function UnpaidMemosPage() {
                                             </div>
                                             <button
                                                 type="button"
-                                                onClick={e => { e.preventDefault(); setCreditMemoFile(null); }}
+                                                onClick={e => { 
+                                                    e.preventDefault(); 
+                                                    setCreditMemoFile(null);
+                                                    setIsAmountAutoCalculated(false);
+                                                    setPaymentAmount('0'); // Reset amount when file is removed
+                                                }}
                                                 className="flex-shrink-0 transition-colors"
                                                 style={{ color: 'var(--outline)' }}
                                             >
@@ -967,12 +1076,12 @@ export default function UnpaidMemosPage() {
                             </button>
                             <button
                                 onClick={handleRecordPayment}
-                                disabled={isActionLoading || (!isEditMode && !creditMemoFile)}
+                                disabled={isActionLoading || isAnalyzingCreditMemo || (!isEditMode && (!creditMemoFile || !isAmountAutoCalculated || parseFloat(paymentAmount) <= 0))}
                                 className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded text-white disabled:opacity-50 transition-colors"
                                 style={{ backgroundColor: 'var(--secondary)' }}
                             >
                                 {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CreditCard className="w-3.5 h-3.5" />}
-                                {isEditMode ? 'Update Payment' : 'Record Payment'}
+                                {isEditMode ? 'Update Payment' : (isAnalyzingCreditMemo ? 'Analyzing...' : 'Record Payment')}
                             </button>
                         </div>
                     </div>
