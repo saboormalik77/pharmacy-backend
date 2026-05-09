@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-    ArrowLeft, ChevronLeft, Loader2, CheckCircle, XCircle, AlertTriangle,
+    ArrowLeft, ChevronLeft, ChevronRight, Loader2, CheckCircle, XCircle, AlertTriangle,
     HelpCircle, Plus, ClipboardCheck, BarChart3, ShieldAlert,
     BoxIcon, Package, ScanLine, Camera, Keyboard, Layers, PlusCircle, X,
     Archive, Ban,
@@ -63,6 +63,58 @@ const normalizeDateKey = (value?: string | null): string => {
     return value.slice(0, 10);
 };
 
+const VERIFICATION_TABLE_PAGE_SIZE = 6;
+
+function VerificationTablePagination({
+    totalItems,
+    page,
+    setPage,
+}: {
+    totalItems: number;
+    page: number;
+    setPage: React.Dispatch<React.SetStateAction<number>>;
+}) {
+    const totalPages = Math.max(1, Math.ceil(totalItems / VERIFICATION_TABLE_PAGE_SIZE));
+    const effectivePage = Math.min(page, totalPages);
+    if (totalItems <= VERIFICATION_TABLE_PAGE_SIZE) return null;
+    return (
+        <div
+            className="flex items-center justify-between px-3 py-2 border-t text-[10px]"
+            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface-variant)' }}
+        >
+            <span>
+                Page {effectivePage} of {totalPages} ({totalItems} total)
+            </span>
+            <div className="flex gap-1">
+                <button
+                    type="button"
+                    disabled={effectivePage <= 1}
+                    onClick={() => setPage(p => {
+                        const ep = Math.min(p, totalPages);
+                        return Math.max(1, ep - 1);
+                    })}
+                    className="p-1 rounded border disabled:opacity-40 hover:bg-primary-50 transition-colors"
+                    style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)' }}
+                >
+                    <ChevronLeft className="w-3 h-3" style={{ color: 'var(--on-surface-variant)' }} />
+                </button>
+                <button
+                    type="button"
+                    disabled={effectivePage >= totalPages}
+                    onClick={() => setPage(p => {
+                        const ep = Math.min(p, totalPages);
+                        return Math.min(totalPages, ep + 1);
+                    })}
+                    className="p-1 rounded border disabled:opacity-40 hover:bg-primary-50 transition-colors"
+                    style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)' }}
+                >
+                    <ChevronRight className="w-3 h-3" style={{ color: 'var(--on-surface-variant)' }} />
+                </button>
+            </div>
+        </div>
+    );
+}
+
 export default function VerificationSessionPage() {
     const dispatch = useAppDispatch();
     const router = useRouter();
@@ -81,6 +133,9 @@ export default function VerificationSessionPage() {
 
     const [toasts, setToasts] = useState<Toast[]>([]);
     const [activeTab, setActiveTab] = useState<ActiveTab>('items');
+    const [itemsTablePage, setItemsTablePage] = useState(1);
+    const [surplusTablePage, setSurplusTablePage] = useState(1);
+    const [discrepanciesTablePage, setDiscrepanciesTablePage] = useState(1);
     
     // Reverse distributors
     const [reverseDistributors, setReverseDistributors] = useState<Array<{id: string; name: string; email: string}>>([]);
@@ -178,6 +233,12 @@ export default function VerificationSessionPage() {
     }, [dispatch, returnId]);
 
     useEffect(() => { loadSummary(); }, [loadSummary]);
+
+    useEffect(() => {
+        setItemsTablePage(1);
+        setSurplusTablePage(1);
+        setDiscrepanciesTablePage(1);
+    }, [returnId]);
 
     useEffect(() => {
         if (verificationAlreadyCompleted) setShowCompleteConfirm(false);
@@ -951,6 +1012,25 @@ export default function VerificationSessionPage() {
     }
 
     const { items, counts, surplus, discrepancies, discrepancyCounts } = v2Summary;
+    const openDiscrepancies = discrepancies.filter(d => d.status === 'open');
+    const itemsTotalPages = Math.max(1, Math.ceil(items.length / VERIFICATION_TABLE_PAGE_SIZE));
+    const itemsPageEffective = Math.min(itemsTablePage, itemsTotalPages);
+    const paginatedItems = items.slice(
+        (itemsPageEffective - 1) * VERIFICATION_TABLE_PAGE_SIZE,
+        itemsPageEffective * VERIFICATION_TABLE_PAGE_SIZE,
+    );
+    const surplusTotalPages = Math.max(1, Math.ceil(surplus.length / VERIFICATION_TABLE_PAGE_SIZE));
+    const surplusPageEffective = Math.min(surplusTablePage, surplusTotalPages);
+    const paginatedSurplus = surplus.slice(
+        (surplusPageEffective - 1) * VERIFICATION_TABLE_PAGE_SIZE,
+        surplusPageEffective * VERIFICATION_TABLE_PAGE_SIZE,
+    );
+    const discrepanciesTotalPages = Math.max(1, Math.ceil(openDiscrepancies.length / VERIFICATION_TABLE_PAGE_SIZE));
+    const discrepanciesPageEffective = Math.min(discrepanciesTablePage, discrepanciesTotalPages);
+    const paginatedOpenDiscrepancies = openDiscrepancies.slice(
+        (discrepanciesPageEffective - 1) * VERIFICATION_TABLE_PAGE_SIZE,
+        discrepanciesPageEffective * VERIFICATION_TABLE_PAGE_SIZE,
+    );
     const verified = counts.correct + counts.damaged + counts.missing + counts.wrongItem;
     const progressPct = counts.totalItems > 0 ? Math.round((verified / counts.totalItems) * 100) : 0;
 
@@ -1151,6 +1231,7 @@ export default function VerificationSessionPage() {
                             {items.length === 0 ? (
                                 <div className="text-center py-12 text-xs" style={{ color: 'var(--outline)' }}>No items found</div>
                             ) : (
+                            <>
                             <div className="overflow-x-auto">
                                 <table className="w-full border" style={{ borderColor: 'var(--outline)' }}>
                                     <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
@@ -1168,7 +1249,7 @@ export default function VerificationSessionPage() {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
-                                        {items.map(item => (
+                                        {paginatedItems.map(item => (
                                             <tr key={item.id} className="hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
                                                 <td className="px-3 py-3">
                                                     <div className="text-sm font-medium" style={{ color: 'var(--on-surface)' }}>{item.proprietaryName || item.genericName}</div>
@@ -1261,6 +1342,8 @@ export default function VerificationSessionPage() {
                                     </tbody>
                                 </table>
                             </div>
+                            <VerificationTablePagination totalItems={items.length} page={itemsTablePage} setPage={setItemsTablePage} />
+                            </>
                             )}
                         </div>
 
@@ -1453,6 +1536,7 @@ export default function VerificationSessionPage() {
                             {surplus.length === 0 ? (
                                 <div className="text-center py-12 text-gray-400 text-xs">No surplus items recorded yet</div>
                             ) : (
+                                <>
                                 <div className="overflow-x-auto">
                                     <table className="w-full">
                                         <thead>
@@ -1466,7 +1550,7 @@ export default function VerificationSessionPage() {
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
-                                            {surplus.map(s => (
+                                            {paginatedSurplus.map(s => (
                                                 <tr key={s.id} className="hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
                                                     <td className="px-3 py-3 text-sm font-medium" style={{ color: 'var(--foreground)' }}>{s.productName || '—'}</td>
                                                     <td className="px-3 py-3 text-sm font-mono text-gray-600">{s.ndc || '—'}</td>
@@ -1483,6 +1567,8 @@ export default function VerificationSessionPage() {
                                         </tbody>
                                     </table>
                                 </div>
+                                <VerificationTablePagination totalItems={surplus.length} page={surplusTablePage} setPage={setSurplusTablePage} />
+                                </>
                             )}
                         </div>
                     </div>
@@ -1491,9 +1577,10 @@ export default function VerificationSessionPage() {
                 {/* DISCREPANCIES TAB */}
                 {activeTab === 'discrepancies' && (
                     <div className="bg-white rounded-[4px] shadow overflow-hidden">
-                        {discrepancies.filter(d => d.status === 'open').length === 0 ? (
+                        {openDiscrepancies.length === 0 ? (
                             <div className="text-center py-12 text-gray-400 text-xs">No open discrepancies</div>
                         ) : (
+                            <>
                             <div className="overflow-x-auto">
                                 <table className="w-full border" style={{ borderColor: 'var(--outline)' }}>
                                     <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
@@ -1506,7 +1593,7 @@ export default function VerificationSessionPage() {
                                         </tr>
                                     </thead>
 <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
-                                            {discrepancies.filter(d => d.status === 'open').map(d => (
+                                            {paginatedOpenDiscrepancies.map(d => (
                                                 <tr key={d.id} className="hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
                                                     <td className="px-3 py-3"><Badge className={`text-[10px] ${discrepancyColor(d.type)}`}>{d.type}</Badge></td>
                                                 <td className="px-3 py-3 text-sm text-gray-900">{d.productName || d.ndc || '—'}</td>
@@ -1543,6 +1630,8 @@ export default function VerificationSessionPage() {
                                     </tbody>
                                 </table>
                             </div>
+                            <VerificationTablePagination totalItems={openDiscrepancies.length} page={discrepanciesTablePage} setPage={setDiscrepanciesTablePage} />
+                            </>
                         )}
                     </div>
                 )}

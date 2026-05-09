@@ -1,12 +1,12 @@
 'use client';
 
 import { PermissionGate } from '@/components/auth/PermissionGate';
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo, type Dispatch, type SetStateAction } from 'react';
 import dynamic from 'next/dynamic';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-    ArrowLeft, ChevronLeft, Loader2, CheckCircle, XCircle, AlertTriangle,
+    ArrowLeft, ChevronLeft, ChevronRight, Loader2, CheckCircle, XCircle, AlertTriangle,
     HelpCircle, Plus, ClipboardCheck, BarChart3, ShieldAlert,
     BoxIcon, Package, ScanLine, Camera, Keyboard, Layers, PlusCircle, X,
 } from 'lucide-react';
@@ -50,6 +50,48 @@ import {
 
 const QrScannerModal = dynamic(() => import('@/components/scanner/QrScannerModal'), { ssr: false });
 
+/** Rows per page for items / surplus / discrepancies tables on this session page */
+const VERIFICATION_TABLE_PAGE_SIZE = 6;
+
+function VerificationTablePagination({
+    totalItems,
+    page,
+    setPage,
+}: {
+    totalItems: number;
+    page: number;
+    setPage: Dispatch<SetStateAction<number>>;
+}) {
+    const totalPages = Math.max(1, Math.ceil(totalItems / VERIFICATION_TABLE_PAGE_SIZE));
+    const effectivePage = Math.min(page, totalPages);
+    if (totalItems <= VERIFICATION_TABLE_PAGE_SIZE) return null;
+    return (
+        <div className="flex items-center justify-between px-3 py-2 border-t border-gray-200 bg-gray-50 text-[10px] text-gray-500">
+            <span>
+                Page {effectivePage} of {totalPages} ({totalItems} total)
+            </span>
+            <div className="flex gap-1">
+                <button
+                    type="button"
+                    disabled={effectivePage <= 1}
+                    onClick={() => setPage(p => Math.max(1, Math.min(p, totalPages) - 1))}
+                    className="p-1 rounded border border-gray-200 bg-white disabled:opacity-40 hover:bg-gray-100 transition-colors"
+                >
+                    <ChevronLeft className="w-3 h-3 text-gray-500" />
+                </button>
+                <button
+                    type="button"
+                    disabled={effectivePage >= totalPages}
+                    onClick={() => setPage(p => Math.min(totalPages, Math.min(p, totalPages) + 1))}
+                    className="p-1 rounded border border-gray-200 bg-white disabled:opacity-40 hover:bg-gray-100 transition-colors"
+                >
+                    <ChevronRight className="w-3 h-3 text-gray-500" />
+                </button>
+            </div>
+        </div>
+    );
+}
+
 type ActiveTab = 'items' | 'surplus' | 'discrepancies';
 
 export default function VerificationSessionPage() {
@@ -70,6 +112,15 @@ export default function VerificationSessionPage() {
 
     const [toasts, setToasts] = useState<Toast[]>([]);
     const [activeTab, setActiveTab] = useState<ActiveTab>('items');
+    const [itemsTablePage, setItemsTablePage] = useState(1);
+    const [surplusTablePage, setSurplusTablePage] = useState(1);
+    const [discrepanciesTablePage, setDiscrepanciesTablePage] = useState(1);
+
+    useEffect(() => {
+        setItemsTablePage(1);
+        setSurplusTablePage(1);
+        setDiscrepanciesTablePage(1);
+    }, [returnId]);
 
     // Box count step
     const [needsBoxCount, setNeedsBoxCount] = useState(false);
@@ -645,6 +696,25 @@ export default function VerificationSessionPage() {
     }
 
     const { items, counts, surplus, discrepancies, discrepancyCounts } = v2Summary;
+    const openDiscrepancies = discrepancies.filter(d => d.status === 'open');
+    const itemsTotalPages = Math.max(1, Math.ceil(items.length / VERIFICATION_TABLE_PAGE_SIZE));
+    const itemsPageEffective = Math.min(itemsTablePage, itemsTotalPages);
+    const paginatedItems = items.slice(
+        (itemsPageEffective - 1) * VERIFICATION_TABLE_PAGE_SIZE,
+        itemsPageEffective * VERIFICATION_TABLE_PAGE_SIZE,
+    );
+    const surplusTotalPages = Math.max(1, Math.ceil(surplus.length / VERIFICATION_TABLE_PAGE_SIZE));
+    const surplusPageEffective = Math.min(surplusTablePage, surplusTotalPages);
+    const paginatedSurplus = surplus.slice(
+        (surplusPageEffective - 1) * VERIFICATION_TABLE_PAGE_SIZE,
+        surplusPageEffective * VERIFICATION_TABLE_PAGE_SIZE,
+    );
+    const discrepanciesTotalPages = Math.max(1, Math.ceil(openDiscrepancies.length / VERIFICATION_TABLE_PAGE_SIZE));
+    const discrepanciesPageEffective = Math.min(discrepanciesTablePage, discrepanciesTotalPages);
+    const paginatedOpenDiscrepancies = openDiscrepancies.slice(
+        (discrepanciesPageEffective - 1) * VERIFICATION_TABLE_PAGE_SIZE,
+        discrepanciesPageEffective * VERIFICATION_TABLE_PAGE_SIZE,
+    );
     const verified = counts.correct + counts.damaged + counts.missing + counts.wrongItem;
     const progressPct = counts.totalItems > 0 ? Math.round((verified / counts.totalItems) * 100) : 0;
 
@@ -740,6 +810,7 @@ export default function VerificationSessionPage() {
                         {items.length === 0 ? (
                             <div className="text-center py-12 text-gray-400 text-xs">No items found</div>
                         ) : (
+                        <>
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>
@@ -755,7 +826,7 @@ export default function VerificationSessionPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
-                                    {items.map(item => (
+                                    {paginatedItems.map(item => (
                                         <tr key={item.id} className="hover:bg-gray-50">
                                             <td className="px-3 py-2">
                                                 <div className="text-xs font-medium text-gray-900">{item.proprietaryName || item.genericName}</div>
@@ -789,6 +860,8 @@ export default function VerificationSessionPage() {
                                 </tbody>
                             </table>
                         </div>
+                        <VerificationTablePagination totalItems={items.length} page={itemsTablePage} setPage={setItemsTablePage} />
+                        </>
                         )}
                     </div>
                 )}
@@ -1059,6 +1132,7 @@ export default function VerificationSessionPage() {
                             {surplus.length === 0 ? (
                                 <div className="text-center py-12 text-gray-400 text-xs">No surplus items recorded yet</div>
                             ) : (
+                                <>
                                 <div className="overflow-x-auto">
                                     <table className="w-full">
                                         <thead>
@@ -1072,7 +1146,7 @@ export default function VerificationSessionPage() {
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-100">
-                                            {surplus.map(s => (
+                                            {paginatedSurplus.map(s => (
                                                 <tr key={s.id} className="hover:bg-gray-50">
                                                     <td className="px-3 py-2 text-xs font-medium text-gray-900">{s.productName || '—'}</td>
                                                     <td className="px-3 py-2 text-[11px] font-mono text-gray-600">{s.ndc || '—'}</td>
@@ -1089,6 +1163,8 @@ export default function VerificationSessionPage() {
                                         </tbody>
                                     </table>
                                 </div>
+                                <VerificationTablePagination totalItems={surplus.length} page={surplusTablePage} setPage={setSurplusTablePage} />
+                                </>
                             )}
                         </div>
                     </div>
@@ -1097,9 +1173,10 @@ export default function VerificationSessionPage() {
                 {/* DISCREPANCIES TAB */}
                 {activeTab === 'discrepancies' && (
                     <div className="bg-white rounded-[4px] shadow overflow-hidden">
-                        {discrepancies.filter(d => d.status === 'open').length === 0 ? (
+                        {openDiscrepancies.length === 0 ? (
                             <div className="text-center py-12 text-gray-400 text-xs">No open discrepancies</div>
                         ) : (
+                            <>
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
@@ -1112,7 +1189,7 @@ export default function VerificationSessionPage() {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
-                                        {discrepancies.filter(d => d.status === 'open').map(d => (
+                                        {paginatedOpenDiscrepancies.map(d => (
                                             <tr key={d.id} className="hover:bg-gray-50">
                                                 <td className="px-3 py-2"><Badge className={`text-[10px] ${discrepancyColor(d.type)}`}>{d.type}</Badge></td>
                                                 <td className="px-3 py-2 text-xs text-gray-900">{d.productName || d.ndc || '—'}</td>
@@ -1149,6 +1226,8 @@ export default function VerificationSessionPage() {
                                     </tbody>
                                 </table>
                             </div>
+                            <VerificationTablePagination totalItems={openDiscrepancies.length} page={discrepanciesTablePage} setPage={setDiscrepanciesTablePage} />
+                            </>
                         )}
                     </div>
                 )}

@@ -19,6 +19,9 @@ type VerificationFilter = '' | 'not_started' | 'in_progress' | 'completed';
 
 type UiVerificationPhase = 'not_started' | 'in_progress' | 'completed';
 
+/** Rows per page for the warehouse verification list table */
+const WAREHOUSE_VERIFICATION_LIST_PAGE_SIZE = 6;
+
 /** Matches DB logic in fcr_49 / fcr_48 when API omits verificationStatus (older _rt_to_json). */
 function deriveWarehouseVerificationUiStatus(r: ReturnTransaction): UiVerificationPhase {
     const vs = r.verificationStatus;
@@ -52,7 +55,7 @@ export default function WarehouseVerificationListPage() {
             search: debouncedSearch || undefined,
             verificationStatus: filter || undefined,
             page,
-            limit: 20,
+            limit: WAREHOUSE_VERIFICATION_LIST_PAGE_SIZE,
         }));
     }, [debouncedSearch, filter, page, dispatch]);
 
