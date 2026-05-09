@@ -257,6 +257,25 @@ export default function ReturnDetailPage() {
         fetchReverseDistributors();
     }, [fetchTransaction, fetchReverseDistributors]);
 
+    // Handle browser back button - always redirect to returns list
+    useEffect(() => {
+        // Push a dummy state to intercept back button
+        window.history.pushState(null, '', window.location.href);
+        
+        const handlePopState = () => {
+            // Push state again to prevent going further back
+            window.history.pushState(null, '', window.location.href);
+            // Use window.location for reliable navigation
+            window.location.href = '/returns';
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, []);
+
     useEffect(() => {
         if (tx) fetchItems();
     }, [fetchItems, tx]);
@@ -647,7 +666,7 @@ export default function ReturnDetailPage() {
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <button
-                            onClick={() => router.back()}
+                            onClick={() => router.push('/returns')}
                             className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
                         >
                             <ArrowLeft className="w-4 h-4" />

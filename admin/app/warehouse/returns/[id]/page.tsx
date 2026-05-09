@@ -254,16 +254,9 @@ export default function ReturnDetailPage() {
     const currentUser = useAppSelector((state) => state.auth.user);
     const isProcessor = currentUser?.role === 'processor';
 
-    // Use browser history for back navigation instead of hardcoded paths
+    // Always navigate to returns list page
     const handleBackNavigation = () => {
-        // Check if there's previous history to go back to
-        if (window.history.length > 1) {
-            router.back();
-        } else {
-            // Fallback to appropriate default page if no history
-            const fallbackPath = isProcessor ? '/warehouse/returns' : '/warehouse/receiving?tab=received';
-            router.push(fallbackPath);
-        }
+        router.push('/warehouse/returns');
     };
 
     // Return lock status protection (granular)
@@ -326,6 +319,25 @@ export default function ReturnDetailPage() {
                 // non-critical — dropdown stays empty
             }
         })();
+    }, []);
+
+    // Handle browser back button - always redirect to returns list
+    useEffect(() => {
+        // Push a dummy state to intercept back button
+        window.history.pushState(null, '', window.location.href);
+        
+        const handlePopState = () => {
+            // Push state again to prevent going further back
+            window.history.pushState(null, '', window.location.href);
+            // Use window.location for reliable navigation
+            window.location.href = '/warehouse/returns';
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+        };
     }, []);
 
     // Wine Cellar integration state
