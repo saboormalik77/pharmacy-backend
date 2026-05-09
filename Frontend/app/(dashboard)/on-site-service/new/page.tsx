@@ -15,8 +15,6 @@ import {
 import {
   onSiteServiceService,
   CreateServiceRequestPayload,
-  purposeLabels,
-  type ServiceRequestPurpose,
 } from '@/lib/api/services/onSiteServiceService';
 import { branchService, Branch } from '@/lib/api/services/branchService';
 import { usePharmacyPermissions } from '@/hooks/usePharmacyPermissions';
@@ -31,7 +29,6 @@ export default function NewServiceRequestPage() {
   // Form state
   const today = new Date().toISOString().slice(0, 10);
   const [requestedDate, setRequestedDate] = useState(today);
-  const [purpose, setPurpose] = useState<ServiceRequestPurpose>('return_pickup');
   const [branchId, setBranchId] = useState<string>('');
   const [specialInstructions, setSpecialInstructions] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -126,7 +123,6 @@ export default function NewServiceRequestPage() {
       const payload: CreateServiceRequestPayload = {
         requested_date: requestedDate,
         branch_id: branchId || null,
-        purpose,
         special_instructions: specialInstructions || null,
       };
       
@@ -162,7 +158,7 @@ export default function NewServiceRequestPage() {
               Request On-Site Service
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Schedule a field representative visit for returns, training, or inventory review.
+              Schedule a field representative visit for return pickup at your pharmacy.
             </p>
           </div>
         </div>
@@ -177,47 +173,22 @@ export default function NewServiceRequestPage() {
           </CardHeader>
           <CardContent className="pt-6">
             <form onSubmit={submit} className="space-y-6">
-              {/* Form Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Preferred Date */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Preferred Date <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    type="date"
-                    min={today}
-                    value={requestedDate}
-                    onChange={(e) => setRequestedDate(e.target.value)}
-                    required
-                    className="w-full"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Choose your preferred date for the visit
-                  </p>
-                </div>
-
-                {/* Purpose */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Purpose of Visit <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={purpose}
-                    onChange={(e) => setPurpose(e.target.value as ServiceRequestPurpose)}
-                    required
-                    className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  >
-                    {(Object.keys(purposeLabels) as ServiceRequestPurpose[]).map((key) => (
-                      <option key={key} value={key}>
-                        {purposeLabels[key]}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    What should the rep focus on?
-                  </p>
-                </div>
+              {/* Preferred Date */}
+              <div className="max-w-md">
+                <label className="block text-sm font-medium mb-2">
+                  Preferred Date <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  type="date"
+                  min={today}
+                  value={requestedDate}
+                  onChange={(e) => setRequestedDate(e.target.value)}
+                  required
+                  className="w-full"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Choose your preferred date for the visit
+                </p>
               </div>
 
               {/* Branch Selection (for parent pharmacies) */}

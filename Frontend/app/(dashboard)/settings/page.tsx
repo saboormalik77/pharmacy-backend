@@ -499,7 +499,7 @@ export default function SettingsPage() {
   const SERVICE_TYPES = [
     { value: 'full_service', label: 'Full Service (Rep processes onsite)' },
     { value: 'self_service', label: 'Self-Service (Web)' },
-    { value: 'express', label: 'Express (Box-and-Ship)' },
+    // { value: 'express', label: 'Express (Box-and-Ship)' },
   ];
 
   const tabs = [

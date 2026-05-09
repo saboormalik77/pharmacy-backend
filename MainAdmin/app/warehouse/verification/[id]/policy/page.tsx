@@ -1,8 +1,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, CheckCircle, Ban, AlertTriangle, ShieldAlert, X } from 'lucide-react';
-import { useAppSelector } from '@/lib/store/hooks';
+import { ArrowLeft, CheckCircle, Ban, AlertTriangle, ShieldAlert } from 'lucide-react';
 
 function PolicyDetail({ label, value, capitalize, highlight }: {
     label: string;
@@ -10,9 +9,9 @@ function PolicyDetail({ label, value, capitalize, highlight }: {
     capitalize?: boolean;
     highlight?: 'green' | 'red' | 'purple';
 }) {
-    const valueClass = highlight === 'green' ? 'text-green-700 font-semibold'
-        : highlight === 'red' ? 'text-red-700 font-semibold'
-        : highlight === 'purple' ? 'text-purple-700 font-semibold'
+    const valueClass = highlight === 'green' ? 'font-semibold text-[var(--on-secondary-container)]'
+        : highlight === 'red' ? 'font-semibold text-[var(--error)]'
+        : highlight === 'purple' ? 'font-semibold text-[var(--on-tertiary-container)]'
         : 'text-[var(--on-surface)]';
     
     return (
@@ -69,7 +68,7 @@ export default function PolicyPage() {
                     </button>
                     
                     <div className="flex items-center gap-3">
-                        <ShieldAlert className="w-6 h-6 text-blue-600" />
+                        <ShieldAlert className="w-6 h-6" style={{ color: 'var(--secondary)' }} />
                         <div>
                             <h1 className="font-heading text-headline text-[var(--on-surface)]">Manufacturer Return Policy</h1>
                             <p className="text-sm text-[var(--on-surface-variant)]">Policy details for this item</p>
@@ -79,24 +78,31 @@ export default function PolicyPage() {
 
                 <div className="bg-[var(--surface-container-lowest)] rounded-[4px] shadow">
                     <div className="p-6 space-y-6">
-                        <div className={`flex items-center gap-3 rounded-[4px] px-4 py-3 ${
-                            policyResult.status === 'returnable' ? 'bg-green-100 border border-green-300' :
-                            policyResult.status === 'non_returnable' ? 'bg-red-100 border border-red-300' :
-                            'bg-yellow-100 border border-yellow-300'
-                        }`}>
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                policyResult.status === 'returnable' ? 'bg-green-200' :
-                                policyResult.status === 'non_returnable' ? 'bg-red-200' : 'bg-yellow-200'
-                            }`}>
-                                {policyResult.status === 'returnable' ? <CheckCircle className="w-5 h-5 text-green-700" /> :
-                                 policyResult.status === 'non_returnable' ? <Ban className="w-5 h-5 text-red-700" /> :
-                                 <AlertTriangle className="w-5 h-5 text-yellow-700" />}
+                        <div
+                            className="flex items-center gap-3 rounded-[4px] px-4 py-3 border"
+                            style={
+                                policyResult.status === 'returnable'
+                                    ? { backgroundColor: 'var(--secondary-container)', borderColor: 'var(--secondary)' }
+                                    : policyResult.status === 'non_returnable'
+                                        ? { backgroundColor: 'var(--status-danger-bg)', borderColor: 'var(--error)' }
+                                        : { backgroundColor: 'var(--tertiary-container)', borderColor: 'var(--tertiary)' }
+                            }
+                        >
+                            <div
+                                className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                                style={{
+                                    backgroundColor: 'var(--surface-container-lowest)',
+                                    borderWidth: 1,
+                                    borderStyle: 'solid',
+                                    borderColor: 'var(--outline-variant)',
+                                }}
+                            >
+                                {policyResult.status === 'returnable' ? <CheckCircle className="w-5 h-5" style={{ color: 'var(--secondary)' }} /> :
+                                 policyResult.status === 'non_returnable' ? <Ban className="w-5 h-5" style={{ color: 'var(--error)' }} /> :
+                                 <AlertTriangle className="w-5 h-5" style={{ color: 'var(--status-warning)' }} />}
                             </div>
                             <div>
-                                <p className={`text-lg font-bold ${
-                                    policyResult.status === 'returnable' ? 'text-green-800' :
-                                    policyResult.status === 'non_returnable' ? 'text-red-800' : 'text-yellow-800'
-                                }`}>
+                                <p className="text-lg font-bold" style={{ color: 'var(--on-surface)' }}>
                                     {policyResult.status === 'returnable' ? 'RETURNABLE' : 
                                      policyResult.status === 'non_returnable' ? 'NON-RETURNABLE' : 'TBD — No Policy Found'}
                                 </p>
@@ -147,7 +153,9 @@ export default function PolicyPage() {
                             </p>
                             <button 
                                 onClick={handleBack}
-                                className="px-4 py-2 text-sm font-medium bg-[var(--primary-container)] text-[var(--on-primary-container)] rounded-[4px] hover:bg-[var(--surface-container-high)] transition-colors"
+                                type="button"
+                                className="px-4 py-2 text-sm font-medium rounded-[4px] transition-colors hover:opacity-90"
+                                style={{ backgroundColor: 'var(--secondary)', color: 'var(--on-secondary)' }}
                             >
                                 Back to Verification
                             </button>

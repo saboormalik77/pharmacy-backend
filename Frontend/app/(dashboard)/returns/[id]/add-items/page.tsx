@@ -257,7 +257,7 @@ export default function AddItemsPage() {
     // ── Barcode scan handler ──────────────────────────────────
 
     const handleScan = async (raw: string) => {
-        if (!raw.trim()) return;
+        if (!raw.trim() || isScanLoading) return;
 
         setScanError('');
         setLastWarning('');
@@ -370,19 +370,19 @@ export default function AddItemsPage() {
     const handleScanKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            handleScan(scanInput);
+            if (!isScanLoading) void handleScan(scanInput);
         }
     };
 
-    const handleManualLookup = async () => {
-        if (!manualNdc.trim()) return;
-        handleScan(manualNdc.trim());
-        setManualNdc('');
+    const handleManualLookup = () => {
+        if (!manualNdc.trim() || isScanLoading) return;
+        void handleScan(manualNdc.trim());
     };
 
     const handleCameraScan = (data: string) => {
+        if (isScanLoading) return;
         setCameraOpen(false);
-        handleScan(data);
+        void handleScan(data);
     };
 
     // ── Validation ──────────────────────────────────────────
@@ -614,6 +614,9 @@ export default function AddItemsPage() {
         );
     }
 
+    /** While barcode/NDC lookup runs — lock scan inputs + product form */
+    const scanFetching = isScanLoading;
+
     return (
         <DashboardLayout>
             <div className="space-y-3">
@@ -756,12 +759,14 @@ export default function AddItemsPage() {
                             ] as const).map(({ key, icon: Icon, label }) => (
                                 <button
                                     key={key}
+                                    type="button"
                                     onClick={() => setMode(key)}
+                                    disabled={scanFetching}
                                     className={`flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-colors ${
                                         mode === key
                                             ? 'bg-primary-100 text-primary-700 ring-1 ring-primary-300'
                                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                    }`}
+                                    } disabled:opacity-50 disabled:cursor-not-allowed`}
                                 >
                                     <Icon className="w-3.5 h-3.5" /> {label}
                                 </button>
@@ -772,11 +777,12 @@ export default function AddItemsPage() {
                         {mode === 'camera' && (
                             <div>
                                 <button
+                                    type="button"
                                     onClick={() => setCameraOpen(true)}
-                                    disabled={isScanLoading}
+                                    disabled={scanFetching}
                                     className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 border border-dashed rounded transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed border-primary-300 bg-primary-50 hover:bg-primary-100 hover:border-primary-400"
                                 >
-                                    {isScanLoading ? (
+                                    {scanFetching ? (
                                         <>
                                             <Loader2 className="w-4 h-4 animate-spin text-primary-500 flex-shrink-0" />
                                             <span className="text-xs font-medium text-primary-600">Looking up product...</span>
@@ -804,11 +810,12 @@ export default function AddItemsPage() {
                                         value={scanInput}
                                         onChange={e => setScanInput(e.target.value)}
                                         onKeyDown={handleScanKeyDown}
+                                        disabled={scanFetching}
                                         placeholder="Scan with USB/Bluetooth scanner — press Enter after scan"
-                                        className="w-full pl-8 pr-8 py-2 text-xs border-2 border-primary-300 bg-primary-50 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-primary-500"
+                                        className="w-full pl-8 pr-8 py-2 text-xs border-2 border-primary-300 bg-primary-50 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-primary-500 disabled:bg-gray-50 disabled:border-gray-300 disabled:cursor-not-allowed"
                                         autoFocus
                                     />
-                                    {isScanLoading && (
+                                    {scanFetching && (
                                         <div className="absolute right-2.5 top-1/2 -translate-y-1/2">
                                             <Loader2 className="w-4 h-4 animate-spin text-primary-600" />
                                         </div>
@@ -826,13 +833,16 @@ export default function AddItemsPage() {
                                         type="text"
                                         value={manualNdc}
                                         onChange={e => setManualNdc(e.target.value)}
-                                        onKeyDown={e => e.key === 'Enter' && handleManualLookup()}
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter' && !scanFetching) handleManualLookup();
+                                        }}
+                                        disabled={scanFetching}
                                         placeholder="Enter NDC (e.g. 43547-3250-06) and press Enter or Lookup..."
-                                        className="flex-1 px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500"
+                                        className="flex-1 px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500 disabled:bg-gray-50 disabled:cursor-not-allowed"
                                         autoFocus
                                     />
-                                    <button onClick={handleManualLookup} disabled={isScanLoading || !manualNdc.trim()} className="px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors">
-                                        {isScanLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Lookup'}
+                                    <button type="button" onClick={handleManualLookup} disabled={scanFetching || !manualNdc.trim()} className="px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors">
+                                        {scanFetching ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Lookup'}
                                     </button>
                                 </div>
                                 <p className="text-[10px] text-gray-400 mt-1">Enter the full NDC from the bottle label (e.g. <span className="font-mono">43547-3250-06</span>).</p>
@@ -861,12 +871,12 @@ export default function AddItemsPage() {
                         <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Product Information</h2>
 
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-                            <Field label="NDC" value={form.ndc} onChange={v => updateField('ndc', v)} placeholder="e.g. 43547-3250-06" required hasError={formErrors.has('ndc')} readOnly={scannedFields.has('ndc')} />
-                            <Field label="Proprietary Name" value={form.proprietaryName} onChange={v => updateField('proprietaryName', v)} placeholder="Brand name" required hasError={formErrors.has('proprietaryName')} readOnly={scannedFields.has('proprietaryName')} />
-                            <Field label="Generic Name" value={form.genericName} onChange={v => updateField('genericName', v)} placeholder="Generic name" hasError={formErrors.has('genericName')} readOnly={scannedFields.has('genericName')} />
-                            <Field label="Manufacturer" value={form.manufacturer} onChange={v => updateField('manufacturer', v)} placeholder="Manufacturer" required hasError={formErrors.has('manufacturer')} readOnly={scannedFields.has('manufacturer')} />
-                            <Field label="Package Description" value={form.packageDescription} onChange={v => updateField('packageDescription', v)} placeholder="e.g. 60 TABLET in BOTTLE" readOnly={scannedFields.has('packageDescription')} />
-                            <Field label="Dosage Form" value={form.dosageForm} onChange={v => updateField('dosageForm', v)} placeholder="e.g. TABLET" readOnly={scannedFields.has('dosageForm')} />
+                            <Field label="NDC" value={form.ndc} onChange={v => updateField('ndc', v)} placeholder="e.g. 43547-3250-06" required hasError={formErrors.has('ndc')} readOnly={scannedFields.has('ndc')} disabled={scanFetching} />
+                            <Field label="Proprietary Name" value={form.proprietaryName} onChange={v => updateField('proprietaryName', v)} placeholder="Brand name" required hasError={formErrors.has('proprietaryName')} readOnly={scannedFields.has('proprietaryName')} disabled={scanFetching} />
+                            <Field label="Generic Name" value={form.genericName} onChange={v => updateField('genericName', v)} placeholder="Generic name" hasError={formErrors.has('genericName')} readOnly={scannedFields.has('genericName')} disabled={scanFetching} />
+                            <Field label="Manufacturer" value={form.manufacturer} onChange={v => updateField('manufacturer', v)} placeholder="Manufacturer" required hasError={formErrors.has('manufacturer')} readOnly={scannedFields.has('manufacturer')} disabled={scanFetching} />
+                            <Field label="Package Description" value={form.packageDescription} onChange={v => updateField('packageDescription', v)} placeholder="e.g. 60 TABLET in BOTTLE" readOnly={scannedFields.has('packageDescription')} disabled={scanFetching} />
+                            <Field label="Dosage Form" value={form.dosageForm} onChange={v => updateField('dosageForm', v)} placeholder="e.g. TABLET" readOnly={scannedFields.has('dosageForm')} disabled={scanFetching} />
 
                             {/* Strength */}
                             <div>
@@ -878,11 +888,12 @@ export default function AddItemsPage() {
                                     <input 
                                         type="text" 
                                         value={form.strengthValue} 
-                                        onChange={e => !scannedFields.has('strengthValue') && updateField('strengthValue', e.target.value)} 
+                                        onChange={e => !scannedFields.has('strengthValue') && !scanFetching && updateField('strengthValue', e.target.value)} 
                                         placeholder="500" 
+                                        disabled={scanFetching}
                                         readOnly={scannedFields.has('strengthValue')}
                                         className={`w-1/2 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
-                                            scannedFields.has('strengthValue') 
+                                            scanFetching || scannedFields.has('strengthValue') 
                                                 ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed' 
                                                 : 'border-gray-300 focus:ring-teal-500'
                                         }`} 
@@ -890,11 +901,12 @@ export default function AddItemsPage() {
                                     <input 
                                         type="text" 
                                         value={form.strengthUnit} 
-                                        onChange={e => !scannedFields.has('strengthUnit') && updateField('strengthUnit', e.target.value)} 
+                                        onChange={e => !scannedFields.has('strengthUnit') && !scanFetching && updateField('strengthUnit', e.target.value)} 
                                         placeholder="mg" 
+                                        disabled={scanFetching}
                                         readOnly={scannedFields.has('strengthUnit')}
                                         className={`w-1/2 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
-                                            scannedFields.has('strengthUnit') 
+                                            scanFetching || scannedFields.has('strengthUnit') 
                                                 ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed' 
                                                 : 'border-gray-300 focus:ring-teal-500'
                                         }`} 
@@ -902,7 +914,7 @@ export default function AddItemsPage() {
                                 </div>
                             </div>
 
-                            <Field label="Route" value={form.route} onChange={v => updateField('route', v)} placeholder="e.g. ORAL" readOnly={scannedFields.has('route')} />
+                            <Field label="Route" value={form.route} onChange={v => updateField('route', v)} placeholder="e.g. ORAL" readOnly={scannedFields.has('route')} disabled={scanFetching} />
                             <div>
                                 <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
                                     DEA Schedule
@@ -910,10 +922,10 @@ export default function AddItemsPage() {
                                 </label>
                                 <select
                                     value={form.deaSchedule}
-                                    onChange={e => !scannedFields.has('deaSchedule') && updateField('deaSchedule', e.target.value)}
-                                    disabled={scannedFields.has('deaSchedule')}
+                                    onChange={e => !scannedFields.has('deaSchedule') && !scanFetching && updateField('deaSchedule', e.target.value)}
+                                    disabled={scanFetching || scannedFields.has('deaSchedule')}
                                     className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
-                                        scannedFields.has('deaSchedule')
+                                        scanFetching || scannedFields.has('deaSchedule')
                                             ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed'
                                             : 'border-gray-300 focus:ring-teal-500'
                                     }`}
@@ -925,8 +937,8 @@ export default function AddItemsPage() {
                                     ))}
                                 </select>
                             </div>
-                            <Field label="Lot Number" value={form.lotNumber} onChange={v => updateField('lotNumber', v)} placeholder="Lot #" required hasError={formErrors.has('lotNumber')} readOnly={scannedFields.has('lotNumber')} />
-                            <Field label="Serial Number" value={form.serialNumber} onChange={v => updateField('serialNumber', v)} placeholder="Serial #" readOnly={scannedFields.has('serialNumber')} />
+                            <Field label="Lot Number" value={form.lotNumber} onChange={v => updateField('lotNumber', v)} placeholder="Lot #" required hasError={formErrors.has('lotNumber')} readOnly={scannedFields.has('lotNumber')} disabled={scanFetching} />
+                            <Field label="Serial Number" value={form.serialNumber} onChange={v => updateField('serialNumber', v)} placeholder="Serial #" readOnly={scannedFields.has('serialNumber')} disabled={scanFetching} />
                             <div>
                                 <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
                                     Expiration Date<span className="text-red-500 ml-0.5">*</span>
@@ -935,12 +947,13 @@ export default function AddItemsPage() {
                                 <input
                                     type="date"
                                     value={form.expirationDate}
-                                    onChange={e => { if (!scannedFields.has('expirationDate')) updateField('expirationDate', e.target.value); }}
+                                    onChange={e => { if (!scannedFields.has('expirationDate') && !scanFetching) updateField('expirationDate', e.target.value); }}
+                                    disabled={scanFetching}
                                     readOnly={scannedFields.has('expirationDate')}
                                     className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
                                         formErrors.has('expirationDate')
                                             ? 'border-red-400 bg-red-50 focus:ring-red-400'
-                                            : scannedFields.has('expirationDate')
+                                            : scanFetching || scannedFields.has('expirationDate')
                                             ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed'
                                             : 'border-gray-300 focus:ring-teal-500'
                                     }`}
@@ -979,11 +992,12 @@ export default function AddItemsPage() {
                                             type="number" 
                                             min="1" 
                                             value={form.fullPackageSize} 
-                                            onChange={e => !scannedFields.has('fullPackageSize') && updateField('fullPackageSize', e.target.value)} 
+                                            onChange={e => !scannedFields.has('fullPackageSize') && !scanFetching && updateField('fullPackageSize', e.target.value)} 
                                             placeholder="e.g. 60" 
+                                            disabled={scanFetching}
                                             readOnly={scannedFields.has('fullPackageSize')}
                                             className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
-                                                scannedFields.has('fullPackageSize')
+                                                scanFetching || scannedFields.has('fullPackageSize')
                                                     ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed'
                                                     : 'border-gray-300 focus:ring-teal-500'
                                             }`} 
@@ -1000,6 +1014,7 @@ export default function AddItemsPage() {
                                                 step="any" 
                                                 value={form.fullPackageQtyReturned} 
                                                 onChange={e => {
+                                                    if (scanFetching) return;
                                                     const value = e.target.value;
                                                     const numValue = parseFloat(value);
                                                     const maxAllowed = form.qtyMode === 'units' ? pkgSize : 100;
@@ -1010,9 +1025,10 @@ export default function AddItemsPage() {
                                                     }
                                                 }}
                                                 placeholder={form.qtyMode === 'units' ? '45' : '75'} 
-                                                className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500" 
+                                                disabled={scanFetching}
+                                                className={`flex-1 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-teal-500 ${scanFetching ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed' : 'border-gray-300'}`} 
                                             />
-                                            <button type="button" onClick={() => updateField('qtyMode', form.qtyMode === 'units' ? 'percent' : 'units')} className="px-1.5 text-[10px] font-semibold rounded border border-gray-300 bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors" title="Toggle units/percent">
+                                            <button type="button" onClick={() => !scanFetching && updateField('qtyMode', form.qtyMode === 'units' ? 'percent' : 'units')} disabled={scanFetching} className="px-1.5 text-[10px] font-semibold rounded border border-gray-300 bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" title="Toggle units/percent">
                                                 {form.qtyMode === 'units' ? '#' : '%'}
                                             </button>
                                         </div>
@@ -1067,13 +1083,13 @@ export default function AddItemsPage() {
                         <div className="grid grid-cols-2 gap-2">
                             <div>
                                 <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Return Reason</label>
-                                <select value={form.returnReason} onChange={e => updateField('returnReason', e.target.value)} className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500">
+                                <select value={form.returnReason} onChange={e => updateField('returnReason', e.target.value)} disabled={scanFetching} className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500 disabled:bg-gray-50 disabled:text-gray-600 disabled:cursor-not-allowed">
                                     {RETURN_REASONS.map(r => <option key={r} value={r}>{r || '— Select reason —'}</option>)}
                                 </select>
                             </div>
                             <div>
                                 <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Memo</label>
-                                <input type="text" value={form.memo} onChange={e => updateField('memo', e.target.value)} placeholder="Optional memo" className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500" />
+                                <input type="text" value={form.memo} onChange={e => updateField('memo', e.target.value)} placeholder="Optional memo" disabled={scanFetching} className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500 disabled:bg-gray-50 disabled:cursor-not-allowed" />
                             </div>
                         </div>
 
@@ -1082,12 +1098,12 @@ export default function AddItemsPage() {
                         {/* Action Buttons */}
                         <div className="mt-3 pt-3 border-t border-gray-100">
                             <div className="flex flex-wrap gap-1.5">
-                                <button onClick={() => handleSave()} disabled={isItemActionLoading || (!form.ndc && !form.proprietaryName)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors">
+                                <button type="button" onClick={() => handleSave()} disabled={scanFetching || isItemActionLoading || (!form.ndc && !form.proprietaryName)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors">
                                     {isItemActionLoading
                                         ? <><Loader2 className="w-3 h-3 animate-spin" />Saving...</>
                                         : <><CheckCircle className="w-3 h-3" />Save &amp; Scan Next</>}
                                 </button>
-                                <button onClick={handleClearForm} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                                <button type="button" onClick={handleClearForm} disabled={scanFetching} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                                     <RotateCcw className="w-3 h-3" /> Clear
                                 </button>
                                 <button onClick={() => router.push(`/returns/${transactionId}`)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded text-gray-500 hover:bg-gray-100 transition-colors">
@@ -1113,7 +1129,7 @@ export default function AddItemsPage() {
 
 // ── Reusable field component ───────────────────────────────────
 
-function Field({ label, value, onChange, placeholder, required, hasError, readOnly }: {
+function Field({ label, value, onChange, placeholder, required, hasError, readOnly, disabled }: {
     label: string;
     value: string;
     onChange: (v: string) => void;
@@ -1121,7 +1137,12 @@ function Field({ label, value, onChange, placeholder, required, hasError, readOn
     required?: boolean;
     hasError?: boolean;
     readOnly?: boolean;
+    /** Barcode/NDC lookup — disables input (distinct from API-filled read-only) */
+    disabled?: boolean;
 }) {
+    const fetching = !!disabled;
+    const scannedLocked = !!readOnly && !fetching;
+    const muted = fetching || readOnly;
     return (
         <div>
             <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
@@ -1131,13 +1152,14 @@ function Field({ label, value, onChange, placeholder, required, hasError, readOn
             <input
                 type="text"
                 value={value}
-                onChange={e => !readOnly && onChange(e.target.value)}
+                onChange={e => !readOnly && !fetching && onChange(e.target.value)}
                 placeholder={placeholder}
-                readOnly={readOnly}
+                disabled={fetching}
+                readOnly={scannedLocked}
                 className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
                     hasError
                         ? 'border-red-400 bg-red-50 focus:ring-red-400'
-                        : readOnly
+                        : muted
                         ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed'
                         : 'border-gray-300 focus:ring-teal-500'
                 }`}

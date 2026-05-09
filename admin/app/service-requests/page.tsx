@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     Truck, Loader2, Search, CheckCircle2, Clock, CalendarClock, XCircle, AlertCircle,
@@ -253,7 +253,7 @@ export default function ServiceRequestsPage() {
                                                 {r.claimed_processor_name || <span className="text-gray-400">Unclaimed</span>}
                                             </td>
                                         )}
-                                        <td className="px-3 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                                        <td className="relative overflow-visible px-3 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                                             <ActionButtons
                                                 r={r}
                                                 isProcessor={isProcessor}
@@ -324,6 +324,40 @@ export default function ServiceRequestsPage() {
 }
 
 // =====================================================================
+// Row action icon + visible hover tooltip (processor theme)
+// =====================================================================
+
+function ActionIconButton({
+    label,
+    onClick,
+    children,
+}: {
+    label: string;
+    onClick: () => void;
+    children: ReactNode;
+}) {
+    return (
+        <span className="group/action relative inline-flex">
+            <button
+                type="button"
+                onClick={onClick}
+                aria-label={label}
+                title={label}
+                className="p-1.5 text-gray-400 hover:text-[#516057] hover:bg-[#516057]/10 rounded transition-colors"
+            >
+                {children}
+            </button>
+            <span
+                role="tooltip"
+                className="pointer-events-none absolute top-full left-1/2 z-[60] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md bg-[#1d2222] px-2 py-1 text-[11px] font-medium text-white opacity-0 shadow-lg ring-1 ring-black/10 transition-opacity duration-150 group-hover/action:opacity-100"
+            >
+                {label}
+            </span>
+        </span>
+    );
+}
+
+// =====================================================================
 // Inline action buttons (row-level)
 // =====================================================================
 
@@ -341,23 +375,29 @@ function ActionButtons({
     if (isProcessor) {
         if (r.status === 'pending') {
             return (
-                <button onClick={() => router.push(`/service-requests/${r.id}/schedule`)} className="p-1.5 text-gray-400 hover:text-[#516057] hover:bg-[#516057]/10 rounded transition-colors" title="Claim and Schedule">
+                <ActionIconButton
+                    label="Claim & schedule visit"
+                    onClick={() => router.push(`/service-requests/${r.id}/schedule`)}
+                >
                     <Play className="w-3.5 h-3.5" />
-                </button>
+                </ActionIconButton>
             );
         }
         if (r.status === 'scheduled' && r.is_claimed_by_me) {
             return (
                 <div className="flex justify-end gap-1">
-                    <button onClick={() => router.push(`/service-requests/${r.id}/schedule`)} className="p-1.5 text-gray-400 hover:text-[#516057] hover:bg-[#516057]/10 rounded transition-colors" title="Reschedule">
+                    <ActionIconButton
+                        label="Reschedule visit"
+                        onClick={() => router.push(`/service-requests/${r.id}/schedule`)}
+                    >
                         <Calendar className="w-3.5 h-3.5" />
-                    </button>
-                    <button onClick={onComplete} className="p-1.5 text-gray-400 hover:text-[#516057] hover:bg-[#516057]/10 rounded transition-colors" title="Mark as Complete">
+                    </ActionIconButton>
+                    <ActionIconButton label="Mark visit complete" onClick={onComplete}>
                         <CheckSquare className="w-3.5 h-3.5" />
-                    </button>
-                    <button onClick={onRelease} className="p-1.5 text-gray-400 hover:text-[#516057] hover:bg-[#516057]/10 rounded transition-colors" title="Release back to queue">
+                    </ActionIconButton>
+                    <ActionIconButton label="Release to pending queue" onClick={onRelease}>
                         <RotateCcw className="w-3.5 h-3.5" />
-                    </button>
+                    </ActionIconButton>
                 </div>
             );
         }
@@ -366,9 +406,9 @@ function ActionButtons({
     // Admin
     if (r.status === 'pending' || r.status === 'scheduled') {
         return (
-            <button onClick={onReassign} className="p-1.5 text-gray-400 hover:text-[#516057] hover:bg-[#516057]/10 rounded transition-colors" title="Reassign Processor">
+            <ActionIconButton label="Reassign processor" onClick={onReassign}>
                 <User className="w-3.5 h-3.5" />
-            </button>
+            </ActionIconButton>
         );
     }
     return null;
@@ -521,29 +561,33 @@ function DetailModal({
                         <>
                             {r.status === 'pending' && (
                                 <button onClick={() => router.push(`/service-requests/${r.id}/schedule`)} disabled={isActing}
-                                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1d2222] text-white hover:bg-[#3d4343] disabled:opacity-50 transition-colors">
+                                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md bg-[#1d2222] text-white shadow-sm transition-all duration-200 ease-out hover:bg-[#2f3838] hover:shadow-lg hover:ring-2 hover:ring-[#516057]/60 hover:ring-offset-2 hover:ring-offset-gray-50 disabled:opacity-50 disabled:hover:ring-0 disabled:hover:shadow-sm">
                                     <Play className="w-3.5 h-3.5" /> Claim & Schedule
                                 </button>
                             )}
                             {r.status === 'scheduled' && r.is_claimed_by_me && (
                                 <>
                                     <button onClick={onRelease} disabled={isActing}
-                                        className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                                        type="button"
+                                        className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md border-2 border-gray-300 bg-white text-gray-800 shadow-sm transition-all duration-200 ease-out hover:border-amber-500 hover:bg-amber-100 hover:text-amber-950 hover:shadow-md hover:ring-2 hover:ring-amber-400/90 hover:ring-offset-2 hover:ring-offset-gray-50 disabled:opacity-50 disabled:hover:border-gray-300 disabled:hover:bg-white disabled:hover:text-gray-800 disabled:hover:ring-0 disabled:hover:shadow-sm">
                                         <RotateCcw className="w-3.5 h-3.5 mr-1 inline" /> Release
                                     </button>
                                     <button onClick={() => router.push(`/service-requests/${r.id}/schedule`)} disabled={isActing}
-                                        className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                                        type="button"
+                                        className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md border-2 border-gray-300 bg-white text-gray-800 shadow-sm transition-all duration-200 ease-out hover:border-[#516057] hover:bg-[#516057]/20 hover:text-[#1a221c] hover:shadow-md hover:ring-2 hover:ring-[#516057]/70 hover:ring-offset-2 hover:ring-offset-gray-50 disabled:opacity-50 disabled:hover:border-gray-300 disabled:hover:bg-white disabled:hover:text-gray-800 disabled:hover:ring-0 disabled:hover:shadow-sm">
                                         <Calendar className="w-3.5 h-3.5 mr-1 inline" /> Reschedule
                                     </button>
                                     <button onClick={onComplete} disabled={isActing}
-                                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1d2222] text-white hover:bg-[#3d4343] disabled:opacity-50 transition-colors">
+                                        type="button"
+                                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md bg-[#1d2222] text-white shadow-sm transition-all duration-200 ease-out hover:bg-[#2a3333] hover:shadow-lg hover:ring-2 hover:ring-emerald-500/80 hover:ring-offset-2 hover:ring-offset-gray-50 disabled:opacity-50 disabled:hover:ring-0 disabled:hover:shadow-sm">
                                         <CheckSquare className="w-3.5 h-3.5" /> Complete
                                     </button>
                                 </>
                             )}
                             {!['completed', 'cancelled'].includes(r.status) && (r.is_claimed_by_me || r.status === 'pending') && (
                                 <button onClick={onCancel} disabled={isActing}
-                                    className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                                    type="button"
+                                    className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md border-2 border-gray-300 bg-white text-gray-800 shadow-sm transition-all duration-200 ease-out hover:border-red-500 hover:bg-red-100 hover:text-red-900 hover:shadow-md hover:ring-2 hover:ring-red-400/80 hover:ring-offset-2 hover:ring-offset-gray-50 disabled:opacity-50 disabled:hover:border-gray-300 disabled:hover:bg-white disabled:hover:text-gray-800 disabled:hover:ring-0 disabled:hover:shadow-sm">
                                     <Ban className="w-3.5 h-3.5 mr-1 inline" /> Cancel
                                 </button>
                             )}
@@ -551,12 +595,13 @@ function DetailModal({
                     ) : (
                         !['completed', 'cancelled'].includes(r.status) && (
                             <button onClick={onReassign} disabled={isActing}
-                                className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                                type="button"
+                                className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md border-2 border-gray-300 bg-white text-gray-800 shadow-sm transition-all duration-200 ease-out hover:border-[#516057] hover:bg-[#516057]/20 hover:text-[#1a221c] hover:shadow-md hover:ring-2 hover:ring-[#516057]/70 hover:ring-offset-2 hover:ring-offset-gray-50 disabled:opacity-50 disabled:hover:border-gray-300 disabled:hover:bg-white disabled:hover:ring-0 disabled:hover:shadow-sm">
                                 <User className="w-3.5 h-3.5 mr-1 inline" /> Reassign
                             </button>
                         )
                     )}
-                    <button onClick={onClose} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Close</button>
+                    <button type="button" onClick={onClose} className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md border-2 border-gray-300 bg-white text-gray-800 shadow-sm transition-all duration-200 ease-out hover:border-[#516057] hover:bg-[#516057]/20 hover:text-[#1a221c] hover:shadow-md hover:ring-2 hover:ring-[#516057]/70 hover:ring-offset-2 hover:ring-offset-gray-50">Close</button>
                 </div>
             </div>
         </div>
@@ -613,11 +658,11 @@ function CompleteModal({ request, isActing, onClose, onSubmit }: {
                     </div>
                     <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50 -mx-4 -mb-3">
                         <button type="button" onClick={onClose} disabled={isActing}
-                            className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                            className="px-3 py-1.5 text-xs font-medium rounded-md border-2 border-gray-300 bg-white text-gray-800 shadow-sm transition-all duration-200 ease-out hover:border-[#516057] hover:bg-[#516057]/20 hover:text-[#1a221c] hover:shadow-md hover:ring-2 hover:ring-[#516057]/70 hover:ring-offset-2 hover:ring-offset-gray-50 disabled:opacity-50 disabled:hover:border-gray-300 disabled:hover:bg-white disabled:hover:ring-0 disabled:hover:shadow-sm">
                             Cancel
                         </button>
                         <button type="submit" disabled={isActing}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#1d2222] text-white hover:bg-[#3d4343] disabled:opacity-50 transition-colors">
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md bg-[#1d2222] text-white shadow-sm transition-all duration-200 ease-out hover:bg-[#2a3333] hover:shadow-lg hover:ring-2 hover:ring-emerald-500/80 hover:ring-offset-2 hover:ring-offset-gray-50 disabled:opacity-50 disabled:hover:ring-0 disabled:hover:shadow-sm">
                             {isActing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Mark Complete'}
                         </button>
                     </div>

@@ -203,7 +203,7 @@ export default function PerformancePage() {
                                         <thead className="bg-[#f4f5f5] border-b" style={{ borderColor: '#9ca3af', borderBottomWidth: '1.5px' }}>
                                             <tr>
                                                 <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Pharmacy</th>
-                                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">GPO</th>
+                                                {/* <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">GPO</th> */}
                                                 <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Returns</th>
                                                 <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Items</th>
                                                 <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Total Value</th>
@@ -216,7 +216,7 @@ export default function PerformancePage() {
                                             {pharmData.data.map((item) => (
                                                 <tr key={item.pharmacyId} className="hover:bg-[#e9ebec] transition-colors" style={{ borderColor: '#d1d5db' }}>
                                                     <td className="px-3 py-3 text-sm font-medium text-gray-900">{item.pharmacyName}</td>
-                                                    <td className="px-3 py-3 text-sm text-gray-600">{item.gpoAffiliation || '—'}</td>
+                                                    {/* <td className="px-3 py-3 text-sm text-gray-600">{item.gpoAffiliation || '—'}</td> */}
                                                     <td className="px-3 py-3 text-sm text-right">{formatNumber(item.totalReturns)}</td>
                                                     <td className="px-3 py-3 text-sm text-right">{formatNumber(item.totalItems)}</td>
                                                     <td className="px-3 py-3 text-sm text-right font-medium">{formatCurrency(item.totalReturnableValue)}</td>

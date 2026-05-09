@@ -1,9 +1,16 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Loader2, ExternalLink, ChevronRight, Bot } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import {
+  MessageCircle,
+  X,
+  Send,
+  Loader2,
+  ExternalLink,
+  ChevronRight,
+  Bot,
+  GripVertical,
+} from 'lucide-react';
 import Link from 'next/link';
 
 interface Message {
@@ -17,6 +24,47 @@ interface Message {
 
 interface ChatbotProps {
   className?: string;
+}
+
+const FAB_SIZE = 56;
+const PANEL_W = 400;
+const PANEL_H = 600;
+const EDGE_MARGIN = 24;
+const DRAG_THRESHOLD_PX = 6;
+const POSITION_STORAGE_KEY = 'pharmacy-chatbot-anchor';
+
+function clampAnchor(
+  right: number,
+  bottom: number,
+  width: number,
+  height: number
+): { right: number; bottom: number } {
+  if (typeof window === 'undefined') {
+    return { right, bottom };
+  }
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const maxRight = Math.max(EDGE_MARGIN, vw - EDGE_MARGIN - width);
+  const maxBottom = Math.max(EDGE_MARGIN, vh - EDGE_MARGIN - height);
+  return {
+    right: Math.min(Math.max(EDGE_MARGIN, right), maxRight),
+    bottom: Math.min(Math.max(EDGE_MARGIN, bottom), maxBottom),
+  };
+}
+
+function readStoredAnchor(): { right: number; bottom: number } | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(POSITION_STORAGE_KEY);
+    if (!raw) return null;
+    const p = JSON.parse(raw) as { right?: unknown; bottom?: unknown };
+    if (typeof p.right === 'number' && typeof p.bottom === 'number') {
+      return { right: p.right, bottom: p.bottom };
+    }
+  } catch {
+    /* ignore */
+  }
+  return null;
 }
 
 // Hardcoded FAQ questions with instant answers (no API call needed)
@@ -62,6 +110,7 @@ const FAQ_QUESTIONS: Array<{ question: string; answer: string; links?: Array<{ t
 
 export function Chatbot({ className }: ChatbotProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [anchor, setAnchor] = useState(() => readStoredAnchor() ?? { right: EDGE_MARGIN, bottom: EDGE_MARGIN });
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -76,6 +125,34 @@ export function Chatbot({ className }: ChatbotProps) {
   const [faqAnswered, setFaqAnswered] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const dragRef = useRef<{
+    startX: number;
+    startY: number;
+    startRight: number;
+    startBottom: number;
+    width: number;
+    height: number;
+  } | null>(null);
+  const dragMovedRef = useRef(false);
+
+  const persistAnchor = useCallback((next: { right: number; bottom: number }) => {
+    try {
+      localStorage.setItem(POSITION_STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  useEffect(() => {
+    const onResize = () => {
+      const w = isOpen ? PANEL_W : FAB_SIZE;
+      const h = isOpen ? PANEL_H : FAB_SIZE;
+      setAnchor((prev) => clampAnchor(prev.right, prev.bottom, w, h));
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen && inputRef.current) {
@@ -181,32 +258,130 @@ export function Chatbot({ className }: ChatbotProps) {
     }
   };
 
+  const startDrag = (
+    e: React.PointerEvent,
+    width: number,
+    height: number,
+    current: { right: number; bottom: number }
+  ) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    dragMovedRef.current = false;
+    dragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      startRight: current.right,
+      startBottom: current.bottom,
+      width,
+      height,
+    };
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const onDragMove = (e: React.PointerEvent) => {
+    const d = dragRef.current;
+    if (!d) return;
+    const dx = e.clientX - d.startX;
+    const dy = e.clientY - d.startY;
+    if (Math.abs(dx) > DRAG_THRESHOLD_PX || Math.abs(dy) > DRAG_THRESHOLD_PX) {
+      dragMovedRef.current = true;
+    }
+    const nextRight = d.startRight - dx;
+    const nextBottom = d.startBottom - dy;
+    setAnchor(clampAnchor(nextRight, nextBottom, d.width, d.height));
+  };
+
+  const endFabDrag = (e: React.PointerEvent) => {
+    const d = dragRef.current;
+    if (d) {
+      try {
+        (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+      } catch {
+        /* ignore */
+      }
+      dragRef.current = null;
+      if (dragMovedRef.current) {
+        setAnchor((prev) => {
+          const c = clampAnchor(prev.right, prev.bottom, FAB_SIZE, FAB_SIZE);
+          persistAnchor(c);
+          return c;
+        });
+        dragMovedRef.current = false;
+        return;
+      }
+    }
+    setIsOpen((o) => !o);
+  };
+
+  const endPanelHeaderDrag = (e: React.PointerEvent) => {
+    const d = dragRef.current;
+    if (d) {
+      try {
+        (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+      } catch {
+        /* ignore */
+      }
+      dragRef.current = null;
+      if (dragMovedRef.current) {
+        setAnchor((prev) => {
+          const c = clampAnchor(prev.right, prev.bottom, PANEL_W, PANEL_H);
+          persistAnchor(c);
+          return c;
+        });
+      }
+      dragMovedRef.current = false;
+    }
+  };
+
+  const fabStyle = { right: anchor.right, bottom: anchor.bottom } as const;
+  // Panel is much taller than the FAB: same anchor would push the header off-screen when the FAB sits high.
+  const panelAnchor = clampAnchor(anchor.right, anchor.bottom, PANEL_W, PANEL_H);
+  const panelStyle = { right: panelAnchor.right, bottom: panelAnchor.bottom } as const;
+
   return (
     <>
-      {/* Floating Button */}
+      {/* Floating Button — drag to reposition; click without dragging opens chat */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#1e3a5f] text-white shadow-lg hover:bg-[#16304f] transition-all duration-300 ${
+        type="button"
+        style={fabStyle}
+        onPointerDown={(e) => startDrag(e, FAB_SIZE, FAB_SIZE, anchor)}
+        onPointerMove={onDragMove}
+        onPointerUp={endFabDrag}
+        onPointerCancel={endFabDrag}
+        className={`fixed z-50 flex h-14 w-14 touch-none select-none items-center justify-center rounded-full bg-[#1e3a5f] text-white shadow-lg hover:bg-[#16304f] transition-[opacity,transform] duration-300 cursor-grab active:cursor-grabbing ${
           isOpen ? 'scale-0 opacity-0 pointer-events-none' : 'scale-100 opacity-100'
         } ${className}`}
         aria-label="Open pharmacy assistant"
+        title="Drag to move — click to open"
       >
-        <MessageCircle className="h-6 w-6" />
+        <MessageCircle className="h-6 w-6 pointer-events-none" />
       </button>
 
       {/* Chat Window */}
       <div
-        className={`fixed bottom-6 right-6 z-50 flex h-[600px] w-[400px] flex-col rounded-2xl border border-gray-200 bg-white shadow-2xl transition-all duration-300 origin-bottom-right ${
+        style={panelStyle}
+        className={`fixed z-50 flex h-[600px] w-[400px] flex-col rounded-2xl border border-gray-200 bg-white shadow-2xl transition-[opacity,transform] duration-300 origin-bottom-right ${
           isOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'
         }`}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between bg-[#1e3a5f] p-4 rounded-t-2xl">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20">
+        {/* Header — drag handle when chat is open */}
+        <div
+          className="flex cursor-grab touch-none select-none items-center justify-between bg-[#1e3a5f] p-4 rounded-t-2xl active:cursor-grabbing"
+          onPointerDown={(e) => {
+            if ((e.target as HTMLElement).closest('button[aria-label="Close chatbot"]')) return;
+            const origin = clampAnchor(anchor.right, anchor.bottom, PANEL_W, PANEL_H);
+            startDrag(e, PANEL_W, PANEL_H, origin);
+          }}
+          onPointerMove={onDragMove}
+          onPointerUp={endPanelHeaderDrag}
+          onPointerCancel={endPanelHeaderDrag}
+        >
+          <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3 pointer-events-none">
+            <GripVertical className="h-5 w-5 shrink-0 text-white/70" aria-hidden />
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/20">
               <Bot className="h-5 w-5 text-white" />
             </div>
-            <div>
+            <div className="min-w-0">
               <h3 className="font-semibold text-sm text-white">Pharmacy Assistant</h3>
               <div className="flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-green-400 inline-block" />
@@ -215,8 +390,9 @@ export function Chatbot({ className }: ChatbotProps) {
             </div>
           </div>
           <button
+            type="button"
             onClick={() => setIsOpen(false)}
-            className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/20 transition-colors"
+            className="relative z-10 flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full hover:bg-white/20 transition-colors"
             aria-label="Close chatbot"
           >
             <X className="h-4 w-4 text-white" />

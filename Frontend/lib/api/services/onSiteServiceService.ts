@@ -81,7 +81,8 @@ export interface ServiceRequestDetail extends ServiceRequestListItem {
 export interface CreateServiceRequestPayload {
   requested_date: string; // YYYY-MM-DD
   branch_id?: string | null;
-  purpose: ServiceRequestPurpose | null;
+  /** Omit for pharmacy portal default (returns-only visits). */
+  purpose?: ServiceRequestPurpose | null;
   special_instructions?: string | null;
 }
 
