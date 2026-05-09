@@ -5,7 +5,8 @@
   --surface: #ebe8e7;
   --surface-container: #ffffff;
   --surface-container-low: #f5f2f1;
-  --surface-container-lowest: #f0eeed;
+  /* Matches MainAdmin — used by Toast info panels and theme surfaces */
+  --surface-container-lowest: #ffffff;
   
   /* Surface Container High (Top Header) */
   --surface-container-high: #ffffff;
@@ -45,6 +46,17 @@
   --primary-700: #3d4343;
   --primary-800: #2f3333;
   --primary-900: #1d2222;
+
+  /* Toast / status tokens (aligned with MainAdmin components/ui/Toast) */
+  --inverse-surface: #3d4343;
+  --outline-variant: #e2e2e2;
+  --secondary: #516057;
+  --secondary-container: rgba(81, 96, 87, 0.15);
+  --error: #f97316;
+  --status-danger-bg: rgba(249, 115, 22, 0.15);
+  --tertiary: #ad916a;
+  --tertiary-fixed: rgba(173, 145, 106, 0.12);
+  --status-warning: #ad916a;
 }
 
 @theme inline {

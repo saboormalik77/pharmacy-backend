@@ -110,10 +110,12 @@ function ToastContainer({ toasts, onClose }: { toasts: Toast[]; onClose: (id: st
   );
 }
 
-function Field({ label, value, onChange, placeholder, required, hasError, type = 'text' }: {
+function Field({ label, value, onChange, placeholder, required, hasError, type = 'text', disabled }: {
   label: string; value: string; onChange: (v: string) => void;
   placeholder?: string; required?: boolean; hasError?: boolean; type?: string;
+  disabled?: boolean;
 }) {
+  const fetching = !!disabled;
   return (
     <div>
       <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
@@ -122,10 +124,11 @@ function Field({ label, value, onChange, placeholder, required, hasError, type =
       <input
         type={type}
         value={value}
-        onChange={e => onChange(e.target.value)}
+        onChange={e => !fetching && onChange(e.target.value)}
         placeholder={placeholder}
+        disabled={fetching}
         className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
-          hasError ? 'border-red-400 bg-red-50 focus:ring-red-400' : 'border-gray-300 focus:ring-teal-500'
+          hasError ? 'border-red-400 bg-red-50 focus:ring-red-400' : fetching ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed' : 'border-gray-300 focus:ring-teal-500'
         }`}
       />
       {hasError && <p className="text-[10px] text-red-500 mt-0.5">Required</p>}
@@ -301,7 +304,7 @@ export default function PharmacyScanPage() {
   };
 
   const handleScan = async (raw: string) => {
-    if (!raw.trim()) return;
+    if (!raw.trim() || isScanLoading) return;
     setScanError('');
     setLastWarning('');
     setPreCheckResult(null);
@@ -359,13 +362,15 @@ export default function PharmacyScanPage() {
   };
 
   const handleScanKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') { e.preventDefault(); handleScan(scanInput); }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (!isScanLoading) void handleScan(scanInput);
+    }
   };
 
-  const handleManualLookup = async () => {
-    if (!manualNdc.trim()) return;
-    handleScan(manualNdc.trim());
-    setManualNdc('');
+  const handleManualLookup = () => {
+    if (!manualNdc.trim() || isScanLoading) return;
+    void handleScan(manualNdc.trim());
   };
 
   const validateForm = (): boolean => {
@@ -393,6 +398,7 @@ export default function PharmacyScanPage() {
   };
 
   const handleSave = async (skipWineCellarCheck = false) => {
+    if (isScanLoading) return;
     if (!validateForm()) return;
 
     if (!skipWineCellarCheck && preCheckResult?.expectedReturnableDate) return;
@@ -498,6 +504,7 @@ export default function PharmacyScanPage() {
   };
 
   const handleMoveToWineCellarManual = async () => {
+    if (isScanLoading) return;
     if (!validateForm()) return;
     if (!wineCellarDate) {
       showToast('Please enter the Expected Returnable Date before moving to Wine Cellar.', 'error');
@@ -560,6 +567,9 @@ export default function PharmacyScanPage() {
     }
   };
 
+  /** While barcode/NDC lookup runs — lock scan inputs + product form */
+  const scanFetching = isScanLoading;
+
   return (
     <DashboardLayout>
       <PermissionGuard permission="returns:create">
@@ -603,7 +613,8 @@ export default function PharmacyScanPage() {
           <select
             value={selectedTxId}
             onChange={e => setSelectedTxId(e.target.value)}
-            className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500"
+            disabled={scanFetching}
+            className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500 disabled:bg-gray-50 disabled:text-gray-600 disabled:cursor-not-allowed"
           >
             <option value="">— Create new on save —</option>
             {transactions.map(t => (
@@ -616,10 +627,12 @@ export default function PharmacyScanPage() {
         {recentlyAddedItems.length > 0 && (
           <div className="flex gap-2 border-b border-gray-200">
             <button
+              type="button"
               onClick={() => setActiveTab('list')}
+              disabled={scanFetching}
               className={`px-4 py-2 text-xs font-semibold transition-colors border-b-2 ${
                 activeTab === 'list' ? 'border-teal-600 text-teal-700 bg-teal-50' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-              }`}
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               <div className="flex items-center gap-1.5">
                 <FileText className="w-3.5 h-3.5" />
@@ -627,10 +640,12 @@ export default function PharmacyScanPage() {
               </div>
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab('form')}
+              disabled={scanFetching}
               className={`px-4 py-2 text-xs font-semibold transition-colors border-b-2 ${
                 activeTab === 'form' ? 'border-teal-600 text-teal-700 bg-teal-50' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-              }`}
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               <div className="flex items-center gap-1.5">
                 <ScanLine className="w-3.5 h-3.5" />
@@ -686,8 +701,9 @@ export default function PharmacyScanPage() {
                     </div>
                   </div>
                   <button
+                    type="button"
                     onClick={() => handleRemoveRecentItem(item.id)}
-                    disabled={isItemActionLoading}
+                    disabled={scanFetching || isItemActionLoading}
                     className="flex-shrink-0 p-2 rounded border border-red-300 bg-red-50 text-red-600 hover:bg-red-100 hover:border-red-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     title="Remove this item"
                   >
@@ -710,11 +726,13 @@ export default function PharmacyScanPage() {
                   { key: 'manual', icon: Keyboard, label: 'Manual NDC' },
                 ] as const).map(({ key, icon: Icon, label }) => (
                   <button
+                    type="button"
                     key={key}
                     onClick={() => setMode(key)}
+                    disabled={scanFetching}
                     className={`flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-colors ${
                       mode === key ? 'bg-teal-100 text-teal-700 ring-1 ring-teal-300' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
                     <Icon className="w-3.5 h-3.5" /> {label}
                   </button>
@@ -731,11 +749,12 @@ export default function PharmacyScanPage() {
                       value={scanInput}
                       onChange={e => setScanInput(e.target.value)}
                       onKeyDown={handleScanKeyDown}
+                      disabled={scanFetching}
                       placeholder="Scan with USB/Bluetooth scanner — press Enter after scan"
-                      className="w-full pl-8 pr-8 py-2 text-xs border-2 border-teal-300 bg-teal-50 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                      className="w-full pl-8 pr-8 py-2 text-xs border-2 border-teal-300 bg-teal-50 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 disabled:bg-gray-50 disabled:border-gray-300 disabled:cursor-not-allowed"
                       autoFocus
                     />
-                    {isScanLoading && (
+                    {scanFetching && (
                       <div className="absolute right-2.5 top-1/2 -translate-y-1/2">
                         <Loader2 className="w-4 h-4 animate-spin text-teal-600" />
                       </div>
@@ -752,13 +771,16 @@ export default function PharmacyScanPage() {
                       type="text"
                       value={manualNdc}
                       onChange={e => setManualNdc(e.target.value)}
-                      onKeyDown={e => e.key === 'Enter' && handleManualLookup()}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && !scanFetching) handleManualLookup();
+                      }}
+                      disabled={scanFetching}
                       placeholder="Enter NDC (e.g. 43547-3250-06) and press Enter or Lookup..."
-                      className="flex-1 px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500"
+                      className="flex-1 px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500 disabled:bg-gray-50 disabled:cursor-not-allowed"
                       autoFocus
                     />
-                    <button onClick={handleManualLookup} disabled={isScanLoading || !manualNdc.trim()} className="px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors">
-                      {isScanLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Lookup'}
+                    <button type="button" onClick={handleManualLookup} disabled={scanFetching || !manualNdc.trim()} className="px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors">
+                      {scanFetching ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Lookup'}
                     </button>
                   </div>
                   <p className="text-[10px] text-gray-400 mt-1">Enter the full NDC from the bottle label.</p>
@@ -816,7 +838,7 @@ export default function PharmacyScanPage() {
                       )}
                     </div>
                   </div>
-                  <button onClick={() => setLastClassification(null)} className="text-gray-400 hover:text-gray-600 flex-shrink-0">
+                  <button type="button" onClick={() => setLastClassification(null)} disabled={scanFetching} className="text-gray-400 hover:text-gray-600 flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed">
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -827,28 +849,29 @@ export default function PharmacyScanPage() {
             <div className="bg-white rounded-lg shadow px-4 py-3">
               <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Product Information</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-                <Field label="NDC" value={form.ndc} onChange={v => updateField('ndc', v)} placeholder="e.g. 43547-3250-06" required hasError={formErrors.has('ndc')} />
-                <Field label="Proprietary Name" value={form.proprietaryName} onChange={v => updateField('proprietaryName', v)} placeholder="Brand name" required hasError={formErrors.has('proprietaryName')} />
-                <Field label="Generic Name" value={form.genericName} onChange={v => updateField('genericName', v)} placeholder="Generic name" hasError={formErrors.has('genericName')} />
-                <Field label="Manufacturer" value={form.manufacturer} onChange={v => updateField('manufacturer', v)} placeholder="Manufacturer" required hasError={formErrors.has('manufacturer')} />
-                <Field label="Package Description" value={form.packageDescription} onChange={v => updateField('packageDescription', v)} placeholder="e.g. 60 TABLET in BOTTLE" />
-                <Field label="Dosage Form" value={form.dosageForm} onChange={v => updateField('dosageForm', v)} placeholder="e.g. TABLET" />
+                <Field label="NDC" value={form.ndc} onChange={v => updateField('ndc', v)} placeholder="e.g. 43547-3250-06" required hasError={formErrors.has('ndc')} disabled={scanFetching} />
+                <Field label="Proprietary Name" value={form.proprietaryName} onChange={v => updateField('proprietaryName', v)} placeholder="Brand name" required hasError={formErrors.has('proprietaryName')} disabled={scanFetching} />
+                <Field label="Generic Name" value={form.genericName} onChange={v => updateField('genericName', v)} placeholder="Generic name" hasError={formErrors.has('genericName')} disabled={scanFetching} />
+                <Field label="Manufacturer" value={form.manufacturer} onChange={v => updateField('manufacturer', v)} placeholder="Manufacturer" required hasError={formErrors.has('manufacturer')} disabled={scanFetching} />
+                <Field label="Package Description" value={form.packageDescription} onChange={v => updateField('packageDescription', v)} placeholder="e.g. 60 TABLET in BOTTLE" disabled={scanFetching} />
+                <Field label="Dosage Form" value={form.dosageForm} onChange={v => updateField('dosageForm', v)} placeholder="e.g. TABLET" disabled={scanFetching} />
                 <div>
                   <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Strength</label>
                   <div className="flex gap-1">
-                    <input type="text" value={form.strengthValue} onChange={e => updateField('strengthValue', e.target.value)} placeholder="500" className="w-1/2 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500" />
-                    <input type="text" value={form.strengthUnit} onChange={e => updateField('strengthUnit', e.target.value)} placeholder="mg" className="w-1/2 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500" />
+                    <input type="text" value={form.strengthValue} onChange={e => !scanFetching && updateField('strengthValue', e.target.value)} placeholder="500" disabled={scanFetching} className={`w-1/2 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-teal-500 ${scanFetching ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed' : 'border-gray-300'}`} />
+                    <input type="text" value={form.strengthUnit} onChange={e => !scanFetching && updateField('strengthUnit', e.target.value)} placeholder="mg" disabled={scanFetching} className={`w-1/2 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-teal-500 ${scanFetching ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed' : 'border-gray-300'}`} />
                   </div>
                 </div>
-                <Field label="Route" value={form.route} onChange={v => updateField('route', v)} placeholder="e.g. ORAL" />
+                <Field label="Route" value={form.route} onChange={v => updateField('route', v)} placeholder="e.g. ORAL" disabled={scanFetching} />
                 <div>
                   <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
                     DEA Schedule
                   </label>
                   <select
                     value={form.deaSchedule}
-                    onChange={e => updateField('deaSchedule', e.target.value)}
-                    className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500"
+                    onChange={e => !scanFetching && updateField('deaSchedule', e.target.value)}
+                    disabled={scanFetching}
+                    className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-teal-500 ${scanFetching ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed' : 'border-gray-300'}`}
                   >
                     {DEA_SCHEDULE_OPTIONS.map(option => (
                       <option key={option} value={option}>
@@ -857,8 +880,8 @@ export default function PharmacyScanPage() {
                     ))}
                   </select>
                 </div>
-                <Field label="Lot Number" value={form.lotNumber} onChange={v => updateField('lotNumber', v)} placeholder="Lot #" required hasError={formErrors.has('lotNumber')} />
-                <Field label="Serial Number" value={form.serialNumber} onChange={v => updateField('serialNumber', v)} placeholder="Serial #" />
+                <Field label="Lot Number" value={form.lotNumber} onChange={v => updateField('lotNumber', v)} placeholder="Lot #" required hasError={formErrors.has('lotNumber')} disabled={scanFetching} />
+                <Field label="Serial Number" value={form.serialNumber} onChange={v => updateField('serialNumber', v)} placeholder="Serial #" disabled={scanFetching} />
                 <div>
                   <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
                     Expiration Date<span className="text-red-500 ml-0.5">*</span>
@@ -866,9 +889,10 @@ export default function PharmacyScanPage() {
                   <input
                     type="date"
                     value={form.expirationDate}
-                    onChange={e => updateField('expirationDate', e.target.value)}
+                    onChange={e => !scanFetching && updateField('expirationDate', e.target.value)}
+                    disabled={scanFetching}
                     className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
-                      formErrors.has('expirationDate') ? 'border-red-400 bg-red-50 focus:ring-red-400' : 'border-gray-300 focus:ring-teal-500'
+                      formErrors.has('expirationDate') ? 'border-red-400 bg-red-50 focus:ring-red-400' : scanFetching ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed' : 'border-gray-300 focus:ring-teal-500'
                     }`}
                   />
                   {formErrors.has('expirationDate') && <p className="text-[10px] text-red-500 mt-0.5">Required</p>}
@@ -894,19 +918,19 @@ export default function PharmacyScanPage() {
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       <div>
                         <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Price ($)</label>
-                        <input type="number" step="0.01" min="0" value={form.standardPrice} onChange={e => updateField('standardPrice', e.target.value)} placeholder="0.00" className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500" />
+                        <input type="number" step="0.01" min="0" value={form.standardPrice} onChange={e => !scanFetching && updateField('standardPrice', e.target.value)} placeholder="0.00" disabled={scanFetching} className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-teal-500 ${scanFetching ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed' : 'border-gray-300'}`} />
                       </div>
                       <div>
                         <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Pkg Size</label>
-                        <input type="number" min="1" value={form.fullPackageSize} onChange={e => updateField('fullPackageSize', e.target.value)} placeholder="e.g. 60" className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500" />
+                        <input type="number" min="1" value={form.fullPackageSize} onChange={e => !scanFetching && updateField('fullPackageSize', e.target.value)} placeholder="e.g. 60" disabled={scanFetching} className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-teal-500 ${scanFetching ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed' : 'border-gray-300'}`} />
                       </div>
                       <div>
                         <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
                           Qty Returned <span className="text-gray-400">({form.qtyMode === 'units' ? 'units' : '%'})</span>
                         </label>
                         <div className="flex gap-1">
-                          <input type="number" min="0" step="any" value={form.fullPackageQtyReturned} onChange={e => updateField('fullPackageQtyReturned', e.target.value)} placeholder={form.qtyMode === 'units' ? '45' : '75'} className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500" />
-                          <button type="button" onClick={() => updateField('qtyMode', form.qtyMode === 'units' ? 'percent' : 'units')} className="px-1.5 text-[10px] font-semibold rounded border border-gray-300 bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors">
+                          <input type="number" min="0" step="any" value={form.fullPackageQtyReturned} onChange={e => { if (!scanFetching) updateField('fullPackageQtyReturned', e.target.value); }} placeholder={form.qtyMode === 'units' ? '45' : '75'} disabled={scanFetching} className={`flex-1 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-teal-500 ${scanFetching ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed' : 'border-gray-300'}`} />
+                          <button type="button" onClick={() => !scanFetching && updateField('qtyMode', form.qtyMode === 'units' ? 'percent' : 'units')} disabled={scanFetching} className="px-1.5 text-[10px] font-semibold rounded border border-gray-300 bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                             {form.qtyMode === 'units' ? '#' : '%'}
                           </button>
                         </div>
@@ -960,9 +984,10 @@ export default function PharmacyScanPage() {
               <div className="flex flex-wrap gap-3 mb-2">
                 {(['tbd', 'returnable', 'non_returnable'] as const).map((status) => {
                   const isLocked = !isPolicyChecking && !!policyAutoCheck && policyAutoCheck.status !== 'tbd';
+                  const radioDisabled = scanFetching || isLocked;
                   return (
-                    <label key={status} className={`flex items-center gap-1.5 text-xs ${isLocked ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}>
-                      <input type="radio" name="returnStatus" value={status} checked={form.returnStatus === status} onChange={() => { if (!isLocked) updateField('returnStatus', status); }} disabled={isLocked} className="text-teal-600 focus:ring-teal-500" />
+                    <label key={status} className={`flex items-center gap-1.5 text-xs ${radioDisabled ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}>
+                      <input type="radio" name="returnStatus" value={status} checked={form.returnStatus === status} onChange={() => { if (!isLocked && !scanFetching) updateField('returnStatus', status); }} disabled={radioDisabled} className="text-teal-600 focus:ring-teal-500" />
                       <span className={`font-medium ${status === 'returnable' ? 'text-green-700' : status === 'non_returnable' ? 'text-red-700' : 'text-yellow-700'}`}>
                         {status === 'tbd' ? 'TBD' : status === 'returnable' ? 'Returnable' : 'Non-Returnable'}
                       </span>
@@ -974,13 +999,13 @@ export default function PharmacyScanPage() {
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Return Reason</label>
-                  <select value={form.returnReason} onChange={e => updateField('returnReason', e.target.value)} className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500">
+                  <select value={form.returnReason} onChange={e => updateField('returnReason', e.target.value)} disabled={scanFetching} className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500 disabled:bg-gray-50 disabled:text-gray-600 disabled:cursor-not-allowed">
                     {RETURN_REASONS.map(r => <option key={r} value={r}>{r || '— Select reason —'}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Memo</label>
-                  <input type="text" value={form.memo} onChange={e => updateField('memo', e.target.value)} placeholder="Optional memo" className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500" />
+                  <input type="text" value={form.memo} onChange={e => updateField('memo', e.target.value)} placeholder="Optional memo" disabled={scanFetching} className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500 disabled:bg-gray-50 disabled:cursor-not-allowed" />
                 </div>
               </div>
 
@@ -994,7 +1019,8 @@ export default function PharmacyScanPage() {
                   <select
                     value={manualDestination}
                     onChange={e => setManualDestination(e.target.value)}
-                    className="w-full px-2 py-1 text-xs border border-amber-300 rounded focus:outline-none focus:ring-1 focus:ring-amber-400 bg-white"
+                    disabled={scanFetching}
+                    className="w-full px-2 py-1 text-xs border border-amber-300 rounded focus:outline-none focus:ring-1 focus:ring-amber-400 bg-white disabled:bg-gray-50 disabled:text-gray-600 disabled:cursor-not-allowed"
                   >
                     <option value="">— Select destination —</option>
                     {reverseDistributors.map((d) => (
@@ -1009,13 +1035,13 @@ export default function PharmacyScanPage() {
                 <div className="mt-2 p-2.5 bg-red-50 border border-red-200 rounded-lg">
                   <p className="text-[10px] font-semibold text-red-800 mb-1.5">Non-Returnable Route</p>
                   <div className="grid grid-cols-2 gap-2">
-                    <label className={`flex items-center gap-2 px-2 py-1.5 border rounded cursor-pointer ${nonReturnableRoute === 'wine_cellar' ? 'border-purple-400 bg-purple-50' : 'border-gray-300 bg-white'}`}>
-                      <input type="radio" checked={nonReturnableRoute === 'wine_cellar'} onChange={() => setNonReturnableRoute('wine_cellar')} />
+                    <label className={`flex items-center gap-2 px-2 py-1.5 border rounded ${scanFetching ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'} ${nonReturnableRoute === 'wine_cellar' ? 'border-purple-400 bg-purple-50' : 'border-gray-300 bg-white'}`}>
+                      <input type="radio" checked={nonReturnableRoute === 'wine_cellar'} onChange={() => setNonReturnableRoute('wine_cellar')} disabled={scanFetching} />
                       <Archive className="w-3.5 h-3.5 text-purple-600" />
                       <span className="text-xs font-medium text-purple-800">Wine Cellar</span>
                     </label>
-                    <label className={`flex items-center gap-2 px-2 py-1.5 border rounded cursor-pointer ${nonReturnableRoute === 'destruction' ? 'border-red-400 bg-red-50' : 'border-gray-300 bg-white'}`}>
-                      <input type="radio" checked={nonReturnableRoute === 'destruction'} onChange={() => setNonReturnableRoute('destruction')} />
+                    <label className={`flex items-center gap-2 px-2 py-1.5 border rounded ${scanFetching ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'} ${nonReturnableRoute === 'destruction' ? 'border-red-400 bg-red-50' : 'border-gray-300 bg-white'}`}>
+                      <input type="radio" checked={nonReturnableRoute === 'destruction'} onChange={() => setNonReturnableRoute('destruction')} disabled={scanFetching} />
                       <Ban className="w-3.5 h-3.5 text-red-600" />
                       <span className="text-xs font-medium text-red-800">Destruction</span>
                     </label>
@@ -1041,10 +1067,10 @@ export default function PharmacyScanPage() {
                       </div>
                     </div>
                     <div className="flex gap-1.5">
-                      <button onClick={() => handleSave(true)} disabled={isItemActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors">
+                      <button type="button" onClick={() => handleSave(true)} disabled={scanFetching || isItemActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors">
                         {isItemActionLoading ? <><Loader2 className="w-3 h-3 animate-spin" />Moving...</> : <><Archive className="w-3 h-3" />Move to Wine Cellar</>}
                       </button>
-                      <button onClick={resetForm} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                      <button type="button" onClick={resetForm} disabled={scanFetching} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                         <X className="w-3 h-3" /> Cancel
                       </button>
                     </div>
@@ -1071,7 +1097,8 @@ export default function PharmacyScanPage() {
                               type="date"
                               value={wineCellarDate}
                               onChange={e => setWineCellarDate(e.target.value)}
-                              className={`w-44 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-purple-400 ${!wineCellarDate ? 'border-red-300 bg-red-50' : 'border-purple-300 bg-white'}`}
+                              disabled={scanFetching}
+                              className={`w-44 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-purple-400 ${scanFetching ? 'border-gray-200 bg-gray-50 cursor-not-allowed' : !wineCellarDate ? 'border-red-300 bg-red-50' : 'border-purple-300 bg-white'}`}
                             />
                           </div>
                         </div>
@@ -1089,30 +1116,30 @@ export default function PharmacyScanPage() {
                       )}
                       <div className="flex flex-wrap gap-1.5">
                         {nonReturnableRoute === 'wine_cellar' ? (
-                          <button onClick={handleMoveToWineCellarManual} disabled={isItemActionLoading || !wineCellarDate} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 transition-colors">
+                          <button type="button" onClick={handleMoveToWineCellarManual} disabled={scanFetching || isItemActionLoading || !wineCellarDate} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 transition-colors">
                             {isItemActionLoading ? <><Loader2 className="w-3 h-3 animate-spin" />Moving...</> : <><Archive className="w-3 h-3" />Move to Wine Cellar</>}
                           </button>
                         ) : (
-                          <button onClick={() => handleSave()} disabled={isItemActionLoading || isPreChecking} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors">
+                          <button type="button" onClick={() => handleSave()} disabled={scanFetching || isItemActionLoading || isPreChecking} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors">
                             {isItemActionLoading || isPreChecking ? <><Loader2 className="w-3 h-3 animate-spin" />Saving...</> : <><Ban className="w-3 h-3" />Save to Destruction</>}
                           </button>
                         )}
-                        <button onClick={resetForm} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                        <button type="button" onClick={resetForm} disabled={scanFetching} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                           <X className="w-3 h-3" /> Clear
                         </button>
                       </div>
                     </>
                   ) : (
                     <div className="flex flex-wrap gap-1.5">
-                      <button onClick={() => handleSave()} disabled={isItemActionLoading || isPreChecking || (!form.ndc && !form.proprietaryName)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors">
+                      <button type="button" onClick={() => handleSave()} disabled={scanFetching || isItemActionLoading || isPreChecking || (!form.ndc && !form.proprietaryName)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors">
                         {isItemActionLoading || isPreChecking
                           ? <><Loader2 className="w-3 h-3 animate-spin" />{isPreChecking ? 'Checking...' : 'Saving...'}</>
                           : <><CheckCircle className="w-3 h-3" />Save &amp; Scan Next</>}
                       </button>
-                      <button onClick={resetForm} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                      <button type="button" onClick={resetForm} disabled={scanFetching} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                         <RotateCcw className="w-3 h-3" /> Clear
                       </button>
-                      <button onClick={() => router.push('/returns')} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded text-gray-500 hover:bg-gray-100 transition-colors">
+                      <button type="button" onClick={() => router.push('/returns')} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded text-gray-500 hover:bg-gray-100 transition-colors">
                         <X className="w-3 h-3" /> Cancel
                       </button>
                     </div>

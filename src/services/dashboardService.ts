@@ -434,41 +434,76 @@ export const getReturnDetail = async (pharmacyId: string, returnId: string): Pro
     value: Math.round(value * 100) / 100,
   }));
 
-  // 3. Get credit data from pharmacy_payments for this pharmacy
-  //    FCR OneCheck = payment_type 'ocs' (included credits via RSI check)
-  //    Manufacturer Direct = payment_type 'direct' 
+  // 3. Get expected (ask_price) and received (received_price) values from debit_memo_items
+  //    for this specific return transaction
+  const { data: creditData, error: creditError } = await db.rpc('get_return_credit_summary', {
+    p_return_id: returnId,
+  });
+
+  let totalExpected = 0;
+  let totalReceived = 0;
+
+  if (creditError) {
+    // Fallback: try raw query via return_transaction_items -> debit_memo_items
+    console.warn('RPC get_return_credit_summary failed, trying fallback query:', creditError.message);
+    
+    // Get return_transaction_items for this return
+    const { data: rtiData, error: rtiError } = await db
+      .from('return_transaction_items')
+      .select('id')
+      .eq('transaction_id', returnId);
+
+    if (!rtiError && rtiData && rtiData.length > 0) {
+      const rtiIds = rtiData.map((rti: any) => rti.id);
+      
+      // Get debit_memo_items for these transaction items
+      const { data: dmiData, error: dmiError } = await db
+        .from('debit_memo_items')
+        .select('ask_price, received_price')
+        .in('transaction_item_id', rtiIds);
+
+      if (!dmiError && dmiData) {
+        dmiData.forEach((dmi: any) => {
+          totalExpected += Number(dmi.ask_price) || 0;
+          totalReceived += Number(dmi.received_price) || 0;
+        });
+      }
+    }
+  } else if (creditData) {
+    // RPC returns { total_ask, total_received }
+    totalExpected = Number(creditData.total_ask) || 0;
+    totalReceived = Number(creditData.total_received) || 0;
+  }
+
+  // 3b. Get pharmacy_payments for FCR vs Manufacturer Direct breakdown ratio
   const { data: paymentsData, error: paymentsError } = await db
     .from('pharmacy_payments')
-    .select('payment_type, total_credit_received, included_credit_amount, direct_credit_amount, por_credit_amount, pharmacy_payout, status')
+    .select('included_credit_amount, direct_credit_amount')
     .eq('pharmacy_id', pharmacyId);
 
   if (paymentsError) {
     console.warn('Failed to fetch pharmacy payments:', paymentsError.message);
   }
 
-  let fcrReceived = 0;
-  let manufacturerDirectReceived = 0;
+  let fcrReceivedRatio = 0;
+  let manufacturerDirectReceivedRatio = 0;
 
   (paymentsData || []).forEach((p: any) => {
-    const included = Number(p.included_credit_amount) || 0;
-    const direct = Number(p.direct_credit_amount) || 0;
-    fcrReceived += included;
-    manufacturerDirectReceived += direct;
+    fcrReceivedRatio += Number(p.included_credit_amount) || 0;
+    manufacturerDirectReceivedRatio += Number(p.direct_credit_amount) || 0;
   });
 
   const totalReturnableValue = Number(rtData.total_returnable_value) || 0;
   const totalNonReturnableValue = Number(rtData.total_non_returnable_value) || 0;
 
-  // Expected values: Since expected values are not stored in the database, we calculate them as follows:
-  // - Total Expected = totalReturnableValue from the selected return transaction
-  // - We split this total between FCR and Manufacturer Direct based on the historical ratio of received credits
-  // - This gives a reasonable estimate for comparison, though these are calculated/dummy values
-  const totalExpected = totalReturnableValue;
-  const fcrExpectedRatio = fcrReceived > 0 || manufacturerDirectReceived > 0
-    ? fcrReceived / (fcrReceived + manufacturerDirectReceived)
-    : 0.72; // Default 72% FCR, 28% Manufacturer Direct if no historical data
-  const fcrExpected = Math.round(totalExpected * fcrExpectedRatio * 100) / 100;
+  // Split expected and received between FCR and Manufacturer Direct based on historical ratio
+  const totalRatio = fcrReceivedRatio + manufacturerDirectReceivedRatio;
+  const fcrRatio = totalRatio > 0 ? fcrReceivedRatio / totalRatio : 0.72; // Default 72% FCR if no data
+  
+  const fcrExpected = Math.round(totalExpected * fcrRatio * 100) / 100;
   const manufacturerDirectExpected = Math.round((totalExpected - fcrExpected) * 100) / 100;
+  const fcrReceived = Math.round(totalReceived * fcrRatio * 100) / 100;
+  const manufacturerDirectReceived = Math.round((totalReceived - fcrReceived) * 100) / 100;
 
   // 4. Get product values over time (all returns for this pharmacy, ordered by date)
   const { data: allReturns, error: allReturnsError } = await db
@@ -500,14 +535,14 @@ export const getReturnDetail = async (pharmacyId: string, returnId: string): Pro
     creditSummary: {
       fcrOneCheck: {
         expected: fcrExpected,
-        received: Math.round(fcrReceived * 100) / 100,
+        received: fcrReceived,
       },
       manufacturerDirect: {
         expected: manufacturerDirectExpected,
-        received: Math.round(manufacturerDirectReceived * 100) / 100,
+        received: manufacturerDirectReceived,
       },
       totalExpected: Math.round(totalExpected * 100) / 100,
-      totalReceived: Math.round((fcrReceived + manufacturerDirectReceived) * 100) / 100,
+      totalReceived: Math.round(totalReceived * 100) / 100,
     },
     productValueBreakdown: {
       returnable: totalReturnableValue,

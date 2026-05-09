@@ -51,7 +51,7 @@ export function TopBar({ onMenuClick }: TopBarProps) {
       <div className="flex items-center gap-2 sm:gap-4">
         <PharmacySwitcher />
         <NotificationDropdown />
-        <Button
+        {/* <Button
           variant="ghost"
           size="sm"
           className="relative"
@@ -64,7 +64,7 @@ export function TopBar({ onMenuClick }: TopBarProps) {
               {cartItems.length}
             </span>
           )}
-        </Button>
+        </Button> */}
         <UserDropdown />
       </div>
     </header>

@@ -343,7 +343,7 @@ export default function CreditsPage() {
                         <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Batch</th>
                         <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Credit Received</th>
                         <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Company Fee</th>
-                        <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">GPO Share</th>
+                        {/* <th className="text-left px-4 py-3.5 text-xs font-semibold text-white up?percase tracking-wider">GPO Share</th> */}
                         <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Your Payout</th>
                         <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Method</th>
                         <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Reference</th>
@@ -366,14 +366,14 @@ export default function CreditsPage() {
                             <span className="text-sm text-amber-700">{formatCurrency(payment.companyFee)}</span>
                             <span className="text-sm text-gray-400 ml-1">({payment.companyFeePercent}%)</span>
                           </td>
-                          <td className="px-4 py-3">
-                            <span className="text-sm text-gray-600">{payment.gpoShare > 0 ? (
-                              <>
-                                {formatCurrency(payment.gpoShare)}
-                                {payment.gpoName && <span className="text-sm text-gray-400 ml-1">({payment.gpoName})</span>}
-                              </>
-                            ) : '—'}</span>
-                          </td>
+                            {/* <td className="px-4 py-3">
+                              <span className="text-sm text-gray-600">{payment.gpoShare > 0 ? (
+                                <>
+                                  {formatCurrency(payment.gpoShare)}
+                                  {payment.gpoName && <span className="text-sm text-gray-400 ml-1">({payment.gpoName})</span>}
+                                </>
+                              ) : '—'}</span>
+                            </td> */}
                           <td className="px-4 py-3"><span className="text-sm font-bold text-emerald-700">{formatCurrency(payment.pharmacyPayout)}</span></td>
                           <td className="px-4 py-3"><span className="text-sm text-gray-700">{getMethodLabel(payment.paymentMethod)}</span></td>
                           <td className="px-4 py-3"><span className="text-sm font-mono text-gray-600">{payment.paymentReference || '—'}</span></td>
