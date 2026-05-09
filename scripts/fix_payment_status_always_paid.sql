@@ -13,6 +13,13 @@ BEGIN
   END IF;
 END $$;
 
+-- Backfill: any existing 'partial' memos that already have amount_received > 0
+-- should be promoted to 'paid' so they disappear from the unpaid list.
+UPDATE debit_memos
+SET payment_status = 'paid'
+WHERE payment_status = 'partial'
+  AND amount_received > 0;
+
 -- Update payment_record function with new logic
 CREATE OR REPLACE FUNCTION payment_record(
   p_debit_memo_id    UUID,

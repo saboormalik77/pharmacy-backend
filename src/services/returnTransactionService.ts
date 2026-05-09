@@ -318,64 +318,56 @@ export const getManifestData = async (
   
   const manifestData = data.data;
   
-  // TEMPORARY FIX: If no returnable/non-returnable items but totalItems > 0,
-  // fetch all items directly from return_transaction_items
-  if (manifestData && manifestData.summary.totalItems > 0 && 
-      manifestData.returnableItems.length === 0 && 
-      manifestData.nonReturnableItems.length === 0) {
-    
-    console.log('🔧 Fetching all items as fallback for manifest');
-    
-    // Fetch all items directly
-    const { data: allItemsData, error: itemsError } = await sb
-      .from('return_transaction_items')
-      .select(`
-        ndc, ndc_10, proprietary_name, generic_name, manufacturer,
-        lot_number, serial_number, expiration_date, quantity,
-        standard_price, estimated_value, destination, dea_schedule,
-        is_partial, partial_percentage, strength, dosage_form,
-        return_status, non_returnable_reason
-      `)
-      .eq('transaction_id', transactionId)
-      .order('proprietary_name');
-    
-    if (itemsError) {
-      console.error('❌ Error fetching all items:', itemsError);
-    } else if (allItemsData && allItemsData.length > 0) {
-      console.log(`✅ Found ${allItemsData.length} items to display`);
-      
-      // Convert to manifest format
-      const formattedItems = allItemsData.map(item => ({
-        ndc: item.ndc,
-        ndc10: item.ndc_10,
-        proprietaryName: item.proprietary_name,
-        genericName: item.generic_name,
-        manufacturer: item.manufacturer,
-        lotNumber: item.lot_number,
-        serialNumber: item.serial_number,
-        expirationDate: item.expiration_date,
-        quantity: item.quantity,
-        standardPrice: item.standard_price,
-        estimatedValue: item.estimated_value,
-        destination: item.destination,
-        deaSchedule: item.dea_schedule,
-        isPartial: item.is_partial,
-        partialPercentage: item.partial_percentage,
-        strength: item.strength,
-        dosageForm: item.dosage_form,
-        returnStatus: item.return_status,
-        nonReturnableReason: item.non_returnable_reason
-      }));
-      
-      // Add all items to manifest data
-      manifestData.allItems = formattedItems;
-      
-      // Also populate returnable/non-returnable based on status
-      manifestData.returnableItems = formattedItems.filter(item => item.returnStatus === 'returnable');
-      manifestData.nonReturnableItems = formattedItems.filter(item => item.returnStatus === 'non_returnable');
+  // Always fetch all items directly so we always have full_package_size,
+  // full_package_qty_returned, and any TBD items the RPC might have skipped.
+  const { data: allItemsData, error: itemsError } = await sb
+    .from('return_transaction_items')
+    .select(`
+      ndc, ndc_10, proprietary_name, generic_name, manufacturer,
+      lot_number, serial_number, expiration_date, quantity,
+      standard_price, estimated_value, destination, dea_schedule,
+      is_partial, partial_percentage, strength, dosage_form,
+      return_status, non_returnable_reason,
+      full_package_size, full_package_qty_returned
+    `)
+    .eq('transaction_id', transactionId)
+    .order('proprietary_name');
+
+  if (!itemsError && allItemsData && allItemsData.length > 0) {
+    const formattedItems = allItemsData.map((item: any) => ({
+      ndc: item.ndc,
+      ndc10: item.ndc_10,
+      proprietaryName: item.proprietary_name,
+      genericName: item.generic_name,
+      manufacturer: item.manufacturer,
+      lotNumber: item.lot_number,
+      serialNumber: item.serial_number,
+      expirationDate: item.expiration_date,
+      quantity: item.quantity,
+      standardPrice: item.standard_price,
+      estimatedValue: item.estimated_value,
+      destination: item.destination,
+      deaSchedule: item.dea_schedule,
+      isPartial: item.is_partial,
+      partialPercentage: item.partial_percentage,
+      strength: item.strength,
+      dosageForm: item.dosage_form,
+      returnStatus: item.return_status,
+      nonReturnableReason: item.non_returnable_reason,
+      fullPackageSize: item.full_package_size,
+      fullPackageQtyReturned: item.full_package_qty_returned,
+    }));
+
+    // Always provide allItems so generators can use it as authoritative source
+    manifestData.allItems = formattedItems;
+
+    // If the RPC returned no items in either bucket, also populate the buckets
+    if (manifestData.returnableItems.length === 0 && manifestData.nonReturnableItems.length === 0) {
+      manifestData.returnableItems = formattedItems.filter((i: any) => i.returnStatus === 'returnable');
+      manifestData.nonReturnableItems = formattedItems.filter((i: any) => i.returnStatus === 'non_returnable');
     }
   }
-  
+
   return manifestData;
 };
 

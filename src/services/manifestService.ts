@@ -31,6 +31,9 @@ interface ManifestItem {
   nonReturnableReason?: string | null;
   strength: string | null;
   dosageForm: string | null;
+  fullPackageSize?: number | null;
+  fullPackageQtyReturned?: number | null;
+  returnStatus?: string | null;
 }
 
 interface ManifestData {
@@ -265,16 +268,24 @@ export async function generateManifestPdf(data: ManifestData): Promise<Buffer> {
 
   doc.y = sumY + 30;
 
-  // ── Returnable Items Table ──
-  if (data.returnableItems.length > 0) {
-    drawItemsTable(doc, 'RETURNABLE ITEMS', data.returnableItems, pageWidth, false);
-  }
+  // ── Item Tables ──
+  // Use allItems (direct DB fetch with pkg size) when available; fall back to RPC arrays.
+  const allItemsSrcPdf: ManifestItem[] = (data as any).allItems && (data as any).allItems.length > 0
+    ? (data as any).allItems
+    : [...data.returnableItems, ...data.nonReturnableItems];
 
-  // ── Non-Returnable Items Table ──
-  // FCR-52: Non-returnable items must now appear in manifests/PDFs
-  // so warehouse and pharmacies have full visibility.
-  if (data.nonReturnableItems.length > 0) {
-    drawItemsTable(doc, 'NON-RETURNABLE ITEMS', data.nonReturnableItems, pageWidth, true);
+  if (allItemsSrcPdf.length === 0) {
+    doc.fontSize(10).font('Helvetica').text('No items found for this return transaction.', { align: 'center' });
+  } else {
+    const retItemsPdf = allItemsSrcPdf.filter((i: ManifestItem) => (i as any).returnStatus === 'returnable');
+    const nonRetItemsPdf = allItemsSrcPdf.filter((i: ManifestItem) => (i as any).returnStatus === 'non_returnable');
+    const otherItemsPdf = allItemsSrcPdf.filter((i: ManifestItem) =>
+      (i as any).returnStatus !== 'returnable' && (i as any).returnStatus !== 'non_returnable'
+    );
+    const returnablePlusPendingPdf = [...retItemsPdf, ...otherItemsPdf];
+
+    if (returnablePlusPendingPdf.length > 0) drawItemsTable(doc, 'RETURNABLE ITEMS', returnablePlusPendingPdf, pageWidth, false);
+    if (nonRetItemsPdf.length > 0) drawItemsTable(doc, 'NON-RETURNABLE ITEMS', nonRetItemsPdf, pageWidth, true);
   }
 
   // ── Notes ──
@@ -309,49 +320,58 @@ function manifestItemsTableHtml(
   showReason: boolean
 ): string {
   if (items.length === 0) return '';
-  
-  // For ALL ITEMS, show status column. For specific categories, show reason if requested
-  const showStatus = false; // title === 'ALL ITEMS';  // COMMENTED OUT: Remove status column
-  
-  let th = '<th>NDC</th><th>Product</th><th>Lot</th><th>Exp</th><th class="num">Qty</th>';
-  // if (showStatus) {
-  //   th += '<th>Status</th><th>Reason</th>';
-  // } else if (showReason) {
-  //   th += '<th>Reason</th>';
-  // }
-  
+
+  const th = `
+    <th>NDC</th>
+    <th>Product</th>
+    <th>Lot</th>
+    <th>Exp</th>
+    <th class="num">Pkg Size</th>
+    <th class="num">Full Qty</th>
+    <th class="num">Partial Qty</th>
+    ${showReason ? '<th>Reason</th>' : ''}
+  `;
+
   const rows = items
     .map((item, idx) => {
-      const namePlain = productName(item) + (item.isPartial ? ` (${item.partialPercentage || 0}%)` : '');
+      const namePlain = productName(item);
       const reason = formatNonReturnableReason(item.nonReturnableReason).toUpperCase();
-      const status = ((item as any).returnStatus || 'TBD').toUpperCase();
       const bg = idx % 2 === 0 ? ' class="alt"' : '';
-      
-      let statusCell = '';
-      // if (showStatus) {
-      //   statusCell = `<td>${escapeHtml(status)}</td><td>${escapeHtml(reason || '—')}</td>`;
-      // } else if (showReason) {
-      //   statusCell = `<td>${escapeHtml(reason)}</td>`;
-      // }
-      
+
+      const pkgSize = item.fullPackageSize != null ? String(item.fullPackageSize) : '—';
+
+      // Full Qty: units returned when NOT partial
+      const fullQty = item.isPartial
+        ? '—'
+        : String(item.fullPackageQtyReturned ?? item.quantity ?? '—');
+
+      // Partial Qty: show units + % when IS partial
+      const partialQty = item.isPartial
+        ? `${item.quantity ?? ''}${item.partialPercentage != null ? ` (${item.partialPercentage}%)` : ''}`
+        : '—';
+
+      const reasonCell = showReason ? `<td>${escapeHtml(reason || '—')}</td>` : '';
+
       return `<tr${bg}>
         <td class="mono">${escapeHtml(item.ndc || '—')}</td>
         <td>${escapeHtml(namePlain)}</td>
         <td>${escapeHtml(item.lotNumber || '—')}</td>
         <td>${escapeHtml(fmtDate(item.expirationDate))}</td>
-        <td class="num">${item.quantity}</td>
-        ${statusCell}
+        <td class="num">${escapeHtml(pkgSize)}</td>
+        <td class="num">${escapeHtml(fullQty)}</td>
+        <td class="num">${escapeHtml(partialQty)}</td>
+        ${reasonCell}
       </tr>`;
     })
     .join('');
-    
+
   return `
     <h2 class="section-title">${escapeHtml(title)}</h2>
     <table class="items">
       <thead><tr>${th}</tr></thead>
       <tbody>${rows}</tbody>
     </table>
-    <p class="subtotal"><strong>${escapeHtml(title)} total:</strong> ${items.length} items</p>
+    <p class="subtotal"><strong>${escapeHtml(title)} total:</strong> ${items.length} item${items.length !== 1 ? 's' : ''}</p>
   `;
 }
 
@@ -362,19 +382,32 @@ export function generateManifestHtml(data: ManifestData): string {
   const proc = data.processor;
   const dateStr = fmtDate(t.finalizedAt || t.createdAt);
   
-  // Show all items if specific categories are empty
+  // Build item blocks.
+  // Priority: use allItems (direct DB fetch — includes TBD and pkg size fields) when available.
+  // Fall back to combining returnableItems + nonReturnableItems from the RPC.
+  const allItemsSrc: ManifestItem[] = (data as any).allItems && (data as any).allItems.length > 0
+    ? (data as any).allItems
+    : [...data.returnableItems, ...data.nonReturnableItems];
+
   let returnableBlock = '';
   let nonRetBlock = '';
-  
-  if (data.returnableItems.length > 0) {
-    returnableBlock = manifestItemsTableHtml('RETURNABLE ITEMS', data.returnableItems, false);
-  } else if (data.nonReturnableItems.length > 0) {
-    nonRetBlock = manifestItemsTableHtml('NON-RETURNABLE ITEMS', data.nonReturnableItems, true);
-  } else if ((data as any).allItems && (data as any).allItems.length > 0) {
-    // Fallback: show all items if returnable/non-returnable are empty
-    returnableBlock = manifestItemsTableHtml('ALL ITEMS', (data as any).allItems, true);
+
+  if (allItemsSrc.length > 0) {
+    // Separate by status for display so labels are correct
+    const retItems = allItemsSrc.filter((i: ManifestItem) => (i as any).returnStatus === 'returnable');
+    const nonRetItems = allItemsSrc.filter((i: ManifestItem) => (i as any).returnStatus === 'non_returnable');
+    const otherItems = allItemsSrc.filter((i: ManifestItem) =>
+      (i as any).returnStatus !== 'returnable' && (i as any).returnStatus !== 'non_returnable'
+    );
+    const returnablePlusPending = [...retItems, ...otherItems];
+
+    if (returnablePlusPending.length > 0) {
+      returnableBlock += manifestItemsTableHtml('RETURNABLE ITEMS', returnablePlusPending, false);
+    }
+    if (nonRetItems.length > 0) {
+      nonRetBlock += manifestItemsTableHtml('NON-RETURNABLE ITEMS', nonRetItems, true);
+    }
   } else {
-    // Show message if no items found
     returnableBlock = `
       <h2 class="section-title">NO ITEMS FOUND</h2>
       <p>This return transaction appears to have no items or the items have not been classified yet.</p>
@@ -471,33 +504,29 @@ function drawItemsTable(
   doc.fontSize(11).font('Helvetica-Bold').fillColor('#000000').text(title);
   doc.moveDown(0.3);
 
-  // Column widths - destination removed per user request, only show reason for non-returnable
+  // Column widths — NDC | Product | Lot | Exp | Pkg Size | Full Qty | Partial Qty [| Reason]
   const cols = showReason
-    ? { ndc: 80, name: 165, lot: 60, exp: 60, qty: 35, price: 0, value: 0, reason: 62 }
-    : { ndc: 85, name: 200, lot: 70, exp: 70, qty: 40, price: 0, value: 0 };
+    ? { ndc: 68, name: 118, lot: 48, exp: 44, pkgSize: 36, fullQty: 36, partialQty: 52, reason: 50 }
+    : { ndc: 75, name: 145, lot: 55, exp: 50, pkgSize: 42, fullQty: 42, partialQty: 55 };
 
   const headerY = doc.y;
-
-  // Header bg
   doc.rect(40, headerY - 2, pageWidth, 14).fill('#e2e8f0');
 
-  // Header text
   doc.fillColor('#000000').fontSize(7).font('Helvetica-Bold');
   let x = 42;
   doc.text('NDC', x, headerY, { width: cols.ndc }); x += cols.ndc;
-  doc.text('PRODUCT', x, headerY, { width: (cols as any).name }); x += (cols as any).name;
+  doc.text('PRODUCT', x, headerY, { width: cols.name }); x += cols.name;
   doc.text('LOT', x, headerY, { width: cols.lot }); x += cols.lot;
   doc.text('EXP', x, headerY, { width: cols.exp }); x += cols.exp;
-  doc.text('QTY', x, headerY, { width: cols.qty }); x += cols.qty;
-  // doc.text('PRICE', x, headerY, { width: cols.price }); x += cols.price;
-  // doc.text('VALUE', x, headerY, { width: cols.value }); x += cols.value;
+  doc.text('PKG SIZE', x, headerY, { width: cols.pkgSize }); x += cols.pkgSize;
+  doc.text('FULL QTY', x, headerY, { width: cols.fullQty }); x += cols.fullQty;
+  doc.text('PARTIAL QTY', x, headerY, { width: cols.partialQty }); x += cols.partialQty;
   if (showReason) {
-    doc.text('REASON', x, headerY, { width: (cols as any).reason });
+    doc.text('REASON', x, headerY, { width: cols.reason });
   }
 
   doc.y = headerY + 16;
 
-  // Rows
   doc.font('Helvetica').fontSize(7);
   items.forEach((item, idx) => {
     if (doc.y > 700) {
@@ -506,39 +535,38 @@ function drawItemsTable(
     }
 
     const rowY = doc.y;
-
-    // Alternate row bg
     if (idx % 2 === 0) {
       doc.rect(40, rowY - 1, pageWidth, 12).fill('#f8fafc');
     }
 
+    // Compute Pkg Size / Full Qty / Partial Qty
+    const pkgSize = item.fullPackageSize != null ? String(item.fullPackageSize) : '—';
+    const fullQty = item.isPartial
+      ? '—'
+      : String(item.fullPackageQtyReturned ?? item.quantity ?? '—');
+    const partialQty = item.isPartial
+      ? `${item.quantity ?? ''}${item.partialPercentage != null ? ` (${item.partialPercentage}%)` : ''}`
+      : '—';
+
     doc.fillColor('#000000');
     let cx = 42;
     doc.text(item.ndc || '—', cx, rowY, { width: cols.ndc }); cx += cols.ndc;
-    const name = productName(item) + (item.isPartial ? ` (${item.partialPercentage || 0}%)` : '');
-    doc.text(name.substring(0, 35), cx, rowY, { width: (cols as any).name }); cx += (cols as any).name;
+    doc.text(productName(item).substring(0, 28), cx, rowY, { width: cols.name }); cx += cols.name;
     doc.text(item.lotNumber || '—', cx, rowY, { width: cols.lot }); cx += cols.lot;
     doc.text(fmtDate(item.expirationDate), cx, rowY, { width: cols.exp }); cx += cols.exp;
-    doc.text(String(item.quantity), cx, rowY, { width: cols.qty }); cx += cols.qty;
-    // doc.text(fmt$(item.standardPrice), cx, rowY, { width: cols.price }); cx += cols.price;
-    // doc.text(fmt$(item.estimatedValue), cx, rowY, { width: cols.value }); cx += cols.value;
+    doc.text(pkgSize, cx, rowY, { width: cols.pkgSize }); cx += cols.pkgSize;
+    doc.text(fullQty, cx, rowY, { width: cols.fullQty }); cx += cols.fullQty;
+    doc.text(partialQty, cx, rowY, { width: cols.partialQty }); cx += cols.partialQty;
     if (showReason) {
       const reasonLabel = formatNonReturnableReason(item.nonReturnableReason);
-      doc.text(reasonLabel.toUpperCase(), cx, rowY, { width: (cols as any).reason });
+      doc.text(reasonLabel.toUpperCase(), cx, rowY, { width: cols.reason });
     }
 
     doc.y = rowY + 13;
   });
 
-  // Table bottom line
   doc.strokeColor('#cccccc').lineWidth(0.5)
     .moveTo(40, doc.y).lineTo(572, doc.y).stroke();
-  doc.moveDown(0.3);
-
-  // Subtotal
-  // const totalValue = items.reduce((sum, i) => sum + (i.estimatedValue || 0), 0);
-  // doc.font('Helvetica-Bold').fontSize(8)
-  //   .text(`${title} TOTAL: ${items.length} items — ${fmt$(totalValue)}`, { align: 'right' });
   doc.moveDown(0.5);
 }
 
