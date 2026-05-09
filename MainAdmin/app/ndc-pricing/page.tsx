@@ -366,25 +366,25 @@ export default function NDCPricingPage() {
             {/* Table */}
             <div className="rounded-[4px] shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead>
-                            <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
-                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product Name</th>
-                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Current Price</th>
-                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap" title="Average ask price across observed credit memos">Avg Ask</th>
-                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap" title="Average received / credited price across observed credit memos">Avg Recv</th>
-                                <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap" title="Historical pay rate = avg received / avg ask">Pay %</th>
-                                <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap" title="Number of historical ask/received observations">Samples</th>
-                                <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap" title="Manufacturer reliability bucket derived from pay rate + sample size">Reliability</th>
-                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Est. Store Price</th>
-                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Source</th>
-                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Destination</th>
-                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Updated</th>
-                                <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
+                    <table className="w-full border" style={{ borderColor: 'var(--outline)' }}>
+                        <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
+                            <tr className="bg-[var(--surface-container-low)]">
+                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">NDC</th>
+                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Product Name</th>
+                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Current Price</th>
+                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap" title="Average ask price across observed credit memos">Avg Ask</th>
+                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap" title="Average received / credited price across observed credit memos">Avg Recv</th>
+                                <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap" title="Historical pay rate = avg received / avg ask">Pay %</th>
+                                <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap" title="Number of historical ask/received observations">Samples</th>
+                                <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap" title="Manufacturer reliability bucket derived from pay rate + sample size">Reliability</th>
+                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Est. Store Price</th>
+                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Source</th>
+                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Destination</th>
+                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Updated</th>
+                                <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                             {isLoading ? (
                                 <tr>
                                     <td colSpan={14} className="text-center py-12">
@@ -393,7 +393,7 @@ export default function NDCPricingPage() {
                                 </tr>
                             ) : items.length === 0 ? (
                                 <tr>
-                                    <td colSpan={14} className="text-center py-12 text-xs text-gray-400">
+                                    <td colSpan={14} className="text-center py-12 text-xs" style={{ color: 'var(--on-surface-variant)' }}>
                                         {debouncedSearch ? 'No results found' : 'No NDC pricing entries yet. Click "Add NDC Price" to get started.'}
                                     </td>
                                 </tr>
@@ -403,7 +403,7 @@ export default function NDCPricingPage() {
                                 const reliab = (row.manufacturerReliability ?? 'unknown') as ManufacturerReliability;
                                 const reliabColors = reliabilityBadgeColors(reliab);
                                 return (
-                                <tr key={row.id} className="border-b hover:bg-primary-50/40 transition-colors" style={{ borderColor: 'var(--outline-variant)' }}>
+                                <tr key={row.id} className="hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
                                     <td className="px-3 py-3">
                                         <span className="font-mono text-sm font-semibold text-primary-600">{row.ndc}</span>
                                     </td>

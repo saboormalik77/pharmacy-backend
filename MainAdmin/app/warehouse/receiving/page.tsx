@@ -195,7 +195,7 @@ export default function WarehouseReceivingPage() {
 
             {/* Back + Header */}
             <div>
-                <Link href="/warehouse" className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-primary-600 mb-1.5 transition-colors">
+                <Link href="/warehouse" className="inline-flex items-center gap-1 text-[11px] text-[var(--outline)] hover:text-primary-600 mb-1.5 transition-colors">
                     <ChevronLeft className="w-3 h-3" /> Back to Warehouse
                 </Link>
                 <h1 className="font-heading text-headline flex items-center gap-1.5" style={{ color: 'var(--foreground)' }}>
@@ -247,7 +247,7 @@ export default function WarehouseReceivingPage() {
                                                 ? ''
                                                 : ''
                                         }`}
-                                        style={receiveScanMode === key ? { backgroundColor: 'var(--primary-container)', color: 'var(--on-primary-container)', boxShadow: `0 0 0 1px var(--outline-variant)` } : { backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface-variant)' }}
+                                        style={receiveScanMode === key ? { backgroundColor: 'var(--surface-container-lowest)', color: 'var(--primary)', border: '1px solid var(--primary)' } : { backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface-variant)' }}
                                     >
                                         <Icon className="w-3 h-3" /> {label}
                                     </button>
@@ -286,21 +286,21 @@ export default function WarehouseReceivingPage() {
                             <div className="flex gap-2">
                                 <div className="relative flex-1">
                     <ScanLine className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--outline)' }} />
-                                    <input
-                                        ref={inputRef}
-                                        type="text"
-                                        value={trackingInput}
-                                        onChange={e => setTrackingInput(e.target.value)}
-                                        onKeyDown={handleScanKeyDown}
-                                        placeholder={scanProgress && !scanProgress.allScanned
-                                            ? 'Scan next box tracking number…'
-                                            : 'USB wedge: scan barcode — or type — then Enter'
-                                        }
-                                        className="w-full pl-9 pr-3 py-2 text-sm border-2 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-mono"
-                                        style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
-                                        autoFocus
-                                        disabled={isActionLoading || (scanProgress?.allScanned ?? false)}
-                                    />
+<input
+                                ref={inputRef}
+                                type="text"
+                                value={trackingInput}
+                                onChange={e => setTrackingInput(e.target.value)}
+                                onKeyDown={handleScanKeyDown}
+                                placeholder={scanProgress && !scanProgress.allScanned
+                                    ? 'Scan next box tracking number…'
+                                    : 'USB wedge: scan barcode — or type — then Enter'
+                                }
+                                className="w-full pl-9 pr-3 py-2 text-sm border-2 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-mono"
+                                style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface)' }}
+                                autoFocus
+                                disabled={isActionLoading || (scanProgress?.allScanned ?? false)}
+                            />
                                 </div>
                                 <Button
                                     variant="primary"
@@ -353,27 +353,32 @@ export default function WarehouseReceivingPage() {
                         <div
                             className="border-2 rounded-[4px] overflow-hidden"
                             style={{
-                                backgroundColor: scanProgress.allScanned ? 'var(--secondary-container)' : 'var(--primary-container)',
-                                borderColor: 'var(--outline-variant)',
+                                backgroundColor: scanProgress.allScanned ? 'var(--secondary-fixed)' : 'var(--primary-container)',
+                                borderColor: scanProgress.allScanned ? 'var(--secondary)' : 'var(--outline-variant)',
+                                boxShadow: scanProgress.allScanned ? '0 0 0 2px var(--secondary-container), 0 4px 12px rgba(61, 67, 67, 0.15)' : undefined,
                             }}
                         >
                             {/* Header */}
-                            <div className="px-4 py-2 flex items-center justify-between" style={{ backgroundColor: 'var(--surface-container-low)' }}>
+                            <div className="px-4 py-2.5 flex items-center justify-between" style={{ backgroundColor: scanProgress.allScanned ? 'var(--secondary-container)' : 'var(--surface-container-low)' }}>
                                 <div className="flex items-center gap-2">
                                     {scanProgress.allScanned
-                                        ? <CheckCircle className="w-4 h-4" style={{ color: 'var(--secondary)' }} />
+                                        ? <CheckCircle className="w-4.5 h-4.5" style={{ color: 'var(--secondary)' }} />
                                         : <Box className="w-4 h-4" style={{ color: 'var(--primary)' }} />
                                     }
-                                    <h3 className="font-heading text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+                                    <h3 className="font-heading text-sm font-semibold" style={{ color: scanProgress.allScanned ? 'var(--on-secondary-fixed)' : 'var(--foreground)' }}>
                                         {scanProgress.allScanned
                                             ? 'All Boxes Scanned — Return Received!'
                                             : `Scanning in Progress — ${scanProgress.scannedCount} of ${scanProgress.totalPackages} boxes`
                                         }
                                     </h3>
                                 </div>
-                                {!scanProgress.allScanned && (
+                                {!scanProgress.allScanned ? (
                                     <Badge variant="warning">
                                         <span className="text-[10px]">{scanProgress.totalPackages - scanProgress.scannedCount} remaining</span>
+                                    </Badge>
+                                ) : (
+                                    <Badge variant="success">
+                                        <span className="text-[10px]">Complete</span>
                                     </Badge>
                                 )}
                             </div>
@@ -382,11 +387,11 @@ export default function WarehouseReceivingPage() {
                                 {/* Return info */}
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                     {[
-                                        { label: 'License Plate', value: <span className="font-mono font-bold">{scannedReturn.licensePlate}</span> },
-                                        { label: 'Pharmacy', value: scannedReturn.pharmacyName },
-                                        { label: 'Total Items', value: scannedReturn.totalItems },
-                                        { label: 'Box Count', value: scannedReturn.boxCount ?? scanProgress.totalPackages },
-                                        { label: 'Returnable Value', value: <span style={{ color: 'var(--secondary)' }}>${Number(scannedReturn.totalReturnableValue || 0).toFixed(2)}</span> },
+                                        { label: 'License Plate', value: <span className="font-mono font-bold text-sm" style={{ color: scanProgress.allScanned ? 'var(--on-secondary-fixed)' : 'var(--foreground)' }}>{scannedReturn.licensePlate}</span> },
+                                        { label: 'Pharmacy', value: <span className="text-xs font-medium" style={{ color: scanProgress.allScanned ? 'var(--on-secondary-fixed)' : 'var(--foreground)' }}>{scannedReturn.pharmacyName}</span> },
+                                        { label: 'Total Items', value: <span className="text-xs font-medium" style={{ color: scanProgress.allScanned ? 'var(--on-secondary-fixed)' : 'var(--foreground)' }}>{scannedReturn.totalItems}</span> },
+                                        { label: 'Box Count', value: <span className="text-xs font-medium" style={{ color: scanProgress.allScanned ? 'var(--on-secondary-fixed)' : 'var(--foreground)' }}>{scannedReturn.boxCount ?? scanProgress.totalPackages}</span> },
+                                        { label: 'Returnable Value', value: <span className="text-xs font-bold" style={{ color: scanProgress.allScanned ? 'var(--on-secondary-fixed)' : 'var(--secondary)' }}>${Number(scannedReturn.totalReturnableValue || 0).toFixed(2)}</span> },
                                         { label: 'Status', value: (
                                             <Badge variant={scanProgress.allScanned ? 'success' : 'warning'}>
                                                 <span className="text-[10px]">{scanProgress.allScanned ? 'Received' : 'Scanning'}</span>
@@ -394,15 +399,15 @@ export default function WarehouseReceivingPage() {
                                         )},
                                     ].map(({ label, value }) => (
                                         <div key={label}>
-                                            <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>{label}</p>
-                                            <p className="text-xs font-medium mt-0.5" style={{ color: 'var(--foreground)' }}>{value}</p>
+                                            <p className="text-[10px]" style={{ color: scanProgress.allScanned ? 'var(--on-secondary-fixed)' : 'var(--on-surface-variant)' }}>{label}</p>
+                                            <p className="mt-0.5">{value}</p>
                                         </div>
                                     ))}
                                 </div>
 
                                 {/* Progress bar */}
                                 <div>
-                                    <div className="flex justify-between text-[10px] mb-1" style={{ color: 'var(--on-surface-variant)' }}>
+                                    <div className="flex justify-between text-[10px] mb-1" style={{ color: scanProgress.allScanned ? 'var(--on-secondary-fixed)' : 'var(--on-surface-variant)' }}>
                                         <span>Scan progress</span>
                                         <span>{scanProgress.scannedCount} / {scanProgress.totalPackages}</span>
                                     </div>
@@ -420,7 +425,7 @@ export default function WarehouseReceivingPage() {
                                 {/* Package list with scan status */}
                                 {allPackageTrackingNumbers.length > 0 && (
                                     <div>
-                                        <p className="text-[10px] font-semibold uppercase mb-1.5" style={{ color: 'var(--on-surface-variant)' }}>Package Tracking Numbers</p>
+                                        <p className="text-[10px] font-semibold uppercase mb-1.5" style={{ color: scanProgress.allScanned ? 'var(--on-secondary-fixed)' : 'var(--on-surface-variant)' }}>Package Tracking Numbers</p>
                                         <div className="space-y-1">
                                             {allPackageTrackingNumbers.map((num, idx) => {
                                                 const isScanned = scanState.scannedNumbers.some(
@@ -431,13 +436,13 @@ export default function WarehouseReceivingPage() {
                                                         key={idx}
                                                         className="flex items-center justify-between px-3 py-1.5 rounded-[4px] border"
                                                         style={{
-                                                            backgroundColor: isScanned ? 'var(--secondary-container)' : 'var(--surface-container-lowest)',
-                                                            borderColor: 'var(--outline-variant)',
+                                                            backgroundColor: isScanned ? 'var(--secondary-container)' : 'var(--surface-container-low)',
+                                                            borderColor: scanProgress.allScanned ? 'var(--secondary)' : 'var(--outline-variant)',
                                                         }}
                                                     >
                                                         <div className="flex items-center gap-2">
-                                                            <span className="text-[10px] w-16" style={{ color: 'var(--on-surface-variant)' }}>Box {idx + 1}</span>
-                                                            <span className="font-mono text-xs font-medium" style={{ color: 'var(--foreground)' }}>{num}</span>
+                                                            <span className="text-[10px] w-16" style={{ color: scanProgress.allScanned ? 'var(--on-secondary-fixed)' : 'var(--on-surface-variant)' }}>Box {idx + 1}</span>
+                                                            <span className="font-mono text-xs font-medium" style={{ color: scanProgress.allScanned ? 'var(--on-secondary-fixed)' : 'var(--foreground)' }}>{num}</span>
                                                         </div>
                                                         {isScanned ? (
                                                             <div className="flex items-center gap-1" style={{ color: 'var(--secondary)' }}>
@@ -459,7 +464,7 @@ export default function WarehouseReceivingPage() {
 
                                 {/* Info message */}
                                 {scanMessage && (
-                                    <div className="flex items-center gap-2 px-3 py-2 rounded text-xs border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)', color: 'var(--on-surface)' }}>
+                                    <div className="flex items-center gap-2 px-3 py-2 rounded text-xs border" style={{ backgroundColor: scanProgress.allScanned ? 'var(--secondary-container)' : 'var(--surface-container-low)', borderColor: scanProgress.allScanned ? 'var(--secondary)' : 'var(--outline-variant)', color: scanProgress.allScanned ? 'var(--on-secondary-fixed)' : 'var(--on-surface)' }}>
                                         {scanProgress.allScanned
                                             ? <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" />
                                             : <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
@@ -469,7 +474,7 @@ export default function WarehouseReceivingPage() {
                                 )}
 
                                 {/* Actions */}
-                                <div className="flex gap-2 pt-2 border-t" style={{ borderColor: 'var(--outline-variant)' }}>
+                                <div className="flex gap-2 pt-2 border-t" style={{ borderColor: scanProgress.allScanned ? 'var(--secondary)' : 'var(--outline-variant)' }}>
                                     {scanProgress.allScanned && (
                                         <Button variant="primary" size="sm" onClick={() => router.push(`/warehouse/verification/${scannedReturn.id}`)}>
                                             <ArrowRight className="w-3.5 h-3.5 mr-1" />Start Verification
@@ -497,8 +502,8 @@ export default function WarehouseReceivingPage() {
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
                                 placeholder="Search by license plate, tracking, or pharmacy..."
-                                className="w-full pl-8 pr-3 py-1.5 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
-                                style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}
+                                className="w-full pl-8 pr-3 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)', color: 'var(--on-surface)' }}
                             />
                         </div>
                     </div>
@@ -512,16 +517,16 @@ export default function WarehouseReceivingPage() {
                         </div>
                     ) : (
                         <div className="rounded-[4px] shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
-                            <table className="w-full">
-                                <thead>
-                                    <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">License Plate</th>
-                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Pharmacy</th>
-                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">FedEx Tracking</th>
-                                        <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Items</th>
-                                        <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Boxes</th>
-                                        <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Scan Status</th>
-                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Finalized</th>
+                            <table className="w-full border" style={{ borderColor: 'var(--outline)' }}>
+                                <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
+                                    <tr className="bg-[var(--surface-container-low)]">
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">License Plate</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Pharmacy</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">FedEx Tracking</th>
+                                        <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Items</th>
+                                        <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Boxes</th>
+                                        <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Scan Status</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Finalized</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
@@ -535,7 +540,7 @@ export default function WarehouseReceivingPage() {
                                         const fedexCopyKey = `${r.id}:fedex`;
                                         const fedexJustCopied = copiedTrackingKey === fedexCopyKey;
                                         return (
-                                            <tr key={r.id} className="hover:bg-primary-50/40" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
+                                            <tr key={r.id} className="hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
                                                 <td className="px-3 py-3 text-sm font-mono font-semibold" style={{ color: 'var(--foreground)' }}>{r.licensePlate}</td>
                                                 <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{r.pharmacyName}</td>
                                                 <td className="px-3 py-3">
@@ -633,8 +638,8 @@ export default function WarehouseReceivingPage() {
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
                                 placeholder="Search by license plate, tracking, or pharmacy..."
-                                className="w-full pl-8 pr-3 py-1.5 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
-                                style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}
+                                className="w-full pl-8 pr-3 py-1.5 text-xs border rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)', color: 'var(--on-surface)' }}
                             />
                         </div>
                         
@@ -690,20 +695,20 @@ export default function WarehouseReceivingPage() {
                         </div>
                     ) : (
                         <div className="rounded-[4px] shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
-                            <table className="w-full">
-                                <thead>
-                                    <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">License Plate</th>
-                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Pharmacy</th>
-                                        <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Items</th>
-                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Received</th>
-                                        <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Verified</th>
-                                        <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
+                            <table className="w-full border" style={{ borderColor: 'var(--outline)' }}>
+                                <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
+                                    <tr className="bg-[var(--surface-container-low)]">
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">License Plate</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Pharmacy</th>
+                                        <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Items</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Received</th>
+                                        <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Verified</th>
+                                        <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                     {receivedReturns.map(r => (
-                                        <tr key={r.id} className="hover:bg-primary-50/40" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
+                                        <tr key={r.id} className="hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
                                             <td className="px-3 py-3 text-sm font-mono font-semibold" style={{ color: 'var(--foreground)' }}>{r.licensePlate}</td>
                                             <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{r.pharmacyName}</td>
                                             <td className="px-3 py-3 text-sm text-center" style={{ color: 'var(--foreground)' }}>{r.totalItems}</td>

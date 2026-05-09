@@ -630,39 +630,39 @@ export default function VerifyItemPage() {
                 </div>
 
                 {/* Item Info */}
-                <div className="bg-white rounded-[4px] border border-gray-200 shadow-sm mb-5">
-                    <div className="px-5 py-4 border-b border-gray-100 bg-gray-50">
-                        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Product Information</h2>
+                <div className="bg-[var(--surface-container-lowest)] rounded-[4px] border shadow-sm mb-5" style={{ borderColor: 'var(--outline-variant)' }}>
+                    <div className="px-5 py-4 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                        <h2 className="text-sm font-semibold uppercase tracking-wide" style={{ color: 'var(--on-surface)' }}>Product Information</h2>
                     </div>
                     <div className="p-5">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-sm">
                             <div className="flex justify-between items-center py-1.5">
-                                <span className="text-gray-500 font-medium">NDC</span>
-                                <span className="font-mono text-gray-900 font-semibold">{verifyingItem.ndc || '—'}</span>
+                                <span className="text-[var(--on-surface-variant)] font-medium">NDC</span>
+                                <span className="font-mono font-semibold" style={{ color: 'var(--on-surface)' }}>{verifyingItem.ndc || '—'}</span>
                             </div>
                             <div className="flex justify-between items-center py-1.5">
-                                <span className="text-gray-500 font-medium">Lot</span>
-                                <span className="text-gray-900 font-semibold">{verifyingItem.lotNumber || '—'}</span>
+                                <span className="text-[var(--on-surface-variant)] font-medium">Lot</span>
+                                <span className="font-semibold" style={{ color: 'var(--on-surface)' }}>{verifyingItem.lotNumber || '—'}</span>
                             </div>
                             <div className="flex justify-between items-center py-1.5">
-                                <span className="text-gray-500 font-medium">Expires</span>
-                                <span className="text-gray-900 font-semibold">{verifyingItem.expirationDate || '—'}</span>
+                                <span className="text-[var(--on-surface-variant)] font-medium">Expires</span>
+                                <span className="font-semibold" style={{ color: 'var(--on-surface)' }}>{verifyingItem.expirationDate || '—'}</span>
                             </div>
                             <div className="flex justify-between items-center py-1.5">
-                                <span className="text-gray-500 font-medium">Pkg Size</span>
-                                <span className="text-gray-900 font-semibold">
+                                <span className="text-[var(--on-surface-variant)] font-medium">Pkg Size</span>
+                                <span className="font-semibold" style={{ color: 'var(--on-surface)' }}>
                                     {verifyingItem.fullPackageSize ? `${verifyingItem.fullPackageSize} units` : '—'}
                                 </span>
                             </div>
                             <div className="flex justify-between items-center py-1.5">
-                                <span className="text-gray-500 font-medium">Full Qty</span>
-                                <span className="text-gray-900 font-semibold">
+                                <span className="text-[var(--on-surface-variant)] font-medium">Full Qty</span>
+                                <span className="font-semibold" style={{ color: 'var(--on-surface)' }}>
                                     {verifyingItem.isPartial ? '—' : (verifyingItem.fullPackageQtyReturned ?? verifyingItem.quantity ?? '—')}
                                 </span>
                             </div>
                             <div className="flex justify-between items-center py-1.5">
-                                <span className="text-gray-500 font-medium">Partial Qty</span>
-                                <span className="text-gray-900 font-semibold">
+                                <span className="text-[var(--on-surface-variant)] font-medium">Partial Qty</span>
+                                <span className="font-semibold" style={{ color: 'var(--on-surface)' }}>
                                     {verifyingItem.isPartial ? (
                                         verifyingItem.partialPercentage 
                                             ? `${verifyingItem.quantity || 0} (${verifyingItem.partialPercentage}%)`
@@ -671,13 +671,13 @@ export default function VerifyItemPage() {
                                 </span>
                             </div>
                             <div className="flex justify-between items-center py-1.5">
-                                <span className="text-gray-500 font-medium">Serial No</span>
-                                <span className="font-mono text-gray-900 font-semibold">{verifyingItem.serialNumber || '—'}</span>
+                                <span className="text-[var(--on-surface-variant)] font-medium">Serial No</span>
+                                <span className="font-mono font-semibold" style={{ color: 'var(--on-surface)' }}>{verifyingItem.serialNumber || '—'}</span>
                             </div>
                             {verifyingItem.manufacturer && (
                                 <div className="flex justify-between items-center py-1.5">
-                                    <span className="text-gray-500 font-medium">Manufacturer</span>
-                                    <span className="text-gray-900 font-semibold">{verifyingItem.manufacturer}</span>
+                                    <span className="text-[var(--on-surface-variant)] font-medium">Manufacturer</span>
+                                    <span className="font-semibold" style={{ color: 'var(--on-surface)' }}>{verifyingItem.manufacturer}</span>
                                 </div>
                             )}
                         </div>
@@ -686,18 +686,18 @@ export default function VerifyItemPage() {
 
                 {/* NDC Pricing — gates verification until a price exists in the book */}
                 {hasNdc && (
-                    <div className="bg-white rounded-[4px] border border-gray-200 shadow-sm mb-5">
-                        <div className="px-5 py-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
-                            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide flex items-center gap-2">
+                    <div className="bg-[var(--surface-container-lowest)] rounded-[4px] border shadow-sm mb-5" style={{ borderColor: 'var(--outline-variant)' }}>
+                        <div className="px-5 py-4 border-b flex items-center justify-between" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                            <h2 className="text-sm font-semibold uppercase tracking-wide flex items-center gap-2" style={{ color: 'var(--on-surface)' }}>
                                 <DollarSign className="w-4 h-4 text-amber-600" />
                                 NDC Pricing
                             </h2>
-                            {priceLookupLoading && <Loader2 className="w-4 h-4 animate-spin text-gray-500" />}
+                            {priceLookupLoading && <Loader2 className="w-4 h-4 animate-spin text-[var(--on-surface-variant)]" />}
                         </div>
 
                         <div className="p-5 space-y-4">
                             {priceLookupLoading && !priceLookupChecked ? (
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                <div className="flex items-center gap-2 text-sm text-[var(--on-surface-variant)]">
                                     <Loader2 className="w-4 h-4 animate-spin" />
                                     Looking up price for NDC <span className="font-mono font-semibold">{verifyingItem.ndc}</span>...
                                 </div>
@@ -705,7 +705,7 @@ export default function VerifyItemPage() {
                                 <div className="rounded-[4px] border border-green-300 bg-gradient-to-br from-green-50 to-green-100/60 p-4">
                                     <div className="flex items-start justify-between gap-3">
                                         <div className="flex items-start gap-2">
-                                            <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                                            <CheckCircle className="w-5 h-5 text-[var(--status-success)] mt-0.5" />
                                             <div>
                                                 <p className="text-sm font-semibold text-green-800">
                                                     Price found in NDC Pricing Book
@@ -760,31 +760,33 @@ export default function VerifyItemPage() {
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div>
-                                            <label className="block text-[11px] font-semibold text-gray-700 uppercase tracking-wide mb-1">NDC</label>
+                                            <label className="block text-[11px] font-semibold uppercase tracking-wide mb-1" style={{ color: 'var(--on-surface)' }}>NDC</label>
                                             <input
                                                 type="text"
                                                 value={priceForm.ndc}
                                                 disabled
-                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] bg-gray-100 text-gray-700 font-mono"
+                                                className="w-full px-3 py-2 text-sm border rounded-[4px] bg-[var(--surface-container)] font-mono"
+                                                style={{ borderColor: 'var(--outline-variant)', color: 'var(--on-surface)' }}
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-[11px] font-semibold text-gray-700 uppercase tracking-wide mb-1">
-                                                Product Name <span className="text-gray-400 font-normal normal-case">(optional)</span>
+                                            <label className="block text-[11px] font-semibold uppercase tracking-wide mb-1" style={{ color: 'var(--on-surface)' }}>
+                                                Product Name <span className="text-[var(--outline)] font-normal normal-case">(optional)</span>
                                             </label>
                                             <input
                                                 type="text"
                                                 value={priceForm.productName || ''}
                                                 onChange={e => setPriceForm(d => ({ ...d, productName: e.target.value }))}
                                                 placeholder="Auto-filled from item"
-                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                                className="w-full px-3 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                                style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}
                                             />
                                         </div>
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                         <div>
-                                            <label className="block text-[11px] font-semibold text-gray-700 uppercase tracking-wide mb-1">
+                                            <label className="block text-[11px] font-semibold uppercase tracking-wide mb-1" style={{ color: 'var(--on-surface)' }}>
                                                 Current Price ($) <span className="text-red-500 normal-case">*</span>
                                             </label>
                                             <input
@@ -803,22 +805,24 @@ export default function VerifyItemPage() {
                                                         estimatedStorePrice: estimatedStoreFromCurrent(parsed),
                                                     }));
                                                 }}
-                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                                className="w-full px-3 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                                style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-[11px] font-semibold text-gray-700 uppercase tracking-wide mb-1">Est. Store Price ($)</label>
+                                            <label className="block text-[11px] font-semibold uppercase tracking-wide mb-1" style={{ color: 'var(--on-surface)' }}>Est. Store Price ($)</label>
                                             <input
                                                 type="text"
                                                 readOnly
                                                 value={priceForm.estimatedStorePrice != null ? priceForm.estimatedStorePrice.toFixed(2) : ''}
                                                 placeholder="—"
-                                                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-[4px] bg-gray-50 text-gray-700"
+                                                className="w-full px-3 py-2 text-sm border rounded-[4px] bg-[var(--surface-container-low)]"
+                                                style={{ borderColor: 'var(--outline-variant)', color: 'var(--on-surface)' }}
                                             />
-                                            <p className="text-[10px] text-gray-400 mt-0.5">70% of current (30% less)</p>
+                                            <p className="text-[10px] mt-0.5" style={{ color: 'var(--outline)' }}>70% of current (30% less)</p>
                                         </div>
                                         <div>
-                                            <label className="block text-[11px] font-semibold text-gray-700 uppercase tracking-wide mb-1">Last Reimbursement ($)</label>
+                                            <label className="block text-[11px] font-semibold uppercase tracking-wide mb-1" style={{ color: 'var(--on-surface)' }}>Last Reimbursement ($)</label>
                                             <input
                                                 type="number"
                                                 step="0.01"
@@ -830,29 +834,32 @@ export default function VerifyItemPage() {
                                                     const n = v === '' ? undefined : parseFloat(v);
                                                     setPriceForm(d => ({ ...d, lastReimbursement: n != null && !Number.isNaN(n) ? n : undefined }));
                                                 }}
-                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                                className="w-full px-3 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                                style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}
                                             />
                                         </div>
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div>
-                                            <label className="block text-[11px] font-semibold text-gray-700 uppercase tracking-wide mb-1">Price Source</label>
+                                            <label className="block text-[11px] font-semibold uppercase tracking-wide mb-1" style={{ color: 'var(--on-surface)' }}>Price Source</label>
                                             <select
                                                 value={priceForm.priceSource || ''}
                                                 onChange={e => setPriceForm(d => ({ ...d, priceSource: e.target.value }))}
-                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+                                                className="w-full px-3 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-amber-500 bg-[var(--surface-container-lowest)]"
+                                                style={{ borderColor: 'var(--outline-variant)', color: 'var(--on-surface)' }}
                                             >
                                                 <option value="">— Select source —</option>
                                                 {PRICE_SOURCES.map(s => <option key={s} value={s}>{s}</option>)}
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-[11px] font-semibold text-gray-700 uppercase tracking-wide mb-1">Close-Out Destination</label>
+                                            <label className="block text-[11px] font-semibold uppercase tracking-wide mb-1" style={{ color: 'var(--on-surface)' }}>Close-Out Destination</label>
                                             <select
                                                 value={priceForm.closeOutDestination || ''}
                                                 onChange={e => setPriceForm(d => ({ ...d, closeOutDestination: e.target.value }))}
-                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+                                                className="w-full px-3 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-amber-500 bg-[var(--surface-container-lowest)]"
+                                                style={{ borderColor: 'var(--outline-variant)', color: 'var(--on-surface)' }}
                                             >
                                                 <option value="">— Select destination —</option>
                                                 {PRICE_DESTINATIONS.map(d => <option key={d.value} value={d.value}>{d.label}</option>)}
@@ -883,14 +890,14 @@ export default function VerifyItemPage() {
                 )}
 
                 {/* Verification Form */}
-                <div className="bg-white rounded-[4px] border border-gray-200 shadow-sm">
-                    <div className="px-5 py-4 border-b border-gray-100 bg-gray-50">
-                        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Verification Details</h2>
+                <div className="bg-[var(--surface-container-lowest)] rounded-[4px] border shadow-sm" style={{ borderColor: 'var(--outline-variant)' }}>
+                    <div className="px-5 py-4 border-b" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
+                        <h2 className="text-sm font-semibold uppercase tracking-wide" style={{ color: 'var(--on-surface)' }}>Verification Details</h2>
                     </div>
                     <div className="p-5 space-y-5">
                         {/* Verification Status */}
                         <div>
-                            <label className="text-sm font-semibold text-gray-700 mb-2.5 block">Verification Status</label>
+                            <label className="text-sm font-semibold mb-2.5 block" style={{ color: 'var(--on-surface)' }}>Verification Status</label>
                             <div className="grid grid-cols-2 gap-3">
                                 {[
                                     { value: 'correct', label: 'Correct', color: 'green', icon: CheckCircle },
@@ -902,8 +909,8 @@ export default function VerifyItemPage() {
                                             verifyStatus === status.value 
                                                 ? status.color === 'green' 
                                                     ? 'border-green-400 bg-green-50 shadow-sm' 
-                                                    : 'border-red-400 bg-red-50 shadow-sm'
-                                                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                                    : 'border-[var(--error)] bg-[var(--error-container)] shadow-sm'
+                                                : 'border-[var(--outline-variant)] hover:border-[var(--outline-variant)] hover:bg-[var(--surface-container-low)]'
                                         }`}>
                                             <input 
                                                 type="radio" 
@@ -911,17 +918,17 @@ export default function VerifyItemPage() {
                                                 value={status.value} 
                                                 checked={verifyStatus === status.value} 
                                                 onChange={() => setVerifyStatus(status.value)} 
-                                                className={status.color === 'green' ? 'text-green-600' : 'text-red-600'} 
+                                                className={status.color === 'green' ? 'text-[var(--status-success)]' : 'text-[var(--error)]'} 
                                             />
                                             <Icon className={`w-4 h-4 ${
                                                 verifyStatus === status.value 
-                                                    ? status.color === 'green' ? 'text-green-600' : 'text-red-600'
-                                                    : 'text-gray-400'
+                                                    ? status.color === 'green' ? 'text-[var(--status-success)]' : 'text-[var(--error)]'
+                                                    : 'text-[var(--outline)]'
                                             }`} />
                                             <span className={`text-sm font-semibold ${
                                                 verifyStatus === status.value 
-                                                    ? status.color === 'green' ? 'text-green-700' : 'text-red-700'
-                                                    : 'text-gray-700'
+                                                    ? status.color === 'green' ? 'text-[var(--on-secondary-container)]' : 'text-red-700'
+                                                    : 'text-[var(--on-surface)]'
                                             }`}>
                                                 {status.label}
                                             </span>
@@ -974,13 +981,14 @@ export default function VerifyItemPage() {
                         {/* Quantity verification for damaged/wrong items */}
                         {(verifyStatus === 'damaged' || verifyStatus === 'wrong_item') && (
                             <div>
-                                <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1.5 block">Actual Quantity</label>
+                                <label className="text-xs font-semibold uppercase tracking-wide mb-1.5 block" style={{ color: 'var(--on-surface)' }}>Actual Quantity</label>
                                 <input
                                     type="number"
                                     value={verifyActualQty}
                                     onChange={e => setVerifyActualQty(e.target.value)}
                                     placeholder={`Expected: ${verifyingItem.quantity}`}
-                                    className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white shadow-sm"
+                                    className="w-full px-3 py-2.5 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
+                                    style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}
                                 />
                             </div>
                         )}
@@ -988,13 +996,14 @@ export default function VerifyItemPage() {
                         {/* Condition notes for damaged/wrong items */}
                         {(verifyStatus === 'damaged' || verifyStatus === 'wrong_item') && (
                             <div>
-                                <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1.5 block">Condition Notes</label>
+                                <label className="text-xs font-semibold uppercase tracking-wide mb-1.5 block" style={{ color: 'var(--on-surface)' }}>Condition Notes</label>
                                 <textarea 
                                     rows={3} 
                                     placeholder="Describe the issue..." 
                                     value={verifyNotes} 
                                     onChange={e => setVerifyNotes(e.target.value)}
-                                    className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none bg-white shadow-sm"
+                                    className="w-full px-3 py-2.5 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none shadow-sm"
+                                    style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}
                                 />
                             </div>
                         )}
@@ -1003,9 +1012,9 @@ export default function VerifyItemPage() {
                         {(verifyStatus === 'damaged' || verifyStatus === 'missing' || verifyStatus === 'wrong_item') && (
                             <div className="p-4 rounded-[4px] border border-red-300 bg-gradient-to-br from-red-50 to-red-100/50 shadow-sm">
                                 <div className="flex items-center gap-2 mb-2.5">
-                                    <AlertTriangle className="w-4 h-4 text-red-600" />
-                                    <label className="text-sm font-semibold text-red-800">
-                                        Non-Returnable Reason <span className="text-red-600">*</span>
+                                    <AlertTriangle className="w-4 h-4 text-[var(--error)]" />
+                                    <label className="text-sm font-semibold text-[var(--on-error-container)]">
+                                        Non-Returnable Reason <span className="text-[var(--error)]">*</span>
                                     </label>
                                 </div>
                                 <p className="text-xs text-red-700 mb-3 leading-relaxed">
@@ -1014,7 +1023,7 @@ export default function VerifyItemPage() {
                                 <select
                                     value={nonReturnableReason}
                                     onChange={e => setNonReturnableReason(e.target.value)}
-                                    className="w-full px-3 py-2.5 text-sm border border-red-300 rounded-[4px] bg-white focus:outline-none focus:ring-2 focus:ring-red-500 shadow-sm cursor-pointer"
+                                    className="w-full px-3 py-2.5 text-sm border border-red-300 rounded-[4px] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--error)] shadow-sm cursor-pointer"
                                 >
                                     <option value="">— Select a reason —</option>
                                     {NON_RETURNABLE_REASONS.map(r => (
@@ -1024,27 +1033,27 @@ export default function VerifyItemPage() {
                             </div>
                         )}
 
-                        {/* Policy Check & Routing */}
+{/* Policy Check & Routing */}
                         {verifyStatus === 'correct' && (
                             <div className="space-y-4 p-4 rounded-[4px] border border-indigo-300 bg-gradient-to-br from-indigo-50 to-indigo-100/50 shadow-sm">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <ShieldAlert className="w-5 h-5 text-indigo-600" />
-                                        <h3 className="text-sm font-semibold text-indigo-800 uppercase tracking-wide">Policy Check & Routing</h3>
+                                        <h3 className="text-sm font-semibold uppercase tracking-wide" style={{ color: 'var(--on-surface)' }}>Policy Check & Routing</h3>
                                     </div>
                                     {isPolicyChecking && <Loader2 className="w-5 h-5 animate-spin text-indigo-600" />}
                                 </div>
 
                                 {!verifyingItem.ndc || !verifyingItem.expirationDate ? (
-                                    <p className="text-sm text-amber-700">
+                                    <p className="text-sm" style={{ color: 'var(--on-surface-variant)' }}>
                                         Missing NDC or expiration date, so policy could not run. Choose routing manually.
                                     </p>
                                 ) : policyResult && policyResult.status !== 'tbd' ? (
                                     <div className="space-y-3">
-                                        <div className="text-sm text-gray-700 space-y-2">
+                                        <div className="text-sm space-y-2" style={{ color: 'var(--on-surface)' }}>
                                             <p>
                                                 <span className="font-medium">Policy Status:</span>{' '}
-                                                <span className={policyResult.status === 'returnable' ? 'text-green-700 font-semibold' : policyResult.status === 'non_returnable' ? 'text-red-700 font-semibold' : 'text-amber-700 font-semibold'}>
+                                                <span className={policyResult.status === 'returnable' ? 'text-[var(--on-secondary-container)] font-semibold' : policyResult.status === 'non_returnable' ? 'text-red-700 font-semibold' : 'text-amber-700 font-semibold'}>
                                                     {policyResult.status.replace('_', ' ')}
                                                 </span>
                                             </p>
@@ -1057,29 +1066,29 @@ export default function VerifyItemPage() {
                                         </div>
                                         
                                         <div className="flex items-center justify-between">
-                                            <p className="text-sm text-amber-700 bg-amber-100 border border-amber-300 rounded px-3 py-2">
+                                            <p className="text-sm bg-amber-100 border border-amber-300 rounded px-3 py-2" style={{ color: 'var(--on-surface)' }}>
                                                 🔒 Policy determined routing - cannot be changed
                                             </p>
                                             <button 
                                                 type="button"
                                                 onClick={handleViewPolicy}
-                                                className="text-sm text-primary-600 hover:text-primary-800 underline font-medium"
+                                                className="text-sm underline font-medium"
+                                                style={{ color: 'var(--primary)' }}
                                             >
                                                 View Policy
                                             </button>
                                         </div>
 
-                                        {/* Policy-locked routing display */}
                                         <div className="grid grid-cols-2 gap-3">
-                                            <div className={`p-4 border-2 rounded-[4px] ${policyResult.status === 'returnable' ? 'border-green-400 bg-green-50' : 'border-gray-200 bg-gray-100'}`}>
+                                            <div className={`p-4 border-2 rounded-[4px] ${policyResult.status === 'returnable' ? 'border-green-400 bg-green-50' : 'border-[var(--outline-variant)] bg-[var(--surface-container)]'}`}>
                                                 <input type="radio" checked={policyResult.status === 'returnable'} disabled className="mr-2" />
-                                                <span className={`text-sm font-medium ${policyResult.status === 'returnable' ? 'text-green-700' : 'text-gray-500'}`}>
+                                                <span className={`text-sm font-medium ${policyResult.status === 'returnable' ? 'text-[var(--on-secondary-container)]' : 'text-[var(--on-surface-variant)]'}`}>
                                                     ✓ Returnable
                                                 </span>
                                             </div>
-                                            <div className={`p-4 border-2 rounded-[4px] ${policyResult.status === 'non_returnable' ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-100'}`}>
+                                            <div className={`p-4 border-2 rounded-[4px] ${policyResult.status === 'non_returnable' ? 'border-[var(--error)] bg-[var(--error-container)]' : 'border-[var(--outline-variant)] bg-[var(--surface-container)]'}`}>
                                                 <input type="radio" checked={policyResult.status === 'non_returnable'} disabled className="mr-2" />
-                                                <span className={`text-sm font-medium ${policyResult.status === 'non_returnable' ? 'text-red-700' : 'text-gray-500'}`}>
+                                                <span className={`text-sm font-medium ${policyResult.status === 'non_returnable' ? 'text-red-700' : 'text-[var(--on-surface-variant)]'}`}>
                                                     ✗ Non-Returnable
                                                 </span>
                                             </div>
@@ -1087,29 +1096,30 @@ export default function VerifyItemPage() {
                                         
                                         {policyResult.status === 'returnable' && policyResult.destination && (
                                             <div>
-                                                <label className="text-sm font-medium text-gray-700">Destination (from policy)</label>
+                                                <label className="text-sm font-medium mb-2 block" style={{ color: 'var(--on-surface)' }}>Destination (from policy)</label>
                                                 <input
                                                     type="text"
                                                     value={policyResult.destination}
                                                     disabled
-                                                    className="mt-2 w-full px-3 py-2 text-sm border border-gray-200 rounded-[4px] bg-gray-100 text-gray-600"
+                                                    className="mt-2 w-full px-3 py-2 text-sm border rounded-[4px] bg-[var(--surface-container)]"
+                                                    style={{ borderColor: 'var(--outline-variant)', color: 'var(--on-surface-variant)' }}
                                                 />
                                             </div>
                                         )}
                                     </div>
                                 ) : (
                                     <div className="space-y-4">
-                                        <p className="text-sm text-gray-600">
+                                        <p className="text-sm" style={{ color: 'var(--on-surface-variant)' }}>
                                             {policyResult?.status === 'tbd' 
                                                 ? 'Policy status is TBD. Please choose routing manually.' 
                                                 : 'Policy check could not return a result. You can still choose routing manually.'
-                                            }
+                                        }
                                         </p>
                                         
                                         {/* Manual routing selection */}
                                         <div className="grid grid-cols-2 gap-3">
                                             <label className={`flex items-center gap-2 p-4 border-2 rounded-[4px] cursor-pointer transition-colors ${
-                                                returnStatus === 'returnable' ? 'border-green-400 bg-green-50' : 'border-gray-200 hover:border-gray-300'
+                                                returnStatus === 'returnable' ? 'border-green-400 bg-green-50' : 'border-[var(--outline-variant)] hover:border-[var(--outline-variant)]'
                                             }`}>
                                                 <input 
                                                     type="radio" 
@@ -1121,16 +1131,16 @@ export default function VerifyItemPage() {
                                                         setDisposition('returnable');
                                                         fetchReverseDistributors();
                                                     }} 
-                                                    className="text-green-600 focus:ring-green-500" 
+                                                    className="text-[var(--status-success)] focus:ring-green-500" 
                                                 />
                                                 <div>
-                                                    <p className="text-sm font-medium text-green-700">
+                                                    <p className="text-sm font-medium text-[var(--on-secondary-container)]">
                                                         <CheckCircle className="w-4 h-4 inline mr-1" />Returnable
                                                     </p>
                                                 </div>
                                             </label>
                                             <label className={`flex items-center gap-2 p-4 border-2 rounded-[4px] cursor-pointer transition-colors ${
-                                                returnStatus === 'non_returnable' ? 'border-red-400 bg-red-50' : 'border-gray-200 hover:border-gray-300'
+                                                returnStatus === 'non_returnable' ? 'border-[var(--error)] bg-[var(--error-container)]' : 'border-[var(--outline-variant)] hover:border-[var(--outline-variant)]'
                                             }`}>
                                                 <input 
                                                     type="radio" 
@@ -1141,7 +1151,7 @@ export default function VerifyItemPage() {
                                                         setReturnStatus('non_returnable');
                                                         setDisposition(nonReturnableRoute);
                                                     }} 
-                                                    className="text-red-600 focus:ring-red-500" 
+                                                    className="text-[var(--error)] focus:ring-[var(--error)]" 
                                                 />
                                                 <div>
                                                     <p className="text-sm font-medium text-red-700">
@@ -1153,14 +1163,14 @@ export default function VerifyItemPage() {
 
                                         {returnStatus === 'returnable' && (
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    Destination <span className="text-red-600">*</span>
+                                                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--on-surface)' }}>
+                                                    Destination <span className="text-[var(--error)]">*</span>
                                                 </label>
                                                 <select 
                                                     value={manualDestination} 
                                                     onChange={e => setManualDestination(e.target.value)} 
                                                     className={`w-full px-3 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                                                        !manualDestination.trim() ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                                                        !manualDestination.trim() ? 'border-red-300 bg-[var(--error-container)]' : 'border-[var(--outline-variant)]'
                                                     }`}
                                                     disabled={loadingDistributors}
                                                 >
@@ -1174,7 +1184,7 @@ export default function VerifyItemPage() {
                                                     ))}
                                                 </select>
                                                 {!manualDestination.trim() && (
-                                                    <p className="text-xs text-red-600 mt-1">Destination is required to save this item.</p>
+                                                    <p className="text-xs text-[var(--error)] mt-1">Destination is required to save this item.</p>
                                                 )}
                                             </div>
                                         )}
@@ -1182,10 +1192,10 @@ export default function VerifyItemPage() {
                                         {returnStatus === 'non_returnable' && (
                                             <div className="space-y-4">
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-2">Non-Returnable Route</label>
+                                                    <label className="block text-sm font-medium mb-2" style={{ color: 'var(--on-surface)' }}>Non-Returnable Route</label>
                                                     <div className="grid grid-cols-2 gap-3">
                                                         <label className={`flex items-center gap-2 p-3 border rounded-[4px] cursor-pointer ${
-                                                            nonReturnableRoute === 'wine_cellar' ? 'border-purple-400 bg-purple-50' : 'border-gray-300'
+                                                            nonReturnableRoute === 'wine_cellar' ? 'border-[var(--tertiary)] bg-[var(--tertiary-container)]' : 'border-[var(--outline-variant)]'
                                                         }`}>
                                                             <input 
                                                                 type="radio" 
@@ -1193,15 +1203,14 @@ export default function VerifyItemPage() {
                                                                 onChange={() => {
                                                                     setNonReturnableRoute('wine_cellar');
                                                                     setDisposition('wine_cellar');
-                                                                    // Auto-set wine cellar reason
                                                                     setNonReturnableReason('date');
                                                                 }} 
                                                             />
-                                                            <Archive className="w-4 h-4 text-purple-600" />
-                                                            <span className="text-sm font-medium text-purple-800">Wine Cellar</span>
+                                                            <Archive className="w-4 h-4 text-[var(--tertiary)]" />
+                                                            <span className="text-sm font-medium text-[var(--on-tertiary-container)]">Wine Cellar</span>
                                                         </label>
                                                         <label className={`flex items-center gap-2 p-3 border rounded-[4px] cursor-pointer ${
-                                                            nonReturnableRoute === 'destruction' ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                                                            nonReturnableRoute === 'destruction' ? 'border-[var(--error)] bg-[var(--error-container)]' : 'border-[var(--outline-variant)]'
                                                         }`}>
                                                             <input 
                                                                 type="radio" 
@@ -1209,29 +1218,27 @@ export default function VerifyItemPage() {
                                                                 onChange={() => {
                                                                     setNonReturnableRoute('destruction');
                                                                     setDisposition('destruction');
-                                                                    // Clear auto-set reason so user must choose
                                                                     if (nonReturnableReason === 'date') {
                                                                         setNonReturnableReason('');
                                                                     }
                                                                 }} 
                                                             />
-                                                            <Ban className="w-4 h-4 text-red-600" />
-                                                            <span className="text-sm font-medium text-red-800">Destruction</span>
+                                                            <Ban className="w-4 h-4 text-[var(--error)]" />
+                                                            <span className="text-sm font-medium text-[var(--on-error-container)]">Destruction</span>
                                                         </label>
                                                     </div>
                                                 </div>
 
-                                                {/* FCR-52: Required reason dropdown */}
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                        Non-Returnable Reason <span className="text-red-600">*</span>
+                                                    <label className="block text-sm font-medium mb-2" style={{ color: 'var(--on-surface)' }}>
+                                                        Non-Returnable Reason <span className="text-[var(--error)]">*</span>
                                                     </label>
                                                     {nonReturnableRoute === 'wine_cellar' ? (
-                                                        <div className="p-3 rounded-[4px] border border-purple-200 bg-purple-50">
-                                                            <p className="text-sm font-medium text-purple-800">
-                                                                🍷 Wine Cellar items are automatically assigned reason: <strong>"Past Expiration Date"</strong>
+                                                        <div className="p-3 rounded-[4px] border border-[var(--outline-variant)] bg-[var(--surface-container-low)]">
+                                                            <p className="text-sm font-medium text-[var(--on-surface)]">
+                                                                Wine Cellar items are automatically assigned reason: <strong>"Past Expiration Date"</strong>
                                                             </p>
-                                                            <p className="text-xs text-purple-700 mt-1">
+                                                            <p className="text-xs text-[var(--on-surface-variant)] mt-1">
                                                                 This indicates the item is being shelved for future return when policy allows.
                                                             </p>
                                                         </div>
@@ -1239,7 +1246,8 @@ export default function VerifyItemPage() {
                                                         <select
                                                             value={nonReturnableReason}
                                                             onChange={e => setNonReturnableReason(e.target.value)}
-                                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                            className="w-full px-3 py-2 text-sm border rounded-[4px] bg-[var(--surface-container-lowest)] focus:outline-none focus:ring-2 focus:ring-[var(--error)]"
+                                                            style={{ borderColor: 'var(--outline-variant)', color: 'var(--on-surface)' }}
                                                         >
                                                             <option value="">— Select a reason —</option>
                                                             {NON_RETURNABLE_REASONS.map(r => (
@@ -1251,12 +1259,13 @@ export default function VerifyItemPage() {
 
                                                 {nonReturnableRoute === 'wine_cellar' && (
                                                     <div>
-                                                        <label className="block text-sm font-medium text-gray-700 mb-2">Expected Returnable Date *</label>
+                                                        <label className="block text-sm font-medium mb-2" style={{ color: 'var(--on-surface)' }}>Expected Returnable Date *</label>
                                                         <input
                                                             type="date"
                                                             value={wineCellarDate}
                                                             onChange={e => setWineCellarDate(e.target.value)}
-                                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                                            className="w-full px-3 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[var(--secondary)]"
+                                                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}
                                                         />
                                                     </div>
                                                 )}
@@ -1265,39 +1274,32 @@ export default function VerifyItemPage() {
                                     </div>
                                 )}
 
-                                {/* FCR-52: Policy-locked routing — show reason
-                                    dropdown so admin can confirm/override even
-                                    in the policy path (it's required). */}
                                 {policyResult && policyResult.status === 'non_returnable' && (
-                                    <div className="space-y-2 pt-2 border-t border-primary-200">
-                                        <label className="block text-sm font-medium text-gray-700">
-                                            Non-Returnable Reason <span className="text-red-600">*</span>
+                                    <div className="space-y-2 pt-2 border-t border-[var(--outline-variant)]">
+                                        <label className="block text-sm font-medium" style={{ color: 'var(--on-surface)' }}>
+                                            Non-Returnable Reason <span className="text-[var(--error)]">*</span>
                                         </label>
                                         {disposition === 'wine_cellar' ? (
-                                            <div className="p-3 rounded-[4px] border border-purple-200 bg-purple-50">
-                                                <p className="text-sm font-medium text-purple-800">
-                                                    🍷 Wine Cellar routing uses reason: <strong>"Past Expiration Date"</strong>
+                                            <div className="p-3 rounded-[4px] border border-[var(--outline-variant)] bg-[var(--surface-container-low)]">
+                                                <p className="text-sm font-medium text-[var(--on-surface)]">
+                                                    Wine Cellar routing uses reason: <strong>"Past Expiration Date"</strong>
                                                 </p>
-                                                <p className="text-xs text-purple-700 mt-1">
+                                                <p className="text-xs text-[var(--on-surface-variant)] mt-1">
                                                     This is automatically set for wine cellar items based on policy determination.
                                                 </p>
                                             </div>
                                         ) : (
-                                            <>
-                                                <select
-                                                    value={nonReturnableReason}
-                                                    onChange={e => setNonReturnableReason(e.target.value)}
-                                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
-                                                >
-                                                    <option value="">— Select a reason —</option>
-                                                    {NON_RETURNABLE_REASONS.map(r => (
-                                                        <option key={r.id} value={r.value}>{r.label}</option>
-                                                    ))}
-                                                </select>
-                                                <p className="text-xs text-gray-500">
-                                                    Pre-selected based on the policy result; please confirm or change before saving.
-                                                </p>
-                                            </>
+                                            <select
+                                                value={nonReturnableReason}
+                                                onChange={e => setNonReturnableReason(e.target.value)}
+                                                className="w-full px-3 py-2 text-sm border rounded-[4px] bg-[var(--surface-container-lowest)] focus:outline-none focus:ring-2 focus:ring-[var(--error)]"
+                                                style={{ borderColor: 'var(--outline-variant)', color: 'var(--on-surface)' }}
+                                            >
+                                                <option value="">— Select a reason —</option>
+                                                {NON_RETURNABLE_REASONS.map(r => (
+                                                    <option key={r.id} value={r.value}>{r.label}</option>
+                                                ))}
+                                            </select>
                                         )}
                                     </div>
                                 )}
@@ -1306,21 +1308,21 @@ export default function VerifyItemPage() {
 
                         {/* Notes */}
                         <div className="pt-1">
-                            <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1.5 block">Notes (optional)</label>
+                            <label className="text-xs font-semibold uppercase tracking-wide mb-1.5 block" style={{ color: 'var(--on-surface)' }}>Notes (optional)</label>
                             <textarea 
                                 rows={3} 
                                 value={verifyNotes} 
                                 onChange={e => setVerifyNotes(e.target.value)}
                                 placeholder="Any additional notes about this verification..."
-                                className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none bg-white shadow-sm"
+                                className="w-full px-3 py-2.5 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none shadow-sm"
+                                style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}
                             />
                         </div>
                     </div>
 
-                    {/* Footer */}
-                    <div className="border-t bg-gray-50 px-5 py-4 rounded-b-xl flex items-center justify-between gap-3">
+                    <div className="border-t px-5 py-4 rounded-b-xl flex items-center justify-between gap-3" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                         <div className="flex flex-col gap-1">
-                            <p className="text-xs text-gray-500">* indicates required field</p>
+                            <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>* indicates required field</p>
                             {priceGateActive && (
                                 <p className="text-xs text-amber-700 font-medium flex items-center gap-1">
                                     <AlertTriangle className="w-3.5 h-3.5" />
@@ -1331,7 +1333,8 @@ export default function VerifyItemPage() {
                         <div className="flex gap-2.5">
                             <button 
                                 onClick={handleBack} 
-                                className="px-4 py-2.5 text-sm font-semibold text-gray-600 border border-gray-300 rounded-[4px] hover:bg-gray-100 transition-colors cursor-pointer"
+                                className="px-4 py-2.5 text-sm font-semibold border rounded-[4px] hover:bg-[var(--surface-container-low)] transition-colors cursor-pointer"
+                                style={{ borderColor: 'var(--outline-variant)', color: 'var(--on-surface)' }}
                             >
                                 Cancel
                             </button>

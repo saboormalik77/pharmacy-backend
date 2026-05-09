@@ -9,13 +9,13 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ({ className, variant = 'default', size = 'md', ...props }, ref) => {
         const variantStyles = {
-            default: 'bg-gray-600 text-white hover:opacity-90 active:scale-95',
-            primary: 'bg-primary-500 text-white hover:opacity-90 active:scale-95',
-            success: 'bg-green-600 text-white hover:opacity-90 active:scale-95',
-            danger: 'bg-red-600 text-white hover:opacity-90 active:scale-95',
-            warning: 'bg-yellow-500 text-white hover:opacity-90 active:scale-95',
-            ghost: 'bg-transparent hover:bg-gray-100 text-gray-700',
-            outline: 'border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-700',
+            default: 'bg-[var(--primary)] text-[var(--on-primary)] hover:bg-[var(--primary-container)] active:scale-[0.95]',
+            primary: 'bg-[var(--secondary)] text-[var(--on-secondary)] hover:opacity-90 active:scale-[0.95]',
+            success: 'bg-[var(--secondary)] text-[var(--on-secondary)] hover:opacity-90 active:scale-[0.95]',
+            danger: 'bg-red-600 text-white hover:bg-red-700 active:scale-[0.95]',
+            warning: 'bg-[var(--tertiary)] text-[var(--on-tertiary)] hover:opacity-90 active:scale-[0.95]',
+            ghost: 'bg-transparent hover:bg-gray-50 text-gray-700 border border-[var(--primary)]',
+            outline: 'border border-[var(--primary)] bg-transparent text-[var(--primary)] hover:bg-gray-50',
         };
 
         const sizeStyles = {
@@ -28,7 +28,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             <button
                 className={cn(
                     'inline-flex items-center justify-center rounded-[4px] font-medium transition-all cursor-pointer',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--secondary)]',
                     'disabled:opacity-50 disabled:cursor-not-allowed',
                     variantStyles[variant],
                     sizeStyles[size],

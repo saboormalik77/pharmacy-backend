@@ -193,7 +193,7 @@ export default function TbdItemsPage() {
             {/* Search */}
             <div className="rounded-[4px] shadow px-3 py-2 border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 <div className="relative">
-                    <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--outline)]" />
                     <input
                         type="text"
                         value={search}
@@ -256,21 +256,21 @@ export default function TbdItemsPage() {
                                             </div>
                                         ) : (
                                             <div className="overflow-x-auto">
-                                                <table className="w-full">
-                                                    <thead>
-                                                        <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">NDC</th>
-                                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Product</th>
-                                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Manufacturer</th>
-                                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Lot</th>
-                                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Expires</th>
-                                                            <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Qty</th>
-                                                            <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
+                                                <table className="w-full border" style={{ borderColor: 'var(--outline)' }}>
+                                                    <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
+                                                        <tr className="bg-[var(--surface-container-low)]">
+                                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">NDC</th>
+                                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Product</th>
+                                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Manufacturer</th>
+                                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Lot</th>
+                                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Expires</th>
+                                                            <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Qty</th>
+                                                            <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Actions</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                                         {items.map(item => (
-                                                            <tr key={item.id} className="hover:bg-primary-50/40 transition-colors">
+                                                            <tr key={item.id} className="hover:bg-[var(--surface-container)] transition-colors" style={{ borderColor: 'var(--outline-variant)' }}>
                                                                 <td className="px-3 py-3 text-sm font-mono whitespace-nowrap" style={{ color: 'var(--foreground)' }}>{item.ndc || '—'}</td>
                                                                 <td className="px-3 py-3 text-sm max-w-[140px] truncate" style={{ color: 'var(--foreground)' }} title={item.proprietaryName || ''}>
                                                                     {item.proprietaryName || item.genericName || '—'}
@@ -327,10 +327,10 @@ export default function TbdItemsPage() {
 
                             {/* Resolution status */}
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-2">Resolve As <span className="text-red-500">*</span></label>
+                                <label className="block text-xs font-medium text-[var(--on-surface)] mb-2">Resolve As <span className="text-red-500">*</span></label>
                                 <div className="flex gap-3">
                                     <label className={`flex-1 flex items-center gap-2 p-3 border-2 rounded-[4px] cursor-pointer transition-colors ${
-                                        resolveForm.new_status === 'returnable' ? 'border-green-400 bg-green-50' : 'border-gray-200 hover:border-gray-300'
+                                        resolveForm.new_status === 'returnable' ? 'border-green-400 bg-green-50' : 'border-[var(--outline-variant)] hover:border-[var(--outline-variant)]'
                                     }`}>
                                         <input type="radio" name="resolve_status" value="returnable" checked={resolveForm.new_status === 'returnable'} onChange={() => setResolveForm({ ...resolveForm, new_status: 'returnable' })} className="text-green-600 focus:ring-green-500" />
                                         <div>
@@ -338,7 +338,7 @@ export default function TbdItemsPage() {
                                         </div>
                                     </label>
                                     <label className={`flex-1 flex items-center gap-2 p-3 border-2 rounded-[4px] cursor-pointer transition-colors ${
-                                        resolveForm.new_status === 'non_returnable' ? 'border-red-400 bg-red-50' : 'border-gray-200 hover:border-gray-300'
+                                        resolveForm.new_status === 'non_returnable' ? 'border-red-400 bg-red-50' : 'border-[var(--outline-variant)] hover:border-[var(--outline-variant)]'
                                     }`}>
                                         <input type="radio" name="resolve_status" value="non_returnable" checked={resolveForm.new_status === 'non_returnable'} onChange={() => setResolveForm({ ...resolveForm, new_status: 'non_returnable' })} className="text-red-600 focus:ring-red-500" />
                                         <div>
@@ -351,8 +351,8 @@ export default function TbdItemsPage() {
                             {/* Destination (returnable only) */}
                             {resolveForm.new_status === 'returnable' && (
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-1">Destination</label>
-                                    <select value={resolveForm.destination} onChange={e => setResolveForm({ ...resolveForm, destination: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">Destination</label>
+                                    <select value={resolveForm.destination} onChange={e => setResolveForm({ ...resolveForm, destination: e.target.value })} className="w-full px-3 py-2 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500">
                                         <option value="">— Select —</option>
                                         <option value="inmar">Inmar</option>
                                         <option value="qualanex">Qualanex</option>
@@ -366,14 +366,14 @@ export default function TbdItemsPage() {
                             {resolveForm.new_status === 'non_returnable' && (
                                 <>
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">Non-Returnable Route</label>
+                                        <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">Non-Returnable Route</label>
                                         <div className="grid grid-cols-2 gap-2">
-                                            <label className={`flex items-center gap-2 px-3 py-2 border rounded cursor-pointer ${nonReturnableRoute === 'wine_cellar' ? 'border-purple-400 bg-purple-50' : 'border-gray-300'}`}>
+                                            <label className={`flex items-center gap-2 px-3 py-2 border rounded cursor-pointer ${nonReturnableRoute === 'wine_cellar' ? 'border-purple-400 bg-purple-50' : 'border-[var(--outline-variant)]'}`}>
                                                 <input type="radio" checked={nonReturnableRoute === 'wine_cellar'} onChange={() => setNonReturnableRoute('wine_cellar')} />
                                                 <Archive className="w-3.5 h-3.5 text-purple-600" />
                                                 <span className="text-xs font-medium text-purple-800">Wine Cellar</span>
                                             </label>
-                                            <label className={`flex items-center gap-2 px-3 py-2 border rounded cursor-pointer ${nonReturnableRoute === 'destruction' ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}>
+                                            <label className={`flex items-center gap-2 px-3 py-2 border rounded cursor-pointer ${nonReturnableRoute === 'destruction' ? 'border-red-400 bg-red-50' : 'border-[var(--outline-variant)]'}`}>
                                                 <input type="radio" checked={nonReturnableRoute === 'destruction'} onChange={() => setNonReturnableRoute('destruction')} />
                                                 <Ban className="w-3.5 h-3.5 text-red-600" />
                                                 <span className="text-xs font-medium text-red-800">Destruction</span>
@@ -382,18 +382,18 @@ export default function TbdItemsPage() {
                                     </div>
                                     {nonReturnableRoute === 'wine_cellar' && (
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700 mb-1">Expected Returnable Date <span className="text-red-500">*</span></label>
+                                            <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">Expected Returnable Date <span className="text-red-500">*</span></label>
                                             <input
                                                 type="date"
                                                 value={expectedReturnableDate}
                                                 onChange={e => setExpectedReturnableDate(e.target.value)}
-                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                                className="w-full px-3 py-2 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-purple-500"
                                             />
                                         </div>
                                     )}
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-700 mb-1">Reason</label>
-                                        <select value={resolveForm.reason} onChange={e => setResolveForm({ ...resolveForm, reason: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                        <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">Reason</label>
+                                        <select value={resolveForm.reason} onChange={e => setResolveForm({ ...resolveForm, reason: e.target.value })} className="w-full px-3 py-2 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500">
                                             <option value="">— Select Reason —</option>
                                             <option value="date">Date (expired/outside return window)</option>
                                             <option value="policy">Policy (manufacturer restriction)</option>
@@ -406,8 +406,8 @@ export default function TbdItemsPage() {
 
                             {/* Memo */}
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Memo</label>
-                                <textarea value={resolveForm.memo} onChange={e => setResolveForm({ ...resolveForm, memo: e.target.value })} rows={2} placeholder="Optional notes about this resolution" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none" />
+                                <label className="block text-xs font-medium text-[var(--on-surface)] mb-1">Memo</label>
+                                <textarea value={resolveForm.memo} onChange={e => setResolveForm({ ...resolveForm, memo: e.target.value })} rows={2} placeholder="Optional notes about this resolution" className="w-full px-3 py-2 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none" />
                             </div>
                         </div>
                         <div className="flex justify-end gap-2 p-5 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>

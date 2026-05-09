@@ -298,14 +298,14 @@ export default function BatchDetailPage() {
                         <>
                             <button
                                 onClick={openAssignModal}
-                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors cursor-pointer"
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-[4px] text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors cursor-pointer"
                             >
                                 <Plus className="w-3.5 h-3.5" /> Assign Returns
                             </button>
                             {batchReturns.length > 0 && (
                                 <button
                                     onClick={openUnassignModal}
-                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium border transition-colors hover:opacity-95 cursor-pointer bg-[var(--secondary-container)] text-[var(--on-secondary-container)] border-[var(--outline-variant)]"
+                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-[4px] text-xs font-medium border transition-colors hover:opacity-95 cursor-pointer bg-[var(--secondary-container)] text-[var(--on-secondary-container)] border-[var(--outline-variant)]"
                                 >
                                     <UserX className="w-3.5 h-3.5" /> Unassign Returns
                                 </button>
@@ -313,14 +313,14 @@ export default function BatchDetailPage() {
                             <button
                                 onClick={() => setShowClose(true)}
                                 disabled={batch.totalReturns === 0}
-                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium border transition-colors hover:opacity-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed bg-[var(--tertiary)] text-[var(--on-tertiary)] border-[var(--outline-variant)]"
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-[4px] text-xs font-medium border transition-colors hover:opacity-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed bg-[var(--tertiary)] text-[var(--on-tertiary)] border-[var(--outline-variant)]"
                             >
                                 <Lock className="w-3.5 h-3.5" /> Close Batch
                             </button>
                             {batchPermissions?.canDelete && (
                                 <button
                                     onClick={() => setShowDelete(true)}
-                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium border transition-colors hover:bg-primary-50/40 cursor-pointer"
+                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-[4px] text-xs font-medium border transition-colors hover:bg-[var(--surface-container-low)] cursor-pointer"
                                     style={{ backgroundColor: 'var(--error-container)', color: 'var(--on-error-container)', borderColor: 'var(--outline-variant)' }}
                                 >
                                     <Trash2 className="w-3.5 h-3.5" /> Delete Batch
@@ -329,14 +329,14 @@ export default function BatchDetailPage() {
                         </>
                     )}
                     {(batch.status === 'closed' || batch.status === 'submitted') && (
-                        <button
-                            onClick={() => router.push(`/warehouse/batches/${batchId}/workflow`)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium text-white transition-colors"
-                            style={{ backgroundColor: 'var(--primary)' }}
-                        >
-                            <Layers className="w-3.5 h-3.5" />
-                            Continue Workflow
-                        </button>
+<button
+                    onClick={() => router.push(`/warehouse/batches/${batchId}/workflow`)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-[4px] text-xs font-medium text-white transition-colors"
+                    style={{ backgroundColor: 'var(--primary)' }}
+                >
+                    <Layers className="w-3.5 h-3.5" />
+                    Continue Workflow
+                </button>
                     )}
                 </div>
             </div>
@@ -416,7 +416,7 @@ export default function BatchDetailPage() {
             <div className="rounded-[4px] shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 <button
                     onClick={() => setReturnsExpanded(e => !e)}
-                    className="w-full flex items-center justify-between px-4 py-2.5 transition-colors hover:bg-primary-50/40"
+                    className="w-full flex items-center justify-between px-4 py-2.5 transition-colors hover:bg-[var(--surface-container-low)]"
                 >
                     <div className="flex items-center gap-1.5">
                         <Package className="w-3.5 h-3.5" style={{ color: 'var(--on-surface-variant)' }} />
@@ -432,23 +432,21 @@ export default function BatchDetailPage() {
                             <p className="text-center py-6 text-xs" style={{ color: 'var(--on-surface-variant)' }}>No returns assigned yet.</p>
                         ) : (
                             <div className="overflow-x-auto">
-                                <table className="min-w-full">
-                                    <thead>
-                                        <tr style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
-                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">License Plate</th>
-                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Pharmacy</th>
-                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Status</th>
-                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Items</th>
-                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Value</th>
-                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">Tracking</th>
-                                            <th className="px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider text-white">Action</th>
+                                <table className="min-w-full text-sm border" style={{ borderColor: 'var(--outline)' }}>
+                                    <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
+                                        <tr className="bg-[var(--surface-container-low)]">
+                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">License Plate</th>
+                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Pharmacy</th>
+                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Status</th>
+                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Items</th>
+                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Value</th>
+                                            <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Tracking</th>
+                                            <th className="px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)]">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                         {batchReturns.map((rt: ReturnTransaction) => (
-                                            <tr key={rt.id} className="hover:bg-primary-50/40 cursor-pointer"
-                                                style={{ backgroundColor: 'var(--surface-container-lowest)' }}
-                                                onClick={() => router.push(`/warehouse/returns/${rt.id}`)}>
+                                            <tr key={rt.id} className="hover:bg-[var(--surface-container)] cursor-pointer" style={{ borderColor: 'var(--outline-variant)' }} onClick={() => router.push(`/warehouse/returns/${rt.id}`)}>
                                                 <td className="px-3 py-3 text-sm font-medium" style={{ color: 'var(--foreground)' }}>{rt.licensePlate}</td>
                                                 <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface)' }}>{rt.pharmacyName}</td>
                                                 <td className="px-3 py-3"><Badge variant="default"><span className="text-[10px]">{rt.status?.replace(/_/g, ' ')}</span></Badge></td>
@@ -460,7 +458,7 @@ export default function BatchDetailPage() {
                                                         <button
                                                             onClick={(e) => handleDownloadSummary(rt.id, e)}
                                                             disabled={downloadingReturnId === rt.id}
-                                                            className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary-50/40"
+                                                            className="inline-flex items-center gap-1 px-2 py-1 rounded-[4px] text-[10px] font-medium border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--surface-container-low)]"
                                                             style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}
                                                         >
                                                             {downloadingReturnId === rt.id ? (

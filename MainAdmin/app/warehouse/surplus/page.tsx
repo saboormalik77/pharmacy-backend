@@ -48,7 +48,7 @@ export default function WarehouseSurplusPage() {
         switch (condition) {
             case 'good': return 'bg-green-100 text-green-700';
             case 'damaged': return 'bg-red-100 text-red-700';
-            default: return 'bg-gray-100 text-gray-600';
+            default: return 'bg-[var(--surface-container)] text-[var(--on-primary-container)]';
         }
     };
 
@@ -56,8 +56,8 @@ export default function WarehouseSurplusPage() {
         switch (status) {
             case 'stored': return 'bg-blue-100 text-blue-700 border-blue-200';
             case 'assigned_to_return': return 'bg-purple-100 text-purple-700 border-purple-200';
-            case 'disposed': return 'bg-gray-200 text-gray-600 border-gray-300';
-            default: return 'bg-gray-100 text-gray-600 border-gray-200';
+            case 'disposed': return 'bg-[var(--surface-container-high)] text-[var(--on-primary-container)] border-[var(--outline-variant)]';
+            default: return 'bg-[var(--surface-container)] text-[var(--on-primary-container)] border-[var(--outline-variant)]';
         }
     };
 
@@ -67,14 +67,14 @@ export default function WarehouseSurplusPage() {
             <div className="space-y-3">
                 {/* Header */}
                 <div>
-                    <Link href="/warehouse" className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-primary-600 mb-1.5 transition-colors">
+                    <Link href="/warehouse" className="inline-flex items-center gap-1 text-[11px] text-[var(--outline)] hover:text-primary-600 mb-1.5 transition-colors">
                         <ChevronLeft className="w-3 h-3" /> Back to Warehouse
                     </Link>
-                    <h1 className="font-heading text-headline text-gray-900 flex items-center gap-2">
+                    <h1 className="font-heading text-headline text-[var(--on-surface)] flex items-center gap-2">
                         <Warehouse className="w-5 h-5 text-blue-600" />
                         Surplus Inventory
                     </h1>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="text-xs text-[var(--on-surface-variant)] mt-0.5">
                         All surplus items across all verified returns
                     </p>
                 </div>
@@ -82,11 +82,11 @@ export default function WarehouseSurplusPage() {
                 {/* Search */}
                 <div className="bg-white rounded-[4px] shadow p-3 flex gap-2">
                     <div className="relative flex-1">
-                        <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
+                        <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--outline)]" />
                         <input
                             type="text"
                             placeholder="Search by NDC, product name, or location..."
-                            className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full pl-8 pr-3 py-1.5 text-xs border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                         />
@@ -94,7 +94,7 @@ export default function WarehouseSurplusPage() {
                     {(search || statusFilter) && (
                         <button
                             onClick={() => { setSearch(''); setStatusFilter(''); }}
-                            className="px-2.5 py-1.5 text-[10px] font-medium text-gray-500 border border-gray-200 rounded-[4px] hover:bg-gray-50"
+                            className="px-2.5 py-1.5 text-[10px] font-medium text-[var(--on-surface-variant)] border border-[var(--outline-variant)] rounded-[4px] hover:bg-[var(--surface-container-low)]"
                         >
                             Clear
                         </button>
@@ -102,7 +102,7 @@ export default function WarehouseSurplusPage() {
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-1 bg-gray-100 rounded-[4px] p-1">
+                <div className="flex gap-1 bg-[var(--surface-container)] rounded-[4px] p-1">
                     {([
                         { label: 'All', value: '' as StatusFilter },
                         { label: 'Stored', value: 'stored' as StatusFilter },
@@ -115,7 +115,7 @@ export default function WarehouseSurplusPage() {
                             className={`px-3 py-1.5 text-[11px] font-medium rounded-[4px] transition-all ${
                                 statusFilter === tab.value
                                     ? 'bg-white text-primary-700 shadow-sm'
-                                    : 'text-gray-500 hover:text-gray-700'
+                                    : 'text-[var(--on-surface-variant)] hover:text-[var(--on-surface)]'
                             }`}
                         >
                             {tab.label}
@@ -127,39 +127,39 @@ export default function WarehouseSurplusPage() {
                 <div className="bg-white rounded-[4px] shadow overflow-hidden">
                     {isLoading ? (
                         <div className="flex items-center justify-center py-16">
-                            <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
-                            <span className="ml-2 text-xs text-gray-400">Loading...</span>
+                            <Loader2 className="h-5 w-5 animate-spin text-[var(--outline)]" />
+                            <span className="ml-2 text-xs text-[var(--outline)]">Loading...</span>
                         </div>
                     ) : allSurplus.length === 0 ? (
                         <div className="text-center py-16">
-                            <Package className="h-8 w-8 mx-auto text-gray-300 mb-2" />
-                            <p className="text-xs text-gray-400">No surplus items found</p>
+                            <Package className="h-8 w-8 mx-auto text-[var(--outline-variant)] mb-2" />
+                            <p className="text-xs text-[var(--outline)]">No surplus items found</p>
                         </div>
                     ) : (
                         <>
                             <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead>
-                                        <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Product</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">NDC</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Lot</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Qty</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Location</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Condition</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Status</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">From Return</th>
-                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap px-3 py-3">Added</th>
+                                <table className="w-full border" style={{ borderColor: 'var(--outline)' }}>
+                                    <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
+                                        <tr className="bg-[var(--surface-container-low)]">
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Product</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">NDC</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Lot</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Qty</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Location</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Condition</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Status</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">From Return</th>
+                                            <th className="text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap px-3 py-3">Added</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-100">
+                                    <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                         {allSurplus.map(item => (
-                                            <tr key={item.id} className="odd:bg-white even:bg-gray-50/40 hover:bg-gray-50">
-                                                <td className="px-3 py-3 text-sm font-medium text-gray-900">{item.productName || '—'}</td>
-                                                <td className="px-3 py-3 text-sm font-mono text-gray-600">{item.ndc || '—'}</td>
-                                                <td className="px-3 py-3 text-sm text-gray-600">{item.lotNumber || '—'}</td>
+                                            <tr key={item.id} className="hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
+                                                <td className="px-3 py-3 text-sm font-medium text-[var(--on-surface)]">{item.productName || '—'}</td>
+                                                <td className="px-3 py-3 text-sm font-mono text-[var(--on-primary-container)]">{item.ndc || '—'}</td>
+                                                <td className="px-3 py-3 text-sm text-[var(--on-primary-container)]">{item.lotNumber || '—'}</td>
                                                 <td className="px-3 py-3 text-sm font-medium">{item.quantity}</td>
-                                                <td className="px-3 py-3 text-sm text-gray-600">{item.warehouseLocation}</td>
+                                                <td className="px-3 py-3 text-sm text-[var(--on-primary-container)]">{item.warehouseLocation}</td>
                                                 <td className="px-3 py-3">
                                                     <Badge className={`text-[10px] ${conditionBadge(item.condition)}`}>{item.condition}</Badge>
                                                 </td>
@@ -167,10 +167,10 @@ export default function WarehouseSurplusPage() {
                                                     <Badge className={`text-[10px] border ${statusBadge(item.status)}`}>{item.status?.replace(/_/g, ' ')}</Badge>
                                                 </td>
                                                 <td className="px-3 py-3">
-                                                    <div className="text-sm text-gray-700">{item.licensePlate || '—'}</div>
-                                                    {item.pharmacyName && <div className="text-[10px] text-gray-400">{item.pharmacyName}</div>}
+                                                    <div className="text-sm text-[var(--on-surface)]">{item.licensePlate || '—'}</div>
+                                                    {item.pharmacyName && <div className="text-[10px] text-[var(--outline)]">{item.pharmacyName}</div>}
                                                 </td>
-                                                <td className="px-3 py-3 text-sm text-gray-500">{item.createdAt ? formatDate(item.createdAt) : '—'}</td>
+                                                <td className="px-3 py-3 text-sm text-[var(--on-surface-variant)]">{item.createdAt ? formatDate(item.createdAt) : '—'}</td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -178,15 +178,15 @@ export default function WarehouseSurplusPage() {
                             </div>
 
                             {totalPages > 1 && (
-                                <div className="flex items-center justify-between px-3 py-2 border-t bg-gray-50 text-[10px] text-gray-500">
+                                <div className="flex items-center justify-between px-3 py-2 border-t bg-[var(--surface-container-low)] text-[10px] text-[var(--on-surface-variant)]">
                                     <span>Page {page} of {totalPages} ({allSurplusPagination?.total ?? 0} total)</span>
                                     <div className="flex gap-1">
                                         <button disabled={page <= 1} onClick={() => setPage(p => p - 1)}
-                                            className="p-1 rounded border border-gray-200 hover:bg-white disabled:opacity-40">
+                                            className="p-1 rounded border border-[var(--outline-variant)] hover:bg-white disabled:opacity-40">
                                             <ChevronLeft className="w-3 h-3" />
                                         </button>
                                         <button disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}
-                                            className="p-1 rounded border border-gray-200 hover:bg-white disabled:opacity-40">
+                                            className="p-1 rounded border border-[var(--outline-variant)] hover:bg-white disabled:opacity-40">
                                             <ChevronRight className="w-3 h-3" />
                                         </button>
                                     </div>

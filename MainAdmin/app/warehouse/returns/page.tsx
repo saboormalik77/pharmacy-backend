@@ -206,8 +206,8 @@ export default function ReturnsPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="font-heading text-headline text-gray-900">Return Transactions</h1>
-                    <p className="text-xs text-gray-500">Manage and track return transactions for your assigned stores</p>
+                    <h1 className="font-heading text-headline text-[var(--on-surface)]">Return Transactions</h1>
+                    <p className="text-xs text-[var(--on-surface-variant)]">Manage and track return transactions for your assigned stores</p>
                 </div>
                 <button onClick={() => router.push('/warehouse/returns/create')} className="inline-flex items-center gap-1 px-3 py-1.5 rounded text-xs font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors">
                     <Plus className="w-3.5 h-3.5" /> Create Return
@@ -226,52 +226,52 @@ export default function ReturnsPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 <div className="bg-white rounded-[4px] shadow px-3 py-2">
                     <div className="flex items-center gap-1.5 mb-0.5">
-                        <ClipboardList className="w-3.5 h-3.5 text-gray-500" />
-                        <span className="text-[10px] text-gray-500">Total Returns</span>
+                        <ClipboardList className="w-3.5 h-3.5 text-[var(--on-surface-variant)]" />
+                        <span className="text-[10px] text-[var(--on-surface-variant)]">Total Returns</span>
                     </div>
-                    <p className="text-sm font-bold text-gray-900">{stats.total}</p>
+                    <p className="text-sm font-bold text-[var(--on-surface)]">{stats.total}</p>
                 </div>
                 <div className="bg-white rounded-[4px] shadow px-3 py-2">
                     <div className="flex items-center gap-1.5 mb-0.5">
                         <Play className="w-3.5 h-3.5 text-blue-500" />
-                        <span className="text-[10px] text-gray-500">In Progress</span>
+                        <span className="text-[10px] text-[var(--on-surface-variant)]">In Progress</span>
                     </div>
-                    <p className="text-sm font-bold text-gray-900">{stats.inProgress}</p>
+                    <p className="text-sm font-bold text-[var(--on-surface)]">{stats.inProgress}</p>
                 </div>
                 <div className="bg-white rounded-[4px] shadow px-3 py-2">
                     <div className="flex items-center gap-1.5 mb-0.5">
                         <CheckCircle className="w-3.5 h-3.5 text-green-500" />
-                        <span className="text-[10px] text-gray-500">Completed</span>
+                        <span className="text-[10px] text-[var(--on-surface-variant)]">Completed</span>
                     </div>
-                    <p className="text-sm font-bold text-gray-900">{stats.completed}</p>
+                    <p className="text-sm font-bold text-[var(--on-surface)]">{stats.completed}</p>
                 </div>
                 <div className="bg-white rounded-[4px] shadow px-3 py-2">
                     <div className="flex items-center gap-1.5 mb-0.5">
                         <DollarSign className="w-3.5 h-3.5 text-emerald-500" />
-                        <span className="text-[10px] text-gray-500">Total Value</span>
+                        <span className="text-[10px] text-[var(--on-surface-variant)]">Total Value</span>
                     </div>
-                    <p className="text-sm font-bold text-gray-900">{formatCurrency(stats.totalValue)}</p>
+                    <p className="text-sm font-bold text-[var(--on-surface)]">{formatCurrency(stats.totalValue)}</p>
                 </div>
             </div>
 
             {/* Table Card */}
             <div className="bg-white rounded-[4px] shadow">
                 {/* Filters */}
-                <div className="flex flex-wrap gap-2 px-3 py-2 border-b border-gray-100">
+                <div className="flex flex-wrap gap-2 px-3 py-2 border-b border-[var(--surface-container)]">
                     <div className="relative flex-1 min-w-[160px]">
-                        <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--outline)]" />
                         <input
                             type="text"
                             placeholder="Search by license plate or store name..."
                             value={searchTerm}
                             onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                            className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                            className="w-full pl-8 pr-3 py-1.5 text-xs border border-[var(--outline-variant)] rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
                         />
                     </div>
                     <select
                         value={statusFilter}
                         onChange={e => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-                        className="px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                        className="px-2.5 py-1.5 text-xs border border-[var(--outline-variant)] rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
                     >
                         {STATUS_OPTIONS.map(opt => (
                             <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -281,14 +281,14 @@ export default function ReturnsPage() {
                         type="date"
                         value={dateFrom}
                         onChange={e => { setDateFrom(e.target.value); setCurrentPage(1); }}
-                        className="px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                        className="px-2.5 py-1.5 text-xs border border-[var(--outline-variant)] rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
                         title="Date from"
                     />
                     <input
                         type="date"
                         value={dateTo}
                         onChange={e => { setDateTo(e.target.value); setCurrentPage(1); }}
-                        className="px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
+                        className="px-2.5 py-1.5 text-xs border border-[var(--outline-variant)] rounded focus:outline-none focus:ring-1 focus:ring-primary-500"
                         title="Date to"
                     />
                 </div>
@@ -300,9 +300,9 @@ export default function ReturnsPage() {
                     </div>
                 ) : transactions.length === 0 ? (
                     <div className="text-center py-10">
-                        <ClipboardList className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-                        <p className="text-sm text-gray-500 font-medium mb-1">No return transactions found</p>
-                        <p className="text-xs text-gray-400 mb-3">
+                        <ClipboardList className="w-10 h-10 text-[var(--outline-variant)] mx-auto mb-2" />
+                        <p className="text-sm text-[var(--on-surface-variant)] font-medium mb-1">No return transactions found</p>
+                        <p className="text-xs text-[var(--outline)] mb-3">
                             {searchTerm || statusFilter || dateFrom || dateTo
                                 ? 'Try adjusting your filters.'
                                 : 'Create your first return transaction to get started.'}
@@ -315,67 +315,67 @@ export default function ReturnsPage() {
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full table-auto">
-                            <thead>
-                                <tr className="bg-gradient-to-r from-indigo-500 to-indigo-400">
-                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">License Plate</th>
-                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Store</th>
-                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Status</th>
-                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Items</th>
-                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Value</th>
-                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Date</th>
-                                    <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-white whitespace-nowrap">Actions</th>
+                        <table className="w-full table-auto text-sm border" style={{ borderColor: 'var(--outline)' }}>
+                            <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
+                                <tr className="bg-[var(--surface-container-low)]">
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">License Plate</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Store</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Status</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Items</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Value</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Date</th>
+                                    <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
                                 {transactions.map((tx) => {
                                     const badge = getStatusBadge(tx.status);
                                     return (
-                                        <tr key={tx.id} className="odd:bg-white even:bg-gray-50/40 hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => router.push(`/warehouse/returns/${tx.id}`)}>
+                                        <tr key={tx.id} className="hover:bg-[var(--surface-container)] transition-colors cursor-pointer" style={{ borderColor: 'var(--outline-variant)' }}>
                                             <td className="px-3 py-3">
-                                                <span className="text-sm font-mono font-semibold text-gray-900">{tx.licensePlate}</span>
+                                                <span className="text-sm font-mono font-semibold text-[var(--on-surface)]">{tx.licensePlate}</span>
                                             </td>
                                             <td className="px-3 py-3">
-                                                <p className="text-sm font-medium text-gray-900 truncate max-w-[140px]">{tx.pharmacyName || '—'}</p>
+                                                <p className="text-sm font-medium text-[var(--on-surface)] truncate max-w-[140px]">{tx.pharmacyName || '—'}</p>
                                             </td>
                                             <td className="px-3 py-3">
                                                 <Badge variant={badge.variant}><span className="text-[10px]">{badge.label}</span></Badge>
                                             </td>
-                                            <td className="px-3 py-3 text-sm text-gray-600">{tx.totalItems}</td>
-                                            <td className="px-3 py-3 text-sm text-gray-900 font-medium">{formatCurrency(tx.totalReturnableValue)}</td>
-                                            <td className="px-3 py-3 text-sm text-gray-500">{formatDate(tx.createdAt)}</td>
+                                            <td className="px-3 py-3 text-sm text-[var(--on-primary-container)]">{tx.totalItems}</td>
+                                            <td className="px-3 py-3 text-sm text-[var(--on-surface)] font-medium">{formatCurrency(tx.totalReturnableValue)}</td>
+                                            <td className="px-3 py-3 text-sm text-[var(--on-surface-variant)]">{formatDate(tx.createdAt)}</td>
                                             <td className="px-3 py-3" onClick={e => e.stopPropagation()}>
                                                 <div className="flex items-center justify-end gap-0.5">
-                                                    <button onClick={() => setViewModal(tx)} className="p-1 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded" title="View Details">
+                                                    <button onClick={() => setViewModal(tx)} className="p-1 text-[var(--outline)] hover:text-primary-600 hover:bg-primary-50 rounded" title="View Details">
                                                         <Eye className="w-3.5 h-3.5" />
                                                     </button>
                                                     {canDoAction(tx, 'edit') && (
-                                                        <button onClick={() => setEditModal(tx)} className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title="Edit">
+                                                        <button onClick={() => setEditModal(tx)} className="p-1 text-[var(--outline)] hover:text-blue-600 hover:bg-blue-50 rounded" title="Edit">
                                                             <Edit className="w-3.5 h-3.5" />
                                                         </button>
                                                     )}
                                                     {canDoAction(tx, 'pause') && (
-                                                        <button onClick={() => setActionModal({ tx, action: 'pause' })} className="p-1 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded" title="Pause">
+                                                        <button onClick={() => setActionModal({ tx, action: 'pause' })} className="p-1 text-[var(--outline)] hover:text-yellow-600 hover:bg-yellow-50 rounded" title="Pause">
                                                             <Pause className="w-3.5 h-3.5" />
                                                         </button>
                                                     )}
                                                     {canDoAction(tx, 'resume') && (
-                                                        <button onClick={() => setActionModal({ tx, action: 'resume' })} className="p-1 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded" title="Resume">
+                                                        <button onClick={() => setActionModal({ tx, action: 'resume' })} className="p-1 text-[var(--outline)] hover:text-green-600 hover:bg-green-50 rounded" title="Resume">
                                                             <Play className="w-3.5 h-3.5" />
                                                         </button>
                                                     )}
                                                     {canDoAction(tx, 'complete') && (
-                                                        <button onClick={() => setActionModal({ tx, action: 'complete' })} className="p-1 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded" title="Mark Complete">
+                                                        <button onClick={() => setActionModal({ tx, action: 'complete' })} className="p-1 text-[var(--outline)] hover:text-green-600 hover:bg-green-50 rounded" title="Mark Complete">
                                                             <CheckCircle className="w-3.5 h-3.5" />
                                                         </button>
                                                     )}
                                                     {canDoAction(tx, 'finalize') && (
-                                                        <button onClick={() => router.push(`/warehouse/returns/${tx.id}`)} className="p-1 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded" title="Finalize">
+                                                        <button onClick={() => router.push(`/warehouse/returns/${tx.id}`)} className="p-1 text-[var(--outline)] hover:text-purple-600 hover:bg-purple-50 rounded" title="Finalize">
                                                             <Lock className="w-3.5 h-3.5" />
                                                         </button>
                                                     )}
                                                     {canDoAction(tx, 'delete') && (
-                                                        <button onClick={() => setDeleteModal(tx)} className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded" title="Delete">
+                                                        <button onClick={() => setDeleteModal(tx)} className="p-1 text-[var(--outline)] hover:text-red-600 hover:bg-red-50 rounded" title="Delete">
                                                             <Trash2 className="w-3.5 h-3.5" />
                                                         </button>
                                                     )}
@@ -391,16 +391,16 @@ export default function ReturnsPage() {
 
                 {/* Pagination */}
                 {pagination && pagination.totalPages > 1 && (
-                    <div className="flex items-center justify-between px-3 py-2 border-t border-gray-100 bg-gray-50">
-                        <p className="text-[10px] text-gray-500">
+                    <div className="flex items-center justify-between px-3 py-2 border-t border-[var(--surface-container)] bg-[var(--surface-container-low)]">
+                        <p className="text-[10px] text-[var(--on-surface-variant)]">
                             Page {pagination.page} of {pagination.totalPages} ({pagination.totalCount} total)
                         </p>
                         <div className="flex items-center gap-1.5">
-                            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={!pagination.hasPreviousPage} className="p-1 border border-gray-300 rounded disabled:opacity-40 hover:bg-gray-50">
+                            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={!pagination.hasPreviousPage} className="p-1 border border-[var(--outline-variant)] rounded disabled:opacity-40 hover:bg-[var(--surface-container-low)]">
                                 <ChevronLeft className="w-3.5 h-3.5" />
                             </button>
-                            <span className="text-xs font-medium text-gray-700 px-1">{currentPage}</span>
-                            <button onClick={() => setCurrentPage(p => p + 1)} disabled={!pagination.hasNextPage} className="p-1 border border-gray-300 rounded disabled:opacity-40 hover:bg-gray-50">
+                            <span className="text-xs font-medium text-[var(--on-surface)] px-1">{currentPage}</span>
+                            <button onClick={() => setCurrentPage(p => p + 1)} disabled={!pagination.hasNextPage} className="p-1 border border-[var(--outline-variant)] rounded disabled:opacity-40 hover:bg-[var(--surface-container-low)]">
                                 <ChevronRight className="w-3.5 h-3.5" />
                             </button>
                         </div>
@@ -412,13 +412,13 @@ export default function ReturnsPage() {
             {viewModal && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setViewModal(null)}>
                     <div className="bg-white rounded-[4px] max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50 sticky top-0">
-                            <h2 className="text-sm font-semibold text-gray-900">Return Details</h2>
-                            <button onClick={() => setViewModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--outline-variant)] bg-[var(--surface-container-low)] sticky top-0">
+                            <h2 className="text-sm font-semibold text-[var(--on-surface)]">Return Details</h2>
+                            <button onClick={() => setViewModal(null)} className="text-[var(--outline)] hover:text-[var(--on-primary-container)]"><X className="w-4 h-4" /></button>
                         </div>
                         <div className="px-4 py-3 space-y-3">
                             <div className="flex items-center gap-2">
-                                <span className="text-sm font-mono font-bold text-gray-900">{viewModal.licensePlate}</span>
+                                <span className="text-sm font-mono font-bold text-[var(--on-surface)]">{viewModal.licensePlate}</span>
                                 <Badge variant={getStatusBadge(viewModal.status).variant}><span className="text-[10px]">{getStatusBadge(viewModal.status).label}</span></Badge>
                             </div>
                             <div className="grid grid-cols-2 gap-2">
@@ -433,34 +433,34 @@ export default function ReturnsPage() {
                                     { label: 'Updated', value: formatDate(viewModal.updatedAt) },
                                 ].map(({ label, value, className }) => (
                                     <div key={label}>
-                                        <p className="text-[10px] text-gray-400">{label}</p>
-                                        <p className={`text-xs font-medium text-gray-900 ${className || ''}`}>{value}</p>
+                                        <p className="text-[10px] text-[var(--outline)]">{label}</p>
+                                        <p className={`text-xs font-medium text-[var(--on-surface)] ${className || ''}`}>{value}</p>
                                     </div>
                                 ))}
                             </div>
                             {(viewModal.fedexTracking || viewModal.fedexPickupConfirmation) && (
-                                <div className="border-t border-gray-100 pt-2">
-                                    <p className="text-[10px] font-medium text-gray-400 mb-1.5 uppercase">Shipping</p>
+                                <div className="border-t border-[var(--surface-container)] pt-2">
+                                    <p className="text-[10px] font-medium text-[var(--outline)] mb-1.5 uppercase">Shipping</p>
                                     <div className="grid grid-cols-2 gap-2">
-                                        <div><p className="text-[10px] text-gray-400">FedEx Tracking</p><p className="text-xs font-medium">{viewModal.fedexTracking || '—'}</p></div>
-                                        <div><p className="text-[10px] text-gray-400">Pickup Confirmation</p><p className="text-xs font-medium">{viewModal.fedexPickupConfirmation || '—'}</p></div>
+                                        <div><p className="text-[10px] text-[var(--outline)]">FedEx Tracking</p><p className="text-xs font-medium">{viewModal.fedexTracking || '—'}</p></div>
+                                        <div><p className="text-[10px] text-[var(--outline)]">Pickup Confirmation</p><p className="text-xs font-medium">{viewModal.fedexPickupConfirmation || '—'}</p></div>
                                     </div>
                                 </div>
                             )}
                             {viewModal.notes && (
-                                <div className="border-t border-gray-100 pt-2">
-                                    <p className="text-[10px] font-medium text-gray-400 mb-1">Notes</p>
-                                    <p className="text-xs text-gray-700">{viewModal.notes}</p>
+                                <div className="border-t border-[var(--surface-container)] pt-2">
+                                    <p className="text-[10px] font-medium text-[var(--outline)] mb-1">Notes</p>
+                                    <p className="text-xs text-[var(--on-surface)]">{viewModal.notes}</p>
                                 </div>
                             )}
                             {viewModal.finalizedAt && (
-                                <div className="border-t border-gray-100 pt-2">
-                                    <p className="text-[10px] text-gray-400">Finalized on {formatDate(viewModal.finalizedAt)}</p>
+                                <div className="border-t border-[var(--surface-container)] pt-2">
+                                    <p className="text-[10px] text-[var(--outline)]">Finalized on {formatDate(viewModal.finalizedAt)}</p>
                                 </div>
                             )}
                         </div>
-                        <div className="flex justify-end px-4 py-3 border-t border-gray-200 bg-gray-50">
-                            <button onClick={() => setViewModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Close</button>
+                        <div className="flex justify-end px-4 py-3 border-t border-[var(--outline-variant)] bg-[var(--surface-container-low)]">
+                            <button onClick={() => setViewModal(null)} className="px-3 py-1.5 text-xs rounded border border-[var(--outline-variant)] text-[var(--on-surface)] hover:bg-[var(--surface-container-low)] transition-colors">Close</button>
                         </div>
                     </div>
                 </div>
@@ -470,26 +470,26 @@ export default function ReturnsPage() {
             {editModal && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setEditModal(null)}>
                     <div className="bg-white rounded-[4px] max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-sm font-semibold text-gray-900">Edit Return — {editModal.licensePlate}</h2>
-                            <button onClick={() => setEditModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--outline-variant)] bg-[var(--surface-container-low)]">
+                            <h2 className="text-sm font-semibold text-[var(--on-surface)]">Edit Return — {editModal.licensePlate}</h2>
+                            <button onClick={() => setEditModal(null)} className="text-[var(--outline)] hover:text-[var(--on-primary-container)]"><X className="w-4 h-4" /></button>
                         </div>
                         <div className="px-4 py-3 space-y-2.5">
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-0.5">FedEx Tracking Number</label>
-                                <input type="text" value={editForm.fedexTracking} onChange={e => setEditForm({ ...editForm, fedexTracking: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" placeholder="Enter tracking number" />
+                                <label className="block text-xs font-medium text-[var(--on-surface)] mb-0.5">FedEx Tracking Number</label>
+                                <input type="text" value={editForm.fedexTracking} onChange={e => setEditForm({ ...editForm, fedexTracking: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-[var(--outline-variant)] rounded focus:outline-none focus:ring-1 focus:ring-primary-500" placeholder="Enter tracking number" />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-0.5">FedEx Pickup Confirmation</label>
-                                <input type="text" value={editForm.fedexPickupConfirmation} onChange={e => setEditForm({ ...editForm, fedexPickupConfirmation: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500" placeholder="Enter pickup confirmation" />
+                                <label className="block text-xs font-medium text-[var(--on-surface)] mb-0.5">FedEx Pickup Confirmation</label>
+                                <input type="text" value={editForm.fedexPickupConfirmation} onChange={e => setEditForm({ ...editForm, fedexPickupConfirmation: e.target.value })} className="w-full px-2.5 py-1.5 text-xs border border-[var(--outline-variant)] rounded focus:outline-none focus:ring-1 focus:ring-primary-500" placeholder="Enter pickup confirmation" />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-0.5">Notes</label>
-                                <textarea value={editForm.notes} onChange={e => setEditForm({ ...editForm, notes: e.target.value })} rows={2} className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none" placeholder="Optional notes" />
+                                <label className="block text-xs font-medium text-[var(--on-surface)] mb-0.5">Notes</label>
+                                <textarea value={editForm.notes} onChange={e => setEditForm({ ...editForm, notes: e.target.value })} rows={2} className="w-full px-2.5 py-1.5 text-xs border border-[var(--outline-variant)] rounded focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none" placeholder="Optional notes" />
                             </div>
                         </div>
-                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
-                            <button onClick={() => setEditModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-[var(--outline-variant)] bg-[var(--surface-container-low)]">
+                            <button onClick={() => setEditModal(null)} className="px-3 py-1.5 text-xs rounded border border-[var(--outline-variant)] text-[var(--on-surface)] hover:bg-[var(--surface-container-low)] transition-colors">Cancel</button>
                             <button onClick={handleUpdate} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
                                 {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Saving...</> : 'Save Changes'}
                             </button>
@@ -502,21 +502,21 @@ export default function ReturnsPage() {
             {actionModal && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setActionModal(null)}>
                     <div className="bg-white rounded-[4px] max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-sm font-semibold text-gray-900">
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--outline-variant)] bg-[var(--surface-container-low)]">
+                            <h2 className="text-sm font-semibold text-[var(--on-surface)]">
                                 {actionModal.action === 'pause' && 'Pause Return'}
                                 {actionModal.action === 'resume' && 'Resume Return'}
                                 {actionModal.action === 'complete' && 'Mark as Completed'}
                             </h2>
-                            <button onClick={() => setActionModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                            <button onClick={() => setActionModal(null)} className="text-[var(--outline)] hover:text-[var(--on-primary-container)]"><X className="w-4 h-4" /></button>
                         </div>
                         <div className="px-4 py-3">
-                            <p className="text-xs text-gray-700">
+                            <p className="text-xs text-[var(--on-surface)]">
                                 Are you sure you want to <strong>{actionModal.action}</strong> return <strong>{actionModal.tx.licensePlate}</strong>?
                             </p>
                         </div>
-                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
-                            <button onClick={() => setActionModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-[var(--outline-variant)] bg-[var(--surface-container-low)]">
+                            <button onClick={() => setActionModal(null)} className="px-3 py-1.5 text-xs rounded border border-[var(--outline-variant)] text-[var(--on-surface)] hover:bg-[var(--surface-container-low)] transition-colors">Cancel</button>
                             <button onClick={handleStatusAction} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
                                 {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Processing...</> : 'Confirm'}
                             </button>
@@ -529,17 +529,17 @@ export default function ReturnsPage() {
             {deleteModal && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setDeleteModal(null)}>
                     <div className="bg-white rounded-[4px] max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-sm font-semibold text-gray-900">Delete Return</h2>
-                            <button onClick={() => setDeleteModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--outline-variant)] bg-[var(--surface-container-low)]">
+                            <h2 className="text-sm font-semibold text-[var(--on-surface)]">Delete Return</h2>
+                            <button onClick={() => setDeleteModal(null)} className="text-[var(--outline)] hover:text-[var(--on-primary-container)]"><X className="w-4 h-4" /></button>
                         </div>
                         <div className="px-4 py-3">
-                            <p className="text-xs text-gray-700">
+                            <p className="text-xs text-[var(--on-surface)]">
                                 Are you sure you want to delete return <strong>{deleteModal.licensePlate}</strong>? This action cannot be undone.
                             </p>
                         </div>
-                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
-                            <button onClick={() => setDeleteModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-[var(--outline-variant)] bg-[var(--surface-container-low)]">
+                            <button onClick={() => setDeleteModal(null)} className="px-3 py-1.5 text-xs rounded border border-[var(--outline-variant)] text-[var(--on-surface)] hover:bg-[var(--surface-container-low)] transition-colors">Cancel</button>
                             <button onClick={handleDelete} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors">
                                 {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Deleting...</> : 'Delete'}
                             </button>
