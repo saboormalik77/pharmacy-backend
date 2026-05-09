@@ -222,7 +222,7 @@ export default function UnpaidMemosPage() {
         if (!paymentMemo) return;
         const amt = parseFloat(paymentAmount);
         if (isNaN(amt) || amt <= 0) { 
-            addToast('Please upload credit memo to calculate the amount received', 'error'); 
+            addToast('Please enter a valid amount received (greater than 0)', 'error'); 
             return; 
         }
         
@@ -949,20 +949,16 @@ export default function UnpaidMemosPage() {
                                         min="0" 
                                         value={paymentAmount} 
                                         onChange={e => {
-                                            if (isEditMode) {
-                                                setPaymentAmount(e.target.value);
-                                                setIsAmountAutoCalculated(false);
-                                            }
+                                            setPaymentAmount(e.target.value);
+                                            setIsAmountAutoCalculated(false);
                                         }} 
-                                        readOnly={!isEditMode}
                                         disabled={isAnalyzingCreditMemo}
                                         className="w-full pl-8 pr-3 py-1.5 border rounded text-xs focus:ring-1 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-60 disabled:cursor-not-allowed" 
                                         style={{ 
-                                            backgroundColor: (isAmountAutoCalculated && !isEditMode) ? 'var(--secondary-container)' : 'var(--surface-container-low)', 
-                                            borderColor: (isAmountAutoCalculated && !isEditMode) ? 'var(--secondary)' : 'var(--outline-variant)',
-                                            color: (isAmountAutoCalculated && !isEditMode) ? 'var(--on-secondary-container)' : 'var(--on-surface)',
-                                            fontWeight: (isAmountAutoCalculated && !isEditMode) ? '600' : 'normal',
-                                            cursor: !isEditMode ? 'not-allowed' : 'text',
+                                            backgroundColor: isAmountAutoCalculated ? 'var(--secondary-container)' : 'var(--surface-container-low)', 
+                                            borderColor: isAmountAutoCalculated ? 'var(--secondary)' : 'var(--outline-variant)',
+                                            color: isAmountAutoCalculated ? 'var(--on-secondary-container)' : 'var(--on-surface)',
+                                            fontWeight: isAmountAutoCalculated ? '600' : 'normal',
                                         }} 
                                         placeholder={isAnalyzingCreditMemo ? 'Analyzing...' : '0.00'} 
                                     />
@@ -976,7 +972,13 @@ export default function UnpaidMemosPage() {
                                 {!isEditMode && !creditMemoFile && !isAmountAutoCalculated && (
                                     <p className="text-[10px] mt-1 flex items-center gap-1" style={{ color: 'var(--outline)' }}>
                                         <Info className="w-2.5 h-2.5" />
-                                        Upload credit memo to auto-calculate amount
+                                        Upload credit memo — amount will be auto-calculated or you can enter it manually
+                                    </p>
+                                )}
+                                {!isEditMode && creditMemoFile && !isAmountAutoCalculated && !isAnalyzingCreditMemo && (
+                                    <p className="text-[10px] mt-1 flex items-center gap-1" style={{ color: 'var(--tertiary)' }}>
+                                        <Info className="w-2.5 h-2.5" />
+                                        AI could not auto-calculate — please enter the amount manually above
                                     </p>
                                 )}
                             </div>
@@ -1076,7 +1078,7 @@ export default function UnpaidMemosPage() {
                             </button>
                             <button
                                 onClick={handleRecordPayment}
-                                disabled={isActionLoading || isAnalyzingCreditMemo || (!isEditMode && (!creditMemoFile || !isAmountAutoCalculated || parseFloat(paymentAmount) <= 0))}
+                                disabled={isActionLoading || isAnalyzingCreditMemo || (!isEditMode && (!creditMemoFile || parseFloat(paymentAmount) <= 0))}
                                 className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded text-white disabled:opacity-50 transition-colors"
                                 style={{ backgroundColor: 'var(--secondary)' }}
                             >
