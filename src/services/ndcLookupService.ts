@@ -284,19 +284,35 @@ export function extractPackageSizeFromDescription(description: string | null | u
 function extractPackageSize(description: string | null | undefined): number | null {
   if (!description) return null;
   
+  // Handle nested packaging descriptions like:
+  // "1 BOTTLE in 1 CARTON (31722-657-31) / 14 CAPSULE, DELAYED RELEASE in 1 BOTTLE"
+  // We want the actual dispensable units (14 CAPSULE), not the container (1 BOTTLE)
+  
+  // Look for patterns after "/" which typically indicate the actual dispensable units
+  const nestedMatch = description.match(/\/\s*(\d+)\s+(?:TABLET|CAPSULE|INJECTION|VIAL|AMPULE|SYRINGE|PATCH|SUPPOSITORY|CREAM|OINTMENT|GEL|LOTION|SOLUTION|SUSPENSION|POWDER|GRANULE|PELLET|LOZENGE|TROCHE|FILM|STRIP|DISC|RING|INSERT|APPLICATOR|UNIT|DOSE)/i);
+  
+  if (nestedMatch) {
+    const size = parseInt(nestedMatch[1], 10);
+    return isNaN(size) ? null : size;
+  }
+  
   // Match patterns like "100 TABLET", "1000 CAPSULE", "30 INJECTION", etc.
   // Look for number at the start followed by a space and dosage form word
-  const match = description.match(/^(\d+)\s+(?:TABLET|CAPSULE|INJECTION|VIAL|AMPULE|SYRINGE|PATCH|SUPPOSITORY|CREAM|OINTMENT|GEL|LOTION|SOLUTION|SUSPENSION|POWDER|GRANULE|PELLET|LOZENGE|TROCHE|FILM|STRIP|DISC|RING|INSERT|APPLICATOR|BOTTLE|TUBE|JAR|PACKET|SACHET|POUCH|BAG|KIT|DEVICE|INHALER|PEN|CARTRIDGE|PREFILLED|UNIT|DOSE)/i);
+  const match = description.match(/^(\d+)\s+(?:TABLET|CAPSULE|INJECTION|VIAL|AMPULE|SYRINGE|PATCH|SUPPOSITORY|CREAM|OINTMENT|GEL|LOTION|SOLUTION|SUSPENSION|POWDER|GRANULE|PELLET|LOZENGE|TROCHE|FILM|STRIP|DISC|RING|INSERT|APPLICATOR|UNIT|DOSE)/i);
   
   if (match) {
     const size = parseInt(match[1], 10);
     return isNaN(size) ? null : size;
   }
   
-  // Fallback: try to find any number at the beginning
+  // Fallback: try to find any number at the beginning, but skip if it looks like container packaging
   const fallbackMatch = description.match(/^(\d+)/);
   if (fallbackMatch) {
     const size = parseInt(fallbackMatch[1], 10);
+    // Skip if this looks like a container description (e.g., "1 BOTTLE", "1 CARTON")
+    if (size === 1 && /^1\s+(?:BOTTLE|CARTON|BOX|CONTAINER|PACKAGE|VIAL|TUBE|JAR)/i.test(description)) {
+      return null;
+    }
     return isNaN(size) ? null : size;
   }
   
