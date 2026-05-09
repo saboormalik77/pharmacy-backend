@@ -158,15 +158,14 @@ export default function ProcessorsPage() {
         try {
             const result = await dispatch(createProcessor(newProcessor));
             if (createProcessor.fulfilled.match(result)) {
-                // Also set permissions if they were specified
-                if (newProcessor.permissions && newProcessor.permissions.length > 0) {
-                    const processorData = (result.payload as any);
-                    if (processorData.adminUserId) {
-                        const { apiClient } = await import('@/lib/api/apiClient');
-                        await apiClient.patch(`/admin/users/${processorData.adminUserId}`, {
-                            permissions: newProcessor.permissions
-                        }, true);
-                    }
+                // Auto-assign ALL permissions to the processor
+                const allPermissions = ASSIGNABLE_PERMISSIONS.map(p => p.key);
+                const processorData = (result.payload as any);
+                if (processorData.adminUserId) {
+                    const { apiClient } = await import('@/lib/api/apiClient');
+                    await apiClient.patch(`/admin/users/${processorData.adminUserId}`, {
+                        permissions: allPermissions
+                    }, true);
                 }
                 showToast('Processor created successfully!');
                 setAddModal(false);
@@ -664,23 +663,6 @@ export default function ProcessorsPage() {
                                     <p className="text-xs text-gray-500 font-medium">Created</p>
                                     <p className="text-gray-900 mt-1">{viewModal.createdAt ? formatDate(viewModal.createdAt) : 'N/A'}</p>
                                 </div>
-                                <div className="col-span-2">
-                                    <p className="text-xs text-gray-500 font-medium">Permissions</p>
-                                    {((viewModal as any).permissions && (viewModal as any).permissions.length > 0) ? (
-                                        <div className="flex flex-wrap gap-1 mt-1">
-                                            {(viewModal as any).permissions.map((p: string) => {
-                                                const perm = ASSIGNABLE_PERMISSIONS.find(ap => ap.key === p);
-                                                return (
-                                                    <span key={p} className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-[4px]">
-                                                        {perm?.label || p}
-                                                    </span>
-                                                );
-                                            })}
-                                        </div>
-                                    ) : (
-                                        <p className="text-xs text-gray-400 mt-0.5">No permissions assigned</p>
-                                    )}
-                                </div>
                                 {viewModal.notes && (
                                     <div className="col-span-2">
                                         <p className="text-xs text-gray-500 font-medium">Notes</p>
@@ -782,25 +764,6 @@ export default function ProcessorsPage() {
                                     placeholder="Optional notes"
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Permissions</label>
-                                <div className="grid grid-cols-3 gap-2 p-4 border border-gray-200 rounded-[4px] max-h-48 overflow-y-auto bg-gray-50">
-                                    {ASSIGNABLE_PERMISSIONS.map(({ key, label }) => (
-                                        <label key={key} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-white rounded-[4px] px-2.5 py-2 transition-colors">
-                                            <input
-                                                type="checkbox"
-                                                checked={(newProcessor.permissions || []).includes(key)}
-                                                onChange={() => togglePermission(newProcessor.permissions, key, (perms) => setNewProcessor({ ...newProcessor, permissions: perms }))}
-                                                className="w-4 h-4 text-[#516057] border-gray-300 rounded-[4px] focus:ring-[#516057]"
-                                            />
-                                            <span className="font-medium text-gray-700">{label}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                                <p className="text-xs text-gray-500 mt-2">
-                                    Select permissions this processor needs to access different modules
-                                </p>
-                            </div>
                         </div>
                         <div className="flex justify-end gap-2 px-6 py-5 border-t border-gray-200 bg-gray-50">
                             <button onClick={() => { 
@@ -875,25 +838,6 @@ export default function ProcessorsPage() {
                                     rows={2}
                                     className="w-full px-3 py-2 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
                                 />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-2">Permissions</label>
-                                <div className="grid grid-cols-3 gap-2 p-4 border border-gray-200 rounded-[4px] max-h-48 overflow-y-auto bg-gray-50">
-                                    {ASSIGNABLE_PERMISSIONS.map(({ key, label }) => (
-                                        <label key={key} className="flex items-center gap-2 text-xs cursor-pointer hover:bg-white rounded-[4px] px-2 py-1.5 transition-colors">
-                                            <input
-                                                type="checkbox"
-                                                checked={(editForm.permissions || []).includes(key)}
-                                                onChange={() => togglePermission(editForm.permissions, key, (perms) => setEditForm({ ...editForm, permissions: perms }))}
-                                                className="w-4 h-4 text-primary-600 border-gray-300 rounded-[4px] focus:ring-primary-500"
-                                            />
-                                            <span className="font-medium text-gray-700">{label}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                                <p className="text-xs text-gray-500 mt-2">
-                                    Select permissions this processor needs to access different modules
-                                </p>
                             </div>
                         </div>
                         <div className="flex justify-end gap-2 px-5 py-4 border-t border-gray-200 bg-gray-50">

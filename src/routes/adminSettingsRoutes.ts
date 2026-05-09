@@ -228,7 +228,8 @@ router.use(authenticateAdmin);
  *       500:
  *         description: Internal server error
  */
-router.get('/', requirePermission('settings'), getAdminSettingsHandler);
+// All authenticated admins can read settings (needed for branding, warehouse address, etc.)
+router.get('/', getAdminSettingsHandler);
 
 /**
  * @swagger
@@ -321,7 +322,8 @@ router.patch('/', requirePermission('settings'), updateAdminSettingsHandler);
  *       500:
  *         description: Internal server error
  */
-router.get('/timezones', requirePermission('settings'), getTimezonesHandler);
+// Reference data - accessible to all authenticated admins
+router.get('/timezones', getTimezonesHandler);
 
 /**
  * @swagger
@@ -355,7 +357,8 @@ router.get('/timezones', requirePermission('settings'), getTimezonesHandler);
  *       500:
  *         description: Internal server error
  */
-router.get('/languages', requirePermission('settings'), getLanguagesHandler);
+// Reference data - accessible to all authenticated admins
+router.get('/languages', getLanguagesHandler);
 
 /**
  * @swagger

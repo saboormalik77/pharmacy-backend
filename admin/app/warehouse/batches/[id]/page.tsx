@@ -173,7 +173,7 @@ export default function BatchDetailPage() {
         setShowAssign(true);
         setSelectedReturnIds([]);
         setAssignSearch('');
-        dispatch(fetchReceivedReturns({ limit: 100, verificationStatus: 'verified' }));
+        dispatch(fetchReceivedReturns({ limit: 100, verificationStatus: 'completed' }));
     };
 
     const handleAssign = async () => {
