@@ -919,11 +919,11 @@ export default function UnpaidMemosPage() {
                                     <div><p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Outstanding</p><p className="text-xs font-semibold" style={{ color: 'var(--error)' }}>{fmt(paymentMemo.amountRequested - paymentMemo.amountReceived)}</p></div>
                                 </div>
                             ) : (
-                                <div className="p-2.5 border rounded" style={{ backgroundColor: 'var(--primary-container)', borderColor: 'var(--outline-variant)' }}>
-                                    <p className="text-xs mb-1.5" style={{ color: 'var(--on-primary-container)' }}><strong>Editing payment record</strong></p>
+                                <div className="p-2.5 border rounded" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
+                                    <p className="text-xs mb-1.5" style={{ color: 'var(--on-surface)' }}><strong>Editing payment record</strong></p>
                                     <div className="grid grid-cols-2 gap-2 text-center">
-                                        <div><p className="text-[10px]" style={{ color: 'var(--on-primary-container)' }}>Asked</p><p className="text-xs font-semibold" style={{ color: 'var(--on-primary-container)' }}>{fmt(paymentMemo.amountRequested)}</p></div>
-                                        <div><p className="text-[10px]" style={{ color: 'var(--on-primary-container)' }}>Currently Recorded</p><p className="text-xs font-semibold" style={{ color: 'var(--on-primary-container)' }}>{fmt(paymentMemo.amountReceived)}</p></div>
+                                        <div><p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Asked</p><p className="text-xs font-semibold" style={{ color: 'var(--on-surface)' }}>{fmt(paymentMemo.amountRequested)}</p></div>
+                                        <div><p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Currently Recorded</p><p className="text-xs font-semibold" style={{ color: 'var(--on-surface)' }}>{fmt(paymentMemo.amountReceived)}</p></div>
                                     </div>
                                 </div>
                             )}
@@ -1000,11 +1000,11 @@ export default function UnpaidMemosPage() {
                                     <span className="ml-1 text-[10px] font-normal" style={{ color: 'var(--on-surface-variant)' }}>(PDF only)</span>
                                 </label>
                                 {isEditMode && existingCreditMemoUrl && !creditMemoFile && (
-                                    <div className="mb-2 p-2 border rounded flex items-center gap-2" style={{ backgroundColor: 'var(--primary-container)', borderColor: 'var(--outline-variant)' }}>
-                                        <FileText className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--primary)' }} />
+                                    <div className="mb-2 p-2 border rounded flex items-center gap-2" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
+                                        <FileText className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--on-surface-variant)' }} />
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-xs" style={{ color: 'var(--on-primary-container)' }}>Current credit memo on file</p>
-                                            <a href={existingCreditMemoUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] hover:underline truncate block" style={{ color: 'var(--primary)' }}>
+                                            <p className="text-xs" style={{ color: 'var(--on-surface)' }}>Current credit memo on file</p>
+                                            <a href={existingCreditMemoUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] hover:underline truncate block" style={{ color: 'var(--secondary)' }}>
                                                 View existing PDF
                                             </a>
                                         </div>
