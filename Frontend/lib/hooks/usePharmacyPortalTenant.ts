@@ -22,7 +22,16 @@ let cachedState: TenantState | null = null
 let inflight: Promise<TenantState> | null = null
 
 const isLocalHostname = (h: string): boolean =>
-  h === 'localhost' || h === '127.0.0.1' || h.endsWith('.localhost')
+  h === 'localhost' ||
+  h === '127.0.0.1' ||
+  h.endsWith('.localhost') ||
+  // Treat ngrok tunnels as development hosts (bypass tenant verification)
+  h.endsWith('.ngrok.io') ||
+  h.endsWith('.ngrok-free.app') ||
+  h.endsWith('.ngrok-free.dev')
+
+/** Timeout for tenant-info API call to prevent indefinite loading on network issues */
+const TENANT_FETCH_TIMEOUT_MS = 10000
 
 async function loadPharmacyTenant(): Promise<TenantState> {
   if (cachedState) return cachedState
@@ -31,10 +40,21 @@ async function loadPharmacyTenant(): Promise<TenantState> {
   inflight = (async () => {
     try {
       const { apiClient } = await import('@/lib/api/client')
-      const resp = await apiClient.get<{
+
+      // Add timeout to prevent infinite loading on network failures
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(
+          () => reject(new Error('Network timeout verifying domain')),
+          TENANT_FETCH_TIMEOUT_MS
+        )
+      })
+
+      const fetchPromise = apiClient.get<{
         isLocalDev: boolean
         tenant: PharmacyTenantInfo | null
       }>('/auth/tenant-info', { role: 'pharmacy' }, false)
+
+      const resp = await Promise.race([fetchPromise, timeoutPromise])
 
       const tenant = resp?.data?.tenant ?? null
       if (!tenant) {

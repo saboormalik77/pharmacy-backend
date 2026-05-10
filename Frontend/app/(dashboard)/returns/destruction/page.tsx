@@ -18,7 +18,6 @@ interface DestructionRecord {
   lotNumber?: string;
   pharmacyId?: string;
   pharmacyName?: string;
-  pharmacyName?: string;
   quantity?: number;
   estimatedValue?: number;
   status: 'pending' | 'scheduled' | 'picked_up' | 'destroyed' | 'cancelled';
