@@ -354,19 +354,19 @@ export default function OptimizationSuggestionsPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => router.back()}
-              className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-1.5 hover:bg-[#f5f2f1] rounded-[4px] transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
             <div>
-              <h1 className="text-lg sm:text-xl font-bold text-gray-900">Package Management</h1>
+              <h1 className="text-lg sm:text-xl font-bold text-[#000000]">Package Management</h1>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <div className={`flex items-center gap-1 text-[10px] ${currentStep === 1 ? 'text-blue-600 font-semibold' : 'text-gray-400'}`}>
+                <div className={`flex items-center gap-1 text-[10px] ${currentStep === 1 ? 'text-blue-600 font-semibold' : 'text-[#9ca3af]'}`}>
                   {currentStep > 1 ? <CheckCircle className="h-3 w-3" /> : <span className="w-3 h-3 rounded-full border-2 border-current flex items-center justify-center text-[8px]">1</span>}
                   <span>Select Products</span>
                 </div>
-                <ArrowRight className="h-2.5 w-2.5 text-gray-400" />
-                <div className={`flex items-center gap-1 text-[10px] ${currentStep === 2 ? 'text-blue-600 font-semibold' : 'text-gray-400'}`}>
+                <ArrowRight className="h-2.5 w-2.5 text-[#9ca3af]" />
+                <div className={`flex items-center gap-1 text-[10px] ${currentStep === 2 ? 'text-blue-600 font-semibold' : 'text-[#9ca3af]'}`}>
                   <span className="w-3 h-3 rounded-full border-2 border-current flex items-center justify-center text-[8px]">2</span>
                   <span>Choose Distributor</span>
                 </div>
@@ -382,7 +382,7 @@ export default function OptimizationSuggestionsPage() {
                 setError(null);
               }}
               variant="outline"
-              className="text-xs px-3 py-1 bg-teal-600 text-white hover:bg-teal-700 hover:text-white"
+              className="text-xs px-3 py-1 bg-[#516057] text-white hover:bg-[#505454] hover:text-white"
             >
               <ArrowLeft className="h-3 w-3 mr-1.5" />
               Back to Products
@@ -401,7 +401,7 @@ export default function OptimizationSuggestionsPage() {
               {/* Search Bar */}
               <div className="mb-2">
                 <div className="relative">
-                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
+                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-[#9ca3af]" />
                   <Input
                     type="text"
                     placeholder="Search by NDC or product name..."
@@ -415,30 +415,30 @@ export default function OptimizationSuggestionsPage() {
               {/* Products List */}
               {loading.products ? (
                 <div className="flex flex-col items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-teal-600" />
-                  <p className="text-xs text-gray-600 mt-2">Loading products...</p>
+                  <Loader2 className="h-6 w-6 animate-spin text-[#516057]" />
+                  <p className="text-xs text-[#505454] mt-2">Loading products...</p>
                 </div>
               ) : error && !productItems.length ? (
                 <div className="flex flex-col items-center justify-center py-8">
                   <AlertCircle className="h-6 w-6 text-red-600" />
-                  <p className="text-xs text-gray-600 mt-2">{error}</p>
+                  <p className="text-xs text-[#505454] mt-2">{error}</p>
                 </div>
               ) : (
                 <div className="space-y-1">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs font-semibold text-gray-700">
+                    <p className="text-xs font-semibold text-[#505454]">
                       Select Products ({selectedItems.size} selected)
                     </p>
                   </div>
-                  <div className="border border-gray-200 rounded-lg overflow-hidden">
+                  <div className="border border-[#e2e2e2] rounded-[4px] overflow-hidden">
                     {filteredProducts.length > 0 ? (
                       <>
                         {/* Desktop Table View */}
                         <div className="hidden md:block overflow-x-auto">
                           <table className="w-full border-collapse">
-                            <thead className="bg-gray-50">
+                            <thead className="bg-[#f5f2f1]">
                               <tr>
-                                <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 w-10">
+                                <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454] w-10">
                                   <input
                                     type="checkbox"
                                     checked={filteredProducts.length > 0 && filteredProducts.every(item => selectedItems.has(item.id))}
@@ -456,11 +456,11 @@ export default function OptimizationSuggestionsPage() {
                                     className="rounded"
                                   />
                                 </th>
-                                <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">NDC</th>
-                                <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Product Name</th>
-                                <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700"> Full Units</th>
-                                <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700"> Partial Units</th>
-                                <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Select Units</th>
+                                <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">NDC</th>
+                                <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Product Name</th>
+                                <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]"> Full Units</th>
+                                <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]"> Partial Units</th>
+                                <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Select Units</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -472,7 +472,7 @@ export default function OptimizationSuggestionsPage() {
                                 return (
                                   <tr
                                     key={item.id}
-                                    className={`border-b border-gray-100 hover:bg-gray-50 ${isSelected ? 'bg-blue-50' : ''}`}
+                                    className={`border-b border-[#f3f4f6] hover:bg-[#f5f2f1] ${isSelected ? 'bg-blue-50' : ''}`}
                                   >
                                     <td className="px-2 py-1.5">
                                       <input
@@ -482,10 +482,10 @@ export default function OptimizationSuggestionsPage() {
                                         className="rounded"
                                       />
                                     </td>
-                                    <td className="px-2 py-1.5 text-xs font-mono text-gray-900">{item.ndc}</td>
-                                    <td className="px-2 py-1.5 text-xs text-gray-700">{item.product_name || 'Unknown Product'}</td>
-                                    <td className="px-2 py-1.5 text-xs text-gray-600 font-medium">{itemFullUnits}</td>
-                                    <td className="px-2 py-1.5 text-xs text-gray-600 font-medium">{itemPartialUnits}</td>
+                                    <td className="px-2 py-1.5 text-xs font-mono text-[#000000]">{item.ndc}</td>
+                                    <td className="px-2 py-1.5 text-xs text-[#505454]">{item.product_name || 'Unknown Product'}</td>
+                                    <td className="px-2 py-1.5 text-xs text-[#505454] font-medium">{itemFullUnits}</td>
+                                    <td className="px-2 py-1.5 text-xs text-[#505454] font-medium">{itemPartialUnits}</td>
                                     <td className="px-2 py-1.5">
                                       {isSelected ? (
                                         itemFullUnits > 0 && itemPartialUnits === 0 ? (
@@ -567,7 +567,7 @@ export default function OptimizationSuggestionsPage() {
                                           </div>
                                         )
                                       ) : (
-                                        <span className="text-xs text-gray-400">-</span>
+                                        <span className="text-xs text-[#9ca3af]">-</span>
                                       )}
                                     </td>
                                   </tr>
@@ -580,9 +580,9 @@ export default function OptimizationSuggestionsPage() {
                         {/* Mobile Table View */}
                         <div className="md:hidden overflow-x-auto">
                           <table className="w-full border-collapse min-w-[600px]">
-                            <thead className="bg-gray-50">
+                            <thead className="bg-[#f5f2f1]">
                               <tr>
-                                <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700 w-8">
+                                <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454] w-8">
                                   <input
                                     type="checkbox"
                                     checked={filteredProducts.length > 0 && filteredProducts.every(item => selectedItems.has(item.id))}
@@ -600,11 +600,11 @@ export default function OptimizationSuggestionsPage() {
                                     className="rounded"
                                   />
                                 </th>
-                                <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700">NDC</th>
-                                <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700">Product</th>
-                                <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700">Avail Full</th>
-                                <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700">Avail Partial</th>
-                                <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700">Select Units</th>
+                                <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454]">NDC</th>
+                                <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454]">Product</th>
+                                <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454]">Avail Full</th>
+                                <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454]">Avail Partial</th>
+                                <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454]">Select Units</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -616,7 +616,7 @@ export default function OptimizationSuggestionsPage() {
                                 return (
                                   <tr
                                     key={item.id}
-                                    className={`border-b border-gray-100 hover:bg-gray-50 ${isSelected ? 'bg-blue-50' : ''}`}
+                                    className={`border-b border-[#f3f4f6] hover:bg-[#f5f2f1] ${isSelected ? 'bg-blue-50' : ''}`}
                                   >
                                     <td className="px-2 py-1">
                                       <input
@@ -626,12 +626,12 @@ export default function OptimizationSuggestionsPage() {
                                         className="rounded"
                                       />
                                     </td>
-                                    <td className="px-2 py-1 text-[10px] font-mono text-gray-900">{item.ndc}</td>
-                                    <td className="px-2 py-1 text-[10px] text-gray-700 max-w-[150px] truncate" title={item.product_name || 'Unknown Product'}>
+                                    <td className="px-2 py-1 text-[10px] font-mono text-[#000000]">{item.ndc}</td>
+                                    <td className="px-2 py-1 text-[10px] text-[#505454] max-w-[150px] truncate" title={item.product_name || 'Unknown Product'}>
                                       {item.product_name || 'Unknown Product'}
                                     </td>
-                                    <td className="px-2 py-1 text-[10px] text-gray-600 font-medium">{itemFullUnits}</td>
-                                    <td className="px-2 py-1 text-[10px] text-gray-600 font-medium">{itemPartialUnits}</td>
+                                    <td className="px-2 py-1 text-[10px] text-[#505454] font-medium">{itemFullUnits}</td>
+                                    <td className="px-2 py-1 text-[10px] text-[#505454] font-medium">{itemPartialUnits}</td>
                                     <td className="px-2 py-1">
                                       {isSelected ? (
                                         itemFullUnits > 0 && itemPartialUnits === 0 ? (
@@ -713,7 +713,7 @@ export default function OptimizationSuggestionsPage() {
                                           </div>
                                         )
                                       ) : (
-                                        <span className="text-[10px] text-gray-400">-</span>
+                                        <span className="text-[10px] text-[#9ca3af]">-</span>
                                       )}
                                     </td>
                                   </tr>
@@ -724,7 +724,7 @@ export default function OptimizationSuggestionsPage() {
                         </div>
                       </>
                     ) : (
-                      <div className="px-2 py-6 text-center text-xs text-gray-500">
+                      <div className="px-2 py-6 text-center text-xs text-[#6b7280]">
                         No products found
                       </div>
                     )}
@@ -747,7 +747,7 @@ export default function OptimizationSuggestionsPage() {
                       setCurrentStep(2);
                     }
                   }}
-                  className="bg-teal-600 text-white text-xs px-3 py-1"
+                  className="bg-[#516057] text-white text-xs px-3 py-1"
                   disabled={selectedItems.size === 0 || loading.suggestions}
                 >
                   {loading.suggestions ? (
@@ -775,19 +775,19 @@ export default function OptimizationSuggestionsPage() {
               <CardContent className="p-3 sm:p-4">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                   <div>
-                    <p className="text-xs sm:text-sm text-gray-600 mb-1">Total Distributors</p>
+                    <p className="text-xs sm:text-sm text-[#505454] mb-1">Total Distributors</p>
                     <p className="text-xl sm:text-2xl font-bold text-blue-700">{optimizationResults.totalDistributors}</p>
                   </div>
                   <div>
-                    <p className="text-xs sm:text-sm text-gray-600 mb-1">Total Items</p>
+                    <p className="text-xs sm:text-sm text-[#505454] mb-1">Total Items</p>
                     <p className="text-xl sm:text-2xl font-bold text-blue-700">{optimizationResults.totalItems}</p>
                   </div>
                   <div>
-                    <p className="text-xs sm:text-sm text-gray-600 mb-1">Total Estimated Value</p>
+                    <p className="text-xs sm:text-sm text-[#505454] mb-1">Total Estimated Value</p>
                     <p className="text-xl sm:text-2xl font-bold text-blue-700">{formatCurrency(optimizationResults.totalEstimatedValue)}</p>
                   </div>
                   <div>
-                    <p className="text-xs sm:text-sm text-gray-600 mb-1">Generated At</p>
+                    <p className="text-xs sm:text-sm text-[#505454] mb-1">Generated At</p>
                     <p className="text-xs font-medium text-blue-700">
                       {new Date(optimizationResults.generatedAt).toLocaleString()}
                     </p>
@@ -806,14 +806,14 @@ export default function OptimizationSuggestionsPage() {
                 <div className="hidden md:block overflow-x-auto">
                   <table className="w-full border-collapse">
                     <thead>
-                      <tr className="bg-gray-50 border-b border-gray-200">
-                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Distributor</th>
-                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Full Units</th>
-                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Full Price</th>
-                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Partial Units</th>
-                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Partial Price</th>
-                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Contact</th>
-                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Actions</th>
+                      <tr className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
+                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Distributor</th>
+                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Full Units</th>
+                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Full Price</th>
+                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Partial Units</th>
+                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Partial Price</th>
+                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Contact</th>
+                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -857,9 +857,9 @@ export default function OptimizationSuggestionsPage() {
                           return (
                           <tr
                             key={distributor.distributorId || idx}
-                            className="border-b border-gray-100 hover:bg-gray-50"
+                            className="border-b border-[#f3f4f6] hover:bg-[#f5f2f1]"
                           >
-                            <td className="px-2 py-1.5 text-xs text-gray-900 font-medium">
+                            <td className="px-2 py-1.5 text-xs text-[#000000] font-medium">
                               <div className="flex items-center gap-2">
                                 <span>{distributor.distributorName}</span>
                                 {(distributor as any).recommended && (
@@ -869,49 +869,49 @@ export default function OptimizationSuggestionsPage() {
                                 )}
                               </div>
                             </td>
-                            <td className="px-2 py-1.5 text-xs text-gray-700">{totalFullUnits}</td>
-                            <td className="px-2 py-1.5 text-xs text-gray-700">
+                            <td className="px-2 py-1.5 text-xs text-[#505454]">{totalFullUnits}</td>
+                            <td className="px-2 py-1.5 text-xs text-[#505454]">
                               {allProductsHaveNullPrices ? '-' : (
                                 feeRatePercentage > 0 ? (
                                   <div className="flex flex-col">
-                                    <span className="line-through text-gray-400 text-[10px]">{formatCurrency(totalFullPrice)}</span>
-                                    <span className="font-semibold text-teal-700">{formatCurrency(adjustedFullPrice)}</span>
+                                    <span className="line-through text-[#9ca3af] text-[10px]">{formatCurrency(totalFullPrice)}</span>
+                                    <span className="font-semibold text-[#516057]">{formatCurrency(adjustedFullPrice)}</span>
                                   </div>
                                 ) : (
                                   <span className="font-semibold">{formatCurrency(adjustedFullPrice)}</span>
                                 )
                               )}
                             </td>
-                            <td className="px-2 py-1.5 text-xs text-gray-700">{totalPartialUnits}</td>
-                            <td className="px-2 py-1.5 text-xs text-gray-700">
+                            <td className="px-2 py-1.5 text-xs text-[#505454]">{totalPartialUnits}</td>
+                            <td className="px-2 py-1.5 text-xs text-[#505454]">
                               {allProductsHaveNullPrices ? '-' : (
                                 feeRatePercentage > 0 ? (
                                   <div className="flex flex-col">
-                                    <span className="line-through text-gray-400 text-[10px]">{formatCurrency(totalPartialPrice)}</span>
-                                    <span className="font-semibold text-teal-700">{formatCurrency(adjustedPartialPrice)}</span>
+                                    <span className="line-through text-[#9ca3af] text-[10px]">{formatCurrency(totalPartialPrice)}</span>
+                                    <span className="font-semibold text-[#516057]">{formatCurrency(adjustedPartialPrice)}</span>
                                   </div>
                                 ) : (
                                   <span className="font-semibold">{formatCurrency(adjustedPartialPrice)}</span>
                                 )
                               )}
                             </td>
-                            <td className="px-2 py-1.5 text-xs text-gray-700">
+                            <td className="px-2 py-1.5 text-xs text-[#505454]">
                               <div className="flex flex-col gap-0.5">
                                 {distributor.distributorContact?.email && (
                                   <div className="flex items-center gap-1">
-                                    <Mail className="h-2.5 w-2.5 text-gray-500" />
+                                    <Mail className="h-2.5 w-2.5 text-[#6b7280]" />
                                     <span className="text-[10px]">{distributor.distributorContact.email}</span>
                                   </div>
                                 )}
                                 {distributor.distributorContact?.phone && (
                                   <div className="flex items-center gap-1">
-                                    <Phone className="h-2.5 w-2.5 text-gray-500" />
+                                    <Phone className="h-2.5 w-2.5 text-[#6b7280]" />
                                     <span className="text-[10px]">{distributor.distributorContact.phone}</span>
                                   </div>
                                 )}
                                 {distributor.distributorContact?.location && (
                                   <div className="flex items-center gap-1">
-                                    <MapPin className="h-2.5 w-2.5 text-gray-500" />
+                                    <MapPin className="h-2.5 w-2.5 text-[#6b7280]" />
                                     <span className="text-[10px]">{distributor.distributorContact.location}</span>
                                   </div>
                                 )}
@@ -921,7 +921,7 @@ export default function OptimizationSuggestionsPage() {
                               <div className="flex items-center gap-1">
                                 <button
                                   onClick={() => setSelectedDistributor(distributor)}
-                                  className="px-2 py-0.5 bg-teal-600 text-white text-xs rounded hover:bg-teal-700 flex items-center gap-1"
+                                  className="px-2 py-0.5 bg-[#516057] text-white text-xs rounded hover:bg-[#505454] flex items-center gap-1"
                                 >
                                   <Eye className="h-3 w-3" />
                                   View
@@ -929,7 +929,7 @@ export default function OptimizationSuggestionsPage() {
                                 <button
                                   onClick={() => handleDistributorSelect(distributor)}
                                   disabled={submittingDistributorId === (distributor.distributorId || distributor.distributorName)}
-                                  className="px-2 py-0.5 bg-teal-600 text-white text-xs rounded hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                                  className="px-2 py-0.5 bg-[#516057] text-white text-xs rounded hover:bg-[#505454] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                                 >
                                   {submittingDistributorId === (distributor.distributorId || distributor.distributorName) ? (
                                     <>
@@ -947,7 +947,7 @@ export default function OptimizationSuggestionsPage() {
                         })
                       ) : (
                         <tr>
-                          <td colSpan={8} className="px-2 py-6 text-center text-xs text-gray-500">
+                          <td colSpan={8} className="px-2 py-6 text-center text-xs text-[#6b7280]">
                             No distributors available
                           </td>
                         </tr>
@@ -960,14 +960,14 @@ export default function OptimizationSuggestionsPage() {
                 <div className="md:hidden overflow-x-auto">
                   <table className="w-full border-collapse min-w-[800px]">
                     <thead>
-                      <tr className="bg-gray-50 border-b border-gray-200">
-                        <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700">Distributor</th>
-                        <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700">Full Units</th>
-                        <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700">Full Price</th>
-                        <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700">Partial Units</th>
-                        <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700">Partial Price</th>
-                        <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700">Contact</th>
-                        <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700">Actions</th>
+                      <tr className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
+                        <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454]">Distributor</th>
+                        <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454]">Full Units</th>
+                        <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454]">Full Price</th>
+                        <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454]">Partial Units</th>
+                        <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454]">Partial Price</th>
+                        <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454]">Contact</th>
+                        <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454]">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1011,9 +1011,9 @@ export default function OptimizationSuggestionsPage() {
                           return (
                           <tr
                             key={distributor.distributorId || idx}
-                            className="border-b border-gray-100 hover:bg-gray-50"
+                            className="border-b border-[#f3f4f6] hover:bg-[#f5f2f1]"
                           >
-                            <td className="px-2 py-1 text-[10px] text-gray-900 font-medium max-w-[120px]">
+                            <td className="px-2 py-1 text-[10px] text-[#000000] font-medium max-w-[120px]">
                               <div className="flex items-center gap-1 flex-wrap">
                                 <span className="truncate" title={distributor.distributorName}>
                               {distributor.distributorName}
@@ -1025,37 +1025,37 @@ export default function OptimizationSuggestionsPage() {
                                 )}
                               </div>
                             </td>
-                            <td className="px-2 py-1 text-[10px] text-gray-700">{totalFullUnits}</td>
-                            <td className="px-2 py-1 text-[10px] text-gray-700">
+                            <td className="px-2 py-1 text-[10px] text-[#505454]">{totalFullUnits}</td>
+                            <td className="px-2 py-1 text-[10px] text-[#505454]">
                               {allProductsHaveNullPrices ? '-' : (
                                 feeRatePercentage > 0 ? (
                                   <div className="flex flex-col">
-                                    <span className="line-through text-gray-400 text-[9px]">{formatCurrency(totalFullPrice)}</span>
-                                    <span className="font-semibold text-teal-700">{formatCurrency(adjustedFullPrice)}</span>
+                                    <span className="line-through text-[#9ca3af] text-[9px]">{formatCurrency(totalFullPrice)}</span>
+                                    <span className="font-semibold text-[#516057]">{formatCurrency(adjustedFullPrice)}</span>
                                   </div>
                                 ) : (
                                   <span className="font-semibold">{formatCurrency(adjustedFullPrice)}</span>
                                 )
                               )}
                             </td>
-                            <td className="px-2 py-1 text-[10px] text-gray-700">{totalPartialUnits}</td>
-                            <td className="px-2 py-1 text-[10px] text-gray-700">
+                            <td className="px-2 py-1 text-[10px] text-[#505454]">{totalPartialUnits}</td>
+                            <td className="px-2 py-1 text-[10px] text-[#505454]">
                               {allProductsHaveNullPrices ? '-' : (
                                 feeRatePercentage > 0 ? (
                                   <div className="flex flex-col">
-                                    <span className="line-through text-gray-400 text-[9px]">{formatCurrency(totalPartialPrice)}</span>
-                                    <span className="font-semibold text-teal-700">{formatCurrency(adjustedPartialPrice)}</span>
+                                    <span className="line-through text-[#9ca3af] text-[9px]">{formatCurrency(totalPartialPrice)}</span>
+                                    <span className="font-semibold text-[#516057]">{formatCurrency(adjustedPartialPrice)}</span>
                                   </div>
                                 ) : (
                                   <span className="font-semibold">{formatCurrency(adjustedPartialPrice)}</span>
                                 )
                               )}
                             </td>
-                            <td className="px-2 py-1 text-[10px] text-gray-700">
+                            <td className="px-2 py-1 text-[10px] text-[#505454]">
                               <div className="flex flex-col gap-0.5">
                                 {distributor.distributorContact?.email && (
                                   <div className="flex items-center gap-0.5">
-                                    <Mail className="h-2.5 w-2.5 text-gray-500 flex-shrink-0" />
+                                    <Mail className="h-2.5 w-2.5 text-[#6b7280] flex-shrink-0" />
                                     <span className="text-[10px] truncate max-w-[100px]" title={distributor.distributorContact.email}>
                                       {distributor.distributorContact.email}
                                     </span>
@@ -1063,7 +1063,7 @@ export default function OptimizationSuggestionsPage() {
                                 )}
                                 {distributor.distributorContact?.phone && (
                                   <div className="flex items-center gap-0.5">
-                                    <Phone className="h-2.5 w-2.5 text-gray-500 flex-shrink-0" />
+                                    <Phone className="h-2.5 w-2.5 text-[#6b7280] flex-shrink-0" />
                                     <span className="text-[10px]">{distributor.distributorContact.phone}</span>
                                   </div>
                                 )}
@@ -1073,7 +1073,7 @@ export default function OptimizationSuggestionsPage() {
                               <div className="flex items-center gap-0.5 flex-wrap">
                                 <button
                                   onClick={() => setSelectedDistributor(distributor)}
-                                  className="px-1.5 py-0.5 bg-teal-600 text-white text-[10px] rounded hover:bg-teal-700 flex items-center gap-0.5 whitespace-nowrap"
+                                  className="px-1.5 py-0.5 bg-[#516057] text-white text-[10px] rounded hover:bg-[#505454] flex items-center gap-0.5 whitespace-nowrap"
                                   title="View items"
                                 >
                                   <Eye className="h-2.5 w-2.5" />
@@ -1082,7 +1082,7 @@ export default function OptimizationSuggestionsPage() {
                                 <button
                                   onClick={() => handleDistributorSelect(distributor)}
                                   disabled={submittingDistributorId === (distributor.distributorId || distributor.distributorName)}
-                                  className="px-1.5 py-0.5 bg-teal-600 text-white text-[10px] rounded hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-0.5"
+                                  className="px-1.5 py-0.5 bg-[#516057] text-white text-[10px] rounded hover:bg-[#505454] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-0.5"
                                   title="Create"
                                 >
                                   {submittingDistributorId === (distributor.distributorId || distributor.distributorName) ? (
@@ -1101,7 +1101,7 @@ export default function OptimizationSuggestionsPage() {
                         })
                       ) : (
                         <tr>
-                          <td colSpan={8} className="px-2 py-6 text-center text-[10px] text-gray-500">
+                          <td colSpan={8} className="px-2 py-6 text-center text-[10px] text-[#6b7280]">
                             No distributors available
                           </td>
                         </tr>
@@ -1132,18 +1132,18 @@ export default function OptimizationSuggestionsPage() {
         {/* Modal for Viewing Products */}
         {selectedDistributor && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2">
-            <div className="relative w-full max-w-4xl bg-white rounded-lg shadow-xl max-h-[90vh] flex flex-col">
+            <div className="relative w-full max-w-4xl bg-white rounded-[4px] shadow-xl max-h-[90vh] flex flex-col">
               {/* Modal Header */}
-              <div className="flex items-center justify-between p-2 border-b border-gray-200 flex-shrink-0">
+              <div className="flex items-center justify-between p-2 border-b border-[#e2e2e2] flex-shrink-0">
                 <div className="flex-1 min-w-0 pr-2">
-                  <h3 className="text-sm font-bold text-gray-900 truncate">Products</h3>
-                  <p className="text-xs text-gray-600 mt-0.5 truncate">
+                  <h3 className="text-sm font-bold text-[#000000] truncate">Products</h3>
+                  <p className="text-xs text-[#505454] mt-0.5 truncate">
                     {selectedDistributor.distributorName}
                   </p>
                 </div>
                 <button
                   onClick={() => setSelectedDistributor(null)}
-                  className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+                  className="p-1.5 hover:bg-[#f5f2f1] rounded-[4px] transition-colors flex-shrink-0"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -1151,24 +1151,24 @@ export default function OptimizationSuggestionsPage() {
 
               {/* Distributor Contact Info */}
               {selectedDistributor.distributorContact && (
-                <div className="p-2 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+                <div className="p-2 border-b border-[#e2e2e2] bg-[#f5f2f1] flex-shrink-0">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
                     {selectedDistributor.distributorContact.email && (
                       <div className="flex items-center gap-1.5">
-                        <Mail className="h-3 w-3 text-gray-500 flex-shrink-0" />
-                        <span className="text-gray-700 truncate text-xs">{selectedDistributor.distributorContact.email}</span>
+                        <Mail className="h-3 w-3 text-[#6b7280] flex-shrink-0" />
+                        <span className="text-[#505454] truncate text-xs">{selectedDistributor.distributorContact.email}</span>
                       </div>
                     )}
                     {selectedDistributor.distributorContact.phone && (
                       <div className="flex items-center gap-1.5">
-                        <Phone className="h-3 w-3 text-gray-500 flex-shrink-0" />
-                        <span className="text-gray-700 text-xs">{selectedDistributor.distributorContact.phone}</span>
+                        <Phone className="h-3 w-3 text-[#6b7280] flex-shrink-0" />
+                        <span className="text-[#505454] text-xs">{selectedDistributor.distributorContact.phone}</span>
                       </div>
                     )}
                     {selectedDistributor.distributorContact.location && (
                       <div className="flex items-center gap-1.5">
-                        <MapPin className="h-3 w-3 text-gray-500 flex-shrink-0" />
-                        <span className="text-gray-700 truncate text-xs">{selectedDistributor.distributorContact.location}</span>
+                        <MapPin className="h-3 w-3 text-[#6b7280] flex-shrink-0" />
+                        <span className="text-[#505454] truncate text-xs">{selectedDistributor.distributorContact.location}</span>
                       </div>
                     )}
                   </div>
@@ -1191,13 +1191,13 @@ export default function OptimizationSuggestionsPage() {
                       <div className="hidden md:block overflow-x-auto">
                         <table className="w-full border-collapse">
                           <thead>
-                            <tr className="bg-gray-50 border-b border-gray-200">
-                              <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Product Name</th>
-                              <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">NDC</th>
-                              <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Full Units</th>
-                              <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Full Price</th>
-                              <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Partial Units</th>
-                              <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Partial Price</th>
+                            <tr className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
+                              <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Product Name</th>
+                              <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">NDC</th>
+                              <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Full Units</th>
+                              <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Full Price</th>
+                              <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Partial Units</th>
+                              <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Partial Price</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -1223,30 +1223,30 @@ export default function OptimizationSuggestionsPage() {
                                 return (
                                 <tr
                                   key={`${product.ndc}-${idx}`}
-                                  className="border-b border-gray-100 hover:bg-gray-50"
+                                  className="border-b border-[#f3f4f6] hover:bg-[#f5f2f1]"
                                 >
-                                  <td className="px-2 py-1.5 text-xs text-gray-900">{product.productName}</td>
-                                  <td className="px-2 py-1.5 text-xs font-mono text-gray-600">{product.ndc}</td>
-                                  <td className="px-2 py-1.5 text-xs text-gray-700">{full}</td>
-                                  <td className="px-2 py-1.5 text-xs text-gray-700">
+                                  <td className="px-2 py-1.5 text-xs text-[#000000]">{product.productName}</td>
+                                  <td className="px-2 py-1.5 text-xs font-mono text-[#505454]">{product.ndc}</td>
+                                  <td className="px-2 py-1.5 text-xs text-[#505454]">{full}</td>
+                                  <td className="px-2 py-1.5 text-xs text-[#505454]">
                                     {bothPricesNull ? '-' : (
                                       feeRatePercentage > 0 ? (
                                         <div className="flex flex-col">
-                                          <span className="line-through text-gray-400 text-[10px]">{formatCurrency(fullPrice)}</span>
-                                          <span className="font-semibold text-teal-700">{formatCurrency(adjustedFullPrice)}</span>
+                                          <span className="line-through text-[#9ca3af] text-[10px]">{formatCurrency(fullPrice)}</span>
+                                          <span className="font-semibold text-[#516057]">{formatCurrency(adjustedFullPrice)}</span>
                                         </div>
                                       ) : (
                                         <span className="font-semibold">{formatCurrency(fullPrice)}</span>
                                       )
                                     )}
                                   </td>
-                                  <td className="px-2 py-1.5 text-xs text-gray-700">{partial}</td>
-                                  <td className="px-2 py-1.5 text-xs text-gray-700">
+                                  <td className="px-2 py-1.5 text-xs text-[#505454]">{partial}</td>
+                                  <td className="px-2 py-1.5 text-xs text-[#505454]">
                                     {bothPricesNull ? '-' : (
                                       feeRatePercentage > 0 ? (
                                         <div className="flex flex-col">
-                                          <span className="line-through text-gray-400 text-[10px]">{formatCurrency(partialPrice)}</span>
-                                          <span className="font-semibold text-teal-700">{formatCurrency(adjustedPartialPrice)}</span>
+                                          <span className="line-through text-[#9ca3af] text-[10px]">{formatCurrency(partialPrice)}</span>
+                                          <span className="font-semibold text-[#516057]">{formatCurrency(adjustedPartialPrice)}</span>
                                         </div>
                                       ) : (
                                         <span className="font-semibold">{formatCurrency(partialPrice)}</span>
@@ -1258,7 +1258,7 @@ export default function OptimizationSuggestionsPage() {
                               })
                             ) : (
                               <tr>
-                                <td colSpan={6} className="px-2 py-6 text-center text-xs text-gray-500">
+                                <td colSpan={6} className="px-2 py-6 text-center text-xs text-[#6b7280]">
                                   No products found
                                 </td>
                               </tr>
@@ -1271,13 +1271,13 @@ export default function OptimizationSuggestionsPage() {
                       <div className="md:hidden overflow-x-auto">
                         <table className="w-full border-collapse min-w-[600px]">
                           <thead>
-                            <tr className="bg-gray-50 border-b border-gray-200">
-                              <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700">Product</th>
-                              <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700">NDC</th>
-                              <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700">Full Units</th>
-                              <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700">Full Price</th>
-                              <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700">Partial Units</th>
-                              <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700">Partial Price</th>
+                            <tr className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
+                              <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454]">Product</th>
+                              <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454]">NDC</th>
+                              <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454]">Full Units</th>
+                              <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454]">Full Price</th>
+                              <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454]">Partial Units</th>
+                              <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454]">Partial Price</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -1303,32 +1303,32 @@ export default function OptimizationSuggestionsPage() {
                                 return (
                                 <tr
                                   key={`${product.ndc}-${idx}`}
-                                  className="border-b border-gray-100 hover:bg-gray-50"
+                                  className="border-b border-[#f3f4f6] hover:bg-[#f5f2f1]"
                                 >
-                                  <td className="px-2 py-1 text-[10px] text-gray-900 max-w-[150px] truncate" title={product.productName}>
+                                  <td className="px-2 py-1 text-[10px] text-[#000000] max-w-[150px] truncate" title={product.productName}>
                                     {product.productName}
                                   </td>
-                                  <td className="px-2 py-1 text-[10px] font-mono text-gray-600">{product.ndc}</td>
-                                  <td className="px-2 py-1 text-[10px] text-gray-700">{full}</td>
-                                  <td className="px-2 py-1 text-[10px] text-gray-700">
+                                  <td className="px-2 py-1 text-[10px] font-mono text-[#505454]">{product.ndc}</td>
+                                  <td className="px-2 py-1 text-[10px] text-[#505454]">{full}</td>
+                                  <td className="px-2 py-1 text-[10px] text-[#505454]">
                                     {bothPricesNull ? '-' : (
                                       feeRatePercentage > 0 ? (
                                         <div className="flex flex-col">
-                                          <span className="line-through text-gray-400 text-[9px]">{formatCurrency(fullPrice)}</span>
-                                          <span className="font-semibold text-teal-700">{formatCurrency(adjustedFullPrice)}</span>
+                                          <span className="line-through text-[#9ca3af] text-[9px]">{formatCurrency(fullPrice)}</span>
+                                          <span className="font-semibold text-[#516057]">{formatCurrency(adjustedFullPrice)}</span>
                                         </div>
                                       ) : (
                                         <span className="font-semibold">{formatCurrency(fullPrice)}</span>
                                       )
                                     )}
                                   </td>
-                                  <td className="px-2 py-1 text-[10px] text-gray-700">{partial}</td>
-                                  <td className="px-2 py-1 text-[10px] text-gray-700">
+                                  <td className="px-2 py-1 text-[10px] text-[#505454]">{partial}</td>
+                                  <td className="px-2 py-1 text-[10px] text-[#505454]">
                                     {bothPricesNull ? '-' : (
                                       feeRatePercentage > 0 ? (
                                         <div className="flex flex-col">
-                                          <span className="line-through text-gray-400 text-[9px]">{formatCurrency(partialPrice)}</span>
-                                          <span className="font-semibold text-teal-700">{formatCurrency(adjustedPartialPrice)}</span>
+                                          <span className="line-through text-[#9ca3af] text-[9px]">{formatCurrency(partialPrice)}</span>
+                                          <span className="font-semibold text-[#516057]">{formatCurrency(adjustedPartialPrice)}</span>
                                         </div>
                                       ) : (
                                         <span className="font-semibold">{formatCurrency(partialPrice)}</span>
@@ -1340,7 +1340,7 @@ export default function OptimizationSuggestionsPage() {
                               })
                             ) : (
                               <tr>
-                                <td colSpan={6} className="px-2 py-6 text-center text-[10px] text-gray-500">
+                                <td colSpan={6} className="px-2 py-6 text-center text-[10px] text-[#6b7280]">
                                   No products found
                                 </td>
                               </tr>
@@ -1354,10 +1354,10 @@ export default function OptimizationSuggestionsPage() {
               </div>
 
               {/* Modal Footer */}
-              <div className="flex items-center justify-end gap-2 p-2 border-t border-gray-200 flex-shrink-0">
+              <div className="flex items-center justify-end gap-2 p-2 border-t border-[#e2e2e2] flex-shrink-0">
                 <button
                   onClick={() => setSelectedDistributor(null)}
-                  className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-xs"
+                  className="px-3 py-1 bg-[#e2e2e2] text-[#505454] rounded hover:bg-gray-300 text-xs"
                 >
                   Close
                 </button>
@@ -1367,7 +1367,7 @@ export default function OptimizationSuggestionsPage() {
                     setSelectedDistributor(null);
                   }}
                   disabled={submittingDistributorId === (selectedDistributor.distributorId || selectedDistributor.distributorName)}
-                  className="px-3 py-1 bg-teal-600 text-white rounded hover:bg-teal-700 text-xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                  className="px-3 py-1 bg-[#516057] text-white rounded hover:bg-[#505454] text-xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                 >
                   {submittingDistributorId === (selectedDistributor.distributorId || selectedDistributor.distributorName) ? (
                     <>
@@ -1386,12 +1386,12 @@ export default function OptimizationSuggestionsPage() {
         {/* Modal for Distributor Suggestion Response */}
         {distributorSuggestionData && pendingDistributor && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2">
-            <div className="relative w-full max-w-5xl bg-white rounded-lg shadow-xl max-h-[90vh] flex flex-col">
+            <div className="relative w-full max-w-5xl bg-white rounded-[4px] shadow-xl max-h-[90vh] flex flex-col">
               {/* Modal Header */}
-              <div className="flex items-center justify-between p-2 border-b border-gray-200 flex-shrink-0">
+              <div className="flex items-center justify-between p-2 border-b border-[#e2e2e2] flex-shrink-0">
                 <div className="flex-1 min-w-0 pr-2">
-                  <h3 className="text-sm font-bold text-gray-900">Distributor Suggestion</h3>
-                  <p className="text-xs text-gray-600 mt-0.5 truncate">
+                  <h3 className="text-sm font-bold text-[#000000]">Distributor Suggestion</h3>
+                  <p className="text-xs text-[#505454] mt-0.5 truncate">
                     {pendingDistributor.distributorName}
                   </p>
                 </div>
@@ -1402,7 +1402,7 @@ export default function OptimizationSuggestionsPage() {
                     setSubmittingDistributorId(null);
                     setSubmittingAction(null);
                   }}
-                  className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+                  className="p-1.5 hover:bg-[#f5f2f1] rounded-[4px] transition-colors flex-shrink-0"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -1410,13 +1410,13 @@ export default function OptimizationSuggestionsPage() {
 
               {/* Tabs - Only show if existing package exists */}
               {distributorSuggestionData.packages[0]?.existingPackage && (
-                <div className="flex border-b border-gray-200 flex-shrink-0">
+                <div className="flex border-b border-[#e2e2e2] flex-shrink-0">
                   <button
                     onClick={() => setActiveModalTab('existing')}
                     className={`flex-1 px-4 py-2 text-xs font-semibold transition-colors ${
                       activeModalTab === 'existing'
-                        ? 'bg-teal-50 text-teal-700 border-b-2 border-teal-600'
-                        : 'text-gray-600 hover:bg-gray-50'
+                        ? 'bg-[#f5f2f1] text-[#516057] border-b-2 border-[#516057]'
+                        : 'text-[#505454] hover:bg-[#f5f2f1]'
                     }`}
                   >
                     Existing Package
@@ -1425,8 +1425,8 @@ export default function OptimizationSuggestionsPage() {
                     onClick={() => setActiveModalTab('create')}
                     className={`flex-1 px-4 py-2 text-xs font-semibold transition-colors ${
                       activeModalTab === 'create'
-                        ? 'bg-teal-50 text-teal-700 border-b-2 border-teal-600'
-                        : 'text-gray-600 hover:bg-gray-50'
+                        ? 'bg-[#f5f2f1] text-[#516057] border-b-2 border-[#516057]'
+                        : 'text-[#505454] hover:bg-[#f5f2f1]'
                     }`}
                   >
                     Create New
@@ -1449,39 +1449,39 @@ export default function OptimizationSuggestionsPage() {
                     // Existing Package Tab
                     return (
                       <div key={idx} className="space-y-3">
-                        <div className="border border-gray-200 rounded-lg p-2">
-                          <h4 className="text-sm font-bold text-gray-900 mb-3">{pkg.distributorName}</h4>
+                        <div className="border border-[#e2e2e2] rounded-[4px] p-2">
+                          <h4 className="text-sm font-bold text-[#000000] mb-3">{pkg.distributorName}</h4>
                           
                           {/* Existing Package Info */}
-                          <div className="mb-4 p-3 border border-gray-200 bg-yellow-50 rounded-lg">
-                            <h5 className="text-xs font-semibold text-gray-900 mb-3">Existing Package Details</h5>
+                          <div className="mb-4 p-3 border border-[#e2e2e2] bg-yellow-50 rounded-[4px]">
+                            <h5 className="text-xs font-semibold text-[#000000] mb-3">Existing Package Details</h5>
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
                               <div>
-                                <p className="text-gray-600">Package Number</p>
-                                <p className="font-semibold text-gray-900">{pkg.existingPackage.packageNumber}</p>
+                                <p className="text-[#505454]">Package Number</p>
+                                <p className="font-semibold text-[#000000]">{pkg.existingPackage.packageNumber}</p>
                               </div>
                               <div>
-                                <p className="text-gray-600">Current Items</p>
-                                <p className="font-semibold text-gray-900">{pkg.existingPackage.totalItems}</p>
+                                <p className="text-[#505454]">Current Items</p>
+                                <p className="font-semibold text-[#000000]">{pkg.existingPackage.totalItems}</p>
                               </div>
                               <div>
-                                <p className="text-gray-600">Current Value</p>
-                                <p className="font-semibold text-gray-900">{formatCurrency(pkg.existingPackage.totalEstimatedValue)}</p>
+                                <p className="text-[#505454]">Current Value</p>
+                                <p className="font-semibold text-[#000000]">{formatCurrency(pkg.existingPackage.totalEstimatedValue)}</p>
                               </div>
                               <div>
-                                <p className="text-gray-600">Created</p>
-                                <p className="font-semibold text-gray-900">{new Date(pkg.existingPackage.createdAt).toLocaleDateString()}</p>
+                                <p className="text-[#505454]">Created</p>
+                                <p className="font-semibold text-[#000000]">{new Date(pkg.existingPackage.createdAt).toLocaleDateString()}</p>
                               </div>
                               {pkg.existingPackage.feeRate !== undefined && pkg.existingPackage.feeRate !== null && (
                                 <div>
-                                  <p className="text-gray-600">Fee Rate</p>
-                                  <p className="font-semibold text-gray-900">{pkg.existingPackage.feeRate}%</p>
+                                  <p className="text-[#505454]">Fee Rate</p>
+                                  <p className="font-semibold text-[#000000]">{pkg.existingPackage.feeRate}%</p>
                                 </div>
                               )}
                               {pkg.existingPackage.feeDuration !== undefined && pkg.existingPackage.feeDuration !== null && (
                                 <div>
-                                  <p className="text-gray-600">Fee Duration</p>
-                                  <p className="font-semibold text-gray-900">{pkg.existingPackage.feeDuration} days</p>
+                                  <p className="text-[#505454]">Fee Duration</p>
+                                  <p className="font-semibold text-[#000000]">{pkg.existingPackage.feeDuration} days</p>
                                 </div>
                               )}
                             </div>
@@ -1489,24 +1489,24 @@ export default function OptimizationSuggestionsPage() {
 
                           {/* Distributor Contact */}
                           {pkg.distributorContact && (
-                            <div className="mb-3 p-2 bg-gray-50 rounded text-xs">
+                            <div className="mb-3 p-2 bg-[#f5f2f1] rounded text-xs">
                               <div className="grid grid-cols-1 sm:grid-cols-3 gap-1">
                                 {pkg.distributorContact.email && (
                                   <div className="flex items-center gap-1">
-                                    <Mail className="h-3 w-3 text-gray-500" />
-                                    <span className="text-gray-700 truncate">{pkg.distributorContact.email}</span>
+                                    <Mail className="h-3 w-3 text-[#6b7280]" />
+                                    <span className="text-[#505454] truncate">{pkg.distributorContact.email}</span>
                                   </div>
                                 )}
                                 {pkg.distributorContact.phone && (
                                   <div className="flex items-center gap-1">
-                                    <Phone className="h-3 w-3 text-gray-500" />
-                                    <span className="text-gray-700">{pkg.distributorContact.phone}</span>
+                                    <Phone className="h-3 w-3 text-[#6b7280]" />
+                                    <span className="text-[#505454]">{pkg.distributorContact.phone}</span>
                                   </div>
                                 )}
                                 {pkg.distributorContact.location && (
                                   <div className="flex items-center gap-1">
-                                    <MapPin className="h-3 w-3 text-gray-500" />
-                                    <span className="text-gray-700 truncate">{pkg.distributorContact.location}</span>
+                                    <MapPin className="h-3 w-3 text-[#6b7280]" />
+                                    <span className="text-[#505454] truncate">{pkg.distributorContact.location}</span>
                                   </div>
                                 )}
                               </div>
@@ -1519,29 +1519,29 @@ export default function OptimizationSuggestionsPage() {
                     // Create New Tab (or default if no existing package)
                     return (
                       <div key={idx} className="space-y-3">
-                        <div className="border border-gray-200 rounded-lg p-2">
-                          <h4 className="text-sm font-bold text-gray-900 mb-3">{pkg.distributorName}</h4>
+                        <div className="border border-[#e2e2e2] rounded-[4px] p-2">
+                          <h4 className="text-sm font-bold text-[#000000] mb-3">{pkg.distributorName}</h4>
 
                           {/* Distributor Contact */}
                           {pkg.distributorContact && (
-                            <div className="mb-3 p-2 bg-gray-50 rounded text-xs">
+                            <div className="mb-3 p-2 bg-[#f5f2f1] rounded text-xs">
                               <div className="grid grid-cols-1 sm:grid-cols-3 gap-1">
                                 {pkg.distributorContact.email && (
                                   <div className="flex items-center gap-1">
-                                    <Mail className="h-3 w-3 text-gray-500" />
-                                    <span className="text-gray-700 truncate">{pkg.distributorContact.email}</span>
+                                    <Mail className="h-3 w-3 text-[#6b7280]" />
+                                    <span className="text-[#505454] truncate">{pkg.distributorContact.email}</span>
                                   </div>
                                 )}
                                 {pkg.distributorContact.phone && (
                                   <div className="flex items-center gap-1">
-                                    <Phone className="h-3 w-3 text-gray-500" />
-                                    <span className="text-gray-700">{pkg.distributorContact.phone}</span>
+                                    <Phone className="h-3 w-3 text-[#6b7280]" />
+                                    <span className="text-[#505454]">{pkg.distributorContact.phone}</span>
                                   </div>
                                 )}
                                 {pkg.distributorContact.location && (
                                   <div className="flex items-center gap-1">
-                                    <MapPin className="h-3 w-3 text-gray-500" />
-                                    <span className="text-gray-700 truncate">{pkg.distributorContact.location}</span>
+                                    <MapPin className="h-3 w-3 text-[#6b7280]" />
+                                    <span className="text-[#505454] truncate">{pkg.distributorContact.location}</span>
                                   </div>
                                 )}
                               </div>
@@ -1550,8 +1550,8 @@ export default function OptimizationSuggestionsPage() {
 
                           {/* Fee Rate Selection */}
                           {pkg.distributorContact?.feeRates && Object.keys(pkg.distributorContact.feeRates).length > 0 && (
-                            <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                              <label className="text-xs font-semibold text-gray-700 mb-2 block">
+                            <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-[4px]">
+                              <label className="text-xs font-semibold text-[#505454] mb-2 block">
                                 Select Fee Rate:
                               </label>
                               <select
@@ -1574,7 +1574,7 @@ export default function OptimizationSuggestionsPage() {
                                     setSelectedFeeRates(newMap);
                                   }
                                 }}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                className="w-full px-3 py-2 border border-[#e2e2e2] rounded-[4px] text-xs focus:outline-none focus:ring-2 focus:ring-[#516057]"
                               >
                                 <option value="">Select fee rate...</option>
                                 {Object.entries(pkg.distributorContact.feeRates).map(([duration, rate]: [string, any]) => (
@@ -1584,7 +1584,7 @@ export default function OptimizationSuggestionsPage() {
                                 ))}
                               </select>
                               {selectedFeeRateDays && pkg.distributorContact?.feeRates?.[selectedFeeRateDays] && (
-                                <p className="text-xs text-teal-600 mt-1">
+                                <p className="text-xs text-[#516057] mt-1">
                                   Selected: {pkg.distributorContact.feeRates[selectedFeeRateDays].percentage}% for {selectedFeeRateDays} days
                                 </p>
                               )}
@@ -1594,22 +1594,22 @@ export default function OptimizationSuggestionsPage() {
                           {/* Package Stats */}
                           <div className="grid grid-cols-3 gap-2 mb-3 text-xs">
                             <div>
-                              <p className="text-gray-600">Total Items</p>
+                              <p className="text-[#505454]">Total Items</p>
                               <p className="font-semibold">{pkg.totalItems}</p>
                             </div>
                             <div>
-                              <p className="text-gray-600">Total Value</p>
+                              <p className="text-[#505454]">Total Value</p>
                               {feeRatePercentage !== null && feeRatePercentage > 0 ? (
                                 <div className="flex flex-col">
-                                  <span className="line-through text-gray-400 text-[10px]">{formatCurrency(pkg.totalEstimatedValue)}</span>
-                                  <span className="font-semibold text-teal-700">{formatCurrency(pkg.totalEstimatedValue * (1 - feeRatePercentage / 100))}</span>
+                                  <span className="line-through text-[#9ca3af] text-[10px]">{formatCurrency(pkg.totalEstimatedValue)}</span>
+                                  <span className="font-semibold text-[#516057]">{formatCurrency(pkg.totalEstimatedValue * (1 - feeRatePercentage / 100))}</span>
                                 </div>
                               ) : (
                                 <p className="font-semibold">{formatCurrency(pkg.totalEstimatedValue)}</p>
                               )}
                             </div>
                             <div>
-                              <p className="text-gray-600">Avg Price/Unit</p>
+                              <p className="text-[#505454]">Avg Price/Unit</p>
                               <p className="font-semibold">{formatCurrency(pkg.averagePricePerUnit)}</p>
                             </div>
                           </div>
@@ -1618,13 +1618,13 @@ export default function OptimizationSuggestionsPage() {
                           <div className="overflow-x-auto">
                             <table className="w-full border-collapse text-xs">
                               <thead>
-                                <tr className="bg-gray-50 border-b border-gray-200">
-                                  <th className="px-2 py-1 text-left font-semibold text-gray-700">Product Name</th>
-                                  <th className="px-2 py-1 text-left font-semibold text-gray-700">NDC</th>
-                                  <th className="px-2 py-1 text-left font-semibold text-gray-700">Full</th>
-                                  <th className="px-2 py-1 text-left font-semibold text-gray-700">Partial</th>
-                                  <th className="px-2 py-1 text-left font-semibold text-gray-700">Price/Unit</th>
-                                  <th className="px-2 py-1 text-left font-semibold text-gray-700">Total Value</th>
+                                <tr className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
+                                  <th className="px-2 py-1 text-left font-semibold text-[#505454]">Product Name</th>
+                                  <th className="px-2 py-1 text-left font-semibold text-[#505454]">NDC</th>
+                                  <th className="px-2 py-1 text-left font-semibold text-[#505454]">Full</th>
+                                  <th className="px-2 py-1 text-left font-semibold text-[#505454]">Partial</th>
+                                  <th className="px-2 py-1 text-left font-semibold text-[#505454]">Price/Unit</th>
+                                  <th className="px-2 py-1 text-left font-semibold text-[#505454]">Total Value</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -1634,19 +1634,19 @@ export default function OptimizationSuggestionsPage() {
                                     : product.totalValue;
                                   
                                   return (
-                                    <tr key={pIdx} className="border-b border-gray-100">
-                                      <td className="px-2 py-1 text-gray-900">{product.productName}</td>
-                                      <td className="px-2 py-1 font-mono text-gray-600">{product.ndc}</td>
-                                      <td className="px-2 py-1 text-gray-700">{product.full}</td>
-                                      <td className="px-2 py-1 text-gray-700">{product.partial}</td>
-                                      <td className="px-2 py-1 text-gray-700">
+                                    <tr key={pIdx} className="border-b border-[#f3f4f6]">
+                                      <td className="px-2 py-1 text-[#000000]">{product.productName}</td>
+                                      <td className="px-2 py-1 font-mono text-[#505454]">{product.ndc}</td>
+                                      <td className="px-2 py-1 text-[#505454]">{product.full}</td>
+                                      <td className="px-2 py-1 text-[#505454]">{product.partial}</td>
+                                      <td className="px-2 py-1 text-[#505454]">
                                         <span className="font-semibold">{formatCurrency(product.pricePerUnit)}</span>
                                       </td>
-                                      <td className="px-2 py-1 text-gray-700 font-semibold">
+                                      <td className="px-2 py-1 text-[#505454] font-semibold">
                                         {feeRatePercentage !== null && feeRatePercentage > 0 ? (
                                           <div className="flex flex-col">
-                                            <span className="line-through text-gray-400 text-[10px]">{formatCurrency(product.totalValue)}</span>
-                                            <span className="font-semibold text-teal-700">{formatCurrency(adjustedTotalValue)}</span>
+                                            <span className="line-through text-[#9ca3af] text-[10px]">{formatCurrency(product.totalValue)}</span>
+                                            <span className="font-semibold text-[#516057]">{formatCurrency(adjustedTotalValue)}</span>
                                           </div>
                                         ) : (
                                           <span>{formatCurrency(product.totalValue)}</span>
@@ -1666,7 +1666,7 @@ export default function OptimizationSuggestionsPage() {
               </div>
 
               {/* Modal Footer */}
-              <div className="flex items-center justify-end gap-2 p-2 border-t border-gray-200 flex-shrink-0">
+              <div className="flex items-center justify-end gap-2 p-2 border-t border-[#e2e2e2] flex-shrink-0">
                 <button
                   onClick={() => {
                     setDistributorSuggestionData(null);
@@ -1674,7 +1674,7 @@ export default function OptimizationSuggestionsPage() {
                     setSubmittingDistributorId(null);
                     setSubmittingAction(null);
                   }}
-                  className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-xs"
+                  className="px-3 py-1 bg-[#e2e2e2] text-[#505454] rounded hover:bg-gray-300 text-xs"
                 >
                   Cancel
                 </button>
@@ -1688,7 +1688,7 @@ export default function OptimizationSuggestionsPage() {
                       <button
                         onClick={handleAddToExistingPackage}
                         disabled={submittingAction !== null}
-                        className="px-3 py-1 bg-teal-500 text-white rounded hover:bg-teal-600 text-xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                        className="px-3 py-1 bg-[#516057] text-white rounded hover:bg-[#516057] text-xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                       >
                         {submittingAction === 'add' ? (
                           <>
@@ -1709,7 +1709,7 @@ export default function OptimizationSuggestionsPage() {
                           const hasSelectedFeeRate = pendingDistributor ? selectedFeeRates.has(pendingDistributor.distributorId || '') : false;
                           return submittingAction !== null || !hasSelectedFeeRate;
                         })()}
-                        className="px-3 py-1 bg-teal-600 text-white rounded hover:bg-teal-700 text-xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                        className="px-3 py-1 bg-[#516057] text-white rounded hover:bg-[#505454] text-xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                         title={(() => {
                           const hasSelectedFeeRate = pendingDistributor ? selectedFeeRates.has(pendingDistributor.distributorId || '') : false;
                           if (!hasSelectedFeeRate) {

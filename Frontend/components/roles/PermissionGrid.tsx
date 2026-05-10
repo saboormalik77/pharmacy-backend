@@ -53,7 +53,7 @@ export function PermissionGrid({ allPermissions, selectedKeys, onChange, disable
         const someSelected = moduleKeys.some((k) => selectedKeys.includes(k)) && !allSelected
 
         return (
-          <div key={module} className="rounded-lg border-[0.5px] border-gray-200 p-3">
+          <div key={module} className="rounded-[4px] border-[0.5px] border-gray-200 p-3">
             <div className="flex items-center gap-2 mb-3">
               <input
                 type="checkbox"
@@ -61,7 +61,7 @@ export function PermissionGrid({ allPermissions, selectedKeys, onChange, disable
                 ref={(el) => { if (el) el.indeterminate = someSelected }}
                 onChange={() => toggleModule(perms)}
                 disabled={disabled}
-                className="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                className="h-4 w-4 rounded border-gray-300 text-[#516057] focus:ring-[#516057]"
               />
               <span className="text-sm font-semibold text-gray-700">{formatModuleName(module)}</span>
               <span className="text-xs text-muted-foreground">
@@ -76,7 +76,7 @@ export function PermissionGrid({ allPermissions, selectedKeys, onChange, disable
                     checked={selectedKeys.includes(p.permissionKey)}
                     onChange={() => toggleKey(p.permissionKey)}
                     disabled={disabled}
-                    className="h-4 w-4 mt-0.5 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                    className="h-4 w-4 mt-0.5 rounded border-gray-300 text-[#516057] focus:ring-[#516057]"
                   />
                   <div>
                     <span className="font-medium">{p.displayName}</span>

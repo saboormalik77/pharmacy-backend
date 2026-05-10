@@ -346,13 +346,13 @@ export default function InventoryPage() {
     <DashboardLayout>
       <div className="space-y-3">
         {/* Professional Medical Header */}
-        <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-teal-50 via-cyan-50 to-teal-50 border-2 border-teal-200">
+        <div className="flex items-center justify-between p-4 rounded-[4px] bg-[#f5f2f1] border-2 border-[#e2e2e2]">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Inventory Management</h1>
-            <p className="text-xs text-gray-600 mt-0.5">Stock entry, tracking, and expired medication management</p>
+            <h1 className="text-xl font-bold text-[#000000]">Inventory Management</h1>
+            <p className="text-xs text-[#505454] mt-0.5">Stock entry, tracking, and expired medication management</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="border-teal-300 text-teal-700 hover:bg-teal-50" onClick={() => {
+            <Button variant="outline" size="sm" className="border-[#e2e2e2] text-[#516057] hover:bg-[#f5f2f1]" onClick={() => {
               const template = `NDC,Lot Number,Expiration Date,Quantity,Boxes,Tablets Per Box,Location\n00573-0201-30,LOT12345,2025-12-31,1000,10,100,Main Warehouse`;
               const blob = new Blob([template], { type: 'text/csv' });
               const url = window.URL.createObjectURL(blob);
@@ -365,7 +365,7 @@ export default function InventoryPage() {
               <Download className="mr-1 h-3 w-3" />
               Template
             </Button>
-            <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white border-0" onClick={() => setViewMode('add')}>
+            <Button size="sm" className="bg-[#516057] hover:bg-[#505454] text-white border-0" onClick={() => setViewMode('add')}>
               <Plus className="mr-1 h-3 w-3" />
               Add Stock
             </Button>
@@ -385,49 +385,49 @@ export default function InventoryPage() {
 
         {/* Professional Metrics Bar */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
-          <div className="p-3 rounded-lg border-2 border-teal-200 bg-gradient-to-br from-teal-50 to-teal-100">
+          <div className="p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1]">
             <div className="flex items-center gap-1 mb-1">
-              <Package className="h-3 w-3 text-teal-600" />
-              <p className="text-xs text-teal-700 font-medium">Total Items</p>
+              <Package className="h-3 w-3 text-[#516057]" />
+              <p className="text-xs text-[#516057] font-medium">Total Items</p>
             </div>
-            <p className="text-xl font-bold text-teal-900">{metrics.totalItems}</p>
+            <p className="text-xl font-bold text-[#000000]">{metrics.totalItems}</p>
           </div>
-          <div className="p-3 rounded-lg border-2 border-cyan-200 bg-gradient-to-br from-cyan-50 to-cyan-100">
+          <div className="p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1]">
             <div className="flex items-center gap-1 mb-1">
-              <DollarSign className="h-3 w-3 text-cyan-600" />
-              <p className="text-xs text-cyan-700 font-medium">Total Value</p>
+              <DollarSign className="h-3 w-3 text-[#516057]" />
+              <p className="text-xs text-[#516057] font-medium">Total Value</p>
             </div>
-            <p className="text-lg font-bold text-cyan-900">{formatCurrency(metrics.totalValue)}</p>
+            <p className="text-lg font-bold text-[#000000]">{formatCurrency(metrics.totalValue)}</p>
           </div>
-          <div className="p-3 rounded-lg border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100">
+          <div className="p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1]">
             <div className="flex items-center gap-1 mb-1">
-              <CheckCircle className="h-3 w-3 text-emerald-600" />
-              <p className="text-xs text-emerald-700 font-medium">Active</p>
+              <CheckCircle className="h-3 w-3 text-[#516057]" />
+              <p className="text-xs text-[#516057] font-medium">Active</p>
             </div>
-            <p className="text-xl font-bold text-emerald-900">{metrics.active}</p>
+            <p className="text-xl font-bold text-[#000000]">{metrics.active}</p>
           </div>
-          <div className={`p-3 rounded-lg border-2 ${metrics.expiringSoon > 0 ? 'border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100' : 'border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100'}`}>
+          <div className={`p-3 rounded-[4px] border-2 ${metrics.expiringSoon > 0 ? 'border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100' : 'border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100'}`}>
             <div className="flex items-center gap-1 mb-1">
               <Clock className="h-3 w-3 text-amber-600" />
               <p className="text-xs text-amber-700 font-medium">Expiring Soon</p>
             </div>
             <p className="text-xl font-bold text-amber-900">{metrics.expiringSoon}</p>
           </div>
-          <div className={`p-3 rounded-lg border-2 ${metrics.expired > 0 ? 'border-red-200 bg-gradient-to-br from-red-50 to-red-100' : 'border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100'}`}>
+          <div className={`p-3 rounded-[4px] border-2 ${metrics.expired > 0 ? 'border-red-200 bg-gradient-to-br from-red-50 to-red-100' : 'border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100'}`}>
             <div className="flex items-center gap-1 mb-1">
               <AlertTriangle className="h-3 w-3 text-red-600" />
               <p className="text-xs text-red-700 font-medium">Expired</p>
             </div>
             <p className="text-xl font-bold text-red-900">{metrics.expired}</p>
           </div>
-          <div className="p-3 rounded-lg border-2 border-cyan-200 bg-gradient-to-br from-cyan-50 to-cyan-100">
+          <div className="p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1]">
             <div className="flex items-center gap-1 mb-1">
-              <Activity className="h-3 w-3 text-cyan-600" />
-              <p className="text-xs text-cyan-700 font-medium">Avg Days</p>
+              <Activity className="h-3 w-3 text-[#516057]" />
+              <p className="text-xs text-[#516057] font-medium">Avg Days</p>
             </div>
-            <p className="text-xl font-bold text-cyan-900">{metrics.averageDaysToExpiration}</p>
+            <p className="text-xl font-bold text-[#000000]">{metrics.averageDaysToExpiration}</p>
           </div>
-          <div className="p-3 rounded-lg border-2 border-red-200 bg-gradient-to-br from-red-50 to-red-100">
+          <div className="p-3 rounded-[4px] border-2 border-red-200 bg-gradient-to-br from-red-50 to-red-100">
             <div className="flex items-center gap-1 mb-1">
               <DollarSign className="h-3 w-3 text-red-600" />
               <p className="text-xs text-red-700 font-medium">Expired Value</p>
@@ -437,20 +437,20 @@ export default function InventoryPage() {
         </div>
 
         {/* Professional Navigation */}
-        <div className="flex gap-2 border-b-2 border-gray-200 bg-white rounded-t-lg p-1">
+        <div className="flex gap-2 border-b-2 border-[#e2e2e2] bg-white rounded-t-lg p-1">
           {[
-            { id: 'list', label: 'All Items', count: inventory.length, color: 'bg-teal-100 text-teal-700 border-teal-300' },
+            { id: 'list', label: 'All Items', count: inventory.length, color: 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2]' },
             { id: 'expired', label: 'Expired', count: expiredItems.length, variant: 'error' as const, color: 'bg-red-100 text-red-700 border-red-300' },
-            { id: 'overview', label: 'Overview', color: 'bg-cyan-100 text-cyan-700 border-cyan-300' },
-            { id: 'add', label: 'Add Stock', color: 'bg-emerald-100 text-emerald-700 border-emerald-300' },
+            { id: 'overview', label: 'Overview', color: 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2]' },
+            { id: 'add', label: 'Add Stock', color: 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2]' },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setViewMode(tab.id as ViewMode)}
-              className={`px-3 py-1.5 text-sm font-medium rounded-lg border-2 transition-all ${
+              className={`px-3 py-1.5 text-sm font-medium rounded-[4px] border-2 transition-all ${
                 viewMode === tab.id 
                   ? `${tab.color} shadow-md scale-105` 
-                  : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                  : 'bg-white text-[#505454] border-[#e2e2e2] hover:bg-[#f5f2f1]'
               }`}
             >
               {tab.label}
@@ -461,17 +461,17 @@ export default function InventoryPage() {
 
         {/* List View - Professional Table */}
         {viewMode === 'list' && (
-          <Card className="border-2 border-teal-200 bg-gradient-to-br from-white to-teal-50/30">
+          <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1]">
             <CardContent className="p-3">
               <div className="flex gap-2 mb-3">
                 <div className="relative flex-1">
-                  <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-teal-500" />
-                  <Input placeholder="Search..." className="pl-7 h-7 text-xs border-teal-200 focus:border-teal-400" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                  <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-[#6b7280]" />
+                  <Input placeholder="Search..." className="pl-7 h-7 text-xs border-[#e2e2e2] focus:border-[#e2e2e2]" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                 </div>
                 <div className="flex gap-1">
                   {[
                     { value: 'all', label: 'All', color: 'bg-slate-100 text-slate-700 border-slate-300' },
-                    { value: 'active', label: 'Active', color: 'bg-emerald-100 text-emerald-700 border-emerald-300' },
+                    { value: 'active', label: 'Active', color: 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2]' },
                     { value: 'expiring_soon', label: 'Expiring Soon', color: 'bg-amber-100 text-amber-700 border-amber-300' },
                     { value: 'expired', label: 'Expired', color: 'bg-red-100 text-red-700 border-red-300' },
                   ].map((status) => (
@@ -479,7 +479,7 @@ export default function InventoryPage() {
                       key={status.value} 
                       variant={filterStatus === status.value ? 'primary' : 'outline'} 
                       size="sm" 
-                      className={`h-7 text-xs px-2 border-2 ${filterStatus === status.value ? status.color : 'border-gray-300'}`}
+                      className={`h-7 text-xs px-2 border-2 ${filterStatus === status.value ? status.color : 'border-[#e2e2e2]'}`}
                       onClick={() => setFilterStatus(status.value as any)}
                     >
                       {status.label}
@@ -489,25 +489,25 @@ export default function InventoryPage() {
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
-                  <thead className="bg-gradient-to-r from-teal-100 to-cyan-100 border-b-2 border-teal-200">
+                  <thead className="bg-[#f5f2f1] border-b-2 border-[#e2e2e2]">
                     <tr>
-                      <th className="text-left p-2 font-bold text-teal-900">Product</th>
-                      <th className="text-left p-2 font-bold text-teal-900">NDC</th>
-                      <th className="text-left p-2 font-bold text-teal-900">Lot</th>
-                      <th className="text-left p-2 font-bold text-teal-900">Qty</th>
-                      <th className="text-left p-2 font-bold text-teal-900">Expiration</th>
-                      <th className="text-left p-2 font-bold text-teal-900">Days</th>
-                      <th className="text-left p-2 font-bold text-teal-900">Location</th>
-                      <th className="text-left p-2 font-bold text-teal-900">Status</th>
-                      <th className="text-left p-2 font-bold text-teal-900">Actions</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Product</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">NDC</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Lot</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Qty</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Expiration</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Days</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Location</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Status</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredInventory.length === 0 ? (
-                      <tr><td colSpan={9} className="p-4 text-center text-gray-500 text-sm bg-gray-50">No items found</td></tr>
+                      <tr><td colSpan={9} className="p-4 text-center text-[#6b7280] text-sm bg-[#f5f2f1]">No items found</td></tr>
                     ) : (
                       filteredInventory.map((item, idx) => (
-                        <tr key={item.id} className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-teal-50 transition-colors`}>
+                        <tr key={item.id} className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]/50'} hover:bg-[#f5f2f1] transition-colors`}>
                           <td className="p-2">
                             <div className="font-medium text-xs">{item.product?.proprietaryName || item.product?.nonProprietaryName || 'N/A'}</div>
                             <div className="text-xs text-muted-foreground">{item.product?.strength} {item.product?.dosageForm}</div>
@@ -557,16 +557,16 @@ export default function InventoryPage() {
             <CardContent className="p-3">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-red-100">
+                  <div className="p-1.5 rounded-[4px] bg-red-100">
                     <AlertTriangle className="h-4 w-4 text-red-600" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-base text-gray-900">Expired Medications ({expiredItems.length})</h3>
-                    <p className="text-xs text-gray-600">Select items to create warehouse package</p>
+                    <h3 className="font-bold text-base text-[#000000]">Expired Medications ({expiredItems.length})</h3>
+                    <p className="text-xs text-[#505454]">Select items to create warehouse package</p>
                   </div>
                 </div>
                 {selectedItems.size > 0 && (
-                  <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white border-0" onClick={() => window.location.href = `/warehouse/packages/create?items=${Array.from(selectedItems).join(',')}`}>
+                  <Button size="sm" className="bg-[#516057] hover:bg-[#505454] text-white border-0" onClick={() => window.location.href = `/warehouse/packages/create?items=${Array.from(selectedItems).join(',')}`}>
                     <Truck className="mr-1 h-3 w-3" />
                     Create Package ({selectedItems.size})
                   </Button>
@@ -591,7 +591,7 @@ export default function InventoryPage() {
                   </thead>
                   <tbody>
                     {expiredItems.map((item, idx) => (
-                      <tr key={item.id} className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-red-50 transition-colors`}>
+                      <tr key={item.id} className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]/50'} hover:bg-red-50 transition-colors`}>
                         <td className="p-2"><input type="checkbox" checked={selectedItems.has(item.id)} onChange={(e) => {
                           const newSet = new Set(selectedItems);
                           if (e.target.checked) newSet.add(item.id);
@@ -619,7 +619,7 @@ export default function InventoryPage() {
 
         {/* Add Stock - Professional */}
         {viewMode === 'add' && (
-          <Card className="border-2 border-teal-200 bg-gradient-to-br from-white to-teal-50/30">
+          <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1]">
             <CardContent className="p-3">
               <div className="grid grid-cols-3 gap-2 mb-3">
                 {['manual', 'file', 'link'].map((method) => (
@@ -676,10 +676,10 @@ export default function InventoryPage() {
                           </Button>
                         </div>
                       </div>
-                      {isImporting && <div className="h-1 bg-gray-200 rounded overflow-hidden"><div className="h-full bg-primary transition-all" style={{width: `${importProgress}%`}} /></div>}
+                      {isImporting && <div className="h-1 bg-[#e2e2e2] rounded overflow-hidden"><div className="h-full bg-primary transition-all" style={{width: `${importProgress}%`}} /></div>}
                       <div className="max-h-48 overflow-y-auto border rounded">
                         <table className="w-full text-xs">
-                          <thead className="bg-gray-50 sticky top-0"><tr><th className="p-1 text-left">NDC</th><th className="p-1 text-left">Lot</th><th className="p-1 text-left">Exp</th><th className="p-1 text-left">Qty</th><th className="p-1 text-left">Status</th></tr></thead>
+                          <thead className="bg-[#f5f2f1] sticky top-0"><tr><th className="p-1 text-left">NDC</th><th className="p-1 text-left">Lot</th><th className="p-1 text-left">Exp</th><th className="p-1 text-left">Qty</th><th className="p-1 text-left">Status</th></tr></thead>
                           <tbody>
                             {importData.map((row, i) => (
                               <tr key={i} className={row.errors && row.errors.length > 0 ? 'bg-red-50' : ''}>
@@ -704,38 +704,38 @@ export default function InventoryPage() {
         {/* Overview - Professional */}
         {viewMode === 'overview' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            <Card className="border-2 border-teal-200 bg-gradient-to-br from-white to-teal-50/30">
+            <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1]">
               <CardContent className="p-3">
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="p-1.5 rounded-lg bg-teal-100">
-                    <BarChart3 className="h-4 w-4 text-teal-600" />
+                  <div className="p-1.5 rounded-[4px] bg-[#f5f2f1]">
+                    <BarChart3 className="h-4 w-4 text-[#516057]" />
                   </div>
-                  <h3 className="font-bold text-base text-gray-900">Status Breakdown</h3>
+                  <h3 className="font-bold text-base text-[#000000]">Status Breakdown</h3>
                 </div>
                 <div className="space-y-2 text-xs">
-                  <div className="flex justify-between p-2 rounded bg-white/50"><span className="text-teal-700 font-medium">Active:</span><span className="font-bold text-emerald-700">{metrics.active} ({inventory.length > 0 ? Math.round((metrics.active / inventory.length) * 100) : 0}%)</span></div>
-                  <div className="flex justify-between p-2 rounded bg-white/50"><span className="text-teal-700 font-medium">Expiring Soon:</span><span className="font-bold text-amber-700">{metrics.expiringSoon} ({inventory.length > 0 ? Math.round((metrics.expiringSoon / inventory.length) * 100) : 0}%)</span></div>
-                  <div className="flex justify-between p-2 rounded bg-white/50"><span className="text-teal-700 font-medium">Expired:</span><span className="font-bold text-red-700">{metrics.expired} ({inventory.length > 0 ? Math.round((metrics.expired / inventory.length) * 100) : 0}%)</span></div>
+                  <div className="flex justify-between p-2 rounded bg-white/50"><span className="text-[#516057] font-medium">Active:</span><span className="font-bold text-[#516057]">{metrics.active} ({inventory.length > 0 ? Math.round((metrics.active / inventory.length) * 100) : 0}%)</span></div>
+                  <div className="flex justify-between p-2 rounded bg-white/50"><span className="text-[#516057] font-medium">Expiring Soon:</span><span className="font-bold text-amber-700">{metrics.expiringSoon} ({inventory.length > 0 ? Math.round((metrics.expiringSoon / inventory.length) * 100) : 0}%)</span></div>
+                  <div className="flex justify-between p-2 rounded bg-white/50"><span className="text-[#516057] font-medium">Expired:</span><span className="font-bold text-red-700">{metrics.expired} ({inventory.length > 0 ? Math.round((metrics.expired / inventory.length) * 100) : 0}%)</span></div>
                 </div>
               </CardContent>
             </Card>
-            <Card className="border-2 border-cyan-200 bg-gradient-to-br from-white to-cyan-50/30">
+            <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1]">
               <CardContent className="p-3">
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="p-1.5 rounded-lg bg-cyan-100">
-                    <Info className="h-4 w-4 text-cyan-600" />
+                  <div className="p-1.5 rounded-[4px] bg-[#f5f2f1]">
+                    <Info className="h-4 w-4 text-[#516057]" />
                   </div>
-                  <h3 className="font-bold text-base text-gray-900">Insights</h3>
+                  <h3 className="font-bold text-base text-[#000000]">Insights</h3>
                 </div>
                 <div className="space-y-2 text-xs">
-                  <div className="p-2 bg-cyan-50 rounded border-2 border-cyan-200">
-                    <p className="font-bold text-cyan-900">Avg Days to Expiration</p>
-                    <p className="text-xl font-bold text-cyan-600">{metrics.averageDaysToExpiration} days</p>
+                  <div className="p-2 bg-[#f5f2f1] rounded border-2 border-[#e2e2e2]">
+                    <p className="font-bold text-[#000000]">Avg Days to Expiration</p>
+                    <p className="text-xl font-bold text-[#516057]">{metrics.averageDaysToExpiration} days</p>
                   </div>
                   {metrics.expired > 0 && (
                     <div className="p-2 bg-red-50 rounded border-2 border-red-200">
                       <p className="text-red-900 text-xs font-medium">{metrics.expired} expired item(s) require packaging for warehouse disposal</p>
-                      <Button size="sm" className="mt-2 h-7 text-xs bg-emerald-600 hover:bg-emerald-700 text-white border-0" onClick={() => setViewMode('expired')}>Create Package</Button>
+                      <Button size="sm" className="mt-2 h-7 text-xs bg-[#516057] hover:bg-[#505454] text-white border-0" onClick={() => setViewMode('expired')}>Create Package</Button>
                     </div>
                   )}
                 </div>

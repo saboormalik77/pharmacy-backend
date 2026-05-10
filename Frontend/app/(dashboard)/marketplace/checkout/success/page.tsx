@@ -123,7 +123,7 @@ function CheckoutSuccessContent() {
       case 'delivered':
         return 'bg-blue-100 text-black dark:bg-blue-900/30 dark:text-black'
       default:
-        return 'bg-gray-100 text-black dark:bg-gray-900/30 dark:text-black'
+        return 'bg-[#f5f2f1] text-black dark:bg-gray-900/30 dark:text-black'
     }
   }
 
@@ -131,7 +131,7 @@ function CheckoutSuccessContent() {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-10 w-10 animate-spin text-teal-600 mx-auto mb-4" />
+          <Loader2 className="h-10 w-10 animate-spin text-[#516057] mx-auto mb-4" />
           <p className="text-muted-foreground">Processing your order...</p>
         </div>
       </div>
@@ -151,7 +151,7 @@ function CheckoutSuccessContent() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={() => router.push(`/login?redirect=/orders`)}
-              className="px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium transition-all"
+              className="px-6 py-3 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] font-medium transition-all"
             >
               Log In to View Order
             </button>
@@ -171,13 +171,13 @@ function CheckoutSuccessContent() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={() => router.push('/orders')}
-              className="px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium transition-all"
+              className="px-6 py-3 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] font-medium transition-all"
             >
               View My Orders
             </button>
             <button
               onClick={() => router.push('/marketplace')}
-              className="px-6 py-3 border rounded-lg hover:bg-muted font-medium transition-all"
+              className="px-6 py-3 border rounded-[4px] hover:bg-muted font-medium transition-all"
             >
               Continue Shopping
             </button>
@@ -199,7 +199,7 @@ function CheckoutSuccessContent() {
           Thank you for your purchase. Your order has been received.
         </p>
         {order && countdown > 0 && (
-          <p className="text-sm text-teal-600 font-medium">
+          <p className="text-sm text-[#516057] font-medium">
             Redirecting to orders page in {countdown} second{countdown !== 1 ? 's' : ''}...
           </p>
         )}
@@ -209,7 +209,7 @@ function CheckoutSuccessContent() {
         <>
           {/* Order Summary Card */}
           <div className="bg-card rounded-2xl border shadow-sm overflow-hidden mb-6">
-            <div className="p-6 border-b bg-gradient-to-r from-teal-50 to-emerald-50 dark:from-teal-900/20 dark:to-emerald-900/20">
+            <div className="p-6 border-b bg-[#f5f2f1] ">
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Order Number</p>
@@ -229,7 +229,7 @@ function CheckoutSuccessContent() {
               </h3>
               <div className="space-y-3 mb-6">
                 {order.items?.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between py-3 px-4 bg-muted/50 rounded-lg">
+                  <div key={item.id} className="flex items-center justify-between py-3 px-4 bg-muted/50 rounded-[4px]">
                     <div className="flex-1">
                       <p className="font-medium text-sm">{item.productName}</p>
                       <p className="text-xs text-muted-foreground">
@@ -294,7 +294,7 @@ function CheckoutSuccessContent() {
                   href={order.stripeReceiptUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-teal-600 hover:underline mt-2"
+                  className="inline-flex items-center gap-1 text-sm text-[#516057] hover:underline mt-2"
                 >
                   <Receipt className="h-4 w-4" />
                   View Receipt
@@ -334,14 +334,14 @@ function CheckoutSuccessContent() {
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
         <button
           onClick={() => router.push('/orders')}
-          className="px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium transition-all flex items-center justify-center gap-2"
+          className="px-6 py-3 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] font-medium transition-all flex items-center justify-center gap-2"
         >
           View All Orders
           <ArrowRight className="h-5 w-5" />
         </button>
         <button
           onClick={() => router.push('/marketplace')}
-          className="px-6 py-3 border rounded-lg hover:bg-muted font-medium transition-all"
+          className="px-6 py-3 border rounded-[4px] hover:bg-muted font-medium transition-all"
         >
           Continue Shopping
         </button>
@@ -355,7 +355,7 @@ export default function CheckoutSuccessPage() {
     <Suspense fallback={
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-10 w-10 animate-spin text-teal-600 mx-auto mb-4" />
+          <Loader2 className="h-10 w-10 animate-spin text-[#516057] mx-auto mb-4" />
           <p className="text-muted-foreground">Loading order details...</p>
         </div>
       </div>

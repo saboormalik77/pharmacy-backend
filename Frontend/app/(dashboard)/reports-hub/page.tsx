@@ -42,8 +42,8 @@ const REPORT_CARDS: ReportCardConfig[] = [
     title: 'Return Reports',
     subtitle: 'Full return packet: pharmacy header, items, lots, totals.',
     icon: PackageOpen,
-    accentClass: 'from-teal-500 to-emerald-500',
-    iconBgClass: 'bg-teal-100 text-teal-700',
+    accentClass: 'bg-[#516057]',
+    iconBgClass: 'bg-[#f5f2f1] text-[#516057]',
   },
   {
     id: 'controlled-substance',
@@ -176,9 +176,9 @@ export default function ReportsHubPage() {
                 </label>
 
                 {loading ? (
-                  <div className="h-11 rounded-lg bg-muted/60 animate-pulse" />
+                  <div className="h-11 rounded-[4px] bg-muted/60 animate-pulse" />
                 ) : error ? (
-                  <div className="flex items-start gap-2 p-3 rounded-lg border border-red-200 bg-red-50 text-sm text-red-700">
+                  <div className="flex items-start gap-2 p-3 rounded-[4px] border border-red-200 bg-red-50 text-sm text-red-700">
                     <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
                       <div className="font-medium">Couldn't load returns</div>
@@ -186,7 +186,7 @@ export default function ReportsHubPage() {
                     </div>
                   </div>
                 ) : returns.length === 0 ? (
-                  <div className="flex items-start gap-2 p-3 rounded-lg border border-amber-200 bg-amber-50 text-sm text-amber-800">
+                  <div className="flex items-start gap-2 p-3 rounded-[4px] border border-amber-200 bg-amber-50 text-sm text-amber-800">
                     <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                     <div>
                       <div className="font-medium">No completed returns yet</div>
@@ -201,7 +201,7 @@ export default function ReportsHubPage() {
                     id="ras"
                     value={selectedRefNum}
                     onChange={(e) => setSelectedRefNum(e.target.value)}
-                    className="w-full h-11 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    className="w-full h-11 rounded-[4px] border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-[#e2e2e2]"
                   >
                     {returns.map((r) => (
                       <option key={r.refNum} value={r.refNum}>
@@ -213,7 +213,7 @@ export default function ReportsHubPage() {
 
                 {selectedReturn && (
                   <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                    <div className="rounded-lg bg-muted/50 p-2">
+                    <div className="rounded-[4px] bg-muted/50 p-2">
                       <div className="uppercase tracking-wide text-muted-foreground">
                         Reference #
                       </div>
@@ -221,7 +221,7 @@ export default function ReportsHubPage() {
                         {selectedReturn.refNum}
                       </div>
                     </div>
-                    <div className="rounded-lg bg-muted/50 p-2">
+                    <div className="rounded-[4px] bg-muted/50 p-2">
                       <div className="uppercase tracking-wide text-muted-foreground">
                         Date
                       </div>
@@ -229,7 +229,7 @@ export default function ReportsHubPage() {
                         {selectedReturn.date}
                       </div>
                     </div>
-                    <div className="rounded-lg bg-muted/50 p-2">
+                    <div className="rounded-[4px] bg-muted/50 p-2">
                       <div className="uppercase tracking-wide text-muted-foreground">
                         Items
                       </div>
@@ -237,11 +237,11 @@ export default function ReportsHubPage() {
                         {selectedReturn.totalItems ?? 0}
                       </div>
                     </div>
-                    <div className="rounded-lg bg-muted/50 p-2">
+                    <div className="rounded-[4px] bg-muted/50 p-2">
                       <div className="uppercase tracking-wide text-muted-foreground">
                         Total
                       </div>
-                      <div className="font-semibold mt-0.5 text-teal-700">
+                      <div className="font-semibold mt-0.5 text-[#516057]">
                         {formatCurrency(selectedReturn.amount)}
                       </div>
                     </div>
@@ -298,7 +298,7 @@ function ReportTile({
       <div className={`h-1 bg-gradient-to-r ${card.accentClass}`} />
       <div className="p-4 flex flex-col gap-3">
         <div className="flex items-start gap-3">
-          <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${card.iconBgClass}`}>
+          <div className={`w-10 h-10 rounded-[4px] flex items-center justify-center flex-shrink-0 ${card.iconBgClass}`}>
             <Icon className="w-5 h-5" />
           </div>
           <div className="flex-1 min-w-0">
@@ -312,7 +312,7 @@ function ReportTile({
           onClick={onView}
           disabled={disabled}
           size="sm"
-          className="w-full gap-2 bg-teal-600 hover:bg-teal-700 text-white disabled:opacity-50"
+          className="w-full gap-2 bg-[#516057] hover:bg-[#505454] text-white disabled:opacity-50"
         >
           {disabled ? (
             <>

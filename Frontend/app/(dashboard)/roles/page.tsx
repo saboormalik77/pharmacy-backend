@@ -97,7 +97,7 @@ export default function RolesPage() {
             <h1 className="text-xl font-bold">Roles & Permissions</h1>
             <p className="text-sm text-muted-foreground">Define roles and assign them to branch pharmacies</p>
           </div>
-          <Button className="bg-teal-600 hover:bg-teal-700 text-white" onClick={() => { setEditRole(null); setShowCreateModal(true) }}>
+          <Button className="bg-[#516057] hover:bg-[#505454] text-white" onClick={() => { setEditRole(null); setShowCreateModal(true) }}>
             <Plus className="h-4 w-4 mr-2" /> Create Role
           </Button>
         </div>
@@ -108,11 +108,11 @@ export default function RolesPage() {
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         ) : roles.length === 0 ? (
-          <div className="text-center py-20 bg-card border rounded-lg">
+          <div className="text-center py-20 bg-card border rounded-[4px]">
             <ShieldCheck className="h-10 w-10 mx-auto mb-3 text-muted-foreground opacity-40" />
             <h3 className="text-sm font-medium mb-1">No roles yet</h3>
             <p className="text-sm text-muted-foreground mb-4">Create your first role to assign permissions to branches.</p>
-            <Button className="bg-teal-600 hover:bg-teal-700 text-white" size="sm" onClick={() => { setEditRole(null); setShowCreateModal(true) }}>
+            <Button className="bg-[#516057] hover:bg-[#505454] text-white" size="sm" onClick={() => { setEditRole(null); setShowCreateModal(true) }}>
               <Plus className="h-4 w-4 mr-1" /> Create Role
             </Button>
           </div>
@@ -121,22 +121,22 @@ export default function RolesPage() {
             {roles.map((role) => (
               <div
                 key={role.id}
-                className="bg-card border rounded-lg p-5 hover:shadow-md transition-shadow cursor-pointer"
+                className="bg-card border rounded-[4px] p-5 hover:shadow-md transition-shadow cursor-pointer"
                 onClick={() => router.push(`/roles/${role.id}`)}
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <ShieldCheck className="h-5 w-5 text-teal-600" />
+                    <ShieldCheck className="h-5 w-5 text-[#516057]" />
                     <h3 className="font-semibold">{role.roleName}</h3>
                   </div>
                   <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
-                    <button onClick={() => handleEdit(role)} className="p-1.5 hover:bg-accent rounded-md text-muted-foreground hover:text-foreground">
+                    <button onClick={() => handleEdit(role)} className="p-1.5 hover:bg-accent rounded-[4px] text-muted-foreground hover:text-foreground">
                       <Edit2 className="h-3.5 w-3.5" />
                     </button>
                     <button
                       onClick={() => handleDelete(role)}
                       disabled={deletingId === role.id}
-                      className="p-1.5 hover:bg-red-50 rounded-md text-muted-foreground hover:text-red-600"
+                      className="p-1.5 hover:bg-red-50 rounded-[4px] text-muted-foreground hover:text-red-600"
                     >
                       {deletingId === role.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
                     </button>

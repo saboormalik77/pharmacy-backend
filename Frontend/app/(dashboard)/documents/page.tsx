@@ -151,13 +151,13 @@ export default function DocumentsPage() {
     <DashboardLayout>
       <div className="space-y-3">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-teal-50 via-cyan-50 to-teal-50 border-2 border-teal-200">
+        <div className="flex items-center justify-between p-4 rounded-[4px] bg-[#f5f2f1] border-2 border-[#e2e2e2]">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Documents</h1>
-            <p className="text-xs text-gray-600 mt-0.5">View and manage uploaded credit reports</p>
+            <h1 className="text-xl font-bold text-[#000000]">Documents</h1>
+            <p className="text-xs text-[#505454] mt-0.5">View and manage uploaded credit reports</p>
           </div>
           <Link href="/upload">
-            <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white border-0">
+            <Button size="sm" className="bg-[#516057] hover:bg-[#505454] text-white border-0">
               Upload Documents
             </Button>
           </Link>
@@ -171,11 +171,11 @@ export default function DocumentsPage() {
         )}
 
         {/* Filters */}
-        <Card className="border-2 border-teal-200">
+        <Card className="border-2 border-[#e2e2e2]">
           <CardContent className="p-3">
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-teal-500" />
+                <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6b7280]" />
                 <Input
                   placeholder="Search documents..."
                   value={searchQuery}
@@ -197,7 +197,7 @@ export default function DocumentsPage() {
         </Card>
 
         {/* Status Tabs */}
-        {/* <div className="flex gap-2 border-b-2 border-gray-200 bg-white rounded-t-lg p-1 overflow-x-auto">
+        {/* <div className="flex gap-2 border-b-2 border-[#e2e2e2] bg-white rounded-t-lg p-1 overflow-x-auto">
           {[
             { value: 'all', label: 'All', count: statusCounts.all },
             { value: 'completed', label: 'Completed', count: statusCounts.completed },
@@ -210,30 +210,30 @@ export default function DocumentsPage() {
               <button
                 key={tab.value}
                 onClick={() => setStatusFilter(tab.value as any)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-lg border-2 transition-all whitespace-nowrap ${
+                className={`px-3 py-1.5 text-sm font-medium rounded-[4px] border-2 transition-all whitespace-nowrap ${
                   isActive
-                    ? 'bg-teal-100 text-teal-700 border-teal-300 shadow-md'
-                    : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                    ? 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2] shadow-md'
+                    : 'bg-white text-[#505454] border-[#e2e2e2] hover:bg-[#f5f2f1]'
                 }`}
               >
-                {tab.label} <span className={`font-bold ${isActive ? '' : 'text-gray-400'}`}>({tab.count})</span>
+                {tab.label} <span className={`font-bold ${isActive ? '' : 'text-[#9ca3af]'}`}>({tab.count})</span>
               </button>
             );
           })}
         </div> */}
 
         {/* Documents List */}
-        <Card className="border-2 border-teal-200">
+        <Card className="border-2 border-[#e2e2e2]">
           <CardContent className="p-3">
             {loading ? (
               <div className="text-center py-12">
-                <Loader2 className="h-12 w-12 mx-auto mb-4 text-teal-600 animate-spin" />
-                <p className="text-gray-500 text-sm">Loading documents...</p>
+                <Loader2 className="h-12 w-12 mx-auto mb-4 text-[#516057] animate-spin" />
+                <p className="text-[#6b7280] text-sm">Loading documents...</p>
               </div>
             ) : filteredDocuments.length === 0 ? (
               <div className="text-center py-12">
-                <FileText className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <p className="text-gray-500 text-sm">No documents found</p>
+                <FileText className="h-12 w-12 mx-auto mb-4 text-[#9ca3af]" />
+                <p className="text-[#6b7280] text-sm">No documents found</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -244,26 +244,26 @@ export default function DocumentsPage() {
                   return (
                     <div
                       key={doc.id}
-                      className="p-3 rounded-lg border-2 border-gray-200 hover:border-teal-300 hover:bg-teal-50/50 transition-all"
+                      className="p-3 rounded-[4px] border-2 border-[#e2e2e2] hover:border-[#e2e2e2] hover:bg-[#f5f2f1]/50 transition-all"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-start gap-3 flex-1 min-w-0">
-                          <div className={`p-2 rounded-lg ${
-                            doc.status === 'completed' ? 'bg-emerald-100' :
-                            doc.status === 'processing' || doc.status === 'uploading' ? 'bg-cyan-100' :
+                          <div className={`p-2 rounded-[4px] ${
+                            doc.status === 'completed' ? 'bg-[#f5f2f1]' :
+                            doc.status === 'processing' || doc.status === 'uploading' ? 'bg-[#f5f2f1]' :
                             doc.status === 'failed' ? 'bg-red-100' :
                             'bg-amber-100'
                           }`}>
                             <StatusIcon className={`h-5 w-5 ${
-                              doc.status === 'completed' ? 'text-emerald-600' :
-                              doc.status === 'processing' || doc.status === 'uploading' ? 'text-cyan-600 animate-spin' :
+                              doc.status === 'completed' ? 'text-[#516057]' :
+                              doc.status === 'processing' || doc.status === 'uploading' ? 'text-[#516057] animate-spin' :
                               doc.status === 'failed' ? 'text-red-600' :
                               'text-amber-600'
                             }`} />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-gray-900 truncate">{doc.fileName}</p>
-                            <div className="flex items-center gap-3 mt-1 text-xs text-gray-600">
+                            <p className="text-sm font-semibold text-[#000000] truncate">{doc.fileName}</p>
+                            <div className="flex items-center gap-3 mt-1 text-xs text-[#505454]">
                               <span>{doc.reverseDistributorName}</span>
                               <span>•</span>
                               <span>{(doc.fileSize / 1024).toFixed(1)} KB</span>
@@ -283,13 +283,13 @@ export default function DocumentsPage() {
                       {/* Progress Bar for Processing */}
                       {isProcessing && doc.processingProgress !== undefined && (
                         <div className="mt-2">
-                          <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                          <div className="flex items-center justify-between text-xs text-[#505454] mb-1">
                             <span>Processing...</span>
                             <span>{doc.processingProgress}%</span>
                           </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="w-full bg-[#e2e2e2] rounded-full h-2">
                             <div
-                              className="bg-cyan-600 h-2 rounded-full transition-all"
+                              className="bg-[#516057] h-2 rounded-full transition-all"
                               style={{ width: `${doc.processingProgress}%` }}
                             />
                           </div>
@@ -297,15 +297,15 @@ export default function DocumentsPage() {
                       )}
 
                       {/* Document Details */}
-                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
-                        <div className="flex items-center gap-4 text-xs text-gray-600">
+                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#e2e2e2]">
+                        <div className="flex items-center gap-4 text-xs text-[#505454]">
                           <span>
                             <span className="font-medium">Items:</span> {doc.extractedItems}
                           </span>
                           {doc.totalCreditAmount && (
                             <span>
                               <span className="font-medium">Credit:</span>{' '}
-                              <span className="font-bold text-emerald-700">
+                              <span className="font-bold text-[#516057]">
                                 {formatCurrency(doc.totalCreditAmount)}
                               </span>
                             </span>

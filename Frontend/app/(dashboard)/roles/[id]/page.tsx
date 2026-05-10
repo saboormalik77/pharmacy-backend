@@ -105,7 +105,7 @@ export default function RoleDetailPage() {
             <div className="flex items-start justify-between">
               <div>
                 <h1 className="text-xl font-bold flex items-center gap-2">
-                  <ShieldCheck className="h-5 w-5 text-teal-600" />
+                  <ShieldCheck className="h-5 w-5 text-[#516057]" />
                   {role.roleName}
                 </h1>
                 {role.description && <p className="text-sm text-muted-foreground mt-0.5">{role.description}</p>}
@@ -116,7 +116,7 @@ export default function RoleDetailPage() {
             </div>
 
             {/* Role Info */}
-            <div className="bg-card border rounded-lg p-5">
+            <div className="bg-card border rounded-[4px] p-5">
               <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">Role Details</h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
                 <div>
@@ -135,7 +135,7 @@ export default function RoleDetailPage() {
             </div>
 
             {/* Permissions */}
-            <div className="bg-card border rounded-lg p-5">
+            <div className="bg-card border rounded-[4px] p-5">
               <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">Permissions</h2>
               {allPermissions.length > 0 ? (
                 <PermissionGrid
@@ -154,12 +154,12 @@ export default function RoleDetailPage() {
             </div>
 
             {/* Assigned Branches */}
-            <div className="bg-card border rounded-lg p-5">
+            <div className="bg-card border rounded-[4px] p-5">
               <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">Assigned Branches</h2>
               {role.assignedBranches?.length > 0 ? (
                 <div className="space-y-2">
                   {role.assignedBranches.map((b) => (
-                    <div key={b.branchId} className="flex items-center justify-between bg-muted/30 rounded-lg px-4 py-2.5">
+                    <div key={b.branchId} className="flex items-center justify-between bg-muted/30 rounded-[4px] px-4 py-2.5">
                       <div className="flex items-center gap-2">
                         <Building2 className="h-4 w-4 text-muted-foreground" />
                         <div>

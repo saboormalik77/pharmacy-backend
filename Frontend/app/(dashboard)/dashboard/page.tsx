@@ -202,37 +202,37 @@ export default function DashboardPage() {
   return (
     <DashboardLayout>
       <div className="space-y-2 p-2">
-        <h1 className="text-lg sm:text-xl font-bold text-gray-900">Dashboard</h1>
+        <h1 className="text-lg sm:text-xl font-bold text-[#000000]">Dashboard</h1>
 
         {/* Key Metrics * /}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-            <div className="p-2 rounded-lg border-2 border-teal-200 bg-gradient-to-br from-teal-50 to-teal-100 hover:from-teal-100 hover:to-teal-200 transition-all cursor-pointer shadow-sm hover:shadow-md">
+            <div className="p-2 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1] hover:bg-[var(--surface-container)] transition-all cursor-pointer shadow-sm hover:shadow-md">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1">
-                  <Package className="h-3 w-3 text-teal-600" />
-                  <p className="text-[10px] sm:text-xs text-teal-700 font-medium">Pharmacy Added Products</p>
+                  <Package className="h-3 w-3 text-[#516057]" />
+                  <p className="text-[10px] sm:text-xs text-[#516057] font-medium">Pharmacy Added Products</p>
                 </div>
                 {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-teal-600" />
+                  <Loader2 className="h-4 w-4 animate-spin text-[#516057]" />
                 ) : (
-                  <p className="text-sm sm:text-base font-bold text-teal-900 whitespace-nowrap">{summary?.totalPharmacyAddedProducts ?? 0}</p>
+                  <p className="text-sm sm:text-base font-bold text-[#000000] whitespace-nowrap">{summary?.totalPharmacyAddedProducts ?? 0}</p>
                 )}
               </div>
             </div>
-            <div className="p-2 rounded-lg border-2 border-cyan-200 bg-gradient-to-br from-cyan-50 to-cyan-100 hover:from-cyan-100 hover:to-cyan-200 transition-all cursor-pointer shadow-sm hover:shadow-md">
+            <div className="p-2 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1] hover:bg-[var(--surface-container)] transition-all cursor-pointer shadow-sm hover:shadow-md">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1">
-                  <Building2 className="h-3 w-3 text-cyan-600" />
-                  <p className="text-[10px] sm:text-xs text-cyan-700 font-medium">Top Distributors</p>
+                  <Building2 className="h-3 w-3 text-[#516057]" />
+                  <p className="text-[10px] sm:text-xs text-[#516057] font-medium">Top Distributors</p>
                 </div>
                 {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-cyan-600" />
+                  <Loader2 className="h-4 w-4 animate-spin text-[#516057]" />
                 ) : (
-                  <p className="text-sm sm:text-base font-bold text-cyan-900 whitespace-nowrap">{summary?.topDistributorCount ?? 0}</p>
+                  <p className="text-sm sm:text-base font-bold text-[#000000] whitespace-nowrap">{summary?.topDistributorCount ?? 0}</p>
                 )}
               </div>
             </div>
-            <div className="p-2 rounded-lg border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 transition-all cursor-pointer shadow-sm hover:shadow-md">
+            <div className="p-2 rounded-[4px] border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 transition-all cursor-pointer shadow-sm hover:shadow-md">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1">
                   <Box className="h-3 w-3 text-blue-600" />
@@ -245,7 +245,7 @@ export default function DashboardPage() {
                 )}
               </div>
             </div>
-            <div className="p-2 rounded-lg border-2 border-green-200 bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 transition-all cursor-pointer shadow-sm hover:shadow-md">
+            <div className="p-2 rounded-[4px] border-2 border-green-200 bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 transition-all cursor-pointer shadow-sm hover:shadow-md">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1">
                   <CheckCircle className="h-3 w-3 text-green-600" />
@@ -258,7 +258,7 @@ export default function DashboardPage() {
                 )}
               </div>
             </div>
-            <div className="p-2 rounded-lg border-2 border-red-200 bg-gradient-to-br from-red-50 to-red-100 hover:from-red-100 hover:to-red-200 transition-all cursor-pointer shadow-sm hover:shadow-md">
+            <div className="p-2 rounded-[4px] border-2 border-red-200 bg-gradient-to-br from-red-50 to-red-100 hover:from-red-100 hover:to-red-200 transition-all cursor-pointer shadow-sm hover:shadow-md">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1">
                   <XCircle className="h-3 w-3 text-red-600" />
@@ -275,34 +275,34 @@ export default function DashboardPage() {
 
         {/* Earnings Cards * /}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          <Card className="border-2 border-teal-200">
+          <Card className="border-2 border-[#e2e2e2]">
             <CardContent className="p-2">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1">
-                  <DollarSign className="h-3 w-3 text-teal-600" />
-                  <p className="text-[10px] sm:text-xs text-teal-700 font-medium">Total Earnings</p>
+                  <DollarSign className="h-3 w-3 text-[#516057]" />
+                  <p className="text-[10px] sm:text-xs text-[#516057] font-medium">Total Earnings</p>
                 </div>
                 {earningsLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-teal-600" />
+                  <Loader2 className="h-4 w-4 animate-spin text-[#516057]" />
                 ) : (
-                  <p className="text-sm sm:text-base font-bold text-teal-700 whitespace-nowrap">
+                  <p className="text-sm sm:text-base font-bold text-[#516057] whitespace-nowrap">
                     {earningsData ? formatCurrency(earningsData.totalEarnings) : '$0.00'}
                   </p>
                 )}
               </div>
             </CardContent>
           </Card>
-          <Card className="border-2 border-teal-200">
+          <Card className="border-2 border-[#e2e2e2]">
             <CardContent className="p-2">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1">
-                  <FileText className="h-3 w-3 text-teal-600" />
-                  <p className="text-[10px] sm:text-xs text-teal-700 font-medium">Total Documents</p>
+                  <FileText className="h-3 w-3 text-[#516057]" />
+                  <p className="text-[10px] sm:text-xs text-[#516057] font-medium">Total Documents</p>
                 </div>
                 {earningsLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-teal-600" />
+                  <Loader2 className="h-4 w-4 animate-spin text-[#516057]" />
                 ) : (
-                  <p className="text-sm sm:text-base font-bold text-teal-700 whitespace-nowrap">
+                  <p className="text-sm sm:text-base font-bold text-[#516057] whitespace-nowrap">
                     {earningsData?.totalDocuments ?? 0}
                   </p>
                 )}
@@ -316,7 +316,7 @@ export default function DashboardPage() {
           {/* Left Column - Earnings History Chart + Period Information * /}
           <div className="space-y-2">
             {/* Earnings History Chart * /}
-            <Card className="border-2 border-teal-200">
+            <Card className="border-2 border-[#e2e2e2]">
               <CardHeader className="p-2">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <CardTitle className="text-sm sm:text-base">Earnings History</CardTitle>
@@ -333,7 +333,7 @@ export default function DashboardPage() {
                           setPeriodsInput(newMax.toString());
                         }
                       }}
-                      className="px-2 py-1 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      className="px-2 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057]"
                     >
                       <option value="monthly">Monthly</option>
                       <option value="yearly">Yearly</option>
@@ -347,7 +347,7 @@ export default function DashboardPage() {
                         const value = e.target.value;
                         setPeriodsInput(value);
                       }}
-                      className="w-20 px-2 py-1 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      className="w-20 px-2 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057]"
                       placeholder="Periods"
                     />
                   </div>
@@ -356,8 +356,8 @@ export default function DashboardPage() {
               <CardContent className="p-2">
                 {earningsLoading ? (
                   <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin text-teal-600" />
-                    <span className="ml-2 text-xs text-gray-600">Loading earnings data...</span>
+                    <Loader2 className="h-6 w-6 animate-spin text-[#516057]" />
+                    <span className="ml-2 text-xs text-[#505454]">Loading earnings data...</span>
                   </div>
                 ) : chartData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
@@ -386,7 +386,7 @@ export default function DashboardPage() {
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="text-center py-8 text-gray-500 text-xs">
+                  <div className="text-center py-8 text-[#6b7280] text-xs">
                     No earnings data available
                   </div>
                 )}
@@ -399,7 +399,7 @@ export default function DashboardPage() {
 
           {/* Right Column - Earnings Estimation Chart * /}
           <div>
-            <Card className="border-2 border-teal-200">
+            <Card className="border-2 border-[#e2e2e2]">
               <CardHeader className="p-2">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <CardTitle className="text-sm sm:text-base">Earnings Estimation</CardTitle>
@@ -416,7 +416,7 @@ export default function DashboardPage() {
                           setEstimationPeriodsInput(newMax.toString());
                         }
                       }}
-                      className="px-2 py-1 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      className="px-2 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057]"
                     >
                       <option value="monthly">Monthly</option>
                       <option value="yearly">Yearly</option>
@@ -430,7 +430,7 @@ export default function DashboardPage() {
                         const value = e.target.value;
                         setEstimationPeriodsInput(value);
                       }}
-                      className="w-20 px-2 py-1 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      className="w-20 px-2 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057]"
                       placeholder="Periods"
                     />
                   </div>
@@ -439,8 +439,8 @@ export default function DashboardPage() {
               <CardContent className="p-2">
                 {estimationLoading ? (
                   <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin text-teal-600" />
-                    <span className="ml-2 text-xs text-gray-600">Loading estimation data...</span>
+                    <Loader2 className="h-6 w-6 animate-spin text-[#516057]" />
+                    <span className="ml-2 text-xs text-[#505454]">Loading estimation data...</span>
                   </div>
                 ) : earningsEstimation?.chartData && earningsEstimation.chartData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
@@ -484,7 +484,7 @@ export default function DashboardPage() {
                     </LineChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="text-center py-8 text-gray-500 text-xs">
+                  <div className="text-center py-8 text-[#6b7280] text-xs">
                     No estimation data available
                   </div>
                 )}

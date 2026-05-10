@@ -210,10 +210,10 @@ export default function SupportPage() {
   const getStatusColor = (status: SupportTicket['status']) => {
     switch (status) {
       case 'resolved': return 'bg-green-100 text-green-700 border-green-300';
-      case 'closed': return 'bg-gray-100 text-gray-700 border-gray-300';
+      case 'closed': return 'bg-[#f5f2f1] text-[#505454] border-[#e2e2e2]';
       case 'in_progress': return 'bg-blue-100 text-blue-700 border-blue-300';
       case 'open': return 'bg-orange-100 text-orange-700 border-orange-300';
-      default: return 'bg-gray-100 text-gray-700 border-gray-300';
+      default: return 'bg-[#f5f2f1] text-[#505454] border-[#e2e2e2]';
     }
   };
 
@@ -223,7 +223,7 @@ export default function SupportPage() {
       case 'high': return 'bg-orange-100 text-orange-800 border-orange-300';
       case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
       case 'low': return 'bg-blue-100 text-blue-800 border-blue-300';
-      default: return 'bg-gray-100 text-gray-800 border-gray-300';
+      default: return 'bg-[#f5f2f1] text-[#000000] border-[#e2e2e2]';
     }
   };
 
@@ -233,7 +233,7 @@ export default function SupportPage() {
       case 'billing': return 'bg-green-100 text-green-700 border-green-300';
       case 'account': return 'bg-blue-100 text-blue-700 border-blue-300';
       case 'returns': return 'bg-indigo-100 text-indigo-700 border-indigo-300';
-      default: return 'bg-gray-100 text-gray-700 border-gray-300';
+      default: return 'bg-[#f5f2f1] text-[#505454] border-[#e2e2e2]';
     }
   };
 
@@ -253,40 +253,40 @@ export default function SupportPage() {
     <DashboardLayout>
       <div className="space-y-3">
         {/* Colorful Header */}
-        <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-cyan-50 via-blue-50 to-indigo-50 border-2 border-cyan-200">
+        <div className="flex items-center justify-between p-4 rounded-[4px] bg-[#f5f2f1] border-2 border-[#e2e2e2]">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-cyan-100">
-              <HelpCircle className="h-5 w-5 text-cyan-600" />
+            <div className="p-2 rounded-[4px] bg-[#f5f2f1]">
+              <HelpCircle className="h-5 w-5 text-[#516057]" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Support Center</h1>
-              <p className="text-xs text-gray-600 mt-0.5">Get help with your account, returns, and payments</p>
+              <h1 className="text-xl font-bold text-[#000000]">Support Center</h1>
+              <p className="text-xs text-[#505454] mt-0.5">Get help with your account, returns, and payments</p>
             </div>
           </div>
-          <Button onClick={() => setActiveTab('create')} className="bg-cyan-600 hover:bg-cyan-700 text-white border-0">
+          <Button onClick={() => setActiveTab('create')} className="bg-[#516057] hover:bg-[#505454] text-white border-0">
             <Plus className="mr-1 h-3 w-3" />
             New Ticket
           </Button>
         </div>
 
         {/* Colorful Tabs */}
-        <div className="flex gap-2 border-b-2 border-gray-200 bg-white rounded-t-lg p-1">
+        <div className="flex gap-2 border-b-2 border-[#e2e2e2] bg-white rounded-t-lg p-1">
           <button
             onClick={() => setActiveTab('tickets')}
-            className={`px-3 py-1.5 text-sm font-medium rounded-lg border-2 transition-all ${
+            className={`px-3 py-1.5 text-sm font-medium rounded-[4px] border-2 transition-all ${
               activeTab === 'tickets'
-                ? 'bg-cyan-100 text-cyan-700 border-cyan-300 shadow-md scale-105'
-                : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                ? 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2] shadow-md scale-105'
+                : 'bg-white text-[#505454] border-[#e2e2e2] hover:bg-[#f5f2f1]'
             }`}
           >
             My Tickets ({tickets.length})
           </button>
           <button
             onClick={() => setActiveTab('create')}
-            className={`px-3 py-1.5 text-sm font-medium rounded-lg border-2 transition-all ${
+            className={`px-3 py-1.5 text-sm font-medium rounded-[4px] border-2 transition-all ${
               activeTab === 'create'
                 ? 'bg-blue-100 text-blue-700 border-blue-300 shadow-md scale-105'
-                : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                : 'bg-white text-[#505454] border-[#e2e2e2] hover:bg-[#f5f2f1]'
             }`}
           >
             Create Ticket
@@ -298,14 +298,14 @@ export default function SupportPage() {
           <Card className="border-2 border-blue-200 bg-gradient-to-br from-white to-blue-50/30">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-4">
-                <div className="p-1.5 rounded-lg bg-blue-100">
+                <div className="p-1.5 rounded-[4px] bg-blue-100">
                   <Ticket className="h-4 w-4 text-blue-600" />
                 </div>
-                <h3 className="font-bold text-base text-gray-900">Create Support Ticket</h3>
+                <h3 className="font-bold text-base text-[#000000]">Create Support Ticket</h3>
               </div>
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-900 mb-1">
+                  <label className="block text-xs font-bold text-[#000000] mb-1">
                     Subject <span className="text-red-500">*</span>
                   </label>
                   <Input
@@ -319,11 +319,11 @@ export default function SupportPage() {
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">Category</label>
+                    <label className="block text-xs font-bold text-[#000000] mb-1">Category</label>
                     <select
                       value={newTicket.category}
                       onChange={(e) => setNewTicket({ ...newTicket, category: e.target.value as any })}
-                      className="w-full px-2 py-1.5 border rounded text-xs"
+                      className="w-full px-2 py-1.5 border border-[#e2e2e2] rounded-[4px] text-xs"
                     >
                       <option value="technical">Technical Issue</option>
                       <option value="billing">Billing & Payments</option>
@@ -333,11 +333,11 @@ export default function SupportPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">Priority</label>
+                    <label className="block text-xs font-bold text-[#000000] mb-1">Priority</label>
                     <select
                       value={newTicket.priority}
                       onChange={(e) => setNewTicket({ ...newTicket, priority: e.target.value as any })}
-                      className="w-full px-2 py-1.5 border rounded text-xs"
+                      className="w-full px-2 py-1.5 border border-[#e2e2e2] rounded-[4px] text-xs"
                     >
                       <option value="low">Low</option>
                       <option value="medium">Medium</option>
@@ -348,27 +348,27 @@ export default function SupportPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-900 mb-1">
+                  <label className="block text-xs font-bold text-[#000000] mb-1">
                     Description <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     value={newTicket.description}
                     onChange={(e) => setNewTicket({ ...newTicket, description: e.target.value })}
                     placeholder="Please provide detailed information about your issue..."
-                    className="w-full px-2 py-1.5 border rounded text-xs min-h-[100px] resize-none"
+                    className="w-full px-2 py-1.5 border border-[#e2e2e2] rounded-[4px] text-xs min-h-[100px] resize-none"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-900 mb-1">Related Return ID (Optional)</label>
+                  <label className="block text-xs font-bold text-[#000000] mb-1">Related Return ID (Optional)</label>
                   <Input
                     value={newTicket.relatedReturnId}
                     onChange={(e) => setNewTicket({ ...newTicket, relatedReturnId: e.target.value })}
                     placeholder="RET-2024-001"
                     className="text-xs"
                   />
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <p className="text-xs text-[#6b7280] mt-0.5">
                     If this ticket is related to a specific return, enter the return ID
                   </p>
                 </div>
@@ -391,17 +391,17 @@ export default function SupportPage() {
         {activeTab === 'tickets' && (
           <>
             {/* Colorful Filters */}
-            <Card className="border-2 border-cyan-200 bg-gradient-to-br from-white to-cyan-50/30">
+            <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1]">
               <CardContent className="p-3">
                 <div className="flex gap-2">
                   <div className="relative flex-1">
-                    <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-cyan-500" />
-                    <Input placeholder="Search tickets..." className="pl-7 h-7 text-xs border-cyan-200 focus:border-cyan-400" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                    <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-[#6b7280]" />
+                    <Input placeholder="Search tickets..." className="pl-7 h-7 text-xs border-[#e2e2e2] focus:border-[#e2e2e2]" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                   </div>
                   <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value as any)}
-                    className="h-7 px-2 text-xs border rounded border-cyan-200"
+                    className="h-7 px-2 text-xs border border-[#e2e2e2] rounded-[4px] border-[#e2e2e2]"
                   >
                     <option value="all">All Status</option>
                     <option value="open">Open</option>
@@ -412,7 +412,7 @@ export default function SupportPage() {
                   <select
                     value={filterCategory}
                     onChange={(e) => setFilterCategory(e.target.value as any)}
-                    className="h-7 px-2 text-xs border rounded border-cyan-200"
+                    className="h-7 px-2 text-xs border border-[#e2e2e2] rounded-[4px] border-[#e2e2e2]"
                   >
                     <option value="all">All Categories</option>
                     <option value="technical">Technical</option>
@@ -421,7 +421,7 @@ export default function SupportPage() {
                     <option value="returns">Returns</option>
                     <option value="other">Other</option>
                   </select>
-                  <Button variant="outline" size="sm" className="h-7 text-xs border-gray-300 hover:bg-gray-100" onClick={() => { setFilterStatus('all'); setFilterCategory('all'); setSearchQuery(''); }}>
+                  <Button variant="outline" size="sm" className="h-7 text-xs border-[#e2e2e2] hover:bg-[#f5f2f1]" onClick={() => { setFilterStatus('all'); setFilterCategory('all'); setSearchQuery(''); }}>
                     <Filter className="mr-1 h-3 w-3" />
                     Clear
                   </Button>
@@ -430,59 +430,59 @@ export default function SupportPage() {
             </Card>
 
             {/* Colorful Status Tabs */}
-            <div className="flex gap-2 border-b-2 border-gray-200 bg-white rounded-t-lg p-1">
+            <div className="flex gap-2 border-b-2 border-[#e2e2e2] bg-white rounded-t-lg p-1">
               {[
-                { label: 'All', value: 'all', count: statusCounts.all, color: 'bg-gray-100 text-gray-700 border-gray-300' },
+                { label: 'All', value: 'all', count: statusCounts.all, color: 'bg-[#f5f2f1] text-[#505454] border-[#e2e2e2]' },
                 { label: 'Open', value: 'open', count: statusCounts.open, color: 'bg-orange-100 text-orange-700 border-orange-300' },
                 { label: 'In Progress', value: 'in_progress', count: statusCounts.in_progress, color: 'bg-blue-100 text-blue-700 border-blue-300' },
                 { label: 'Resolved', value: 'resolved', count: statusCounts.resolved, color: 'bg-green-100 text-green-700 border-green-300' },
-                { label: 'Closed', value: 'closed', count: statusCounts.closed, color: 'bg-gray-100 text-gray-700 border-gray-300' },
+                { label: 'Closed', value: 'closed', count: statusCounts.closed, color: 'bg-[#f5f2f1] text-[#505454] border-[#e2e2e2]' },
               ].map((tab) => {
                 const isActive = (tab.value === 'all' && filterStatus === 'all') || filterStatus === tab.value;
                 return (
                   <button
                     key={tab.value}
                     onClick={() => setFilterStatus(tab.value === 'all' ? 'all' : tab.value as any)}
-                    className={`px-3 py-1.5 text-sm font-medium rounded-lg border-2 transition-all ${
+                    className={`px-3 py-1.5 text-sm font-medium rounded-[4px] border-2 transition-all ${
                       isActive
                         ? `${tab.color} shadow-md scale-105`
-                        : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                        : 'bg-white text-[#505454] border-[#e2e2e2] hover:bg-[#f5f2f1]'
                     }`}
                   >
-                    {tab.label} <span className={`font-bold ${isActive ? '' : 'text-gray-400'}`}>({tab.count})</span>
+                    {tab.label} <span className={`font-bold ${isActive ? '' : 'text-[#9ca3af]'}`}>({tab.count})</span>
                   </button>
                 );
               })}
             </div>
 
             {/* Colorful Table */}
-            <Card className="border-2 border-cyan-200 bg-gradient-to-br from-white to-cyan-50/30">
+            <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1]">
               <CardContent className="p-3">
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="bg-gradient-to-r from-cyan-100 to-blue-100 border-b-2 border-cyan-200">
-                        <th className="text-left p-2 font-bold text-cyan-900">Ticket ID</th>
-                        <th className="text-left p-2 font-bold text-cyan-900">Subject</th>
-                        <th className="text-left p-2 font-bold text-cyan-900">Category</th>
-                        <th className="text-left p-2 font-bold text-cyan-900">Priority</th>
-                        <th className="text-left p-2 font-bold text-cyan-900">Status</th>
-                        <th className="text-left p-2 font-bold text-cyan-900">Messages</th>
-                        <th className="text-left p-2 font-bold text-cyan-900">Assigned To</th>
-                        <th className="text-left p-2 font-bold text-cyan-900">Created</th>
-                        <th className="text-left p-2 font-bold text-cyan-900">Updated</th>
-                        <th className="text-left p-2 font-bold text-cyan-900">Related Return</th>
-                        <th className="text-left p-2 font-bold text-cyan-900">Actions</th>
+                      <tr className="bg-[#f5f2f1] border-b-2 border-[#e2e2e2]">
+                        <th className="text-left p-2 font-bold text-[#000000]">Ticket ID</th>
+                        <th className="text-left p-2 font-bold text-[#000000]">Subject</th>
+                        <th className="text-left p-2 font-bold text-[#000000]">Category</th>
+                        <th className="text-left p-2 font-bold text-[#000000]">Priority</th>
+                        <th className="text-left p-2 font-bold text-[#000000]">Status</th>
+                        <th className="text-left p-2 font-bold text-[#000000]">Messages</th>
+                        <th className="text-left p-2 font-bold text-[#000000]">Assigned To</th>
+                        <th className="text-left p-2 font-bold text-[#000000]">Created</th>
+                        <th className="text-left p-2 font-bold text-[#000000]">Updated</th>
+                        <th className="text-left p-2 font-bold text-[#000000]">Related Return</th>
+                        <th className="text-left p-2 font-bold text-[#000000]">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredTickets.length === 0 ? (
-                        <tr><td colSpan={11} className="p-4 text-center text-gray-500 text-sm bg-gray-50">No tickets found</td></tr>
+                        <tr><td colSpan={11} className="p-4 text-center text-[#6b7280] text-sm bg-[#f5f2f1]">No tickets found</td></tr>
                       ) : (
                         filteredTickets.map((ticket, idx) => (
-                          <tr key={ticket.id} className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-cyan-50 transition-colors`}>
-                            <td className="p-2 font-semibold text-cyan-700">{ticket.id}</td>
-                            <td className="p-2 font-medium text-gray-900">{ticket.subject}</td>
+                          <tr key={ticket.id} className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]/50'} hover:bg-[#f5f2f1] transition-colors`}>
+                            <td className="p-2 font-semibold text-[#516057]">{ticket.id}</td>
+                            <td className="p-2 font-medium text-[#000000]">{ticket.subject}</td>
                             <td className="p-2">
                               <Badge className={`text-xs border-2 ${getCategoryColor(ticket.category)}`}>
                                 {getCategoryLabel(ticket.category)}
@@ -499,24 +499,24 @@ export default function SupportPage() {
                               </Badge>
                             </td>
                             <td className="p-2">
-                              <span className="px-2 py-0.5 rounded bg-cyan-100 text-cyan-700 font-medium">
+                              <span className="px-2 py-0.5 rounded bg-[#f5f2f1] text-[#516057] font-medium">
                                 {ticket.messages.length}
                               </span>
                             </td>
-                            <td className="p-2 text-gray-700">{ticket.assignedTo || '-'}</td>
-                            <td className="p-2 text-gray-600">{formatDateTime(ticket.createdAt)}</td>
-                            <td className="p-2 text-gray-600">{formatDateTime(ticket.updatedAt)}</td>
+                            <td className="p-2 text-[#505454]">{ticket.assignedTo || '-'}</td>
+                            <td className="p-2 text-[#505454]">{formatDateTime(ticket.createdAt)}</td>
+                            <td className="p-2 text-[#505454]">{formatDateTime(ticket.updatedAt)}</td>
                             <td className="p-2">
                               {ticket.relatedReturnId ? (
                                 <Link href={`/returns/${ticket.relatedReturnId}`} className="font-mono text-blue-700 hover:underline">
                                   {ticket.relatedReturnId}
                                 </Link>
                               ) : (
-                                <span className="text-gray-400">-</span>
+                                <span className="text-[#9ca3af]">-</span>
                               )}
                             </td>
                             <td className="p-2">
-                              <Button variant="outline" size="sm" className="h-6 px-2 text-xs border-cyan-300 text-cyan-700 hover:bg-cyan-50">
+                              <Button variant="outline" size="sm" className="h-6 px-2 text-xs border-[#e2e2e2] text-[#516057] hover:bg-[#f5f2f1]">
                                 <FileText className="h-3 w-3" />
                               </Button>
                             </td>
@@ -531,37 +531,37 @@ export default function SupportPage() {
 
             {/* Colorful Help Resources */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-              <Card className="border-2 border-cyan-200 bg-gradient-to-br from-cyan-50 to-blue-50 hover:shadow-md transition-all cursor-pointer">
+              <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1] hover:shadow-md transition-all cursor-pointer">
                 <CardContent className="p-3">
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="p-1.5 rounded-lg bg-cyan-100">
-                      <HelpCircle className="h-4 w-4 text-cyan-600" />
+                    <div className="p-1.5 rounded-[4px] bg-[#f5f2f1]">
+                      <HelpCircle className="h-4 w-4 text-[#516057]" />
                     </div>
-                    <h3 className="font-bold text-sm text-gray-900">Knowledge Base</h3>
+                    <h3 className="font-bold text-sm text-[#000000]">Knowledge Base</h3>
                   </div>
-                  <p className="text-xs text-gray-600">Browse articles and tutorials</p>
+                  <p className="text-xs text-[#505454]">Browse articles and tutorials</p>
                 </CardContent>
               </Card>
               <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 hover:shadow-md transition-all cursor-pointer">
                 <CardContent className="p-3">
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="p-1.5 rounded-lg bg-blue-100">
+                    <div className="p-1.5 rounded-[4px] bg-blue-100">
                       <FileText className="h-4 w-4 text-blue-600" />
                     </div>
-                    <h3 className="font-bold text-sm text-gray-900">Documentation</h3>
+                    <h3 className="font-bold text-sm text-[#000000]">Documentation</h3>
                   </div>
-                  <p className="text-xs text-gray-600">User guides and API docs</p>
+                  <p className="text-xs text-[#505454]">User guides and API docs</p>
                 </CardContent>
               </Card>
               <Card className="border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 hover:shadow-md transition-all cursor-pointer">
                 <CardContent className="p-3">
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="p-1.5 rounded-lg bg-indigo-100">
+                    <div className="p-1.5 rounded-[4px] bg-indigo-100">
                       <MessageSquare className="h-4 w-4 text-indigo-600" />
                     </div>
-                    <h3 className="font-bold text-sm text-gray-900">Live Chat</h3>
+                    <h3 className="font-bold text-sm text-[#000000]">Live Chat</h3>
                   </div>
-                  <p className="text-xs text-gray-600">Chat with our support team</p>
+                  <p className="text-xs text-[#505454]">Chat with our support team</p>
                 </CardContent>
               </Card>
             </div>

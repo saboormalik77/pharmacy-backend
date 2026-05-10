@@ -60,27 +60,27 @@ export default function CreateReturnPage() {
 
             {/* Header */}
             <div>
-                <h1 className="text-lg font-bold text-gray-900">Create Return Transaction</h1>
-                <p className="text-xs text-gray-500">Create a new return transaction for your pharmacy</p>
+                <h1 className="text-lg font-bold text-[#000000] font-serif">Create Return Transaction</h1>
+                <p className="text-xs text-[#6b7280]">Create a new return transaction for your pharmacy</p>
             </div>
 
             {/* Create Card */}
-            <div className="bg-white rounded-lg shadow px-4 py-3">
-                <h2 className="text-sm font-semibold text-gray-900 mb-2">New Return</h2>
+            <div className="bg-white rounded-[4px] shadow-sm border border-[#e2e2e2] px-4 py-3">
+                <h2 className="text-sm font-semibold text-[#000000] mb-2">New Return</h2>
 
-                <div className="border border-gray-200 hover:border-primary-400 hover:bg-primary-50 rounded px-3 py-2 cursor-pointer transition-all"
+                <div className="border border-[#e2e2e2] hover:border-[#516057] hover:bg-[#f5f2f1] rounded-[4px] px-3 py-2 cursor-pointer transition-all"
                     onClick={() => setConfirmModal(true)}
                 >
                     <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-0.5">
-                                <Building2 className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
-                                <span className="text-xs font-semibold text-gray-900">Start a new return transaction</span>
+                                <Building2 className="w-3.5 h-3.5 text-[#516057] flex-shrink-0" />
+                                <span className="text-xs font-semibold text-[#000000]">Start a new return transaction</span>
                             </div>
-                            <p className="text-[10px] text-gray-500 pl-5">A unique license plate will be generated. You can then add products by scanning.</p>
+                            <p className="text-[10px] text-[#6b7280] pl-5">A unique license plate will be generated. You can then add products by scanning.</p>
                         </div>
                         <div className="ml-2 flex-shrink-0">
-                            <ClipboardList className="w-4 h-4 text-gray-300" />
+                            <ClipboardList className="w-4 h-4 text-[#9ca3af]" />
                         </div>
                     </div>
                 </div>
@@ -89,37 +89,37 @@ export default function CreateReturnPage() {
             {/* Confirmation Modal */}
             {confirmModal && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setConfirmModal(false)}>
-                    <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-sm font-semibold text-gray-900">Confirm Return Creation</h2>
-                            <button onClick={() => setConfirmModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                    <div className="bg-white rounded-[4px] max-w-md w-full shadow-xl border border-[#e2e2e2]" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-[#e2e2e2] bg-[#f5f2f1]">
+                            <h2 className="text-sm font-semibold text-[#000000] font-serif">Confirm Return Creation</h2>
+                            <button onClick={() => setConfirmModal(false)} className="text-[#9ca3af] hover:text-[#505454]"><X className="w-4 h-4" /></button>
                         </div>
                         <div className="px-4 py-3 space-y-3">
-                            <p className="text-xs text-gray-600">You are about to create a new return transaction.</p>
-                            <div className="bg-gray-50 rounded-lg border border-gray-100 px-3 py-2.5 space-y-2">
+                            <p className="text-xs text-[#505454]">You are about to create a new return transaction.</p>
+                            <div className="bg-[#f5f2f1] rounded-[4px] border border-[#e2e2e2] px-3 py-2.5 space-y-2">
                                 <div className="flex items-start gap-2">
-                                    <Building2 className="w-3.5 h-3.5 text-gray-500 mt-0.5 flex-shrink-0" />
+                                    <Building2 className="w-3.5 h-3.5 text-[#516057] mt-0.5 flex-shrink-0" />
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-xs font-semibold text-gray-900">Your Pharmacy</p>
-                                        <p className="text-[10px] text-gray-500 mt-0.5">A unique license plate will be generated</p>
+                                        <p className="text-xs font-semibold text-[#000000]">Your Pharmacy</p>
+                                        <p className="text-[10px] text-[#6b7280] mt-0.5">A unique license plate will be generated</p>
                                     </div>
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Notes (optional)</label>
+                                <label className="block text-xs font-medium text-[#505454] mb-1">Notes (optional)</label>
                                 <textarea
                                     value={notes}
                                     onChange={e => setNotes(e.target.value)}
                                     rows={2}
-                                    className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500 resize-none"
+                                    className="w-full px-2.5 py-1.5 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] resize-none"
                                     placeholder="Optional notes..."
                                 />
                             </div>
-                            <p className="text-[10px] text-gray-500">Once created, you can begin adding products.</p>
+                            <p className="text-[10px] text-[#6b7280]">Once created, you can begin adding products.</p>
                         </div>
-                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
-                            <button onClick={() => setConfirmModal(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleConfirmCreate} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors">
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-[#e2e2e2] bg-[#f5f2f1]">
+                            <button onClick={() => setConfirmModal(false)} className="px-3 py-1.5 text-xs rounded-[4px] border border-[#e2e2e2] text-[#505454] hover:bg-white transition-colors">Cancel</button>
+                            <button onClick={handleConfirmCreate} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded-[4px] bg-[#516057] text-white hover:opacity-90 disabled:opacity-50 transition-colors">
                                 {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Creating...</> : 'Confirm & Create'}
                             </button>
                         </div>

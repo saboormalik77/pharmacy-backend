@@ -139,7 +139,7 @@ export default function BranchDetailPage() {
             <div className="flex items-start justify-between">
               <div>
                 <h1 className="text-xl font-bold flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-teal-600" />
+                  <Building2 className="h-5 w-5 text-[#516057]" />
                   {branch.pharmacyName}
                 </h1>
                 <p className="text-sm text-muted-foreground mt-0.5">{branch.email}</p>
@@ -158,7 +158,7 @@ export default function BranchDetailPage() {
             </div>
 
             {/* Branch Info */}
-            <div className="bg-card border rounded-lg p-5">
+            <div className="bg-card border rounded-[4px] p-5">
               <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">Branch Information</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div className="flex items-start gap-2">
@@ -191,7 +191,7 @@ export default function BranchDetailPage() {
             </div>
 
             {/* Assigned Roles */}
-            <div className="bg-card border rounded-lg p-5">
+            <div className="bg-card border rounded-[4px] p-5">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Assigned Roles</h2>
                 <div className="relative">
@@ -199,7 +199,7 @@ export default function BranchDetailPage() {
                     <Plus className="h-3.5 w-3.5 mr-1" /> Assign Role
                   </Button>
                   {showRoleDropdown && availableRoles.length > 0 && (
-                    <div className="absolute right-0 mt-1 w-56 bg-card border rounded-md shadow-lg z-10">
+                    <div className="absolute right-0 mt-1 w-56 bg-card border rounded-[4px] shadow-lg z-10">
                       {availableRoles.map((r) => (
                         <button
                           key={r.id}
@@ -218,9 +218,9 @@ export default function BranchDetailPage() {
               {branch.assignedRoles?.length > 0 ? (
                 <div className="space-y-2">
                   {branch.assignedRoles.map((r) => (
-                    <div key={r.roleId} className="flex items-center justify-between bg-muted/30 rounded-lg px-4 py-2.5">
+                    <div key={r.roleId} className="flex items-center justify-between bg-muted/30 rounded-[4px] px-4 py-2.5">
                       <div className="flex items-center gap-2">
-                        <ShieldCheck className="h-4 w-4 text-teal-600" />
+                        <ShieldCheck className="h-4 w-4 text-[#516057]" />
                         <span className="text-sm font-medium">{r.roleName}</span>
                       </div>
                       <button
@@ -240,7 +240,7 @@ export default function BranchDetailPage() {
 
             {/* Effective Permissions */}
             {branch.permissions && branch.permissions.length > 0 && (
-              <div className="bg-card border rounded-lg p-5">
+              <div className="bg-card border rounded-[4px] p-5">
                 <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">Effective Permissions ({branch.permissions.length})</h2>
                 <div className="flex flex-wrap gap-2">
                   {branch.permissions.map((p) => (

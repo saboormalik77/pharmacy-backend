@@ -49,7 +49,7 @@ function ToastContainer({ toasts, onClose }: { toasts: Toast[]; onClose: (id: st
   return (
     <div className="fixed top-4 right-4 z-[60] space-y-2">
       {toasts.map(t => (
-        <div key={t.id} className={`flex items-center gap-2 px-3 py-2 rounded-lg shadow-lg text-xs font-medium ${
+        <div key={t.id} className={`flex items-center gap-2 px-3 py-2 rounded-[4px] shadow-lg text-xs font-medium ${
           t.type === 'success' ? 'bg-green-600 text-white' :
           t.type === 'error' ? 'bg-red-600 text-white' :
           'bg-yellow-500 text-white'
@@ -215,47 +215,47 @@ export default function TbdItemsPage() {
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-lg font-bold text-gray-900 flex items-center gap-1.5">
+            <h1 className="text-lg font-bold text-[#000000] flex items-center gap-1.5">
               <AlertTriangle className="w-4 h-4 text-yellow-500" /> TBD Items
             </h1>
-            <p className="text-xs text-gray-500">Items requiring manual review — resolve as Returnable or Non-Returnable</p>
+            <p className="text-xs text-[#6b7280]">Items requiring manual review — resolve as Returnable or Non-Returnable</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow px-3 py-2">
+        <div className="bg-white rounded-[4px] shadow px-3 py-2">
           <div className="relative">
-            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#9ca3af]" />
             <input
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search by NDC, product name, manufacturer, or lot..."
-              className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500"
+              className="w-full pl-8 pr-3 py-1.5 text-xs border border-[#e2e2e2] rounded focus:outline-none focus:ring-1 focus:ring-[#516057]"
             />
           </div>
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-teal-600" /></div>
+          <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-[#516057]" /></div>
         ) : groups.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-10 text-center">
+          <div className="bg-white rounded-[4px] shadow p-10 text-center">
             <CheckCircle className="w-10 h-10 text-green-300 mx-auto mb-2" />
-            <p className="text-gray-500 text-sm font-medium">No active returns found</p>
+            <p className="text-[#6b7280] text-sm font-medium">No active returns found</p>
           </div>
         ) : (
           <div className="space-y-2">
             {groups.map(({ transaction: tx, items, loading, loaded }) => {
               const isExpanded = expandedTx.has(tx.id);
               return (
-                <div key={tx.id} className={`bg-white rounded-lg shadow overflow-hidden ${isExpanded ? 'ring-1 ring-yellow-300' : ''}`}>
+                <div key={tx.id} className={`bg-white rounded-[4px] shadow overflow-hidden ${isExpanded ? 'ring-1 ring-yellow-300' : ''}`}>
                   <button
                     onClick={() => toggleExpand(tx.id)}
-                    className={`w-full flex items-center justify-between px-4 py-2 transition-colors text-left ${isExpanded ? 'bg-yellow-50 hover:bg-yellow-100' : 'hover:bg-gray-50'}`}
+                    className={`w-full flex items-center justify-between px-4 py-2 transition-colors text-left ${isExpanded ? 'bg-yellow-50 hover:bg-yellow-100' : 'hover:bg-[#f5f2f1]'}`}
                   >
                     <div className="flex items-center gap-2">
-                      {isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-yellow-500" /> : <ChevronRight className="w-3.5 h-3.5 text-gray-400" />}
-                      <span className="font-mono font-semibold text-gray-900 text-xs">{tx.licensePlate}</span>
-                      <span className="text-xs text-gray-500 truncate max-w-[160px]">{tx.pharmacyName}</span>
+                      {isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-yellow-500" /> : <ChevronRight className="w-3.5 h-3.5 text-[#9ca3af]" />}
+                      <span className="font-mono font-semibold text-[#000000] text-xs">{tx.licensePlate}</span>
+                      <span className="text-xs text-[#6b7280] truncate max-w-[160px]">{tx.pharmacyName}</span>
                       <Badge variant={tx.status === 'in_progress' ? 'info' : tx.status === 'paused' ? 'warning' : 'success'}>
                         <span className="text-[10px]">{tx.status.replace(/_/g, ' ')}</span>
                       </Badge>
@@ -267,18 +267,18 @@ export default function TbdItemsPage() {
                       {loaded && items.length === 0 && (
                         <span className="text-[10px] text-green-500">✓ Clear</span>
                       )}
-                      <span className="text-[10px] text-gray-400">{formatDate(tx.createdAt)}</span>
+                      <span className="text-[10px] text-[#9ca3af]">{formatDate(tx.createdAt)}</span>
                     </div>
                   </button>
 
                   {isExpanded && (
                     <div className="border-t border-yellow-200 bg-yellow-50/30">
                       {loading ? (
-                        <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 animate-spin text-teal-600" /></div>
+                        <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 animate-spin text-[#516057]" /></div>
                       ) : items.length === 0 ? (
                         <div className="py-4 text-center">
                           <CheckCircle className="w-5 h-5 text-green-300 mx-auto mb-1" />
-                          <p className="text-xs text-gray-400">No TBD items in this return</p>
+                          <p className="text-xs text-[#9ca3af]">No TBD items in this return</p>
                         </div>
                       ) : (
                         <div className="overflow-x-auto">
@@ -297,14 +297,14 @@ export default function TbdItemsPage() {
                             <tbody className="divide-y divide-yellow-100">
                               {items.map(item => (
                                 <tr key={item.id} className="hover:bg-yellow-50">
-                                  <td className="px-3 py-1.5 text-xs font-mono text-gray-900 whitespace-nowrap">{item.ndc || '—'}</td>
-                                  <td className="px-3 py-1.5 text-xs text-gray-900 max-w-[140px] truncate" title={item.proprietaryName || ''}>
+                                  <td className="px-3 py-1.5 text-xs font-mono text-[#000000] whitespace-nowrap">{item.ndc || '—'}</td>
+                                  <td className="px-3 py-1.5 text-xs text-[#000000] max-w-[140px] truncate" title={item.proprietaryName || ''}>
                                     {item.proprietaryName || item.genericName || '—'}
                                   </td>
-                                  <td className="px-3 py-1.5 text-xs text-gray-600 max-w-[100px] truncate">{item.manufacturer || '—'}</td>
-                                  <td className="px-3 py-1.5 text-xs text-gray-600 font-mono whitespace-nowrap">{item.lotNumber || '—'}</td>
-                                  <td className="px-3 py-1.5 text-xs text-gray-600 whitespace-nowrap">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
-                                  <td className="px-3 py-1.5 text-xs text-center text-gray-900 font-semibold">{item.quantity}</td>
+                                  <td className="px-3 py-1.5 text-xs text-[#505454] max-w-[100px] truncate">{item.manufacturer || '—'}</td>
+                                  <td className="px-3 py-1.5 text-xs text-[#505454] font-mono whitespace-nowrap">{item.lotNumber || '—'}</td>
+                                  <td className="px-3 py-1.5 text-xs text-[#505454] whitespace-nowrap">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</td>
+                                  <td className="px-3 py-1.5 text-xs text-center text-[#000000] font-semibold">{item.quantity}</td>
                                   <td className="px-3 py-1.5 text-right">
                                     <button
                                       onClick={() => {
@@ -335,33 +335,33 @@ export default function TbdItemsPage() {
         {/* Resolve Modal */}
         {resolveModal && (
           <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4" onClick={() => setResolveModal(null)}>
-            <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
-              <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
-                <h2 className="text-lg font-semibold text-gray-900">Resolve TBD Item</h2>
-                <button onClick={() => setResolveModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+            <div className="bg-white rounded-[4px] max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between p-5 border-b border-[#e2e2e2] bg-[#f5f2f1]">
+                <h2 className="text-lg font-semibold text-[#000000]">Resolve TBD Item</h2>
+                <button onClick={() => setResolveModal(null)} className="text-[#9ca3af] hover:text-[#505454]"><X className="w-5 h-5" /></button>
               </div>
               <div className="p-5 space-y-4">
-                <div className="bg-gray-50 rounded-lg p-3 text-xs space-y-1">
-                  <p className="font-medium text-gray-900">{resolveModal.item.proprietaryName || resolveModal.item.ndc || 'Unknown item'}</p>
-                  <p className="text-gray-500">
+                <div className="bg-[#f5f2f1] rounded-[4px] p-3 text-xs space-y-1">
+                  <p className="font-medium text-[#000000]">{resolveModal.item.proprietaryName || resolveModal.item.ndc || 'Unknown item'}</p>
+                  <p className="text-[#6b7280]">
                     NDC: <span className="font-mono">{resolveModal.item.ndc || '—'}</span> | Lot: {resolveModal.item.lotNumber || '—'} | Exp: {resolveModal.item.expirationDate ? formatDate(resolveModal.item.expirationDate) : '—'}
                   </p>
-                  <p className="text-gray-500">Manufacturer: {resolveModal.item.manufacturer || '—'}</p>
+                  <p className="text-[#6b7280]">Manufacturer: {resolveModal.item.manufacturer || '—'}</p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-2">Resolve As <span className="text-red-500">*</span></label>
+                  <label className="block text-xs font-medium text-[#505454] mb-2">Resolve As <span className="text-red-500">*</span></label>
                   <div className="flex gap-3">
-                    <label className={`flex-1 flex items-center gap-2 p-3 border-2 rounded-lg cursor-pointer transition-colors ${
-                      resolveForm.new_status === 'returnable' ? 'border-green-400 bg-green-50' : 'border-gray-200 hover:border-gray-300'
+                    <label className={`flex-1 flex items-center gap-2 p-3 border-2 rounded-[4px] cursor-pointer transition-colors ${
+                      resolveForm.new_status === 'returnable' ? 'border-green-400 bg-green-50' : 'border-[#e2e2e2] hover:border-[#e2e2e2]'
                     }`}>
                       <input type="radio" name="resolve_status" value="returnable" checked={resolveForm.new_status === 'returnable'} onChange={() => setResolveForm({ ...resolveForm, new_status: 'returnable' })} className="text-green-600 focus:ring-green-500" />
                       <div>
                         <p className="text-sm font-medium text-green-700"><CheckCircle className="w-3.5 h-3.5 inline mr-1" />Returnable</p>
                       </div>
                     </label>
-                    <label className={`flex-1 flex items-center gap-2 p-3 border-2 rounded-lg cursor-pointer transition-colors ${
-                      resolveForm.new_status === 'non_returnable' ? 'border-red-400 bg-red-50' : 'border-gray-200 hover:border-gray-300'
+                    <label className={`flex-1 flex items-center gap-2 p-3 border-2 rounded-[4px] cursor-pointer transition-colors ${
+                      resolveForm.new_status === 'non_returnable' ? 'border-red-400 bg-red-50' : 'border-[#e2e2e2] hover:border-[#e2e2e2]'
                     }`}>
                       <input type="radio" name="resolve_status" value="non_returnable" checked={resolveForm.new_status === 'non_returnable'} onChange={() => setResolveForm({ ...resolveForm, new_status: 'non_returnable' })} className="text-red-600 focus:ring-red-500" />
                       <div>
@@ -373,8 +373,8 @@ export default function TbdItemsPage() {
 
                 {resolveForm.new_status === 'returnable' && (
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Destination</label>
-                    <select value={resolveForm.destination} onChange={e => setResolveForm({ ...resolveForm, destination: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <label className="block text-xs font-medium text-[#505454] mb-1">Destination</label>
+                    <select value={resolveForm.destination} onChange={e => setResolveForm({ ...resolveForm, destination: e.target.value })} className="w-full px-3 py-2 text-sm border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057]">
                       <option value="">— Select —</option>
                       <option value="inmar">Inmar</option>
                       <option value="qualanex">Qualanex</option>
@@ -387,14 +387,14 @@ export default function TbdItemsPage() {
                 {resolveForm.new_status === 'non_returnable' && (
                   <>
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Non-Returnable Route</label>
+                      <label className="block text-xs font-medium text-[#505454] mb-1">Non-Returnable Route</label>
                       <div className="grid grid-cols-2 gap-2">
-                        <label className={`flex items-center gap-2 px-3 py-2 border rounded cursor-pointer ${nonReturnableRoute === 'wine_cellar' ? 'border-purple-400 bg-purple-50' : 'border-gray-300'}`}>
+                        <label className={`flex items-center gap-2 px-3 py-2 border border-[#e2e2e2] rounded-[4px] cursor-pointer ${nonReturnableRoute === 'wine_cellar' ? 'border-purple-400 bg-purple-50' : 'border-[#e2e2e2]'}`}>
                           <input type="radio" checked={nonReturnableRoute === 'wine_cellar'} onChange={() => setNonReturnableRoute('wine_cellar')} />
                           <Archive className="w-3.5 h-3.5 text-purple-600" />
                           <span className="text-xs font-medium text-purple-800">Wine Cellar</span>
                         </label>
-                        <label className={`flex items-center gap-2 px-3 py-2 border rounded cursor-pointer ${nonReturnableRoute === 'destruction' ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}>
+                        <label className={`flex items-center gap-2 px-3 py-2 border border-[#e2e2e2] rounded-[4px] cursor-pointer ${nonReturnableRoute === 'destruction' ? 'border-red-400 bg-red-50' : 'border-[#e2e2e2]'}`}>
                           <input type="radio" checked={nonReturnableRoute === 'destruction'} onChange={() => setNonReturnableRoute('destruction')} />
                           <Ban className="w-3.5 h-3.5 text-red-600" />
                           <span className="text-xs font-medium text-red-800">Destruction</span>
@@ -403,18 +403,18 @@ export default function TbdItemsPage() {
                     </div>
                     {nonReturnableRoute === 'wine_cellar' && (
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Expected Returnable Date <span className="text-red-500">*</span></label>
+                        <label className="block text-xs font-medium text-[#505454] mb-1">Expected Returnable Date <span className="text-red-500">*</span></label>
                         <input
                           type="date"
                           value={expectedReturnableDate}
                           onChange={e => setExpectedReturnableDate(e.target.value)}
-                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          className="w-full px-3 py-2 text-sm border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-purple-500"
                         />
                       </div>
                     )}
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Reason</label>
-                      <select value={resolveForm.reason} onChange={e => setResolveForm({ ...resolveForm, reason: e.target.value })} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500">
+                      <label className="block text-xs font-medium text-[#505454] mb-1">Reason</label>
+                      <select value={resolveForm.reason} onChange={e => setResolveForm({ ...resolveForm, reason: e.target.value })} className="w-full px-3 py-2 text-sm border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057]">
                         <option value="">— Select Reason —</option>
                         <option value="date">Date (expired/outside return window)</option>
                         <option value="policy">Policy (manufacturer restriction)</option>
@@ -426,16 +426,16 @@ export default function TbdItemsPage() {
                 )}
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Memo</label>
-                  <textarea value={resolveForm.memo} onChange={e => setResolveForm({ ...resolveForm, memo: e.target.value })} rows={2} placeholder="Optional notes about this resolution" className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none" />
+                  <label className="block text-xs font-medium text-[#505454] mb-1">Memo</label>
+                  <textarea value={resolveForm.memo} onChange={e => setResolveForm({ ...resolveForm, memo: e.target.value })} rows={2} placeholder="Optional notes about this resolution" className="w-full px-3 py-2 text-sm border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] resize-none" />
                 </div>
               </div>
-              <div className="flex justify-end gap-2 p-5 border-t border-gray-200 bg-gray-50">
+              <div className="flex justify-end gap-2 p-5 border-t border-[#e2e2e2] bg-[#f5f2f1]">
                 <Button variant="outline" onClick={() => setResolveModal(null)}>Cancel</Button>
                 <button
                   onClick={handleResolve}
                   disabled={isResolving}
-                  className={`inline-flex items-center gap-1 px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 ${
+                  className={`inline-flex items-center gap-1 px-4 py-2 text-sm font-medium rounded-[4px] transition-colors disabled:opacity-50 ${
                     resolveForm.new_status === 'returnable'
                       ? 'bg-green-600 text-white hover:bg-green-700'
                       : 'bg-red-600 text-white hover:bg-red-700'

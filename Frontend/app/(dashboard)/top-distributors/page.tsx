@@ -216,16 +216,16 @@ export default function TopDistributorsPage() {
     <DashboardLayout>
       <div className="space-y-2 p-2">
         {/* Header */}
-        <div className="flex items-center justify-between p-2 sm:p-3 rounded-lg bg-gradient-to-r from-teal-50 via-cyan-50 to-teal-50 border-2 border-teal-200">
+        <div className="flex items-center justify-between p-2 sm:p-3 rounded-[4px] bg-[#f5f2f1] border-2 border-[#e2e2e2]">
           <div>
-            <h1 className="text-lg sm:text-xl font-bold text-gray-900">Top Distributors</h1>
-            {/* <p className="text-xs text-gray-600 mt-0.5">Compare distributors and find the best returns</p> */}
+            <h1 className="text-lg sm:text-xl font-bold text-[#000000]">Top Distributors</h1>
+            {/* <p className="text-xs text-[#505454] mt-0.5">Compare distributors and find the best returns</p> */}
           </div>
           <div className="flex items-center gap-2">
             {/* {!isComparing && (
               <Button 
                 onClick={handleCompare}
-                className="bg-teal-600 hover:bg-teal-700"
+                className="bg-[#516057] hover:bg-[#505454]"
               >
                 <TrendingUp className="mr-2 h-4 w-4" />
                 Compare
@@ -261,10 +261,10 @@ export default function TopDistributorsPage() {
 
         {/* Loading State */}
         {loading && (
-          <Card className="border-2 border-teal-200">
+          <Card className="border-2 border-[#e2e2e2]">
             <CardContent className="p-2 text-center py-8">
-              <Loader2 className="h-6 w-6 mx-auto mb-2 text-teal-600 animate-spin" />
-              <p className="text-xs text-gray-600">Loading top distributors...</p>
+              <Loader2 className="h-6 w-6 mx-auto mb-2 text-[#516057] animate-spin" />
+              <p className="text-xs text-[#505454]">Loading top distributors...</p>
             </CardContent>
           </Card>
         )}
@@ -273,10 +273,10 @@ export default function TopDistributorsPage() {
           /* Distributors List View */
           <div className="space-y-3">
             {/* Search */}
-            <Card className="border-2 border-teal-200">
+            <Card className="border-2 border-[#e2e2e2]">
               <CardContent className="p-2">
                 <div className="relative">
-                  <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-gray-400" />
+                  <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-[#9ca3af]" />
                   <Input
                     placeholder="Search distributors..."
                     value={searchQuery}
@@ -290,12 +290,12 @@ export default function TopDistributorsPage() {
             {/* Distributors Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {filteredDistributors.map((distributor) => (
-                <Card key={distributor.id} className="border-2 border-teal-200 hover:border-teal-400 transition-colors">
+                <Card key={distributor.id} className="border-2 border-[#e2e2e2] hover:border-[#e2e2e2] transition-colors">
                   <CardHeader className="p-2">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-2">
-                        <div className="p-1.5 bg-teal-100 rounded-lg">
-                          <Building2 className="h-4 w-4 text-teal-600" />
+                        <div className="p-1.5 bg-[#f5f2f1] rounded-[4px]">
+                          <Building2 className="h-4 w-4 text-[#516057]" />
                         </div>
                         <div>
                           <CardTitle className="text-sm sm:text-base">{distributor.name}</CardTitle>
@@ -313,19 +313,19 @@ export default function TopDistributorsPage() {
                   <CardContent className="p-2 space-y-2">
                     {distributor.email && (
                       <div className="text-xs">
-                        <span className="text-gray-600">Email: </span>
+                        <span className="text-[#505454]">Email: </span>
                         <span className="font-medium">{distributor.email}</span>
                       </div>
                     )}
                     {distributor.phone && (
                       <div className="text-xs">
-                        <span className="text-gray-600">Phone: </span>
+                        <span className="text-[#505454]">Phone: </span>
                         <span className="font-medium">{distributor.phone}</span>
                       </div>
                     )}
                     {distributor.location && (
                       <div className="text-xs">
-                        <span className="text-gray-600">Location: </span>
+                        <span className="text-[#505454]">Location: </span>
                         <span className="font-medium">{distributor.location}</span>
                       </div>
                     )}
@@ -342,10 +342,10 @@ export default function TopDistributorsPage() {
             </div>
 
             {filteredDistributors.length === 0 && (
-              <Card className="border-2 border-gray-200">
+              <Card className="border-2 border-[#e2e2e2]">
                 <CardContent className="p-2 py-8 text-center">
-                  <AlertCircle className="h-6 w-6 mx-auto mb-2 text-gray-400" />
-                  <p className="text-xs text-gray-600">No distributors found matching your search.</p>
+                  <AlertCircle className="h-6 w-6 mx-auto mb-2 text-[#9ca3af]" />
+                  <p className="text-xs text-[#505454]">No distributors found matching your search.</p>
                 </CardContent>
               </Card>
             )}
@@ -355,30 +355,30 @@ export default function TopDistributorsPage() {
           <div className="space-y-3">
             {/* Selected Inventory Info */}
             {selectedInventory && (
-              <Card className="border-2 border-teal-200 bg-teal-50">
+              <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1]">
                 <CardHeader className="p-2">
                   <CardTitle className="text-sm sm:text-base flex items-center gap-2">
-                    <Package className="h-3 w-3 text-teal-600" />
+                    <Package className="h-3 w-3 text-[#516057]" />
                     Selected Inventory
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-2">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                     <div>
-                      <p className="text-[10px] text-gray-600 mb-0.5">Product Name</p>
+                      <p className="text-[10px] text-[#505454] mb-0.5">Product Name</p>
                       <p className="text-xs font-medium">{selectedInventory.productName}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-gray-600 mb-0.5">NDC</p>
+                      <p className="text-[10px] text-[#505454] mb-0.5">NDC</p>
                       <p className="text-xs font-mono font-medium">{selectedInventory.ndc}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-gray-600 mb-0.5">Quantity</p>
+                      <p className="text-[10px] text-[#505454] mb-0.5">Quantity</p>
                       <p className="text-xs font-medium">{selectedInventory.quantity}</p>
                     </div>
                     {selectedInventory.expirationDate && (
                       <div>
-                        <p className="text-[10px] text-gray-600 mb-0.5">Expiration</p>
+                        <p className="text-[10px] text-[#505454] mb-0.5">Expiration</p>
                         <p className="text-xs font-medium">{formatDate(selectedInventory.expirationDate)}</p>
                       </div>
                     )}
@@ -389,10 +389,10 @@ export default function TopDistributorsPage() {
 
             {/* Loading State */}
             {optimizationLoading && (
-              <Card className="border-2 border-teal-200">
+              <Card className="border-2 border-[#e2e2e2]">
                 <CardContent className="p-2 text-center py-8">
-                  <Loader2 className="h-6 w-6 mx-auto mb-2 text-teal-600 animate-spin" />
-                  <p className="text-xs text-gray-600">Loading optimization recommendations...</p>
+                  <Loader2 className="h-6 w-6 mx-auto mb-2 text-[#516057] animate-spin" />
+                  <p className="text-xs text-[#505454]">Loading optimization recommendations...</p>
                 </CardContent>
               </Card>
             )}
@@ -412,7 +412,7 @@ export default function TopDistributorsPage() {
             {/* Top Distributors Rankings */}
             {distributorRankings.length > 0 && (
               <div className="space-y-3">
-                <Card className="border-2 border-teal-200">
+                <Card className="border-2 border-[#e2e2e2]">
                   <CardHeader className="p-2">
                     <CardTitle className="text-sm sm:text-base">Top Distributors Ranking</CardTitle>
                     <CardDescription className="text-xs">
@@ -434,7 +434,7 @@ export default function TopDistributorsPage() {
                       className={`border-2 ${
                         isBest 
                           ? 'border-yellow-400 bg-yellow-50' 
-                          : 'border-teal-200'
+                          : 'border-[#e2e2e2]'
                       }`}
                     >
                       <CardContent className="p-2">
@@ -445,10 +445,10 @@ export default function TopDistributorsPage() {
                               isBest 
                                 ? 'bg-yellow-400 text-yellow-900' 
                                 : ranking.rank === 2
-                                ? 'bg-gray-300 text-gray-700'
+                                ? 'bg-gray-300 text-[#505454]'
                                 : ranking.rank === 3
                                 ? 'bg-orange-300 text-orange-700'
-                                : 'bg-gray-200 text-gray-600'
+                                : 'bg-[#e2e2e2] text-[#505454]'
                             }`}>
                               {ranking.rank}
                             </div>
@@ -456,7 +456,7 @@ export default function TopDistributorsPage() {
                             {/* Distributor Info */}
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <Building2 className="h-3 w-3 text-teal-600" />
+                                <Building2 className="h-3 w-3 text-[#516057]" />
                                 <h3 className="text-xs font-bold">{ranking.distributor.name}</h3>
                                 {isBest && (
                                   <Badge variant="success" className="text-xs">
@@ -487,24 +487,24 @@ export default function TopDistributorsPage() {
                               </div>
                               <div className="space-y-1 mt-2">
                                 <div className="text-xs">
-                                  <span className="text-gray-600">Price per unit: </span>
-                                  <span className="font-medium text-emerald-700">{formatCurrency(ranking.averagePricePerUnit)}</span>
+                                  <span className="text-[#505454]">Price per unit: </span>
+                                  <span className="font-medium text-[#516057]">{formatCurrency(ranking.averagePricePerUnit)}</span>
                                 </div>
                                 {ranking.distributor.email && (
                                   <div className="text-xs">
-                                    <span className="text-gray-600">Email: </span>
+                                    <span className="text-[#505454]">Email: </span>
                                     <span className="font-medium">{ranking.distributor.email}</span>
                                   </div>
                                 )}
                                 {ranking.distributor.phone && (
                                   <div className="text-xs">
-                                    <span className="text-gray-600">Phone: </span>
+                                    <span className="text-[#505454]">Phone: </span>
                                     <span className="font-medium">{ranking.distributor.phone}</span>
                                   </div>
                                 )}
                                 {ranking.distributor.location && (
                                   <div className="text-xs">
-                                    <span className="text-gray-600">Location: </span>
+                                    <span className="text-[#505454]">Location: </span>
                                     <span className="font-medium">{ranking.distributor.location}</span>
                                   </div>
                                 )}
@@ -524,15 +524,15 @@ export default function TopDistributorsPage() {
         {/* Inventory Selection Modal */}
         {showInventoryModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-            <div className="relative w-full max-w-3xl bg-white rounded-lg shadow-2xl max-h-[90vh] flex flex-col">
+            <div className="relative w-full max-w-3xl bg-white rounded-[4px] shadow-2xl max-h-[90vh] flex flex-col">
               <div className="flex items-center justify-between p-2 border-b">
                 <div className="flex items-center gap-2">
-                  <Package className="h-4 w-4 text-teal-600" />
+                  <Package className="h-4 w-4 text-[#516057]" />
                   <h3 className="font-bold text-sm sm:text-base">Select Inventory to Compare</h3>
                 </div>
                 <button
                   onClick={() => setShowInventoryModal(false)}
-                  className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-1.5 hover:bg-[#f5f2f1] rounded-[4px] transition-colors"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -540,8 +540,8 @@ export default function TopDistributorsPage() {
               <div className="flex-1 overflow-y-auto p-2">
                 {inventoryLoading ? (
                   <div className="text-center py-8">
-                    <Loader2 className="h-6 w-6 mx-auto mb-2 text-teal-600 animate-spin" />
-                    <p className="text-xs text-gray-600">Loading inventory items...</p>
+                    <Loader2 className="h-6 w-6 mx-auto mb-2 text-[#516057] animate-spin" />
+                    <p className="text-xs text-[#505454]">Loading inventory items...</p>
                   </div>
                 ) : inventoryError ? (
                   <div className="text-center py-8">
@@ -549,16 +549,16 @@ export default function TopDistributorsPage() {
                     <p className="text-xs text-red-600 mb-2">{inventoryError}</p>
                     <button
                       onClick={fetchInventoryItems}
-                      className="px-2 py-1 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs mx-auto"
+                      className="px-2 py-1 bg-white border border-[#e2e2e2] text-[#505454] rounded-[4px] hover:bg-[#f5f2f1] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs mx-auto"
                     >
                       Retry
                     </button>
                   </div>
                 ) : inventoryItems.length === 0 ? (
                   <div className="text-center py-8">
-                    <AlertCircle className="h-6 w-6 mx-auto mb-2 text-gray-400" />
-                    <p className="text-xs text-gray-600 mb-2">No inventory items available.</p>
-                    <p className="text-[10px] text-gray-500">
+                    <AlertCircle className="h-6 w-6 mx-auto mb-2 text-[#9ca3af]" />
+                    <p className="text-xs text-[#505454] mb-2">No inventory items available.</p>
+                    <p className="text-[10px] text-[#6b7280]">
                       Please add products to your inventory first.
                     </p>
                   </div>
@@ -568,12 +568,12 @@ export default function TopDistributorsPage() {
                       <button
                         key={item.id}
                         onClick={() => handleSelectInventory(item)}
-                        className="w-full text-left p-2 border-2 border-gray-200 rounded-lg hover:border-teal-400 hover:bg-teal-50 transition-all"
+                        className="w-full text-left p-2 border-2 border-[#e2e2e2] rounded-[4px] hover:border-[#e2e2e2] hover:bg-[#f5f2f1] transition-all"
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
                             <p className="font-medium text-xs">{item.productName}</p>
-                            <div className="flex items-center gap-2 mt-1 text-[10px] text-gray-600">
+                            <div className="flex items-center gap-2 mt-1 text-[10px] text-[#505454]">
                               <span>NDC: <span className="font-mono">{item.ndc}</span></span>
                               <span>Qty: {item.quantity}</span>
                               {item.lotNumber && <span>Lot: {item.lotNumber}</span>}
@@ -582,7 +582,7 @@ export default function TopDistributorsPage() {
                               )}
                             </div>
                           </div>
-                          <CheckCircle2 className="h-3 w-3 text-teal-600" />
+                          <CheckCircle2 className="h-3 w-3 text-[#516057]" />
                         </div>
                       </button>
                     ))}

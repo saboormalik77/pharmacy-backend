@@ -80,12 +80,12 @@ export default function OrderDetailPage() {
       case 'shipped':
         return 'bg-blue-100 text-black dark:bg-blue-900/30 dark:text-black'
       case 'delivered':
-        return 'bg-teal-100 text-black dark:bg-teal-900/30 dark:text-black'
+        return 'bg-[#f5f2f1] text-black dark:bg-[#516057]/30 dark:text-black'
       case 'cancelled':
       case 'refunded':
         return 'bg-red-100 text-black dark:bg-red-900/30 dark:text-black'
       default:
-        return 'bg-gray-100 text-black dark:bg-gray-900/30 dark:text-black'
+        return 'bg-[#f5f2f1] text-black dark:bg-gray-900/30 dark:text-black'
     }
   }
 
@@ -125,7 +125,7 @@ export default function OrderDetailPage() {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-10 w-10 animate-spin text-teal-600 mx-auto mb-4" />
+          <Loader2 className="h-10 w-10 animate-spin text-[#516057] mx-auto mb-4" />
           <p className="text-muted-foreground">Loading order details...</p>
         </div>
       </div>
@@ -140,7 +140,7 @@ export default function OrderDetailPage() {
         <p className="text-muted-foreground mb-6">{error}</p>
         <button
           onClick={() => router.push('/marketplace/orders')}
-          className="px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium transition-all"
+          className="px-6 py-3 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] font-medium transition-all"
         >
           Back to Orders
         </button>
@@ -158,7 +158,7 @@ export default function OrderDetailPage() {
       <div className="flex items-center gap-4 mb-8">
         <button
           onClick={() => router.push('/marketplace/orders')}
-          className="p-2 hover:bg-muted rounded-lg transition-colors"
+          className="p-2 hover:bg-muted rounded-[4px] transition-colors"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
@@ -172,7 +172,7 @@ export default function OrderDetailPage() {
 
       {/* Error */}
       {error && (
-        <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-start gap-3">
+        <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-[4px] flex items-start gap-3">
           <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
           <p className="text-destructive">{error}</p>
         </div>
@@ -255,7 +255,7 @@ export default function OrderDetailPage() {
             <div className="divide-y">
               {order.items?.map((item) => (
                 <div key={item.id} className="p-4 flex gap-4">
-                  <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                  <div className="w-16 h-16 bg-muted rounded-[4px] flex items-center justify-center overflow-hidden flex-shrink-0">
                     <Package className="h-8 w-8 text-muted-foreground" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -346,7 +346,7 @@ export default function OrderDetailPage() {
                 href={order.stripeReceiptUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-sm text-teal-600 hover:underline mt-3"
+                className="inline-flex items-center gap-1 text-sm text-[#516057] hover:underline mt-3"
               >
                 <Receipt className="h-4 w-4" />
                 View Receipt
@@ -373,7 +373,7 @@ export default function OrderDetailPage() {
               <button
                 onClick={handleCancelOrder}
                 disabled={isCancelling}
-                className="w-full px-4 py-2 border border-destructive text-destructive rounded-lg hover:bg-destructive/10 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full px-4 py-2 border border-destructive text-destructive rounded-[4px] hover:bg-destructive/10 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isCancelling ? (
                   <>

@@ -245,7 +245,7 @@ export function NotificationDropdown() {
         case 'system':
           return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
         default:
-          return <Bell className="h-4 w-4 text-gray-600" />;
+          return <Bell className="h-4 w-4 text-[#505454]" />;
       }
     } else {
       // Service request notifications
@@ -340,10 +340,10 @@ export function NotificationDropdown() {
       <style>{scrollbarStyles}</style>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative rounded-full p-2 hover:bg-gray-100 transition-colors"
+        className="relative rounded-full p-2 hover:bg-[var(--surface-container)] transition-colors"
         aria-label="Notifications"
       >
-        <Bell className="h-5 w-5 text-gray-600" />
+        <Bell className="h-5 w-5 text-[#505454]" />
         {mounted && unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-gradient-to-br from-red-500 to-orange-500 text-white text-[10px] font-bold flex items-center justify-center shadow-sm">
             {unreadCount > 99 ? '99+' : unreadCount}
@@ -352,14 +352,14 @@ export function NotificationDropdown() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-[320px] sm:w-[360px] bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-[70vh] flex flex-col overflow-hidden">
+        <div className="absolute right-0 mt-2 w-[320px] sm:w-[360px] bg-white rounded-[4px] shadow-xl border border-[#e2e2e2] z-50 max-h-[70vh] flex flex-col overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[#f3f4f6] bg-[#f5f2f1]">
             <div className="flex items-center gap-2">
-              <Bell className="h-4 w-4 text-teal-600" />
-              <h3 className="font-semibold text-sm text-gray-900">Notifications</h3>
+              <Bell className="h-4 w-4 text-[#516057]" />
+              <h3 className="font-semibold text-sm text-[#000000]">Notifications</h3>
             </div>
-            <span className="text-xs text-gray-500">{notifications.length} total</span>
+            <span className="text-xs text-[#6b7280]">{notifications.length} total</span>
           </div>
 
           {/* Notifications List */}
@@ -372,9 +372,9 @@ export function NotificationDropdown() {
           >
             {recentNotifications.length === 0 ? (
               <div className="p-8 text-center">
-                <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                <p className="text-sm font-medium text-gray-500">No notifications</p>
-                <p className="text-xs text-gray-400 mt-1">You're all caught up!</p>
+                <Bell className="h-12 w-12 mx-auto mb-3 text-[#9ca3af]" />
+                <p className="text-sm font-medium text-[#6b7280]">No notifications</p>
+                <p className="text-xs text-[#9ca3af] mt-1">You're all caught up!</p>
               </div>
             ) : (
               <div>
@@ -382,8 +382,8 @@ export function NotificationDropdown() {
                   <div
                     key={notification.id}
                     onClick={() => handleNotificationClick(notification)}
-                    className={`px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer ${
-                      index !== recentNotifications.length - 1 ? 'border-b border-gray-100' : ''
+                    className={`px-4 py-3 hover:bg-[#f5f2f1] transition-colors cursor-pointer ${
+                      index !== recentNotifications.length - 1 ? 'border-b border-[#f3f4f6]' : ''
                     }`}
                   >
                     <div className="flex gap-3">
@@ -395,24 +395,24 @@ export function NotificationDropdown() {
                       {/* Content */}
                       <div className="flex-1 min-w-0">
                         {/* Title */}
-                        <p className="font-medium text-sm text-gray-900 leading-snug">
+                        <p className="font-medium text-sm text-[#000000] leading-snug">
                           {notification.title}
                         </p>
                         
                         {/* Message */}
-                        <p className="text-xs text-gray-600 mt-1 leading-relaxed line-clamp-2">
+                        <p className="text-xs text-[#505454] mt-1 leading-relaxed line-clamp-2">
                           {notification.message}
                         </p>
                         
                         {/* Potential value for expiring products */}
                         {notification.type === 'inventory' && notification.notification_type === 'expiring_product' && notification.total_potential_value && notification.total_potential_value > 0 && (
-                          <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-1 bg-emerald-50 rounded-md border border-emerald-200">
-                            <DollarSign className="h-3.5 w-3.5 text-emerald-600" />
-                            <span className="text-xs font-semibold text-emerald-700">
+                          <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-1 bg-[#f5f2f1] rounded-[4px] border border-[#e2e2e2]">
+                            <DollarSign className="h-3.5 w-3.5 text-[#516057]" />
+                            <span className="text-xs font-semibold text-[#516057]">
                               {formatCurrency(notification.total_potential_value)}
                             </span>
                             {notification.recommended_distributor_name && (
-                              <span className="text-xs text-emerald-600">
+                              <span className="text-xs text-[#516057]">
                                 • {notification.recommended_distributor_name}
                               </span>
                             )}
@@ -421,7 +421,7 @@ export function NotificationDropdown() {
 
                         {/* Service request metadata (processor name, scheduled date, etc.) */}
                         {notification.type === 'service_request' && notification.metadata && (
-                          <div className="mt-1.5 text-xs text-gray-500 space-y-0.5">
+                          <div className="mt-1.5 text-xs text-[#6b7280] space-y-0.5">
                             {notification.metadata.processor_name && (
                               <div>Rep: {notification.metadata.processor_name}</div>
                             )}
@@ -433,7 +433,7 @@ export function NotificationDropdown() {
 
                         {/* Footer: time and expiration badge */}
                         <div className="flex items-center gap-2 mt-2">
-                          <span className="text-xs text-gray-400">
+                          <span className="text-xs text-[#9ca3af]">
                             {formatDate(notification.created_at)}
                           </span>
                           {notification.type === 'inventory' &&
@@ -469,8 +469,8 @@ export function NotificationDropdown() {
 
           {/* Footer */}
           {notifications.length > 10 && (
-            <div className="px-4 py-2 border-t border-gray-100 bg-gray-50 text-center">
-              <p className="text-xs text-gray-500">
+            <div className="px-4 py-2 border-t border-[#f3f4f6] bg-[#f5f2f1] text-center">
+              <p className="text-xs text-[#6b7280]">
                 Showing 10 of {notifications.length} notifications
               </p>
             </div>

@@ -73,12 +73,12 @@ export default function CreditStatementPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'paid': return 'bg-emerald-100 text-emerald-700 border-emerald-300';
-      case 'processing': return 'bg-cyan-100 text-cyan-700 border-cyan-300';
+      case 'paid': return 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2]';
+      case 'processing': return 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2]';
       case 'pending': return 'bg-amber-100 text-amber-700 border-amber-300';
       case 'failed': return 'bg-red-100 text-red-700 border-red-300';
       case 'disputed': return 'bg-red-100 text-red-700 border-red-300';
-      default: return 'bg-gray-100 text-gray-700 border-gray-300';
+      default: return 'bg-[#f5f2f1] text-[#505454] border-[#e2e2e2]';
     }
   };
 
@@ -125,23 +125,23 @@ export default function CreditStatementPage() {
     <DashboardLayout>
       <div className="space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-lg bg-gradient-to-r from-teal-50 via-cyan-50 to-teal-50 border-2 border-teal-200">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-[4px] bg-[#f5f2f1] border-2 border-[#e2e2e2]">
           <div className="flex items-center gap-3">
             <Link href="/credits">
-              <Button size="sm" variant="outline" className="border-teal-300 text-teal-700 hover:bg-teal-100">
+              <Button size="sm" variant="outline" className="border-[#e2e2e2] text-[#516057] hover:bg-[#f5f2f1]">
                 <ArrowLeft className="h-3 w-3" />
               </Button>
             </Link>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Credit Statements</h1>
-              <p className="text-xs text-gray-600 mt-0.5">
+              <h1 className="text-xl font-bold text-[#000000]">Credit Statements</h1>
+              <p className="text-xs text-[#505454] mt-0.5">
                 Detailed payout records with downloadable statements
               </p>
             </div>
           </div>
           <Button
             size="sm"
-            className="bg-teal-600 hover:bg-teal-700 text-white border-0"
+            className="bg-[#516057] hover:bg-[#505454] text-white border-0"
             onClick={handleDownload}
             disabled={payments.length === 0}
           >
@@ -153,65 +153,65 @@ export default function CreditStatementPage() {
         {/* Summary Row */}
         {summary && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            <div className="p-3 rounded-lg border-2 border-teal-200 bg-gradient-to-br from-teal-50 to-teal-100">
+            <div className="p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1]">
               <div className="flex items-center gap-1 mb-1">
-                <DollarSign className="h-3 w-3 text-teal-600" />
-                <p className="text-xs text-teal-700 font-medium">Total Credits</p>
+                <DollarSign className="h-3 w-3 text-[#516057]" />
+                <p className="text-xs text-[#516057] font-medium">Total Credits</p>
               </div>
-              <p className="text-lg font-bold text-teal-900">{formatCurrency(summary.totalCredits)}</p>
+              <p className="text-lg font-bold text-[#000000]">{formatCurrency(summary.totalCredits)}</p>
             </div>
-            <div className="p-3 rounded-lg border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100">
+            <div className="p-3 rounded-[4px] border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100">
               <div className="flex items-center gap-1 mb-1">
                 <Receipt className="h-3 w-3 text-amber-600" />
                 <p className="text-xs text-amber-700 font-medium">Total Fees</p>
               </div>
               <p className="text-lg font-bold text-amber-900">{formatCurrency(summary.totalFees)}</p>
             </div>
-            <div className="p-3 rounded-lg border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100">
+            <div className="p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1]">
               <div className="flex items-center gap-1 mb-1">
-                <Banknote className="h-3 w-3 text-emerald-600" />
-                <p className="text-xs text-emerald-700 font-medium">Total Payout</p>
+                <Banknote className="h-3 w-3 text-[#516057]" />
+                <p className="text-xs text-[#516057] font-medium">Total Payout</p>
               </div>
-              <p className="text-lg font-bold text-emerald-900">{formatCurrency(summary.totalPayout)}</p>
+              <p className="text-lg font-bold text-[#000000]">{formatCurrency(summary.totalPayout)}</p>
             </div>
-            <div className="p-3 rounded-lg border-2 border-cyan-200 bg-gradient-to-br from-cyan-50 to-cyan-100">
+            <div className="p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1]">
               <div className="flex items-center gap-1 mb-1">
-                <CheckCircle2 className="h-3 w-3 text-cyan-600" />
-                <p className="text-xs text-cyan-700 font-medium">Payments</p>
+                <CheckCircle2 className="h-3 w-3 text-[#516057]" />
+                <p className="text-xs text-[#516057] font-medium">Payments</p>
               </div>
-              <p className="text-lg font-bold text-cyan-900">{summary.paidCount} paid / {summary.pendingCount} pending</p>
+              <p className="text-lg font-bold text-[#000000]">{summary.paidCount} paid / {summary.pendingCount} pending</p>
             </div>
           </div>
         )}
 
         {/* Date Filters */}
-        <Card className="border-2 border-teal-200 bg-gradient-to-br from-white to-teal-50/30">
+        <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1]">
           <CardContent className="p-3">
             <div className="flex flex-wrap items-end gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Start Date</label>
+                <label className="block text-xs font-medium text-[#505454] mb-1">Start Date</label>
                 <Input
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="h-8 text-xs border-teal-200 w-40"
+                  className="h-8 text-xs border-[#e2e2e2] w-40"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">End Date</label>
+                <label className="block text-xs font-medium text-[#505454] mb-1">End Date</label>
                 <Input
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="h-8 text-xs border-teal-200 w-40"
+                  className="h-8 text-xs border-[#e2e2e2] w-40"
                 />
               </div>
-              <Button size="sm" className="h-8 text-xs bg-teal-600 hover:bg-teal-700 text-white" onClick={applyDateFilter}>
+              <Button size="sm" className="h-8 text-xs bg-[#516057] hover:bg-[#505454] text-white" onClick={applyDateFilter}>
                 <Calendar className="mr-1 h-3 w-3" />
                 Apply
               </Button>
               {(startDate || endDate) && (
-                <Button size="sm" variant="outline" className="h-8 text-xs border-gray-300" onClick={clearDateFilter}>
+                <Button size="sm" variant="outline" className="h-8 text-xs border-[#e2e2e2]" onClick={clearDateFilter}>
                   Clear
                 </Button>
               )}
@@ -220,15 +220,15 @@ export default function CreditStatementPage() {
         </Card>
 
         {/* Statement Table */}
-        <Card className="border-2 border-teal-200 bg-gradient-to-br from-white to-teal-50/30">
+        <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1]">
           <CardHeader className="p-3">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-teal-100">
-                <FileText className="h-4 w-4 text-teal-600" />
+              <div className="p-1.5 rounded-[4px] bg-[#f5f2f1]">
+                <FileText className="h-4 w-4 text-[#516057]" />
               </div>
               <div>
-                <CardTitle className="text-base text-gray-900">Payment Statement</CardTitle>
-                <CardDescription className="text-xs text-gray-600">
+                <CardTitle className="text-base text-[#000000]">Payment Statement</CardTitle>
+                <CardDescription className="text-xs text-[#505454]">
                   {total} record{total !== 1 ? 's' : ''}
                   {startDate && ` from ${startDate}`}
                   {endDate && ` to ${endDate}`}
@@ -239,8 +239,8 @@ export default function CreditStatementPage() {
           <CardContent className="p-3 pt-0">
             {loading ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-teal-600" />
-                <span className="ml-2 text-sm text-gray-500">Loading statement...</span>
+                <Loader2 className="h-6 w-6 animate-spin text-[#516057]" />
+                <span className="ml-2 text-sm text-[#6b7280]">Loading statement...</span>
               </div>
             ) : error ? (
               <div className="text-center py-12">
@@ -249,7 +249,7 @@ export default function CreditStatementPage() {
                 <Button size="sm" className="mt-2" onClick={loadPayments}>Retry</Button>
               </div>
             ) : payments.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
+              <div className="text-center py-12 text-[#6b7280]">
                 <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p className="font-medium">No records found</p>
                 <p className="text-xs mt-1">Adjust your date filters or check back later.</p>
@@ -259,7 +259,7 @@ export default function CreditStatementPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full table-auto">
                     <thead>
-                      <tr className="bg-gradient-to-r from-teal-600 to-teal-700 border-b-2 border-teal-800">
+                      <tr className="bg-[#516057] border-b-2 border-[#516057]">
                         <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">#</th>
                         <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Date</th>
                         <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Batch</th>
@@ -278,28 +278,28 @@ export default function CreditStatementPage() {
                       {payments.map((payment, idx) => (
                         <tr
                           key={payment.id}
-                          className={`border-b border-gray-100 ${idx % 2 === 0 ? 'bg-white' : 'bg-teal-50/40'} hover:bg-teal-50 transition-colors`}
+                          className={`border-b border-[#f3f4f6] ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]/40'} hover:bg-[#f5f2f1] transition-colors`}
                         >
-                          <td className="px-4 py-3 text-sm text-gray-400">{(page - 1) * 25 + idx + 1}</td>
+                          <td className="px-4 py-3 text-sm text-[#9ca3af]">{(page - 1) * 25 + idx + 1}</td>
                           <td className="px-4 py-3 text-sm">{formatDate(payment.createdAt)}</td>
                           <td className="px-4 py-3 text-sm font-medium">{payment.batchName || '—'}</td>
                           <td className="px-4 py-3 text-sm">{payment.batchMonth || '—'}</td>
-                          <td className="px-4 py-3 text-sm text-right font-bold text-teal-700">{formatCurrency(payment.totalCreditReceived)}</td>
+                          <td className="px-4 py-3 text-sm text-right font-bold text-[#516057]">{formatCurrency(payment.totalCreditReceived)}</td>
                           <td className="px-4 py-3 text-sm text-right text-amber-700">
                             {formatCurrency(payment.companyFee)}
-                            <span className="text-gray-400 ml-1">({payment.companyFeePercent}%)</span>
+                            <span className="text-[#9ca3af] ml-1">({payment.companyFeePercent}%)</span>
                           </td>
-                          {/* <td className="px-4 py-3 text-sm text-right text-gray-600">
+                          {/* <td className="px-4 py-3 text-sm text-right text-[#505454]">
                             {payment.gpoShare > 0 ? (
                               <>
                                 {formatCurrency(payment.gpoShare)}
-                                {payment.gpoName && <span className="text-gray-400 ml-1 block text-[10px]">{payment.gpoName}</span>}
+                                {payment.gpoName && <span className="text-[#9ca3af] ml-1 block text-[10px]">{payment.gpoName}</span>}
                               </>
                             ) : '—'}
                           </td> */}
-                          <td className="px-4 py-3 text-sm text-right font-bold text-emerald-700">{formatCurrency(payment.pharmacyPayout)}</td>
+                          <td className="px-4 py-3 text-sm text-right font-bold text-[#516057]">{formatCurrency(payment.pharmacyPayout)}</td>
                           <td className="px-4 py-3 text-sm capitalize">{payment.paymentMethod || '—'}</td>
-                          <td className="px-4 py-3 text-sm font-mono text-gray-500">{payment.paymentReference || '—'}</td>
+                          <td className="px-4 py-3 text-sm font-mono text-[#6b7280]">{payment.paymentReference || '—'}</td>
                           <td className="px-4 py-3 text-sm">{payment.paidAt ? formatDate(payment.paidAt) : '—'}</td>
                           <td className="px-4 py-3 text-sm">
                             <Badge
@@ -313,19 +313,19 @@ export default function CreditStatementPage() {
                       ))}
                     </tbody>
                     {/* Totals Row */}
-                    <tfoot className="bg-gradient-to-r from-teal-50 to-cyan-50 border-t-2 border-teal-300">
+                    <tfoot className="bg-[#f5f2f1] border-t-2 border-[#e2e2e2]">
                       <tr className="font-bold">
                         <td className="px-4 py-3 text-sm" colSpan={4}>Statement Total</td>
-                        <td className="px-4 py-3 text-sm text-right text-teal-800">
+                        <td className="px-4 py-3 text-sm text-right text-[#505454]">
                           {formatCurrency(payments.reduce((s, p) => s + p.totalCreditReceived, 0))}
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-amber-800">
                           {formatCurrency(payments.reduce((s, p) => s + p.companyFee, 0))}
                         </td>
-                        <td className="px-4 py-3 text-sm text-right text-gray-700">
+                        <td className="px-4 py-3 text-sm text-right text-[#505454]">
                           {formatCurrency(payments.reduce((s, p) => s + p.gpoShare, 0))}
                         </td>
-                        <td className="px-4 py-3 text-sm text-right text-emerald-800">
+                        <td className="px-4 py-3 text-sm text-right text-[#505454]">
                           {formatCurrency(payments.reduce((s, p) => s + p.pharmacyPayout, 0))}
                         </td>
                         <td className="px-4 py-3 text-sm" colSpan={4}></td>
@@ -337,7 +337,7 @@ export default function CreditStatementPage() {
                 {/* Pagination */}
                 {totalPages > 1 && (
                   <div className="flex items-center justify-between mt-4">
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-[#6b7280]">
                       Page {page} of {totalPages} ({total} total records)
                     </p>
                     <div className="flex gap-1">

@@ -202,7 +202,7 @@ export default function UnpaidMemosPage() {
                     addToast(`Amount auto-calculated: ${fmt(result.data.totalAmount)} (${result.data.lineItemsCount} NDCs matched)`, 'success');
                 } else {
                     setPaymentAmount('0'); // Reset to 0 if no amount calculated
-                    addToast(`Could not calculate amount from credit memo: ${result.data.errorMessage || 'No matching NDCs found'}`, 'warning');
+                    addToast(`Credit memo uploaded successfully. No NDC matches were found automatically — please enter the payment amount manually.`, 'warning');
                     setIsAmountAutoCalculated(false);
                 }
             } catch (error: any) {
@@ -257,6 +257,7 @@ export default function UnpaidMemosPage() {
                 setPaymentMemo(null);
                 setCreditMemoFile(null);
                 dispatch(fetchUnpaidMemos({ search: debouncedSearch || undefined, destination: destination || undefined, page }));
+                dispatch(fetchPaidMemos({ search: debouncedPaidSearch || undefined, destination: paidDestination || undefined, page: paidPage }));
             }
         }
     };

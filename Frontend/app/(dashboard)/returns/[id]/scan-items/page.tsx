@@ -150,18 +150,18 @@ export default function PharmacyScanItemsPage() {
     <DashboardLayout>
       <div className="max-w-3xl mx-auto space-y-3">
         <div>
-          <h1 className="text-lg font-bold text-gray-900">Scan Items</h1>
-          <p className="text-xs text-gray-500">Add scanned items and classify non-returnables into Wine Cellar or Destruction.</p>
+          <h1 className="text-lg font-bold text-[#000000]">Scan Items</h1>
+          <p className="text-xs text-[#6b7280]">Add scanned items and classify non-returnables into Wine Cellar or Destruction.</p>
         </div>
-        <div className="bg-white rounded-lg border p-3 space-y-2">
-          <label className="text-xs text-gray-600">Barcode Scan Data</label>
+        <div className="bg-white rounded-[4px] border p-3 space-y-2">
+          <label className="text-xs text-[#505454]">Barcode Scan Data</label>
           <div className="flex gap-2">
-            <input className="flex-1 border rounded px-2 py-1.5 text-xs" value={scanData} onChange={(e) => setScanData(e.target.value)} />
+            <input className="flex-1 border border-[#e2e2e2] rounded-[4px] px-2 py-1.5 text-xs" value={scanData} onChange={(e) => setScanData(e.target.value)} />
             <Button variant="outline" onClick={onScan} disabled={loadingScan}>{loadingScan ? <Loader2 className="w-4 h-4 animate-spin" /> : <><ScanLine className="w-4 h-4 mr-1" />Parse</>}</Button>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border p-3 space-y-3">
+        <div className="bg-white rounded-[4px] border p-3 space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <Input label="NDC" value={form.ndc} onChange={(v) => setForm((f) => ({ ...f, ndc: v }))} />
             <Input label="Product Name" value={form.productName} onChange={(v) => setForm((f) => ({ ...f, productName: v }))} />
@@ -174,7 +174,7 @@ export default function PharmacyScanItemsPage() {
           </div>
 
           <div className="space-y-1">
-            <label className="block text-xs text-gray-600">Return Status</label>
+            <label className="block text-xs text-[#505454]">Return Status</label>
             <div className="flex gap-3 text-xs">
               <label><input type="radio" checked={status === 'returnable'} onChange={() => setStatus('returnable')} /> Returnable</label>
               <label><input type="radio" checked={status === 'non_returnable'} onChange={() => setStatus('non_returnable')} /> Non-returnable</label>
@@ -189,11 +189,11 @@ export default function PharmacyScanItemsPage() {
           {status === 'non_returnable' && (
             <>
               <div className="grid grid-cols-2 gap-2">
-                <label className={`border rounded px-2 py-2 text-xs flex items-center gap-1 cursor-pointer ${route === 'wine_cellar' ? 'bg-purple-50 border-purple-300' : 'bg-white'}`}>
+                <label className={`border border-[#e2e2e2] rounded-[4px] px-2 py-2 text-xs flex items-center gap-1 cursor-pointer ${route === 'wine_cellar' ? 'bg-purple-50 border-purple-300' : 'bg-white'}`}>
                   <input type="radio" checked={route === 'wine_cellar'} onChange={() => setRoute('wine_cellar')} />
                   <Archive className="w-3.5 h-3.5 text-purple-600" /> Wine Cellar
                 </label>
-                <label className={`border rounded px-2 py-2 text-xs flex items-center gap-1 cursor-pointer ${route === 'destruction' ? 'bg-red-50 border-red-300' : 'bg-white'}`}>
+                <label className={`border border-[#e2e2e2] rounded-[4px] px-2 py-2 text-xs flex items-center gap-1 cursor-pointer ${route === 'destruction' ? 'bg-red-50 border-red-300' : 'bg-white'}`}>
                   <input type="radio" checked={route === 'destruction'} onChange={() => setRoute('destruction')} />
                   <AlertTriangle className="w-3.5 h-3.5 text-red-600" /> Destruction
                 </label>
@@ -202,8 +202,8 @@ export default function PharmacyScanItemsPage() {
                 <Input type="date" label="Expected Returnable Date" value={expectedDate} onChange={setExpectedDate} />
               )}
               <div>
-                <label className="block text-xs text-gray-600 mb-1">Reason</label>
-                <select className="w-full border rounded px-2 py-1.5 text-xs" value={reason} onChange={(e) => setReason(e.target.value)}>
+                <label className="block text-xs text-[#505454] mb-1">Reason</label>
+                <select className="w-full border border-[#e2e2e2] rounded-[4px] px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#516057]" value={reason} onChange={(e) => setReason(e.target.value)}>
                   <option value="">— Select Reason —</option>
                   <option value="date">Date</option>
                   <option value="policy">Policy</option>
@@ -236,9 +236,9 @@ function Input(props: {
 }) {
   return (
     <div>
-      <label className="block text-xs text-gray-600 mb-1">{props.label}</label>
+      <label className="block text-xs text-[#505454] mb-1">{props.label}</label>
       <input
-        className="w-full border rounded px-2 py-1.5 text-xs"
+        className="w-full border border-[#e2e2e2] rounded-[4px] px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#516057]"
         type={props.type || 'text'}
         step={props.step}
         value={props.value}

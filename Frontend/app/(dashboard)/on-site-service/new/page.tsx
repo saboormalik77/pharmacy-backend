@@ -57,7 +57,7 @@ export default function NewServiceRequestPage() {
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="flex flex-col items-center gap-3">
-            <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+            <Loader2 className="h-8 w-8 animate-spin text-[#516057]" />
             <p className="text-sm text-muted-foreground">Loading...</p>
           </div>
         </div>
@@ -71,7 +71,7 @@ export default function NewServiceRequestPage() {
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="flex flex-col items-center gap-3">
-            <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+            <Loader2 className="h-8 w-8 animate-spin text-[#516057]" />
             <p className="text-sm text-muted-foreground">Loading permissions...</p>
           </div>
         </div>
@@ -86,10 +86,10 @@ export default function NewServiceRequestPage() {
         <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
           <AlertCircle className="h-12 w-12 text-orange-500 mb-4" />
           <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
-          <p className="text-gray-600 mb-4">
+          <p className="text-[#505454] mb-4">
             You don't have permission to create on-site service requests.
           </p>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm text-[#6b7280] mb-4">
             Please contact your administrator to request access.
           </p>
           <Button 
@@ -154,7 +154,7 @@ export default function NewServiceRequestPage() {
               </Button>
             </div>
             <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <Truck className="w-6 h-6 text-teal-600" />
+              <Truck className="w-6 h-6 text-[#516057]" />
               Request On-Site Service
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
@@ -200,7 +200,7 @@ export default function NewServiceRequestPage() {
                   <select
                     value={branchId}
                     onChange={(e) => setBranchId(e.target.value)}
-                    className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    className="w-full h-10 rounded-[4px] border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#516057]"
                   >
                     <option value="">Main pharmacy</option>
                     {branches.map((b) => (
@@ -225,7 +225,7 @@ export default function NewServiceRequestPage() {
                   onChange={(e) => setSpecialInstructions(e.target.value)}
                   rows={6}
                   maxLength={2000}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+                  className="w-full rounded-[4px] border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#516057] resize-none"
                   placeholder="e.g., Access hours, parking notes, contact person, preferred time of day..."
                 />
                 <div className="flex items-center justify-between mt-1">
@@ -240,7 +240,7 @@ export default function NewServiceRequestPage() {
 
               {/* Error Message */}
               {formError && (
-                <div className="flex items-center gap-2 p-3 rounded-md border border-red-200 bg-red-50 text-red-800 text-sm">
+                <div className="flex items-center gap-2 p-3 rounded-[4px] border border-red-200 bg-red-50 text-red-800 text-sm">
                   <AlertCircle className="w-4 h-4" /> {formError}
                 </div>
               )}
@@ -258,7 +258,7 @@ export default function NewServiceRequestPage() {
                 <Button
                   type="submit"
                   disabled={submitting}
-                  className="bg-teal-600 hover:bg-teal-700 text-white"
+                  className="bg-[#516057] hover:bg-[#505454] text-white"
                 >
                   {submitting ? (
                     <>
@@ -275,15 +275,15 @@ export default function NewServiceRequestPage() {
         </Card>
 
         {/* Info Card */}
-        <Card className="border-teal-200 bg-teal-50/60">
+        <Card className="border-[#e2e2e2] bg-[#f5f2f1]/60">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <div className="bg-teal-600 rounded-full p-1.5 flex-shrink-0">
+              <div className="bg-[#516057] rounded-full p-1.5 flex-shrink-0">
                 <AlertCircle className="w-4 h-4 text-white" />
               </div>
               <div>
-                <h3 className="font-semibold text-teal-900 text-sm mb-1">How This Works</h3>
-                <p className="text-sm text-teal-900">
+                <h3 className="font-semibold text-[#000000] text-sm mb-1">How This Works</h3>
+                <p className="text-sm text-[#000000]">
                   When you submit a request, it is automatically routed to every field representative assigned to your store. 
                   The first rep to claim and schedule it owns the visit. You'll receive an email once a rep confirms a date.
                 </p>

@@ -175,11 +175,11 @@ function SubscriptionContent() {
 
   const getPlanColor = (planId: string) => {
     switch (planId) {
-      case 'free': return 'border-gray-200 bg-gray-50';
+      case 'free': return 'border-[#e2e2e2] bg-[#f5f2f1]';
       case 'basic': return 'border-blue-200 bg-blue-50';
-      case 'premium': return 'border-teal-200 bg-teal-50';
+      case 'premium': return 'border-[#e2e2e2] bg-[#f5f2f1]';
       case 'enterprise': return 'border-purple-200 bg-purple-50';
-      default: return 'border-gray-200 bg-gray-50';
+      default: return 'border-[#e2e2e2] bg-[#f5f2f1]';
     }
   };
 
@@ -195,31 +195,31 @@ function SubscriptionContent() {
       <PermissionGuard permission="subscription:view">
       <div className="space-y-3 sm:space-y-4">
         {/* Header */}
-        <div className="flex items-center justify-between p-3 sm:p-4 rounded-lg bg-gradient-to-r from-teal-50 via-cyan-50 to-teal-50 border-2 border-teal-200">
+        <div className="flex items-center justify-between p-3 sm:p-4 rounded-[4px] bg-[#f5f2f1] border-2 border-[#e2e2e2]">
           <div>
-            <h1 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">Subscription & Billing</h1>
-            <p className="text-xs sm:text-sm text-gray-600 mt-0.5">Manage your subscription and payment methods</p>
+            <h1 className="text-base sm:text-lg md:text-xl font-bold text-[#000000]">Subscription & Billing</h1>
+            <p className="text-xs sm:text-sm text-[#505454] mt-0.5">Manage your subscription and payment methods</p>
           </div>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="p-2 sm:p-3 bg-red-50 border border-red-200 rounded-lg">
+          <div className="p-2 sm:p-3 bg-red-50 border border-red-200 rounded-[4px]">
             <p className="text-xs sm:text-sm text-red-600 break-words">{error}</p>
           </div>
         )}
 
         {/* Current Subscription */}
         {loading ? (
-          <Card className="border-2 border-teal-200">
+          <Card className="border-2 border-[#e2e2e2]">
             <CardContent className="p-6">
               <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-teal-600" />
+                <Loader2 className="h-6 w-6 animate-spin text-[#516057]" />
               </div>
             </CardContent>
           </Card>
         ) : subscription && currentPlan ? (
-          <Card className="border-2 border-teal-200">
+          <Card className="border-2 border-[#e2e2e2]">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
@@ -236,21 +236,21 @@ function SubscriptionContent() {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-                  <div className={`p-3 sm:p-4 rounded-lg ${getPlanColor(currentPlan.id)} flex-shrink-0 self-start sm:self-auto`}>
+                  <div className={`p-3 sm:p-4 rounded-[4px] ${getPlanColor(currentPlan.id)} flex-shrink-0 self-start sm:self-auto`}>
                     {(() => {
                       const Icon = getPlanIcon(currentPlan.id);
-                      return <Icon className="h-6 w-6 sm:h-8 sm:w-8 text-teal-600" />;
+                      return <Icon className="h-6 w-6 sm:h-8 sm:w-8 text-[#516057]" />;
                     })()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-lg sm:text-xl font-bold">{currentPlan.name} Plan</h3>
-                    <p className="text-xs sm:text-sm text-gray-600">
+                    <p className="text-xs sm:text-sm text-[#505454]">
                       {subscription.price ? formatCurrency(subscription.price) : 'Free'}/{subscription.billingInterval === 'monthly' ? 'month' : 'year'}
                     </p>
                   </div>
                   {subscription.currentPeriodEnd && (
                     <div className="text-left sm:text-right">
-                      <p className="text-xs text-gray-600">Next billing date</p>
+                      <p className="text-xs text-[#505454]">Next billing date</p>
                       <p className="text-sm font-semibold">{formatDate(subscription.currentPeriodEnd)}</p>
                     </div>
                   )}
@@ -259,7 +259,7 @@ function SubscriptionContent() {
                 {/* Plan Features */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs font-medium text-gray-600 mb-2">Plan Features</p>
+                    <p className="text-xs font-medium text-[#505454] mb-2">Plan Features</p>
                     <ul className="space-y-1">
                       {currentPlan.features.slice(0, 4).map((feature, idx) => (
                         <li key={idx} className="flex items-start gap-2 text-xs">
@@ -270,7 +270,7 @@ function SubscriptionContent() {
                     </ul>
                   </div>
                   <div>
-                    <p className="text-xs font-medium text-gray-600 mb-2">Limits</p>
+                    <p className="text-xs font-medium text-[#505454] mb-2">Limits</p>
                     <div className="space-y-1 text-xs">
                       <div className="flex justify-between">
                         <span>Documents:</span>
@@ -294,15 +294,15 @@ function SubscriptionContent() {
 
                 {/* Payment Method */}
                 {subscription.paymentMethod && (
-                  <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="p-3 bg-[#f5f2f1] rounded-[4px] border border-[#e2e2e2]">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0">
-                        <CreditCard className="h-5 w-5 text-gray-600 flex-shrink-0" />
+                        <CreditCard className="h-5 w-5 text-[#505454] flex-shrink-0" />
                         <div className="min-w-0">
                           <p className="text-sm font-medium truncate">
                             {subscription.paymentMethod.brand} •••• {subscription.paymentMethod.last4}
                           </p>
-                          <p className="text-xs text-gray-600">
+                          <p className="text-xs text-[#505454]">
                             Expires {subscription.paymentMethod.expiryMonth}/{subscription.paymentMethod.expiryYear}
                           </p>
                         </div>
@@ -364,24 +364,24 @@ function SubscriptionContent() {
         {/* Available Plans */}
         <div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
-            <h2 className="text-base sm:text-lg font-bold text-gray-900">Available Plans</h2>
-            <div className="flex gap-2 bg-gray-100 p-1 rounded-lg self-start sm:self-auto">
+            <h2 className="text-base sm:text-lg font-bold text-[#000000]">Available Plans</h2>
+            <div className="flex gap-2 bg-[#f5f2f1] p-1 rounded-[4px] self-start sm:self-auto">
               <button
                 onClick={() => setBillingInterval('monthly')}
-                className={`px-3 py-1.5 text-xs sm:text-sm rounded-lg transition-colors ${
+                className={`px-3 py-1.5 text-xs sm:text-sm rounded-[4px] transition-colors ${
                   billingInterval === 'monthly'
-                    ? 'bg-teal-600 text-white shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-[#516057] text-white shadow-sm'
+                    : 'text-[#505454] hover:text-[#000000]'
                 }`}
               >
                 Monthly
               </button>
               <button
                 onClick={() => setBillingInterval('yearly')}
-                className={`px-3 py-1.5 text-xs sm:text-sm rounded-lg transition-colors ${
+                className={`px-3 py-1.5 text-xs sm:text-sm rounded-[4px] transition-colors ${
                   billingInterval === 'yearly'
-                    ? 'bg-teal-600 text-white shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-[#516057] text-white shadow-sm'
+                    : 'text-[#505454] hover:text-[#000000]'
                 }`}
               >
                 Yearly
@@ -391,10 +391,10 @@ function SubscriptionContent() {
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {[1, 2, 3, 4].map((i) => (
-                <Card key={i} className="border-2 border-gray-200">
+                <Card key={i} className="border-2 border-[#e2e2e2]">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-center py-12">
-                      <Loader2 className="h-6 w-6 animate-spin text-teal-600" />
+                      <Loader2 className="h-6 w-6 animate-spin text-[#516057]" />
                     </div>
                   </CardContent>
                 </Card>
@@ -412,24 +412,24 @@ function SubscriptionContent() {
                     key={plan.id}
                     className={`border-2 ${
                       isCurrentPlan
-                        ? 'border-teal-500 bg-teal-50'
+                        ? 'border-[#e2e2e2] bg-[#f5f2f1]'
                         : getPlanColor(plan.id)
                     }`}
                   >
                   <CardHeader>
                     <div className="flex items-center gap-2 sm:gap-3 mb-2">
-                      <div className={`p-2 rounded-lg flex-shrink-0 ${
-                        isCurrentPlan ? 'bg-teal-100' : 'bg-gray-100'
+                      <div className={`p-2 rounded-[4px] flex-shrink-0 ${
+                        isCurrentPlan ? 'bg-[#f5f2f1]' : 'bg-[#f5f2f1]'
                       }`}>
                         <Icon className={`h-5 w-5 sm:h-6 sm:w-6 ${
-                          isCurrentPlan ? 'text-teal-600' : 'text-gray-600'
+                          isCurrentPlan ? 'text-[#516057]' : 'text-[#505454]'
                         }`} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <CardTitle className="text-sm sm:text-base">{plan.name}</CardTitle>
                         <p className="text-xl sm:text-2xl font-bold mt-1">
                           {price === 0 ? 'Free' : formatCurrency(price)}
-                          {price > 0 && <span className="text-xs sm:text-sm font-normal text-gray-600">/{billingInterval === 'monthly' ? 'mo' : 'yr'}</span>}
+                          {price > 0 && <span className="text-xs sm:text-sm font-normal text-[#505454]">/{billingInterval === 'monthly' ? 'mo' : 'yr'}</span>}
                         </p>
                       </div>
                     </div>
@@ -447,10 +447,10 @@ function SubscriptionContent() {
                       ))}
                     </ul>
                     <Button
-                      className={`w-full text-sm sm:text-base rounded-lg ${
+                      className={`w-full text-sm sm:text-base rounded-[4px] ${
                         isCurrentPlan
-                          ? 'bg-gray-200 text-gray-600 cursor-not-allowed'
-                          : 'bg-teal-600 hover:bg-teal-700 text-white'
+                          ? 'bg-[#e2e2e2] text-[#505454] cursor-not-allowed'
+                          : 'bg-[#516057] hover:bg-[#505454] text-white'
                       }`}
                       disabled={isCurrentPlan || processing !== null}
                       onClick={() => handleSelectPlan(plan.id)}
@@ -482,24 +482,24 @@ function SubscriptionContent() {
             <CardDescription className="text-xs sm:text-sm">Configure automatic data collection</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 bg-[#f5f2f1] rounded-[4px] border border-[#e2e2e2]">
               <div className="flex items-center gap-3 min-w-0">
                 <Mail className="h-5 w-5 text-blue-600 flex-shrink-0" />
                 <div className="min-w-0">
                   <p className="text-sm font-medium">Email Integration</p>
-                  <p className="text-xs text-gray-600">Forward emails from reverse distributors</p>
+                  <p className="text-xs text-[#505454]">Forward emails from reverse distributors</p>
                 </div>
               </div>
               <Button variant="outline" size="sm" className="w-full sm:w-auto">
                 Configure
               </Button>
             </div>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 bg-[#f5f2f1] rounded-[4px] border border-[#e2e2e2]">
               <div className="flex items-center gap-3 min-w-0">
                 <Globe className="h-5 w-5 text-blue-600 flex-shrink-0" />
                 <div className="min-w-0">
                   <p className="text-sm font-medium">Portal Auto-Fetch</p>
-                  <p className="text-xs text-gray-600">Automatically fetch from distributor portals</p>
+                  <p className="text-xs text-[#505454]">Automatically fetch from distributor portals</p>
                 </div>
               </div>
               <Button variant="outline" size="sm" className="w-full sm:w-auto">
@@ -521,7 +521,7 @@ export default function SubscriptionPage() {
       <DashboardLayout>
         <PermissionGuard permission="subscription:view">
         <div className="flex items-center justify-center min-h-[400px]">
-          <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#516057]" />
         </div>
         </PermissionGuard>
       </DashboardLayout>

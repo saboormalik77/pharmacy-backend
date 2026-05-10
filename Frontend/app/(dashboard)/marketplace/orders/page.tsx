@@ -74,12 +74,12 @@ export default function OrdersPage() {
       case 'shipped':
         return 'bg-blue-100 text-black dark:bg-blue-900/30 dark:text-black'
       case 'delivered':
-        return 'bg-teal-100 text-black dark:bg-teal-900/30 dark:text-black'
+        return 'bg-[#f5f2f1] text-black dark:bg-[#516057]/30 dark:text-black'
       case 'cancelled':
       case 'refunded':
         return 'bg-red-100 text-black dark:bg-red-900/30 dark:text-black'
       default:
-        return 'bg-gray-100 text-black dark:bg-gray-900/30 dark:text-black'
+        return 'bg-[#f5f2f1] text-black dark:bg-gray-900/30 dark:text-black'
     }
   }
 
@@ -97,7 +97,7 @@ export default function OrdersPage() {
       <div className="flex items-center gap-4 mb-8">
         <button
           onClick={() => router.push('/marketplace')}
-          className="p-2 hover:bg-muted rounded-lg transition-colors"
+          className="p-2 hover:bg-muted rounded-[4px] transition-colors"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
@@ -117,7 +117,7 @@ export default function OrdersPage() {
               setStatusFilter(e.target.value)
               setCurrentPage(1)
             }}
-            className="w-full pl-10 pr-4 py-2.5 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-teal-500 appearance-none cursor-pointer"
+            className="w-full pl-10 pr-4 py-2.5 border rounded-[4px] bg-background focus:outline-none focus:ring-2 focus:ring-[#516057] appearance-none cursor-pointer"
           >
             {STATUS_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -130,7 +130,7 @@ export default function OrdersPage() {
 
       {/* Error */}
       {error && (
-        <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-start gap-3">
+        <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-[4px] flex items-start gap-3">
           <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-medium text-destructive">{error}</p>
@@ -141,7 +141,7 @@ export default function OrdersPage() {
       {/* Loading */}
       {isLoading ? (
         <div className="py-16 text-center">
-          <Loader2 className="h-10 w-10 animate-spin text-teal-600 mx-auto mb-4" />
+          <Loader2 className="h-10 w-10 animate-spin text-[#516057] mx-auto mb-4" />
           <p className="text-muted-foreground">Loading orders...</p>
         </div>
       ) : orders.length === 0 ? (
@@ -156,7 +156,7 @@ export default function OrdersPage() {
           </p>
           <button
             onClick={() => router.push('/marketplace')}
-            className="px-6 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium transition-all"
+            className="px-6 py-2.5 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] font-medium transition-all"
           >
             Browse Marketplace
           </button>
@@ -220,7 +220,7 @@ export default function OrdersPage() {
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="px-4 py-2 border rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="px-4 py-2 border rounded-[4px] hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 Previous
               </button>
@@ -230,7 +230,7 @@ export default function OrdersPage() {
               <button
                 onClick={() => setCurrentPage(p => Math.min(pagination.totalPages, p + 1))}
                 disabled={currentPage === pagination.totalPages}
-                className="px-4 py-2 border rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="px-4 py-2 border rounded-[4px] hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 Next
               </button>

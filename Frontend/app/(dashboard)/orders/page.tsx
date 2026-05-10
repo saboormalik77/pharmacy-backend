@@ -36,11 +36,11 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.C
   pending: { label: 'Pending', color: 'bg-amber-100 text-black dark:bg-amber-900/30 dark:text-black', icon: Clock },
   processing: { label: 'Processing', color: 'bg-blue-100 text-black dark:bg-blue-900/30 dark:text-black', icon: RefreshCw },
   paid: { label: 'Paid', color: 'bg-green-100 text-black dark:bg-green-900/30 dark:text-black', icon: CreditCard },
-  confirmed: { label: 'Confirmed', color: 'bg-teal-100 text-black dark:bg-teal-900/30 dark:text-black', icon: CheckCircle2 },
+  confirmed: { label: 'Confirmed', color: 'bg-[#f5f2f1] text-black dark:bg-[#516057]/30 dark:text-black', icon: CheckCircle2 },
   shipped: { label: 'Shipped', color: 'bg-purple-100 text-black dark:bg-purple-900/30 dark:text-black', icon: Truck },
-  delivered: { label: 'Delivered', color: 'bg-emerald-100 text-black dark:bg-emerald-900/30 dark:text-black', icon: Package },
+  delivered: { label: 'Delivered', color: 'bg-[#f5f2f1] text-black dark:bg-[#516057]/30 dark:text-black', icon: Package },
   cancelled: { label: 'Cancelled', color: 'bg-red-100 text-black dark:bg-red-900/30 dark:text-black', icon: XCircle },
-  refunded: { label: 'Refunded', color: 'bg-gray-100 text-black dark:bg-gray-900/30 dark:text-black', icon: Ban },
+  refunded: { label: 'Refunded', color: 'bg-[#f5f2f1] text-black dark:bg-gray-900/30 dark:text-black', icon: Ban },
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -159,7 +159,7 @@ export default function OrdersPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-lg sm:text-xl font-bold flex items-center gap-2">
-              <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-teal-600" />
+              <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-[#516057]" />
               My Orders
             </h1>
             <p className="text-xs text-muted-foreground mt-1">
@@ -169,7 +169,7 @@ export default function OrdersPage() {
           {/* <button
             onClick={() => fetchOrders()}
             disabled={isLoading}
-            className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 transition-all shadow-sm font-medium text-sm"
+            className="flex items-center gap-2 px-4 py-2 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] disabled:opacity-50 transition-all shadow-sm font-medium text-sm"
           >
             <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
             Refresh
@@ -178,27 +178,27 @@ export default function OrdersPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-          <div className="p-2 rounded-lg border-2 border-teal-200 bg-gradient-to-br from-teal-50 to-teal-100 hover:from-teal-100 hover:to-teal-200 transition-all cursor-pointer shadow-sm hover:shadow-md">
+          <div className="p-2 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1] hover:bg-[var(--surface-container)] transition-all cursor-pointer shadow-sm hover:shadow-md">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1">
-                <ShoppingBag className="h-3 w-3 text-teal-600" />
-                <p className="text-[10px] sm:text-xs text-teal-700 font-medium">Total Orders</p>
+                <ShoppingBag className="h-3 w-3 text-[#516057]" />
+                <p className="text-[10px] sm:text-xs text-[#516057] font-medium">Total Orders</p>
               </div>
-              <p className="text-sm sm:text-base font-bold text-teal-900 whitespace-nowrap">{stats.totalOrders}</p>
+              <p className="text-sm sm:text-base font-bold text-[#000000] whitespace-nowrap">{stats.totalOrders}</p>
             </div>
           </div>
 
-          <div className="p-2 rounded-lg border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 hover:from-emerald-100 hover:to-emerald-200 transition-all cursor-pointer shadow-sm hover:shadow-md">
+          <div className="p-2 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1] hover:bg-[var(--surface-container)] transition-all cursor-pointer shadow-sm hover:shadow-md">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1">
-                <DollarSign className="h-3 w-3 text-emerald-600" />
-                <p className="text-[10px] sm:text-xs text-emerald-700 font-medium">Total Spent</p>
+                <DollarSign className="h-3 w-3 text-[#516057]" />
+                <p className="text-[10px] sm:text-xs text-[#516057] font-medium">Total Spent</p>
               </div>
-              <p className="text-sm sm:text-base font-bold text-emerald-900 whitespace-nowrap">{formatCurrency(stats.totalSpent)}</p>
+              <p className="text-sm sm:text-base font-bold text-[#000000] whitespace-nowrap">{formatCurrency(stats.totalSpent)}</p>
             </div>
           </div>
 
-          <div className="p-2 rounded-lg border-2 border-violet-200 bg-gradient-to-br from-violet-50 to-violet-100 hover:from-violet-100 hover:to-violet-200 transition-all cursor-pointer shadow-sm hover:shadow-md">
+          <div className="p-2 rounded-[4px] border-2 border-violet-200 bg-gradient-to-br from-violet-50 to-violet-100 hover:from-violet-100 hover:to-violet-200 transition-all cursor-pointer shadow-sm hover:shadow-md">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1">
                 <TrendingUp className="h-3 w-3 text-violet-600" />
@@ -208,7 +208,7 @@ export default function OrdersPage() {
             </div>
           </div>
 
-          <div className="p-2 rounded-lg border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100 hover:from-amber-100 hover:to-amber-200 transition-all cursor-pointer shadow-sm hover:shadow-md">
+          <div className="p-2 rounded-[4px] border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100 hover:from-amber-100 hover:to-amber-200 transition-all cursor-pointer shadow-sm hover:shadow-md">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1">
                 <Clock className="h-3 w-3 text-amber-600" />
@@ -228,7 +228,7 @@ export default function OrdersPage() {
               placeholder="Search by order number..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-10 pl-10 pr-4 text-sm border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
+              className="w-full h-10 pl-10 pr-4 text-sm border rounded-[4px] bg-background focus:outline-none focus:ring-2 focus:ring-[#516057]/20 focus:border-[#e2e2e2]"
             />
           </div>
         </div>
@@ -244,7 +244,7 @@ export default function OrdersPage() {
         {/* Loading State */}
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <Loader2 className="h-10 w-10 animate-spin text-teal-600 mb-4" />
+            <Loader2 className="h-10 w-10 animate-spin text-[#516057] mb-4" />
             <p className="text-muted-foreground">Loading orders...</p>
           </div>
         ) : filteredOrders.length === 0 ? (
@@ -263,7 +263,7 @@ export default function OrdersPage() {
               </p>
               <button
                 onClick={() => router.push('/marketplace')}
-                className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-all font-medium text-xs"
+                className="px-4 py-2 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] transition-all font-medium text-xs"
               >
                 Browse Marketplace
               </button>
@@ -285,7 +285,7 @@ export default function OrdersPage() {
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                         <div>
                           <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-base font-bold text-teal-600">{order.orderNumber}</h3>
+                            <h3 className="text-base font-bold text-[#516057]">{order.orderNumber}</h3>
                             <StatusBadge status={order.status} />
                           </div>
                           <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
@@ -309,7 +309,7 @@ export default function OrdersPage() {
                         <div className="text-right">
                           <p className="text-lg font-bold">{formatCurrency(order.totalAmount)}</p>
                           {order.totalSavings > 0 && (
-                            <p className="text-xs text-emerald-600 font-medium flex items-center justify-end gap-1">
+                            <p className="text-xs text-[#516057] font-medium flex items-center justify-end gap-1">
                               <TrendingUp className="h-3 w-3" />
                               Saved {formatCurrency(order.totalSavings)}
                             </p>
@@ -319,8 +319,8 @@ export default function OrdersPage() {
                     </div>
                     
                     {/* Arrow */}
-                    <div className="hidden lg:flex items-center px-4 bg-muted/30 group-hover:bg-teal-50 dark:group-hover:bg-teal-950/30 transition-colors">
-                      <ChevronRight className="h-6 w-6 text-muted-foreground group-hover:text-teal-600 transition-colors" />
+                    <div className="hidden lg:flex items-center px-4 bg-muted/30 group-hover:bg-[#f5f2f1] dark:group-hover:bg-[#1d2222] transition-colors">
+                      <ChevronRight className="h-6 w-6 text-muted-foreground group-hover:text-[#516057] transition-colors" />
                     </div>
                   </div>
                 </CardContent>
@@ -335,7 +335,7 @@ export default function OrdersPage() {
             <button
               onClick={() => fetchOrders(pagination.page - 1)}
               disabled={pagination.page <= 1 || isLoading}
-              className="px-4 py-2 text-sm font-medium border rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-2 text-sm font-medium border rounded-[4px] hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Previous
             </button>
@@ -345,7 +345,7 @@ export default function OrdersPage() {
             <button
               onClick={() => fetchOrders(pagination.page + 1)}
               disabled={pagination.page >= pagination.totalPages || isLoading}
-              className="px-4 py-2 text-sm font-medium border rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-2 text-sm font-medium border rounded-[4px] hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Next
             </button>
@@ -366,14 +366,14 @@ export default function OrdersPage() {
               <div className="p-4 border-b bg-muted/30">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-base font-bold text-teal-600">{selectedOrder.orderNumber}</h2>
+                    <h2 className="text-base font-bold text-[#516057]">{selectedOrder.orderNumber}</h2>
                     <p className="text-xs text-muted-foreground mt-1">
                       Placed on {formatDate(selectedOrder.createdAt)}
                     </p>
                   </div>
                   <button
                     onClick={() => setSelectedOrder(null)}
-                    className="p-1.5 hover:bg-muted rounded-lg transition-colors"
+                    className="p-1.5 hover:bg-muted rounded-[4px] transition-colors"
                   >
                     <XCircle className="h-5 w-5 text-muted-foreground" />
                   </button>
@@ -384,7 +384,7 @@ export default function OrdersPage() {
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {isLoadingDetail ? (
                   <div className="flex items-center justify-center py-10">
-                    <Loader2 className="h-6 w-6 animate-spin text-teal-600" />
+                    <Loader2 className="h-6 w-6 animate-spin text-[#516057]" />
                   </div>
                 ) : (
                   <>
@@ -397,13 +397,13 @@ export default function OrdersPage() {
                     {selectedOrder.items && selectedOrder.items.length > 0 && (
                       <div>
                         <h3 className="text-sm font-semibold mb-2 flex items-center gap-1.5">
-                          <Package className="h-3 w-3 text-teal-600" />
+                          <Package className="h-3 w-3 text-[#516057]" />
                           Order Items
                         </h3>
                         <div className="space-y-2 max-h-[300px] overflow-y-auto">
                           {selectedOrder.items.map((item) => (
-                            <div key={item.id} className="flex gap-3 p-3 bg-muted/50 rounded-lg">
-                              <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                            <div key={item.id} className="flex gap-3 p-3 bg-muted/50 rounded-[4px]">
+                              <div className="w-12 h-12 bg-muted rounded-[4px] flex items-center justify-center overflow-hidden flex-shrink-0">
                                 <img
                                   src={item.imageUrl || `https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=128&h=128&fit=crop&q=80`}
                                   alt={item.productName}
@@ -425,7 +425,7 @@ export default function OrdersPage() {
                               <div className="text-right flex-shrink-0">
                                 <p className="font-bold text-sm">{formatCurrency(item.lineTotal)}</p>
                                 {item.lineSavings > 0 && (
-                                  <p className="text-[10px] text-emerald-600 font-medium">
+                                  <p className="text-[10px] text-[#516057] font-medium">
                                     Save {formatCurrency(item.lineSavings)}
                                   </p>
                                 )}
@@ -437,9 +437,9 @@ export default function OrdersPage() {
                     )}
 
                     {/* Order Summary */}
-                    <div className="bg-muted/30 rounded-lg p-3">
+                    <div className="bg-muted/30 rounded-[4px] p-3">
                       <h3 className="text-sm font-semibold mb-2 flex items-center gap-1.5">
-                        <Receipt className="h-3 w-3 text-teal-600" />
+                        <Receipt className="h-3 w-3 text-[#516057]" />
                         Order Summary
                       </h3>
                       <div className="space-y-1.5 text-xs">
@@ -448,7 +448,7 @@ export default function OrdersPage() {
                           <span className="font-medium">{formatCurrency(selectedOrder.subtotal)}</span>
                         </div>
                         {selectedOrder.totalSavings > 0 && (
-                          <div className="flex justify-between text-emerald-600">
+                          <div className="flex justify-between text-[#516057]">
                             <span>Total Savings</span>
                             <span className="font-medium">−{formatCurrency(selectedOrder.totalSavings)}</span>
                           </div>
@@ -459,7 +459,7 @@ export default function OrdersPage() {
                         </div>
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Shipping</span>
-                          <span className="font-medium text-emerald-600">
+                          <span className="font-medium text-[#516057]">
                             {selectedOrder.shippingAmount === 0 ? 'Free' : formatCurrency(selectedOrder.shippingAmount)}
                           </span>
                         </div>
@@ -472,14 +472,14 @@ export default function OrdersPage() {
                         <div className="h-px bg-border my-1.5" />
                         <div className="flex justify-between text-sm font-bold">
                           <span>Total</span>
-                          <span className="text-teal-600">{formatCurrency(selectedOrder.totalAmount)}</span>
+                          <span className="text-[#516057]">{formatCurrency(selectedOrder.totalAmount)}</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Payment Info */}
                     {selectedOrder.paymentMethodBrand && (
-                      <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-[4px]">
                         <CreditCard className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-xs capitalize">{selectedOrder.paymentMethodBrand}</p>
@@ -496,7 +496,7 @@ export default function OrdersPage() {
 
                     {/* Notes */}
                     {selectedOrder.notes && (
-                      <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                      <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-[4px] border border-amber-200 dark:border-amber-800">
                         <p className="text-xs text-amber-800 dark:text-amber-200">{selectedOrder.notes}</p>
                       </div>
                     )}
@@ -512,7 +512,7 @@ export default function OrdersPage() {
                       href={selectedOrder.stripeReceiptUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border rounded-lg hover:bg-muted transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border rounded-[4px] hover:bg-muted transition-colors"
                     >
                       <Receipt className="h-3 w-3" />
                       View Receipt
@@ -521,7 +521,7 @@ export default function OrdersPage() {
                   {/* {['pending', 'processing'].includes(selectedOrder.status) && (
                     <button
                       onClick={() => handleCancelOrder(selectedOrder.id)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-destructive border border-destructive/30 rounded-lg hover:bg-destructive/10 transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-destructive border border-destructive/30 rounded-[4px] hover:bg-destructive/10 transition-colors"
                     >
                       <XCircle className="h-3 w-3" />
                       Cancel Order
@@ -530,7 +530,7 @@ export default function OrdersPage() {
                 </div>
                 <button
                   onClick={() => setSelectedOrder(null)}
-                  className="px-3 py-1.5 text-xs font-medium bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+                  className="px-3 py-1.5 text-xs font-medium bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] transition-colors"
                 >
                   Close
                 </button>

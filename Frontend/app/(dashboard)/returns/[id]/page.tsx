@@ -8,6 +8,7 @@ import {
     ArrowLeft, Loader2, AlertCircle, X, Play, CheckCircle, Lock,
     Trash2, Edit, ClipboardList, Building2, Package, Truck,
     Plus, Search, ScanLine, FileText, Download, AlertTriangle, Printer, QrCode,
+    ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
@@ -125,6 +126,9 @@ function getStatusBadge(status: string): { variant: 'success' | 'warning' | 'err
     }
 }
 
+/** Products table on return detail — rows per page */
+const RETURN_DETAIL_ITEMS_PAGE_SIZE = 6;
+
 function getItemStatusBadge(status: string): { variant: 'success' | 'warning' | 'error' | 'info' | 'default'; label: string } {
     switch (status) {
         case 'returnable': return { variant: 'success', label: 'Returnable' };
@@ -170,6 +174,7 @@ export default function ReturnDetailPage() {
     const [itemSearch, setItemSearch] = useState('');
     const [itemStatusFilter, setItemStatusFilter] = useState('');
     const debouncedItemSearch = useDebounce(itemSearch, 300);
+    const [itemsTablePage, setItemsTablePage] = useState(1);
 
     // Modals
     const [editModal, setEditModal] = useState(false);
@@ -240,6 +245,15 @@ export default function ReturnDetailPage() {
             setIsItemsLoading(false);
         }
     }, [id, debouncedItemSearch, itemStatusFilter]);
+
+    useEffect(() => {
+        setItemsTablePage(1);
+    }, [debouncedItemSearch, itemStatusFilter]);
+
+    useEffect(() => {
+        const maxPage = Math.max(1, Math.ceil(items.length / RETURN_DETAIL_ITEMS_PAGE_SIZE));
+        setItemsTablePage((p) => Math.min(p, maxPage));
+    }, [items.length]);
 
     const fetchReverseDistributors = useCallback(async () => {
         try {
@@ -620,7 +634,7 @@ export default function ReturnDetailPage() {
                 <div className="flex items-center justify-center min-h-64">
                     <div className="text-center">
                         <Loader2 className="w-8 h-8 animate-spin text-primary-600 mx-auto mb-3" />
-                        <p className="text-sm text-gray-500">Loading return transaction...</p>
+                        <p className="text-sm text-[#6b7280]">Loading return transaction...</p>
                     </div>
                 </div>
                 </PermissionGuard>
@@ -632,11 +646,11 @@ export default function ReturnDetailPage() {
         return (
             <DashboardLayout>
                 <PermissionGuard permission="returns:view">
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+                <div className="bg-red-50 border border-red-200 rounded-[4px] p-4 text-center">
                     <AlertCircle className="w-8 h-8 text-red-500 mx-auto mb-2" />
                     <p className="text-sm text-red-800">{error || 'Return transaction not found'}</p>
                     <button
-                        className="mt-3 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="mt-3 px-3 py-1.5 text-xs rounded border border-[#e2e2e2] text-[#505454] hover:bg-[#f5f2f1] transition-colors"
                         onClick={() => router.push('/returns')}
                     >
                         Back to Returns
@@ -656,6 +670,19 @@ export default function ReturnDetailPage() {
         (tx.fedexLabels && Object.keys(tx.fedexLabels).length > 0)
     );
 
+    const itemsTableTotalPages = Math.max(1, Math.ceil(items.length / RETURN_DETAIL_ITEMS_PAGE_SIZE));
+    const paginatedItemsTable = items.slice(
+        (itemsTablePage - 1) * RETURN_DETAIL_ITEMS_PAGE_SIZE,
+        itemsTablePage * RETURN_DETAIL_ITEMS_PAGE_SIZE
+    );
+    const itemsTableRangeStart = items.length === 0
+        ? 0
+        : (itemsTablePage - 1) * RETURN_DETAIL_ITEMS_PAGE_SIZE + 1;
+    const itemsTableRangeEnd = Math.min(
+        itemsTablePage * RETURN_DETAIL_ITEMS_PAGE_SIZE,
+        items.length
+    );
+
     return (
         <DashboardLayout>
             <PermissionGuard permission="returns:view">
@@ -667,23 +694,23 @@ export default function ReturnDetailPage() {
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => router.push('/returns')}
-                            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
+                            className="p-1.5 text-[#9ca3af] hover:text-[#505454] hover:bg-[#f5f2f1] rounded transition-colors"
                         >
                             <ArrowLeft className="w-4 h-4" />
                         </button>
                         <div>
                             <div className="flex items-center gap-2 mb-1">
-                                <h1 className="text-lg font-mono font-bold text-gray-900">{tx.licensePlate}</h1>
+                                <h1 className="text-lg font-mono font-bold text-[#000000]">{tx.licensePlate}</h1>
                                 <Badge variant={badge.variant}>{badge.label}</Badge>
                             </div>
-                            <p className="text-xs text-gray-500">Return Transaction Details</p>
+                            <p className="text-xs text-[#6b7280]">Return Transaction Details</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
                         {canDoAction(tx, 'resume') && (
                             <button
                                 onClick={() => setActionModal({ action: 'resume' })}
-                                className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded bg-[#516057] text-white hover:bg-[#505454] transition-colors focus:outline-none focus:ring-2 focus:ring-[#516057]"
                             >
                                 <Play className="w-3 h-3" /> Resume
                             </button>
@@ -698,7 +725,7 @@ export default function ReturnDetailPage() {
                                     }
                                     setActionModal({ action: 'complete' });
                                 }}
-                                className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded bg-green-600 text-white hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded bg-green-600 text-white hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-[#516057]"
                             >
                                 <CheckCircle className="w-3 h-3" /> Complete
                             </button>
@@ -715,7 +742,7 @@ export default function ReturnDetailPage() {
                         {/* {canDoAction(tx, 'edit') && (
                             <button
                                 onClick={() => setEditModal(true)}
-                                className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                className="p-1.5 text-[#9ca3af] hover:text-[#516057] hover:bg-[#f5f2f1] rounded transition-colors focus:outline-none focus:ring-2 focus:ring-[#516057]"
                                 title="Edit"
                             >
                                 <Edit className="w-4 h-4" />
@@ -724,7 +751,7 @@ export default function ReturnDetailPage() {
                         {canDoAction(tx, 'delete') && (
                             <button
                                 onClick={() => setDeleteModal(true)}
-                                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                className="p-1.5 text-[#9ca3af] hover:text-red-600 hover:bg-red-50 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-[#516057]"
                                 title="Delete"
                             >
                                 <Trash2 className="w-4 h-4" />
@@ -736,101 +763,101 @@ export default function ReturnDetailPage() {
                 {/* ── Info Cards ──────────────────────────────────── */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* General Information */}
-                    <div className="bg-white rounded-lg shadow p-4">
-                        <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                            <ClipboardList className="w-4 h-4 text-gray-500" />
+                    <div className="bg-white rounded-[4px] shadow p-4">
+                        <h2 className="text-sm font-semibold text-[#000000] mb-3 flex items-center gap-2">
+                            <ClipboardList className="w-4 h-4 text-[#6b7280]" />
                             General Information
                         </h2>
                         <dl className="space-y-2">
                             <div className="flex justify-between">
-                                <dt className="text-xs text-gray-500">License Plate</dt>
-                                <dd className="text-xs font-mono font-medium text-gray-900">{tx.licensePlate}</dd>
+                                <dt className="text-xs text-[#6b7280]">License Plate</dt>
+                                <dd className="text-xs font-mono font-medium text-[#000000]">{tx.licensePlate}</dd>
                             </div>
                             <div className="flex justify-between">
-                                <dt className="text-xs text-gray-500">Service Type</dt>
-                                <dd className="text-xs font-medium text-gray-900">
+                                <dt className="text-xs text-[#6b7280]">Service Type</dt>
+                                <dd className="text-xs font-medium text-[#000000]">
                                     {tx.serviceType?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
                                 </dd>
                             </div>
                             <div className="flex justify-between">
-                                <dt className="text-xs text-gray-500">Created</dt>
-                                <dd className="text-xs font-medium text-gray-900">{formatDate(tx.createdAt)}</dd>
+                                <dt className="text-xs text-[#6b7280]">Created</dt>
+                                <dd className="text-xs font-medium text-[#000000]">{formatDate(tx.createdAt)}</dd>
                             </div>
                             <div className="flex justify-between">
-                                <dt className="text-xs text-gray-500">Updated</dt>
-                                <dd className="text-xs font-medium text-gray-900">{formatDate(tx.updatedAt)}</dd>
+                                <dt className="text-xs text-[#6b7280]">Updated</dt>
+                                <dd className="text-xs font-medium text-[#000000]">{formatDate(tx.updatedAt)}</dd>
                             </div>
                             {tx.finalizedAt && (
                                 <div className="flex justify-between">
-                                    <dt className="text-xs text-gray-500">Finalized</dt>
-                                    <dd className="text-xs font-medium text-gray-900">{formatDate(tx.finalizedAt)}</dd>
+                                    <dt className="text-xs text-[#6b7280]">Finalized</dt>
+                                    <dd className="text-xs font-medium text-[#000000]">{formatDate(tx.finalizedAt)}</dd>
                                 </div>
                             )}
                             {tx.notes && (
-                                <div className="pt-2 border-t border-gray-100">
-                                    <dt className="text-xs text-gray-500 mb-1">Notes</dt>
-                                    <dd className="text-xs text-gray-700">{tx.notes}</dd>
+                                <div className="pt-2 border-t border-[#f3f4f6]">
+                                    <dt className="text-xs text-[#6b7280] mb-1">Notes</dt>
+                                    <dd className="text-xs text-[#505454]">{tx.notes}</dd>
                                 </div>
                             )}
                         </dl>
                     </div>
 
                     {/* Store & Processor */}
-                    <div className="bg-white rounded-lg shadow p-4">
-                        <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                            <Building2 className="w-4 h-4 text-gray-500" />
+                    <div className="bg-white rounded-[4px] shadow p-4">
+                        <h2 className="text-sm font-semibold text-[#000000] mb-3 flex items-center gap-2">
+                            <Building2 className="w-4 h-4 text-[#6b7280]" />
                             Store &amp; Processor
                         </h2>
                         <dl className="space-y-2">
                             <div className="flex justify-between">
-                                <dt className="text-xs text-gray-500">Store Name</dt>
-                                <dd className="text-xs font-medium text-gray-900">{tx.pharmacyName || '—'}</dd>
+                                <dt className="text-xs text-[#6b7280]">Store Name</dt>
+                                <dd className="text-xs font-medium text-[#000000]">{tx.pharmacyName || '—'}</dd>
                             </div>
                             
                             {/* Store Address */}
                             {tx.pharmacyStreetAddress && (
                                 <div className="flex justify-between">
-                                    <dt className="text-xs text-gray-500">Address</dt>
-                                    <dd className="text-xs font-medium text-gray-900">{tx.pharmacyStreetAddress}</dd>
+                                    <dt className="text-xs text-[#6b7280]">Address</dt>
+                                    <dd className="text-xs font-medium text-[#000000]">{tx.pharmacyStreetAddress}</dd>
                                 </div>
                             )}
                             
                             {/* City / State */}
                             {(tx.pharmacyCity || tx.pharmacyState) && (
                                 <div className="flex justify-between">
-                                    <dt className="text-xs text-gray-500">City / State</dt>
-                                    <dd className="text-xs font-medium text-gray-900">
+                                    <dt className="text-xs text-[#6b7280]">City / State</dt>
+                                    <dd className="text-xs font-medium text-[#000000]">
                                         {[tx.pharmacyCity, tx.pharmacyState].filter(Boolean).join(', ') || '—'}
                                     </dd>
                                 </div>
                             )}
                             
                             <div className="flex justify-between">
-                                <dt className="text-xs text-gray-500">Service Type</dt>
-                                <dd className="text-xs font-medium text-gray-900">
+                                <dt className="text-xs text-[#6b7280]">Service Type</dt>
+                                <dd className="text-xs font-medium text-[#000000]">
                                     {tx.serviceType ? tx.serviceType.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : '—'}
                                 </dd>
                             </div>
                             
                             <div className="flex justify-between">
-                                <dt className="text-xs text-gray-500">Processor</dt>
-                                <dd className="text-xs font-medium text-gray-900">{tx.processorName || '—'}</dd>
+                                <dt className="text-xs text-[#6b7280]">Processor</dt>
+                                <dd className="text-xs font-medium text-[#000000]">{tx.processorName || '—'}</dd>
                             </div>
                             
                             {/* Shipping Details Section */}
                             {(tx.fedexTracking || tx.fedexPickupConfirmation) && (
                                 <>
-                                    <div className="pt-2 border-t border-gray-100" />
+                                    <div className="pt-2 border-t border-[#f3f4f6]" />
                                     {tx.fedexTracking && (
                                         <div className="flex justify-between">
-                                            <dt className="text-xs text-gray-500">FedEx Tracking</dt>
-                                            <dd className="text-xs font-medium text-gray-900 font-mono">{tx.fedexTracking}</dd>
+                                            <dt className="text-xs text-[#6b7280]">FedEx Tracking</dt>
+                                            <dd className="text-xs font-medium text-[#000000] font-mono">{tx.fedexTracking}</dd>
                                         </div>
                                     )}
                                     {tx.fedexPickupConfirmation && (
                                         <div className="flex justify-between">
-                                            <dt className="text-xs text-gray-500">Pickup Confirmation</dt>
-                                            <dd className="text-xs font-medium text-gray-900 font-mono">{tx.fedexPickupConfirmation}</dd>
+                                            <dt className="text-xs text-[#6b7280]">Pickup Confirmation</dt>
+                                            <dd className="text-xs font-medium text-[#000000] font-mono">{tx.fedexPickupConfirmation}</dd>
                                         </div>
                                     )}
                                 </>
@@ -838,8 +865,8 @@ export default function ReturnDetailPage() {
                             
                             {/* Package Tracking with Print Labels */}
                             {tx.packageTracking && Object.keys(tx.packageTracking).length > 0 && (
-                                <div className="pt-2 border-t border-gray-100">
-                                    <dt className="text-xs text-gray-500 mb-2 flex items-center justify-between">
+                                <div className="pt-2 border-t border-[#f3f4f6]">
+                                    <dt className="text-xs text-[#6b7280] mb-2 flex items-center justify-between">
                                         <span>Package Tracking</span>
                                         <div className="flex items-center gap-1">
                                             <button
@@ -863,9 +890,9 @@ export default function ReturnDetailPage() {
                                                     : `Package ${key}`;
                                                 return (
                                                     <div key={key} className="flex justify-between items-center text-xs">
-                                                        <span className="text-gray-500 capitalize">{displayKey}</span>
+                                                        <span className="text-[#6b7280] capitalize">{displayKey}</span>
                                                         <div className="flex items-center gap-1.5">
-                                                            <span className="font-mono text-gray-900">{val}</span>
+                                                            <span className="font-mono text-[#000000]">{val}</span>
                                                             <button
                                                                 onClick={() => printSingleLabel(idx + 1)}
                                                                 disabled={pdfLoading === `shipping-label-${idx + 1}`}
@@ -885,8 +912,8 @@ export default function ReturnDetailPage() {
 
                             {/* FedEx Labels */}
                             {tx.fedexLabels && Object.keys(tx.fedexLabels).length > 0 && (
-                                <div className="pt-2 border-t border-gray-100">
-                                    <dt className="text-xs text-gray-500 mb-1 flex items-center gap-1"><Printer className="w-3.5 h-3.5" /> Shipping Labels</dt>
+                                <div className="pt-2 border-t border-[#f3f4f6]">
+                                    <dt className="text-xs text-[#6b7280] mb-1 flex items-center gap-1"><Printer className="w-3.5 h-3.5" /> Shipping Labels</dt>
                                     <dd className="flex flex-wrap gap-2">
                                         {Object.keys(tx.fedexLabels).map((key) => {
                                             const num = key.replace('package', '');
@@ -896,7 +923,7 @@ export default function ReturnDetailPage() {
                                                     href={`${process.env.NEXT_PUBLIC_API_URL}/return-transactions/${tx.id}/labels/${num}/download`}
                                                     target="_blank"
                                                     rel="noreferrer"
-                                                    className="flex items-center gap-1 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-xs text-gray-700 rounded border border-gray-200 transition-colors"
+                                                    className="flex items-center gap-1 px-2 py-1 bg-[#f5f2f1] hover:bg-[#e2e2e2] text-xs text-[#505454] rounded border border-[#e2e2e2] transition-colors"
                                                 >
                                                     <Download className="w-3 h-3" /> Label {num}
                                                 </a>
@@ -909,27 +936,27 @@ export default function ReturnDetailPage() {
                     </div>
 
                     {/* Items & Values */}
-                    {/* <div className="bg-white rounded-lg shadow p-4">
-                        <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                            <Package className="w-4 h-4 text-gray-500" />
+                    {/* <div className="bg-white rounded-[4px] shadow p-4">
+                        <h2 className="text-sm font-semibold text-[#000000] mb-3 flex items-center gap-2">
+                            <Package className="w-4 h-4 text-[#6b7280]" />
                             Items &amp; Values
                         </h2>
                         <dl className="space-y-2">
                             <div className="flex justify-between">
-                                <dt className="text-xs text-gray-500">Total Items</dt>
-                                <dd className="text-xs font-medium text-gray-900">{returnableAndTbdItemsCount}</dd>
+                                <dt className="text-xs text-[#6b7280]">Total Items</dt>
+                                <dd className="text-xs font-medium text-[#000000]">{returnableAndTbdItemsCount}</dd>
                             </div>
                             <div className="flex justify-between">
-                                <dt className="text-xs text-gray-500">Returnable Value</dt>
+                                <dt className="text-xs text-[#6b7280]">Returnable Value</dt>
                                 <dd className="text-xs font-medium text-green-700">{formatCurrency(itemsSummary?.totalReturnableValue ?? tx.totalReturnableValue)}</dd>
                             </div>
                             <div className="flex justify-between">
-                                <dt className="text-xs text-gray-500">Non-Returnable Value</dt>
+                                <dt className="text-xs text-[#6b7280]">Non-Returnable Value</dt>
                                 <dd className="text-xs font-medium text-red-700">{formatCurrency(itemsSummary?.totalNonReturnableValue ?? tx.totalNonReturnableValue)}</dd>
                             </div>
-                            <div className="flex justify-between border-t border-gray-200 pt-2">
-                                <dt className="text-xs font-semibold text-gray-700">Total Value</dt>
-                                <dd className="text-xs font-bold text-gray-900">
+                            <div className="flex justify-between border-t border-[#e2e2e2] pt-2">
+                                <dt className="text-xs font-semibold text-[#505454]">Total Value</dt>
+                                <dd className="text-xs font-bold text-[#000000]">
                                     {formatCurrency(itemsSummary?.totalReturnableValue ?? tx.totalReturnableValue)}
                                 </dd>
                             </div>
@@ -941,15 +968,15 @@ export default function ReturnDetailPage() {
 
                 {/* ── Documents Section ───────────────────────────── */}
                 {showDocuments && (
-                    <div className="bg-white rounded-lg shadow p-4">
-                        <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                            <FileText className="w-4 h-4 text-gray-500" />
+                    <div className="bg-white rounded-[4px] shadow p-4">
+                        <h2 className="text-sm font-semibold text-[#000000] mb-3 flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-[#6b7280]" />
                             Documents
                         </h2>
                         <div className="flex flex-wrap gap-2">
                             <button
                                 onClick={() => downloadPdf('manifest', `manifest-${tx.licensePlate}.pdf`)}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded bg-[#516057] text-white hover:bg-[#505454] transition-colors focus:outline-none focus:ring-2 focus:ring-[#516057]"
                             >
                                 <Download className="w-3.5 h-3.5" /> Download Manifest
                             </button>
@@ -983,35 +1010,35 @@ export default function ReturnDetailPage() {
 
                 {/* ── Summary Bar ─────────────────────────────────── */}
                 {/* <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    <div className="bg-white rounded-lg shadow px-4 py-3 text-center">
-                        <p className="text-[10px] uppercase tracking-wide text-gray-500 mb-1">Items</p>
-                        <p className="text-lg font-bold text-gray-900">{returnableAndTbdItemsCount}</p>
+                    <div className="bg-white rounded-[4px] shadow px-4 py-3 text-center">
+                        <p className="text-[10px] uppercase tracking-wide text-[#6b7280] mb-1">Items</p>
+                        <p className="text-lg font-bold text-[#000000]">{returnableAndTbdItemsCount}</p>
                     </div>
-                    <div className="bg-white rounded-lg shadow px-4 py-3 text-center">
+                    <div className="bg-white rounded-[4px] shadow px-4 py-3 text-center">
                         <p className="text-[10px] uppercase tracking-wide text-green-600 mb-1">Returnable</p>
                         <p className="text-lg font-bold text-green-700">{formatCurrency(itemsSummary?.totalReturnableValue ?? tx.totalReturnableValue)}</p>
                     </div>
-                    <div className="bg-white rounded-lg shadow px-4 py-3 text-center">
+                    <div className="bg-white rounded-[4px] shadow px-4 py-3 text-center">
                         <p className="text-[10px] uppercase tracking-wide text-red-600 mb-1">Non-Returnable</p>
                         <p className="text-lg font-bold text-red-700">{formatCurrency(itemsSummary?.totalNonReturnableValue ?? tx.totalNonReturnableValue)}</p>
                     </div>
-                    <div className="bg-white rounded-lg shadow px-4 py-3 text-center">
-                        <p className="text-[10px] uppercase tracking-wide text-blue-600 mb-1">Total Value</p>
-                        <p className="text-lg font-bold text-blue-700">{formatCurrency(itemsSummary?.totalReturnableValue ?? tx.totalReturnableValue)}</p>
+                    <div className="bg-white rounded-[4px] shadow px-4 py-3 text-center">
+                        <p className="text-[10px] uppercase tracking-wide text-[#516057] mb-1">Total Value</p>
+                        <p className="text-lg font-bold text-[#505454]">{formatCurrency(itemsSummary?.totalReturnableValue ?? tx.totalReturnableValue)}</p>
                     </div>
                 </div> */}
 
                 {/* ── Items Section ───────────────────────────────── */}
-                <div className="bg-white rounded-lg shadow">
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-                        <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                            <Package className="w-4 h-4 text-gray-500" />
+                <div className="bg-white rounded-[4px] shadow">
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-[#e2e2e2]">
+                        <h2 className="text-sm font-semibold text-[#000000] flex items-center gap-2">
+                            <Package className="w-4 h-4 text-[#6b7280]" />
                             Products ({itemsSummary?.totalItems ?? items.length})
                         </h2>
                         {canDoAction(tx, 'add_items') && (
                             <button
                                 onClick={() => router.push(`/returns/${tx.id}/add-items`)}
-                                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#516057] text-white hover:bg-[#505454] transition-colors focus:outline-none focus:ring-2 focus:ring-[#516057]"
                             >
                                 <Plus className="w-3 h-3" /> Add Items
                             </button>
@@ -1019,21 +1046,21 @@ export default function ReturnDetailPage() {
                     </div>
 
                     {/* Items Filters */}
-                    <div className="flex flex-wrap gap-2 px-4 py-2 border-b border-gray-100">
+                    <div className="flex flex-wrap gap-2 px-4 py-2 border-b border-[#f3f4f6]">
                         <div className="relative flex-1 min-w-[200px]">
-                            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#9ca3af]" />
                             <input
                                 type="text"
                                 placeholder="Search by NDC, name, or manufacturer..."
                                 value={itemSearch}
                                 onChange={e => setItemSearch(e.target.value)}
-                                className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500"
+                                className="w-full pl-8 pr-3 py-1.5 text-xs border border-[#e2e2e2] rounded focus:outline-none focus:ring-1 focus:ring-[#516057]"
                             />
                         </div>
                         <select
                             value={itemStatusFilter}
                             onChange={e => setItemStatusFilter(e.target.value)}
-                            className="px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500"
+                            className="px-2.5 py-1.5 text-xs border border-[#e2e2e2] rounded focus:outline-none focus:ring-1 focus:ring-[#516057]"
                         >
                             <option value="">All Statuses</option>
                             <option value="returnable">Returnable</option>
@@ -1050,14 +1077,14 @@ export default function ReturnDetailPage() {
                     ) : items.length === 0 ? (
                         <div className="text-center py-8">
                             <Package className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                            <p className="text-sm text-gray-500 font-medium mb-1">No items found</p>
-                            <p className="text-xs text-gray-400 mb-3">
+                            <p className="text-sm text-[#6b7280] font-medium mb-1">No items found</p>
+                            <p className="text-xs text-[#9ca3af] mb-3">
                                 {itemSearch || itemStatusFilter ? 'Try adjusting your filters.' : 'Start adding items to this return.'}
                             </p>
                             {canDoAction(tx, 'add_items') && !itemSearch && !itemStatusFilter && (
                                 <button
                                     onClick={() => router.push(`/returns/${tx.id}/add-items`)}
-                                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#516057] text-white hover:bg-[#505454] transition-colors focus:outline-none focus:ring-2 focus:ring-[#516057]"
                                 >
                                     <ScanLine className="w-3 h-3" /> Start Scanning
                                 </button>
@@ -1067,7 +1094,7 @@ export default function ReturnDetailPage() {
                         <div className="overflow-x-auto">
                             <table className="w-full table-auto">
                                 <thead>
-                                    <tr className="bg-gradient-to-r from-teal-600 to-teal-700 border-b-2 border-teal-800">
+                                    <tr className="bg-[#516057] border-b-2 border-[#516057]">
                                         <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">NDC</th>
                                         <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Name</th>
                                         <th className="text-left px-3 py-2.5 text-[10px] font-semibold text-white uppercase tracking-wider">Manufacturer</th>
@@ -1084,26 +1111,26 @@ export default function ReturnDetailPage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {items.map((item) => {
+                                    {paginatedItemsTable.map((item) => {
                                         const itemBadge = getItemStatusBadge(item.returnStatus);
                                         return (
-                                            <tr key={item.id} className="border-b border-gray-100 hover:bg-teal-50 transition-colors">
+                                            <tr key={item.id} className="border-b border-[#f3f4f6] hover:bg-[#f5f2f1] transition-colors">
                                                 <td className="px-3 py-2">
-                                                    <span className="text-xs font-mono text-gray-900">{item.ndc}</span>
+                                                    <span className="text-xs font-mono text-[#000000]">{item.ndc}</span>
                                                 </td>
                                                 <td className="px-3 py-2">
-                                                    <p className="text-xs font-medium text-gray-900 truncate max-w-[180px]">
+                                                    <p className="text-xs font-medium text-[#000000] truncate max-w-[180px]">
                                                         {item.proprietaryName || item.genericName || '—'}
                                                     </p>
                                                 </td>
                                                 <td className="px-3 py-2">
-                                                    <span className="text-xs text-gray-700">{item.manufacturer || '—'}</span>
+                                                    <span className="text-xs text-[#505454]">{item.manufacturer || '—'}</span>
                                                 </td>
                                                 <td className="px-3 py-2">
-                                                    <span className="text-xs text-gray-900">{item.fullPackageSize || '—'}</span>
+                                                    <span className="text-xs text-[#000000]">{item.fullPackageSize || '—'}</span>
                                                 </td>
                                                 <td className="px-3 py-2">
-                                                    <span className="text-xs text-gray-900">
+                                                    <span className="text-xs text-[#000000]">
                                                         {(() => {
                                                             const qtyReturned = item.fullPackageQtyReturned ?? item.quantityReturned ?? item.quantity;
                                                             const fullPkgQty = item.fullPackageQtyReturned ?? item.quantityReturned;
@@ -1113,19 +1140,19 @@ export default function ReturnDetailPage() {
                                                     </span>
                                                 </td>
                                                 <td className="px-3 py-2">
-                                                    <span className="text-xs font-mono text-gray-700">{item.serialNumber || '—'}</span>
+                                                    <span className="text-xs font-mono text-[#505454]">{item.serialNumber || '—'}</span>
                                                 </td>
                                                 {/* <td className="px-3 py-2">
-                                                    <span className="text-xs text-gray-900">{item.standardPrice ? formatCurrency(item.standardPrice) : '—'}</span>
+                                                    <span className="text-xs text-[#000000]">{item.standardPrice ? formatCurrency(item.standardPrice) : '—'}</span>
                                                 </td>
                                                 <td className="px-3 py-2">
-                                                    <span className="text-xs text-gray-900 font-medium">{item.estimatedValue ? formatCurrency(item.estimatedValue) : '—'}</span>
+                                                    <span className="text-xs text-[#000000] font-medium">{item.estimatedValue ? formatCurrency(item.estimatedValue) : '—'}</span>
                                                 </td>
                                                 <td className="px-3 py-2">
-                                                    <span className="text-xs text-gray-900">{item.estimatedStoreValue ? formatCurrency(item.estimatedStoreValue) : '—'}</span>
+                                                    <span className="text-xs text-[#000000]">{item.estimatedStoreValue ? formatCurrency(item.estimatedStoreValue) : '—'}</span>
                                                 </td> */}
                                                 <td className="px-3 py-2">
-                                                    <span className="text-xs text-gray-700">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</span>
+                                                    <span className="text-xs text-[#505454]">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</span>
                                                 </td>
                                                 <td className="px-3 py-2">
                                                     <div className="flex flex-col gap-0.5">
@@ -1153,14 +1180,14 @@ export default function ReturnDetailPage() {
                                                 <td className="px-3 py-2">
                                                     {item.returnStatus === 'returnable' ? (
                                                         item.destination ? (
-                                                            <span className="text-xs text-gray-700">{item.destination}</span>
+                                                            <span className="text-xs text-[#505454]">{item.destination}</span>
                                                         ) : (
                                                             <span className="text-xs text-orange-500 flex items-center gap-0.5">
                                                                 <AlertTriangle className="w-3 h-3" /> Missing
                                                             </span>
                                                         )
                                                     ) : (
-                                                        <span className="text-xs text-gray-400">—</span>
+                                                        <span className="text-xs text-[#9ca3af]">—</span>
                                                     )}
                                                 </td>
                                                 <td className="px-3 py-2">
@@ -1168,7 +1195,7 @@ export default function ReturnDetailPage() {
                                                         {canDoAction(tx, 'edit') && (
                                                             <button
                                                                 onClick={() => setEditItemModal(item)}
-                                                                className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded transition-colors"
+                                                                className="p-1.5 text-[#9ca3af] hover:text-[#516057] hover:bg-[#f5f2f1] rounded transition-colors"
                                                                 title="Edit Item"
                                                             >
                                                                 <Edit className="w-3.5 h-3.5" />
@@ -1177,7 +1204,7 @@ export default function ReturnDetailPage() {
                                                         {canDoAction(tx, 'delete') && (
                                                             <button
                                                                 onClick={() => setDeleteItemModal(item)}
-                                                                className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                                                className="p-1 text-[#9ca3af] hover:text-red-600 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-[#516057]"
                                                                 title="Delete Item"
                                                             >
                                                                 <Trash2 className="w-3.5 h-3.5" />
@@ -1190,6 +1217,34 @@ export default function ReturnDetailPage() {
                                     })}
                                 </tbody>
                             </table>
+                            {items.length > 0 && itemsTableTotalPages > 1 && (
+                                <div className="flex items-center justify-between px-4 py-2.5 border-t border-gray-100 gap-2 bg-gray-50/80">
+                                    <p className="text-[10px] text-gray-500">
+                                        Showing {itemsTableRangeStart}–{itemsTableRangeEnd} of {items.length}
+                                    </p>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setItemsTablePage((p) => Math.max(1, p - 1))}
+                                            disabled={itemsTablePage <= 1}
+                                            className="inline-flex items-center gap-0.5 px-2 py-1 text-[10px] font-medium rounded border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                                        >
+                                            <ChevronLeft className="w-3.5 h-3.5" /> Previous
+                                        </button>
+                                        <span className="text-[10px] text-gray-600 tabular-nums">
+                                            Page {itemsTablePage} of {itemsTableTotalPages}
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => setItemsTablePage((p) => Math.min(itemsTableTotalPages, p + 1))}
+                                            disabled={itemsTablePage >= itemsTableTotalPages}
+                                            className="inline-flex items-center gap-0.5 px-2 py-1 text-[10px] font-medium rounded border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                                        >
+                                            Next <ChevronRight className="w-3.5 h-3.5" />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
@@ -1197,46 +1252,46 @@ export default function ReturnDetailPage() {
                 {/* ── Edit Return Modal ───────────────────────────── */}
                 {editModal && (
                     <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setEditModal(false)}>
-                        <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-                                <h2 className="text-sm font-semibold text-gray-900">Edit Return — {tx.licensePlate}</h2>
-                                <button onClick={() => setEditModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                        <div className="bg-white rounded-[4px] max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                            <div className="flex items-center justify-between px-4 py-3 border-b border-[#e2e2e2] bg-[#f5f2f1]">
+                                <h2 className="text-sm font-semibold text-[#000000]">Edit Return — {tx.licensePlate}</h2>
+                                <button onClick={() => setEditModal(false)} className="text-[#9ca3af] hover:text-[#505454]"><X className="w-4 h-4" /></button>
                             </div>
                             <div className="px-4 py-3 space-y-2.5">
                                 {/* <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-0.5">FedEx Tracking Number</label>
+                                    <label className="block text-xs font-medium text-[#505454] mb-0.5">FedEx Tracking Number</label>
                                     <input
                                         type="text"
                                         value={editForm.fedexTracking}
                                         onChange={e => setEditForm({ ...editForm, fedexTracking: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500"
+                                        className="w-full px-2.5 py-1.5 text-xs border border-[#e2e2e2] rounded focus:outline-none focus:ring-1 focus:ring-[#516057]"
                                         placeholder="Enter tracking number"
                                     />
                                 </div> */}
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-0.5">FedEx Pickup Confirmation</label>
+                                    <label className="block text-xs font-medium text-[#505454] mb-0.5">FedEx Pickup Confirmation</label>
                                     <input
                                         type="text"
                                         value={editForm.fedexPickupConfirmation}
                                         onChange={e => setEditForm({ ...editForm, fedexPickupConfirmation: e.target.value })}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500"
+                                        className="w-full px-2.5 py-1.5 text-xs border border-[#e2e2e2] rounded focus:outline-none focus:ring-1 focus:ring-[#516057]"
                                         placeholder="Enter pickup confirmation"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-0.5">Notes</label>
+                                    <label className="block text-xs font-medium text-[#505454] mb-0.5">Notes</label>
                                     <textarea
                                         value={editForm.notes}
                                         onChange={e => setEditForm({ ...editForm, notes: e.target.value })}
                                         rows={2}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500 resize-none"
+                                        className="w-full px-2.5 py-1.5 text-xs border border-[#e2e2e2] rounded focus:outline-none focus:ring-1 focus:ring-[#516057] resize-none"
                                         placeholder="Optional notes"
                                     />
                                 </div>
                             </div>
-                            <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
-                                <button onClick={() => setEditModal(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                                <button onClick={handleUpdate} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <div className="flex justify-end gap-2 px-4 py-3 border-t border-[#e2e2e2] bg-[#f5f2f1]">
+                                <button onClick={() => setEditModal(false)} className="px-3 py-1.5 text-xs rounded border border-[#e2e2e2] text-[#505454] hover:bg-[#f5f2f1] transition-colors">Cancel</button>
+                                <button onClick={handleUpdate} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#516057] text-white hover:bg-[#505454] disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#516057]">
                                     {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Saving...</> : 'Save Changes'}
                                 </button>
                             </div>
@@ -1247,23 +1302,23 @@ export default function ReturnDetailPage() {
                 {/* ── Status Action Modal ─────────────────────────── */}
                 {actionModal && (
                     <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setActionModal(null)}>
-                        <div className="bg-white rounded-lg max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-                                <h2 className="text-sm font-semibold text-gray-900">
+                        <div className="bg-white rounded-[4px] max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                            <div className="flex items-center justify-between px-4 py-3 border-b border-[#e2e2e2] bg-[#f5f2f1]">
+                                <h2 className="text-sm font-semibold text-[#000000]">
                                     {actionModal.action === 'pause' && 'Pause Return'}
                                     {actionModal.action === 'resume' && 'Resume Return'}
                                     {actionModal.action === 'complete' && 'Mark as Completed'}
                                 </h2>
-                                <button onClick={() => setActionModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                                <button onClick={() => setActionModal(null)} className="text-[#9ca3af] hover:text-[#505454]"><X className="w-4 h-4" /></button>
                             </div>
                             <div className="px-4 py-3">
-                                <p className="text-xs text-gray-700">
+                                <p className="text-xs text-[#505454]">
                                     Are you sure you want to <strong>{actionModal.action}</strong> return <strong>{tx.licensePlate}</strong>?
                                 </p>
                             </div>
-                            <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
-                                <button onClick={() => setActionModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                                <button onClick={handleStatusAction} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <div className="flex justify-end gap-2 px-4 py-3 border-t border-[#e2e2e2] bg-[#f5f2f1]">
+                                <button onClick={() => setActionModal(null)} className="px-3 py-1.5 text-xs rounded border border-[#e2e2e2] text-[#505454] hover:bg-[#f5f2f1] transition-colors">Cancel</button>
+                                <button onClick={handleStatusAction} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#516057] text-white hover:bg-[#505454] disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#516057]">
                                     {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Processing...</> : 'Confirm'}
                                 </button>
                             </div>
@@ -1274,19 +1329,19 @@ export default function ReturnDetailPage() {
                 {/* ── Delete Return Modal ─────────────────────────── */}
                 {deleteModal && (
                     <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setDeleteModal(false)}>
-                        <div className="bg-white rounded-lg max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-                                <h2 className="text-sm font-semibold text-gray-900">Delete Return</h2>
-                                <button onClick={() => setDeleteModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                        <div className="bg-white rounded-[4px] max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                            <div className="flex items-center justify-between px-4 py-3 border-b border-[#e2e2e2] bg-[#f5f2f1]">
+                                <h2 className="text-sm font-semibold text-[#000000]">Delete Return</h2>
+                                <button onClick={() => setDeleteModal(false)} className="text-[#9ca3af] hover:text-[#505454]"><X className="w-4 h-4" /></button>
                             </div>
                             <div className="px-4 py-3">
-                                <p className="text-xs text-gray-700">
+                                <p className="text-xs text-[#505454]">
                                     Are you sure you want to delete return <strong>{tx.licensePlate}</strong>? This action cannot be undone.
                                 </p>
                             </div>
-                            <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
-                                <button onClick={() => setDeleteModal(false)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                                <button onClick={handleDelete} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <div className="flex justify-end gap-2 px-4 py-3 border-t border-[#e2e2e2] bg-[#f5f2f1]">
+                                <button onClick={() => setDeleteModal(false)} className="px-3 py-1.5 text-xs rounded border border-[#e2e2e2] text-[#505454] hover:bg-[#f5f2f1] transition-colors">Cancel</button>
+                                <button onClick={handleDelete} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#516057]">
                                     {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Deleting...</> : 'Delete'}
                                 </button>
                             </div>
@@ -1297,35 +1352,35 @@ export default function ReturnDetailPage() {
                 {/* ── Edit Item Modal ─────────────────────────────── */}
                 {editItemModal && (
                     <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setEditItemModal(null)}>
-                        <div className="bg-white rounded-lg max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-                                <h2 className="text-sm font-semibold text-gray-900">Edit Item — {editItemModal.ndc}</h2>
-                                <button onClick={() => setEditItemModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                        <div className="bg-white rounded-[4px] max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                            <div className="flex items-center justify-between px-4 py-3 border-b border-[#e2e2e2] bg-[#f5f2f1]">
+                                <h2 className="text-sm font-semibold text-[#000000]">Edit Item — {editItemModal.ndc}</h2>
+                                <button onClick={() => setEditItemModal(null)} className="text-[#9ca3af] hover:text-[#505454]"><X className="w-4 h-4" /></button>
                             </div>
                             <div className="px-4 py-3 space-y-2.5">
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-0.5">Quantity</label>
+                                    <label className="block text-xs font-medium text-[#505454] mb-0.5">Quantity</label>
                                     <div className="grid grid-cols-2 gap-2 text-xs">
                                         <div>
-                                            <label className="block text-[10px] text-gray-500 mb-0.5">Pkg Size</label>
-                                            <div className="text-center py-1.5 bg-gray-50 border border-gray-200 rounded">
+                                            <label className="block text-[10px] text-[#6b7280] mb-0.5">Pkg Size</label>
+                                            <div className="text-center py-1.5 bg-[#f5f2f1] border border-[#e2e2e2] rounded">
                                                 {editItemForm.fullPackageSize || '—'}
                                             </div>
                                         </div>
                                         <div>
-                                            <label className="block text-[10px] text-gray-500 mb-0.5">Qty Returned (units)</label>
+                                            <label className="block text-[10px] text-[#6b7280] mb-0.5">Qty Returned (units)</label>
                                             <input 
                                                 type="number" 
                                                 min="0" 
                                                 max={editItemForm.fullPackageSize || undefined}
                                                 value={editItemForm.fullPackageQtyReturned || ''} 
                                                 onChange={e => setEditItemForm({ ...editItemForm, fullPackageQtyReturned: e.target.value })} 
-                                                className="w-full px-2 py-1.5 text-center text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500" 
+                                                className="w-full px-2 py-1.5 text-center text-xs border border-[#e2e2e2] rounded focus:outline-none focus:ring-1 focus:ring-[#516057]" 
                                             />
                                         </div>
                                         {/* <div>
-                                            <label className="block text-[10px] text-gray-500 mb-0.5">#</label>
-                                            <div className="text-center py-1.5 bg-gray-50 border border-gray-200 rounded">
+                                            <label className="block text-[10px] text-[#6b7280] mb-0.5">#</label>
+                                            <div className="text-center py-1.5 bg-[#f5f2f1] border border-[#e2e2e2] rounded">
                                                 {editItemForm.fullPackageQtyReturned && editItemForm.fullPackageSize ? 
                                                     Math.ceil(Number(editItemForm.fullPackageQtyReturned) / Number(editItemForm.fullPackageSize)) : '—'}
                                             </div>
@@ -1333,19 +1388,19 @@ export default function ReturnDetailPage() {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-0.5">Memo</label>
+                                    <label className="block text-xs font-medium text-[#505454] mb-0.5">Memo</label>
                                     <textarea
                                         value={editItemForm.memo}
                                         onChange={e => setEditItemForm({ ...editItemForm, memo: e.target.value })}
                                         rows={2}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500 resize-none"
+                                        className="w-full px-2.5 py-1.5 text-xs border border-[#e2e2e2] rounded focus:outline-none focus:ring-1 focus:ring-[#516057] resize-none"
                                         placeholder="Optional memo"
                                     />
                                 </div>
                             </div>
-                            <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
-                                <button onClick={() => setEditItemModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                                <button onClick={handleUpdateItem} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <div className="flex justify-end gap-2 px-4 py-3 border-t border-[#e2e2e2] bg-[#f5f2f1]">
+                                <button onClick={() => setEditItemModal(null)} className="px-3 py-1.5 text-xs rounded border border-[#e2e2e2] text-[#505454] hover:bg-[#f5f2f1] transition-colors">Cancel</button>
+                                <button onClick={handleUpdateItem} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#516057] text-white hover:bg-[#505454] disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#516057]">
                                     {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Saving...</> : 'Save Changes'}
                                 </button>
                             </div>
@@ -1356,20 +1411,20 @@ export default function ReturnDetailPage() {
                 {/* ── Delete Item Modal ───────────────────────────── */}
                 {deleteItemModal && (
                     <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setDeleteItemModal(null)}>
-                        <div className="bg-white rounded-lg max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-                                <h2 className="text-sm font-semibold text-gray-900">Delete Item</h2>
-                                <button onClick={() => setDeleteItemModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                        <div className="bg-white rounded-[4px] max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                            <div className="flex items-center justify-between px-4 py-3 border-b border-[#e2e2e2] bg-[#f5f2f1]">
+                                <h2 className="text-sm font-semibold text-[#000000]">Delete Item</h2>
+                                <button onClick={() => setDeleteItemModal(null)} className="text-[#9ca3af] hover:text-[#505454]"><X className="w-4 h-4" /></button>
                             </div>
                             <div className="px-4 py-3">
-                                <p className="text-xs text-gray-700">
+                                <p className="text-xs text-[#505454]">
                                     Are you sure you want to delete <strong>{deleteItemModal.proprietaryName || deleteItemModal.genericName || deleteItemModal.ndc}</strong>
                                     {deleteItemModal.lotNumber && <> (Lot: <span className="font-mono">{deleteItemModal.lotNumber}</span>)</>}? This action cannot be undone.
                                 </p>
                             </div>
-                            <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
-                                <button onClick={() => setDeleteItemModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                                <button onClick={handleDeleteItem} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <div className="flex justify-end gap-2 px-4 py-3 border-t border-[#e2e2e2] bg-[#f5f2f1]">
+                                <button onClick={() => setDeleteItemModal(null)} className="px-3 py-1.5 text-xs rounded border border-[#e2e2e2] text-[#505454] hover:bg-[#f5f2f1] transition-colors">Cancel</button>
+                                <button onClick={handleDeleteItem} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#516057]">
                                     {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Deleting...</> : 'Delete'}
                                 </button>
                             </div>

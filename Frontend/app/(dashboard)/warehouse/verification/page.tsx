@@ -88,7 +88,7 @@ export default function WarehouseVerificationPage() {
         );
       default:
         return (
-          <Badge className="bg-gray-100 text-gray-600 border border-gray-300">
+          <Badge className="bg-[#f5f2f1] text-[#505454] border border-[#e2e2e2]">
             Not Started
           </Badge>
         );
@@ -98,30 +98,30 @@ export default function WarehouseVerificationPage() {
   return (
     <DashboardLayout>
       <div className="space-y-3">
-        <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-teal-50 via-cyan-50 to-teal-50 border-2 border-teal-200">
+        <div className="flex items-center justify-between p-4 rounded-[4px] bg-[#f5f2f1] border-2 border-[#e2e2e2]">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-teal-100">
-              <ClipboardCheck className="h-5 w-5 text-teal-600" />
+            <div className="p-2 rounded-[4px] bg-[#f5f2f1]">
+              <ClipboardCheck className="h-5 w-5 text-[#516057]" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">
+              <h1 className="text-xl font-bold text-[#000000]">
                 Warehouse Verification
               </h1>
-              <p className="text-xs text-gray-600 mt-0.5">
+              <p className="text-xs text-[#505454] mt-0.5">
                 Verify received returns — check items, report discrepancies
               </p>
             </div>
           </div>
         </div>
 
-        <Card className="border-2 border-teal-200 bg-gradient-to-br from-white to-teal-50/30">
+        <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1]">
           <CardContent className="p-3">
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-teal-500" />
+                <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-[#6b7280]" />
                 <Input
                   placeholder="Search by license plate or pharmacy name..."
-                  className="pl-7 h-7 text-xs border-teal-200 focus:border-teal-400"
+                  className="pl-7 h-7 text-xs border-[#e2e2e2] focus:border-[#e2e2e2]"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
@@ -129,7 +129,7 @@ export default function WarehouseVerificationPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="h-7 text-xs border-gray-300 hover:bg-gray-100"
+                className="h-7 text-xs border-[#e2e2e2] hover:bg-[#f5f2f1]"
                 onClick={() => {
                   setSearch("");
                   setVerificationStatus(null);
@@ -141,7 +141,7 @@ export default function WarehouseVerificationPage() {
           </CardContent>
         </Card>
 
-        <div className="flex gap-2 border-b-2 border-gray-200 bg-white rounded-t-lg p-1">
+        <div className="flex gap-2 border-b-2 border-[#e2e2e2] bg-white rounded-t-lg p-1">
           {[
             { label: "All", value: null },
             { label: "Not Started", value: "not_started" },
@@ -153,10 +153,10 @@ export default function WarehouseVerificationPage() {
               <button
                 key={tab.label}
                 onClick={() => setVerificationStatus(tab.value)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-lg border-2 transition-all ${
+                className={`px-3 py-1.5 text-sm font-medium rounded-[4px] border-2 transition-all ${
                   isActive
-                    ? "bg-teal-100 text-teal-700 border-teal-300 shadow-md scale-105"
-                    : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                    ? "bg-[#f5f2f1] text-[#516057] border-[#e2e2e2] shadow-md scale-105"
+                    : "bg-white text-[#505454] border-[#e2e2e2] hover:bg-[#f5f2f1]"
                 }`}
               >
                 {tab.label}
@@ -165,15 +165,15 @@ export default function WarehouseVerificationPage() {
           })}
         </div>
 
-        <Card className="border-2 border-teal-200 bg-gradient-to-br from-white to-teal-50/30">
+        <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1]">
           <CardContent className="p-3">
             {loading ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-teal-600" />
-                <span className="ml-2 text-sm text-gray-500">Loading...</span>
+                <Loader2 className="h-6 w-6 animate-spin text-[#516057]" />
+                <span className="ml-2 text-sm text-[#6b7280]">Loading...</span>
               </div>
             ) : returns.length === 0 ? (
-              <div className="text-center py-12 text-gray-500 text-sm">
+              <div className="text-center py-12 text-[#6b7280] text-sm">
                 <Package className="h-8 w-8 mx-auto mb-2 text-gray-300" />
                 No received returns found
               </div>
@@ -181,23 +181,23 @@ export default function WarehouseVerificationPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="bg-gradient-to-r from-teal-100 to-cyan-100 border-b-2 border-teal-200">
-                      <th className="text-left p-2 font-bold text-teal-900">
+                    <tr className="bg-[#f5f2f1] border-b-2 border-[#e2e2e2]">
+                      <th className="text-left p-2 font-bold text-[#000000]">
                         License Plate
                       </th>
-                      <th className="text-left p-2 font-bold text-teal-900">
+                      <th className="text-left p-2 font-bold text-[#000000]">
                         Pharmacy
                       </th>
-                      <th className="text-left p-2 font-bold text-teal-900">
+                      <th className="text-left p-2 font-bold text-[#000000]">
                         Items
                       </th>
-                      <th className="text-left p-2 font-bold text-teal-900">
+                      <th className="text-left p-2 font-bold text-[#000000]">
                         Received
                       </th>
-                      <th className="text-left p-2 font-bold text-teal-900">
+                      <th className="text-left p-2 font-bold text-[#000000]">
                         Verification
                       </th>
-                      <th className="text-left p-2 font-bold text-teal-900">
+                      <th className="text-left p-2 font-bold text-[#000000]">
                         Actions
                       </th>
                     </tr>
@@ -207,19 +207,19 @@ export default function WarehouseVerificationPage() {
                       <tr
                         key={r.id}
                         className={`border-b ${
-                          idx % 2 === 0 ? "bg-white" : "bg-gray-50/50"
-                        } hover:bg-teal-50 transition-colors`}
+                          idx % 2 === 0 ? "bg-white" : "bg-[#f5f2f1]/50"
+                        } hover:bg-[#f5f2f1] transition-colors`}
                       >
-                        <td className="p-2 font-semibold text-teal-700">
+                        <td className="p-2 font-semibold text-[#516057]">
                           {r.licensePlate}
                         </td>
-                        <td className="p-2 text-gray-700">{r.pharmacyName}</td>
+                        <td className="p-2 text-[#505454]">{r.pharmacyName}</td>
                         <td className="p-2">
                           <span className="px-2 py-0.5 rounded bg-purple-100 text-purple-700 font-medium">
                             {r.totalItems}
                           </span>
                         </td>
-                        <td className="p-2 text-gray-600">
+                        <td className="p-2 text-[#505454]">
                           {formatDate(r.receivedAt || r.createdAt)}
                         </td>
                         <td className="p-2">
@@ -229,7 +229,7 @@ export default function WarehouseVerificationPage() {
                           <Link href={`/warehouse/verification/${r.id}`}>
                             <Button
                               size="sm"
-                              className="h-6 px-2 text-xs bg-teal-600 hover:bg-teal-700"
+                              className="h-6 px-2 text-xs bg-[#516057] hover:bg-[#505454]"
                             >
                               {r.verificationStatus === "in_progress"
                                 ? "Continue"
@@ -249,7 +249,7 @@ export default function WarehouseVerificationPage() {
 
             {totalPages > 1 && (
               <div className="flex items-center justify-between mt-3 pt-3 border-t">
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-[#6b7280]">
                   Page {page} of {totalPages} ({total} total)
                 </span>
                 <div className="flex gap-1">

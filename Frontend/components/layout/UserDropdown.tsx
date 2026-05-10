@@ -87,8 +87,8 @@ export function UserDropdown() {
       {isLoggingOut && (
         <div className="fixed inset-0 bg-white z-[9999] flex items-center justify-center">
           <div className="flex flex-col items-center gap-4">
-            <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
-            <p className="text-sm text-gray-600">Signing out...</p>
+            <Loader2 className="h-8 w-8 animate-spin text-[#516057]" />
+            <p className="text-sm text-[#505454]">Signing out...</p>
           </div>
         </div>
       )}
@@ -96,7 +96,7 @@ export function UserDropdown() {
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 sm:gap-3 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 hover:bg-accent transition-colors"
+          className="flex items-center gap-2 sm:gap-3 rounded-[4px] px-2 sm:px-3 py-1.5 sm:py-2 hover:bg-accent transition-colors"
           aria-label="User menu"
           disabled={isLoggingOut}
         >
@@ -106,14 +106,14 @@ export function UserDropdown() {
               {userData?.pharmacy_name || 'Pharmacy'}
             </p>
           </div>
-          <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-teal-600 text-white">
+          <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#516057] text-white">
             <User className="h-4 w-4 sm:h-5 sm:w-5" />
           </div>
           <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
         </button>
 
         {isOpen && !isLoggingOut && (
-          <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-card border border-border z-50">
+          <div className="absolute right-0 mt-2 w-56 rounded-[4px] shadow-lg bg-card border border-border z-50">
             <div className="py-1">
               <div className="px-4 py-3 border-b border-border">
                 <p className="text-sm font-medium">{userData?.name || 'User'}</p>

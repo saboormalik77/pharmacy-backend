@@ -190,32 +190,32 @@ export default function PaymentsPage() {
       <PermissionGuard permission="payments:view">
       <div className="space-y-2">
         {/* Professional Medical Header */}
-        <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-teal-50 via-cyan-50 to-teal-50 border-2 border-teal-200">
+        <div className="flex items-center justify-between p-4 rounded-[4px] bg-[#f5f2f1] border-2 border-[#e2e2e2]">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Payments & Credits</h1>
-            <p className="text-xs text-gray-600 mt-0.5">Track expected credits and received payments from suppliers</p>
+            <h1 className="text-xl font-bold text-[#000000]">Payments & Credits</h1>
+            <p className="text-xs text-[#505454] mt-0.5">Track expected credits and received payments from suppliers</p>
           </div>
-          <Button variant="outline" size="sm" className="border-emerald-300 text-emerald-700 hover:bg-emerald-50">
+          <Button variant="outline" size="sm" className="border-[#e2e2e2] text-[#516057] hover:bg-[#f5f2f1]">
             <Download className="mr-1 h-3 w-3" />
             Export
           </Button>
         </div>
 
         {/* Professional Tabs */}
-        <div className="flex gap-2 border-b-2 border-gray-200 bg-white rounded-t-lg p-1">
+        <div className="flex gap-2 border-b-2 border-[#e2e2e2] bg-white rounded-t-lg p-1">
           <button onClick={() => setActiveTab('payments')}
-            className={`px-3 py-1.5 text-sm font-medium rounded-lg border-2 transition-all ${
+            className={`px-3 py-1.5 text-sm font-medium rounded-[4px] border-2 transition-all ${
               activeTab === 'payments' 
-                ? 'bg-teal-100 text-teal-700 border-teal-300 shadow-md scale-105' 
-                : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                ? 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2] shadow-md scale-105' 
+                : 'bg-white text-[#505454] border-[#e2e2e2] hover:bg-[#f5f2f1]'
             }`}>
             Payments ({mockPayments.length})
           </button>
           <button onClick={() => setActiveTab('credits')}
-            className={`px-3 py-1.5 text-sm font-medium rounded-lg border-2 transition-all ${
+            className={`px-3 py-1.5 text-sm font-medium rounded-[4px] border-2 transition-all ${
               activeTab === 'credits' 
-                ? 'bg-cyan-100 text-cyan-700 border-cyan-300 shadow-md scale-105' 
-                : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                ? 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2] shadow-md scale-105' 
+                : 'bg-white text-[#505454] border-[#e2e2e2] hover:bg-[#f5f2f1]'
             }`}>
             Credits ({mockCredits.length})
           </button>
@@ -224,15 +224,15 @@ export default function PaymentsPage() {
         {/* Professional Metrics */}
         {activeTab === 'payments' ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            <div className="p-3 rounded-lg border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100">
+            <div className="p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1]">
               <div className="flex items-center gap-1 mb-1">
-                <DollarSign className="h-3 w-3 text-emerald-600" />
-                <p className="text-xs text-emerald-700 font-medium">Net Received</p>
+                <DollarSign className="h-3 w-3 text-[#516057]" />
+                <p className="text-xs text-[#516057] font-medium">Net Received</p>
               </div>
-              <p className="text-xl font-bold text-emerald-900">{formatCurrency(totalReceived)}</p>
-              <p className="text-xs text-emerald-700 mt-1">After {DEFAULT_COMMISSION_RATE}% commission</p>
+              <p className="text-xl font-bold text-[#000000]">{formatCurrency(totalReceived)}</p>
+              <p className="text-xs text-[#516057] mt-1">After {DEFAULT_COMMISSION_RATE}% commission</p>
             </div>
-            <div className="p-3 rounded-lg border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100">
+            <div className="p-3 rounded-[4px] border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100">
               <div className="flex items-center gap-1 mb-1">
                 <TrendingUp className="h-3 w-3 text-amber-600" />
                 <p className="text-xs text-amber-700 font-medium">Commission</p>
@@ -240,42 +240,42 @@ export default function PaymentsPage() {
               <p className="text-xl font-bold text-amber-900">{formatCurrency(totalCommission)}</p>
               <p className="text-xs text-amber-700 mt-1">Platform fees</p>
             </div>
-            <div className="p-3 rounded-lg border-2 border-cyan-200 bg-gradient-to-br from-cyan-50 to-cyan-100">
+            <div className="p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1]">
               <div className="flex items-center gap-1 mb-1">
-                <Clock className="h-3 w-3 text-cyan-600" />
-                <p className="text-xs text-cyan-700 font-medium">Pending</p>
+                <Clock className="h-3 w-3 text-[#516057]" />
+                <p className="text-xs text-[#516057] font-medium">Pending</p>
               </div>
-              <p className="text-xl font-bold text-cyan-900">{formatCurrency(totalPending)}</p>
-              <p className="text-xs text-cyan-700 mt-1">Awaiting payment</p>
+              <p className="text-xl font-bold text-[#000000]">{formatCurrency(totalPending)}</p>
+              <p className="text-xs text-[#516057] mt-1">Awaiting payment</p>
             </div>
-            <div className="p-3 rounded-lg border-2 border-teal-200 bg-gradient-to-br from-teal-50 to-teal-100">
+            <div className="p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1]">
               <div className="flex items-center gap-1 mb-1">
-                <Receipt className="h-3 w-3 text-teal-600" />
-                <p className="text-xs text-teal-700 font-medium">Total</p>
+                <Receipt className="h-3 w-3 text-[#516057]" />
+                <p className="text-xs text-[#516057] font-medium">Total</p>
               </div>
-              <p className="text-xl font-bold text-teal-900">{mockPayments.length}</p>
-              <p className="text-xs text-teal-700 mt-1">Payment records</p>
+              <p className="text-xl font-bold text-[#000000]">{mockPayments.length}</p>
+              <p className="text-xs text-[#516057] mt-1">Payment records</p>
             </div>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            <div className="p-3 rounded-lg border-2 border-cyan-200 bg-gradient-to-br from-cyan-50 to-cyan-100">
+            <div className="p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1]">
               <div className="flex items-center gap-1 mb-1">
-                <Clock className="h-3 w-3 text-cyan-600" />
-                <p className="text-xs text-cyan-700 font-medium">Expected</p>
+                <Clock className="h-3 w-3 text-[#516057]" />
+                <p className="text-xs text-[#516057] font-medium">Expected</p>
               </div>
-              <p className="text-xl font-bold text-cyan-900">{formatCurrency(expectedCredits)}</p>
-              <p className="text-xs text-cyan-700 mt-1">{mockCredits.filter(c => c.status === 'expected').length} pending</p>
+              <p className="text-xl font-bold text-[#000000]">{formatCurrency(expectedCredits)}</p>
+              <p className="text-xs text-[#516057] mt-1">{mockCredits.filter(c => c.status === 'expected').length} pending</p>
             </div>
-            <div className="p-3 rounded-lg border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100">
+            <div className="p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1]">
               <div className="flex items-center gap-1 mb-1">
-                <CheckCircle2 className="h-3 w-3 text-emerald-600" />
-                <p className="text-xs text-emerald-700 font-medium">Received</p>
+                <CheckCircle2 className="h-3 w-3 text-[#516057]" />
+                <p className="text-xs text-[#516057] font-medium">Received</p>
               </div>
-              <p className="text-xl font-bold text-emerald-900">{formatCurrency(receivedCredits)}</p>
-              <p className="text-xs text-emerald-700 mt-1">{mockCredits.filter(c => c.status === 'received').length} completed</p>
+              <p className="text-xl font-bold text-[#000000]">{formatCurrency(receivedCredits)}</p>
+              <p className="text-xs text-[#516057] mt-1">{mockCredits.filter(c => c.status === 'received').length} completed</p>
             </div>
-            <div className="p-3 rounded-lg border-2 border-red-200 bg-gradient-to-br from-red-50 to-red-100">
+            <div className="p-3 rounded-[4px] border-2 border-red-200 bg-gradient-to-br from-red-50 to-red-100">
               <div className="flex items-center gap-1 mb-1">
                 <AlertCircle className="h-3 w-3 text-red-600" />
                 <p className="text-xs text-red-700 font-medium">Overdue</p>
@@ -283,37 +283,37 @@ export default function PaymentsPage() {
               <p className="text-xl font-bold text-red-900">{formatCurrency(overdueCredits)}</p>
               <p className="text-xs text-red-700 mt-1">{mockCredits.filter(c => c.status === 'overdue').length} overdue</p>
             </div>
-            <div className="p-3 rounded-lg border-2 border-teal-200 bg-gradient-to-br from-teal-50 to-teal-100">
+            <div className="p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1]">
               <div className="flex items-center gap-1 mb-1">
-                <Package className="h-3 w-3 text-teal-600" />
-                <p className="text-xs text-teal-700 font-medium">Total</p>
+                <Package className="h-3 w-3 text-[#516057]" />
+                <p className="text-xs text-[#516057] font-medium">Total</p>
               </div>
-              <p className="text-xl font-bold text-teal-900">{mockCredits.length}</p>
-              <p className="text-xs text-teal-700 mt-1">Credit records</p>
+              <p className="text-xl font-bold text-[#000000]">{mockCredits.length}</p>
+              <p className="text-xs text-[#516057] mt-1">Credit records</p>
             </div>
           </div>
         )}
 
         {/* Professional Filters */}
-        <Card className="border-2 border-teal-200 bg-gradient-to-br from-white to-teal-50/30">
+        <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1]">
           <CardContent className="p-3">
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-teal-500" />
-                <Input placeholder={activeTab === 'payments' ? "Search payments..." : "Search credits..."} className="pl-7 h-7 text-xs border-teal-200 focus:border-teal-400" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-[#6b7280]" />
+                <Input placeholder={activeTab === 'payments' ? "Search payments..." : "Search credits..."} className="pl-7 h-7 text-xs border-[#e2e2e2] focus:border-[#e2e2e2]" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
               </div>
               <div className="flex gap-1">
                 {[
                   { value: 'all', label: 'All', color: 'bg-slate-100 text-slate-700 border-slate-300' },
-                  { value: 'pending', label: 'Pending', color: 'bg-cyan-100 text-cyan-700 border-cyan-300' },
+                  { value: 'pending', label: 'Pending', color: 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2]' },
                   { value: 'partial', label: 'Partial', color: 'bg-amber-100 text-amber-700 border-amber-300' },
-                  { value: 'completed', label: 'Completed', color: 'bg-emerald-100 text-emerald-700 border-emerald-300' },
+                  { value: 'completed', label: 'Completed', color: 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2]' },
                 ].map((status) => (
                   <Button 
                     key={status.value} 
                     variant={filterStatus === status.value ? 'primary' : 'outline'} 
                     size="sm" 
-                    className={`h-7 text-xs px-2 border-2 ${filterStatus === status.value ? status.color : 'border-gray-300'}`}
+                    className={`h-7 text-xs px-2 border-2 ${filterStatus === status.value ? status.color : 'border-[#e2e2e2]'}`}
                     onClick={() => setFilterStatus(status.value as any)}
                   >
                     {status.label}
@@ -321,9 +321,9 @@ export default function PaymentsPage() {
                 ))}
                 {activeTab === 'credits' && (
                   <>
-                    <Button variant={filterStatus === 'expected' ? 'primary' : 'outline'} size="sm" className={`h-7 text-xs px-2 border-2 ${filterStatus === 'expected' ? 'bg-cyan-100 text-cyan-700 border-cyan-300' : 'border-gray-300'}`}
+                    <Button variant={filterStatus === 'expected' ? 'primary' : 'outline'} size="sm" className={`h-7 text-xs px-2 border-2 ${filterStatus === 'expected' ? 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2]' : 'border-[#e2e2e2]'}`}
                       onClick={() => setFilterStatus('expected')}>Expected</Button>
-                    <Button variant={filterStatus === 'overdue' ? 'primary' : 'outline'} size="sm" className={`h-7 text-xs px-2 border-2 ${filterStatus === 'overdue' ? 'bg-red-100 text-red-700 border-red-300' : 'border-gray-300'}`}
+                    <Button variant={filterStatus === 'overdue' ? 'primary' : 'outline'} size="sm" className={`h-7 text-xs px-2 border-2 ${filterStatus === 'overdue' ? 'bg-red-100 text-red-700 border-red-300' : 'border-[#e2e2e2]'}`}
                       onClick={() => setFilterStatus('overdue')}>Overdue</Button>
                   </>
                 )}
@@ -334,29 +334,29 @@ export default function PaymentsPage() {
 
         {/* Payments Table - Professional */}
         {activeTab === 'payments' && (
-          <Card className="border-2 border-teal-200 bg-gradient-to-br from-white to-teal-50/30">
+          <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1]">
             <CardContent className="p-3">
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
-                  <thead className="bg-gradient-to-r from-teal-100 to-cyan-100 border-b-2 border-teal-200">
+                  <thead className="bg-[#f5f2f1] border-b-2 border-[#e2e2e2]">
                     <tr>
-                      <th className="text-left p-2 font-bold text-teal-900 w-6"></th>
-                      <th className="text-left p-2 font-bold text-teal-900">Payment ID</th>
-                      <th className="text-left p-2 font-bold text-teal-900">Date</th>
-                      <th className="text-left p-2 font-bold text-teal-900">Supplier</th>
-                      <th className="text-left p-2 font-bold text-teal-900">Distributor</th>
-                      <th className="text-left p-2 font-bold text-teal-900">Return ID</th>
-                      <th className="text-left p-2 font-bold text-teal-900">Items</th>
-                      <th className="text-left p-2 font-bold text-teal-900">Total Paid</th>
-                      <th className="text-left p-2 font-bold text-teal-900">Commission</th>
-                      <th className="text-left p-2 font-bold text-teal-900">Net Amount</th>
-                      <th className="text-left p-2 font-bold text-teal-900">Status</th>
-                      <th className="text-left p-2 font-bold text-teal-900">Method</th>
+                      <th className="text-left p-2 font-bold text-[#000000] w-6"></th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Payment ID</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Date</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Supplier</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Distributor</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Return ID</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Items</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Total Paid</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Commission</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Net Amount</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Status</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Method</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredPayments.length === 0 ? (
-                      <tr><td colSpan={12} className="p-4 text-center text-gray-500 text-sm bg-gray-50">No payments found</td></tr>
+                      <tr><td colSpan={12} className="p-4 text-center text-[#6b7280] text-sm bg-[#f5f2f1]">No payments found</td></tr>
                     ) : (
                       filteredPayments.map((payment, idx) => {
                         const isExpanded = expandedPayments.has(payment.id);
@@ -365,7 +365,7 @@ export default function PaymentsPage() {
                         const netAmount = payment.commission?.netAmount || payment.items.reduce((sum, item) => sum + (item.commission?.netAmount || item.actualAmount), 0);
                         return (
                           <>
-                            <tr key={payment.id} className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-teal-50 transition-colors`}>
+                            <tr key={payment.id} className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]/50'} hover:bg-[#f5f2f1] transition-colors`}>
                               <td className="p-2">
                                 <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => togglePayment(payment.id)}>
                                   {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
@@ -377,15 +377,15 @@ export default function PaymentsPage() {
                               <td className="p-2">{payment.distributor?.name || '-'}</td>
                               <td className="p-2 font-mono">{payment.returnId}</td>
                               <td className="p-2">{payment.items.length}</td>
-                              <td className="p-2 font-medium text-cyan-700">{formatCurrency(totalPaid)}</td>
+                              <td className="p-2 font-medium text-[#516057]">{formatCurrency(totalPaid)}</td>
                               <td className="p-2 font-bold text-amber-600">-{formatCurrency(totalCommissionAmount)}</td>
-                              <td className="p-2 font-bold text-emerald-700">{formatCurrency(netAmount)}</td>
+                              <td className="p-2 font-bold text-[#516057]">{formatCurrency(netAmount)}</td>
                               <td className="p-2">
                                 <Badge variant={getStatusVariant(payment.status)} className={`text-xs border-2 ${
-                                  payment.status === 'completed' ? 'bg-emerald-100 text-black border-emerald-300' :
+                                  payment.status === 'completed' ? 'bg-[#f5f2f1] text-black border-[#e2e2e2]' :
                                   payment.status === 'partial' ? 'bg-amber-100 text-black border-amber-300' :
-                                  payment.status === 'pending' ? 'bg-cyan-100 text-black border-cyan-300' :
-                                  'bg-gray-100 text-black border-gray-300'
+                                  payment.status === 'pending' ? 'bg-[#f5f2f1] text-black border-[#e2e2e2]' :
+                                  'bg-[#f5f2f1] text-black border-[#e2e2e2]'
                                 }`}>
                                   {payment.status}
                                 </Badge>
@@ -394,7 +394,7 @@ export default function PaymentsPage() {
                             </tr>
                             {isExpanded && (
                               <tr>
-                                <td colSpan={12} className="p-3 bg-gray-50">
+                                <td colSpan={12} className="p-3 bg-[#f5f2f1]">
                                   <div className="space-y-2">
                                     <div className="grid grid-cols-2 gap-2 text-xs mb-2">
                                       <div><span className="text-muted-foreground">Transaction ID:</span> <span className="font-mono">{payment.transactionId}</span></div>
@@ -446,29 +446,29 @@ export default function PaymentsPage() {
 
         {/* Credits Table - Professional */}
         {activeTab === 'credits' && (
-          <Card className="border-2 border-cyan-200 bg-gradient-to-br from-white to-cyan-50/30">
+          <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1]">
             <CardContent className="p-3">
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
-                  <thead className="bg-gradient-to-r from-cyan-100 to-teal-100 border-b-2 border-cyan-200">
+                  <thead className="bg-[#f5f2f1] border-b-2 border-[#e2e2e2]">
                     <tr>
-                      <th className="text-left p-2 font-bold text-cyan-900 w-6"></th>
-                      <th className="text-left p-2 font-bold text-cyan-900">Drug Name</th>
-                      <th className="text-left p-2 font-bold text-cyan-900">Manufacturer</th>
-                      <th className="text-left p-2 font-bold text-cyan-900">Return ID</th>
-                      <th className="text-left p-2 font-bold text-cyan-900">Expected</th>
-                      <th className="text-left p-2 font-bold text-cyan-900">Received</th>
-                      <th className="text-left p-2 font-bold text-cyan-900">Variance</th>
-                      <th className="text-left p-2 font-bold text-cyan-900">Commission</th>
-                      <th className="text-left p-2 font-bold text-cyan-900">Net Amount</th>
-                      <th className="text-left p-2 font-bold text-cyan-900">Expected Date</th>
-                      <th className="text-left p-2 font-bold text-cyan-900">Actual Date</th>
-                      <th className="text-left p-2 font-bold text-cyan-900">Status</th>
+                      <th className="text-left p-2 font-bold text-[#000000] w-6"></th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Drug Name</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Manufacturer</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Return ID</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Expected</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Received</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Variance</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Commission</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Net Amount</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Expected Date</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Actual Date</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredCredits.length === 0 ? (
-                      <tr><td colSpan={12} className="p-4 text-center text-gray-500 text-sm bg-gray-50">No credits found</td></tr>
+                      <tr><td colSpan={12} className="p-4 text-center text-[#6b7280] text-sm bg-[#f5f2f1]">No credits found</td></tr>
                     ) : (
                       filteredCredits.map((credit, idx) => {
                         const isExpanded = expandedCredits.has(credit.id);
@@ -476,7 +476,7 @@ export default function PaymentsPage() {
                         const netAmount = credit.actualAmount ? (credit.actualAmount - (commission?.amount || 0)) : null;
                         return (
                           <>
-                            <tr key={credit.id} className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-cyan-50 transition-colors`}>
+                            <tr key={credit.id} className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]/50'} hover:bg-[#f5f2f1] transition-colors`}>
                               <td className="p-2">
                                 <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => toggleCredit(credit.id)}>
                                   {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
@@ -486,19 +486,19 @@ export default function PaymentsPage() {
                               <td className="p-2">{credit.manufacturer}</td>
                               <td className="p-2 font-mono"><Link href={`/returns/${credit.returnId}`} className="text-primary">{credit.returnId}</Link></td>
                               <td className="p-2">{formatCurrency(credit.expectedAmount)}</td>
-                              <td className="p-2 font-bold text-emerald-700">{credit.actualAmount ? formatCurrency(credit.actualAmount) : '-'}</td>
-                              <td className={`p-2 font-bold ${credit.variance !== undefined ? (credit.variance >= 0 ? 'text-emerald-700' : 'text-red-700') : 'text-gray-500'}`}>
+                              <td className="p-2 font-bold text-[#516057]">{credit.actualAmount ? formatCurrency(credit.actualAmount) : '-'}</td>
+                              <td className={`p-2 font-bold ${credit.variance !== undefined ? (credit.variance >= 0 ? 'text-[#516057]' : 'text-red-700') : 'text-[#6b7280]'}`}>
                                 {credit.variance !== undefined ? `${credit.variance >= 0 ? '+' : ''}${formatCurrency(credit.variance)}` : '-'}
                               </td>
                               <td className="p-2 font-bold text-amber-600">{commission ? `-${formatCurrency(commission.amount)}` : '-'}</td>
-                              <td className="p-2 font-bold text-emerald-700">{netAmount ? formatCurrency(netAmount) : '-'}</td>
+                              <td className="p-2 font-bold text-[#516057]">{netAmount ? formatCurrency(netAmount) : '-'}</td>
                               <td className="p-2">{formatDate(credit.expectedPaymentDate)}</td>
                               <td className="p-2">{credit.actualPaymentDate ? formatDate(credit.actualPaymentDate) : '-'}</td>
                               <td className="p-2">
                                 <Badge variant={credit.status === 'received' ? 'success' : credit.status === 'overdue' ? 'error' : 'secondary'} className={`text-xs border-2 ${
-                                  credit.status === 'received' ? 'bg-emerald-100 text-black border-emerald-300' :
+                                  credit.status === 'received' ? 'bg-[#f5f2f1] text-black border-[#e2e2e2]' :
                                   credit.status === 'overdue' ? 'bg-red-100 text-black border-red-300' :
-                                  'bg-cyan-100 text-black border-cyan-300'
+                                  'bg-[#f5f2f1] text-black border-[#e2e2e2]'
                                 }`}>
                                   {credit.status}
                                 </Badge>
@@ -506,7 +506,7 @@ export default function PaymentsPage() {
                             </tr>
                             {isExpanded && (
                               <tr>
-                                <td colSpan={12} className="p-3 bg-gray-50">
+                                <td colSpan={12} className="p-3 bg-[#f5f2f1]">
                                   <div className="grid grid-cols-2 gap-2 text-xs">
                                     <div><span className="text-muted-foreground">Item ID:</span> <span>{credit.itemId}</span></div>
                                     <div><span className="text-muted-foreground">Return ID:</span> <Link href={`/returns/${credit.returnId}`} className="text-primary">{credit.returnId}</Link></div>

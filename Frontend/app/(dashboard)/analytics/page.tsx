@@ -41,7 +41,7 @@ import {
 } from 'recharts';
 import { analyticsService, PharmacyDashboardData } from '@/lib/api/services/analyticsService';
 
-const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#6b7280', '#ef4444', '#8b5cf6'];
+const COLORS = ['#516057', '#ad916a', '#1d2222', '#505454', '#e2e2e2', '#6b7280'];
 
 const STATUS_LABELS: Record<string, string> = {
   pending: 'Pending',
@@ -106,7 +106,7 @@ export default function AnalyticsPage() {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-3 border rounded-lg shadow-lg">
+        <div className="bg-white p-3 border border-[#e2e2e2] rounded-[4px] shadow-lg">
           <p className="font-semibold mb-2">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
@@ -141,12 +141,12 @@ export default function AnalyticsPage() {
               Your pharmacy performance metrics and financial analytics
             </p>
           </div>
-          <div className="flex items-center gap-2 border rounded-lg px-3 py-2">
+          <div className="flex items-center gap-2 border border-[#e2e2e2] rounded-[4px] px-3 py-2">
             <Calendar className="h-4 w-4 text-muted-foreground" />
             <select
               value={dateRange}
               onChange={(e) => setDateRange(e.target.value as any)}
-              className="text-sm border-0 bg-transparent focus:outline-none"
+              className="text-sm border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-[#516057] rounded-[4px]"
             >
               <option value="30d">Last 30 days</option>
               <option value="90d">Last 90 days</option>
@@ -178,8 +178,8 @@ export default function AnalyticsPage() {
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
               {[1, 2, 3, 4].map((i) => (
                 <Card key={i} className="animate-pulse">
-                  <CardHeader className="pb-2"><div className="h-4 bg-gray-200 rounded w-24" /></CardHeader>
-                  <CardContent><div className="h-8 bg-gray-200 rounded w-32" /></CardContent>
+                  <CardHeader className="pb-2"><div className="h-4 bg-[#e2e2e2] rounded w-24" /></CardHeader>
+                  <CardContent><div className="h-8 bg-[#e2e2e2] rounded w-32" /></CardContent>
                 </Card>
               ))}
             </div>
@@ -192,15 +192,15 @@ export default function AnalyticsPage() {
           <>
             {/* KPI Cards */}
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-              <Card className="border-l-4 border-l-blue-500">
+              <Card className="border-l-4 border-l-[#516057]">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     Total Returnable Value
                   </CardTitle>
-                  <DollarSign className="h-4 w-4 text-blue-600" />
+                  <DollarSign className="h-4 w-4 text-[#516057]" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-xl font-bold text-blue-600">
+                  <div className="text-xl font-bold text-[#516057]">
                     {formatCurrency(data.overview.totalReturnableValue)}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -209,12 +209,12 @@ export default function AnalyticsPage() {
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-green-500">
+              <Card className="border-l-4 border-l-[#516057]">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     Total Returns
                   </CardTitle>
-                  <Package className="h-4 w-4 text-green-600" />
+                  <Package className="h-4 w-4 text-[#516057]" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-xl font-bold">{data.overview.totalReturns}</div>
@@ -227,15 +227,15 @@ export default function AnalyticsPage() {
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-purple-500">
+              <Card className="border-l-4 border-l-[#1d2222]">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     Net Payout
                   </CardTitle>
-                  <Percent className="h-4 w-4 text-purple-600" />
+                  <Percent className="h-4 w-4 text-[#1d2222]" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-xl font-bold text-purple-600">
+                  <div className="text-xl font-bold text-[#1d2222]">
                     {formatCurrency(data.creditsSummary.totalPayout)}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -244,15 +244,15 @@ export default function AnalyticsPage() {
                 </CardContent>
               </Card>
 
-              <Card className="border-l-4 border-l-orange-500">
+              <Card className="border-l-4 border-l-[#ad916a]">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     Recovery Rate
                   </CardTitle>
-                  <Target className="h-4 w-4 text-orange-600" />
+                  <Target className="h-4 w-4 text-[#ad916a]" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-xl font-bold text-green-600">
+                  <div className="text-xl font-bold text-[#516057]">
                     {data.creditsSummary.estimatedVsActual?.recoveryPercent || 0}%
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -263,17 +263,17 @@ export default function AnalyticsPage() {
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-2 border-b overflow-x-auto">
+            <div className="flex gap-2 border-b border-[#e2e2e2] overflow-x-auto bg-[#f5f2f1] rounded-[4px] p-1">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
-                    className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+                    className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-[4px] border transition-all whitespace-nowrap ${
                       activeTab === tab.id
-                        ? 'border-primary text-primary'
-                        : 'border-transparent text-muted-foreground hover:text-foreground'
+                        ? 'border-[#516057] bg-white text-[#516057] shadow-sm'
+                        : 'border-transparent text-[#505454] hover:text-[#000000] hover:bg-white/50 hover:border-[#e2e2e2]'
                     }`}
                   >
                     <Icon className="h-4 w-4 flex-shrink-0" />
@@ -317,7 +317,7 @@ export default function AnalyticsPage() {
                             yAxisId="left"
                             type="monotone"
                             dataKey="totalValue"
-                            stroke="#3b82f6"
+                            stroke="#516057"
                             fillOpacity={1}
                             fill="url(#colorValue)"
                             name="Total Value"
@@ -327,7 +327,7 @@ export default function AnalyticsPage() {
                             yAxisId="right"
                             type="monotone"
                             dataKey="returns"
-                            stroke="#10b981"
+                            stroke="#516057"
                             strokeWidth={2}
                             name="Returns Count"
                             dot={{ fill: '#10b981', r: 4 }}
@@ -388,25 +388,25 @@ export default function AnalyticsPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <div className="flex justify-between items-center p-3 bg-[#f5f2f1] rounded-[4px]">
                           <span className="text-sm text-muted-foreground">Average Items per Return</span>
                           <span className="font-bold">{data.overview.avgItemsPerReturn}</span>
                         </div>
-                        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <div className="flex justify-between items-center p-3 bg-[#f5f2f1] rounded-[4px]">
                           <span className="text-sm text-muted-foreground">Total Credits Received</span>
-                          <span className="font-bold text-green-600">{formatCurrency(data.creditsSummary.totalCreditsReceived)}</span>
+                          <span className="font-bold text-[#516057]">{formatCurrency(data.creditsSummary.totalCreditsReceived)}</span>
                         </div>
-                        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <div className="flex justify-between items-center p-3 bg-[#f5f2f1] rounded-[4px]">
                           <span className="text-sm text-muted-foreground">Company Fee</span>
-                          <span className="font-bold text-orange-600">{formatCurrency(data.creditsSummary.totalCompanyFee)}</span>
+                          <span className="font-bold text-[#ad916a]">{formatCurrency(data.creditsSummary.totalCompanyFee)}</span>
                         </div>
-                        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <div className="flex justify-between items-center p-3 bg-[#f5f2f1] rounded-[4px]">
                           <span className="text-sm text-muted-foreground">GPO Share</span>
-                          <span className="font-bold text-purple-600">{formatCurrency(data.creditsSummary.totalGpoShare)}</span>
+                          <span className="font-bold text-[#1d2222]">{formatCurrency(data.creditsSummary.totalGpoShare)}</span>
                         </div>
-                        <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg border border-green-200">
-                          <span className="text-sm font-medium text-green-800">Your Net Payout</span>
-                          <span className="font-bold text-green-700">{formatCurrency(data.creditsSummary.totalPayout)}</span>
+                        <div className="flex justify-between items-center p-3 bg-[#f5f2f1] rounded-[4px] border border-[#e2e2e2]">
+                          <span className="text-sm font-medium text-[#000000]">Your Net Payout</span>
+                          <span className="font-bold text-[#505454]">{formatCurrency(data.creditsSummary.totalPayout)}</span>
                         </div>
                       </div>
                     </CardContent>
@@ -426,17 +426,17 @@ export default function AnalyticsPage() {
                         <CardTitle>Revenue Summary</CardTitle>
                         <CardDescription>Complete financial breakdown with fee transparency</CardDescription>
                       </div>
-                      <DollarSign className="h-5 w-5 text-green-600" />
+                      <DollarSign className="h-5 w-5 text-[#516057]" />
                     </div>
                   </CardHeader>
                   <CardContent>
                     <div className="grid gap-4 md:grid-cols-3">
-                      <div className="p-4 bg-white rounded-lg border shadow-sm">
+                      <div className="p-4 bg-white rounded-[4px] border shadow-sm">
                         <div className="flex items-center justify-between mb-2">
                           <p className="text-sm font-medium text-muted-foreground">Total Credits</p>
-                          <TrendingUp className="h-4 w-4 text-blue-600" />
+                          <TrendingUp className="h-4 w-4 text-[#516057]" />
                         </div>
-                        <p className="text-xl font-bold text-blue-600 mb-2">
+                        <p className="text-xl font-bold text-[#516057] mb-2">
                           {formatCurrency(data.creditsSummary.totalCreditsReceived)}
                         </p>
                         <p className="text-xs text-muted-foreground">Total credits received from returns</p>
@@ -448,44 +448,44 @@ export default function AnalyticsPage() {
                         </div>
                       </div>
 
-                      <div className="p-4 bg-white rounded-lg border shadow-sm">
+                      <div className="p-4 bg-white rounded-[4px] border shadow-sm">
                         <div className="flex items-center justify-between mb-2">
                           <p className="text-sm font-medium text-muted-foreground">Fees & Deductions</p>
-                          <Percent className="h-4 w-4 text-orange-600" />
+                          <Percent className="h-4 w-4 text-[#ad916a]" />
                         </div>
-                        <p className="text-xl font-bold text-orange-600 mb-2">
+                        <p className="text-xl font-bold text-[#ad916a] mb-2">
                           -{formatCurrency(data.creditsSummary.totalCompanyFee + data.creditsSummary.totalGpoShare)}
                         </p>
                         <p className="text-xs text-muted-foreground">Company fee + GPO share</p>
                         <div className="mt-3 pt-3 border-t space-y-1">
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-muted-foreground">Company Fee:</span>
-                            <span className="font-semibold text-orange-600">-{formatCurrency(data.creditsSummary.totalCompanyFee)}</span>
+                            <span className="font-semibold text-[#ad916a]">-{formatCurrency(data.creditsSummary.totalCompanyFee)}</span>
                           </div>
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-muted-foreground">GPO Share:</span>
-                            <span className="font-semibold text-orange-600">-{formatCurrency(data.creditsSummary.totalGpoShare)}</span>
+                            <span className="font-semibold text-[#ad916a]">-{formatCurrency(data.creditsSummary.totalGpoShare)}</span>
                           </div>
                         </div>
                       </div>
 
-                      <div className="p-4 bg-green-50 rounded-lg border border-green-200 shadow-sm">
+                      <div className="p-4 bg-[#f5f2f1] rounded-[4px] border border-[#e2e2e2] shadow-sm">
                         <div className="flex items-center justify-between mb-2">
-                          <p className="text-sm font-medium text-green-800">Your Net Payout</p>
-                          <DollarSign className="h-4 w-4 text-green-700" />
+                          <p className="text-sm font-medium text-[#000000]">Your Net Payout</p>
+                          <DollarSign className="h-4 w-4 text-[#505454]" />
                         </div>
-                        <p className="text-xl font-bold text-green-700 mb-2">
+                        <p className="text-xl font-bold text-[#505454] mb-2">
                           {formatCurrency(data.creditsSummary.totalPayout)}
                         </p>
-                        <p className="text-xs text-green-700">Amount you receive after deductions</p>
-                        <div className="mt-3 pt-3 border-t border-green-200 space-y-1">
+                        <p className="text-xs text-[#505454]">Amount you receive after deductions</p>
+                        <div className="mt-3 pt-3 border-t border-[#e2e2e2] space-y-1">
                           <div className="flex items-center justify-between text-sm">
-                            <span className="text-green-700">Paid:</span>
-                            <span className="font-semibold text-green-800">{formatCurrency(data.creditsSummary.paidPayout)}</span>
+                            <span className="text-[#505454]">Paid:</span>
+                            <span className="font-semibold text-[#000000]">{formatCurrency(data.creditsSummary.paidPayout)}</span>
                           </div>
                           <div className="flex items-center justify-between text-sm">
-                            <span className="text-green-700">Pending:</span>
-                            <span className="font-semibold text-green-800">{formatCurrency(data.creditsSummary.pendingPayout)}</span>
+                            <span className="text-[#505454]">Pending:</span>
+                            <span className="font-semibold text-[#000000]">{formatCurrency(data.creditsSummary.pendingPayout)}</span>
                           </div>
                         </div>
                       </div>
@@ -493,7 +493,7 @@ export default function AnalyticsPage() {
 
                     {/* Estimated vs Actual */}
                     {data.creditsSummary.estimatedVsActual && (
-                      <div className="mt-6 p-4 bg-gray-50 rounded-lg border">
+                      <div className="mt-6 p-4 bg-[#f5f2f1] rounded-[4px] border">
                         <h4 className="font-semibold mb-4 text-sm uppercase tracking-wide text-muted-foreground">
                           Estimated vs Actual Recovery
                         </h4>
@@ -504,11 +504,11 @@ export default function AnalyticsPage() {
                           </div>
                           <div className="flex justify-between items-center p-3 bg-white rounded">
                             <span className="text-muted-foreground">Actual Received:</span>
-                            <span className="font-semibold text-green-600">{formatCurrency(data.creditsSummary.estimatedVsActual.actualReceived)}</span>
+                            <span className="font-semibold text-[#516057]">{formatCurrency(data.creditsSummary.estimatedVsActual.actualReceived)}</span>
                           </div>
                           <div className="flex justify-between items-center p-3 bg-white rounded">
                             <span className="text-muted-foreground">Recovery Rate:</span>
-                            <span className="font-bold text-lg text-green-600">{data.creditsSummary.estimatedVsActual.recoveryPercent}%</span>
+                            <span className="font-bold text-lg text-[#516057]">{data.creditsSummary.estimatedVsActual.recoveryPercent}%</span>
                           </div>
                         </div>
                       </div>
@@ -539,7 +539,7 @@ export default function AnalyticsPage() {
                           <Area
                             type="monotone"
                             dataKey="totalValue"
-                            stroke="#3b82f6"
+                            stroke="#516057"
                             fillOpacity={1}
                             fill="url(#colorValueFin)"
                             name="Value"
@@ -563,54 +563,54 @@ export default function AnalyticsPage() {
                         <CardTitle>Performance Metrics</CardTitle>
                         <CardDescription>Key operational indicators</CardDescription>
                       </div>
-                      <Target className="h-5 w-5 text-blue-600" />
+                      <Target className="h-5 w-5 text-[#516057]" />
                     </div>
                   </CardHeader>
                   <CardContent>
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                      <div className="p-4 bg-white rounded-lg border shadow-sm">
+                      <div className="p-4 bg-white rounded-[4px] border shadow-sm">
                         <p className="text-xs font-medium text-muted-foreground mb-2">Completion Rate</p>
-                        <p className="text-xl font-bold text-green-600 mb-2">
+                        <p className="text-xl font-bold text-[#516057] mb-2">
                           {data.overview.totalReturns > 0 ? ((data.overview.completedReturns / data.overview.totalReturns) * 100).toFixed(1) : 0}%
                         </p>
                         <p className="text-xs text-muted-foreground mb-2">{data.overview.completedReturns} of {data.overview.totalReturns} completed</p>
-                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="h-2 bg-[#e2e2e2] rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-green-500 transition-all"
+                            className="h-full bg-[#f5f2f1]0 transition-all"
                             style={{ width: `${data.overview.totalReturns > 0 ? (data.overview.completedReturns / data.overview.totalReturns) * 100 : 0}%` }}
                           />
                         </div>
                       </div>
 
-                      <div className="p-4 bg-white rounded-lg border shadow-sm">
+                      <div className="p-4 bg-white rounded-[4px] border shadow-sm">
                         <p className="text-xs font-medium text-muted-foreground mb-2">Recovery Rate</p>
-                        <p className="text-xl font-bold text-blue-600 mb-2">
+                        <p className="text-xl font-bold text-[#516057] mb-2">
                           {data.creditsSummary.estimatedVsActual?.recoveryPercent || 0}%
                         </p>
                         <p className="text-xs text-muted-foreground mb-2">Credits received vs estimated</p>
-                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="h-2 bg-[#e2e2e2] rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-blue-500 transition-all"
+                            className="h-full bg-[#f5f2f1]0 transition-all"
                             style={{ width: `${Math.min(data.creditsSummary.estimatedVsActual?.recoveryPercent || 0, 100)}%` }}
                           />
                         </div>
                       </div>
 
-                      <div className="p-4 bg-white rounded-lg border shadow-sm">
+                      <div className="p-4 bg-white rounded-[4px] border shadow-sm">
                         <p className="text-xs font-medium text-muted-foreground mb-2">Total Items Returned</p>
-                        <p className="text-xl font-bold text-purple-600 mb-2">{data.overview.totalItems}</p>
+                        <p className="text-xl font-bold text-[#1d2222] mb-2">{data.overview.totalItems}</p>
                         <p className="text-xs text-muted-foreground">{data.overview.avgItemsPerReturn} avg per return</p>
                       </div>
 
-                      <div className="p-4 bg-white rounded-lg border shadow-sm">
+                      <div className="p-4 bg-white rounded-[4px] border shadow-sm">
                         <p className="text-xs font-medium text-muted-foreground mb-2">Payment Status</p>
-                        <p className="text-xl font-bold text-orange-600 mb-2">{data.creditsSummary.totalPayments}</p>
+                        <p className="text-xl font-bold text-[#ad916a] mb-2">{data.creditsSummary.totalPayments}</p>
                         <p className="text-xs text-muted-foreground">Total payment records</p>
                       </div>
                     </div>
 
                     {/* Performance Summary */}
-                    <div className="mt-6 p-4 bg-gray-50 rounded-lg border">
+                    <div className="mt-6 p-4 bg-[#f5f2f1] rounded-[4px] border">
                       <h4 className="font-semibold mb-4 text-sm uppercase tracking-wide text-muted-foreground">Summary</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-3">
@@ -620,11 +620,11 @@ export default function AnalyticsPage() {
                           </div>
                           <div className="flex justify-between items-center p-2 bg-white rounded">
                             <span className="text-sm text-muted-foreground">Completed</span>
-                            <span className="font-bold text-green-600">{data.overview.completedReturns}</span>
+                            <span className="font-bold text-[#516057]">{data.overview.completedReturns}</span>
                           </div>
                           <div className="flex justify-between items-center p-2 bg-white rounded">
                             <span className="text-sm text-muted-foreground">In Progress</span>
-                            <span className="font-bold text-blue-600">{data.overview.inProgressReturns}</span>
+                            <span className="font-bold text-[#516057]">{data.overview.inProgressReturns}</span>
                           </div>
                         </div>
                         <div className="space-y-3">
@@ -634,11 +634,11 @@ export default function AnalyticsPage() {
                           </div>
                           <div className="flex justify-between items-center p-2 bg-white rounded">
                             <span className="text-sm text-muted-foreground">Credits Received</span>
-                            <span className="font-bold text-green-600">{formatCurrency(data.creditsSummary.totalCreditsReceived)}</span>
+                            <span className="font-bold text-[#516057]">{formatCurrency(data.creditsSummary.totalCreditsReceived)}</span>
                           </div>
                           <div className="flex justify-between items-center p-2 bg-white rounded">
                             <span className="text-sm text-muted-foreground">Net Payout</span>
-                            <span className="font-bold text-purple-600">{formatCurrency(data.creditsSummary.totalPayout)}</span>
+                            <span className="font-bold text-[#1d2222]">{formatCurrency(data.creditsSummary.totalPayout)}</span>
                           </div>
                         </div>
                       </div>
@@ -678,7 +678,7 @@ export default function AnalyticsPage() {
                               tickFormatter={(v) => v.length > 22 ? v.substring(0, 22) + '...' : v}
                             />
                             <Tooltip content={<CustomTooltip />} />
-                            <Bar dataKey="totalValue" fill="#3b82f6" name="Total Value" radius={[0, 4, 4, 0]} />
+                            <Bar dataKey="totalValue" fill="#516057" name="Total Value" radius={[0, 4, 4, 0]} />
                           </BarChart>
                         </ResponsiveContainer>
 
@@ -686,7 +686,7 @@ export default function AnalyticsPage() {
                         <div className="mt-6 overflow-x-auto">
                           <table className="w-full table-auto">
                             <thead>
-                              <tr className="bg-gradient-to-r from-teal-600 to-teal-700 border-b-2 border-teal-800">
+                              <tr className="bg-[#516057] border-b-2 border-[#516057]">
                                 <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Product</th>
                                 <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">NDC</th>
                                 <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Manufacturer</th>
@@ -697,13 +697,13 @@ export default function AnalyticsPage() {
                             </thead>
                             <tbody>
                               {data.topProducts.map((product, idx) => (
-                                <tr key={idx} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-teal-50/40'} hover:bg-teal-50 transition-colors border-b border-gray-100`}>
-                                  <td className="px-4 py-3"><span className="text-sm text-gray-900 font-medium">{product.productName}</span></td>
-                                  <td className="px-4 py-3"><span className="text-sm text-gray-600 font-mono">{product.ndc}</span></td>
-                                  <td className="px-4 py-3"><span className="text-sm text-gray-600">{product.manufacturer}</span></td>
-                                  <td className="px-4 py-3 text-right"><span className="text-sm text-gray-900">{product.totalQuantity}</span></td>
-                                  <td className="px-4 py-3 text-right"><span className="text-sm text-gray-900 font-semibold text-green-600">{formatCurrency(product.totalValue)}</span></td>
-                                  <td className="px-4 py-3 text-right"><span className="text-sm text-gray-900">{product.returnCount}</span></td>
+                                <tr key={idx} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]/40'} hover:bg-[#f5f2f1] transition-colors border-b border-[#f3f4f6]`}>
+                                  <td className="px-4 py-3"><span className="text-sm text-[#000000] font-medium">{product.productName}</span></td>
+                                  <td className="px-4 py-3"><span className="text-sm text-[#505454] font-mono">{product.ndc}</span></td>
+                                  <td className="px-4 py-3"><span className="text-sm text-[#505454]">{product.manufacturer}</span></td>
+                                  <td className="px-4 py-3 text-right"><span className="text-sm text-[#000000]">{product.totalQuantity}</span></td>
+                                  <td className="px-4 py-3 text-right"><span className="text-sm text-[#000000] font-semibold text-[#516057]">{formatCurrency(product.totalValue)}</span></td>
+                                  <td className="px-4 py-3 text-right"><span className="text-sm text-[#000000]">{product.returnCount}</span></td>
                                 </tr>
                               ))}
                             </tbody>
@@ -732,7 +732,7 @@ export default function AnalyticsPage() {
                     {data.recentReturns.length > 0 ? (
                       <div className="space-y-3">
                         {data.recentReturns.map((ret) => (
-                          <div key={ret.id} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+                          <div key={ret.id} className="p-4 border border-[#e2e2e2] rounded-[4px] hover:shadow-md transition-shadow">
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                               <div className="flex-1">
                                 <div className="flex items-center gap-3 mb-2">

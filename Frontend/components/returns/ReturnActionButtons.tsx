@@ -37,7 +37,7 @@ export function ReturnActionButtons({ returnId, returnStatus }: ReturnActionButt
     <div className="flex gap-2">
       {/* Show lock warning for locked returns */}
       {isLocked && (
-        <div className="flex items-center gap-1 px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded border border-yellow-300">
+        <div className="flex items-center gap-1 px-2 py-1 text-xs bg-[#ad916a]/20 text-[#6b5a3f] rounded-[4px] border border-[#ad916a]/30">
           <Lock className="w-3 h-3" />
           <span>Locked</span>
         </div>
@@ -87,4 +87,3 @@ export function ReturnActionButtons({ returnId, returnStatus }: ReturnActionButt
     </div>
   );
 }
-

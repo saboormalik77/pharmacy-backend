@@ -7,7 +7,7 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import {
     ArrowLeft, Loader2, ScanLine, Keyboard, CheckCircle,
     AlertTriangle, RotateCcw, X, Camera, Archive, ShieldCheck,
-    FileText, Ban, Info, Trash2,
+    FileText, Ban, Info, Trash2, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 
 // Dynamically imported so it only loads in the browser (uses WebRTC APIs)
@@ -76,6 +76,9 @@ const DEA_SCHEDULE_OPTIONS = [
     '', 'CI', 'CII', 'CIII', 'CIV', 'CV', 'Non-Controlled'
 ];
 
+/** Session product list tab: items per page */
+const PRODUCTS_LIST_PAGE_SIZE = 6;
+
 const EMPTY_FORM = {
     ndc: '', ndc10: '', gtin: '', proprietaryName: '', genericName: '',
     manufacturer: '', packageDescription: '', dosageForm: '',
@@ -125,6 +128,7 @@ export default function AddItemsPage() {
     const [toasts, setToasts] = useState<Toast[]>([]);
     const [itemCount, setItemCount] = useState(0);
     const [recentlyAddedItems, setRecentlyAddedItems] = useState<ReturnTransactionItem[]>([]);
+    const [productsListPage, setProductsListPage] = useState(1);
     const [activeTab, setActiveTab] = useState<'list' | 'form'>('form');
     const [lastWarning, setLastWarning] = useState('');
     // NOTE: Classification display removed - moved to warehouse verification
@@ -189,6 +193,11 @@ export default function AddItemsPage() {
     }, [transactionId]);
 
     useEffect(() => { fetchItems(); }, [fetchItems]);
+
+    useEffect(() => {
+        const maxPage = Math.max(1, Math.ceil(recentlyAddedItems.length / PRODUCTS_LIST_PAGE_SIZE));
+        setProductsListPage((p) => Math.min(p, maxPage));
+    }, [recentlyAddedItems.length]);
 
     useEffect(() => {
         if (mode === 'usb') scanInputRef.current?.focus();
@@ -545,6 +554,7 @@ export default function AddItemsPage() {
                 setScannedPrices(null);
                 setScanError('');
                 setScanInput('');
+                setManualNdc('');
                 setPreCheckResult(null);
                 setPolicyAutoCheck(null);
                 setIsPolicyChecking(false);
@@ -575,6 +585,8 @@ export default function AddItemsPage() {
         setNonReturnableRoute('destruction');
         setScannedPrices(null);
         setScanError('');
+        setScanInput('');
+        setManualNdc('');
         setLastWarning('');
         // setLastClassification(null); // Classification display removed
         setPreCheckResult(null);
@@ -608,7 +620,7 @@ export default function AddItemsPage() {
         return (
             <DashboardLayout>
                 <div className="flex items-center justify-center min-h-64">
-                    <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+                    <Loader2 className="w-8 h-8 animate-spin text-[#516057]" />
                 </div>
             </DashboardLayout>
         );
@@ -616,6 +628,19 @@ export default function AddItemsPage() {
 
     /** While barcode/NDC lookup runs — lock scan inputs + product form */
     const scanFetching = isScanLoading;
+
+    const productsListTotalPages = Math.max(1, Math.ceil(recentlyAddedItems.length / PRODUCTS_LIST_PAGE_SIZE));
+    const paginatedSessionProducts = recentlyAddedItems.slice(
+        (productsListPage - 1) * PRODUCTS_LIST_PAGE_SIZE,
+        productsListPage * PRODUCTS_LIST_PAGE_SIZE
+    );
+    const productsListRangeStart = recentlyAddedItems.length === 0
+        ? 0
+        : (productsListPage - 1) * PRODUCTS_LIST_PAGE_SIZE + 1;
+    const productsListRangeEnd = Math.min(
+        productsListPage * PRODUCTS_LIST_PAGE_SIZE,
+        recentlyAddedItems.length
+    );
 
     return (
         <DashboardLayout>
@@ -627,15 +652,15 @@ export default function AddItemsPage() {
                     <div>
                         <button
                             onClick={() => router.push(`/returns/${transactionId}`)}
-                            className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 mb-1"
+                            className="flex items-center gap-1 text-xs text-[#6b7280] hover:text-[#505454] mb-1"
                         >
                             <ArrowLeft className="w-3.5 h-3.5" /> Back to Return
                         </button>
-                        <h1 className="text-base font-bold text-gray-900 flex items-center gap-1.5">
-                            <ScanLine className="w-4 h-4 text-primary-600" /> Adding Products
+                        <h1 className="text-base font-bold text-[#000000] flex items-center gap-1.5">
+                            <ScanLine className="w-4 h-4 text-[#516057]" /> Adding Products
                         </h1>
-                        <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-500">
-                            <span className="font-mono font-semibold text-gray-800">{tx.licensePlate}</span>
+                        <div className="flex items-center gap-2 mt-0.5 text-xs text-[#6b7280]">
+                            <span className="font-mono font-semibold text-[#000000]">{tx.licensePlate}</span>
                             <span>·</span>
                             <span>{tx.pharmacyName}</span>
                             {itemCount > 0 && (
@@ -646,20 +671,20 @@ export default function AddItemsPage() {
                             )}
                         </div>
                     </div>
-                    <button onClick={() => router.push(`/returns/${transactionId}`)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                    <button onClick={() => router.push(`/returns/${transactionId}`)} className="px-3 py-1.5 text-xs rounded-[4px] border border-[#516057] bg-[#516057] text-white hover:bg-[#505454] hover:border-[#505454] transition-colors shadow-sm">
                         Done Adding
                     </button>
                 </div>
 
                 {/* Tabs */}
                 {recentlyAddedItems.length > 0 && (
-                    <div className="flex gap-2 border-b border-gray-200">
+                    <div className="flex gap-2 border-b border-[#e2e2e2]">
                         <button
                             onClick={() => setActiveTab('list')}
                             className={`px-4 py-2 text-xs font-semibold transition-colors border-b-2 ${
                                 activeTab === 'list'
-                                    ? 'border-primary-600 text-primary-700 bg-primary-50'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                    ? 'border-[#516057] text-[#516057] bg-[#f5f2f1]'
+                                    : 'border-transparent text-[#6b7280] hover:text-[#505454] hover:bg-[#f5f2f1]'
                             }`}
                         >
                             <div className="flex items-center gap-1.5">
@@ -671,8 +696,8 @@ export default function AddItemsPage() {
                             onClick={() => setActiveTab('form')}
                             className={`px-4 py-2 text-xs font-semibold transition-colors border-b-2 ${
                                 activeTab === 'form'
-                                    ? 'border-primary-600 text-primary-700 bg-primary-50'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                    ? 'border-[#516057] text-[#516057] bg-[#f5f2f1]'
+                                    : 'border-transparent text-[#6b7280] hover:text-[#505454] hover:bg-[#f5f2f1]'
                             }`}
                         >
                             <div className="flex items-center gap-1.5">
@@ -685,17 +710,22 @@ export default function AddItemsPage() {
 
                 {/* Tab Content: Product List */}
                 {activeTab === 'list' && recentlyAddedItems.length > 0 && (
-                    <div className="bg-white rounded-lg shadow px-4 py-3">
+                    <div className="bg-white rounded-[4px] shadow px-4 py-3">
                         <div className="flex items-center justify-between mb-3">
-                            <h2 className="text-xs font-semibold text-gray-700">Products Added in This Session</h2>
-                            <p className="text-[10px] text-gray-500">{recentlyAddedItems.length} item{recentlyAddedItems.length !== 1 ? 's' : ''}</p>
+                            <h2 className="text-xs font-semibold text-[#505454]">Products Added in This Session</h2>
+                            <p className="text-[10px] text-[#6b7280]">
+                                {recentlyAddedItems.length} item{recentlyAddedItems.length !== 1 ? 's' : ''}
+                                {productsListTotalPages > 1 && (
+                                    <span className="text-[#9ca3af]"> · Showing {productsListRangeStart}–{productsListRangeEnd}</span>
+                                )}
+                            </p>
                         </div>
                         <div className="space-y-2 max-h-[500px] overflow-y-auto">
-                            {recentlyAddedItems.map((item) => (
-                                <div key={item.id} className="flex items-start gap-2 p-3 border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50/30 transition-all">
+                            {paginatedSessionProducts.map((item) => (
+                                <div key={item.id} className="flex items-start gap-2 p-3 border border-[#e2e2e2] rounded-[4px] hover:border-[#516057] hover:bg-[#f5f2f1] transition-all">
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 mb-1.5">
-                                            <p className="text-sm font-bold text-gray-900 truncate">
+                                            <p className="text-sm font-bold text-[#000000] truncate">
                                                 {item.proprietaryName || item.genericName || 'Unknown Product'}
                                             </p>
                                             <Badge variant={
@@ -710,24 +740,24 @@ export default function AddItemsPage() {
                                                 </span>
                                             </Badge>
                                             {item.isPartial && (
-                                                <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[10px] rounded font-semibold">
+                                                <span className="px-1.5 py-0.5 bg-[#f5f2f1] text-[#505454] text-[10px] rounded font-semibold">
                                                     Partial {item.partialPercentage}%
                                                 </span>
                                             )}
                                         </div>
                                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-1 text-[11px]">
-                                            <div><span className="text-gray-500">NDC:</span> <span className="font-semibold text-gray-900 font-mono">{item.ndc || '—'}</span></div>
-                                            <div><span className="text-gray-500">Lot:</span> <span className="font-medium text-gray-800">{item.lotNumber || '—'}</span></div>
-                                            <div><span className="text-gray-500">Exp:</span> <span className="font-medium text-gray-800">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</span></div>
-                                            {/* <div><span className="text-gray-500">Value:</span> <span className="font-bold text-green-600">${item.estimatedValue?.toFixed(2) || '0.00'}</span></div> */}
+                                            <div><span className="text-[#6b7280]">NDC:</span> <span className="font-semibold text-[#000000] font-mono">{item.ndc || '—'}</span></div>
+                                            <div><span className="text-[#6b7280]">Lot:</span> <span className="font-medium text-[#000000]">{item.lotNumber || '—'}</span></div>
+                                            <div><span className="text-[#6b7280]">Exp:</span> <span className="font-medium text-[#000000]">{item.expirationDate ? formatDate(item.expirationDate) : '—'}</span></div>
+                                            {/* <div><span className="text-[#6b7280]">Value:</span> <span className="font-bold text-[#516057]">${item.estimatedValue?.toFixed(2) || '0.00'}</span></div> */}
                                             {item.manufacturer && (
-                                                <div className="col-span-1"><span className="text-gray-500">Manufacturer:</span> <span className="font-medium text-gray-800">{item.manufacturer}</span></div>
+                                                <div className="col-span-1"><span className="text-[#6b7280]">Manufacturer:</span> <span className="font-medium text-[#000000]">{item.manufacturer}</span></div>
                                             )}
                                             {item.destination && (
-                                                <div className="col-span-1"><span className="text-gray-500">Destination:</span> <span className="font-medium text-gray-800 capitalize">{item.destination}</span></div>
+                                                <div className="col-span-1"><span className="text-[#6b7280]">Destination:</span> <span className="font-medium text-[#000000] capitalize">{item.destination}</span></div>
                                             )}
                                             {item.serialNumber && (
-                                                <div className="col-span-1"><span className="text-gray-500">Serial Number:</span> <span className="font-medium text-gray-800 capitalize">{item.serialNumber}</span></div>
+                                                <div className="col-span-1"><span className="text-[#6b7280]">Serial Number:</span> <span className="font-medium text-[#000000] capitalize">{item.serialNumber}</span></div>
                                             )}
                                         </div>
                                     </div>
@@ -742,6 +772,29 @@ export default function AddItemsPage() {
                                 </div>
                             ))}
                         </div>
+                        {productsListTotalPages > 1 && (
+                            <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#e2e2e2] gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setProductsListPage((p) => Math.max(1, p - 1))}
+                                    disabled={productsListPage <= 1}
+                                    className="inline-flex items-center gap-0.5 px-2 py-1 text-[10px] font-medium rounded-[4px] border border-[#e2e2e2] text-[#505454] hover:bg-[#f5f2f1] disabled:opacity-40 disabled:cursor-not-allowed"
+                                >
+                                    <ChevronLeft className="w-3.5 h-3.5" /> Previous
+                                </button>
+                                <span className="text-[10px] text-[#6b7280] tabular-nums">
+                                    Page {productsListPage} of {productsListTotalPages}
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => setProductsListPage((p) => Math.min(productsListTotalPages, p + 1))}
+                                    disabled={productsListPage >= productsListTotalPages}
+                                    className="inline-flex items-center gap-0.5 px-2 py-1 text-[10px] font-medium rounded-[4px] border border-[#e2e2e2] text-[#505454] hover:bg-[#f5f2f1] disabled:opacity-40 disabled:cursor-not-allowed"
+                                >
+                                    Next <ChevronRight className="w-3.5 h-3.5" />
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -749,7 +802,7 @@ export default function AddItemsPage() {
                 {(activeTab === 'form' || recentlyAddedItems.length === 0) && (
                     <>
                     {/* Scan / Manual Toggle */}
-                    <div className="bg-white rounded-lg shadow px-4 py-3">
+                    <div className="bg-white rounded-[4px] shadow px-4 py-3">
                         {/* Mode tabs */}
                         <div className="flex gap-1.5 mb-3">
                             {([
@@ -764,8 +817,8 @@ export default function AddItemsPage() {
                                     disabled={scanFetching}
                                     className={`flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-colors ${
                                         mode === key
-                                            ? 'bg-primary-100 text-primary-700 ring-1 ring-primary-300'
-                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            ? 'bg-[#f5f2f1] text-[#516057] ring-1 ring-[#e2e2e2]'
+                                            : 'bg-[#f5f2f1] text-[#505454] hover:bg-[#e2e2e2]'
                                     } disabled:opacity-50 disabled:cursor-not-allowed`}
                                 >
                                     <Icon className="w-3.5 h-3.5" /> {label}
@@ -780,22 +833,22 @@ export default function AddItemsPage() {
                                     type="button"
                                     onClick={() => setCameraOpen(true)}
                                     disabled={scanFetching}
-                                    className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 border border-dashed rounded transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed border-primary-300 bg-primary-50 hover:bg-primary-100 hover:border-primary-400"
+                                    className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 border border-dashed rounded transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed border-[#e2e2e2] bg-[#f5f2f1] hover:bg-[#f5f2f1] hover:border-[#516057]"
                                 >
                                     {scanFetching ? (
                                         <>
-                                            <Loader2 className="w-4 h-4 animate-spin text-primary-500 flex-shrink-0" />
-                                            <span className="text-xs font-medium text-primary-600">Looking up product...</span>
+                                            <Loader2 className="w-4 h-4 animate-spin text-[#6b7280] flex-shrink-0" />
+                                            <span className="text-xs font-medium text-[#516057]">Looking up product...</span>
                                         </>
                                     ) : (
                                         <>
-                                            <Camera className="w-4 h-4 text-primary-600 flex-shrink-0" />
-                                            <span className="text-xs font-semibold text-primary-700">Open Camera Scanner</span>
-                                            <span className="text-[10px] text-primary-400">— tap to scan QR / barcode</span>
+                                            <Camera className="w-4 h-4 text-[#516057] flex-shrink-0" />
+                                            <span className="text-xs font-semibold text-[#516057]">Open Camera Scanner</span>
+                                            <span className="text-[10px] text-[#9ca3af]">— tap to scan QR / barcode</span>
                                         </>
                                     )}
                                 </button>
-                                <p className="text-[10px] text-gray-400 mt-1">Works with QR codes, GS1 barcodes, and standard barcodes</p>
+                                <p className="text-[10px] text-[#9ca3af] mt-1">Works with QR codes, GS1 barcodes, and standard barcodes</p>
                             </div>
                         )}
 
@@ -803,7 +856,7 @@ export default function AddItemsPage() {
                         {mode === 'usb' && (
                             <div>
                                 <div className="relative">
-                                    <ScanLine className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                                    <ScanLine className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#9ca3af]" />
                                     <input
                                         ref={scanInputRef}
                                         type="text"
@@ -812,16 +865,16 @@ export default function AddItemsPage() {
                                         onKeyDown={handleScanKeyDown}
                                         disabled={scanFetching}
                                         placeholder="Scan with USB/Bluetooth scanner — press Enter after scan"
-                                        className="w-full pl-8 pr-8 py-2 text-xs border-2 border-primary-300 bg-primary-50 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-primary-500 disabled:bg-gray-50 disabled:border-gray-300 disabled:cursor-not-allowed"
+                                        className="w-full pl-8 pr-8 py-2 text-xs border-2 border-[#e2e2e2] bg-[#f5f2f1] rounded focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-[#516057] disabled:bg-[#f5f2f1] disabled:border-[#e2e2e2] disabled:cursor-not-allowed"
                                         autoFocus
                                     />
                                     {scanFetching && (
                                         <div className="absolute right-2.5 top-1/2 -translate-y-1/2">
-                                            <Loader2 className="w-4 h-4 animate-spin text-primary-600" />
+                                            <Loader2 className="w-4 h-4 animate-spin text-[#516057]" />
                                         </div>
                                     )}
                                 </div>
-                                <p className="text-[10px] text-gray-400 mt-1">Connect USB or Bluetooth barcode scanner — types code automatically and sends Enter.</p>
+                                <p className="text-[10px] text-[#9ca3af] mt-1">Connect USB or Bluetooth barcode scanner — types code automatically and sends Enter.</p>
                             </div>
                         )}
 
@@ -838,26 +891,26 @@ export default function AddItemsPage() {
                                         }}
                                         disabled={scanFetching}
                                         placeholder="Enter NDC (e.g. 43547-3250-06) and press Enter or Lookup..."
-                                        className="flex-1 px-2.5 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500 disabled:bg-gray-50 disabled:cursor-not-allowed"
+                                        className="flex-1 px-2.5 py-1.5 text-xs border border-[#e2e2e2] rounded focus:outline-none focus:ring-1 focus:ring-[#516057] disabled:bg-[#f5f2f1] disabled:cursor-not-allowed"
                                         autoFocus
                                     />
-                                    <button type="button" onClick={handleManualLookup} disabled={scanFetching || !manualNdc.trim()} className="px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors">
+                                    <button type="button" onClick={handleManualLookup} disabled={scanFetching || !manualNdc.trim()} className="px-3 py-1.5 text-xs rounded bg-[#516057] text-white hover:bg-[#505454] disabled:opacity-50 transition-colors">
                                         {scanFetching ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Lookup'}
                                     </button>
                                 </div>
-                                <p className="text-[10px] text-gray-400 mt-1">Enter the full NDC from the bottle label (e.g. <span className="font-mono">43547-3250-06</span>).</p>
+                                <p className="text-[10px] text-[#9ca3af] mt-1">Enter the full NDC from the bottle label (e.g. <span className="font-mono">43547-3250-06</span>).</p>
                             </div>
                         )}
 
                         {/* Scan error */}
                         {scanError && (
-                            <div className="mt-2 flex items-start gap-1.5 text-xs text-yellow-700 bg-yellow-50 border border-yellow-200 rounded px-2.5 py-1.5">
+                            <div className="mt-2 flex items-start gap-1.5 text-xs text-[#ad916a] bg-[#f5f2f1] border border-[#e2e2e2] rounded px-2.5 py-1.5">
                                 <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
                                 <span>{scanError}</span>
                             </div>
                         )}
                         {lastWarning && (
-                            <div className="mt-2 flex items-start gap-1.5 text-xs text-orange-700 bg-orange-50 border border-orange-200 rounded px-2.5 py-1.5">
+                            <div className="mt-2 flex items-start gap-1.5 text-xs text-[#ad916a] bg-[#f5f2f1] border border-[#e2e2e2] rounded px-2.5 py-1.5">
                                 <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
                                 <span>{lastWarning}</span>
                             </div>
@@ -867,8 +920,8 @@ export default function AddItemsPage() {
                     {/* NOTE: Classification results (TBD, Returnable, Non-Returnable, Wine Cellar) moved to warehouse verification */}
 
                     {/* Product Form */}
-                    <div className="bg-white rounded-lg shadow px-4 py-3">
-                        <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Product Information</h2>
+                    <div className="bg-white rounded-[4px] shadow px-4 py-3">
+                        <h2 className="text-[10px] font-semibold text-[#9ca3af] uppercase tracking-wider mb-2">Product Information</h2>
 
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                             <Field label="NDC" value={form.ndc} onChange={v => updateField('ndc', v)} placeholder="e.g. 43547-3250-06" required hasError={formErrors.has('ndc')} readOnly={scannedFields.has('ndc')} disabled={scanFetching} />
@@ -880,9 +933,9 @@ export default function AddItemsPage() {
 
                             {/* Strength */}
                             <div>
-                                <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
+                                <label className="block text-[10px] font-medium text-[#505454] mb-0.5">
                                     Strength
-                                    {(scannedFields.has('strengthValue') || scannedFields.has('strengthUnit')) && <span className="text-gray-400 ml-1 text-[9px]">(from API)</span>}
+                                    {(scannedFields.has('strengthValue') || scannedFields.has('strengthUnit')) && <span className="text-[#9ca3af] ml-1 text-[9px]">(from API)</span>}
                                 </label>
                                 <div className="flex gap-1">
                                     <input 
@@ -892,10 +945,10 @@ export default function AddItemsPage() {
                                         placeholder="500" 
                                         disabled={scanFetching}
                                         readOnly={scannedFields.has('strengthValue')}
-                                        className={`w-1/2 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
+                                        className={`w-1/2 px-2 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-1 ${
                                             scanFetching || scannedFields.has('strengthValue') 
-                                                ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed' 
-                                                : 'border-gray-300 focus:ring-teal-500'
+                                                ? 'border-[#e2e2e2] bg-[#f5f2f1] text-[#505454] cursor-not-allowed' 
+                                                : 'border-[#e2e2e2] focus:ring-[#516057]'
                                         }`} 
                                     />
                                     <input 
@@ -905,10 +958,10 @@ export default function AddItemsPage() {
                                         placeholder="mg" 
                                         disabled={scanFetching}
                                         readOnly={scannedFields.has('strengthUnit')}
-                                        className={`w-1/2 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
+                                        className={`w-1/2 px-2 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-1 ${
                                             scanFetching || scannedFields.has('strengthUnit') 
-                                                ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed' 
-                                                : 'border-gray-300 focus:ring-teal-500'
+                                                ? 'border-[#e2e2e2] bg-[#f5f2f1] text-[#505454] cursor-not-allowed' 
+                                                : 'border-[#e2e2e2] focus:ring-[#516057]'
                                         }`} 
                                     />
                                 </div>
@@ -916,18 +969,18 @@ export default function AddItemsPage() {
 
                             <Field label="Route" value={form.route} onChange={v => updateField('route', v)} placeholder="e.g. ORAL" readOnly={scannedFields.has('route')} disabled={scanFetching} />
                             <div>
-                                <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
+                                <label className="block text-[10px] font-medium text-[#505454] mb-0.5">
                                     DEA Schedule
-                                    {scannedFields.has('deaSchedule') && <span className="text-gray-400 ml-1 text-[9px]">(from API)</span>}
+                                    {scannedFields.has('deaSchedule') && <span className="text-[#9ca3af] ml-1 text-[9px]">(from API)</span>}
                                 </label>
                                 <select
                                     value={form.deaSchedule}
                                     onChange={e => !scannedFields.has('deaSchedule') && !scanFetching && updateField('deaSchedule', e.target.value)}
                                     disabled={scanFetching || scannedFields.has('deaSchedule')}
-                                    className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
+                                    className={`w-full px-2 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-1 ${
                                         scanFetching || scannedFields.has('deaSchedule')
-                                            ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed'
-                                            : 'border-gray-300 focus:ring-teal-500'
+                                            ? 'border-[#e2e2e2] bg-[#f5f2f1] text-[#505454] cursor-not-allowed'
+                                            : 'border-[#e2e2e2] focus:ring-[#516057]'
                                     }`}
                                 >
                                     {DEA_SCHEDULE_OPTIONS.map(option => (
@@ -940,9 +993,9 @@ export default function AddItemsPage() {
                             <Field label="Lot Number" value={form.lotNumber} onChange={v => updateField('lotNumber', v)} placeholder="Lot #" required hasError={formErrors.has('lotNumber')} readOnly={scannedFields.has('lotNumber')} disabled={scanFetching} />
                             <Field label="Serial Number" value={form.serialNumber} onChange={v => updateField('serialNumber', v)} placeholder="Serial #" readOnly={scannedFields.has('serialNumber')} disabled={scanFetching} />
                             <div>
-                                <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
+                                <label className="block text-[10px] font-medium text-[#505454] mb-0.5">
                                     Expiration Date<span className="text-red-500 ml-0.5">*</span>
-                                    {scannedFields.has('expirationDate') && <span className="text-gray-400 ml-1 text-[9px]">(from API)</span>}
+                                    {scannedFields.has('expirationDate') && <span className="text-[#9ca3af] ml-1 text-[9px]">(from API)</span>}
                                 </label>
                                 <input
                                     type="date"
@@ -950,20 +1003,20 @@ export default function AddItemsPage() {
                                     onChange={e => { if (!scannedFields.has('expirationDate') && !scanFetching) updateField('expirationDate', e.target.value); }}
                                     disabled={scanFetching}
                                     readOnly={scannedFields.has('expirationDate')}
-                                    className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
+                                    className={`w-full px-2 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-1 ${
                                         formErrors.has('expirationDate')
                                             ? 'border-red-400 bg-red-50 focus:ring-red-400'
                                             : scanFetching || scannedFields.has('expirationDate')
-                                            ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed'
-                                            : 'border-gray-300 focus:ring-teal-500'
+                                            ? 'border-[#e2e2e2] bg-[#f5f2f1] text-[#505454] cursor-not-allowed'
+                                            : 'border-[#e2e2e2] focus:ring-[#516057]'
                                     }`}
                                 />
                                 {formErrors.has('expirationDate') && <p className="text-[10px] text-red-500 mt-0.5">Required</p>}
                             </div>
                         </div>
 
-                        <hr className="my-3 border-gray-100" />
-                        <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Quantity</h2>
+                        <hr className="my-3 border-[#f3f4f6]" />
+                        <h2 className="text-[10px] font-semibold text-[#9ca3af] uppercase tracking-wider mb-2">Quantity</h2>
 
                         {(() => {
                             const pkgSize = parseFloat(form.fullPackageSize) || 0;
@@ -980,13 +1033,13 @@ export default function AddItemsPage() {
                                 <>
                                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                     {/* <div>
-                                        <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Price ($)</label>
-                                        <input type="number" step="0.01" min="0" value={form.standardPrice} onChange={e => updateField('standardPrice', e.target.value)} placeholder="0.00" className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500" />
+                                        <label className="block text-[10px] font-medium text-[#505454] mb-0.5">Price ($)</label>
+                                        <input type="number" step="0.01" min="0" value={form.standardPrice} onChange={e => updateField('standardPrice', e.target.value)} placeholder="0.00" className="w-full px-2 py-1 text-xs border border-[#e2e2e2] rounded focus:outline-none focus:ring-1 focus:ring-[#516057]" />
                                     </div> */}
                                     <div>
-                                        <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
+                                        <label className="block text-[10px] font-medium text-[#505454] mb-0.5">
                                             Pkg Size
-                                            {scannedFields.has('fullPackageSize') && <span className="text-gray-400 ml-1 text-[9px]">(from API)</span>}
+                                            {scannedFields.has('fullPackageSize') && <span className="text-[#9ca3af] ml-1 text-[9px]">(from API)</span>}
                                         </label>
                                         <input 
                                             type="number" 
@@ -996,16 +1049,16 @@ export default function AddItemsPage() {
                                             placeholder="e.g. 60" 
                                             disabled={scanFetching}
                                             readOnly={scannedFields.has('fullPackageSize')}
-                                            className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
+                                            className={`w-full px-2 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-1 ${
                                                 scanFetching || scannedFields.has('fullPackageSize')
-                                                    ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed'
-                                                    : 'border-gray-300 focus:ring-teal-500'
+                                                    ? 'border-[#e2e2e2] bg-[#f5f2f1] text-[#505454] cursor-not-allowed'
+                                                    : 'border-[#e2e2e2] focus:ring-[#516057]'
                                             }`} 
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
-                                            Qty Returned <span className="text-gray-400">({form.qtyMode === 'units' ? 'units' : '%'})</span>
+                                        <label className="block text-[10px] font-medium text-[#505454] mb-0.5">
+                                            Qty Returned <span className="text-[#9ca3af]">({form.qtyMode === 'units' ? 'units' : '%'})</span>
                                         </label>
                                         <div className="flex gap-1">
                                             <input 
@@ -1026,9 +1079,9 @@ export default function AddItemsPage() {
                                                 }}
                                                 placeholder={form.qtyMode === 'units' ? '45' : '75'} 
                                                 disabled={scanFetching}
-                                                className={`flex-1 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-teal-500 ${scanFetching ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed' : 'border-gray-300'}`} 
+                                                className={`flex-1 px-2 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-1 focus:ring-[#516057] ${scanFetching ? 'border-[#e2e2e2] bg-[#f5f2f1] text-[#505454] cursor-not-allowed' : 'border-[#e2e2e2]'}`} 
                                             />
-                                            <button type="button" onClick={() => !scanFetching && updateField('qtyMode', form.qtyMode === 'units' ? 'percent' : 'units')} disabled={scanFetching} className="px-1.5 text-[10px] font-semibold rounded border border-gray-300 bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" title="Toggle units/percent">
+                                            <button type="button" onClick={() => !scanFetching && updateField('qtyMode', form.qtyMode === 'units' ? 'percent' : 'units')} disabled={scanFetching} className="px-1.5 text-[10px] font-semibold rounded border border-[#e2e2e2] bg-[#f5f2f1] hover:bg-[#e2e2e2] text-[#505454] transition-colors disabled:opacity-50 disabled:cursor-not-allowed" title="Toggle units/percent">
                                                 {form.qtyMode === 'units' ? '#' : '%'}
                                             </button>
                                         </div>
@@ -1043,7 +1096,7 @@ export default function AddItemsPage() {
                                                         Percentage cannot exceed 100%
                                                     </p>
                                                 ) : (
-                                                    <p className="text-[10px] mt-0.5 font-medium text-green-600">
+                                                    <p className="text-[10px] mt-0.5 font-medium text-[#516057]">
                                                         {isPartialDerived ? `Partial — ${pctDerived.toFixed(1)}% (${unitsDerived.toFixed(1)} units)` : 'Full bottle'}
                                                     </p>
                                                 )}
@@ -1053,60 +1106,60 @@ export default function AddItemsPage() {
                                 </div>
                                 {/* <div className="grid grid-cols-2 gap-2 mt-2">
                                     <div>
-                                        <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Est. Value</label>
-                                        <input type="text" readOnly value={`$${estimatedValue.toFixed(2)}`} className="w-full px-2 py-1 text-xs border border-gray-200 rounded bg-gray-50 text-gray-700 font-medium" />
+                                        <label className="block text-[10px] font-medium text-[#505454] mb-0.5">Est. Value</label>
+                                        <input type="text" readOnly value={`$${estimatedValue.toFixed(2)}`} className="w-full px-2 py-1 text-xs border border-[#e2e2e2] rounded bg-[#f5f2f1] text-[#505454] font-medium" />
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Est. Store Value <span className="text-gray-400 font-normal">(−30%)</span></label>
-                                        <input type="text" readOnly value={`$${estimatedStoreValue.toFixed(2)}`} className="w-full px-2 py-1 text-xs border border-gray-200 rounded bg-gray-50 text-gray-700 font-medium" />
+                                        <label className="block text-[10px] font-medium text-[#505454] mb-0.5">Est. Store Value <span className="text-[#9ca3af] font-normal">(−30%)</span></label>
+                                        <input type="text" readOnly value={`$${estimatedStoreValue.toFixed(2)}`} className="w-full px-2 py-1 text-xs border border-[#e2e2e2] rounded bg-[#f5f2f1] text-[#505454] font-medium" />
                                     </div>
                                 </div> */}
                                 </>
                             );
                         })()}
 
-                        <hr className="my-3 border-gray-100" />
+                        <hr className="my-3 border-[#f3f4f6]" />
                         <div className="flex items-center justify-between mb-2">
-                            {/* <h2 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Item Status</h2> */}
-                            <span className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded">
+                            {/* <h2 className="text-[10px] font-semibold text-[#9ca3af] uppercase tracking-wider">Item Status</h2> */}
+                            <span className="text-[10px] text-[#ad916a] bg-[#f5f2f1] border border-[#e2e2e2] px-2 py-0.5 rounded">
                                 Policy/Wine Cellar/Destruction handled in warehouse verification
                             </span>
                         </div>
 
                         {/* <div className="flex flex-wrap gap-3 mb-2">
                             <label className="flex items-center gap-1.5 text-xs cursor-pointer">
-                                <input type="radio" name="returnStatus" value="tbd" checked={form.returnStatus === 'tbd'} onChange={() => updateField('returnStatus', 'tbd')} className="text-primary-600 focus:ring-teal-500" />
-                                <span className="font-medium text-gray-700">Add Item (Status determined at warehouse)</span>
+                                <input type="radio" name="returnStatus" value="tbd" checked={form.returnStatus === 'tbd'} onChange={() => updateField('returnStatus', 'tbd')} className="text-[#516057] focus:ring-[#516057]" />
+                                <span className="font-medium text-[#505454]">Add Item (Status determined at warehouse)</span>
                             </label>
                         </div> */}
 
                         <div className="grid grid-cols-2 gap-2">
                             <div>
-                                <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Return Reason</label>
-                                <select value={form.returnReason} onChange={e => updateField('returnReason', e.target.value)} disabled={scanFetching} className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500 disabled:bg-gray-50 disabled:text-gray-600 disabled:cursor-not-allowed">
+                                <label className="block text-[10px] font-medium text-[#505454] mb-0.5">Return Reason</label>
+                                <select value={form.returnReason} onChange={e => updateField('returnReason', e.target.value)} disabled={scanFetching} className="w-full px-2 py-1 text-xs border border-[#e2e2e2] rounded focus:outline-none focus:ring-1 focus:ring-[#516057] disabled:bg-[#f5f2f1] disabled:text-[#505454] disabled:cursor-not-allowed">
                                     {RETURN_REASONS.map(r => <option key={r} value={r}>{r || '— Select reason —'}</option>)}
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Memo</label>
-                                <input type="text" value={form.memo} onChange={e => updateField('memo', e.target.value)} placeholder="Optional memo" disabled={scanFetching} className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500 disabled:bg-gray-50 disabled:cursor-not-allowed" />
+                                <label className="block text-[10px] font-medium text-[#505454] mb-0.5">Memo</label>
+                                <input type="text" value={form.memo} onChange={e => updateField('memo', e.target.value)} placeholder="Optional memo" disabled={scanFetching} className="w-full px-2 py-1 text-xs border border-[#e2e2e2] rounded focus:outline-none focus:ring-1 focus:ring-[#516057] disabled:bg-[#f5f2f1] disabled:cursor-not-allowed" />
                             </div>
                         </div>
 
                         {/* Destination and non-returnable routing are handled in warehouse verification. */}
 
                         {/* Action Buttons */}
-                        <div className="mt-3 pt-3 border-t border-gray-100">
+                        <div className="mt-3 pt-3 border-t border-[#f3f4f6]">
                             <div className="flex flex-wrap gap-1.5">
-                                <button type="button" onClick={() => handleSave()} disabled={scanFetching || isItemActionLoading || (!form.ndc && !form.proprietaryName)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors">
+                                <button type="button" onClick={() => handleSave()} disabled={scanFetching || isItemActionLoading || (!form.ndc && !form.proprietaryName)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#516057] text-white hover:bg-[#505454] disabled:opacity-50 transition-colors">
                                     {isItemActionLoading
                                         ? <><Loader2 className="w-3 h-3 animate-spin" />Saving...</>
                                         : <><CheckCircle className="w-3 h-3" />Save &amp; Scan Next</>}
                                 </button>
-                                <button type="button" onClick={handleClearForm} disabled={scanFetching} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                <button type="button" onClick={handleClearForm} disabled={scanFetching} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-[#e2e2e2] text-[#505454] hover:bg-[#f5f2f1] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                                     <RotateCcw className="w-3 h-3" /> Clear
                                 </button>
-                                <button onClick={() => router.push(`/returns/${transactionId}`)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded text-gray-500 hover:bg-gray-100 transition-colors">
+                                <button onClick={() => router.push(`/returns/${transactionId}`)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded text-[#6b7280] hover:bg-[#f5f2f1] transition-colors">
                                     <X className="w-3 h-3" /> Cancel
                                 </button>
                             </div>
@@ -1145,9 +1198,9 @@ function Field({ label, value, onChange, placeholder, required, hasError, readOn
     const muted = fetching || readOnly;
     return (
         <div>
-            <label className="block text-[10px] font-medium text-gray-600 mb-0.5">
+            <label className="block text-[10px] font-medium text-[#505454] mb-0.5">
                 {label}{required && <span className="text-red-500 ml-0.5">*</span>}
-                {readOnly && <span className="text-gray-400 ml-1 text-[9px]">(from API)</span>}
+                {readOnly && <span className="text-[#9ca3af] ml-1 text-[9px]">(from API)</span>}
             </label>
             <input
                 type="text"
@@ -1156,12 +1209,12 @@ function Field({ label, value, onChange, placeholder, required, hasError, readOn
                 placeholder={placeholder}
                 disabled={fetching}
                 readOnly={scannedLocked}
-                className={`w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 ${
+                className={`w-full px-2 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-1 ${
                     hasError
                         ? 'border-red-400 bg-red-50 focus:ring-red-400'
                         : muted
-                        ? 'border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed'
-                        : 'border-gray-300 focus:ring-teal-500'
+                        ? 'border-[#e2e2e2] bg-[#f5f2f1] text-[#505454] cursor-not-allowed'
+                        : 'border-[#e2e2e2] focus:ring-[#516057]'
                 }`}
             />
             {hasError && <p className="text-[10px] text-red-500 mt-0.5">Required</p>}
@@ -1177,13 +1230,13 @@ function PolicyDetail({ label, value, capitalize, highlight }: {
     capitalize?: boolean;
     highlight?: 'green' | 'red' | 'purple';
 }) {
-    const valueClass = highlight === 'green' ? 'text-green-700 font-semibold'
+    const valueClass = highlight === 'green' ? 'text-[#505454] font-semibold'
         : highlight === 'red' ? 'text-red-700 font-semibold'
-        : highlight === 'purple' ? 'text-purple-700 font-semibold'
-        : 'text-gray-900';
+        : highlight === 'purple' ? 'text-[#1d2222] font-semibold'
+        : 'text-[#000000]';
     return (
-        <div className="bg-gray-50 rounded p-2 border border-gray-100">
-            <p className="text-[10px] text-gray-500 mb-0.5">{label}</p>
+        <div className="bg-[#f5f2f1] rounded p-2 border border-[#f3f4f6]">
+            <p className="text-[10px] text-[#6b7280] mb-0.5">{label}</p>
             <p className={`text-xs ${valueClass} ${capitalize ? 'capitalize' : ''}`}>{value}</p>
         </div>
     );

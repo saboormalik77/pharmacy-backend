@@ -90,18 +90,18 @@ export function CreateBranchModal({ isOpen, onClose, onSuccess }: CreateBranchMo
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div
-        className={`bg-card rounded-xl shadow-xl max-w-xl w-full max-h-[85vh] overflow-y-auto ${thinScroll}`}
+        className={`bg-card rounded-[4px] shadow-xl max-w-xl w-full max-h-[85vh] overflow-y-auto ${thinScroll}`}
       >
-        <div className="flex items-center justify-between p-4 border-b-[0.5px] border-gray-200 bg-gradient-to-r from-emerald-50 to-teal-50">
+        <div className="flex items-center justify-between p-4 border-b-[0.5px] border-gray-200 bg-[#f5f2f1]">
           <h2 className="text-base font-bold text-gray-900">Create Branch Pharmacy</h2>
-          <button onClick={onClose} className="p-1 hover:bg-white/50 rounded-lg transition-colors">
+          <button onClick={onClose} className="p-1 hover:bg-white/50 rounded-[4px] transition-colors">
             <X className="h-4 w-4 text-gray-600" />
           </button>
         </div>
 
         <div className="p-4 space-y-4">
           {error && (
-            <div className="rounded-lg border-[0.5px] border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+            <div className="rounded-[4px] border-[0.5px] border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
               {error}
             </div>
           )}
@@ -140,7 +140,7 @@ export function CreateBranchModal({ isOpen, onClose, onSuccess }: CreateBranchMo
               <select
                 value={form.state}
                 onChange={(e) => update('state', e.target.value)}
-                className="w-full h-8 px-2 py-1 text-xs border border-input bg-background rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                className="w-full h-8 px-2 py-1 text-xs border border-input bg-background rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057]/20 focus:border-[#516057]"
               >
                 <option value="">Select a state</option>
                 {US_STATES.map((state) => (
@@ -179,7 +179,7 @@ export function CreateBranchModal({ isOpen, onClose, onSuccess }: CreateBranchMo
               <select
                 value={form.serviceType}
                 onChange={(e) => update('serviceType', e.target.value)}
-                className="flex h-8 w-full rounded-lg border border-input bg-background px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/20 focus:border-emerald-500"
+                className="flex h-8 w-full rounded-[4px] border border-input bg-background px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#516057]/20 focus:border-[#516057]"
               >
                 <option value="full_service">Full Service</option>
                 <option value="self_service">Self Service</option>
@@ -191,7 +191,7 @@ export function CreateBranchModal({ isOpen, onClose, onSuccess }: CreateBranchMo
             </div>
           </div>
 
-          <div className="rounded-lg border-[0.5px] border-emerald-200/90 bg-emerald-50/50 p-3">
+          <div className="rounded-[4px] border-[0.5px] border-[#e2e2e2]/90 bg-[#f5f2f1]/50 p-3">
             <label className="block text-sm font-semibold text-gray-900 mb-1">Assign Roles (Optional)</label>
             <p className="text-xs text-gray-600 mb-3">
               Selected roles will be assigned when the branch completes setup. You can modify roles later.
@@ -210,7 +210,7 @@ export function CreateBranchModal({ isOpen, onClose, onSuccess }: CreateBranchMo
                       type="checkbox"
                       checked={selectedRoleIds.includes(r.id)}
                       onChange={() => toggleRole(r.id)}
-                      className="mt-0.5 h-3.5 w-3.5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                      className="mt-0.5 h-3.5 w-3.5 rounded border-gray-300 text-[#516057] focus:ring-[#516057]"
                     />
                     <span>
                       <span className="font-medium">{r.roleName}</span>
@@ -235,7 +235,7 @@ export function CreateBranchModal({ isOpen, onClose, onSuccess }: CreateBranchMo
             Cancel
           </Button>
           <Button 
-            className="bg-emerald-600 hover:bg-emerald-700 text-white h-8 text-xs px-4"
+            className="bg-[#516057] hover:bg-[#505454] text-white h-8 text-xs px-4"
             onClick={handleSubmit} 
             disabled={isSubmitting}
           >

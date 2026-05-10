@@ -212,7 +212,7 @@ export default function InventoryAnalysisPage() {
       return (
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <Package className="h-12 w-12 text-gray-300 mb-3" />
-          <p className="text-gray-500 text-sm">No items in this category</p>
+          <p className="text-[#6b7280] text-sm">No items in this category</p>
         </div>
       );
     }
@@ -226,7 +226,7 @@ export default function InventoryAnalysisPage() {
       }}
       >
         <table className="w-full text-xs min-w-[1000px] sm:min-w-[1200px]">
-          <thead className={`sticky top-0 ${type === 'return' ? 'bg-gradient-to-r from-emerald-100 to-teal-100' : 'bg-gradient-to-r from-blue-100 to-cyan-100'}`}>
+          <thead className={`sticky top-0 ${type === 'return' ? 'bg-[#f5f2f1]' : 'bg-[#f5f2f1]'}`}>
             <tr>
               <th className="text-left p-1.5 sm:p-2 font-bold min-w-[120px] sm:min-w-[150px] text-[10px] sm:text-xs">Product</th>
               <th className="text-left p-1.5 sm:p-2 font-bold min-w-[100px] sm:min-w-[120px] text-[10px] sm:text-xs">Manufacturer</th>
@@ -245,18 +245,18 @@ export default function InventoryAnalysisPage() {
           </thead>
           <tbody>
             {items.map((item, idx) => (
-              <tr key={item.id || `item-${idx}-${item.ndcCode}`} className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-gray-100/50 transition-colors`}>
+              <tr key={item.id || `item-${idx}-${item.ndcCode}`} className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]/50'} hover:bg-[#f5f2f1]/50 transition-colors`}>
                 <td className="p-1.5 sm:p-2">
                   <div className="font-medium text-[10px] sm:text-xs">{item.productName}</div>
                 </td>
                 <td className="p-1.5 sm:p-2">
-                  <span className="text-gray-700 text-[10px] sm:text-xs">{item.manufacturer}</span>
+                  <span className="text-[#505454] text-[10px] sm:text-xs">{item.manufacturer}</span>
                 </td>
                 <td className="p-1.5 sm:p-2 font-mono text-[10px] sm:text-xs">{item.ndcCode}</td>
                 <td className="p-1.5 sm:p-2 text-[10px] sm:text-xs">{item.lotNumber}</td>
                 <td className="p-1.5 sm:p-2">
                   <div className="text-[10px] sm:text-xs">{item.quantity} total</div>
-                  <div className="text-gray-500 text-[9px] sm:text-xs">
+                  <div className="text-[#6b7280] text-[9px] sm:text-xs">
                     {item.fullUnits} full, {item.partialUnits} partial
                   </div>
                 </td>
@@ -268,7 +268,7 @@ export default function InventoryAnalysisPage() {
                   <span className="font-medium text-purple-600 text-[10px] sm:text-xs">{formatCurrency(item.bestPartialPrice)}</span>
                 </td>
                 <td className="p-1.5 sm:p-2">
-                  <span className="font-bold text-emerald-600 text-[10px] sm:text-xs">{formatCurrency(item.estimatedReturnValue)}</span>
+                  <span className="font-bold text-[#516057] text-[10px] sm:text-xs">{formatCurrency(item.estimatedReturnValue)}</span>
                 </td>
                 {type === 'return' && (
                   <td className="p-1.5 sm:p-2">
@@ -276,16 +276,16 @@ export default function InventoryAnalysisPage() {
                       <div>
                         <div className="font-medium text-[10px] sm:text-xs">{item.recommendedDistributor.name}</div>
                         {formatLocation(item.recommendedDistributor.location) && (
-                          <div className="text-gray-500 text-[9px] sm:text-xs">{formatLocation(item.recommendedDistributor.location)}</div>
+                          <div className="text-[#6b7280] text-[9px] sm:text-xs">{formatLocation(item.recommendedDistributor.location)}</div>
                         )}
                       </div>
                     ) : (
-                      <span className="text-gray-400 text-[10px] sm:text-xs">-</span>
+                      <span className="text-[#9ca3af] text-[10px] sm:text-xs">-</span>
                     )}
                   </td>
                 )}
                 <td className="p-1.5 sm:p-2">
-                  <p className="text-[10px] sm:text-xs text-gray-600" title={item.reason}>
+                  <p className="text-[10px] sm:text-xs text-[#505454]" title={item.reason}>
                     {item.reason}
                   </p>
                 </td>
@@ -302,14 +302,14 @@ export default function InventoryAnalysisPage() {
       <PermissionGuard permission="inventory_analysis:view">
       <div className="space-y-4">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 p-3 sm:p-4 rounded-lg bg-gradient-to-r from-teal-50 via-cyan-50 to-teal-50 border-2 border-teal-200">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 p-3 sm:p-4 rounded-[4px] bg-[#f5f2f1] border-2 border-[#e2e2e2]">
           <div className="flex-1 min-w-0">
-            <h1 className="text-lg sm:text-xl font-bold text-gray-900">Inventory Analysis</h1>
-            <p className="text-[10px] sm:text-xs text-gray-600 mt-0.5">Upload your inventory to analyze return opportunities and recommendations</p>
+            <h1 className="text-lg sm:text-xl font-bold text-[#000000]">Inventory Analysis</h1>
+            <p className="text-[10px] sm:text-xs text-[#505454] mt-0.5">Upload your inventory to analyze return opportunities and recommendations</p>
           </div>
           <Button 
             size="sm" 
-            className="bg-teal-600 hover:bg-teal-700 text-white w-full sm:w-auto text-xs sm:text-sm"
+            className="bg-[#516057] hover:bg-[#505454] text-white w-full sm:w-auto text-xs sm:text-sm"
             onClick={() => setShowUploadSection(!showUploadSection)}
           >
             <Upload className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
@@ -324,7 +324,7 @@ export default function InventoryAnalysisPage() {
 
         {/* Alerts */}
         {(success || error) && (
-          <div className={`p-2 sm:p-3 rounded-lg text-xs sm:text-sm flex items-center gap-2 ${
+          <div className={`p-2 sm:p-3 rounded-[4px] text-xs sm:text-sm flex items-center gap-2 ${
             success ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'
           }`}>
             {success ? <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" /> : <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />}
@@ -342,16 +342,16 @@ export default function InventoryAnalysisPage() {
 
         {/* Upload Section - Toggleable */}
         {showUploadSection && (
-          <Card className="border-2 border-teal-200 bg-gradient-to-br from-white to-teal-50/30">
+          <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1]">
             <CardContent className="p-3 sm:p-6">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <div className="p-1.5 sm:p-2 rounded-lg bg-teal-100 flex-shrink-0">
-                    <Upload className="h-4 w-4 sm:h-5 sm:w-5 text-teal-600" />
+                  <div className="p-1.5 sm:p-2 rounded-[4px] bg-[#f5f2f1] flex-shrink-0">
+                    <Upload className="h-4 w-4 sm:h-5 sm:w-5 text-[#516057]" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h2 className="font-bold text-sm sm:text-base text-gray-900 truncate">Upload Inventory File</h2>
-                    <p className="text-[10px] sm:text-xs text-gray-600">Upload Excel (.xlsx, .xls) or CSV files</p>
+                    <h2 className="font-bold text-sm sm:text-base text-[#000000] truncate">Upload Inventory File</h2>
+                    <p className="text-[10px] sm:text-xs text-[#505454]">Upload Excel (.xlsx, .xls) or CSV files</p>
                   </div>
                 </div>
                 <Button 
@@ -364,7 +364,7 @@ export default function InventoryAnalysisPage() {
                 </Button>
               </div>
 
-              <div className="border-2 border-dashed border-teal-300 rounded-lg p-4 sm:p-8 text-center bg-teal-50/30 hover:bg-teal-50/50 transition-colors">
+              <div className="border-2 border-dashed border-[#e2e2e2] rounded-[4px] p-4 sm:p-8 text-center bg-[#f5f2f1]/30 hover:bg-[#f5f2f1]/50 transition-colors">
                 <input 
                   ref={fileInputRef}
                   type="file" 
@@ -376,21 +376,21 @@ export default function InventoryAnalysisPage() {
                 
                 {!file ? (
                   <label htmlFor="inventory-file-upload" className="cursor-pointer block">
-                    <FileSpreadsheet className="h-8 w-8 sm:h-12 sm:w-12 mx-auto mb-2 sm:mb-3 text-teal-400" />
-                    <p className="text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                    <FileSpreadsheet className="h-8 w-8 sm:h-12 sm:w-12 mx-auto mb-2 sm:mb-3 text-[#9ca3af]" />
+                    <p className="text-xs sm:text-sm font-medium text-[#505454] mb-1">
                       Click to upload or drag and drop
                     </p>
-                    <p className="text-[10px] sm:text-xs text-gray-500">
+                    <p className="text-[10px] sm:text-xs text-[#6b7280]">
                       Supported: CSV, Excel (.xlsx, .xls)
                     </p>
                   </label>
                 ) : (
                   <div className="space-y-2 sm:space-y-3">
                     <div className="flex items-center justify-center gap-2 flex-wrap">
-                      <FileSpreadsheet className="h-6 w-6 sm:h-8 sm:w-8 text-teal-600 flex-shrink-0" />
+                      <FileSpreadsheet className="h-6 w-6 sm:h-8 sm:w-8 text-[#516057] flex-shrink-0" />
                       <div className="text-left min-w-0 flex-1">
-                        <p className="font-medium text-gray-900 text-xs sm:text-sm truncate">{file.name}</p>
-                        <p className="text-[10px] sm:text-xs text-gray-500">
+                        <p className="font-medium text-[#000000] text-xs sm:text-sm truncate">{file.name}</p>
+                        <p className="text-[10px] sm:text-xs text-[#6b7280]">
                           {(file.size / 1024).toFixed(1)} KB
                         </p>
                       </div>
@@ -400,14 +400,14 @@ export default function InventoryAnalysisPage() {
                         className="h-6 w-6 sm:h-6 sm:w-6 p-0 flex-shrink-0"
                         onClick={clearFile}
                       >
-                        <X className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500" />
+                        <X className="h-3 w-3 sm:h-4 sm:w-4 text-[#6b7280]" />
                       </Button>
                     </div>
                     
                     <Button 
                       onClick={handleUpload}
                       disabled={isUploading}
-                      className="bg-teal-600 hover:bg-teal-700 text-white w-full sm:w-auto text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2"
+                      className="bg-[#516057] hover:bg-[#505454] text-white w-full sm:w-auto text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2"
                     >
                       {isUploading ? (
                         <>
@@ -426,7 +426,7 @@ export default function InventoryAnalysisPage() {
               </div>
 
               {/* Info Box */}
-              <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-blue-50 rounded-[4px] border border-blue-200">
                 <div className="flex items-start gap-2">
                   <Info className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600 mt-0.5 flex-shrink-0" />
                   <div className="text-[10px] sm:text-xs text-blue-800 min-w-0">
@@ -446,45 +446,45 @@ export default function InventoryAnalysisPage() {
         {/* Loading State */}
         {isLoading && (
           <div className="flex flex-col items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-teal-600 mb-3" />
-            <p className="text-sm text-gray-500">Loading analysis data...</p>
+            <Loader2 className="h-8 w-8 animate-spin text-[#516057] mb-3" />
+            <p className="text-sm text-[#6b7280]">Loading analysis data...</p>
           </div>
         )}
 
         {/* Summary Cards */}
         {!isLoading && analysisData && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="p-3 rounded-lg border-2 border-teal-200 bg-gradient-to-br from-teal-50 to-teal-100">
-              <p className="text-xs text-teal-700 font-medium">Total Items</p>
-              <p className="text-2xl font-bold text-teal-900">{analysisData.totalItems}</p>
+            <div className="p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1]">
+              <p className="text-xs text-[#516057] font-medium">Total Items</p>
+              <p className="text-2xl font-bold text-[#000000]">{analysisData.totalItems}</p>
             </div>
-            <div className="p-3 rounded-lg border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100">
+            <div className="p-3 rounded-[4px] border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100">
               <p className="text-xs text-blue-700 font-medium">Items to Keep</p>
               <p className="text-2xl font-bold text-blue-900">{analysisData.summary.keep}</p>
             </div>
-            <div className="p-3 rounded-lg border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100">
-              <p className="text-xs text-emerald-700 font-medium">Items to Return</p>
-              <p className="text-2xl font-bold text-emerald-900">{analysisData.summary.returnNow}</p>
+            <div className="p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1]">
+              <p className="text-xs text-[#516057] font-medium">Items to Return</p>
+              <p className="text-2xl font-bold text-[#000000]">{analysisData.summary.returnNow}</p>
             </div>
-            <div className="p-3 rounded-lg border-2 border-cyan-200 bg-gradient-to-br from-cyan-50 to-cyan-100">
-              <p className="text-xs text-cyan-700 font-medium">Potential Value</p>
-              <p className="text-xl font-bold text-cyan-900">{formatCurrency(analysisData.totalPotentialValue)}</p>
+            <div className="p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1]">
+              <p className="text-xs text-[#516057] font-medium">Potential Value</p>
+              <p className="text-xl font-bold text-[#000000]">{formatCurrency(analysisData.totalPotentialValue)}</p>
             </div>
           </div>
         )}
 
         {/* Tabs Section - Always show after upload when data exists */}
         {!isLoading && analysisData && (
-          <Card className="border-2 border-gray-200">
+          <Card className="border-2 border-[#e2e2e2]">
             <CardContent className="p-4">
               {/* Tab Navigation */}
-              <div className="flex gap-2 border-b-2 border-gray-200 pb-2 mb-4 overflow-x-auto">
+              <div className="flex gap-2 border-b-2 border-[#e2e2e2] pb-2 mb-4 overflow-x-auto">
                 <button
                   onClick={() => setActiveTab('keep')}
-                  className={`px-3 py-2 sm:px-4 text-xs sm:text-sm font-medium rounded-lg border-2 transition-all whitespace-nowrap flex-shrink-0 ${
+                  className={`px-3 py-2 sm:px-4 text-xs sm:text-sm font-medium rounded-[4px] border-2 transition-all whitespace-nowrap flex-shrink-0 ${
                     activeTab === 'keep'
                       ? 'bg-blue-100 text-blue-700 border-blue-300 shadow-md'
-                      : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                      : 'bg-white text-[#505454] border-[#e2e2e2] hover:bg-[#f5f2f1]'
                   }`}
                 >
                   <div className="flex items-center gap-1 sm:gap-2">
@@ -496,17 +496,17 @@ export default function InventoryAnalysisPage() {
                 </button>
                 <button
                   onClick={() => setActiveTab('return')}
-                  className={`px-3 py-2 sm:px-4 text-xs sm:text-sm font-medium rounded-lg border-2 transition-all whitespace-nowrap flex-shrink-0 ${
+                  className={`px-3 py-2 sm:px-4 text-xs sm:text-sm font-medium rounded-[4px] border-2 transition-all whitespace-nowrap flex-shrink-0 ${
                     activeTab === 'return'
-                      ? 'bg-emerald-100 text-emerald-700 border-emerald-300 shadow-md'
-                      : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                      ? 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2] shadow-md'
+                      : 'bg-white text-[#505454] border-[#e2e2e2] hover:bg-[#f5f2f1]'
                   }`}
                 >
                   <div className="flex items-center gap-1 sm:gap-2">
                     <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" />
                     <span className="hidden sm:inline">Items to Return</span>
                     <span className="sm:hidden">Return</span>
-                    <Badge className="bg-emerald-600 text-white text-[10px] sm:text-xs">{analysisData.itemsToReturn.length}</Badge>
+                    <Badge className="bg-[#516057] text-white text-[10px] sm:text-xs">{analysisData.itemsToReturn.length}</Badge>
                   </div>
                 </button>
               </div>
@@ -515,7 +515,7 @@ export default function InventoryAnalysisPage() {
               {activeTab === 'keep' && (
                 <div>
                   {analysisData.itemsToKeep.length > 0 && (
-                    <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="mb-3 p-3 bg-blue-50 rounded-[4px] border border-blue-200">
                       <p className="text-sm text-blue-800">
                         <span className="font-bold">{analysisData.itemsToKeep.length}</span> items recommended to keep in inventory
                       </p>
@@ -527,8 +527,8 @@ export default function InventoryAnalysisPage() {
               {activeTab === 'return' && (
                 <div>
                   {analysisData.itemsToReturn.length > 0 && (
-                    <div className="mb-3 p-3 bg-emerald-50 rounded-lg border border-emerald-200">
-                      <p className="text-sm text-emerald-800">
+                    <div className="mb-3 p-3 bg-[#f5f2f1] rounded-[4px] border border-[#e2e2e2]">
+                      <p className="text-sm text-[#505454]">
                         <span className="font-bold">{analysisData.itemsToReturn.length}</span> items recommended for return with total potential value of{' '}
                         <span className="font-bold">{formatCurrency(analysisData.totalPotentialValue)}</span>
                       </p>
@@ -543,17 +543,17 @@ export default function InventoryAnalysisPage() {
 
         {/* Empty State - No data yet */}
         {!isLoading && !analysisData && (
-          <Card className="border-2 border-gray-200">
+          <Card className="border-2 border-[#e2e2e2]">
             <CardContent className="p-8">
               <div className="flex flex-col items-center justify-center text-center">
                 <Package className="h-16 w-16 text-gray-300 mb-4" />
-                <h3 className="text-lg font-bold text-gray-700 mb-2">No Analysis Data Available</h3>
-                <p className="text-sm text-gray-500 mb-4">
+                <h3 className="text-lg font-bold text-[#505454] mb-2">No Analysis Data Available</h3>
+                <p className="text-sm text-[#6b7280] mb-4">
                   Upload an inventory file to analyze return opportunities and get recommendations
                 </p>
                 <Button 
                   onClick={() => setShowUploadSection(true)}
-                  className="bg-teal-600 hover:bg-teal-700 text-white"
+                  className="bg-[#516057] hover:bg-[#505454] text-white"
                 >
                   <Upload className="mr-2 h-4 w-4" />
                   Upload Inventory File
@@ -569,14 +569,14 @@ export default function InventoryAnalysisPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/50">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-3 sm:p-4 border-b bg-gradient-to-r from-teal-50 to-cyan-50">
+            <div className="flex items-center justify-between p-3 sm:p-4 border-b bg-[#f5f2f1]">
               <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                <div className="p-1.5 sm:p-2 rounded-lg bg-teal-100 flex-shrink-0">
-                  <TrendingUp className="h-4 w-4 sm:h-6 sm:w-6 text-teal-600" />
+                <div className="p-1.5 sm:p-2 rounded-[4px] bg-[#f5f2f1] flex-shrink-0">
+                  <TrendingUp className="h-4 w-4 sm:h-6 sm:w-6 text-[#516057]" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-base sm:text-lg font-bold text-gray-900 truncate">Inventory Analysis Results</h2>
-                  <p className="text-[10px] sm:text-xs text-gray-600 truncate">
+                  <h2 className="text-base sm:text-lg font-bold text-[#000000] truncate">Inventory Analysis Results</h2>
+                  <p className="text-[10px] sm:text-xs text-[#505454] truncate">
                     Analyzed {uploadResponseData.totalItems} items • Generated {formatDate(uploadResponseData.generatedAt)}
                   </p>
                 </div>
@@ -587,30 +587,30 @@ export default function InventoryAnalysisPage() {
             </div>
 
             {/* Modal Summary */}
-            <div className="p-2 sm:p-4 border-b bg-gray-50">
+            <div className="p-2 sm:p-4 border-b bg-[#f5f2f1]">
               <div className="grid grid-cols-2 md:grid-cols-5 gap-2 sm:gap-3">
-                <div className="p-3 rounded-lg border-2 border-teal-200 bg-white">
-                  <p className="text-xs text-teal-700 font-medium">Total Items</p>
-                  <p className="text-xl font-bold text-teal-900">{uploadResponseData.totalItems}</p>
+                <div className="p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-white">
+                  <p className="text-xs text-[#516057] font-medium">Total Items</p>
+                  <p className="text-xl font-bold text-[#000000]">{uploadResponseData.totalItems}</p>
                 </div>
-                <div className="p-3 rounded-lg border-2 border-blue-200 bg-white">
+                <div className="p-3 rounded-[4px] border-2 border-blue-200 bg-white">
                   <p className="text-xs text-blue-700 font-medium">Keep</p>
                   <p className="text-xl font-bold text-blue-900">{uploadResponseData.summary.keep}</p>
                 </div>
-                <div className="p-3 rounded-lg border-2 border-emerald-200 bg-white">
-                  <p className="text-xs text-emerald-700 font-medium">Return Now</p>
-                  <p className="text-xl font-bold text-emerald-900">{uploadResponseData.summary.returnNow}</p>
+                <div className="p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-white">
+                  <p className="text-xs text-[#516057] font-medium">Return Now</p>
+                  <p className="text-xl font-bold text-[#000000]">{uploadResponseData.summary.returnNow}</p>
                 </div>
-                <div className="p-3 rounded-lg border-2 border-amber-200 bg-white">
+                <div className="p-3 rounded-[4px] border-2 border-amber-200 bg-white">
                   <p className="text-xs text-amber-700 font-medium">Monitor</p>
                   <p className="text-xl font-bold text-amber-900">{uploadResponseData.summary.monitor}</p>
                 </div>
-                <div className="p-3 rounded-lg border-2 border-cyan-200 bg-white">
+                <div className="p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-white">
                   <div className="flex items-center gap-1">
-                    <DollarSign className="h-3 w-3 text-cyan-600" />
-                    <p className="text-xs text-cyan-700 font-medium">Potential Value</p>
+                    <DollarSign className="h-3 w-3 text-[#516057]" />
+                    <p className="text-xs text-[#516057] font-medium">Potential Value</p>
                   </div>
-                  <p className="text-lg font-bold text-cyan-900">{formatCurrency(uploadResponseData.totalPotentialValue)}</p>
+                  <p className="text-lg font-bold text-[#000000]">{formatCurrency(uploadResponseData.totalPotentialValue)}</p>
                 </div>
               </div>
             </div>
@@ -618,13 +618,13 @@ export default function InventoryAnalysisPage() {
             {/* Modal Tabs */}
             <div className="p-2 sm:p-4 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 250px)' }}>
               {/* Tab Navigation */}
-              <div className="flex gap-2 border-b-2 border-gray-200 pb-2 mb-4 overflow-x-auto">
+              <div className="flex gap-2 border-b-2 border-[#e2e2e2] pb-2 mb-4 overflow-x-auto">
                 <button
                   onClick={() => setModalActiveTab('keep')}
-                  className={`px-3 py-2 sm:px-4 text-xs sm:text-sm font-medium rounded-lg border-2 transition-all whitespace-nowrap flex-shrink-0 ${
+                  className={`px-3 py-2 sm:px-4 text-xs sm:text-sm font-medium rounded-[4px] border-2 transition-all whitespace-nowrap flex-shrink-0 ${
                     modalActiveTab === 'keep'
                       ? 'bg-blue-100 text-blue-700 border-blue-300 shadow-md'
-                      : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                      : 'bg-white text-[#505454] border-[#e2e2e2] hover:bg-[#f5f2f1]'
                   }`}
                 >
                   <div className="flex items-center gap-1 sm:gap-2">
@@ -636,17 +636,17 @@ export default function InventoryAnalysisPage() {
                 </button>
                 <button
                   onClick={() => setModalActiveTab('return')}
-                  className={`px-3 py-2 sm:px-4 text-xs sm:text-sm font-medium rounded-lg border-2 transition-all whitespace-nowrap flex-shrink-0 ${
+                  className={`px-3 py-2 sm:px-4 text-xs sm:text-sm font-medium rounded-[4px] border-2 transition-all whitespace-nowrap flex-shrink-0 ${
                     modalActiveTab === 'return'
-                      ? 'bg-emerald-100 text-emerald-700 border-emerald-300 shadow-md'
-                      : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                      ? 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2] shadow-md'
+                      : 'bg-white text-[#505454] border-[#e2e2e2] hover:bg-[#f5f2f1]'
                   }`}
                 >
                   <div className="flex items-center gap-1 sm:gap-2">
                     <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" />
                     <span className="hidden sm:inline">Items to Return</span>
                     <span className="sm:hidden">Return</span>
-                    <Badge className="bg-emerald-600 text-white text-[10px] sm:text-xs">{uploadResponseData.itemsToReturn.length}</Badge>
+                    <Badge className="bg-[#516057] text-white text-[10px] sm:text-xs">{uploadResponseData.itemsToReturn.length}</Badge>
                   </div>
                 </button>
               </div>
@@ -655,7 +655,7 @@ export default function InventoryAnalysisPage() {
               {modalActiveTab === 'keep' && (
                 <div>
                   {uploadResponseData.itemsToKeep.length > 0 && (
-                    <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="mb-3 p-3 bg-blue-50 rounded-[4px] border border-blue-200">
                       <p className="text-sm text-blue-800">
                         <span className="font-bold">{uploadResponseData.itemsToKeep.length}</span> items recommended to keep in inventory
                       </p>
@@ -667,8 +667,8 @@ export default function InventoryAnalysisPage() {
               {modalActiveTab === 'return' && (
                 <div>
                   {uploadResponseData.itemsToReturn.length > 0 && (
-                    <div className="mb-3 p-3 bg-emerald-50 rounded-lg border border-emerald-200">
-                      <p className="text-sm text-emerald-800">
+                    <div className="mb-3 p-3 bg-[#f5f2f1] rounded-[4px] border border-[#e2e2e2]">
+                      <p className="text-sm text-[#505454]">
                         <span className="font-bold">{uploadResponseData.itemsToReturn.length}</span> items recommended for return with total potential value of{' '}
                         <span className="font-bold">{formatCurrency(uploadResponseData.totalPotentialValue)}</span>
                       </p>
@@ -680,8 +680,8 @@ export default function InventoryAnalysisPage() {
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-between p-3 sm:p-4 border-t bg-gray-50">
-              {/* <p className="text-xs text-gray-500">
+            <div className="flex items-center justify-between p-3 sm:p-4 border-t bg-[#f5f2f1]">
+              {/* <p className="text-xs text-[#6b7280]">
                 Upload ID: {uploadResponseData.uploadId}
               </p> */}
               <div className="flex gap-2 w-full justify-end">

@@ -230,17 +230,17 @@ export default function ReturnsPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-lg font-bold text-gray-900">Return Transactions</h1>
-                    <p className="text-xs text-gray-500">Manage and track your pharmaceutical returns</p>
+                    <h1 className="text-lg font-bold text-[#000000] font-serif">Return Transactions</h1>
+                    <p className="text-xs text-[#6b7280]">Manage and track your pharmaceutical returns</p>
                 </div>
-                <button onClick={() => router.push('/returns/create')} className="inline-flex items-center gap-1 px-3 py-1.5 rounded text-xs font-medium bg-teal-600 text-white hover:bg-teal-700 transition-colors">
+                <button onClick={() => router.push('/returns/create')} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-[4px] text-xs font-medium bg-[#516057] text-white hover:opacity-90 transition-colors">
                     <Plus className="w-3.5 h-3.5" /> Create Return
                 </button>
             </div>
 
             {/* Error */}
             {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded flex items-center gap-2">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-[4px] flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 flex-shrink-0" />
                     <span className="text-xs">{error}</span>
                 </div>
@@ -248,54 +248,62 @@ export default function ReturnsPage() {
 
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                <div className="bg-white rounded-lg shadow px-3 py-2 border-2 border-teal-200">
+                <div className="bg-white rounded-[4px] shadow-sm px-3 py-2 border border-[#e2e2e2]">
                     <div className="flex items-center gap-1.5 mb-0.5">
-                        <ClipboardList className="w-4 h-4 text-teal-600" />
-                        <span className="text-xs text-teal-600 font-semibold uppercase tracking-wide">Total Returns</span>
+                        <div className="p-1 bg-[#f5f2f1] rounded-[4px]">
+                            <ClipboardList className="w-4 h-4 text-[#516057]" />
+                        </div>
+                        <span className="text-xs text-[#505454] font-semibold uppercase tracking-wide">Total Returns</span>
                     </div>
-                    <p className="text-lg font-bold text-teal-700">{stats.total}</p>
+                    <p className="text-lg font-bold text-[#000000]">{stats.total}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow px-3 py-2 border-2 border-cyan-200">
+                <div className="bg-white rounded-[4px] shadow-sm px-3 py-2 border border-[#e2e2e2]">
                     <div className="flex items-center gap-1.5 mb-0.5">
-                        <Play className="w-4 h-4 text-cyan-600" />
-                        <span className="text-xs text-cyan-600 font-semibold uppercase tracking-wide">In Progress</span>
+                        <div className="p-1 bg-[#f5f2f1] rounded-[4px]">
+                            <Play className="w-4 h-4 text-[#516057]" />
+                        </div>
+                        <span className="text-xs text-[#505454] font-semibold uppercase tracking-wide">In Progress</span>
                     </div>
-                    <p className="text-lg font-bold text-cyan-700">{stats.inProgress}</p>
+                    <p className="text-lg font-bold text-[#000000]">{stats.inProgress}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow px-3 py-2 border-2 border-emerald-200">
+                <div className="bg-white rounded-[4px] shadow-sm px-3 py-2 border border-[#e2e2e2]">
                     <div className="flex items-center gap-1.5 mb-0.5">
-                        <CheckCircle className="w-4 h-4 text-emerald-600" />
-                        <span className="text-xs text-emerald-600 font-semibold uppercase tracking-wide">Verified</span>
+                        <div className="p-1 bg-[#f5f2f1] rounded-[4px]">
+                            <CheckCircle className="w-4 h-4 text-[#516057]" />
+                        </div>
+                        <span className="text-xs text-[#505454] font-semibold uppercase tracking-wide">Verified</span>
                     </div>
-                    <p className="text-lg font-bold text-emerald-700">{stats.verified}</p>
+                    <p className="text-lg font-bold text-[#000000]">{stats.verified}</p>
                 </div>
-                <div className="bg-white rounded-lg shadow px-3 py-2 border-2 border-teal-200">
+                <div className="bg-white rounded-[4px] shadow-sm px-3 py-2 border border-[#e2e2e2]">
                     <div className="flex items-center gap-1.5 mb-0.5">
-                        <DollarSign className="w-4 h-4 text-teal-600" />
-                        <span className="text-xs text-teal-600 font-semibold uppercase tracking-wide">Total Value</span>
+                        <div className="p-1 bg-[#f5f2f1] rounded-[4px]">
+                            <DollarSign className="w-4 h-4 text-[#516057]" />
+                        </div>
+                        <span className="text-xs text-[#505454] font-semibold uppercase tracking-wide">Total Value</span>
                     </div>
-                    <p className="text-lg font-bold text-teal-700">{formatCurrency(stats.totalValue)}</p>
+                    <p className="text-lg font-bold text-[#000000]">{formatCurrency(stats.totalValue)}</p>
                 </div>
             </div>
 
             {/* Table Card */}
-            <div className="bg-white rounded-lg shadow">
+            <div className="bg-white rounded-[4px] shadow-sm border border-[#e2e2e2]">
                 {/* Filters */}
-                <div className="flex flex-wrap gap-2 px-3 py-2 border-b border-gray-100">
+                <div className="flex flex-wrap gap-2 px-3 py-2 border-b border-[#e2e2e2]">
                     <div className="relative flex-1 min-w-[160px]">
-                        <Search className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <Search className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#9ca3af]" />
                         <input
                             type="text"
                             placeholder="Search by license plate or store name..."
                             value={searchTerm}
                             onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                            className="w-full pl-8 pr-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500"
+                            className="w-full pl-8 pr-3 py-2 text-sm border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] bg-white"
                         />
                     </div>
                     <select
                         value={statusFilter}
                         onChange={e => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-                        className="px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        className="px-3 py-2 text-sm border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] bg-white"
                     >
                         {STATUS_OPTIONS.map(opt => (
                             <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -305,14 +313,14 @@ export default function ReturnsPage() {
                         type="date"
                         value={dateFrom}
                         onChange={e => { setDateFrom(e.target.value); setCurrentPage(1); }}
-                        className="px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        className="px-3 py-2 text-sm border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] bg-white"
                         title="Date from"
                     />
                     <input
                         type="date"
                         value={dateTo}
                         onChange={e => { setDateTo(e.target.value); setCurrentPage(1); }}
-                        className="px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        className="px-3 py-2 text-sm border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] bg-white"
                         title="Date to"
                     />
                 </div>
@@ -320,72 +328,77 @@ export default function ReturnsPage() {
                 {/* Loading / Empty / Table */}
                 {isLoading ? (
                     <div className="flex justify-center py-10">
-                        <Loader2 className="w-6 h-6 animate-spin text-teal-600" />
+                        <Loader2 className="w-6 h-6 animate-spin text-[#516057]" />
                     </div>
                 ) : transactions.length === 0 ? (
                     <div className="text-center py-10">
-                        <ClipboardList className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-                        <p className="text-sm text-gray-500 font-medium mb-1">No return transactions found</p>
-                        <p className="text-xs text-gray-400 mb-3">
+                        <ClipboardList className="w-10 h-10 text-[#9ca3af] mx-auto mb-2" />
+                        <p className="text-sm text-[#505454] font-medium mb-1">No return transactions found</p>
+                        <p className="text-xs text-[#9ca3af] mb-3">
                             {searchTerm || statusFilter || dateFrom || dateTo
                                 ? 'Try adjusting your filters.'
                                 : 'Create your first return transaction to get started.'}
                         </p>
                         {!searchTerm && !statusFilter && (
-                            <button onClick={() => router.push('/returns/create')} className="inline-flex items-center gap-1 px-3 py-1.5 rounded text-xs font-medium bg-teal-600 text-white hover:bg-teal-700 transition-colors">
+                            <button onClick={() => router.push('/returns/create')} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-[4px] text-xs font-medium bg-[#516057] text-white hover:opacity-90 transition-colors">
                                 <Plus className="w-3.5 h-3.5" /> Create Return
                             </button>
                         )}
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full table-auto">
-                            <thead>
-                                <tr className="bg-gradient-to-r from-teal-600 to-teal-700 border-b-2 border-teal-800">
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">License Plate</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Processor</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Status</th>
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Items</th>
-                                    {/* <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Value</th> */}
-                                    <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Date</th>
-                                    <th className="text-right px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Actions</th>
+                        <table className="w-full text-sm border border-[var(--outline)]" style={{ borderColor: 'var(--outline)' }}>
+                            <thead 
+                                className="bg-[var(--surface-container-low)] border-b" 
+                                style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}
+                            >
+                                <tr className="bg-[var(--surface-container-low)]">
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[#505454] border-r border-[var(--outline)]">License Plate</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[#505454] border-r border-[var(--outline)]">Processor</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[#505454] border-r border-[var(--outline)]">Status</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[#505454] border-r border-[var(--outline)]">Items</th>
+                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[#505454] border-r border-[var(--outline)]">Date</th>
+                                    <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[#505454]">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                {transactions.map((tx, index) => {
+                            <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
+                                {transactions.map((tx) => {
                                     const badge = getStatusBadge(tx.status);
-                                    const isEven = index % 2 === 0;
                                     return (
-                                        <tr key={tx.id} className={`border-b border-gray-100 hover:bg-teal-50 transition-colors cursor-pointer ${isEven ? 'bg-white' : 'bg-teal-50/40'}`} onClick={() => router.push(`/returns/${tx.id}`)}>
-                                            <td className="px-4 py-3">
-                                                <span className="text-sm font-mono font-semibold text-gray-900">{tx.licensePlate}</span>
+                                        <tr 
+                                            key={tx.id} 
+                                            className="hover:bg-[var(--surface-container)] transition-colors border-b cursor-pointer"
+                                            style={{ borderColor: 'var(--outline-variant)' }}
+                                            onClick={() => router.push(`/returns/${tx.id}`)}
+                                        >
+                                            <td className="px-3 py-3 border-r border-[var(--outline-variant)]">
+                                                <span className="text-sm font-mono font-semibold text-[#000000]">{tx.licensePlate}</span>
                                             </td>
-                                            <td className="px-4 py-3">
-                                                <p className="text-sm font-medium text-gray-900 truncate max-w-[140px]">{tx.processorName || '—'}</p>
+                                            <td className="px-3 py-3 border-r border-[var(--outline-variant)]">
+                                                <p className="text-sm font-medium text-[#000000] truncate max-w-[140px]">{tx.processorName || '—'}</p>
                                             </td>
-                                            <td className="px-4 py-3">
+                                            <td className="px-3 py-3 border-r border-[var(--outline-variant)]">
                                                 <Badge variant={badge.variant}><span className="text-xs">{badge.label}</span></Badge>
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-gray-700 font-medium">{tx.totalItems}</td>
-                                            {/* <td className="px-4 py-3 text-sm text-gray-900 font-medium">{formatCurrency(tx.totalReturnableValue)}</td> */}
-                                            <td className="px-4 py-3 text-sm text-gray-600">{formatDate(tx.createdAt)}</td>
-                                            <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
+                                            <td className="px-3 py-3 text-sm text-[#505454] font-medium border-r border-[var(--outline-variant)]">{tx.totalItems}</td>
+                                            <td className="px-3 py-3 text-sm text-[#505454] border-r border-[var(--outline-variant)]">{formatDate(tx.createdAt)}</td>
+                                            <td className="px-3 py-3" onClick={e => e.stopPropagation()}>
                                                 <div className="flex items-center justify-end gap-1">
-                                                    <button onClick={() => setViewModal(tx)} className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded transition-colors" title="View Details">
+                                                    <button onClick={() => setViewModal(tx)} className="p-1.5 text-[#9ca3af] hover:text-[#516057] hover:bg-[var(--surface-container)] rounded-[4px] transition-colors" title="View Details">
                                                         <Eye className="w-4 h-4" />
                                                     </button>
                                                     {tx.hasCiiItems && (
-                                                        <button onClick={() => downloadDeaForm222(tx)} className="p-1.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors" title="Download DEA Form 222">
+                                                        <button onClick={() => downloadDeaForm222(tx)} className="p-1.5 text-[#9ca3af] hover:text-[#ad916a] hover:bg-[#ad916a]/10 rounded-[4px] transition-colors" title="Download DEA Form 222">
                                                             <FileText className="w-4 h-4" />
                                                         </button>
                                                     )}
                                                     {canDoAction(tx, 'edit') && (
-                                                        <button onClick={() => router.push(`/returns/${tx.id}`)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Edit">
+                                                        <button onClick={() => router.push(`/returns/${tx.id}`)} className="p-1.5 text-[#9ca3af] hover:text-[#516057] hover:bg-[var(--surface-container)] rounded-[4px] transition-colors" title="Edit">
                                                             <Edit className="w-4 h-4" />
                                                         </button>
                                                     )}
                                                     {canDoAction(tx, 'delete') && (
-                                                        <button onClick={() => setDeleteModal(tx)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" title="Delete">
+                                                        <button onClick={() => setDeleteModal(tx)} className="p-1.5 text-[#9ca3af] hover:text-red-600 hover:bg-red-50 rounded-[4px] transition-colors" title="Delete">
                                                             <Trash2 className="w-4 h-4" />
                                                         </button>
                                                     )}
@@ -401,17 +414,17 @@ export default function ReturnsPage() {
 
                 {/* Pagination */}
                 {pagination && pagination.totalPages > 1 && (
-                    <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50">
-                        <p className="text-sm text-gray-600 font-medium">
-                            Page <span className="font-bold text-gray-900">{pagination.page}</span> of <span className="font-bold text-gray-900">{pagination.totalPages}</span> (<span className="font-bold text-gray-900">{pagination.total}</span> total)
+                    <div className="flex items-center justify-between px-4 py-3 border-t border-[#e2e2e2] bg-white">
+                        <p className="text-sm text-[#6b7280] font-medium">
+                            Page <span className="font-bold text-[#000000]">{pagination.page}</span> of <span className="font-bold text-[#000000]">{pagination.totalPages}</span> (<span className="font-bold text-[#000000]">{pagination.total}</span> total)
                         </p>
                         <div className="flex items-center gap-2">
-                            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage <= 1} className="p-1.5 border border-gray-300 rounded disabled:opacity-40 hover:bg-teal-50 transition-colors">
-                                <ChevronLeft className="w-4 h-4" />
+                            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage <= 1} className="p-1.5 border border-[#e2e2e2] rounded-[4px] disabled:opacity-40 hover:bg-[var(--surface-container)] transition-colors">
+                                <ChevronLeft className="w-4 h-4 text-[#505454]" />
                             </button>
-                            <span className="text-sm font-semibold text-gray-700 px-2">{currentPage}</span>
-                            <button onClick={() => setCurrentPage(p => p + 1)} disabled={currentPage >= pagination.totalPages} className="p-1.5 border border-gray-300 rounded disabled:opacity-40 hover:bg-teal-50 transition-colors">
-                                <ChevronRight className="w-4 h-4" />
+                            <span className="text-sm font-semibold text-[#000000] px-2">{currentPage}</span>
+                            <button onClick={() => setCurrentPage(p => p + 1)} disabled={currentPage >= pagination.totalPages} className="p-1.5 border border-[#e2e2e2] rounded-[4px] disabled:opacity-40 hover:bg-[var(--surface-container)] transition-colors">
+                                <ChevronRight className="w-4 h-4 text-[#505454]" />
                             </button>
                         </div>
                     </div>
@@ -421,14 +434,14 @@ export default function ReturnsPage() {
             {/* ── View Detail Modal ────────────────────────── */}
             {viewModal && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setViewModal(null)}>
-                    <div className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50 sticky top-0">
-                            <h2 className="text-sm font-semibold text-gray-900">Return Details</h2>
-                            <button onClick={() => setViewModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                    <div className="bg-white rounded-[4px] max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto border border-[#e2e2e2]" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-[#e2e2e2] bg-[#f5f2f1] sticky top-0">
+                            <h2 className="text-sm font-semibold text-[#000000] font-serif">Return Details</h2>
+                            <button onClick={() => setViewModal(null)} className="text-[#9ca3af] hover:text-[#505454]"><X className="w-4 h-4" /></button>
                         </div>
                         <div className="px-4 py-3 space-y-3">
                             <div className="flex items-center gap-2">
-                                <span className="text-sm font-mono font-bold text-gray-900">{viewModal.licensePlate}</span>
+                                <span className="text-sm font-mono font-bold text-[#000000]">{viewModal.licensePlate}</span>
                                 <Badge variant={getStatusBadge(viewModal.status).variant}><span className="text-[10px]">{getStatusBadge(viewModal.status).label}</span></Badge>
                             </div>
                             <div className="grid grid-cols-2 gap-2">
@@ -443,47 +456,46 @@ export default function ReturnsPage() {
                                     ] : []),
                                     { label: 'Service Type', value: (viewModal.serviceType || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) },
                                     { label: 'Total Items', value: String(viewModal.totalItems) },
-                                    // Show Returnable/Non-Returnable values only when status is verified
                                     ...(viewModal.status === 'verified' ? [
-                                        { label: 'Returnable Value', value: formatCurrency(viewModal.totalReturnableValue), className: 'text-green-700' },
-                                        { label: 'Non-Returnable', value: formatCurrency(viewModal.totalNonReturnableValue), className: 'text-red-700' },
+                                        { label: 'Returnable Value', value: formatCurrency(viewModal.totalReturnableValue), className: 'text-[#516057]' },
+                                        { label: 'Non-Returnable', value: formatCurrency(viewModal.totalNonReturnableValue), className: 'text-[#ad916a]' },
                                     ] : []),
                                     { label: 'Created', value: formatDate(viewModal.createdAt) },
                                     { label: 'Updated', value: formatDate(viewModal.updatedAt) },
                                 ].map(({ label, value, className, fullWidth }) => (
                                     <div key={label} className={fullWidth ? 'col-span-2' : ''}>
-                                        <p className="text-[10px] text-gray-400">{label}</p>
-                                        <p className={`text-xs font-medium text-gray-900 ${className || ''}`}>{value}</p>
+                                        <p className="text-[10px] text-[#9ca3af]">{label}</p>
+                                        <p className={`text-xs font-medium text-[#000000] ${className || ''}`}>{value}</p>
                                     </div>
                                 ))}
                             </div>
                             {(viewModal.fedexTracking || viewModal.fedexPickupConfirmation) && (
-                                <div className="border-t border-gray-100 pt-2">
-                                    <p className="text-[10px] font-medium text-gray-400 mb-1.5 uppercase">Shipping Details</p>
+                                <div className="border-t border-[#e2e2e2] pt-2">
+                                    <p className="text-[10px] font-medium text-[#9ca3af] mb-1.5 uppercase">Shipping Details</p>
                                     <div className="grid grid-cols-2 gap-2">
                                         {viewModal.fedexTracking && (
-                                            <div><p className="text-[10px] text-gray-400">FedEx Tracking</p><p className="text-xs font-medium font-mono">{viewModal.fedexTracking}</p></div>
+                                            <div><p className="text-[10px] text-[#9ca3af]">FedEx Tracking</p><p className="text-xs font-medium font-mono text-[#505454]">{viewModal.fedexTracking}</p></div>
                                         )}
                                         {viewModal.fedexPickupConfirmation && (
-                                            <div><p className="text-[10px] text-gray-400">Pickup Confirmation</p><p className="text-xs font-medium font-mono">{viewModal.fedexPickupConfirmation}</p></div>
+                                            <div><p className="text-[10px] text-[#9ca3af]">Pickup Confirmation</p><p className="text-xs font-medium font-mono text-[#505454]">{viewModal.fedexPickupConfirmation}</p></div>
                                         )}
                                     </div>
                                 </div>
                             )}
                             {viewModal.notes && (
-                                <div className="border-t border-gray-100 pt-2">
-                                    <p className="text-[10px] font-medium text-gray-400 mb-1">Notes</p>
-                                    <p className="text-xs text-gray-700">{viewModal.notes}</p>
+                                <div className="border-t border-[#e2e2e2] pt-2">
+                                    <p className="text-[10px] font-medium text-[#9ca3af] mb-1">Notes</p>
+                                    <p className="text-xs text-[#505454]">{viewModal.notes}</p>
                                 </div>
                             )}
                             {viewModal.finalizedAt && (
-                                <div className="border-t border-gray-100 pt-2">
-                                    <p className="text-[10px] text-gray-400">Finalized on {formatDate(viewModal.finalizedAt)}</p>
+                                <div className="border-t border-[#e2e2e2] pt-2">
+                                    <p className="text-[10px] text-[#9ca3af]">Finalized on {formatDate(viewModal.finalizedAt)}</p>
                                 </div>
                             )}
                         </div>
-                        <div className="flex justify-end px-4 py-3 border-t border-gray-200 bg-gray-50">
-                            <button onClick={() => setViewModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Close</button>
+                        <div className="flex justify-end px-4 py-3 border-t border-[#e2e2e2] bg-[#f5f2f1]">
+                            <button onClick={() => setViewModal(null)} className="px-3 py-1.5 text-xs rounded-[4px] border border-[#e2e2e2] text-[#505454] hover:bg-white transition-colors">Close</button>
                         </div>
                     </div>
                 </div>
@@ -492,19 +504,19 @@ export default function ReturnsPage() {
             {/* ── Delete Modal ─────────────────── */}
             {deleteModal && (
                 <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4" onClick={() => setDeleteModal(null)}>
-                    <div className="bg-white rounded-lg max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-sm font-semibold text-gray-900">Delete Return</h2>
-                            <button onClick={() => setDeleteModal(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                    <div className="bg-white rounded-[4px] max-w-sm w-full shadow-xl border border-[#e2e2e2]" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-[#e2e2e2] bg-[#f5f2f1]">
+                            <h2 className="text-sm font-semibold text-[#000000] font-serif">Delete Return</h2>
+                            <button onClick={() => setDeleteModal(null)} className="text-[#9ca3af] hover:text-[#505454]"><X className="w-4 h-4" /></button>
                         </div>
                         <div className="px-4 py-3">
-                            <p className="text-xs text-gray-700">
+                            <p className="text-xs text-[#505454]">
                                 Are you sure you want to delete return <strong>{deleteModal.licensePlate}</strong>? This action cannot be undone.
                             </p>
                         </div>
-                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
-                            <button onClick={() => setDeleteModal(null)} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-                            <button onClick={handleDelete} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors">
+                        <div className="flex justify-end gap-2 px-4 py-3 border-t border-[#e2e2e2] bg-[#f5f2f1]">
+                            <button onClick={() => setDeleteModal(null)} className="px-3 py-1.5 text-xs rounded-[4px] border border-[#e2e2e2] text-[#505454] hover:bg-white transition-colors">Cancel</button>
+                            <button onClick={handleDelete} disabled={isActionLoading} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded-[4px] bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors">
                                 {isActionLoading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Deleting...</> : 'Delete'}
                             </button>
                         </div>

@@ -60,9 +60,9 @@ export default function NotificationsPage() {
 
   const getNotificationColor = (type: Notification['type']) => {
     switch (type) {
-      case 'credit_received': return 'bg-emerald-100 text-emerald-600 border-emerald-200';
-      case 'shipment_update': return 'bg-cyan-100 text-cyan-600 border-cyan-200';
-      case 'order_status': return 'bg-teal-100 text-teal-600 border-teal-200';
+      case 'credit_received': return 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2]';
+      case 'shipment_update': return 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2]';
+      case 'order_status': return 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2]';
       case 'system': return 'bg-amber-100 text-amber-600 border-amber-200';
       default: return 'bg-slate-100 text-slate-600 border-slate-200';
     }
@@ -82,20 +82,20 @@ export default function NotificationsPage() {
     <DashboardLayout>
       <div className="space-y-3">
         {/* Professional Medical Header */}
-        <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-teal-50 via-cyan-50 to-teal-50 border-2 border-teal-200">
+        <div className="flex items-center justify-between p-4 rounded-[4px] bg-[#f5f2f1] border-2 border-[#e2e2e2]">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-teal-100">
-              <Bell className="h-5 w-5 text-teal-600" />
+            <div className="p-2 rounded-[4px] bg-[#f5f2f1]">
+              <Bell className="h-5 w-5 text-[#516057]" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Notifications</h1>
-              <p className="text-xs text-gray-600 mt-0.5">
+              <h1 className="text-xl font-bold text-[#000000]">Notifications</h1>
+              <p className="text-xs text-[#505454] mt-0.5">
                 {unreadCount > 0 ? `${unreadCount} unread notification(s)` : 'All caught up!'}
               </p>
             </div>
           </div>
           {unreadCount > 0 && (
-            <Button onClick={handleMarkAllAsRead} size="sm" className="bg-teal-600 hover:bg-teal-700 text-white border-0">
+            <Button onClick={handleMarkAllAsRead} size="sm" className="bg-[#516057] hover:bg-[#505454] text-white border-0">
               <CheckCheck className="mr-1 h-3 w-3" />
               Mark All Read
             </Button>
@@ -103,17 +103,17 @@ export default function NotificationsPage() {
         </div>
 
         {/* Professional Filters */}
-        <Card className="border-2 border-teal-200 bg-gradient-to-br from-white to-teal-50/30">
+        <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1]">
           <CardContent className="p-3">
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-teal-500" />
-                <Input placeholder="Search notifications..." className="pl-7 h-7 text-xs border-teal-200 focus:border-teal-400" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-[#6b7280]" />
+                <Input placeholder="Search notifications..." className="pl-7 h-7 text-xs border-[#e2e2e2] focus:border-[#e2e2e2]" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
               </div>
               <select
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value as any)}
-                className="h-7 px-2 text-xs border rounded border-teal-200"
+                className="h-7 px-2 text-xs border border-[#e2e2e2] rounded-[4px] border-[#e2e2e2]"
               >
                 <option value="all">All Types</option>
                 <option value="credit_received">Credit Received</option>
@@ -124,7 +124,7 @@ export default function NotificationsPage() {
               <select
                 value={filterRead}
                 onChange={(e) => setFilterRead(e.target.value as any)}
-                className="h-7 px-2 text-xs border rounded border-teal-200"
+                className="h-7 px-2 text-xs border border-[#e2e2e2] rounded-[4px] border-[#e2e2e2]"
               >
                 <option value="all">All</option>
                 <option value="unread">Unread</option>
@@ -139,24 +139,24 @@ export default function NotificationsPage() {
         </Card>
 
         {/* Professional Notifications Table */}
-        <Card className="border-2 border-teal-200 bg-gradient-to-br from-white to-teal-50/30">
+        <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1]">
           <CardContent className="p-3">
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="bg-gradient-to-r from-teal-100 to-cyan-100 border-b-2 border-teal-200">
-                    <th className="text-left p-2 font-bold text-teal-900 w-12">Type</th>
-                    <th className="text-left p-2 font-bold text-teal-900">Title</th>
-                    <th className="text-left p-2 font-bold text-teal-900">Message</th>
-                    <th className="text-left p-2 font-bold text-teal-900">Date</th>
-                    <th className="text-left p-2 font-bold text-teal-900">Status</th>
-                    <th className="text-left p-2 font-bold text-teal-900">Actions</th>
+                  <tr className="bg-[#f5f2f1] border-b-2 border-[#e2e2e2]">
+                    <th className="text-left p-2 font-bold text-[#000000] w-12">Type</th>
+                    <th className="text-left p-2 font-bold text-[#000000]">Title</th>
+                    <th className="text-left p-2 font-bold text-[#000000]">Message</th>
+                    <th className="text-left p-2 font-bold text-[#000000]">Date</th>
+                    <th className="text-left p-2 font-bold text-[#000000]">Status</th>
+                    <th className="text-left p-2 font-bold text-[#000000]">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredNotifications.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="p-4 text-center text-gray-500 text-sm bg-gray-50">
+                      <td colSpan={6} className="p-4 text-center text-[#6b7280] text-sm bg-[#f5f2f1]">
                         <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
                         <p>No notifications found</p>
                       </td>
@@ -166,22 +166,22 @@ export default function NotificationsPage() {
                       const Icon = getNotificationIcon(notification.type);
                       const colorClass = getNotificationColor(notification.type);
                       return (
-                        <tr key={notification.id} className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} ${!notification.read ? 'bg-teal-50/50' : ''} hover:bg-teal-50 transition-colors`}>
+                        <tr key={notification.id} className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]/50'} ${!notification.read ? 'bg-[#f5f2f1]/50' : ''} hover:bg-[#f5f2f1] transition-colors`}>
                           <td className="p-2">
-                            <div className={`p-1.5 rounded-lg border-2 ${colorClass}`}>
+                            <div className={`p-1.5 rounded-[4px] border-2 ${colorClass}`}>
                               <Icon className="h-4 w-4" />
                             </div>
                           </td>
                           <td className="p-2">
                             <div className="flex items-center gap-2">
-                              <span className="font-semibold text-gray-900">{notification.title}</span>
+                              <span className="font-semibold text-[#000000]">{notification.title}</span>
                               {!notification.read && (
-                                <span className="w-2 h-2 rounded-full bg-teal-600"></span>
+                                <span className="w-2 h-2 rounded-full bg-[#516057]"></span>
                               )}
                             </div>
                           </td>
-                          <td className="p-2 text-gray-700">{notification.message}</td>
-                          <td className="p-2 text-gray-600">{formatDateTime(notification.createdAt)}</td>
+                          <td className="p-2 text-[#505454]">{notification.message}</td>
+                          <td className="p-2 text-[#505454]">{formatDateTime(notification.createdAt)}</td>
                           <td className="p-2">
                             <Badge className={`text-xs border-2 ${colorClass}`}>
                               {getTypeLabel(notification.type)}
@@ -193,7 +193,7 @@ export default function NotificationsPage() {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="h-6 px-2 text-xs border-teal-300 text-teal-700 hover:bg-teal-50"
+                                  className="h-6 px-2 text-xs border-[#e2e2e2] text-[#516057] hover:bg-[#f5f2f1]"
                                   onClick={() => handleMarkAsRead(notification.id)}
                                 >
                                   <Check className="h-3 w-3" />
@@ -201,7 +201,7 @@ export default function NotificationsPage() {
                               )}
                               {notification.actionUrl && (
                                 <Link href={notification.actionUrl}>
-                                  <Button variant="outline" size="sm" className="h-6 px-2 text-xs border-cyan-300 text-cyan-700 hover:bg-cyan-50">
+                                  <Button variant="outline" size="sm" className="h-6 px-2 text-xs border-[#e2e2e2] text-[#516057] hover:bg-[#f5f2f1]">
                                     View
                                   </Button>
                                 </Link>

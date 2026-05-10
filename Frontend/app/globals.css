@@ -4,6 +4,41 @@
 
 @layer base {
   :root {
+    /* Nordic Healthcare Design System */
+    
+    /* Primary Colors */
+    --nordic-charcoal: #1d2222;
+    --nordic-sage: #516057;
+    --nordic-sage-light: #7fb399;
+    --nordic-tan: #ad916a;
+    --nordic-tan-dark: #6b5a3f;
+    
+    /* Surface Colors */
+    --nordic-page-bg: #ebe8e7;
+    --nordic-card-bg: #ffffff;
+    --nordic-table-header: #f5f2f1;
+    --nordic-sidebar-bg: #1d2222;
+    --nordic-sidebar-active: #3d4343;
+    
+    /* Border & Divider Colors */
+    --nordic-border: #e2e2e2;
+    --nordic-border-subtle: #f3f4f6;
+    --nordic-border-sidebar: #3d4343;
+    
+    /* Text Colors */
+    --nordic-text-primary: #000000;
+    --nordic-text-secondary: #505454;
+    --nordic-text-tertiary: #9ca3af;
+    --nordic-text-muted: #6b7280;
+    --nordic-text-on-dark: #ffffff;
+    
+    /* Table-specific CSS Variables (per spec) */
+    --surface-container-low: #f4f5f5;
+    --surface-container: #e9ebec;
+    --outline: #9ca3af;
+    --outline-variant: #d1d5db;
+    --on-surface-variant: #9ca3af;
+    
     /* Professional Medical/Pharmaceutical Theme */
     --background: 0 0% 100%;
     --foreground: 222.2 47.4% 11.2%;
@@ -14,32 +49,33 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 47.4% 11.2%;
     
-    /* Primary: Teal Green - Pharmacy/Medical */
-    --primary: 175 77% 31%;
+    /* Primary: Nordic Sage Green */
+    --primary: 142 9% 33%;
     --primary-foreground: 0 0% 100%;
     
-    /* Secondary: Soft Gray - Professional, Clean */
-    --secondary: 210 20% 98%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary: Nordic Charcoal */
+    --secondary: 160 6% 12%;
+    --secondary-foreground: 0 0% 100%;
     
     /* Muted: Light Gray - Subtle backgrounds */
     --muted: 210 20% 96%;
     --muted-foreground: 215.4 16.3% 46.9%;
     
-    /* Accent: Subtle Teal - Highlights */
-    --accent: 175 33% 96%;
-    --accent-foreground: 175 77% 20%;
+    /* Accent: Nordic Tan */
+    --accent: 34 26% 55%;
+    --accent-foreground: 0 0% 100%;
     
     /* Destructive: Professional Red - Errors */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
     
-    /* Border: Light Gray */
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 175 77% 31%;
+    /* Border: Nordic Border */
+    --border: 0 0% 89%;
+    --input: 0 0% 89%;
+    --ring: 142 9% 33%;
     
-    --radius: 0.75rem;
+    /* Border Radius - Nordic Standard: 4px */
+    --radius: 4px;
   }
 
   .dark {
@@ -52,7 +88,7 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
     
-    --primary: 175 77% 40%;
+    --primary: 142 9% 40%;
     --primary-foreground: 0 0% 100%;
     
     --secondary: 217.2 32.6% 17.5%;
@@ -61,7 +97,7 @@
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
     
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 34 26% 45%;
     --accent-foreground: 210 40% 98%;
     
     --destructive: 0 62.8% 30.6%;
@@ -69,7 +105,7 @@
     
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 175 77% 40%;
+    --ring: 142 9% 40%;
   }
 }
 

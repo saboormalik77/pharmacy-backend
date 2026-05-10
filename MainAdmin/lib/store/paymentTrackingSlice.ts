@@ -129,7 +129,7 @@ export const fetchPaidMemos = createAsyncThunk<
 >('paymentTracking/fetchPaid', async (params, { rejectWithValue }) => {
     try {
         const { apiClient } = await import('@/lib/api/apiClient');
-        const q: Record<string, string> = { payment_status: 'paid' };
+        const q: Record<string, string> = { payment_status: 'paid,partial' };
         if (params?.destination) q.destination = params.destination;
         if (params?.search) q.search = params.search;
         if (params?.page) q.page = String(params.page);
@@ -215,12 +215,18 @@ const paymentTrackingSlice = createSlice({
                 state.isActionLoading = false;
                 const memo = action.payload.memo;
                 state.lastAiAnalysis = action.payload.aiAnalysis;
-                state.unpaidMemos = state.unpaidMemos.filter(m => {
-                    if (m.id === memo.id) {
-                        return memo.paymentStatus !== 'paid';
+                // Remove from unpaid list (both paid and partial with received amount leave the unpaid tab)
+                state.unpaidMemos = state.unpaidMemos.filter(m => m.id !== memo.id);
+                // Add to paid list so it appears immediately without waiting for a re-fetch
+                if (memo.paymentStatus === 'paid' || memo.paymentStatus === 'partial') {
+                    const alreadyInPaid = state.paidMemos.some(m => m.id === memo.id);
+                    if (!alreadyInPaid) {
+                        state.paidMemos = [memo, ...state.paidMemos];
+                        if (state.paidPagination) {
+                            state.paidPagination = { ...state.paidPagination, total: state.paidPagination.total + 1 };
+                        }
                     }
-                    return true;
-                }).map(m => m.id === memo.id ? { ...memo, daysOutstanding: m.daysOutstanding, outstandingAmount: memo.amountRequested - memo.amountReceived } : m);
+                }
             })
             .addCase(recordPayment.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
 
