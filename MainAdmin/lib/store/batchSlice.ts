@@ -400,7 +400,12 @@ const batchSlice = createSlice({
             .addCase(createBatch.fulfilled, (state, action) => { state.isActionLoading = false; state.batches = [action.payload, ...state.batches]; })
             .addCase(createBatch.rejected, (state, action) => { state.isActionLoading = false; state.error = action.payload as string; })
 
-            .addCase(fetchBatchDetail.pending, (state) => { state.isLoading = true; state.error = null; })
+            .addCase(fetchBatchDetail.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+                // Avoid showing stale workflow flags from another batch while the next batch loads.
+                state.workflowState = null;
+            })
             .addCase(fetchBatchDetail.fulfilled, (state, action) => {
                 state.isLoading = false;
                 state.currentBatch = action.payload.batch;

@@ -16,6 +16,8 @@ import {
   deleteNoteHandler,
   bulkImportHandler,
   checkReturnabilityHandler,
+  updatePoliciesWithApiNamesHandler,
+  ensureManufacturerPolicyHandler,
 } from '../controllers/policiesController';
 import { authenticateAdmin, requirePermission } from '../middleware/adminAuth';
 import { authenticateProcessor } from '../middleware/processorAuth';
@@ -451,6 +453,58 @@ adminPoliciesRouter.post('/:id/notes', addNoteHandler);
  *         description: Deleted
  */
 adminPoliciesRouter.delete('/:id/notes/:noteId', deleteNoteHandler);
+
+// ── API Name Updates ───────────────────────────────────────
+
+/**
+ * @swagger
+ * /api/admin/policies/update-api-names:
+ *   post:
+ *     summary: Update manufacturer policies with correct names from OpenFDA API
+ *     tags: [Admin - Policies]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               limit:
+ *                 type: integer
+ *                 default: 50
+ *                 description: Maximum number of policies to process in this batch
+ *     responses:
+ *       200:
+ *         description: Policies updated with API names
+ */
+adminPoliciesRouter.post('/update-api-names', updatePoliciesWithApiNamesHandler);
+
+/**
+ * @swagger
+ * /api/admin/policies/ensure:
+ *   post:
+ *     summary: Ensure a manufacturer policy exists for a labeler_id (auto-create with API name if needed)
+ *     tags: [Admin - Policies]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               labelerId:
+ *                 type: string
+ *                 description: The labeler_id (first 5 digits of NDC)
+ *             required:
+ *               - labelerId
+ *     responses:
+ *       200:
+ *         description: Manufacturer policy ensured
+ */
+adminPoliciesRouter.post('/ensure', ensureManufacturerPolicyHandler);
 
 
 // ============================================================

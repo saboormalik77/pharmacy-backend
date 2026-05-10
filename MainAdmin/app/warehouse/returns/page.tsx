@@ -191,7 +191,7 @@ export default function ReturnsPage() {
             <PermissionGate permission="warehouse">
             <div className="border rounded-[4px] p-6 text-center" style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
                 <AlertCircle className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--error)' }} />
-                <p className="font-medium" style={{ color: 'var(--on-error-container)' }}>Access denied. This page is for processors only.</p>
+                <p className="font-medium" style={{ color: '#000000' }}>Access denied. This page is for processors only.</p>
                 <Button variant="outline" className="mt-4" onClick={() => router.push('/')}>Go to Dashboard</Button>
             </div>
             </PermissionGate>

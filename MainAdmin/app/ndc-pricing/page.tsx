@@ -648,7 +648,7 @@ export default function NDCPricingPage() {
                                             style={{
                                                 backgroundColor: 'var(--error-container)',
                                                 borderColor: 'var(--outline-variant)',
-                                                color: 'var(--on-error-container)',
+                                                color: '#000000',
                                             }}
                                         >
                                             <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />

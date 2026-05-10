@@ -464,8 +464,8 @@ export async function generateDebitMemoSummaryPdf(data: DebitMemoSummaryData): P
     num: 35,
     memo: 55,
     labeler: 195,
-    returnTo: 395,
-    ra: 500,
+    returnTo: 380,
+    ra: 485,
     total: 540,
   };
 
@@ -474,7 +474,7 @@ export async function generateDebitMemoSummaryPdf(data: DebitMemoSummaryData): P
   doc.text('Full Debit Memo', sColX.memo, yPos, { width: 135 });
   doc.text('Labeler Name', sColX.labeler, yPos, { width: 195 });
   doc.text('Return To', sColX.returnTo, yPos, { width: 100 });
-  doc.text('RA Needed', sColX.ra, yPos, { width: 45 });
+  doc.text('RA Needed', sColX.ra, yPos, { width: 55 });
   doc.text('Total', sColX.total, yPos, { width: 42, align: 'right' });
 
   yPos = tableTop + 20;
@@ -498,7 +498,7 @@ export async function generateDebitMemoSummaryPdf(data: DebitMemoSummaryData): P
     doc.text(memo.memoNumber || '—', sColX.memo, yPos, { width: 135 });
     doc.text((memo.labelerName || '—').substring(0, 40), sColX.labeler, yPos, { width: 195 });
     doc.text(memo.destination || '—', sColX.returnTo, yPos, { width: 100 });
-    doc.text(memo.raNeeded ? 'YES' : 'NO', sColX.ra, yPos, { width: 45 });
+    doc.text(memo.raNeeded ? 'YES' : 'NO', sColX.ra, yPos, { width: 55 });
     doc.text(fmt$(memo.totalAskValue), sColX.total, yPos, { width: 42, align: 'right' });
 
     yPos += rowHeight;

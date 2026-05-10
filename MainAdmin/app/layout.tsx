@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Newsreader, Manrope } from 'next/font/google';
 import './globals.css';
+import '../styles/color-contrast-fixes.css';
 import ClientLayout from '@/components/layout/ClientLayout';
 
 const newsreader = Newsreader({

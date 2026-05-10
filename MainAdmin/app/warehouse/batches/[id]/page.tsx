@@ -16,7 +16,7 @@ import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import {
     fetchBatchDetail, assignReturnsToBatch, closeBatch, submitCardinal,
     deleteBatch, unassignReturnsFromBatch, getBatchPermissions,
-    clearCurrentBatch, clearError,
+    clearCurrentBatch, clearError, fetchBatchWorkflow,
 } from '@/lib/store/batchSlice';
 import { fetchReceivedReturns } from '@/lib/store/warehouseSlice';
 import { ReturnTransaction } from '@/lib/types';
@@ -83,9 +83,11 @@ export default function BatchDetailPage() {
     const {
         currentBatch: batch,
         batchReturns,
+        batchMemos,
         isLoading,
         isActionLoading,
         error,
+        workflowState,
     } = useAppSelector(s => s.batch);
 
     const { receivedReturns } = useAppSelector(s => s.warehouse);
@@ -100,6 +102,7 @@ export default function BatchDetailPage() {
     const [batchPermissions, setBatchPermissions] = useState<any>(null);
     const [selectedReturnIds, setSelectedReturnIds] = useState<string[]>([]);
     const [assignSearch, setAssignSearch] = useState('');
+    const [assignReturnsLoading, setAssignReturnsLoading] = useState(false);
     const [returnsExpanded, setReturnsExpanded] = useState(true);
     const [downloadingReturnId, setDownloadingReturnId] = useState<string | null>(null);
 
@@ -114,8 +117,18 @@ export default function BatchDetailPage() {
                 setBatchPermissions(result.payload);
             }
         });
+        
+        // Fetch workflow state for closed/submitted batches to determine if workflow is complete
+        dispatch(fetchBatchWorkflow(batchId));
+        
         return () => { dispatch(clearCurrentBatch()); };
     }, [dispatch, batchId]);
+
+    // Warm eligible returns for Assign modal (same API as modal uses). Avoids empty list flash before fetch completes.
+    useEffect(() => {
+        if (!batch || batch.status !== 'open') return;
+        dispatch(fetchReceivedReturns({ limit: 100, verificationStatus: 'completed' }));
+    }, [dispatch, batchId, batch?.status]);
 
     // Auto-open Close Batch modal when navigated via ?action=closeout
     useEffect(() => {
@@ -132,7 +145,11 @@ export default function BatchDetailPage() {
         setShowAssign(true);
         setSelectedReturnIds([]);
         setAssignSearch('');
-        dispatch(fetchReceivedReturns({ limit: 100, verificationStatus: 'completed' }));
+        setAssignReturnsLoading(true);
+        dispatch(fetchReceivedReturns({ limit: 100, verificationStatus: 'completed' }))
+            .unwrap()
+            .catch(() => addToast('Failed to load returns for assignment', 'error'))
+            .finally(() => setAssignReturnsLoading(false));
     };
 
     const handleAssign = async () => {
@@ -202,12 +219,10 @@ export default function BatchDetailPage() {
         );
     };
 
+    // API uses verificationStatus=completed (matches warehouse_list_received "completed" rules):
+    // rows may still have status "received" with verification_completed_at / verified_integrity — do not require status === "verified".
     const filteredReceived = receivedReturns.filter(r => {
-        // Only show verified returns
-        if (r.status !== 'verified') return false;
-        // Don't show returns already assigned to a batch
         if (r.batchId) return false;
-        // Apply search filter
         if (!assignSearch) return true;
         const s = assignSearch.toLowerCase();
         return (
@@ -247,6 +262,30 @@ export default function BatchDetailPage() {
         } finally {
             setDownloadingReturnId(null);
         }
+    };
+
+    // Workflow completion from batch + debit memos (same rules as /workflow page).
+    // Do not require workflowState — it loads in a second request and caused "Continue Workflow"
+    // to flash before fetchBatchWorkflow returned. Optional workflow flags still merge when loaded.
+    const isWorkflowComplete = () => {
+        if (!batch) return false;
+
+        const cardinalComplete = Boolean(workflowState?.cardinalGenerated || batch.cardinalFileGenerated);
+        const cardinalSent = Boolean(workflowState?.cardinalSent || batch.cardinalSubmittedAt);
+        const debitMemosCreated = Boolean(workflowState?.debitMemosCreated || batch.totalDebitMemos > 0);
+
+        const allRasSent =
+            batchMemos.length > 0 &&
+            batchMemos.every(
+                memo =>
+                    memo.raRequestedAt ||
+                    memo.raStatus === 'requested' ||
+                    memo.raStatus === 'received' ||
+                    memo.raStatus === 'shipped'
+            );
+        const raComplete = Boolean(workflowState?.raRequested || allRasSent);
+
+        return cardinalComplete && cardinalSent && debitMemosCreated && raComplete;
     };
 
     // ─────────────────────────────────────────────────────────
@@ -321,14 +360,14 @@ export default function BatchDetailPage() {
                                 <button
                                     onClick={() => setShowDelete(true)}
                                     className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-[4px] text-xs font-medium border transition-colors hover:bg-[var(--surface-container-low)] cursor-pointer"
-                                    style={{ backgroundColor: 'var(--error-container)', color: 'var(--on-error-container)', borderColor: 'var(--outline-variant)' }}
+                                    style={{ backgroundColor: 'var(--error-container)', color: '#000000', borderColor: 'var(--outline-variant)' }}
                                 >
                                     <Trash2 className="w-3.5 h-3.5" /> Delete Batch
                                 </button>
                             )}
                         </>
                     )}
-                    {(batch.status === 'closed' || batch.status === 'submitted') && (
+                    {(batch.status === 'closed' || batch.status === 'submitted') && !isWorkflowComplete() && (
 <button
                     onClick={() => router.push(`/warehouse/batches/${batchId}/workflow`)}
                     className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-[4px] text-xs font-medium text-white transition-colors"
@@ -337,6 +376,14 @@ export default function BatchDetailPage() {
                     <Layers className="w-3.5 h-3.5" />
                     Continue Workflow
                 </button>
+                    )}
+                    {(batch.status === 'closed' || batch.status === 'submitted') && isWorkflowComplete() && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-[4px] text-xs font-medium border"
+                              style={{ backgroundColor: 'var(--secondary-container)', color: 'var(--on-secondary-container)', borderColor: 'var(--outline-variant)' }}
+                        >
+                            <CheckCircle className="w-3.5 h-3.5" />
+                            Workflow Complete
+                        </span>
                     )}
                 </div>
             </div>
@@ -502,7 +549,12 @@ export default function BatchDetailPage() {
                         </div>
 
                         <div className="overflow-y-auto flex-1 p-3">
-                            {filteredReceived.length === 0 ? (
+                            {assignReturnsLoading ? (
+                                <div className="flex flex-col items-center justify-center gap-2 py-10 text-xs" style={{ color: 'var(--on-surface-variant)' }}>
+                                    <Loader2 className="w-6 h-6 animate-spin" style={{ color: 'var(--primary)' }} />
+                                    Loading returns…
+                                </div>
+                            ) : filteredReceived.length === 0 ? (
                                 <p className="text-center py-6 text-xs" style={{ color: 'var(--on-surface-variant)' }}>No verified returns available for assignment.</p>
                             ) : (
                                 <div className="space-y-1.5">
@@ -523,10 +575,35 @@ export default function BatchDetailPage() {
                                                     className="w-3.5 h-3.5 text-primary-600 rounded focus:ring-primary-500"
                                                 />
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-xs font-medium" style={{ color: 'var(--foreground)' }}>{rt.licensePlate}</p>
-                                                    <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>{rt.pharmacyName} · {rt.totalItems} items · {formatCurrency(rt.totalReturnableValue || 0)}</p>
+                                                    <p
+                                                        className="text-xs font-medium"
+                                                        style={{ color: selected ? '#ffffff' : 'var(--foreground)' }}
+                                                    >
+                                                        {rt.licensePlate}
+                                                    </p>
+                                                    <p
+                                                        className="text-[10px]"
+                                                        style={{
+                                                            color: selected ? 'rgba(255, 255, 255, 0.85)' : 'var(--on-surface-variant)',
+                                                        }}
+                                                    >
+                                                        {rt.pharmacyName} · {rt.totalItems} items · {formatCurrency(rt.totalReturnableValue || 0)}
+                                                    </p>
                                                 </div>
-                                                <Badge variant="default"><span className="text-[10px]">{rt.status?.replace(/_/g, ' ')}</span></Badge>
+                                                <Badge
+                                                    variant="default"
+                                                    style={
+                                                        selected
+                                                            ? {
+                                                                  backgroundColor: 'rgba(255, 255, 255, 0.18)',
+                                                                  color: '#ffffff',
+                                                                  borderColor: 'rgba(255, 255, 255, 0.35)',
+                                                              }
+                                                            : undefined
+                                                    }
+                                                >
+                                                    <span className="text-[10px]">{rt.status?.replace(/_/g, ' ')}</span>
+                                                </Badge>
                                             </label>
                                         );
                                     })}

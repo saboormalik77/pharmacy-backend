@@ -73,7 +73,7 @@ function pillStyle(kind: 'success' | 'warning' | 'danger' | 'info' | 'default') 
         case 'warning':
             return { ...base, backgroundColor: 'var(--tertiary-fixed)', color: 'var(--on-tertiary-container)' };
         case 'danger':
-            return { ...base, backgroundColor: 'var(--error-container)', color: 'var(--on-error-container)' };
+            return { ...base, backgroundColor: 'var(--error-container)', color: '#000000' };
         case 'info':
             return { ...base, backgroundColor: 'var(--primary-fixed)', color: 'var(--on-primary-container)' };
         default:

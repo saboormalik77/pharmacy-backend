@@ -799,7 +799,7 @@ export default function ReturnDetailPage() {
                 </button>
                 <div className="border rounded-[4px] p-6 text-center" style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
                     <AlertCircle className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--error)' }} />
-                    <p className="font-medium" style={{ color: 'var(--on-error-container)' }}>{error || 'Return transaction not found.'}</p>
+                    <p className="font-medium" style={{ color: '#000000' }}>{error || 'Return transaction not found.'}</p>
                     <Button variant="outline" className="mt-4" onClick={() => router.push('/warehouse/returns')}>Go Back</Button>
                 </div>
             </div>
@@ -882,7 +882,7 @@ export default function ReturnDetailPage() {
                             </button>
                         )}
                         {canDoAction(tx, 'delete') && canEdit && (
-                            <button onClick={() => checkActionWithToast('delete return', () => setDeleteModal(true))} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border transition-colors hover:bg-primary-50/40" style={{ backgroundColor: 'var(--error-container)', color: 'var(--on-error-container)', borderColor: 'var(--outline-variant)' }}>
+                            <button onClick={() => checkActionWithToast('delete return', () => setDeleteModal(true))} className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium border transition-colors hover:bg-primary-50/40" style={{ backgroundColor: 'var(--error-container)', color: '#000000', borderColor: 'var(--outline-variant)' }}>
                                 <Trash2 className="w-3 h-3" /> Delete
                             </button>
                         )}
@@ -1617,10 +1617,10 @@ export default function ReturnDetailPage() {
                                 <div className="border rounded-[4px] p-3 flex items-start gap-2" style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
                                     <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: 'var(--error)' }} />
                                     <div>
-                                        <p className="text-sm font-medium" style={{ color: 'var(--on-error-container)' }}>
+                                        <p className="text-sm font-medium" style={{ color: '#000000' }}>
                                             {tbdItems.length} item{tbdItems.length !== 1 ? 's' : ''} still have TBD status
                                         </p>
-                                        <p className="text-xs mt-0.5" style={{ color: 'var(--on-error-container)' }}>
+                                        <p className="text-xs mt-0.5" style={{ color: '#000000' }}>
                                             Resolve all TBD items before finalizing.
                                         </p>
                                     </div>
@@ -1837,7 +1837,7 @@ export default function ReturnDetailPage() {
                                                 {hasTbdItems && (
                                                     <div className="border rounded-[4px] p-2 flex items-start gap-1.5 mb-3" style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
                                                         <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--error)' }} />
-                                                        <p className="text-xs" style={{ color: 'var(--on-error-container)' }}>
+                                                        <p className="text-xs" style={{ color: '#000000' }}>
                                                             Resolve all TBD items before finalizing.
                                                         </p>
                                                     </div>

@@ -40,6 +40,10 @@ function isValidReceivingTab(v: string | null): v is Tab {
     return v === 'scan' || v === 'pending' || v === 'received';
 }
 
+function normalizeTrackingKey(s: string): string {
+    return s.replace(/\s+/g, '').toLowerCase();
+}
+
 export default function WarehouseReceivingPage() {
     const dispatch = useAppDispatch();
     const router = useRouter();
@@ -342,44 +346,44 @@ export default function WarehouseReceivingPage() {
                         <div className="border rounded-[4px] px-4 py-2.5 flex items-start gap-2.5" style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
                             <XCircle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--error)' }} />
                             <div>
-                                <p className="text-xs font-medium" style={{ color: 'var(--on-error-container)' }}>Could not scan box</p>
-                                <p className="text-xs" style={{ color: 'var(--on-error-container)' }}>{scanError}</p>
+                                <p className="text-xs font-medium" style={{ color: '#000000' }}>Could not scan box</p>
+                                <p className="text-xs" style={{ color: '#000000' }}>{scanError}</p>
                             </div>
                         </div>
                     )}
 
-                    {/* Scan Progress Card */}
+                    {/* Scan Progress Card — same secondary / sage chrome for scanning + complete */}
                     {scannedReturn && scanProgress && (
                         <div
                             className="border-2 rounded-[4px] overflow-hidden"
                             style={{
-                                backgroundColor: scanProgress.allScanned ? 'var(--secondary-fixed)' : 'var(--primary-container)',
-                                borderColor: scanProgress.allScanned ? 'var(--secondary)' : 'var(--outline-variant)',
-                                boxShadow: scanProgress.allScanned ? '0 0 0 2px var(--secondary-container), 0 4px 12px rgba(61, 67, 67, 0.15)' : undefined,
+                                backgroundColor: 'var(--secondary-fixed)',
+                                borderColor: 'var(--secondary)',
+                                boxShadow: '0 0 0 2px var(--secondary-container), 0 4px 12px rgba(61, 67, 67, 0.15)',
                             }}
                         >
                             {/* Header */}
-                            <div className="px-4 py-2.5 flex items-center justify-between" style={{ backgroundColor: scanProgress.allScanned ? 'var(--secondary-container)' : 'var(--surface-container-low)' }}>
+                            <div className="px-4 py-2.5 flex items-center justify-between" style={{ backgroundColor: 'var(--secondary-container)' }}>
                                 <div className="flex items-center gap-2">
-                                    {scanProgress.allScanned
-                                        ? <CheckCircle className="w-4.5 h-4.5" style={{ color: 'var(--secondary)' }} />
-                                        : <Box className="w-4 h-4" style={{ color: 'var(--primary)' }} />
-                                    }
-                                    <h3 className="font-heading text-sm font-semibold" style={{ color: scanProgress.allScanned ? 'var(--on-secondary-fixed)' : 'var(--foreground)' }}>
+                                    {scanProgress.allScanned ? (
+                                        <CheckCircle className="w-4.5 h-4.5" style={{ color: 'var(--secondary)' }} />
+                                    ) : (
+                                        <Box className="w-4.5 h-4.5" style={{ color: 'var(--secondary)' }} />
+                                    )}
+                                    <h3 className="font-heading text-sm font-semibold" style={{ color: 'var(--on-secondary-fixed)' }}>
                                         {scanProgress.allScanned
                                             ? 'All Boxes Scanned — Return Received!'
-                                            : `Scanning in Progress — ${scanProgress.scannedCount} of ${scanProgress.totalPackages} boxes`
-                                        }
+                                            : `Scanning in Progress — ${scanProgress.scannedCount} of ${scanProgress.totalPackages} boxes`}
                                     </h3>
                                 </div>
                                 {!scanProgress.allScanned ? (
-                                    <Badge variant="warning">
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--secondary)]/10 text-[var(--secondary)] border border-[var(--outline-variant)]">
                                         <span className="text-[10px]">{scanProgress.totalPackages - scanProgress.scannedCount} remaining</span>
-                                    </Badge>
+                                    </span>
                                 ) : (
-                                    <Badge variant="success">
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--secondary)]/10 text-[var(--secondary)] border border-[var(--outline-variant)]">
                                         <span className="text-[10px]">Complete</span>
-                                    </Badge>
+                                    </span>
                                 )}
                             </div>
 
@@ -387,19 +391,22 @@ export default function WarehouseReceivingPage() {
                                 {/* Return info */}
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                     {[
-                                        { label: 'License Plate', value: <span className="font-mono font-bold text-sm" style={{ color: scanProgress.allScanned ? 'var(--on-secondary-fixed)' : 'var(--foreground)' }}>{scannedReturn.licensePlate}</span> },
-                                        { label: 'Pharmacy', value: <span className="text-xs font-medium" style={{ color: scanProgress.allScanned ? 'var(--on-secondary-fixed)' : 'var(--foreground)' }}>{scannedReturn.pharmacyName}</span> },
-                                        { label: 'Total Items', value: <span className="text-xs font-medium" style={{ color: scanProgress.allScanned ? 'var(--on-secondary-fixed)' : 'var(--foreground)' }}>{scannedReturn.totalItems}</span> },
-                                        { label: 'Box Count', value: <span className="text-xs font-medium" style={{ color: scanProgress.allScanned ? 'var(--on-secondary-fixed)' : 'var(--foreground)' }}>{scannedReturn.boxCount ?? scanProgress.totalPackages}</span> },
-                                        { label: 'Returnable Value', value: <span className="text-xs font-bold" style={{ color: scanProgress.allScanned ? 'var(--on-secondary-fixed)' : 'var(--secondary)' }}>${Number(scannedReturn.totalReturnableValue || 0).toFixed(2)}</span> },
-                                        { label: 'Status', value: (
-                                            <Badge variant={scanProgress.allScanned ? 'success' : 'warning'}>
-                                                <span className="text-[10px]">{scanProgress.allScanned ? 'Received' : 'Scanning'}</span>
-                                            </Badge>
-                                        )},
+                                        { label: 'License Plate', value: <span className="font-mono font-bold text-sm" style={{ color: 'var(--on-secondary-fixed)' }}>{scannedReturn.licensePlate}</span> },
+                                        { label: 'Pharmacy', value: <span className="text-xs font-medium" style={{ color: 'var(--on-secondary-fixed)' }}>{scannedReturn.pharmacyName}</span> },
+                                        { label: 'Total Items', value: <span className="text-xs font-medium" style={{ color: 'var(--on-secondary-fixed)' }}>{scannedReturn.totalItems}</span> },
+                                        { label: 'Box Count', value: <span className="text-xs font-medium" style={{ color: 'var(--on-secondary-fixed)' }}>{scannedReturn.boxCount ?? scanProgress.totalPackages}</span> },
+                                        { label: 'Returnable Value', value: <span className="text-xs font-bold" style={{ color: 'var(--on-secondary-fixed)' }}>${Number(scannedReturn.totalReturnableValue || 0).toFixed(2)}</span> },
+                                        {
+                                            label: 'Status',
+                                            value: (
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--secondary)]/10 text-[var(--secondary)] border border-[var(--outline-variant)]">
+                                                    <span className="text-[10px]">{scanProgress.allScanned ? 'Received' : 'Scanning'}</span>
+                                                </span>
+                                            ),
+                                        },
                                     ].map(({ label, value }) => (
                                         <div key={label}>
-                                            <p className="text-[10px]" style={{ color: scanProgress.allScanned ? 'var(--on-secondary-fixed)' : 'var(--on-surface-variant)' }}>{label}</p>
+                                            <p className="text-[10px]" style={{ color: 'var(--on-secondary-fixed)' }}>{label}</p>
                                             <p className="mt-0.5">{value}</p>
                                         </div>
                                     ))}
@@ -407,7 +414,7 @@ export default function WarehouseReceivingPage() {
 
                                 {/* Progress bar */}
                                 <div>
-                                    <div className="flex justify-between text-[10px] mb-1" style={{ color: scanProgress.allScanned ? 'var(--on-secondary-fixed)' : 'var(--on-surface-variant)' }}>
+                                    <div className="flex justify-between text-[10px] mb-1" style={{ color: 'var(--on-secondary-fixed)' }}>
                                         <span>Scan progress</span>
                                         <span>{scanProgress.scannedCount} / {scanProgress.totalPackages}</span>
                                     </div>
@@ -415,7 +422,7 @@ export default function WarehouseReceivingPage() {
                                         <div
                                             className="h-2.5 rounded-full transition-all duration-500"
                                             style={{
-                                                backgroundColor: scanProgress.allScanned ? 'var(--secondary)' : 'var(--primary)',
+                                                backgroundColor: 'var(--secondary)',
                                                 width: `${(scanProgress.scannedCount / scanProgress.totalPackages) * 100}%`,
                                             }}
                                         />
@@ -425,24 +432,23 @@ export default function WarehouseReceivingPage() {
                                 {/* Package list with scan status */}
                                 {allPackageTrackingNumbers.length > 0 && (
                                     <div>
-                                        <p className="text-[10px] font-semibold uppercase mb-1.5" style={{ color: scanProgress.allScanned ? 'var(--on-secondary-fixed)' : 'var(--on-surface-variant)' }}>Package Tracking Numbers</p>
+                                        <p className="text-[10px] font-semibold uppercase mb-1.5" style={{ color: 'var(--on-secondary-fixed)' }}>Package Tracking Numbers</p>
                                         <div className="space-y-1">
                                             {allPackageTrackingNumbers.map((num, idx) => {
-                                                const isScanned = scanState.scannedNumbers.some(
-                                                    s => s.toLowerCase() === num.toLowerCase()
-                                                );
+                                                const nNorm = normalizeTrackingKey(num);
+                                                const isScanned = scanState.scannedNumbers.some(s => normalizeTrackingKey(s) === nNorm);
                                                 return (
                                                     <div
                                                         key={idx}
                                                         className="flex items-center justify-between px-3 py-1.5 rounded-[4px] border"
                                                         style={{
                                                             backgroundColor: isScanned ? 'var(--secondary-container)' : 'var(--surface-container-low)',
-                                                            borderColor: scanProgress.allScanned ? 'var(--secondary)' : 'var(--outline-variant)',
+                                                            borderColor: 'var(--secondary)',
                                                         }}
                                                     >
                                                         <div className="flex items-center gap-2">
-                                                            <span className="text-[10px] w-16" style={{ color: scanProgress.allScanned ? 'var(--on-secondary-fixed)' : 'var(--on-surface-variant)' }}>Box {idx + 1}</span>
-                                                            <span className="font-mono text-xs font-medium" style={{ color: scanProgress.allScanned ? 'var(--on-secondary-fixed)' : 'var(--foreground)' }}>{num}</span>
+                                                            <span className="text-[10px] w-16" style={{ color: 'var(--on-secondary-fixed)' }}>Box {idx + 1}</span>
+                                                            <span className="font-mono text-xs font-medium" style={{ color: 'var(--on-secondary-fixed)' }}>{num}</span>
                                                         </div>
                                                         {isScanned ? (
                                                             <div className="flex items-center gap-1" style={{ color: 'var(--secondary)' }}>
@@ -464,17 +470,25 @@ export default function WarehouseReceivingPage() {
 
                                 {/* Info message */}
                                 {scanMessage && (
-                                    <div className="flex items-center gap-2 px-3 py-2 rounded text-xs border" style={{ backgroundColor: scanProgress.allScanned ? 'var(--secondary-container)' : 'var(--surface-container-low)', borderColor: scanProgress.allScanned ? 'var(--secondary)' : 'var(--outline-variant)', color: scanProgress.allScanned ? 'var(--on-secondary-fixed)' : 'var(--on-surface)' }}>
-                                        {scanProgress.allScanned
-                                            ? <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                                            : <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
-                                        }
+                                    <div
+                                        className="flex items-center gap-2 px-3 py-2 rounded text-xs border"
+                                        style={{
+                                            backgroundColor: 'var(--secondary-container)',
+                                            borderColor: 'var(--secondary)',
+                                            color: 'var(--on-secondary-fixed)',
+                                        }}
+                                    >
+                                        {scanProgress.allScanned ? (
+                                            <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                                        ) : (
+                                            <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+                                        )}
                                         {scanMessage}
                                     </div>
                                 )}
 
                                 {/* Actions */}
-                                <div className="flex gap-2 pt-2 border-t" style={{ borderColor: scanProgress.allScanned ? 'var(--secondary)' : 'var(--outline-variant)' }}>
+                                <div className="flex gap-2 pt-2 border-t" style={{ borderColor: 'var(--secondary)' }}>
                                     {scanProgress.allScanned && (
                                         <Button variant="primary" size="sm" onClick={() => router.push(`/warehouse/verification/${scannedReturn.id}`)}>
                                             <ArrowRight className="w-3.5 h-3.5 mr-1" />Start Verification
