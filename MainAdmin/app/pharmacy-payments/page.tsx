@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { Search, DollarSign, Calculator, ChevronLeft, ChevronRight, Clock, CheckCircle, AlertTriangle, Plus, FileText, CreditCard, ExternalLink, Banknote } from 'lucide-react';
+import { Search, DollarSign, Calculator, ChevronLeft, ChevronRight, Clock, CheckCircle, AlertTriangle, Plus, FileText, CreditCard, ExternalLink, Banknote, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { 
@@ -318,24 +318,32 @@ function IssueCheckModal({
         {/* Body */}
         <div className="px-4 py-3 flex-1 overflow-y-auto space-y-4">
           {/* Payment Summary */}
-          <div className="border rounded p-3" style={{ backgroundColor: 'var(--primary-container)', borderColor: 'var(--outline-variant)' }}>
-            <p className="text-xs font-semibold mb-2" style={{ color: 'var(--on-primary-container)' }}>Payment Summary</p>
-            <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="border rounded-lg p-4" style={{ backgroundColor: 'var(--surface-container-high)', borderColor: 'var(--outline-variant)' }}>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center justify-center w-7 h-7 rounded-full" style={{ backgroundColor: 'var(--primary-container)' }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--primary)' }}>
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 6v6l4 2"/>
+                </svg>
+              </div>
+              <p className="text-sm font-bold" style={{ color: 'var(--on-surface)' }}>Payment Summary</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
-                <span style={{ color: 'var(--on-primary-container)' }}>Pharmacy:</span>
-                <p className="font-medium" style={{ color: 'var(--on-primary-container)' }}>{payment.pharmacyName}</p>
+                <span className="text-xs font-medium" style={{ color: 'var(--on-surface-variant)' }}>Pharmacy:</span>
+                <p className="font-semibold" style={{ color: 'var(--on-surface)' }}>{payment.pharmacyName}</p>
               </div>
               <div>
-                <span style={{ color: 'var(--on-primary-container)' }}>Batch:</span>
-                <p className="font-medium" style={{ color: 'var(--on-primary-container)' }}>{payment.batchName || 'N/A'}</p>
+                <span className="text-xs font-medium" style={{ color: 'var(--on-surface-variant)' }}>Batch:</span>
+                <p className="font-semibold" style={{ color: 'var(--on-surface)' }}>{payment.batchName || 'N/A'}</p>
               </div>
               <div>
-                <span style={{ color: 'var(--on-primary-container)' }}>Total Credit:</span>
-                <p className="font-medium" style={{ color: 'var(--on-primary-container)' }}>${payment.totalCreditReceived?.toFixed(2) || '0.00'}</p>
+                <span className="text-xs font-medium" style={{ color: 'var(--on-surface-variant)' }}>Total Credit:</span>
+                <p className="font-semibold" style={{ color: 'var(--on-surface)' }}>${payment.totalCreditReceived?.toFixed(2) || '0.00'}</p>
               </div>
               <div>
-                <span style={{ color: 'var(--on-primary-container)' }}>Payout Amount:</span>
-                <p className="font-bold" style={{ color: 'var(--secondary)' }}>${payment.pharmacyPayout?.toFixed(2) || '0.00'}</p>
+                <span className="text-xs font-medium" style={{ color: 'var(--on-surface-variant)' }}>Payout Amount:</span>
+                <p className="font-bold text-lg" style={{ color: 'var(--secondary)' }}>${payment.pharmacyPayout?.toFixed(2) || '0.00'}</p>
               </div>
             </div>
           </div>
@@ -471,6 +479,7 @@ function PharmacyPaymentsPageContent() {
   const [viewModal, setViewModal] = useState<PharmacyPayment | null>(null);
   const [calculateModal, setCalculateModal] = useState(false);
   const [issueCheckModal, setIssueCheckModal] = useState<PharmacyPayment | null>(null);
+  const [pdfLoading, setPdfLoading] = useState<string | null>(null);
 
   const debouncedSearch = useDebounce(searchTerm, 500);
   const debouncedPharmacyFilter = useDebounce(pharmacyFilter, 500);
@@ -595,9 +604,52 @@ function PharmacyPaymentsPageContent() {
   };
 
   // Open Check PDF in new tab
-  const handleViewCheckPdf = (checkNumber: string) => {
-    const pdfUrl = `${process.env.NEXT_PUBLIC_API_URL || ''}/api/pharmacy-payments/check-pdf/${checkNumber}`;
-    window.open(pdfUrl, '_blank');
+  const handleViewCheckPdf = async (checkNumber: string) => {
+    if (!checkNumber) {
+      alert('Check number not available');
+      return;
+    }
+
+    setPdfLoading(checkNumber);
+    try {
+      const { cookieUtils } = await import('@/lib/utils/cookies');
+      const token = cookieUtils.getAuthToken();
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+      
+      if (!token) {
+        alert('Authentication required. Please log in.');
+        return;
+      }
+      
+      const response = await fetch(`${apiUrl}/admin/pharmacy-payments/check-pdf/${checkNumber}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate check PDF');
+      }
+      
+      const pdfBlob = await response.blob();
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      const newWindow = window.open(pdfUrl, '_blank');
+      
+      if (newWindow) {
+        newWindow.onload = () => {
+          URL.revokeObjectURL(pdfUrl);
+        };
+      } else {
+        URL.revokeObjectURL(pdfUrl);
+        alert('Please allow popups for this site to view PDFs.');
+      }
+    } catch (error) {
+      console.error('Error opening check PDF:', error);
+      alert('Failed to open check PDF. Please try again.');
+    } finally {
+      setPdfLoading(null);
+    }
   };
 
   const getStatusVariant = (status: PharmacyPaymentStatus) => {
@@ -693,8 +745,8 @@ function PharmacyPaymentsPageContent() {
               <table className="w-full table-auto text-sm border" style={{ borderColor: 'var(--outline)' }}>
                 <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
                   <tr className="bg-[var(--surface-container-low)]">
-                    {['Payment ID', 'Check #', 'Pharmacy', 'Batch', 'Total Credit', 'Payout Amount', 'Type', 'Status', 'Created', 'Actions'].map(h => (
-                      <th key={h} className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">{h}</th>
+                    {['Payment ID', 'Check #', 'Pharmacy', 'Batch', 'Total Credit', 'Payout Amount', 'Type', 'Status', 'Created', 'Actions'].map((h, index) => (
+                      <th key={h} className={`${index === 9 ? 'pl-3 pr-6' : 'px-3'} py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap`}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -708,13 +760,18 @@ function PharmacyPaymentsPageContent() {
                         {payment.checkNumber ? (
                           <button
                             onClick={() => handleViewCheckPdf(payment.checkNumber!)}
-                            className="inline-flex items-center gap-1 text-xs font-medium hover:underline"
+                            disabled={pdfLoading === payment.checkNumber}
+                            className="inline-flex items-center gap-1 text-xs font-medium hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
                             style={{ color: 'var(--primary)' }}
                             title="View Check PDF"
                           >
-                            <FileText className="w-3 h-3" />
+                            {pdfLoading === payment.checkNumber ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <FileText className="w-3 h-3" />
+                            )}
                             {payment.checkNumber}
-                            <ExternalLink className="w-2.5 h-2.5" />
+                            {pdfLoading !== payment.checkNumber && <ExternalLink className="w-2.5 h-2.5" />}
                           </button>
                         ) : (
                           <span className="text-sm text-gray-400">—</span>
@@ -753,7 +810,7 @@ function PharmacyPaymentsPageContent() {
                       <td className="px-3 py-3 whitespace-nowrap text-sm" style={{ color: 'var(--on-surface-variant)' }}>
                         {payment.createdAt ? new Date(payment.createdAt).toLocaleDateString() : 'N/A'}
                       </td>
-                      <td className="px-3 py-3">
+                      <td className="pl-3 pr-6 py-3">
                         <div className="flex flex-wrap items-center gap-1">
                           <button
                             type="button"
@@ -767,7 +824,7 @@ function PharmacyPaymentsPageContent() {
                             <button
                               type="button"
                               onClick={() => handleStatusUpdate(payment.id, 'processing')}
-                              className="px-2 py-1 text-[10px] font-medium border rounded transition-colors"
+                              className="px-4 py-1 text-[10px] font-medium border rounded transition-colors whitespace-nowrap"
                               style={{ color: 'var(--on-tertiary-container)', backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}
                             >
                              Mark as Processing
@@ -777,7 +834,7 @@ function PharmacyPaymentsPageContent() {
                             <button
                               type="button"
                               onClick={() => handleOpenIssueCheckModal(payment)}
-                              className="px-2 py-1 text-[10px] font-medium border rounded transition-colors inline-flex items-center gap-1"
+                              className="px-4 py-1 text-[10px] font-medium border rounded transition-colors inline-flex items-center gap-1 whitespace-nowrap"
                               style={{ color: 'var(--on-secondary-container)', backgroundColor: 'var(--secondary-container)', borderColor: 'var(--outline-variant)' }}
                             >
                               <Banknote className="w-3 h-3" />
@@ -798,10 +855,15 @@ function PharmacyPaymentsPageContent() {
                             <button
                               type="button"
                               onClick={() => handleViewCheckPdf(payment.checkNumber!)}
-                              className="px-2 py-1 text-[10px] font-medium border rounded transition-colors inline-flex items-center gap-1"
+                              disabled={pdfLoading === payment.checkNumber}
+                              className="px-2 py-1 text-[10px] font-medium border rounded transition-colors inline-flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                               style={{ color: 'var(--on-tertiary-container)', backgroundColor: 'var(--tertiary-fixed)', borderColor: 'var(--outline-variant)' }}
                             >
-                              <FileText className="w-3 h-3" />
+                              {pdfLoading === payment.checkNumber ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              ) : (
+                                <FileText className="w-3 h-3" />
+                              )}
                               PDF
                             </button>
                           )}
@@ -889,13 +951,13 @@ function PharmacyPaymentsPageContent() {
           style={{ backgroundColor: 'color-mix(in srgb, var(--inverse-surface) 55%, transparent)' }}
           onClick={() => setViewModal(null)}
         >
-          <div
-            className="rounded-[4px] shadow-xl w-full max-w-lg my-auto flex flex-col border"
-            style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="rounded-t-xl px-5 py-3" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
+            <div
+              className="rounded-xl shadow-xl w-full max-w-lg my-auto flex flex-col border"
+              style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="rounded-t-xl px-5 py-3" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%)' }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 bg-white/20 rounded-[4px]">
@@ -977,31 +1039,33 @@ function PharmacyPaymentsPageContent() {
 
               {/* Check Information */}
               {(viewModal.checkNumber || viewModal.paymentType) && (
-                <div className="border rounded-[4px] p-3" style={{ background: 'linear-gradient(135deg, var(--primary-container) 0%, var(--surface-container-low) 100%)', borderColor: 'var(--outline-variant)' }}>
-                  <div className="flex items-center gap-1.5 mb-2.5">
-                    <Banknote className="w-3.5 h-3.5" style={{ color: 'var(--primary)' }} />
-                    <h3 className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--on-primary-container)' }}>Check Information</h3>
+                <div className="border rounded-[4px] p-4" style={{ backgroundColor: 'var(--surface-container-high)', borderColor: 'var(--outline-variant)' }}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center justify-center w-7 h-7 rounded-full" style={{ backgroundColor: 'var(--primary-container)' }}>
+                      <Banknote className="w-4 h-4" style={{ color: 'var(--primary)' }} />
+                    </div>
+                    <h3 className="text-sm font-bold uppercase tracking-wide" style={{ color: 'var(--on-surface)' }}>Check Information</h3>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {viewModal.checkNumber && (
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-semibold uppercase" style={{ color: 'var(--on-primary-container)' }}>Check Number</span>
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-bold" style={{ color: 'var(--on-primary-container)' }}>{viewModal.checkNumber}</span>
+                        <span className="text-xs font-medium uppercase" style={{ color: 'var(--on-surface-variant)' }}>Check Number</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold" style={{ color: 'var(--on-surface)' }}>{viewModal.checkNumber}</span>
                           <button
                             onClick={() => handleViewCheckPdf(viewModal.checkNumber!)}
-                            className="transition-colors cursor-pointer"
+                            className="p-1 rounded-full transition-colors hover:bg-primary-50/40 cursor-pointer"
                             style={{ color: 'var(--primary)' }}
                             title="View Check PDF"
                           >
-                            <ExternalLink className="w-3 h-3" />
+                            <ExternalLink className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </div>
                     )}
                     {viewModal.paymentType && (
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-semibold uppercase" style={{ color: 'var(--on-primary-container)' }}>Payment Type</span>
+                        <span className="text-xs font-medium uppercase" style={{ color: 'var(--on-surface-variant)' }}>Payment Type</span>
                         <Badge variant={viewModal.paymentType === 'ocs' ? 'success' : viewModal.paymentType === 'por' ? 'warning' : 'default'}>
                           {viewModal.paymentType.toUpperCase()}
                         </Badge>
@@ -1009,26 +1073,26 @@ function PharmacyPaymentsPageContent() {
                     )}
                     {viewModal.checkDate && (
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-semibold uppercase" style={{ color: 'var(--on-primary-container)' }}>Check Date</span>
-                        <span className="text-xs" style={{ color: 'var(--on-primary-container)' }}>{new Date(viewModal.checkDate).toLocaleDateString()}</span>
+                        <span className="text-xs font-medium uppercase" style={{ color: 'var(--on-surface-variant)' }}>Check Date</span>
+                        <span className="text-sm font-medium" style={{ color: 'var(--on-surface)' }}>{new Date(viewModal.checkDate).toLocaleDateString()}</span>
                       </div>
                     )}
                     {viewModal.returnReferenceNumber && (
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-semibold uppercase" style={{ color: 'var(--on-primary-container)' }}>Return Reference #</span>
-                        <span className="text-xs font-mono" style={{ color: 'var(--on-primary-container)' }}>{viewModal.returnReferenceNumber}</span>
+                        <span className="text-xs font-medium uppercase" style={{ color: 'var(--on-surface-variant)' }}>Return Reference #</span>
+                        <span className="text-sm font-mono font-medium" style={{ color: 'var(--on-surface)' }}>{viewModal.returnReferenceNumber}</span>
                       </div>
                     )}
                     {viewModal.paidAt && (
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-semibold uppercase" style={{ color: 'var(--on-primary-container)' }}>Paid At</span>
-                        <span className="text-xs" style={{ color: 'var(--on-primary-container)' }}>{new Date(viewModal.paidAt).toLocaleString()}</span>
+                        <span className="text-xs font-medium uppercase" style={{ color: 'var(--on-surface-variant)' }}>Paid At</span>
+                        <span className="text-sm font-medium" style={{ color: 'var(--on-surface)' }}>{new Date(viewModal.paidAt).toLocaleString()}</span>
                       </div>
                     )}
                     {viewModal.pharmacyAccountNumber && (
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-semibold uppercase" style={{ color: 'var(--on-primary-container)' }}>Account Number</span>
-                        <span className="text-xs font-mono" style={{ color: 'var(--on-primary-container)' }}>{viewModal.pharmacyAccountNumber}</span>
+                        <span className="text-xs font-medium uppercase" style={{ color: 'var(--on-surface-variant)' }}>Account Number</span>
+                        <span className="text-sm font-mono font-medium" style={{ color: 'var(--on-surface)' }}>{viewModal.pharmacyAccountNumber}</span>
                       </div>
                     )}
                   </div>
@@ -1036,7 +1100,7 @@ function PharmacyPaymentsPageContent() {
               )}
 
               {/* Credit Breakdown */}
-              {(viewModal.includedCreditAmount || viewModal.directCreditAmount || viewModal.porCreditAmount) && (
+              {(!!viewModal.includedCreditAmount || !!viewModal.directCreditAmount || !!viewModal.porCreditAmount) && (
                 <div className="border rounded-[4px] p-3" style={{ background: 'linear-gradient(135deg, var(--tertiary-fixed) 0%, var(--surface-container-low) 100%)', borderColor: 'var(--outline-variant)' }}>
                   <div className="flex items-center gap-1.5 mb-2.5">
                     <CreditCard className="w-3.5 h-3.5" style={{ color: 'var(--tertiary)' }} />
@@ -1080,11 +1144,16 @@ function PharmacyPaymentsPageContent() {
                 {viewModal.checkNumber && (
                   <button
                     onClick={() => handleViewCheckPdf(viewModal.checkNumber!)}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 text-xs border rounded-[4px] transition-colors font-medium cursor-pointer hover:bg-primary-50/40"
+                    disabled={pdfLoading === viewModal.checkNumber}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 text-xs border rounded-[4px] transition-colors font-medium cursor-pointer hover:bg-primary-50/40 disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{ backgroundColor: 'var(--surface-container-lowest)', color: 'var(--primary)', borderColor: 'var(--outline-variant)' }}
                   >
-                    <FileText className="w-3.5 h-3.5" />
-                    View Check PDF
+                    {pdfLoading === viewModal.checkNumber ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <FileText className="w-3.5 h-3.5" />
+                    )}
+                    {pdfLoading === viewModal.checkNumber ? 'Generating PDF...' : 'View Check PDF'}
                   </button>
                 )}
               </div>
@@ -1098,7 +1167,7 @@ function PharmacyPaymentsPageContent() {
                 {viewModal.status === 'pending' && (
                   <button
                     onClick={() => { handleStatusUpdate(viewModal.id, 'processing'); setViewModal(null); }}
-                    className="px-4 py-2 text-xs text-white rounded-[4px] transition-colors font-medium cursor-pointer"
+                    className="px-5 py-2 text-xs text-white rounded-[4px] transition-colors font-medium cursor-pointer"
                     style={{ backgroundColor: 'var(--primary)' }}
                   >
                     Mark as Processing
@@ -1107,7 +1176,7 @@ function PharmacyPaymentsPageContent() {
                 {viewModal.status === 'processing' && !viewModal.checkNumber && (
                   <button
                     onClick={() => { setViewModal(null); handleOpenIssueCheckModal(viewModal); }}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs text-white rounded-[4px] transition-colors font-medium cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-5 py-2 text-xs text-white rounded-[4px] transition-colors font-medium cursor-pointer"
                     style={{ backgroundColor: 'var(--secondary)' }}
                   >
                     <Banknote className="w-3.5 h-3.5" />

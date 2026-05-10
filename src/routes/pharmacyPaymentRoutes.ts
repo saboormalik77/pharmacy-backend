@@ -228,6 +228,32 @@ adminRouter.get('/:id', authenticateAdmin, getPaymentHandler);
  */
 adminRouter.patch('/:id', authenticateAdmin, updatePaymentHandler);
 
+/**
+ * @swagger
+ * /api/admin/pharmacy-payments/check-pdf/{checkNumber}:
+ *   get:
+ *     summary: Generate check PDF for admin users
+ *     tags: [Pharmacy Payments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: checkNumber
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: PDF file
+ *         content:
+ *           application/pdf:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       404:
+ *         description: Check not found
+ */
+adminRouter.get('/check-pdf/:checkNumber', authenticateAdmin, checkPdfHandler);
+
 
 // ============================================================
 // Pharmacy-facing routes: /api/pharmacy-payments
