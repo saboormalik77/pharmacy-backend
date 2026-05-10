@@ -42,7 +42,7 @@
   --error: #f97316;
   --on-error: #ffffff;
   --error-container: rgba(249, 115, 22, 0.1);
-  --on-error-container: #ffffff;
+  --on-error-container: #000000;
 
   /* Status */
   --status-success: #516057;
@@ -114,8 +114,8 @@
   --color-red-400: var(--error);
   --color-red-500: var(--error);
   --color-red-600: var(--error);
-  --color-red-700: var(--on-error-container);
-  --color-red-800: var(--on-error-container);
+  --color-red-700: #b91c1c;
+  --color-red-800: #991b1b;
 
   /* Success colors - Spec uses #516057 sage green */
   --color-green-50: var(--secondary-container);

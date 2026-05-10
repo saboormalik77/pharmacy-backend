@@ -8,6 +8,7 @@ import {
     ArrowLeft, Loader2, AlertCircle, X, Play, CheckCircle, Lock,
     Trash2, Edit, ClipboardList, Building2, Package, Truck,
     Plus, Search, ScanLine, FileText, Download, AlertTriangle, Printer, QrCode,
+    ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
@@ -125,6 +126,9 @@ function getStatusBadge(status: string): { variant: 'success' | 'warning' | 'err
     }
 }
 
+/** Products table on return detail — rows per page */
+const RETURN_DETAIL_ITEMS_PAGE_SIZE = 6;
+
 function getItemStatusBadge(status: string): { variant: 'success' | 'warning' | 'error' | 'info' | 'default'; label: string } {
     switch (status) {
         case 'returnable': return { variant: 'success', label: 'Returnable' };
@@ -170,6 +174,7 @@ export default function ReturnDetailPage() {
     const [itemSearch, setItemSearch] = useState('');
     const [itemStatusFilter, setItemStatusFilter] = useState('');
     const debouncedItemSearch = useDebounce(itemSearch, 300);
+    const [itemsTablePage, setItemsTablePage] = useState(1);
 
     // Modals
     const [editModal, setEditModal] = useState(false);
@@ -240,6 +245,15 @@ export default function ReturnDetailPage() {
             setIsItemsLoading(false);
         }
     }, [id, debouncedItemSearch, itemStatusFilter]);
+
+    useEffect(() => {
+        setItemsTablePage(1);
+    }, [debouncedItemSearch, itemStatusFilter]);
+
+    useEffect(() => {
+        const maxPage = Math.max(1, Math.ceil(items.length / RETURN_DETAIL_ITEMS_PAGE_SIZE));
+        setItemsTablePage((p) => Math.min(p, maxPage));
+    }, [items.length]);
 
     const fetchReverseDistributors = useCallback(async () => {
         try {
@@ -654,6 +668,19 @@ export default function ReturnDetailPage() {
         tx.fedexPickupConfirmation ||
         (tx.packageTracking && Object.keys(tx.packageTracking).length > 0) ||
         (tx.fedexLabels && Object.keys(tx.fedexLabels).length > 0)
+    );
+
+    const itemsTableTotalPages = Math.max(1, Math.ceil(items.length / RETURN_DETAIL_ITEMS_PAGE_SIZE));
+    const paginatedItemsTable = items.slice(
+        (itemsTablePage - 1) * RETURN_DETAIL_ITEMS_PAGE_SIZE,
+        itemsTablePage * RETURN_DETAIL_ITEMS_PAGE_SIZE
+    );
+    const itemsTableRangeStart = items.length === 0
+        ? 0
+        : (itemsTablePage - 1) * RETURN_DETAIL_ITEMS_PAGE_SIZE + 1;
+    const itemsTableRangeEnd = Math.min(
+        itemsTablePage * RETURN_DETAIL_ITEMS_PAGE_SIZE,
+        items.length
     );
 
     return (
@@ -1084,7 +1111,7 @@ export default function ReturnDetailPage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {items.map((item) => {
+                                    {paginatedItemsTable.map((item) => {
                                         const itemBadge = getItemStatusBadge(item.returnStatus);
                                         return (
                                             <tr key={item.id} className="border-b border-[#f3f4f6] hover:bg-[#f5f2f1] transition-colors">
@@ -1190,6 +1217,34 @@ export default function ReturnDetailPage() {
                                     })}
                                 </tbody>
                             </table>
+                            {items.length > 0 && itemsTableTotalPages > 1 && (
+                                <div className="flex items-center justify-between px-4 py-2.5 border-t border-gray-100 gap-2 bg-gray-50/80">
+                                    <p className="text-[10px] text-gray-500">
+                                        Showing {itemsTableRangeStart}–{itemsTableRangeEnd} of {items.length}
+                                    </p>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setItemsTablePage((p) => Math.max(1, p - 1))}
+                                            disabled={itemsTablePage <= 1}
+                                            className="inline-flex items-center gap-0.5 px-2 py-1 text-[10px] font-medium rounded border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                                        >
+                                            <ChevronLeft className="w-3.5 h-3.5" /> Previous
+                                        </button>
+                                        <span className="text-[10px] text-gray-600 tabular-nums">
+                                            Page {itemsTablePage} of {itemsTableTotalPages}
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => setItemsTablePage((p) => Math.min(itemsTableTotalPages, p + 1))}
+                                            disabled={itemsTablePage >= itemsTableTotalPages}
+                                            className="inline-flex items-center gap-0.5 px-2 py-1 text-[10px] font-medium rounded border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                                        >
+                                            Next <ChevronRight className="w-3.5 h-3.5" />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>

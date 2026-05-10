@@ -228,7 +228,7 @@ export default function PolicyDetailPage() {
             <button onClick={() => router.push('/policies')} className="flex items-center gap-2 text-sm hover:underline" style={{ color: 'var(--outline)' }}><ArrowLeft className="w-4 h-4" /> Back</button>
             <div className="border rounded-[4px] p-6 text-center" style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)' }}>
                 <AlertCircle className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--error)' }} />
-                <p className="font-medium" style={{ color: 'var(--on-error-container)' }}>Policy not found.</p>
+                <p className="font-medium" style={{ color: '#000000' }}>Policy not found.</p>
                 <Button variant="outline" className="mt-4" onClick={() => router.push('/policies')}>Go Back</Button>
             </div>
         </div>

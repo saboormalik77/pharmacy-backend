@@ -81,7 +81,6 @@ export default function BatchWorkflowPage() {
         currentBatch: batch,
         batchMemos,
         isLoading,
-        isActionLoading,
         workflowState,
         error,
     } = useAppSelector(s => s.batch);
@@ -93,6 +92,11 @@ export default function BatchWorkflowPage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [raSendingGroup, setRaSendingGroup] = useState<string | null>(null);
     const [isSendingAllRA, setIsSendingAllRA] = useState(false);
+    /** PDF/XLSX fetches + workflow save for step 1 */
+    const [generatingCardinalDownloads, setGeneratingCardinalDownloads] = useState(false);
+    /** Which workflow step is saving via API (so only that button shows a spinner) */
+    const [completingWorkflowStep, setCompletingWorkflowStep] = useState<string | null>(null);
+    const [creatingDebitMemos, setCreatingDebitMemos] = useState(false);
 
     const addToast = useCallback((msg: string, type: Toast['type']) => {
         setToasts(prev => [...prev, { id: Date.now().toString(), message: msg, type }]);
@@ -109,15 +113,21 @@ export default function BatchWorkflowPage() {
     }, [error, addToast, dispatch]);
 
     const handleCompleteStep = async (stepKey: string) => {
-        const result = await dispatch(completeBatchWorkflowStep({ batchId, step: stepKey }));
-        if (completeBatchWorkflowStep.rejected.match(result)) {
-            addToast(result.payload as string || 'Failed to save step', 'error');
+        setCompletingWorkflowStep(stepKey);
+        try {
+            const result = await dispatch(completeBatchWorkflowStep({ batchId, step: stepKey }));
+            if (completeBatchWorkflowStep.rejected.match(result)) {
+                addToast(result.payload as string || 'Failed to save step', 'error');
+            }
+        } finally {
+            setCompletingWorkflowStep(null);
         }
     };
 
     const handleGenerateCardinal = async () => {
         if (!batch) return;
 
+        setGeneratingCardinalDownloads(true);
         try {
             const token = cookieUtils.getAuthToken();
             if (!token) {
@@ -197,6 +207,8 @@ export default function BatchWorkflowPage() {
             addToast(`Cardinal Invoice (PDF) and ${files.length} Pharmacy Return (XLSX) file(s) downloaded. Step saved.`, 'success');
         } catch (error: unknown) {
             addToast(error instanceof Error ? error.message : 'Failed to generate Cardinal Invoice', 'error');
+        } finally {
+            setGeneratingCardinalDownloads(false);
         }
     };
 
@@ -212,12 +224,17 @@ export default function BatchWorkflowPage() {
     };
 
     const handleCreateDebitMemos = async () => {
-        const result = await dispatch(generateBatchMemos(batchId));
-        if (generateBatchMemos.fulfilled.match(result)) {
-            addToast(`${result.payload.memosGenerated} debit memo(s) created.`, 'success');
-            dispatch(fetchBatchDetail(batchId));
-        } else {
-            addToast((result.payload as string) || 'Failed to create debit memos', 'error');
+        setCreatingDebitMemos(true);
+        try {
+            const result = await dispatch(generateBatchMemos(batchId));
+            if (generateBatchMemos.fulfilled.match(result)) {
+                addToast(`${result.payload.memosGenerated} debit memo(s) created.`, 'success');
+                dispatch(fetchBatchDetail(batchId));
+            } else {
+                addToast((result.payload as string) || 'Failed to create debit memos', 'error');
+            }
+        } finally {
+            setCreatingDebitMemos(false);
         }
     };
 
@@ -295,16 +312,45 @@ export default function BatchWorkflowPage() {
         addToast('RA request step completed.', 'success');
     };
 
+    // Check if individual steps are complete (manual state OR actual completion)
+    const isStepComplete = (stepKey: string) => {
+        if (!workflowState || !batch) return false;
+        
+        switch (stepKey) {
+            case 'cardinal_generated':
+                return workflowState.cardinalGenerated || batch.cardinalFileGenerated;
+            case 'cardinal_sent':
+                return workflowState.cardinalSent || !!batch.cardinalSubmittedAt;
+            case 'debit_memos_created':
+                return workflowState.debitMemosCreated || (batch.totalDebitMemos > 0);
+            case 'ra_requested':
+                const allRasSent = batchMemos.length > 0 && batchMemos.every(memo => 
+                    memo.raRequestedAt || 
+                    memo.raStatus === 'requested' || 
+                    memo.raStatus === 'received' || 
+                    memo.raStatus === 'shipped'
+                );
+                return workflowState.raRequested || allRasSent;
+            default:
+                return false;
+        }
+    };
+
     const getActiveStepIndex = () => {
         if (!workflowState) return 0;
         for (let i = 0; i < WORKFLOW_STEPS.length; i++) {
-            if (!workflowState[WORKFLOW_STEPS[i].stateKey]) return i;
+            if (!isStepComplete(WORKFLOW_STEPS[i].key)) return i;
         }
         return WORKFLOW_STEPS.length;
     };
 
     const activeStepIndex = getActiveStepIndex();
     const allDone = workflowState !== null && activeStepIndex === WORKFLOW_STEPS.length;
+
+    const loadingGenerateCardinal = generatingCardinalDownloads;
+    const loadingSendCardinal = completingWorkflowStep === 'cardinal_sent';
+    const loadingDebitMemosStep = completingWorkflowStep === 'debit_memos_created';
+    const loadingRaStep = completingWorkflowStep === 'ra_requested';
 
     if (isLoading && !batch) {
         return (
@@ -383,7 +429,7 @@ export default function BatchWorkflowPage() {
             {/* Steps list */}
             <div className="space-y-3">
                 {WORKFLOW_STEPS.map((step, idx) => {
-                    const done = workflowState?.[step.stateKey] ?? false;
+                    const done = isStepComplete(step.key);
                     const isActive = idx === activeStepIndex;
                     const isLocked = idx > activeStepIndex;
                     const Icon = step.icon;
@@ -427,10 +473,10 @@ export default function BatchWorkflowPage() {
                                             {step.key === 'cardinal_generated' && (
                                                 <button
                                                     onClick={handleGenerateCardinal}
-                                                    disabled={isActionLoading}
+                                                    disabled={loadingGenerateCardinal}
                                                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-[var(--primary)] text-white hover:opacity-90 disabled:opacity-50 transition-colors font-medium"
                                                 >
-                                                    {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+                                                    {loadingGenerateCardinal ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
                                                     Generate Cardinal Invoice
                                                 </button>
                                             )}
@@ -455,10 +501,10 @@ export default function BatchWorkflowPage() {
                                                     </div>
                                                     <button
                                                         onClick={handleSendCardinal}
-                                                        disabled={isActionLoading || !cardinalFile}
-                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-[var(--tertiary)] text-white hover:opacity-90 disabled:opacity-50 transition-colors font-medium"
+                                                        disabled={loadingSendCardinal || !cardinalFile}
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-[var(--primary)] text-white hover:opacity-90 disabled:opacity-50 transition-colors font-medium"
                                                     >
-                                                        {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                                                        {loadingSendCardinal ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                                                         Send Cardinal Invoice
                                                     </button>
                                                 </div>
@@ -474,10 +520,10 @@ export default function BatchWorkflowPage() {
                                                             </p>
                                                             <button
                                                                 onClick={handleCreateDebitMemos}
-                                                                disabled={isActionLoading}
-                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-[var(--tertiary)] text-white hover:opacity-90 disabled:opacity-50 transition-colors font-medium"
+                                                                disabled={creatingDebitMemos}
+                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-[var(--primary)] text-white hover:opacity-90 disabled:opacity-50 transition-colors font-medium"
                                                             >
-                                                                {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
+                                                                {creatingDebitMemos ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
                                                                 Create Debit Memos
                                                             </button>
                                                         </div>
@@ -501,14 +547,39 @@ export default function BatchWorkflowPage() {
                                                                 ))}
                                                             </div>
                                                             <div className="flex items-center gap-2 flex-wrap">
-                                                                <button
-                                                                    onClick={handleConfirmDebitMemos}
-                                                                    disabled={isActionLoading}
-                                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-[var(--tertiary)] text-white hover:opacity-90 disabled:opacity-50 transition-colors font-medium"
-                                                                >
-                                                                    {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
-                                                                    Confirm &amp; Next Step
-                                                                </button>
+                                                                {workflowState?.debitMemosCreated ? (
+                                                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] border font-medium"
+                                                                          style={{ backgroundColor: 'var(--secondary-container)', color: 'var(--on-secondary-container)', borderColor: 'var(--outline-variant)' }}>
+                                                                        <CheckCircle className="w-3.5 h-3.5" />
+                                                                        Step Manually Completed
+                                                                    </span>
+                                                                ) : batch && batch.totalDebitMemos > 0 ? (
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] border font-medium"
+                                                                              style={{ backgroundColor: 'var(--secondary-container)', color: 'var(--on-secondary-container)', borderColor: 'var(--outline-variant)' }}>
+                                                                            <CheckCircle className="w-3.5 h-3.5" />
+                                                                            Memos Created (Auto-Complete)
+                                                                        </span>
+                                                                        <button
+                                                                            onClick={handleConfirmDebitMemos}
+                                                                            disabled={loadingDebitMemosStep}
+                                                                            className="inline-flex items-center gap-1.5 px-2 py-1 text-[10px] rounded-[4px] border transition-colors font-medium hover:bg-[var(--surface-container-low)] disabled:opacity-50"
+                                                                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}
+                                                                        >
+                                                                            {loadingDebitMemosStep ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                                                                            Mark Complete
+                                                                        </button>
+                                                                    </div>
+                                                                ) : (
+                                                                    <button
+                                                                        onClick={handleConfirmDebitMemos}
+                                                                        disabled={loadingDebitMemosStep}
+                                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-[var(--primary)] text-white hover:opacity-90 disabled:opacity-50 transition-colors font-medium"
+                                                                    >
+                                                                        {loadingDebitMemosStep ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                                                                        Confirm &amp; Next Step
+                                                                    </button>
+                                                                )}
                                                                 <a
                                                                     href={`/warehouse/debit-memos?batchId=${batchId}`}
                                                                     target="_blank"
@@ -580,7 +651,7 @@ export default function BatchWorkflowPage() {
                                                                                     ) : (
                                                                                         <button
                                                                                             onClick={() => handleSendRAForGroup(group.destination, group.distributorName, group.memos)}
-                                                                                            disabled={isSending || !!raSendingGroup || isSendingAllRA}
+                                                                                            disabled={isSending || !!raSendingGroup || isSendingAllRA || raActionLoading}
                                                                                             className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] rounded bg-[var(--secondary)] text-white hover:opacity-90 disabled:opacity-50 transition-colors font-medium"
                                                                                         >
                                                                                             {isSending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
@@ -601,24 +672,55 @@ export default function BatchWorkflowPage() {
                                                         const anyRaSent = batchMemos.some(
                                                             m => m.raRequestedAt || m.raStatus === 'requested' || m.raStatus === 'received' || m.raStatus === 'shipped'
                                                         );
+                                                        const allRasSent = batchMemos.length > 0 && batchMemos.every(
+                                                            m => m.raRequestedAt || m.raStatus === 'requested' || m.raStatus === 'received' || m.raStatus === 'shipped'
+                                                        );
                                                         const hasPending = batchMemos.some(
                                                             m => !m.raRequestedAt && m.raStatus !== 'requested' && m.raStatus !== 'received' && m.raStatus !== 'shipped'
                                                         );
+                                                        const manuallyMarkedComplete = workflowState?.raRequested;
+                                                        const actuallyComplete = allRasSent;
+                                                        
                                                         return (
                                                             <div className="flex items-center gap-2 flex-wrap">
-                                                                <button
-                                                                    onClick={handleCompleteRAStep}
-                                                                    disabled={isActionLoading || !anyRaSent}
-                                                                    title={!anyRaSent ? 'Send at least one RA request before completing this step' : undefined}
-                                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-[var(--secondary)] text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-                                                                >
-                                                                    {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
-                                                                    Complete Step
-                                                                </button>
+                                                                {manuallyMarkedComplete ? (
+                                                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] border font-medium"
+                                                                          style={{ backgroundColor: 'var(--secondary-container)', color: 'var(--on-secondary-container)', borderColor: 'var(--outline-variant)' }}>
+                                                                        <CheckCircle className="w-3.5 h-3.5" />
+                                                                        Step Manually Completed
+                                                                    </span>
+                                                                ) : actuallyComplete ? (
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] border font-medium"
+                                                                              style={{ backgroundColor: 'var(--secondary-container)', color: 'var(--on-secondary-container)', borderColor: 'var(--outline-variant)' }}>
+                                                                            <CheckCircle className="w-3.5 h-3.5" />
+                                                                            All RAs Sent (Auto-Complete)
+                                                                        </span>
+                                                                        <button
+                                                                            onClick={handleCompleteRAStep}
+                                                                            disabled={loadingRaStep}
+                                                                            className="inline-flex items-center gap-1.5 px-2 py-1 text-[10px] rounded-[4px] border transition-colors font-medium hover:bg-[var(--surface-container-low)] disabled:opacity-50"
+                                                                            style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-lowest)', color: 'var(--on-surface)' }}
+                                                                        >
+                                                                            {loadingRaStep ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                                                                            Mark Complete
+                                                                        </button>
+                                                                    </div>
+                                                                ) : (
+                                                                    <button
+                                                                        onClick={handleCompleteRAStep}
+                                                                        disabled={loadingRaStep || !anyRaSent}
+                                                                        title={!anyRaSent ? 'Send at least one RA request before completing this step' : undefined}
+                                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-[var(--secondary)] text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                                                                    >
+                                                                        {loadingRaStep ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                                                                        Complete Step
+                                                                    </button>
+                                                                )}
                                                                 {hasPending && (
                                                                     <button
                                                                         onClick={handleSendAllRA}
-                                                                        disabled={isSendingAllRA || !!raSendingGroup}
+                                                                        disabled={isSendingAllRA || !!raSendingGroup || raActionLoading}
                                                                         className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[4px] bg-[var(--secondary)] text-white hover:opacity-90 disabled:opacity-50 transition-colors font-medium"
                                                                     >
                                                                         {isSendingAllRA ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}

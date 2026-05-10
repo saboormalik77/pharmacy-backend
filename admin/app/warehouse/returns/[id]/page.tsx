@@ -6,6 +6,7 @@ import {
     ArrowLeft, Loader2, AlertCircle, X, Play, CheckCircle, Lock,
     Trash2, Edit, ClipboardList, Building2, UserCog, Package, Truck, Clock,
     Plus, Search, ScanLine, Archive, FileText, Download, AlertTriangle, Printer, QrCode,
+    ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -36,6 +37,9 @@ import {
     formatNonReturnableReason,
     isValidNonReturnableReason,
 } from '@/lib/constants/nonReturnableReasons';
+
+/** Products table on return detail — rows per page */
+const RETURN_DETAIL_ITEMS_PAGE_SIZE = 6;
 
 // ── Helpers ────────────────────────────────────────────────────
 
@@ -301,6 +305,7 @@ export default function ReturnDetailPage() {
     // Items state
     const [itemSearch, setItemSearch] = useState('');
     const [itemStatusFilter, setItemStatusFilter] = useState('');
+    const [itemsTablePage, setItemsTablePage] = useState(1);
     const [deleteItemModal, setDeleteItemModal] = useState<ReturnTransactionItem | null>(null);
     const [editItemModal, setEditItemModal] = useState<ReturnTransactionItem | null>(null);
     const [editItemForm, setEditItemForm] = useState({ fullPackageSize: '', fullPackageQtyReturned: '', standardPrice: '', returnStatus: 'tbd', destination: '', memo: '', nonReturnableReason: '' });
@@ -370,6 +375,16 @@ export default function ReturnDetailPage() {
             }));
         }
     }, [dispatch, id, itemStatusFilter, debouncedItemSearch]);
+
+    useEffect(() => {
+        setItemsTablePage(1);
+    }, [debouncedItemSearch, itemStatusFilter]);
+
+    useEffect(() => {
+        const nonWcCount = items.filter((i) => !i.wineCellarId).length;
+        const maxPage = Math.max(1, Math.ceil(nonWcCount / RETURN_DETAIL_ITEMS_PAGE_SIZE));
+        setItemsTablePage((p) => Math.min(p, maxPage));
+    }, [items]);
 
     useEffect(() => {
         if (editModal && tx) {
@@ -610,6 +625,18 @@ export default function ReturnDetailPage() {
     // ── Finalize & Document helpers ─────────────────────────────
 
     const nonWcItems = items.filter(i => !i.wineCellarId);
+    const nonWcItemsTableTotalPages = Math.max(1, Math.ceil(nonWcItems.length / RETURN_DETAIL_ITEMS_PAGE_SIZE));
+    const paginatedNonWcItems = nonWcItems.slice(
+        (itemsTablePage - 1) * RETURN_DETAIL_ITEMS_PAGE_SIZE,
+        itemsTablePage * RETURN_DETAIL_ITEMS_PAGE_SIZE
+    );
+    const nonWcItemsTableRangeStart = nonWcItems.length === 0
+        ? 0
+        : (itemsTablePage - 1) * RETURN_DETAIL_ITEMS_PAGE_SIZE + 1;
+    const nonWcItemsTableRangeEnd = Math.min(
+        itemsTablePage * RETURN_DETAIL_ITEMS_PAGE_SIZE,
+        nonWcItems.length
+    );
     const nonWcReturnableAndTbdItemsCount = nonWcItems.filter(i => i.returnStatus === 'returnable' || i.returnStatus === 'tbd').length;
     const nonWcReturnableValue = nonWcItems
         .filter(i => i.returnStatus === 'returnable')
@@ -1138,7 +1165,7 @@ export default function ReturnDetailPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y" style={{ borderColor: '#d1d5db' }}>
-                                {nonWcItems.map((item) => {
+                                {paginatedNonWcItems.map((item) => {
                                     const sBadge = getItemStatusBadge(item.returnStatus);
                                     return (
                                         <tr key={item.id} className="hover:bg-[#e9ebec] transition-colors" style={{ borderColor: '#d1d5db' }}>
@@ -1224,6 +1251,34 @@ export default function ReturnDetailPage() {
                                 })}
                             </tbody>
                         </table>
+                        {nonWcItems.length > 0 && nonWcItemsTableTotalPages > 1 && (
+                            <div className="flex items-center justify-between px-3 py-2 border-t gap-2 bg-[#fafbfb]" style={{ borderColor: '#d1d5db' }}>
+                                <p className="text-[10px] text-gray-500">
+                                    Showing {nonWcItemsTableRangeStart}–{nonWcItemsTableRangeEnd} of {nonWcItems.length}
+                                </p>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setItemsTablePage((p) => Math.max(1, p - 1))}
+                                        disabled={itemsTablePage <= 1}
+                                        className="inline-flex items-center gap-0.5 px-2 py-1 text-[10px] font-medium rounded border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                                    >
+                                        <ChevronLeft className="w-3.5 h-3.5" /> Previous
+                                    </button>
+                                    <span className="text-[10px] text-gray-600 tabular-nums">
+                                        Page {itemsTablePage} of {nonWcItemsTableTotalPages}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={() => setItemsTablePage((p) => Math.min(nonWcItemsTableTotalPages, p + 1))}
+                                        disabled={itemsTablePage >= nonWcItemsTableTotalPages}
+                                        className="inline-flex items-center gap-0.5 px-2 py-1 text-[10px] font-medium rounded border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                                    >
+                                        Next <ChevronRight className="w-3.5 h-3.5" />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

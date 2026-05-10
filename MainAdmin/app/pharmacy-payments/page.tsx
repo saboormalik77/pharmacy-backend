@@ -641,7 +641,7 @@ function PharmacyPaymentsPageContent() {
       </div>
 
       {error && (
-        <div className="px-3 py-2 rounded text-xs border" style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)', color: 'var(--on-error-container)' }}>
+        <div className="px-3 py-2 rounded text-xs border" style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--outline-variant)', color: '#000000' }}>
           {error}
         </div>
       )}

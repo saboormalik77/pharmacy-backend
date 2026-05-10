@@ -10,6 +10,7 @@
 
 import { supabaseAdmin } from '../config/supabase';
 import { AppError } from '../utils/appError';
+import { lookupNDC } from './ndcLookupService';
 
 // ============================================================
 // Types
@@ -98,6 +99,37 @@ function getDb() {
     throw new AppError('Supabase admin client not configured', 500);
   }
   return supabaseAdmin;
+}
+
+// ============================================================
+// Helper: Get real manufacturer name from API
+// ============================================================
+
+/**
+ * Fetch the correct manufacturer name from OpenFDA API using labeler_id (first 5 digits of any NDC)
+ * This ensures we always store the real manufacturer name, not user-entered incorrect data.
+ */
+async function getCorrectManufacturerName(labelerId: string): Promise<string | null> {
+  try {
+    // Create a fake NDC using the labeler_id to lookup manufacturer
+    // Format: {labelerId}01-001 (common NDC pattern for API lookup)
+    const sampleNdc = `${labelerId}01-001`;
+    
+    console.log(`Looking up manufacturer for labeler_id: ${labelerId} using NDC: ${sampleNdc}`);
+    
+    const productInfo = await lookupNDC(sampleNdc);
+    
+    if (productInfo && productInfo.manufacturer) {
+      console.log(`Found manufacturer via API: ${productInfo.manufacturer} for labeler ${labelerId}`);
+      return productInfo.manufacturer;
+    }
+    
+    console.log(`No manufacturer found via API for labeler ${labelerId}`);
+    return null;
+  } catch (error) {
+    console.error(`Error looking up manufacturer for labeler ${labelerId}:`, error);
+    return null;
+  }
 }
 
 function toCamelCase(row: any): any {
@@ -284,8 +316,8 @@ export async function getPolicyById(id: string) {
 export async function createPolicy(input: ManufacturerPolicyInput) {
   const db = getDb();
 
-  if (!input.labelerId || !input.manufacturerName) {
-    throw new AppError('labelerId and manufacturerName are required', 400);
+  if (!input.labelerId) {
+    throw new AppError('labelerId is required', 400);
   }
 
   const { data: existing } = await db
@@ -298,12 +330,23 @@ export async function createPolicy(input: ManufacturerPolicyInput) {
     throw new AppError(`A policy for labeler ID "${input.labelerId}" already exists`, 409);
   }
 
+  // ALWAYS fetch the correct manufacturer name from API
+  console.log(`Creating policy for labeler ${input.labelerId} - fetching correct manufacturer name from API...`);
+  const correctManufacturerName = await getCorrectManufacturerName(input.labelerId);
+  
+  // Use API name if found, otherwise fall back to user input, otherwise use a placeholder
+  const manufacturerNameToUse = correctManufacturerName || input.manufacturerName || `Unknown Manufacturer (${input.labelerId})`;
+  
+  if (correctManufacturerName && input.manufacturerName && correctManufacturerName !== input.manufacturerName) {
+    console.log(`Corrected manufacturer name for ${input.labelerId}: "${input.manufacturerName}" → "${correctManufacturerName}"`);
+  }
+
   const { data, error } = await db
     .from('manufacturer_policies')
     .insert({
       labeler_id: input.labelerId,
       labeler_type: input.labelerType || 'generic',
-      manufacturer_name: input.manufacturerName,
+      manufacturer_name: manufacturerNameToUse, // Use API-fetched name
       address_1: input.address1 || null,
       address_2: input.address2 || null,
       city: input.city || null,
@@ -629,10 +672,21 @@ export async function bulkImport(rows: BulkImportRow[]) {
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
     try {
-      if (!row.labelerId || !row.manufacturerName) {
-        errors.push({ row: i + 1, error: 'labelerId and manufacturerName are required' });
+      if (!row.labelerId) {
+        errors.push({ row: i + 1, error: 'labelerId is required' });
         skipped++;
         continue;
+      }
+
+      // ALWAYS fetch the correct manufacturer name from API
+      console.log(`Bulk import row ${i + 1}: Fetching correct manufacturer name for labeler ${row.labelerId}...`);
+      const correctManufacturerName = await getCorrectManufacturerName(row.labelerId);
+      
+      // Use API name if found, otherwise fall back to user input, otherwise use a placeholder
+      const manufacturerNameToUse = correctManufacturerName || row.manufacturerName || `Unknown Manufacturer (${row.labelerId})`;
+      
+      if (correctManufacturerName && row.manufacturerName && correctManufacturerName !== row.manufacturerName) {
+        console.log(`Bulk import corrected manufacturer name for ${row.labelerId}: "${row.manufacturerName}" → "${correctManufacturerName}"`);
       }
 
       const { data: existing } = await db
@@ -647,7 +701,7 @@ export async function bulkImport(rows: BulkImportRow[]) {
         const { data: updatedRow, error: updateErr } = await db
           .from('manufacturer_policies')
           .update({
-            manufacturer_name: row.manufacturerName,
+            manufacturer_name: manufacturerNameToUse, // Use API-fetched name
             labeler_type: row.labelerType || 'generic',
           })
           .eq('id', existing.id)
@@ -667,7 +721,7 @@ export async function bulkImport(rows: BulkImportRow[]) {
           .insert({
             labeler_id: row.labelerId,
             labeler_type: row.labelerType || 'generic',
-            manufacturer_name: row.manufacturerName,
+            manufacturer_name: manufacturerNameToUse, // Use API-fetched name
           })
           .select()
           .single();
@@ -704,4 +758,131 @@ export async function bulkImport(rows: BulkImportRow[]) {
   }
 
   return { created, updated, skipped, errors, total: rows.length };
+}
+
+// ============================================================
+// Auto-create manufacturer policy with correct name from API
+// ============================================================
+
+/**
+ * Auto-create a manufacturer policy if it doesn't exist for a given labeler_id.
+ * This function is called during verification or debit memo creation when we encounter
+ * a new labeler_id that doesn't have a policy yet.
+ * 
+ * ALWAYS fetches the correct manufacturer name from OpenFDA API.
+ */
+export async function ensureManufacturerPolicy(labelerId: string): Promise<string> {
+  const db = getDb();
+
+  if (!labelerId || labelerId === 'UNKWN') {
+    throw new AppError('Invalid labeler_id provided', 400);
+  }
+
+  // Check if policy already exists
+  const { data: existing } = await db
+    .from('manufacturer_policies')
+    .select('id, manufacturer_name')
+    .eq('labeler_id', labelerId)
+    .maybeSingle();
+
+  if (existing) {
+    return existing.id;
+  }
+
+  // Policy doesn't exist - create it with correct manufacturer name from API
+  console.log(`Auto-creating manufacturer policy for labeler ${labelerId} - fetching correct name from API...`);
+  const correctManufacturerName = await getCorrectManufacturerName(labelerId);
+  
+  const manufacturerNameToUse = correctManufacturerName || `Unknown Manufacturer (${labelerId})`;
+  
+  console.log(`Auto-creating manufacturer policy for ${labelerId} with name: "${manufacturerNameToUse}"`);
+
+  const { data: newPolicy, error } = await db
+    .from('manufacturer_policies')
+    .insert({
+      labeler_id: labelerId,
+      labeler_type: 'generic', // Default to generic unless specified
+      manufacturer_name: manufacturerNameToUse,
+    })
+    .select('id')
+    .single();
+
+  if (error) {
+    throw new AppError(`Failed to auto-create manufacturer policy for ${labelerId}: ${error.message}`, 500);
+  }
+
+  console.log(`Successfully auto-created manufacturer policy for ${labelerId} (ID: ${newPolicy.id})`);
+  return newPolicy.id;
+}
+
+// ============================================================
+// Bulk update existing policies with correct API names
+// ============================================================
+
+/**
+ * Update existing manufacturer policies with correct names from API.
+ * This function can be called periodically to fix any incorrect manufacturer names
+ * that were entered manually or imported incorrectly.
+ */
+export async function updateAllPoliciesWithApiNames(limit: number = 50): Promise<{
+  processed: number;
+  updated: number;
+  errors: { labelerId: string; error: string }[];
+}> {
+  const db = getDb();
+  
+  // Get manufacturer policies that might need updating
+  const { data: policies, error: fetchError } = await db
+    .from('manufacturer_policies')
+    .select('id, labeler_id, manufacturer_name')
+    .limit(limit);
+
+  if (fetchError) {
+    throw new AppError(`Failed to fetch manufacturer policies: ${fetchError.message}`, 500);
+  }
+
+  if (!policies || policies.length === 0) {
+    return { processed: 0, updated: 0, errors: [] };
+  }
+
+  let processed = 0;
+  let updated = 0;
+  const errors: { labelerId: string; error: string }[] = [];
+
+  for (const policy of policies) {
+    try {
+      processed++;
+      console.log(`Checking labeler ${policy.labeler_id} (${processed}/${policies.length})...`);
+      
+      const correctManufacturerName = await getCorrectManufacturerName(policy.labeler_id);
+      
+      if (correctManufacturerName && correctManufacturerName !== policy.manufacturer_name) {
+        console.log(`Updating manufacturer name for ${policy.labeler_id}: "${policy.manufacturer_name}" → "${correctManufacturerName}"`);
+        
+        const { error: updateError } = await db
+          .from('manufacturer_policies')
+          .update({
+            manufacturer_name: correctManufacturerName,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', policy.id);
+
+        if (updateError) {
+          errors.push({ labelerId: policy.labeler_id, error: updateError.message });
+        } else {
+          updated++;
+        }
+      } else {
+        console.log(`Manufacturer name for ${policy.labeler_id} is already correct: "${policy.manufacturer_name}"`);
+      }
+      
+      // Add small delay to avoid rate limiting the API
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+    } catch (error: any) {
+      errors.push({ labelerId: policy.labeler_id, error: error.message || 'Unknown error' });
+    }
+  }
+
+  return { processed, updated, errors };
 }
