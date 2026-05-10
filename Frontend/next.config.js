@@ -4,8 +4,15 @@ const nextConfig = {
     // Keep Turbopack scoped to this app directory (avoid scanning parent dirs).
     root: __dirname,
   },
-  // Allow browser origins that tunnel or proxy to this dev server (ngrok, LAN IP, etc.)
+  // Allow tunnel/proxy hosts to hit dev-only assets (e.g. /_next/webpack-hmr).
+  // Next supports glob suffixes: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
   allowedDevOrigins: [
+    '*.ngrok-free.app',
+    '*.ngrok-free.dev',
+    '*.ngrok.io',
+    '*.ngrok.app',
+    '*.trycloudflare.com',
+    // Legacy single hostname (safe to remove once unused)
     'watch-scouring-agreed.ngrok-free.dev',
     ...(process.env.NEXT_PUBLIC_ALLOWED_DEV_ORIGINS || '')
       .split(',')
