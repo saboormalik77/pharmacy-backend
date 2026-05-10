@@ -486,10 +486,10 @@ export default function BatchWorkflowPage() {
                                                 <div className="space-y-2">
                                                     <div
                                                         onClick={() => fileInputRef.current?.click()}
-                                                        className="flex items-center gap-2 px-3 py-2 border-2 border-dashed border-[var(--primary)] rounded-[4px] cursor-pointer hover:bg-[var(--primary-container)] transition-colors"
+                                                        className="group flex items-center gap-2 px-3 py-2 border-2 border-dashed border-[var(--primary)] rounded-[4px] cursor-pointer hover:bg-[var(--primary)] transition-colors"
                                                     >
-                                                        <Upload className="w-3.5 h-3.5 text-[var(--primary)] flex-shrink-0" />
-                                                        <span className="text-sm text-[var(--primary)] truncate">
+                                                        <Upload className="w-3.5 h-3.5 text-[var(--primary)] group-hover:text-white flex-shrink-0" />
+                                                        <span className="text-sm text-[var(--primary)] group-hover:text-white truncate">
                                                             {cardinalFile ? cardinalFile.name : 'Click to select file'}
                                                         </span>
                                                         <input
