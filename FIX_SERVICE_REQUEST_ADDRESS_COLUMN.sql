@@ -64,7 +64,7 @@ BEGIN
     SELECT v_request_id, pr.id
     FROM processors pr
     WHERE pr.buying_group_id = (
-        SELECT buying_group_id FROM pharmacy WHERE id = p_pharmacy_id
+        SELECT created_by FROM pharmacy WHERE id = p_pharmacy_id
     );
 
     -- Include pharmacy details in the response for email notifications

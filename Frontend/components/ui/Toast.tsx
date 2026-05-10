@@ -23,11 +23,12 @@ const toastIcons = {
     warning: AlertCircle,
 };
 
+/** Opaque surfaces so header/nav dropdowns never show through (no /alpha tailwind fills). */
 const toastStyles = {
-    success: 'bg-[#516057]/10 border-[#516057]/20 text-[#516057]',
-    error: 'bg-red-50 border-red-200 text-red-800',
-    info: 'bg-blue-50 border-blue-200 text-blue-800',
-    warning: 'bg-[#ad916a]/20 border-[#ad916a]/30 text-[#6b5a3f]',
+    success: 'bg-[#eef1ee] border border-[#c5cfc7] text-[#516057]',
+    error: 'bg-[#fef2f2] border border-[#fecaca] text-red-800',
+    info: 'bg-[#eff6ff] border border-[#bfdbfe] text-blue-800',
+    warning: 'bg-[#faf6f0] border border-[#e8dcc8] text-[#6b5a3f]',
 };
 
 export function ToastComponent({ toast, onClose }: ToastProps) {
@@ -48,7 +49,7 @@ export function ToastComponent({ toast, onClose }: ToastProps) {
     return (
         <div
             onClick={() => onClose(toast.id)}
-            className={`${style} border rounded-[4px] shadow-lg p-4 mb-3 flex items-center gap-3 min-w-[300px] max-w-[500px] animate-in slide-in-from-right cursor-pointer select-none`}
+            className={`${style} rounded-[4px] shadow-lg p-4 mb-3 flex items-center gap-3 min-w-[300px] max-w-[500px] animate-in slide-in-from-right cursor-pointer select-none`}
         >
             <Icon className="w-5 h-5 flex-shrink-0" />
             <p className="flex-1 text-sm font-medium">{toast.message}</p>
@@ -66,7 +67,7 @@ export function ToastContainer({ toasts, onClose }: ToastContainerProps) {
     if (toasts.length === 0) return null;
 
     return (
-        <div className="fixed top-4 right-4 z-[200] flex flex-col items-end">
+        <div className="fixed top-4 right-4 z-[10000] flex flex-col items-end pointer-events-none [&>*]:pointer-events-auto">
             {toasts.map((toast) => (
                 <ToastComponent key={toast.id} toast={toast} onClose={onClose} />
             ))}

@@ -579,15 +579,13 @@ BEGIN
 
     v_effective_pharmacy_id := COALESCE(p_branch_id, p_pharmacy_id);
 
-    BEGIN
-        SELECT buying_group_id, parent_pharmacy_id
-          INTO v_buying_group_id, v_parent_id
-        FROM pharmacy
-        WHERE id = v_effective_pharmacy_id;
-    EXCEPTION WHEN OTHERS THEN
-        v_buying_group_id := NULL;
-        v_parent_id := NULL;
-    END;
+    SELECT
+        COALESCE(ph.created_by, par.created_by),
+        ph.parent_pharmacy_id
+      INTO v_buying_group_id, v_parent_id
+      FROM pharmacy ph
+      LEFT JOIN pharmacy par ON par.id = ph.parent_pharmacy_id
+     WHERE ph.id = v_effective_pharmacy_id;
 
     INSERT INTO service_requests (
         pharmacy_id, branch_id, requested_by_user_id, buying_group_id,

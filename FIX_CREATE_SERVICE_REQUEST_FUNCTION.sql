@@ -1,17 +1,16 @@
 -- ============================================================================
--- Fix create_service_request Function - Drop all versions and recreate
+-- Fix create_service_request — drop overloads and replace with one definition
 -- ============================================================================
--- This migration drops all existing versions of create_service_request function
--- and creates a new version with optional purpose parameter
+-- Aligns with sqlTable/service_requests.sql and Node (serviceRequestService.ts).
+-- pharmacy.created_by holds the admin id used as buying_group_id on service_requests
+-- and matches processors.buying_group_id (there is no pharmacy.buying_group_id column).
 -- ============================================================================
 
--- Drop all existing versions of the function
 DROP FUNCTION IF EXISTS create_service_request(uuid, date, uuid, text, text);
 DROP FUNCTION IF EXISTS create_service_request(uuid, date, uuid, text, text, uuid);
 DROP FUNCTION IF EXISTS create_service_request(uuid, uuid, date, text, text);
 DROP FUNCTION IF EXISTS create_service_request(uuid, uuid, date, text, text, uuid);
 
--- Create the new function with proper parameter order (required params first, defaults last)
 CREATE OR REPLACE FUNCTION create_service_request(
     p_pharmacy_id UUID,
     p_requested_date DATE,
@@ -32,103 +31,122 @@ DECLARE
     v_request_row            JSONB;
     v_assigned_processors    JSONB;
 BEGIN
-    -- ---- Validation -----------------------------------------------------
-    
-    -- Determine effective pharmacy (branch → parent lookup)
-    IF p_branch_id IS NOT NULL THEN
-        SELECT parent_id INTO v_parent_id 
-        FROM pharmacy 
-        WHERE id = p_branch_id AND parent_id IS NOT NULL;
-        
-        IF v_parent_id IS NOT NULL THEN
-            v_effective_pharmacy_id := v_parent_id;
-        ELSE
-            -- Branch doesn't exist or is not a branch
-            RAISE EXCEPTION 'Invalid branch_id: %', p_branch_id;
-        END IF;
-    ELSE
-        v_effective_pharmacy_id := p_pharmacy_id;
+    IF p_pharmacy_id IS NULL THEN
+        RAISE EXCEPTION 'pharmacy_id is required' USING ERRCODE = '22023';
+    END IF;
+    IF p_requested_date IS NULL THEN
+        RAISE EXCEPTION 'requested_date is required' USING ERRCODE = '22023';
+    END IF;
+    IF p_requested_date < CURRENT_DATE THEN
+        RAISE EXCEPTION 'requested_date cannot be in the past' USING ERRCODE = '22023';
+    END IF;
+    IF p_purpose IS NOT NULL AND p_purpose NOT IN
+       ('return_pickup','training','inventory_review','destruction_pickup','other') THEN
+        RAISE EXCEPTION 'Invalid purpose value' USING ERRCODE = '22023';
+    END IF;
+    IF COALESCE(LENGTH(p_special_instructions), 0) > 2000 THEN
+        RAISE EXCEPTION 'special_instructions cannot exceed 2000 characters' USING ERRCODE = '22023';
     END IF;
 
-    -- Get buying_group_id
-    SELECT buying_group_id INTO v_buying_group_id 
-    FROM pharmacy 
-    WHERE id = v_effective_pharmacy_id;
-    
-    IF v_buying_group_id IS NULL THEN
-        RAISE EXCEPTION 'Pharmacy % not found or missing buying_group_id', v_effective_pharmacy_id;
-    END IF;
+    v_effective_pharmacy_id := COALESCE(p_branch_id, p_pharmacy_id);
 
-    -- ---- Create the service request ------------------------------------
-    
+    SELECT
+        COALESCE(ph.created_by, par.created_by),
+        ph.parent_pharmacy_id
+      INTO v_buying_group_id, v_parent_id
+      FROM pharmacy ph
+      LEFT JOIN pharmacy par ON par.id = ph.parent_pharmacy_id
+     WHERE ph.id = v_effective_pharmacy_id;
+
     INSERT INTO service_requests (
-        pharmacy_id,
-        branch_id,
-        requested_by_user_id,
-        buying_group_id,
-        requested_date,
-        purpose,
-        special_instructions,
-        status
+        pharmacy_id, branch_id, requested_by_user_id, buying_group_id,
+        requested_date, purpose, special_instructions, status
     ) VALUES (
-        p_pharmacy_id,
-        p_branch_id,
-        p_requested_by_user_id,
-        v_buying_group_id,
-        p_requested_date,
-        p_purpose,  -- Can be NULL now
-        p_special_instructions,
+        p_pharmacy_id, p_branch_id, p_requested_by_user_id, v_buying_group_id,
+        p_requested_date, p_purpose, NULLIF(TRIM(COALESCE(p_special_instructions, '')), ''),
         'pending'
-    ) RETURNING id INTO v_request_id;
+    )
+    RETURNING id INTO v_request_id;
 
-    -- ---- Auto-assign to processors ------------------------------------
-    
-    -- Find all active processors in the same buying group
     INSERT INTO service_request_assignments (service_request_id, processor_id)
-    SELECT v_request_id, p.id
-    FROM processors p
-    WHERE p.buying_group_id = v_buying_group_id
-      AND p.status = 'active';
-    
+    SELECT DISTINCT v_request_id, psa.processor_id
+    FROM processor_store_assignments psa
+    JOIN processors p ON p.id = psa.processor_id
+    WHERE psa.pharmacy_id IN (
+            v_effective_pharmacy_id,
+            COALESCE(v_parent_id, v_effective_pharmacy_id)
+          )
+      AND p.status = 'active'
+    ON CONFLICT (service_request_id, processor_id) DO NOTHING;
+
     GET DIAGNOSTICS v_assigned_count = ROW_COUNT;
 
-    -- ---- Build return object ------------------------------------------
-    
-    -- Get the full request row with joined data
-    SELECT 
-        jsonb_build_object(
-            'id', sr.id,
-            'pharmacy_id', sr.pharmacy_id,
-            'branch_id', sr.branch_id,
-            'requested_by_user_id', sr.requested_by_user_id,
-            'buying_group_id', sr.buying_group_id,
-            'requested_date', sr.requested_date,
-            'purpose', sr.purpose,
-            'special_instructions', sr.special_instructions,
-            'status', sr.status,
-            'created_at', sr.created_at,
-            'pharmacy_business_name', ph.business_name,
-            'pharmacy_email', ph.email,
-            'pharmacy_phone', ph.phone,
-            'pharmacy_address', ph.physical_address,
-            'branch_name', CASE 
-                WHEN sr.branch_id IS NOT NULL THEN br.business_name 
-                ELSE NULL 
-            END,
-            'assigned_processor_count', v_assigned_count
+    BEGIN
+        INSERT INTO processor_notifications (
+            processor_id, type, title, message,
+            entity_type, entity_id, metadata
         )
-    INTO v_request_row
+        SELECT
+            sra.processor_id,
+            'service_request_new',
+            'New on-site service request',
+            COALESCE(ph.pharmacy_name, ph.name, 'A pharmacy')
+                || ' requested an on-site visit for '
+                || to_char(p_requested_date, 'Mon DD, YYYY')
+                || CASE
+                    WHEN p_purpose IS NOT NULL THEN ' (' || INITCAP(REPLACE(p_purpose, '_', ' ')) || ')'
+                    ELSE ''
+                END,
+            'service_request',
+            v_request_id,
+            jsonb_build_object(
+                'pharmacy_id',    p_pharmacy_id,
+                'branch_id',      p_branch_id,
+                'purpose',        p_purpose,
+                'requested_date', p_requested_date,
+                'pharmacy_name',  COALESCE(ph.pharmacy_name, ph.name)
+            )
+        FROM service_request_assignments sra
+        LEFT JOIN pharmacy ph ON ph.id = v_effective_pharmacy_id
+        WHERE sra.service_request_id = v_request_id;
+    EXCEPTION WHEN undefined_table THEN
+        NULL;
+    END;
+
+    SELECT
+        to_jsonb(sr.*) || jsonb_build_object(
+            'pharmacy_name',     ph.pharmacy_name,
+            'pharmacy_business_name', ph.name,
+            'pharmacy_email',    ph.email,
+            'pharmacy_phone',    ph.phone,
+            'pharmacy_address',  ph.physical_address
+        ) INTO v_request_row
     FROM service_requests sr
     LEFT JOIN pharmacy ph ON ph.id = sr.pharmacy_id
-    LEFT JOIN pharmacy br ON br.id = sr.branch_id
     WHERE sr.id = v_request_id;
 
-    RETURN v_request_row;
+    SELECT COALESCE(
+        jsonb_agg(jsonb_build_object(
+            'processor_id', p.id,
+            'name',         p.name,
+            'email',        p.email,
+            'phone',        p.phone
+        )),
+        '[]'::jsonb
+    )
+    INTO v_assigned_processors
+    FROM service_request_assignments sra
+    JOIN processors p ON p.id = sra.processor_id
+    WHERE sra.service_request_id = v_request_id;
+
+    RETURN v_request_row
+        || jsonb_build_object(
+            'assigned_processors', v_assigned_processors,
+            'assigned_count',      v_assigned_count
+        );
 END;
 $$;
 
--- Grant permissions
 GRANT EXECUTE ON FUNCTION create_service_request TO service_role, authenticated;
 
--- Add comment
-COMMENT ON FUNCTION create_service_request IS 'Creates a new service request with optional purpose field and auto-assigns to eligible processors';
+COMMENT ON FUNCTION create_service_request IS 'Creates on-site service request with optional purpose; assigns processors via processor_store_assignments';

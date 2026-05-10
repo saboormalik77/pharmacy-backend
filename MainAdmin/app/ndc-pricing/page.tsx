@@ -377,7 +377,7 @@ export default function NDCPricingPage() {
                                 <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap" title="Historical pay rate = avg received / avg ask">Pay %</th>
                                 <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap" title="Number of historical ask/received observations">Samples</th>
                                 <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap" title="Manufacturer reliability bucket derived from pay rate + sample size">Reliability</th>
-                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Est. Store Price</th>
+                                {/* <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Est. Store Price</th> */}
                                 <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Source</th>
                                 <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Destination</th>
                                 <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Updated</th>
@@ -431,7 +431,7 @@ export default function NDCPricingPage() {
                                             {reliab}
                                         </span>
                                     </td>
-                                    <td className="px-3 py-3 text-right font-mono text-sm" style={{ color: 'var(--foreground)' }}>{fmt(row.estimatedStorePrice)}</td>
+                                    {/* <td className="px-3 py-3 text-right font-mono text-sm" style={{ color: 'var(--foreground)' }}>{fmt(row.estimatedStorePrice)}</td> */}
                                     <td className="px-3 py-3">
                                         {row.priceSource
                                             ? <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border truncate max-w-[130px]" style={{ backgroundColor: 'var(--secondary-container)', color: 'var(--on-surface)', borderColor: 'color-mix(in srgb, var(--secondary) 35%, var(--outline-variant))' }}>{row.priceSource}</span>
@@ -758,7 +758,7 @@ export default function NDCPricingPage() {
                                         className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-[4px] focus:outline-none focus:ring-1 focus:ring-primary-500"
                                     />
                                 </div>
-                                <div>
+                                {/* <div>
                                     <label className="block text-[11px] font-medium text-gray-700 mb-1">Est. Store Price ($)</label>
                                     <input
                                         type="text"
@@ -768,7 +768,7 @@ export default function NDCPricingPage() {
                                         className="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-[4px] bg-gray-50 text-gray-700"
                                     />
                                     <p className="text-[10px] text-gray-400 mt-0.5">70% of current (30% less)</p>
-                                </div>
+                                </div> */}
                                 <div>
                                     <label className="block text-[11px] font-medium text-gray-700 mb-1">Last Reimbursement ($)</label>
                                     <input type="number" step="0.01" value={formData.lastReimbursement ?? ''} placeholder="e.g. 12.50"
