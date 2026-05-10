@@ -11,6 +11,7 @@ export interface PaymentTrackingState {
     paidPagination: { page: number; limit: number; total: number; totalPages: number } | null;
     askVsReceived: AskVsReceivedRow[];
     askVsReceivedTotals: Record<string, any> | null;
+    askVsReceivedPagination: { page: number; limit: number; total: number; totalPages: number } | null;
     manufacturerSummary: ManufacturerPaymentSummary[];
     manufacturerPagination: { page: number; limit: number; total: number; totalPages: number } | null;
     isLoading: boolean;
@@ -28,6 +29,7 @@ const initialState: PaymentTrackingState = {
     paidPagination: null,
     askVsReceived: [],
     askVsReceivedTotals: null,
+    askVsReceivedPagination: null,
     manufacturerSummary: [],
     manufacturerPagination: null,
     isLoading: false,
@@ -144,8 +146,8 @@ export const fetchPaidMemos = createAsyncThunk<
 });
 
 export const fetchAskVsReceived = createAsyncThunk<
-    { data: AskVsReceivedRow[]; totals: any },
-    { groupBy?: string; period?: string } | void,
+    { data: AskVsReceivedRow[]; totals: any; pagination?: any },
+    { groupBy?: string; period?: string; page?: number; limit?: number } | void,
     { rejectValue: string }
 >('paymentTracking/askVsReceived', async (params, { rejectWithValue }) => {
     try {
@@ -153,10 +155,12 @@ export const fetchAskVsReceived = createAsyncThunk<
         const q: Record<string, string> = {};
         if (params?.groupBy) q.group_by = params.groupBy;
         if (params?.period) q.period = params.period;
+        if (params?.page) q.page = String(params.page);
+        if (params?.limit) q.limit = String(params.limit);
         const res = await apiClient.get<{
-            status: string; data: AskVsReceivedRow[]; totals: any;
+            status: string; data: AskVsReceivedRow[]; totals: any; pagination?: any;
         }>('/admin/analytics/ask-vs-received', true, q);
-        return { data: res.data, totals: res.totals };
+        return { data: res.data, totals: res.totals, pagination: res.pagination };
     } catch (err: any) {
         return rejectWithValue(err?.message || 'Failed to fetch ask vs received');
     }
@@ -248,6 +252,7 @@ const paymentTrackingSlice = createSlice({
                 state.isLoading = false;
                 state.askVsReceived = action.payload.data;
                 state.askVsReceivedTotals = action.payload.totals;
+                state.askVsReceivedPagination = action.payload.pagination;
             })
             .addCase(fetchAskVsReceived.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; })
 

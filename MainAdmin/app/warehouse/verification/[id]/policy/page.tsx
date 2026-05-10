@@ -32,6 +32,15 @@ export default function PolicyPage() {
         : null;
 
     const handleBack = () => {
+        if (typeof window !== 'undefined') {
+            const storedItemId = sessionStorage.getItem('verificationVerifyItemId');
+            if (storedItemId && returnId) {
+                router.push(
+                    `/warehouse/verification/${returnId}/verify-item?itemId=${encodeURIComponent(storedItemId)}`,
+                );
+                return;
+            }
+        }
         router.back();
     };
 

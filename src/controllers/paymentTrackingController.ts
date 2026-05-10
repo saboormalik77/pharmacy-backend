@@ -268,14 +268,20 @@ export const sendReminderHandler = catchAsync(
 // ============================================================
 export const askVsReceivedHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
-    const { group_by, period } = req.query as Record<string, string>;
+    const { group_by, period, page, limit } = req.query as Record<string, string>;
 
-    const result = await paymentTrackingService.askVsReceived(group_by, period);
+    const result = await paymentTrackingService.askVsReceived(
+      group_by, 
+      period,
+      page ? Number(page) : undefined,
+      limit ? Number(limit) : undefined
+    );
 
     res.status(200).json({
       status: 'success',
       data: result.data,
       totals: result.totals,
+      pagination: result.pagination,
     });
   }
 );

@@ -24,7 +24,7 @@ export default function WarehouseSurplusPage() {
     const [page, setPage] = useState(1);
     const [toasts, setToasts] = useState<Toast[]>([]);
     const debouncedSearch = useDebounce(search, 400);
-    const limit = 20;
+    const limit = 10;
 
     const showToast = (msg: string, type: Toast['type'] = 'success') => {
         setToasts(prev => [...prev, { id: Date.now().toString(), message: msg, type }]);

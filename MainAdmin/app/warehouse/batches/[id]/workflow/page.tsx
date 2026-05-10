@@ -312,32 +312,37 @@ export default function BatchWorkflowPage() {
         addToast('RA request step completed.', 'success');
     };
 
-    // Check if individual steps are complete (manual state OR actual completion)
+    // Step complete if persisted workflow row says so OR batch/debit-memos prove it (same rules everywhere).
     const isStepComplete = (stepKey: string) => {
-        if (!workflowState || !batch) return false;
-        
+        if (!batch) return false;
+        const ws = workflowState;
+
         switch (stepKey) {
             case 'cardinal_generated':
-                return workflowState.cardinalGenerated || batch.cardinalFileGenerated;
+                return Boolean(ws?.cardinalGenerated || batch.cardinalFileGenerated);
             case 'cardinal_sent':
-                return workflowState.cardinalSent || !!batch.cardinalSubmittedAt;
+                return Boolean(ws?.cardinalSent || batch.cardinalSubmittedAt);
             case 'debit_memos_created':
-                return workflowState.debitMemosCreated || (batch.totalDebitMemos > 0);
-            case 'ra_requested':
-                const allRasSent = batchMemos.length > 0 && batchMemos.every(memo => 
-                    memo.raRequestedAt || 
-                    memo.raStatus === 'requested' || 
-                    memo.raStatus === 'received' || 
-                    memo.raStatus === 'shipped'
-                );
-                return workflowState.raRequested || allRasSent;
+                return Boolean(ws?.debitMemosCreated || batch.totalDebitMemos > 0);
+            case 'ra_requested': {
+                const allRasSent =
+                    batchMemos.length > 0 &&
+                    batchMemos.every(
+                        memo =>
+                            memo.raRequestedAt ||
+                            memo.raStatus === 'requested' ||
+                            memo.raStatus === 'received' ||
+                            memo.raStatus === 'shipped'
+                    );
+                return Boolean(ws?.raRequested || allRasSent);
+            }
             default:
                 return false;
         }
     };
 
     const getActiveStepIndex = () => {
-        if (!workflowState) return 0;
+        if (!batch) return 0;
         for (let i = 0; i < WORKFLOW_STEPS.length; i++) {
             if (!isStepComplete(WORKFLOW_STEPS[i].key)) return i;
         }
@@ -345,7 +350,7 @@ export default function BatchWorkflowPage() {
     };
 
     const activeStepIndex = getActiveStepIndex();
-    const allDone = workflowState !== null && activeStepIndex === WORKFLOW_STEPS.length;
+    const allDone = activeStepIndex === WORKFLOW_STEPS.length;
 
     const loadingGenerateCardinal = generatingCardinalDownloads;
     const loadingSendCardinal = completingWorkflowStep === 'cardinal_sent';
@@ -399,7 +404,7 @@ export default function BatchWorkflowPage() {
             <div className="bg-[var(--surface-container-lowest)] rounded-[4px] shadow px-5 pt-4 pb-3">
                 <div className="flex items-center gap-0">
                     {WORKFLOW_STEPS.map((step, idx) => {
-                        const done = workflowState?.[step.stateKey] ?? false;
+                        const done = isStepComplete(step.key);
                         const isLast = idx === WORKFLOW_STEPS.length - 1;
                         return (
                             <div key={step.key} className="flex items-center flex-1">

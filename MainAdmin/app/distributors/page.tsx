@@ -64,7 +64,7 @@ export default function DistributorsPage() {
             (filters?.search || '') === searchParam &&
             (filters?.status || 'all') === statusParam;
         if (!hasMatchingData) {
-            dispatch(fetchDistributors({ page: currentPage, limit: 20, search: debouncedSearch || undefined, status: statusFilter }));
+            dispatch(fetchDistributors({ page: currentPage, limit: 10, search: debouncedSearch || undefined, status: statusFilter }));
         }
     }, [dispatch, currentPage, debouncedSearch, statusFilter]);
 
@@ -85,7 +85,7 @@ export default function DistributorsPage() {
         }
     }, [editModal]);
 
-    const refetch = () => dispatch(fetchDistributors({ page: currentPage, limit: 20, search: debouncedSearch || undefined, status: statusFilter }));
+    const refetch = () => dispatch(fetchDistributors({ page: currentPage, limit: 10, search: debouncedSearch || undefined, status: statusFilter }));
 
     const handleDeactivate = async () => {
         if (deactivateModal) {

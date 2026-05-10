@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { ArrowLeft, CheckCircle, XCircle, AlertTriangle, ShieldAlert, X, Loader2, Archive, Ban, DollarSign, Save } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import {
@@ -10,7 +10,7 @@ import {
     moveItemToWineCellar,
     resolveTransactionItem,
 } from '@/lib/store/returnTransactionsSlice';
-import { verifyItemV2 } from '@/lib/store/warehouseSlice';
+import { verifyItemV2, fetchVerificationSummary } from '@/lib/store/warehouseSlice';
 import { checkReturnability } from '@/lib/store/policiesSlice';
 import { upsertNDCPricing } from '@/lib/store/ndcPricingSlice';
 import type { VerificationV2Item, ReturnabilityCheckResult, NDCPricingUpsertPayload } from '@/lib/types';
@@ -78,10 +78,29 @@ export default function VerifyItemPage() {
     
     const returnId = params.id as string;
     const itemId = searchParams.get('itemId');
-    const { v2Summary, isActionLoading } = useAppSelector(s => s.warehouse);
-    
+    const { v2Summary, isActionLoading, isLoading } = useAppSelector(s => s.warehouse);
+    const verificationBootstrapKeyRef = useRef<string | null>(null);
+
     // Find the item to verify
     const verifyingItem = v2Summary?.items?.find(item => item.id === itemId) || null;
+
+    // Refetch summary when the store lost this return's items (e.g. after visiting /policy and back)
+    useEffect(() => {
+        if (!returnId || !itemId) return;
+
+        const summaryMatches = v2Summary?.transaction?.id === returnId;
+        const hasItem = !!(summaryMatches && v2Summary?.items?.some(i => i.id === itemId));
+        if (hasItem) {
+            verificationBootstrapKeyRef.current = null;
+            return;
+        }
+
+        const key = `${returnId}:${itemId}`;
+        if (verificationBootstrapKeyRef.current === key) return;
+
+        verificationBootstrapKeyRef.current = key;
+        void dispatch(fetchVerificationSummary(returnId));
+    }, [returnId, itemId, v2Summary, dispatch]);
     
     // State
     const [verifyStatus, setVerifyStatus] = useState('correct'); // Auto-set to "correct"
@@ -578,13 +597,40 @@ export default function VerifyItemPage() {
     };
 
     const handleViewPolicy = () => {
-        if (policyResult) {
+        if (policyResult && itemId) {
             sessionStorage.setItem('policyResult', JSON.stringify(policyResult));
+            sessionStorage.setItem('verificationVerifyItemId', itemId);
             router.push(`/warehouse/verification/${returnId}/policy`);
         }
     };
 
+    if (!itemId) {
+        return (
+            <div className="space-y-3">
+                <div className="w-full">
+                    <button onClick={handleBack} className="inline-flex items-center gap-2 text-sm mb-4 transition-colors cursor-pointer font-medium hover:underline" style={{ color: 'var(--outline)' }}>
+                        <ArrowLeft className="w-4 h-4" />
+                        Back to Verification
+                    </button>
+                    <div className="rounded-[4px] border shadow-sm p-12 text-center" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
+                        <AlertTriangle className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--on-surface-variant)' }} />
+                        <p className="font-medium" style={{ color: 'var(--on-surface)' }}>No item selected</p>
+                        <p className="text-sm mt-1" style={{ color: 'var(--on-surface-variant)' }}>Open this page from verification with a valid item link.</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     if (!verifyingItem) {
+        if (isLoading) {
+            return (
+                <div className="flex flex-col items-center justify-center min-h-[240px] gap-3">
+                    <Loader2 className="w-10 h-10 animate-spin" style={{ color: 'var(--secondary)' }} />
+                    <p className="text-sm" style={{ color: 'var(--on-surface-variant)' }}>Loading item…</p>
+                </div>
+            );
+        }
         return (
             <div className="space-y-3">
                 <div className="w-full">
@@ -595,7 +641,7 @@ export default function VerifyItemPage() {
                     <div className="rounded-[4px] border shadow-sm p-12 text-center" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         <AlertTriangle className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--on-surface-variant)' }} />
                         <p className="font-medium" style={{ color: 'var(--on-surface)' }}>Item not found</p>
-                        <p className="text-sm mt-1" style={{ color: 'var(--on-surface-variant)' }}>The item you're looking for could not be found.</p>
+                        <p className="text-sm mt-1" style={{ color: 'var(--on-surface-variant)' }}>The item you&apos;re looking for could not be found.</p>
                     </div>
                 </div>
             </div>

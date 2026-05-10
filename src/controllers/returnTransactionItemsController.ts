@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { catchAsync } from '../utils/catchAsync';
 import { AppError } from '../utils/appError';
 import * as itemsService from '../services/returnTransactionItemsService';
-import { parseGS1 } from '../services/gs1ParserService';
+import { parseGS1, type GS1ParsedData } from '../services/gs1ParserService';
 import { lookupNDC, lookupNDCFromCandidates, extractPackageSizeFromDescription } from '../services/ndcLookupService';
 import { getPricingForSingleNDC } from '../services/pricingService';
 import { resolveNDCPrice } from '../services/ndcPricingBookService';
@@ -15,6 +15,25 @@ import * as wcService from '../services/wineCellarService';
 import * as destructionService from '../services/destructionService';
 import { getReturnTransactionById } from '../services/returnTransactionService';
 import { isValidNonReturnableReason } from '../constants/nonReturnableReasons';
+
+/**
+ * Plain NDC entry (10–11 digits, optional hyphens) is passed through the GS1 parser,
+ * which walks every pair of characters and treats embedded "10"/"21"/"17" as GS1 AIs.
+ * That produces false lot/serial/exp values and breaks warehouse verification matching.
+ */
+function clearFalsePositiveGs1FieldsFromPlainNdc(trimmed: string, gs1: GS1ParsedData): void {
+  if (gs1.gtin) return;
+  const t = trimmed.trim();
+  if (t.startsWith('http://') || t.startsWith('https://')) return;
+  if (t.includes('\u001d')) return;
+  if (/\([0-9]{2,4}\)/.test(t)) return;
+  const digits = t.replace(/\D/g, '');
+  if (digits.length >= 10 && digits.length <= 11) {
+    gs1.lotNumber = null;
+    gs1.serialNumber = null;
+    gs1.expirationDate = null;
+  }
+}
 
 const parseBooleanInput = (value: unknown): boolean => value === true || value === 'true';
 
@@ -614,6 +633,7 @@ export const scanBarcodeHandler = catchAsync(
 
     // 1. Parse GS1 data from scan
     const gs1 = parseGS1(trimmed);
+    clearFalsePositiveGs1FieldsFromPlainNdc(trimmed, gs1);
 
     // 2. Look up product info from NDC
     let productInfo = null;

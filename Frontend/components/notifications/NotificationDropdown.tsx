@@ -340,10 +340,10 @@ export function NotificationDropdown() {
       <style>{scrollbarStyles}</style>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative rounded-full p-2 hover:bg-[var(--surface-container)] transition-colors"
+        className="group relative rounded-full p-2 transition-colors hover:bg-primary/10"
         aria-label="Notifications"
       >
-        <Bell className="h-5 w-5 text-[#505454]" />
+        <Bell className="h-5 w-5 text-nordic-text-secondary transition-colors group-hover:text-primary" />
         {mounted && unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-gradient-to-br from-red-500 to-orange-500 text-white text-[10px] font-bold flex items-center justify-center shadow-sm">
             {unreadCount > 99 ? '99+' : unreadCount}

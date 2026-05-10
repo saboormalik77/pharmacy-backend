@@ -123,7 +123,7 @@ export default function DebitMemosPage() {
             destination: destination || undefined,
             paymentStatus: paymentStatus || undefined,
             page: currentPage,
-            limit: 20,
+            limit: 10,
         }));
     }, [dispatch, debouncedSearch, destination, paymentStatus, currentPage]);
 

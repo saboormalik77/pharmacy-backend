@@ -248,15 +248,19 @@ export const sendPaymentReminder = async (
 
 export const askVsReceived = async (
   groupBy?: string,
-  period?: string
-): Promise<{ data: AskVsReceivedRow[]; totals: any }> => {
+  period?: string,
+  page?: number,
+  limit?: number
+): Promise<{ data: AskVsReceivedRow[]; totals: any; pagination?: any }> => {
   const sb = ensureAdmin();
   const { data, error } = await sb.rpc('payment_ask_vs_received', {
     p_group_by: groupBy || 'manufacturer',
     p_period: period || null,
+    p_page: page || 1,
+    p_limit: limit || 20,
   });
   handleRpcError(data, error, 'Failed to get ask vs received analytics');
-  return { data: data.data as AskVsReceivedRow[], totals: data.totals };
+  return { data: data.data as AskVsReceivedRow[], totals: data.totals, pagination: data.pagination };
 };
 
 // ============================================================

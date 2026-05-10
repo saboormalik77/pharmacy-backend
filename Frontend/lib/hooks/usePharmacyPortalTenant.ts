@@ -22,13 +22,7 @@ let cachedState: TenantState | null = null
 let inflight: Promise<TenantState> | null = null
 
 const isLocalHostname = (h: string): boolean =>
-  h === 'localhost' ||
-  h === '127.0.0.1' ||
-  h.endsWith('.localhost') ||
-  // Treat ngrok tunnels as development hosts (bypass tenant verification)
-  h.endsWith('.ngrok.io') ||
-  h.endsWith('.ngrok-free.app') ||
-  h.endsWith('.ngrok-free.dev')
+  h === 'localhost' || h === '127.0.0.1' || h.endsWith('.localhost')
 
 /** Timeout for tenant-info API call to prevent indefinite loading on network issues */
 const TENANT_FETCH_TIMEOUT_MS = 10000
@@ -90,7 +84,7 @@ async function loadPharmacyTenant(): Promise<TenantState> {
 /**
  * Same tenant resolution as the pharmacy login page:
  * - localhost / 127.0.0.1 / *.localhost → skip API, no enforcement
- * - otherwise → GET /auth/tenant-info, must be portalType `pharmacy`
+ * - ngrok (and any other public hostname) → GET /auth/tenant-info, must be portalType `pharmacy`
  *
  * Uses a module-level cache, so the global <TenantGate /> and any per-page
  * consumer share the same result without re-fetching.

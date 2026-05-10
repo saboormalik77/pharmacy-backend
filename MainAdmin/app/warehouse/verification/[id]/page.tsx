@@ -63,7 +63,17 @@ const normalizeDateKey = (value?: string | null): string => {
     return value.slice(0, 10);
 };
 
-const VERIFICATION_TABLE_PAGE_SIZE = 6;
+/** Normalize scan identifier fields; JSON/null-like strings are treated as empty. */
+const sanitizeScanIdentField = (value: unknown): string => {
+    if (value == null) return '';
+    const s = String(value).trim();
+    if (!s) return '';
+    const lower = s.toLowerCase();
+    if (lower === 'null' || lower === 'undefined') return '';
+    return s;
+};
+
+const VERIFICATION_TABLE_PAGE_SIZE = 10;
 
 function VerificationTablePagination({
     totalItems,
@@ -363,9 +373,12 @@ export default function VerificationSessionPage() {
         const usableNdcs = Array.from(ndcCandidates).filter(Boolean);
         if (usableNdcs.length === 0) return { item: null };
 
-        const serial = (scanData.scan.serialNumber || '').trim();
-        const lot = (scanData.scan.lotNumber || '').trim();
-        const exp = normalizeDateKey(scanData.scan.expirationDate);
+        // Manual NDC lookup (`scanSource: manual`) must not enforce GS1 serial/lot/exp:
+        // plain NDC digit strings can falsely parse embedded "10"/"21" as lot/serial.
+        const trustParsedIdentifiers = scanData.autoFill?.scanSource !== 'manual';
+        const serial = trustParsedIdentifiers ? sanitizeScanIdentField(scanData.scan.serialNumber) : '';
+        const lot = trustParsedIdentifiers ? sanitizeScanIdentField(scanData.scan.lotNumber) : '';
+        const exp = trustParsedIdentifiers ? normalizeDateKey(scanData.scan.expirationDate) : '';
 
         const allMatches = v2Summary.items.filter((item) =>
             usableNdcs.includes(normalizeNdc(item.ndc))

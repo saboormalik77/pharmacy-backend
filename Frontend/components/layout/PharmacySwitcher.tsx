@@ -36,13 +36,15 @@ export function PharmacySwitcher() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 rounded-[4px] px-2.5 py-1.5 text-sm hover:bg-accent transition-colors border border-border"
+        className="group flex items-center gap-2 rounded-[4px] px-2.5 py-1.5 text-sm font-medium text-foreground transition-colors border border-border hover:border-primary/30 hover:bg-primary/10 hover:text-primary"
       >
-        <ArrowLeftRight className="h-4 w-4 text-[#516057]" />
-        <span className="hidden sm:inline text-sm font-medium truncate max-w-[140px]">
+        <ArrowLeftRight className="h-4 w-4 text-primary transition-colors group-hover:text-primary" />
+        <span className="hidden sm:inline truncate max-w-[140px] transition-colors group-hover:text-primary">
           Switch Branch
         </span>
-        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown
+          className={`h-3.5 w-3.5 text-muted-foreground transition-all group-hover:text-primary ${isOpen ? 'rotate-180' : ''}`}
+        />
       </button>
 
       {isOpen && (
@@ -56,9 +58,9 @@ export function PharmacySwitcher() {
               <button
                 key={b.id}
                 onClick={() => handleSwitch(b.id)}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-accent transition-colors"
+                className="group/item w-full flex items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-primary/10 hover:text-primary"
               >
-                <Building2 className="h-4 w-4 text-muted-foreground" />
+                <Building2 className="h-4 w-4 text-muted-foreground transition-colors group-hover/item:text-primary" />
                 <div className="text-left">
                   <p className="truncate">{b.pharmacyName}</p>
                   <p className="text-xs text-muted-foreground truncate">{b.email}</p>
