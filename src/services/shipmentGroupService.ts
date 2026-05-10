@@ -233,6 +233,13 @@ export const createShipmentGroupFedexShipment = async (
     return acc;
   }, {} as Record<string, string>);
 
+  // Debug logging to verify labels are being stored
+  console.log('FedEx labels to store:', {
+    packageCount: fedexResult.packages.length,
+    labelsFound: Object.keys(labelsMap).length,
+    labelSizes: Object.entries(labelsMap).map(([k, v]) => `${k}: ${v ? v.length : 0} chars`),
+  });
+
   await shipMemoGroup(groupId, {
     outboundTracking: fedexResult.masterTrackingNumber,
     fedexShipmentId: fedexResult.shipmentId,

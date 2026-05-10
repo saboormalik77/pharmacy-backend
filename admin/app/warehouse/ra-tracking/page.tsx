@@ -169,6 +169,8 @@ export default function RATrackingPage() {
     const [pickupConfirmation, setPickupConfirmation] = useState('');
 
     const [printLabelLoading, setPrintLabelLoading] = useState<string | null>(null);
+    const [printAllPackageLabelsLoading, setPrintAllPackageLabelsLoading] = useState(false);
+    const [printSinglePackageLabelLoading, setPrintSinglePackageLabelLoading] = useState<string | null>(null);
 
     const printDebitMemoLabel = async (memoId: string) => {
         setPrintLabelLoading(memoId);
@@ -222,6 +224,61 @@ export default function RATrackingPage() {
             }
         } catch (e: any) {
             addToast(e.message || 'Failed to print group label', 'error');
+        }
+        setPrintGroupLabelLoading(false);
+    };
+
+    const printAllFedexLabels = async (groupId: string) => {
+        setPrintGroupLabelLoading(true);
+        try {
+            const { cookieUtils } = await import('@/lib/utils/cookies');
+            const token = cookieUtils.getAuthToken();
+            const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+            const res = await fetch(`${baseUrl}/admin/shipment-groups/${encodeURIComponent(groupId)}/fedex-labels/print-all`, {
+                headers: { Authorization: `Bearer ${token}`, Accept: 'text/html' },
+            });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({ message: 'Print failed' }));
+                throw new Error(err.message || 'Print failed');
+            }
+            const htmlContent = await res.text();
+            const printWindow = window.open('', '_blank');
+            if (printWindow) {
+                printWindow.document.write(htmlContent);
+                printWindow.document.close();
+            } else {
+                throw new Error('Unable to open print window. Please check popup blockers.');
+            }
+        } catch (e: any) {
+            addToast(e.message || 'Failed to print FedEx labels', 'error');
+        }
+        setPrintGroupLabelLoading(false);
+    };
+
+    const printSingleFedexLabel = async (groupId: string, packageNumber: number) => {
+        setPrintGroupLabelLoading(true);
+        try {
+            const { cookieUtils } = await import('@/lib/utils/cookies');
+            const token = cookieUtils.getAuthToken();
+            const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+            // Use format=print to get an HTML page with embedded PDF that auto-prints
+            const res = await fetch(`${baseUrl}/admin/shipment-groups/${encodeURIComponent(groupId)}/fedex-labels/${packageNumber}/download?format=print`, {
+                headers: { Authorization: `Bearer ${token}`, Accept: 'text/html' },
+            });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({ message: 'Print failed' }));
+                throw new Error(err.message || 'Print failed');
+            }
+            const htmlContent = await res.text();
+            const printWindow = window.open('', '_blank');
+            if (printWindow) {
+                printWindow.document.write(htmlContent);
+                printWindow.document.close();
+            } else {
+                throw new Error('Unable to open print window. Please check popup blockers.');
+            }
+        } catch (e: any) {
+            addToast(e.message || 'Failed to print FedEx label', 'error');
         }
         setPrintGroupLabelLoading(false);
     };
@@ -1112,7 +1169,7 @@ export default function RATrackingPage() {
                                             <p className="text-sm font-semibold text-gray-800">Package Tracking Numbers:</p>
                                             <button
                                                 type="button"
-                                                onClick={() => printShipmentGroupLabel(groupShipGroupId)}
+                                                onClick={() => printAllFedexLabels(groupShipGroupId)}
                                                 disabled={printGroupLabelLoading}
                                                 className="flex items-center gap-1 px-2 py-1 bg-green-100 hover:bg-green-200 text-xs text-green-700 rounded border border-green-200 disabled:opacity-50"
                                             >
@@ -1129,9 +1186,10 @@ export default function RATrackingPage() {
                                                     </div>
                                                     <button
                                                         type="button"
-                                                        onClick={() => printShipmentGroupLabel(groupShipGroupId)}
+                                                        onClick={() => printSingleFedexLabel(groupShipGroupId, i + 1)}
                                                         disabled={printGroupLabelLoading}
                                                         className="flex items-center justify-center w-7 h-7 bg-green-50 hover:bg-green-100 text-green-700 rounded border border-green-200 disabled:opacity-50"
+                                                        title={`Print label for package ${i + 1}`}
                                                     >
                                                         {printGroupLabelLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
                                                     </button>

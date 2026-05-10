@@ -241,11 +241,27 @@ export default function FinalizeReturnPage() {
             if (printWindow) {
                 printWindow.document.write(htmlContent);
                 printWindow.document.close();
+                
+                // Wait for content and images to load, then print all labels
                 printWindow.onload = () => {
                     setTimeout(() => {
                         printWindow.print();
-                    }, 500);
+                        // Close the window after printing
+                        setTimeout(() => {
+                            printWindow.close();
+                        }, 1500);
+                    }, 800);
                 };
+                
+                // Fallback if onload doesn't fire
+                setTimeout(() => {
+                    if (printWindow && !printWindow.closed) {
+                        printWindow.print();
+                        setTimeout(() => {
+                            printWindow.close();
+                        }, 1500);
+                    }
+                }, 2500);
             } else {
                 throw new Error('Unable to open print window. Please check popup blockers.');
             }

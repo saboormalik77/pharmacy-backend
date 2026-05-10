@@ -9,6 +9,9 @@ import {
   getShipmentGroupDetailsHandler,
   shipGroupHandler,
   createGroupFedexShipmentHandler,
+  getShipmentGroupFedexLabelsHandler,
+  downloadShipmentGroupFedexLabelHandler,
+  printAllShipmentGroupFedexLabelsHandler,
 } from '../controllers/shipmentGroupController';
 
 const router = Router();
@@ -80,6 +83,11 @@ router.get('/available-memos', listMemosForGroupShippingHandler);
 router.post('/', createShipmentGroupHandler);
 
 router.get('/:id/shipping-label', shipmentGroupShippingLabelHandler);
+
+// FedEx label endpoints
+router.get('/:id/fedex-labels', getShipmentGroupFedexLabelsHandler);
+router.get('/:id/fedex-labels/print-all', printAllShipmentGroupFedexLabelsHandler);
+router.get('/:id/fedex-labels/:packageNumber/download', downloadShipmentGroupFedexLabelHandler);
 
 router.post('/:id/schedule-pickup', scheduleShipmentGroupPickupHandler);
 

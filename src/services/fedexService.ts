@@ -178,7 +178,7 @@ export async function createShipment(params: CreateShipmentParams): Promise<Crea
   }));
 
   const shipmentPayload = {
-    labelResponseOptions: 'URL_ONLY',
+    labelResponseOptions: 'LABEL',
     requestedShipment: {
       shipper: {
         address: shipperAddress,
@@ -215,20 +215,68 @@ export async function createShipment(params: CreateShipmentParams): Promise<Crea
   console.log('FedEx shipment request:', JSON.stringify(shipmentPayload, null, 2));
   const data = await fedexRequest('POST', '/ship/v1/shipments', shipmentPayload);
 
+  // Log full response structure for debugging
+  console.log('FedEx full response:', JSON.stringify(data, null, 2));
+
   const output = data?.output;
   if (!output?.transactionShipments?.length) {
     throw new AppError('FedEx returned no shipment data', 502);
   }
 
   const shipment = output.transactionShipments[0];
+  
+  // Log shipment structure
+  console.log('Shipment structure:', {
+    hasMasterTracking: !!shipment.masterTrackingNumber,
+    masterTrackingNumber: shipment.masterTrackingNumber?.trackingNumber,
+    pieceResponsesCount: shipment.pieceResponses?.length || 0,
+    hasCompletedShipmentDetail: !!shipment.completedShipmentDetail,
+  });
+  
   const masterTrackingNumber = shipment.masterTrackingNumber?.trackingNumber
     || shipment.pieceResponses?.[0]?.trackingNumber
     || '';
 
-  const packages: FedExPackageResult[] = (shipment.pieceResponses || []).map((piece: any) => ({
-    trackingNumber: piece.trackingNumber || '',
-    labelBase64: piece.packageDocuments?.[0]?.encodedLabel || '',
-  }));
+  // Process packages and fetch label content
+  const packages: FedExPackageResult[] = [];
+  const pieceResponses = shipment.pieceResponses || [];
+  
+  console.log('FedEx pieceResponses count:', pieceResponses.length);
+  
+  for (let i = 0; i < pieceResponses.length; i++) {
+    const piece = pieceResponses[i];
+    const doc = piece.packageDocuments?.[0];
+    let labelBase64 = doc?.encodedLabel || '';
+    
+    console.log(`Package ${i + 1}:`, {
+      trackingNumber: piece.trackingNumber,
+      hasEncodedLabel: !!doc?.encodedLabel,
+      encodedLabelLength: doc?.encodedLabel?.length || 0,
+      hasUrl: !!doc?.url,
+      url: doc?.url?.substring(0, 100),
+      docCount: piece.packageDocuments?.length || 0,
+    });
+    
+    // If no encoded label but we have a URL, fetch the PDF from the URL
+    if (!labelBase64 && doc?.url) {
+      try {
+        console.log(`Fetching label from URL for tracking ${piece.trackingNumber}`);
+        const labelRes = await fetch(doc.url);
+        if (labelRes.ok) {
+          const arrayBuffer = await labelRes.arrayBuffer();
+          labelBase64 = Buffer.from(arrayBuffer).toString('base64');
+          console.log(`Fetched label for ${piece.trackingNumber}, size: ${labelBase64.length}`);
+        }
+      } catch (err) {
+        console.error('Failed to fetch label from URL:', err);
+      }
+    }
+    
+    packages.push({
+      trackingNumber: piece.trackingNumber || '',
+      labelBase64,
+    });
+  }
 
   return {
     masterTrackingNumber,

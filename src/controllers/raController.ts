@@ -399,11 +399,20 @@ export const outboundShipmentsHandler = catchAsync(
 
 // ============================================================
 // GET /api/admin/debit-memos/:id/shipping-label
+// Query params:
+//   - tracking: optional specific tracking number (for individual package)
+//   - packageNumber: optional package number for "Package N of M" display
+//   - totalPackages: optional total count for "Package N of M" display
+//   - trackingNumbers: optional comma-separated list (for print-all, generates one label per tracking)
 // Returns a printable HTML shipping label page
 // ============================================================
 export const debitMemoShippingLabelHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const { id } = req.params;
+    const trackingParam = (req.query.tracking as string | undefined)?.trim();
+    const packageNumberParam = req.query.packageNumber as string | undefined;
+    const totalPackagesParam = req.query.totalPackages as string | undefined;
+    const trackingNumbersParam = (req.query.trackingNumbers as string | undefined)?.trim();
 
     if (!supabaseAdmin) throw new AppError('Supabase admin client not configured', 500);
 
@@ -414,7 +423,9 @@ export const debitMemoShippingLabelHandler = catchAsync(
       .single();
 
     if (memoErr || !memo) throw new AppError('Debit memo not found', 404);
-    if (!memo.outbound_tracking) throw new AppError('No tracking number found for this memo', 400);
+    if (!memo.outbound_tracking && !trackingParam && !trackingNumbersParam) {
+      throw new AppError('No tracking number found for this memo', 400);
+    }
 
     const s = await getWarehouseAddressFromTable();
 
@@ -472,42 +483,51 @@ export const debitMemoShippingLabelHandler = catchAsync(
       }
     }
 
-    let barcodeDataUrl = '';
-    try {
-      const bc = generateBarcode(memo.outbound_tracking, { format: 'CODE128', width: 2, height: 60, displayValue: true, fontSize: 12, margin: 5 });
-      barcodeDataUrl = `data:image/png;base64,${bc.buffer.toString('base64')}`;
-    } catch { /* barcode is optional */ }
-
     const esc = (v: string) => v.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     const cityLine = (city: string, state: string, zip: string) =>
       [city, state, zip].filter(Boolean).join(', ');
 
-    const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Shipping Label - ${esc(memo.outbound_tracking)}</title>
-<style>
-  @page { margin:0.3in; size:4in 6in; }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:Arial,Helvetica,sans-serif;font-size:10pt;color:#000;background:#fff;}
-  .label{width:100%;max-width:3.6in;margin:0 auto;padding:10px 0;}
-  .label-box{border:2px solid #000;padding:12px;margin-bottom:14px;}
-  .label-heading{font-size:8pt;font-weight:bold;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;border-bottom:1px solid #aaa;padding-bottom:2px;}
-  .label-name{font-size:13pt;font-weight:bold;margin-bottom:2px;}
-  .label-line{font-size:10pt;margin-bottom:1px;}
-  .barcode-section{text-align:center;margin:12px 0 4px;}
-  .barcode-section img{max-width:100%;}
-  .tracking-text{font-family:'Courier New',monospace;font-size:14pt;font-weight:bold;margin-top:4px;text-align:center;}
-  .pkg-info{text-align:center;font-size:9pt;color:#555;margin-bottom:8px;}
-  .memo-info{text-align:center;font-size:8pt;color:#333;margin-top:10px;border-top:1px dashed #ccc;padding-top:6px;}
-  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}.label{max-width:none;}}
-</style>
-<script>window.onload=function(){setTimeout(function(){window.print();},400);}</script>
-</head>
-<body>
-<div class="label">
-  <div class="pkg-info">SHIPPING LABEL - Debit Memo ${esc(memo.memo_number)}</div>
+    // Build a list of (trackingNumber, packageNumber, totalPackages) tuples to render
+    let trackingList: { tracking: string; packageNumber: number; total: number }[] = [];
+    
+    if (trackingNumbersParam) {
+      // Print all: trackingNumbers=794814275781,794814275792
+      const list = trackingNumbersParam.split(',').map((t) => t.trim()).filter(Boolean);
+      trackingList = list.map((tracking, idx) => ({
+        tracking,
+        packageNumber: idx + 1,
+        total: list.length,
+      }));
+    } else if (trackingParam) {
+      // Print single specific tracking
+      trackingList = [{
+        tracking: trackingParam,
+        packageNumber: packageNumberParam ? parseInt(packageNumberParam, 10) : 1,
+        total: totalPackagesParam ? parseInt(totalPackagesParam, 10) : 1,
+      }];
+    } else {
+      // Default: print master tracking
+      trackingList = [{
+        tracking: memo.outbound_tracking!,
+        packageNumber: 1,
+        total: 1,
+      }];
+    }
+
+    // Render a single label HTML block (without <html>/<body>) for one tracking number
+    const renderLabel = (tracking: string, pkgNum: number, total: number) => {
+      let barcodeDataUrl = '';
+      try {
+        const bc = generateBarcode(tracking, { format: 'CODE128', width: 2, height: 60, displayValue: true, fontSize: 12, margin: 5 });
+        barcodeDataUrl = `data:image/png;base64,${bc.buffer.toString('base64')}`;
+      } catch { /* barcode is optional */ }
+
+      const headerLine = total > 1
+        ? `SHIPPING LABEL — Package ${pkgNum} of ${total} — Memo ${esc(memo.memo_number)}`
+        : `SHIPPING LABEL — Debit Memo ${esc(memo.memo_number)}`;
+
+      return `<div class="label">
+  <div class="pkg-info">${headerLine}</div>
   <div class="label-box">
     <div class="label-heading">From - Shipper</div>
     <div class="label-name">${esc(fromName)}</div>
@@ -527,17 +547,48 @@ export const debitMemoShippingLabelHandler = catchAsync(
   <div class="barcode-section">
     ${barcodeDataUrl ? `<img src="${barcodeDataUrl}" alt="barcode">` : ''}
   </div>
-  <div class="tracking-text">${esc(memo.outbound_tracking)}</div>
+  <div class="tracking-text">${esc(tracking)}</div>
   <div class="memo-info">
     Memo: ${esc(memo.memo_number)} | Items: ${memo.total_items}${memo.labeler_name ? ` | Labeler: ${esc(memo.labeler_name)}` : ''}
   </div>
-</div>
+</div>`;
+    };
+
+    const labelsHtml = trackingList.map((t) => renderLabel(t.tracking, t.packageNumber, t.total)).join('\n');
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Shipping Label${trackingList.length > 1 ? 's' : ''} - Memo ${esc(memo.memo_number)}</title>
+<style>
+  @page { margin:0.3in; size:4in 6in; }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:Arial,Helvetica,sans-serif;font-size:10pt;color:#000;background:#fff;}
+  .label{width:100%;max-width:3.6in;margin:0 auto;padding:10px 0;page-break-after:always;}
+  .label:last-child{page-break-after:auto;}
+  .label-box{border:2px solid #000;padding:12px;margin-bottom:14px;}
+  .label-heading{font-size:8pt;font-weight:bold;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;border-bottom:1px solid #aaa;padding-bottom:2px;}
+  .label-name{font-size:13pt;font-weight:bold;margin-bottom:2px;}
+  .label-line{font-size:10pt;margin-bottom:1px;}
+  .barcode-section{text-align:center;margin:12px 0 4px;}
+  .barcode-section img{max-width:100%;}
+  .tracking-text{font-family:'Courier New',monospace;font-size:14pt;font-weight:bold;margin-top:4px;text-align:center;}
+  .pkg-info{text-align:center;font-size:9pt;color:#555;margin-bottom:8px;}
+  .memo-info{text-align:center;font-size:8pt;color:#333;margin-top:10px;border-top:1px dashed #ccc;padding-top:6px;}
+  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}.label{max-width:none;}}
+</style>
+<script>window.onload=function(){setTimeout(function(){window.print();},400);}</script>
+</head>
+<body>
+${labelsHtml}
 </body>
 </html>`;
 
+    const filenameTracking = trackingList.length === 1 ? trackingList[0].tracking : `memo-${memo.memo_number}-all`;
     res.set({
       'Content-Type': 'text/html; charset=utf-8',
-      'Content-Disposition': `inline; filename="label-${memo.outbound_tracking}.html"`,
+      'Content-Disposition': `inline; filename="label-${filenameTracking}.html"`,
     });
     res.send(html);
   }
