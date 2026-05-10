@@ -68,7 +68,7 @@ export default function WineCellarPage() {
         status: statusFilter || undefined,
         expectedMonth: expectedMonth || undefined,
         page,
-        limit: 50,
+        limit: 10,
     }), [debouncedSearch, statusFilter, expectedMonth, page]);
 
     // Fetch items and stats

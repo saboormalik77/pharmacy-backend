@@ -478,7 +478,7 @@ function PharmacyPaymentsPageContent() {
   useEffect(() => {
     dispatch(fetchPharmacyPayments({
       page: currentPage,
-      limit: 20,
+      limit: 10,
       search: debouncedSearch || undefined,
       status: statusFilter === 'all' ? undefined : statusFilter,
       pharmacy: debouncedPharmacyFilter || undefined,
@@ -524,7 +524,7 @@ function PharmacyPaymentsPageContent() {
         dispatch(clearBatchPharmacies());
         dispatch(fetchPharmacyPayments({
           page: currentPage,
-          limit: 20,
+          limit: 10,
           search: debouncedSearch || undefined,
           status: statusFilter === 'all' ? undefined : statusFilter,
           pharmacy: debouncedPharmacyFilter || undefined,
@@ -537,7 +537,7 @@ function PharmacyPaymentsPageContent() {
     await dispatch(updatePharmacyPayment({ id: paymentId, updates: { status: newStatus } }));
     dispatch(fetchPharmacyPayments({
       page: currentPage,
-      limit: 20,
+      limit: 10,
       search: debouncedSearch || undefined,
       status: statusFilter === 'all' ? undefined : statusFilter,
       pharmacy: debouncedPharmacyFilter || undefined,
@@ -586,7 +586,7 @@ function PharmacyPaymentsPageContent() {
       dispatch(clearGeneratedCheckNumber());
       dispatch(fetchPharmacyPayments({
         page: currentPage,
-        limit: 20,
+        limit: 10,
         search: debouncedSearch || undefined,
         status: statusFilter === 'all' ? undefined : statusFilter,
         pharmacy: debouncedPharmacyFilter || undefined,

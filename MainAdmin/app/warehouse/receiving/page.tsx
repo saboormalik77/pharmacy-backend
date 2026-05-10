@@ -8,7 +8,7 @@ import Link from 'next/link';
 import {
     PackageCheck, Loader2, Search, ScanLine, CheckCircle, XCircle, Package,
     Box, AlertTriangle,
-    ArrowRight, RotateCcw, Truck, Clock, ChevronLeft, Camera, Copy, Check,
+    ArrowRight, RotateCcw, Truck, Clock, ChevronLeft, ChevronRight, Camera, Copy, Check,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -27,6 +27,8 @@ import {
 import { ReturnTransaction } from '@/lib/types';
 
 const QrScannerModal = dynamic(() => import('@/components/scanner/QrScannerModal'), { ssr: false });
+
+const PAGE_SIZE = 10;
 
 type Tab = 'scan' | 'pending' | 'received';
 
@@ -65,6 +67,8 @@ export default function WarehouseReceivingPage() {
     const [scanMessage, setScanMessage] = useState('');
     const [search, setSearch] = useState('');
     const [verificationFilter, setVerificationFilter] = useState<string>(''); // '', 'verified', 'unverified'
+    const [pendingPage, setPendingPage] = useState(1);
+    const [receivedPage, setReceivedPage] = useState(1);
     const debouncedSearch = useDebounce(search, 400);
     const [toasts, setToasts] = useState<Toast[]>([]);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -100,12 +104,28 @@ export default function WarehouseReceivingPage() {
     }, [searchParams]);
 
     useEffect(() => {
-        if (tab === 'pending') dispatch(fetchPendingReturns({ search: debouncedSearch }));
-        if (tab === 'received') dispatch(fetchReceivedReturns({ 
-            search: debouncedSearch, 
-            verificationStatus: verificationFilter || undefined 
-        }));
-    }, [tab, debouncedSearch, verificationFilter, dispatch]);
+        if (tab === 'pending') {
+            dispatch(fetchPendingReturns({ 
+                search: debouncedSearch, 
+                page: pendingPage, 
+                limit: PAGE_SIZE 
+            }));
+        }
+        if (tab === 'received') {
+            dispatch(fetchReceivedReturns({ 
+                search: debouncedSearch, 
+                page: receivedPage, 
+                limit: PAGE_SIZE,
+                verificationStatus: verificationFilter || undefined 
+            }));
+        }
+    }, [tab, debouncedSearch, verificationFilter, pendingPage, receivedPage, dispatch]);
+
+    // Reset pagination when search changes
+    useEffect(() => {
+        setPendingPage(1);
+        setReceivedPage(1);
+    }, [debouncedSearch]);
 
     useEffect(() => {
         if (tab !== 'scan') setCameraOpen(false);
@@ -213,7 +233,11 @@ export default function WarehouseReceivingPage() {
                 {tabs.map(t => (
                     <button
                         key={t.key}
-                        onClick={() => setTab(t.key)}
+                        onClick={() => {
+                            setTab(t.key);
+                            setPendingPage(1);
+                            setReceivedPage(1);
+                        }}
                         className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-[4px] transition-colors ${
                             tab === t.key ? 'shadow-sm' : ''
                         }`}
@@ -634,6 +658,25 @@ export default function WarehouseReceivingPage() {
                             {pendingPagination && pendingPagination.totalPages > 1 && (
                                 <div className="flex justify-between items-center px-3 py-2 border-t text-[10px]" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface-variant)' }}>
                                     <span>Page {pendingPagination.page} of {pendingPagination.totalPages} ({pendingPagination.total} total)</span>
+                                    <div className="flex items-center gap-1">
+                                        <button
+                                            disabled={pendingPage === 1}
+                                            onClick={() => setPendingPage(p => Math.max(1, p - 1))}
+                                            className="w-6 h-6 rounded border flex items-center justify-center text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--surface-container)]"
+                                            style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
+                                        >
+                                            <ChevronLeft className="w-3 h-3" />
+                                        </button>
+                                        <span className="px-2 text-xs font-medium">{pendingPage}</span>
+                                        <button
+                                            disabled={pendingPage >= (pendingPagination.totalPages ?? 1)}
+                                            onClick={() => setPendingPage(p => Math.min(pendingPagination?.totalPages ?? 1, p + 1))}
+                                            className="w-6 h-6 rounded border flex items-center justify-center text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--surface-container)]"
+                                            style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
+                                        >
+                                            <ChevronRight className="w-3 h-3" />
+                                        </button>
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -661,7 +704,10 @@ export default function WarehouseReceivingPage() {
                         <div className="flex items-center gap-1">
                             <span className="text-[10px] font-medium mr-2" style={{ color: 'var(--on-surface-variant)' }}>Filter:</span>
                             <button
-                                onClick={() => setVerificationFilter('')}
+                                onClick={() => {
+                                    setVerificationFilter('');
+                                    setReceivedPage(1);
+                                }}
                                 className={`px-2 py-1 text-[10px] rounded transition-colors ${
                                     verificationFilter === '' 
                                         ? '' 
@@ -672,7 +718,10 @@ export default function WarehouseReceivingPage() {
                                 All Returns
                             </button>
                             <button
-                                onClick={() => setVerificationFilter('unverified')}
+                                onClick={() => {
+                                    setVerificationFilter('unverified');
+                                    setReceivedPage(1);
+                                }}
                                 className={`px-2 py-1 text-[10px] rounded transition-colors ${
                                     verificationFilter === 'unverified' 
                                         ? '' 
@@ -683,7 +732,10 @@ export default function WarehouseReceivingPage() {
                                 Needs Verification
                             </button>
                             <button
-                                onClick={() => setVerificationFilter('verified')}
+                                onClick={() => {
+                                    setVerificationFilter('verified');
+                                    setReceivedPage(1);
+                                }}
                                 className={`px-2 py-1 text-[10px] rounded transition-colors ${
                                     verificationFilter === 'verified' 
                                         ? '' 
@@ -761,6 +813,25 @@ export default function WarehouseReceivingPage() {
                             {receivedPagination && receivedPagination.totalPages > 1 && (
                                 <div className="flex justify-between items-center px-3 py-2 border-t text-[10px]" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)', color: 'var(--on-surface-variant)' }}>
                                     <span>Page {receivedPagination.page} of {receivedPagination.totalPages} ({receivedPagination.total} total)</span>
+                                    <div className="flex items-center gap-1">
+                                        <button
+                                            disabled={receivedPage === 1}
+                                            onClick={() => setReceivedPage(p => Math.max(1, p - 1))}
+                                            className="w-6 h-6 rounded border flex items-center justify-center text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--surface-container)]"
+                                            style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
+                                        >
+                                            <ChevronLeft className="w-3 h-3" />
+                                        </button>
+                                        <span className="px-2 text-xs font-medium">{receivedPage}</span>
+                                        <button
+                                            disabled={receivedPage >= (receivedPagination.totalPages ?? 1)}
+                                            onClick={() => setReceivedPage(p => Math.min(receivedPagination?.totalPages ?? 1, p + 1))}
+                                            className="w-6 h-6 rounded border flex items-center justify-center text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--surface-container)]"
+                                            style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
+                                        >
+                                            <ChevronRight className="w-3 h-3" />
+                                        </button>
+                                    </div>
                                 </div>
                             )}
                         </div>

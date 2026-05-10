@@ -238,14 +238,14 @@ export default function RATrackingPage() {
             dateTo: dateTo || undefined,
             search: debouncedSearch || undefined,
             page: currentPage,
-            limit: 20,
+            limit: 10,
         }));
     }, [dispatch, raStatus, destination, dateFrom, dateTo, debouncedSearch, currentPage]);
 
     const loadShippedGroups = useCallback(() => {
         dispatch(fetchShippedShipmentGroups({
             page: shippedGroupsPage,
-            limit: 15,
+            limit: 10,
             destination: destination?.trim() || undefined,
         }));
     }, [dispatch, shippedGroupsPage, destination]);

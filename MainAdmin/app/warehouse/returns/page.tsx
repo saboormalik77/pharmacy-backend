@@ -89,7 +89,7 @@ export default function ReturnsPage() {
     useEffect(() => {
         dispatch(fetchReturnTransactions({
             page: currentPage,
-            limit: 20,
+            limit: 10,
             search: debouncedSearch || undefined,
             status: statusFilter || undefined,
             dateFrom: dateFrom || undefined,
@@ -100,7 +100,7 @@ export default function ReturnsPage() {
     const refresh = () => {
         dispatch(fetchReturnTransactions({
             page: currentPage,
-            limit: 20,
+            limit: 10,
             search: debouncedSearch || undefined,
             status: statusFilter || undefined,
             dateFrom: dateFrom || undefined,

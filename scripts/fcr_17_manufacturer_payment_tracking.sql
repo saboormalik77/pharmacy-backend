@@ -286,14 +286,30 @@ $$;
 
 CREATE OR REPLACE FUNCTION payment_ask_vs_received(
   p_group_by TEXT DEFAULT 'manufacturer',
-  p_period   TEXT DEFAULT NULL
+  p_period   TEXT DEFAULT NULL,
+  p_page     INTEGER DEFAULT 1,
+  p_limit    INTEGER DEFAULT 20
 )
 RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
 DECLARE
   v_rows jsonb;
   v_totals jsonb;
+  v_total_count INTEGER;
+  v_offset INTEGER;
 BEGIN
+  v_offset := (p_page - 1) * p_limit;
+
   IF p_group_by = 'manufacturer' THEN
+    -- Get total count for pagination
+    SELECT COUNT(*) INTO v_total_count
+    FROM (
+      SELECT d.labeler_id, d.labeler_name
+      FROM debit_memos d
+      WHERE (p_period IS NULL OR TO_CHAR(d.created_at, 'YYYY-MM') = p_period)
+      GROUP BY d.labeler_id, d.labeler_name
+    ) sub;
+
+    -- Get paginated data
     SELECT COALESCE(jsonb_agg(row_data ORDER BY (row_data->>'totalAskValue')::decimal DESC), '[]'::jsonb)
     INTO v_rows
     FROM (
@@ -314,9 +330,20 @@ BEGIN
       FROM debit_memos d
       WHERE (p_period IS NULL OR TO_CHAR(d.created_at, 'YYYY-MM') = p_period)
       GROUP BY d.labeler_id, d.labeler_name
+      ORDER BY SUM(d.amount_requested) DESC
+      LIMIT p_limit OFFSET v_offset
     ) sub;
   ELSE
     -- Group by month
+    -- Get total count for pagination
+    SELECT COUNT(*) INTO v_total_count
+    FROM (
+      SELECT TO_CHAR(d.created_at, 'YYYY-MM')
+      FROM debit_memos d
+      GROUP BY TO_CHAR(d.created_at, 'YYYY-MM')
+    ) sub;
+
+    -- Get paginated data
     SELECT COALESCE(jsonb_agg(row_data ORDER BY row_data->>'period'), '[]'::jsonb)
     INTO v_rows
     FROM (
@@ -332,10 +359,12 @@ BEGIN
       ) AS row_data
       FROM debit_memos d
       GROUP BY TO_CHAR(d.created_at, 'YYYY-MM')
+      ORDER BY TO_CHAR(d.created_at, 'YYYY-MM') DESC
+      LIMIT p_limit OFFSET v_offset
     ) sub;
   END IF;
 
-  -- Overall totals
+  -- Overall totals (not paginated)
   SELECT jsonb_build_object(
     'totalMemos',      COUNT(*),
     'totalAskValue',   COALESCE(SUM(d.amount_requested), 0),
@@ -351,7 +380,13 @@ BEGIN
   RETURN jsonb_build_object(
     'error', false,
     'data', v_rows,
-    'totals', v_totals
+    'totals', v_totals,
+    'pagination', jsonb_build_object(
+      'page', p_page,
+      'limit', p_limit,
+      'total', v_total_count,
+      'totalPages', CEIL(v_total_count::decimal / p_limit)
+    )
   );
 END;
 $$;

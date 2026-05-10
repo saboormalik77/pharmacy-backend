@@ -62,7 +62,7 @@ export default function BatchesPage() {
         dispatch(fetchBatches({
             status: statusFilter || undefined,
             page: currentPage,
-            limit: 20,
+            limit: 10,
         }));
     }, [dispatch, statusFilter, currentPage]);
 

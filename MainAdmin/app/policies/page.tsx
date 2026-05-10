@@ -91,7 +91,7 @@ export default function PoliciesPage() {
     const removeToast = (id: string) => setToasts(prev => prev.filter(t => t.id !== id));
 
     useEffect(() => {
-        const params: FetchPoliciesParams = { page, limit: 20 };
+        const params: FetchPoliciesParams = { page, limit: 10 };
         if (debouncedSearch) params.search = debouncedSearch;
         if (labelerType !== 'all') params.labelerType = labelerType;
         if (destination !== 'all') params.destination = destination;
@@ -176,7 +176,7 @@ export default function PoliciesPage() {
             setNewReturnPolicy({ ...INITIAL_RETURN_POLICY });
             setPartialPolicy({ ...INITIAL_PARTIAL_POLICY });
             setNewNote('');
-            dispatch(fetchPolicies({ page, limit: 20 }));
+            dispatch(fetchPolicies({ page, limit: 10 }));
         } else {
             showToast(result.payload as string || 'Failed to create policy', 'error');
         }

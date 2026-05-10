@@ -73,7 +73,7 @@ const sanitizeScanIdentField = (value: unknown): string => {
     return s;
 };
 
-const VERIFICATION_TABLE_PAGE_SIZE = 6;
+const VERIFICATION_TABLE_PAGE_SIZE = 10;
 
 function VerificationTablePagination({
     totalItems,

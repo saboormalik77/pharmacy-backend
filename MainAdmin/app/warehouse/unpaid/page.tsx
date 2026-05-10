@@ -19,6 +19,8 @@ import {
 import { DebitMemo, AskVsReceivedRow, ManufacturerPaymentSummary } from '@/lib/types';
 import { apiClient } from '@/lib/api/apiClient';
 
+const PAGE_SIZE = 10;
+
 type TabKey = 'unpaid' | 'paid' | 'askVsReceived' | 'manufacturers';
 
 function fmt(v: number | null | undefined) {
@@ -51,7 +53,7 @@ export default function UnpaidMemosPage() {
     const {
         unpaidMemos, unpaidPagination, unpaidSummary,
         paidMemos, paidPagination,
-        askVsReceived, askVsReceivedTotals,
+        askVsReceived, askVsReceivedTotals, askVsReceivedPagination,
         manufacturerSummary, manufacturerPagination,
         isLoading, isActionLoading, error,
         lastAiAnalysis,
@@ -65,6 +67,7 @@ export default function UnpaidMemosPage() {
     const [destination, setDestination] = useState('');
     const [page, setPage] = useState(1);
     const [mfgPage, setMfgPage] = useState(1);
+    const [analyticsPage, setAnalyticsPage] = useState(1);
     const [analyticsGroupBy, setAnalyticsGroupBy] = useState<'manufacturer' | 'period'>('manufacturer');
 
     // Paid memos tab state
@@ -105,6 +108,7 @@ export default function UnpaidMemosPage() {
                 search: debouncedSearch || undefined,
                 destination: destination || undefined,
                 page,
+                limit: PAGE_SIZE,
             }));
         }
     }, [dispatch, activeTab, debouncedSearch, destination, page]);
@@ -116,6 +120,7 @@ export default function UnpaidMemosPage() {
                 search: debouncedPaidSearch || undefined,
                 destination: paidDestination || undefined,
                 page: paidPage,
+                limit: PAGE_SIZE,
             }));
         }
     }, [dispatch, activeTab, debouncedPaidSearch, paidDestination, paidPage]);
@@ -123,9 +128,9 @@ export default function UnpaidMemosPage() {
     // Fetch analytics
     useEffect(() => {
         if (activeTab === 'askVsReceived') {
-            dispatch(fetchAskVsReceived({ groupBy: analyticsGroupBy }));
+            dispatch(fetchAskVsReceived({ groupBy: analyticsGroupBy, page: analyticsPage, limit: PAGE_SIZE }));
         }
-    }, [dispatch, activeTab, analyticsGroupBy]);
+    }, [dispatch, activeTab, analyticsGroupBy, analyticsPage]);
 
     // Fetch manufacturer summary
     useEffect(() => {
@@ -133,6 +138,7 @@ export default function UnpaidMemosPage() {
             dispatch(fetchManufacturerSummary({
                 search: debouncedMfgSearch || undefined,
                 page: mfgPage,
+                limit: PAGE_SIZE,
             }));
         }
     }, [dispatch, activeTab, debouncedMfgSearch, mfgPage]);
@@ -240,7 +246,7 @@ export default function UnpaidMemosPage() {
                 setPaymentMemo(null);
                 setCreditMemoFile(null);
                 setExistingCreditMemoUrl(null);
-                dispatch(fetchPaidMemos({ search: debouncedPaidSearch || undefined, destination: paidDestination || undefined, page: paidPage }));
+                dispatch(fetchPaidMemos({ search: debouncedPaidSearch || undefined, destination: paidDestination || undefined, page: paidPage, limit: PAGE_SIZE }));
             }
         } else {
             if (!creditMemoFile) { addToast('Credit memo PDF is required', 'error'); return; }
@@ -256,8 +262,8 @@ export default function UnpaidMemosPage() {
                 addToast(`Payment of ${fmt(amt)} recorded for ${paymentMemo.memoNumber}`, 'success');
                 setPaymentMemo(null);
                 setCreditMemoFile(null);
-                dispatch(fetchUnpaidMemos({ search: debouncedSearch || undefined, destination: destination || undefined, page }));
-                dispatch(fetchPaidMemos({ search: debouncedPaidSearch || undefined, destination: paidDestination || undefined, page: paidPage }));
+                dispatch(fetchUnpaidMemos({ search: debouncedSearch || undefined, destination: destination || undefined, page, limit: PAGE_SIZE }));
+                dispatch(fetchPaidMemos({ search: debouncedPaidSearch || undefined, destination: paidDestination || undefined, page: paidPage, limit: PAGE_SIZE }));
             }
         }
     };
@@ -713,7 +719,10 @@ export default function UnpaidMemosPage() {
                         <span className="text-xs font-medium" style={{ color: 'var(--on-surface-variant)' }}>Group by:</span>
                         <div className="flex gap-0.5 rounded p-0.5" style={{ backgroundColor: 'var(--surface-container-low)' }}>
                             <button
-                                onClick={() => setAnalyticsGroupBy('manufacturer')}
+                                onClick={() => {
+                                    setAnalyticsGroupBy('manufacturer');
+                                    setAnalyticsPage(1);
+                                }}
                                 className={`px-3 py-1 rounded text-xs font-medium transition-colors ${analyticsGroupBy === 'manufacturer' ? 'shadow-sm' : ''}`}
                                 style={{
                                     backgroundColor: analyticsGroupBy === 'manufacturer' ? 'var(--surface-container-lowest)' : 'transparent',
@@ -723,7 +732,10 @@ export default function UnpaidMemosPage() {
                                 Manufacturer
                             </button>
                             <button
-                                onClick={() => setAnalyticsGroupBy('period')}
+                                onClick={() => {
+                                    setAnalyticsGroupBy('period');
+                                    setAnalyticsPage(1);
+                                }}
                                 className={`px-3 py-1 rounded text-xs font-medium transition-colors ${analyticsGroupBy === 'period' ? 'shadow-sm' : ''}`}
                                 style={{
                                     backgroundColor: analyticsGroupBy === 'period' ? 'var(--surface-container-lowest)' : 'transparent',
@@ -787,6 +799,34 @@ export default function UnpaidMemosPage() {
                             </div>
                         )}
                     </div>
+
+                    {/* Pagination */}
+                    {askVsReceivedPagination && askVsReceivedPagination.totalPages > 1 && (
+                        <div className="flex items-center justify-between px-3 py-2">
+                            <span className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>
+                                Page {askVsReceivedPagination.page} of {askVsReceivedPagination.totalPages} ({askVsReceivedPagination.total} records)
+                            </span>
+                            <div className="flex items-center gap-1">
+                                <button
+                                    disabled={analyticsPage === 1}
+                                    onClick={() => setAnalyticsPage(p => Math.max(1, p - 1))}
+                                    className="w-6 h-6 rounded border flex items-center justify-center text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--surface-container)]"
+                                    style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
+                                >
+                                    <ChevronLeft className="w-3 h-3" />
+                                </button>
+                                <span className="px-2 text-xs font-medium">{analyticsPage}</span>
+                                <button
+                                    disabled={analyticsPage >= (askVsReceivedPagination.totalPages ?? 1)}
+                                    onClick={() => setAnalyticsPage(p => Math.min(askVsReceivedPagination?.totalPages ?? 1, p + 1))}
+                                    className="w-6 h-6 rounded border flex items-center justify-center text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--surface-container)]"
+                                    style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}
+                                >
+                                    <ChevronRight className="w-3 h-3" />
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 

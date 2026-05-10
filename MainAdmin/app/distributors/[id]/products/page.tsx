@@ -13,7 +13,7 @@ export default function DistributorProductsPage() {
 
     const [products, setProducts] = useState<DistributorProduct[]>([]);
     const [distributorName, setDistributorName] = useState<string>('');
-    const [productsPagination, setProductsPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 0 });
+    const [productsPagination, setProductsPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
     const [productsLoading, setProductsLoading] = useState(false);
     const [productsError, setProductsError] = useState<string | null>(null);
 
@@ -26,7 +26,7 @@ export default function DistributorProductsPage() {
             const response: DistributorProductsResponse = await apiClient.get<DistributorProductsResponse>(
                 `/admin/distributors/${distributorId}/products`,
                 true,
-                { page, limit: 20 }
+                { page, limit: 10 }
             );
             setProducts(response.data.products);
             setDistributorName(response.data.distributor.name);

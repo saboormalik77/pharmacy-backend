@@ -251,7 +251,7 @@ export default function NDCPricingPage() {
     }, [formModal, editingRecord, ndcScanMode]);
 
     const loadData = useCallback((p: number = page) => {
-        dispatch(fetchNDCPricing({ search: debouncedSearch, page: p, limit: 25 }));
+        dispatch(fetchNDCPricing({ search: debouncedSearch, page: p, limit: 10 }));
     }, [dispatch, debouncedSearch, page]);
 
     useEffect(() => { setPage(1); }, [debouncedSearch]);
