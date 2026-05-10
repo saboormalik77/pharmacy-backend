@@ -247,11 +247,11 @@ export function BarcodeScanner({ onScan, onClose, isOpen }: BarcodeScannerProps)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-      <div className="relative w-full max-w-2xl bg-white rounded-lg shadow-2xl">
+      <div className="relative w-full max-w-2xl bg-white rounded-[4px] shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
           <div className="flex items-center gap-2">
-            <ScanLine className="h-5 w-5 text-teal-600" />
+            <ScanLine className="h-5 w-5 text-[#516057]" />
             <h3 className="font-bold text-lg">Barcode Scanner</h3>
           </div>
           <button
@@ -259,7 +259,7 @@ export function BarcodeScanner({ onScan, onClose, isOpen }: BarcodeScannerProps)
               stopScanning();
               onClose();
             }}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-[4px] transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
@@ -268,7 +268,7 @@ export function BarcodeScanner({ onScan, onClose, isOpen }: BarcodeScannerProps)
         {/* Scanner Area */}
         <div className="p-4">
           {error ? (
-            <div className="aspect-video bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center p-8">
+            <div className="aspect-video bg-gray-100 rounded-[4px] border-2 border-dashed border-gray-300 flex flex-col items-center justify-center p-8">
               <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
               <p className="text-sm text-red-600 text-center mb-4">{error}</p>
               <Button onClick={handleRetry} variant="outline" size="sm">
@@ -278,7 +278,7 @@ export function BarcodeScanner({ onScan, onClose, isOpen }: BarcodeScannerProps)
             </div>
           ) : (
             <div className="relative">
-              <div className="aspect-video bg-black rounded-lg overflow-hidden relative">
+              <div className="aspect-video bg-black rounded-[4px] overflow-hidden relative">
                 <video
                   ref={videoRef}
                   className="w-full h-full object-cover"
@@ -292,15 +292,15 @@ export function BarcodeScanner({ onScan, onClose, isOpen }: BarcodeScannerProps)
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div className="relative">
                       {/* Scanning Frame */}
-                      <div className="w-64 h-64 border-4 border-teal-500 rounded-lg">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-teal-500 animate-pulse" />
-                        <div className="absolute bottom-0 left-0 w-full h-1 bg-teal-500 animate-pulse" />
+                      <div className="w-64 h-64 border-4 border-[#516057] rounded-[4px]">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-[#516057] animate-pulse" />
+                        <div className="absolute bottom-0 left-0 w-full h-1 bg-[#516057] animate-pulse" />
                       </div>
                       {/* Corner Indicators */}
-                      <div className="absolute -top-2 -left-2 w-8 h-8 border-t-4 border-l-4 border-teal-500 rounded-tl-lg" />
-                      <div className="absolute -top-2 -right-2 w-8 h-8 border-t-4 border-r-4 border-teal-500 rounded-tr-lg" />
-                      <div className="absolute -bottom-2 -left-2 w-8 h-8 border-b-4 border-l-4 border-teal-500 rounded-bl-lg" />
-                      <div className="absolute -bottom-2 -right-2 w-8 h-8 border-b-4 border-r-4 border-teal-500 rounded-br-lg" />
+                      <div className="absolute -top-2 -left-2 w-8 h-8 border-t-4 border-l-4 border-[#516057] rounded-tl-[4px]" />
+                      <div className="absolute -top-2 -right-2 w-8 h-8 border-t-4 border-r-4 border-[#516057] rounded-tr-[4px]" />
+                      <div className="absolute -bottom-2 -left-2 w-8 h-8 border-b-4 border-l-4 border-[#516057] rounded-bl-[4px]" />
+                      <div className="absolute -bottom-2 -right-2 w-8 h-8 border-b-4 border-r-4 border-[#516057] rounded-br-[4px]" />
                     </div>
                   </div>
                 )}
@@ -318,7 +318,7 @@ export function BarcodeScanner({ onScan, onClose, isOpen }: BarcodeScannerProps)
                 {/* Scanning in progress overlay */}
                 {scanning && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
-                    <div className="bg-teal-500/90 text-white px-4 py-2 rounded-lg shadow-lg">
+                    <div className="bg-[#516057]/90 text-white px-4 py-2 rounded-[4px] shadow-lg">
                       <div className="flex items-center gap-2">
                         <ScanLine className="h-5 w-5 animate-pulse" />
                         <span className="text-sm font-medium">Scanning for barcode...</span>
@@ -329,7 +329,7 @@ export function BarcodeScanner({ onScan, onClose, isOpen }: BarcodeScannerProps)
               </div>
               
               {/* Instructions */}
-              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-[4px]">
                 <p className="text-xs text-blue-800 mb-2">
                   <strong>Instructions:</strong>
                 </p>
@@ -348,7 +348,7 @@ export function BarcodeScanner({ onScan, onClose, isOpen }: BarcodeScannerProps)
             {scanning ? (
               <Button
                 disabled
-                className="flex-1 bg-teal-600 hover:bg-teal-700"
+                className="flex-1 bg-[#516057] hover:bg-[#505454]"
               >
                 <ScanLine className="mr-2 h-4 w-4 animate-pulse" />
                 Scanning...
@@ -356,7 +356,7 @@ export function BarcodeScanner({ onScan, onClose, isOpen }: BarcodeScannerProps)
             ) : error ? (
               <Button
                 onClick={handleRetry}
-                className="flex-1 bg-teal-600 hover:bg-teal-700"
+                className="flex-1 bg-[#516057] hover:bg-[#505454]"
               >
                 <Camera className="mr-2 h-4 w-4" />
                 Try Again

@@ -72,7 +72,7 @@ export function ReportLayout({
           <button
             onClick={() => window.print()}
             disabled={loading || !!error}
-            className="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-3 py-1.5 rounded-lg disabled:opacity-50"
+            className="inline-flex items-center gap-2 bg-[#516057] hover:bg-[#505454] text-white text-sm font-medium px-3 py-1.5 rounded-[4px] disabled:opacity-50"
           >
             <Printer className="w-4 h-4" />
             Print / Save as PDF
@@ -81,7 +81,7 @@ export function ReportLayout({
       </div>
 
       <div className="report-wrapper py-6 px-4">
-        <div className="report-sheet max-w-5xl mx-auto bg-white border rounded-xl shadow-sm overflow-hidden">
+        <div className="report-sheet max-w-5xl mx-auto bg-white border rounded-[4px] shadow-sm overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center py-32">
               <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />

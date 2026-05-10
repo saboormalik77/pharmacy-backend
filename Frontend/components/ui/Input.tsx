@@ -9,11 +9,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       <input
         type={type}
         className={cn(
-          'flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm',
+          'flex h-10 w-full rounded-[4px] border border-gray-300 bg-white px-3 py-2 text-sm',
           'ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium',
-          'placeholder:text-muted-foreground',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2',
-          'disabled:cursor-not-allowed disabled:opacity-50',
+          'placeholder:text-[#9ca3af]',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#516057] focus-visible:ring-offset-2',
+          'disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100',
           'transition-all duration-200',
           className
         )}

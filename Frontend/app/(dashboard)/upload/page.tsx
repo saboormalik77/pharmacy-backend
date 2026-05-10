@@ -266,15 +266,15 @@ export default function UploadPage() {
       <PermissionGuard permission="documents:upload">
       <div className="space-y-2 p-2">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:py-2 sm:px-3 rounded-lg bg-gradient-to-r from-teal-50 via-cyan-50 to-teal-50 border-2 border-teal-200">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:py-2 sm:px-3 rounded-[4px] bg-[#f5f2f1] border-2 border-[#e2e2e2]">
           <div>
-            <h1 className="text-lg sm:text-md font-bold text-gray-900">Upload Documents</h1>
-            {/* <p className="text-xs text-gray-600 mt-0.5">Upload credit reports from reverse distributors</p> */}
+            <h1 className="text-lg sm:text-md font-bold text-[#000000]">Upload Documents</h1>
+            {/* <p className="text-xs text-[#505454] mt-0.5">Upload credit reports from reverse distributors</p> */}
           </div>
           <button
             onClick={() => setIsUploadModalOpen(true)}
             disabled={isUploadInProgress}
-            className="mt-3 sm:mt-0 px-2 py-1 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
+            className="mt-3 sm:mt-0 px-2 py-1 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
             title={isUploadInProgress ? 'Please wait for current upload to complete' : 'Upload Documents'}
           >
             <Upload className="h-3 w-3" />
@@ -284,7 +284,7 @@ export default function UploadPage() {
 
         {/* Error and Success Messages */}
         {error && (
-          <div className="p-2 rounded-lg bg-red-50 border-2 border-red-200 flex items-center gap-2">
+          <div className="p-2 rounded-[4px] bg-red-50 border-2 border-red-200 flex items-center gap-2">
             <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
             <p className="text-xs text-red-800">{error}</p>
             <button
@@ -296,7 +296,7 @@ export default function UploadPage() {
           </div>
         )}
         {success && (
-          <div className="p-2 rounded-lg bg-green-50 border-2 border-green-200 flex items-center gap-2">
+          <div className="p-2 rounded-[4px] bg-green-50 border-2 border-green-200 flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
             <p className="text-xs text-green-800">{success}</p>
             <button
@@ -308,7 +308,7 @@ export default function UploadPage() {
           </div>
         )}
         {isUploadInProgress && !uploading && (
-          <div className="p-2 rounded-lg bg-blue-50 border-2 border-blue-200 flex items-center gap-2">
+          <div className="p-2 rounded-[4px] bg-blue-50 border-2 border-blue-200 flex items-center gap-2">
             <Loader2 className="h-4 w-4 text-blue-600 flex-shrink-0 animate-spin" />
             <p className="text-xs text-blue-800">
               Document upload/processing in progress. Please wait before uploading new documents.
@@ -317,7 +317,7 @@ export default function UploadPage() {
         )}
 
         {/* Documents List - First Section */}
-        <Card className="border-2 border-teal-200">
+        <Card className="border-2 border-[#e2e2e2]">
           <CardHeader className="p-2">
             <CardTitle className="text-sm sm:text-base">All Documents</CardTitle>
             <CardDescription className="text-xs">View and manage uploaded credit reports</CardDescription>
@@ -326,7 +326,7 @@ export default function UploadPage() {
             {/* Search and Filter */}
             <div className="flex flex-col sm:flex-row gap-2">
               <div className="relative flex-1">
-                <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-gray-400" />
+                <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-[#9ca3af]" />
                 <Input
                   placeholder="Search documents..."
                   value={searchQuery}
@@ -339,7 +339,7 @@ export default function UploadPage() {
                   className="pl-8 text-xs"
                 />
               </div>
-              <button onClick={loadDocuments} className="w-full sm:w-auto px-2 py-1 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs">
+              <button onClick={loadDocuments} className="w-full sm:w-auto px-2 py-1 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs">
                 <Search className="h-3 w-3" />
                 <span>Search</span>
               </button>
@@ -348,26 +348,26 @@ export default function UploadPage() {
             {/* Documents Table */}
             {documentsLoading ? (
               <div className="text-center py-8">
-                <Loader2 className="h-6 w-6 mx-auto mb-2 text-teal-600 animate-spin" />
-                <p className="text-gray-500 text-xs">Loading documents...</p>
+                <Loader2 className="h-6 w-6 mx-auto mb-2 text-[#516057] animate-spin" />
+                <p className="text-[#6b7280] text-xs">Loading documents...</p>
               </div>
             ) : filteredDocuments.length === 0 ? (
               <div className="text-center py-8">
-                <FileText className="h-6 w-6 mx-auto mb-2 text-gray-400" />
-                <p className="text-gray-500 text-xs">No documents found</p>
+                <FileText className="h-6 w-6 mx-auto mb-2 text-[#9ca3af]" />
+                <p className="text-[#6b7280] text-xs">No documents found</p>
               </div>
             ) : (
               <>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b-2 border-gray-200">
-                        <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-gray-700">File Name</th>
-                        <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-gray-700">Distributor</th>
-                        <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-gray-700">Uploaded</th>
-                        {/* <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-gray-700">Status</th> */}
-                        {/* <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-gray-700">Credit</th> */}
-                        <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-gray-700">Actions</th>
+                      <tr className="border-b-2 border-[#e2e2e2]">
+                        <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-[#505454]">File Name</th>
+                        <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-[#505454]">Distributor</th>
+                        <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-[#505454]">Uploaded</th>
+                        {/* <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-[#505454]">Status</th> */}
+                        {/* <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-[#505454]">Credit</th> */}
+                        <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-[#505454]">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -378,19 +378,19 @@ export default function UploadPage() {
                         return (
                           <tr
                             key={doc.id}
-                            className="border-b border-gray-100 hover:bg-teal-50/50 transition-colors"
+                            className="border-b border-[#f3f4f6] hover:bg-[#f5f2f1]/50 transition-colors"
                           >
                             <td className="py-3 px-2 sm:px-4">
                               <div className="flex items-center gap-2">
-                                <FileText className="h-3 w-3 text-teal-600 flex-shrink-0" />
-                                <span className="text-xs font-medium text-gray-900 truncate max-w-[200px]">{doc.fileName}</span>
+                                <FileText className="h-3 w-3 text-[#516057] flex-shrink-0" />
+                                <span className="text-xs font-medium text-[#000000] truncate max-w-[200px]">{doc.fileName}</span>
                               </div>
                             </td>
                             <td className="py-3 px-2 sm:px-4">
-                              <span className="text-xs text-gray-600 truncate max-w-[150px] block">{doc.reverseDistributorName || '-'}</span>
+                              <span className="text-xs text-[#505454] truncate max-w-[150px] block">{doc.reverseDistributorName || '-'}</span>
                             </td>
                             <td className="py-3 px-2 sm:px-4">
-                              <span className="text-xs text-gray-600 whitespace-nowrap">{formatDate(doc.uploadedAt)}</span>
+                              <span className="text-xs text-[#505454] whitespace-nowrap">{formatDate(doc.uploadedAt)}</span>
                             </td>
                             {/* <td className="py-3 px-4">
                               <Badge variant={getStatusVariant(doc.status)} className="text-xs border-2">
@@ -402,17 +402,17 @@ export default function UploadPage() {
                             </td> */}
                             {/* <td className="py-3 px-4">
                               {doc.totalCreditAmount ? (
-                                <span className="text-sm font-bold text-emerald-700">
+                                <span className="text-sm font-bold text-[#516057]">
                                   {formatCurrency(doc.totalCreditAmount)}
                                 </span>
                               ) : (
-                                <span className="text-sm text-gray-400">-</span>
+                                <span className="text-sm text-[#9ca3af]">-</span>
                               )}
                             </td> */}
                             <td className="py-3 px-2 sm:px-4">
                               <div className="flex items-center gap-1 sm:gap-2">
                                 <button 
-                                  className="px-2 py-1 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
+                                  className="px-2 py-1 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
                                   onClick={() => handleViewFile(doc)}
                                   disabled={viewingDocId === doc.id || downloadingDocId === doc.id}
                                 >
@@ -425,7 +425,7 @@ export default function UploadPage() {
                                 </button>
                                 {doc.status === 'completed' && (
                                   <button 
-                                    className="px-2 py-1 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
+                                    className="px-2 py-1 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
                                     onClick={() => handleDownloadFile(doc)}
                                     disabled={viewingDocId === doc.id || downloadingDocId === doc.id}
                                   >
@@ -448,15 +448,15 @@ export default function UploadPage() {
 
                 {/* Pagination Controls */}
                 {totalPages > 1 && (
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 pt-4 border-t border-gray-200">
-                    <div className="text-xs text-gray-600">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 pt-4 border-t border-[#e2e2e2]">
+                    <div className="text-xs text-[#505454]">
                       Showing {startIndex + 1} to {Math.min(endIndex, filteredDocuments.length)} of {filteredDocuments.length} documents
                     </div>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                         disabled={currentPage === 1}
-                        className="px-2 py-1 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
+                        className="px-2 py-1 bg-white border border-[#e2e2e2] text-[#505454] rounded-[4px] hover:bg-[#f5f2f1] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
                       >
                         <ChevronLeft className="h-3 w-3" />
                         <span className="hidden sm:inline">Previous</span>
@@ -474,10 +474,10 @@ export default function UploadPage() {
                               <button
                                 key={page}
                                 onClick={() => setCurrentPage(page)}
-                                className={`min-w-[32px] px-2 py-1 rounded-lg text-xs ${
+                                className={`min-w-[32px] px-2 py-1 rounded-[4px] text-xs ${
                                   currentPage === page
-                                    ? 'bg-teal-600 hover:bg-teal-700 text-white'
-                                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                                    ? 'bg-[#516057] hover:bg-[#505454] text-white'
+                                    : 'bg-white border border-[#e2e2e2] text-[#505454] hover:bg-[#f5f2f1]'
                                 }`}
                               >
                                 {page}
@@ -488,7 +488,7 @@ export default function UploadPage() {
                             page === currentPage + 2
                           ) {
                             return (
-                              <span key={page} className="px-2 text-gray-400 text-xs">
+                              <span key={page} className="px-2 text-[#9ca3af] text-xs">
                                 ...
                               </span>
                             );
@@ -500,7 +500,7 @@ export default function UploadPage() {
                       <button
                         onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                         disabled={currentPage >= totalPages}
-                        className="px-2 py-1 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
+                        className="px-2 py-1 bg-white border border-[#e2e2e2] text-[#505454] rounded-[4px] hover:bg-[#f5f2f1] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
                       >
                         <span className="hidden sm:inline">Next</span>
                         <ChevronRight className="h-3 w-3" />
@@ -516,7 +516,7 @@ export default function UploadPage() {
         {/* Upload Modal */}
         {isUploadModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setIsUploadModalOpen(false)}>
-            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-white rounded-[4px] shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
               <Card className="border-0 shadow-none">
                 <CardHeader className="flex flex-row items-center justify-between pb-2 p-2">
                   <div>
@@ -526,10 +526,10 @@ export default function UploadPage() {
                   <button
                     onClick={() => !isUploadInProgress && setIsUploadModalOpen(false)}
                     disabled={isUploadInProgress}
-                    className="p-1 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="p-1 hover:bg-[#f5f2f1] rounded disabled:opacity-50 disabled:cursor-not-allowed"
                     title={isUploadInProgress ? 'Cannot close while uploading' : 'Close'}
                   >
-                    <X className="h-4 w-4 text-gray-500" />
+                    <X className="h-4 w-4 text-[#6b7280]" />
                   </button>
                 </CardHeader>
                 <CardContent className="p-2 space-y-3">
@@ -538,19 +538,19 @@ export default function UploadPage() {
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
-                    className={`border-2 border-dashed rounded-lg p-6 text-center transition-all ${
+                    className={`border-2 border-dashed rounded-[4px] p-6 text-center transition-all ${
                       isUploadInProgress
-                        ? 'border-gray-300 bg-gray-100 cursor-not-allowed opacity-50'
+                        ? 'border-[#e2e2e2] bg-[#f5f2f1] cursor-not-allowed opacity-50'
                         : isDragging
-                        ? 'border-teal-500 bg-teal-50'
-                        : 'border-gray-300 hover:border-teal-400 hover:bg-teal-50/50'
+                        ? 'border-[#e2e2e2] bg-[#f5f2f1]'
+                        : 'border-[#e2e2e2] hover:border-[#e2e2e2] hover:bg-[#f5f2f1]/50'
                     }`}
                   >
-                    <Upload className={`h-6 w-6 mx-auto mb-2 ${isUploadInProgress ? 'text-gray-400' : 'text-teal-500'}`} />
-                    <p className={`text-xs font-medium mb-1 ${isUploadInProgress ? 'text-gray-500' : ''}`}>
+                    <Upload className={`h-6 w-6 mx-auto mb-2 ${isUploadInProgress ? 'text-[#9ca3af]' : 'text-[#6b7280]'}`} />
+                    <p className={`text-xs font-medium mb-1 ${isUploadInProgress ? 'text-[#6b7280]' : ''}`}>
                       {isUploadInProgress ? 'Upload in progress... Please wait' : 'Drag and drop PDF files here, or click to select'}
                     </p>
-                    <p className="text-[10px] text-gray-500 mb-3">
+                    <p className="text-[10px] text-[#6b7280] mb-3">
                       Supports PDF files from all major reverse distributors
                     </p>
                     <input
@@ -567,7 +567,7 @@ export default function UploadPage() {
                       type="button"
                       onClick={() => !isUploadInProgress && fileInputRef.current?.click()}
                       disabled={isUploadInProgress}
-                      className="mx-auto px-2 py-1 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
+                      className="mx-auto px-2 py-1 bg-white border border-[#e2e2e2] text-[#505454] rounded-[4px] hover:bg-[#f5f2f1] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
                     >
                       Choose Files
                     </button>
@@ -581,13 +581,13 @@ export default function UploadPage() {
                         {files.map((file, index) => (
                           <div
                             key={index}
-                            className="flex items-center justify-between p-2 bg-gray-50 rounded-lg border border-gray-200"
+                            className="flex items-center justify-between p-2 bg-[#f5f2f1] rounded-[4px] border border-[#e2e2e2]"
                           >
                             <div className="flex items-center gap-2 flex-1 min-w-0">
-                              <FileText className="h-4 w-4 text-teal-600 flex-shrink-0" />
+                              <FileText className="h-4 w-4 text-[#516057] flex-shrink-0" />
                               <div className="flex-1 min-w-0">
                                 <p className="text-xs font-medium truncate">{file.name}</p>
-                                <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
+                                <p className="text-xs text-[#6b7280]">{formatFileSize(file.size)}</p>
                               </div>
                             </div>
                             <button
@@ -608,7 +608,7 @@ export default function UploadPage() {
                   <button
                     onClick={handleUpload}
                     disabled={files.length === 0 || uploading}
-                    className="w-full px-2 py-1 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
+                    className="w-full px-2 py-1 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
                   >
                     {uploading ? (
                       <>

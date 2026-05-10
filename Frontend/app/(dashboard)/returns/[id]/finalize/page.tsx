@@ -489,25 +489,25 @@ export default function FinalizeReturnPage() {
     return (
         <DashboardLayout>
             <PermissionGuard permission="returns:view">
-                <div className="min-h-screen bg-gray-50">
+                <div className="min-h-screen bg-[#f5f2f1]">
                     <ToastContainer toasts={toasts} onClose={removeToast} />
 
                     {/* Header */}
-                    <div className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
+                    <div className="bg-white border-b border-[#e2e2e2] sticky top-0 z-10 shadow-sm">
                         <div className="max-w-5xl mx-auto px-4 py-3">
                             <div className="flex items-center gap-3">
                                 <button
                                     onClick={() => router.back()}
-                                    className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                                    className="p-1.5 hover:bg-[#f5f2f1] rounded-[4px] transition-colors"
                                 >
-                                    <ArrowLeft className="w-4 h-4 text-gray-600" />
+                                    <ArrowLeft className="w-4 h-4 text-[#505454]" />
                                 </button>
                                 <div className="flex-1">
-                                    <h1 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                                    <h1 className="text-base font-bold text-[#000000] flex items-center gap-2">
                                         <Lock className="w-4 h-4 text-red-600" />
                                         Finalize Return — {tx.licensePlate}
                                     </h1>
-                                    <p className="text-xs text-gray-500 mt-0.5">Complete all steps below to finalize this return</p>
+                                    <p className="text-xs text-[#6b7280] mt-0.5">Complete all steps below to finalize this return</p>
                                 </div>
                             </div>
                         </div>
@@ -518,17 +518,17 @@ export default function FinalizeReturnPage() {
                         <div className="space-y-4">
 
                             {/* Progress Bar */}
-                            <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                            <div className="bg-white rounded-[4px] border border-[#e2e2e2] p-4 shadow-sm">
                                 <div className="flex items-center justify-between mb-3">
-                                    <span className="text-sm font-semibold text-gray-700">Progress</span>
-                                    <span className="text-sm font-bold text-teal-600">
+                                    <span className="text-sm font-semibold text-[#505454]">Progress</span>
+                                    <span className="text-sm font-bold text-[#516057]">
                                         {[finalizeStepsDone.printManifest, finalizeStepsDone.fedexEntered, finalizeStepsDone.printJobSheets].filter(Boolean).length} / 3 steps completed
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                    <div className="flex-1 h-2 bg-[#e2e2e2] rounded-full overflow-hidden">
                                         <div 
-                                            className="h-full bg-gradient-to-r from-teal-500 to-teal-600 rounded-full transition-all duration-500"
+                                            className="h-full bg-[#516057] rounded-full transition-all duration-500"
                                             style={{ 
                                                 width: `${([finalizeStepsDone.printManifest, finalizeStepsDone.fedexEntered, finalizeStepsDone.printJobSheets].filter(Boolean).length / 3) * 100}%` 
                                             }}
@@ -536,16 +536,16 @@ export default function FinalizeReturnPage() {
                                     </div>
                                 </div>
                                 <div className="flex justify-between mt-3">
-                                    <div className={`flex items-center gap-1.5 text-xs ${finalizeStepsDone.printManifest ? 'text-green-600 font-semibold' : 'text-gray-400'}`}>
-                                        {finalizeStepsDone.printManifest ? <CheckCircle className="w-3.5 h-3.5" /> : <div className="w-3.5 h-3.5 rounded-full border-2 border-gray-300" />}
+                                    <div className={`flex items-center gap-1.5 text-xs ${finalizeStepsDone.printManifest ? 'text-green-600 font-semibold' : 'text-[#9ca3af]'}`}>
+                                        {finalizeStepsDone.printManifest ? <CheckCircle className="w-3.5 h-3.5" /> : <div className="w-3.5 h-3.5 rounded-full border-2 border-[#e2e2e2]" />}
                                         Print Manifest
                                     </div>
-                                    <div className={`flex items-center gap-1.5 text-xs ${finalizeStepsDone.fedexEntered ? 'text-green-600 font-semibold' : 'text-gray-400'}`}>
-                                        {finalizeStepsDone.fedexEntered ? <CheckCircle className="w-3.5 h-3.5" /> : <div className="w-3.5 h-3.5 rounded-full border-2 border-gray-300" />}
+                                    <div className={`flex items-center gap-1.5 text-xs ${finalizeStepsDone.fedexEntered ? 'text-green-600 font-semibold' : 'text-[#9ca3af]'}`}>
+                                        {finalizeStepsDone.fedexEntered ? <CheckCircle className="w-3.5 h-3.5" /> : <div className="w-3.5 h-3.5 rounded-full border-2 border-[#e2e2e2]" />}
                                         FedEx/USPS
                                     </div>
-                                    <div className={`flex items-center gap-1.5 text-xs ${finalizeStepsDone.printJobSheets ? 'text-green-600 font-semibold' : 'text-gray-400'}`}>
-                                        {finalizeStepsDone.printJobSheets ? <CheckCircle className="w-3.5 h-3.5" /> : <div className="w-3.5 h-3.5 rounded-full border-2 border-gray-300" />}
+                                    <div className={`flex items-center gap-1.5 text-xs ${finalizeStepsDone.printJobSheets ? 'text-green-600 font-semibold' : 'text-[#9ca3af]'}`}>
+                                        {finalizeStepsDone.printJobSheets ? <CheckCircle className="w-3.5 h-3.5" /> : <div className="w-3.5 h-3.5 rounded-full border-2 border-[#e2e2e2]" />}
                                         Job Sheets
                                     </div>
                                 </div>
@@ -554,21 +554,21 @@ export default function FinalizeReturnPage() {
                             {/* NOTE: TBD blocker removed - TBD items handled by warehouse verification */}
 
                             {/* ── Step 1: Print Itemized Return ── */}
-                            <div className={`border rounded-lg p-4 transition-all ${finalizeStepsDone.printManifest ? 'border-green-300 bg-green-50' : 'border-gray-300 bg-white'}`}>
+                            <div className={`border rounded-[4px] p-4 transition-all ${finalizeStepsDone.printManifest ? 'border-green-300 bg-green-50' : 'border-[#e2e2e2] bg-white'}`}>
                                 <div className="flex items-start gap-3">
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${finalizeStepsDone.printManifest ? 'bg-green-500 text-white' : 'bg-blue-500 text-white'}`}>
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${finalizeStepsDone.printManifest ? 'bg-green-500 text-white' : 'bg-[#516057] text-white'}`}>
                                         {finalizeStepsDone.printManifest ? <CheckCircle className="w-4 h-4" /> : '1'}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className={`text-sm font-bold ${finalizeStepsDone.printManifest ? 'text-green-800' : 'text-gray-800'}`}>
+                                        <p className={`text-sm font-bold ${finalizeStepsDone.printManifest ? 'text-green-800' : 'text-[#000000]'}`}>
                                             Print Itemized Return
                                         </p>
-                                        <p className="text-xs text-gray-600 mt-0.5">Print the full list of all items included in this return.</p>
+                                        <p className="text-xs text-[#505454] mt-0.5">Print the full list of all items included in this return.</p>
                                         <div className="flex items-center gap-3 mt-2">
                                             <button
                                                 onClick={() => printHtml('manifest-html', 'manifest')}
                                                 disabled={pdfLoading === 'manifest'}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#516057] hover:bg-[#505454] text-white text-xs font-medium rounded-[4px] transition-colors disabled:opacity-50"
                                             >
                                                 {pdfLoading === 'manifest' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Printer className="w-3.5 h-3.5" />}
                                                 Print Manifest
@@ -584,27 +584,27 @@ export default function FinalizeReturnPage() {
                             </div>
 
                             {/* ── Step 2: Enter FedEx Tracking ── */}
-                            <div className={`border rounded-lg p-4 transition-all ${!finalizeStepsDone.printManifest ? 'opacity-50 pointer-events-none' : ''} ${finalizeStepsDone.fedexEntered ? 'border-green-300 bg-green-50' : 'border-gray-300 bg-white'}`}>
+                            <div className={`border rounded-[4px] p-4 transition-all ${!finalizeStepsDone.printManifest ? 'opacity-50 pointer-events-none' : ''} ${finalizeStepsDone.fedexEntered ? 'border-green-300 bg-green-50' : 'border-[#e2e2e2] bg-white'}`}>
                                 <div className="flex items-start gap-3">
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${finalizeStepsDone.fedexEntered ? 'bg-green-500 text-white' : finalizeStepsDone.printManifest ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600'}`}>
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${finalizeStepsDone.fedexEntered ? 'bg-green-500 text-white' : finalizeStepsDone.printManifest ? 'bg-[#516057] text-white' : 'bg-gray-300 text-[#505454]'}`}>
                                         {finalizeStepsDone.fedexEntered ? <CheckCircle className="w-4 h-4" /> : '2'}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className={`text-sm font-bold ${finalizeStepsDone.fedexEntered ? 'text-green-800' : 'text-gray-800'}`}>
+                                        <p className={`text-sm font-bold ${finalizeStepsDone.fedexEntered ? 'text-green-800' : 'text-[#000000]'}`}>
                                             FedEx / USPS Shipping
                                         </p>
-                                        <p className="text-xs text-gray-600 mt-0.5">Create a shipment via FedEx API or enter tracking info manually.</p>
+                                        <p className="text-xs text-[#505454] mt-0.5">Create a shipment via FedEx API or enter tracking info manually.</p>
                                         <div className="flex items-center gap-2 mt-2 flex-wrap">
                                             <button
                                                 onClick={() => { setFedexMode('api'); setFedexSubModal(true); }}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition-colors"
+                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#516057] hover:bg-[#505454] text-white text-xs font-medium rounded-[4px] transition-colors"
                                             >
                                                 <Truck className="w-3.5 h-3.5" />
                                                 {finalizeStepsDone.fedexEntered ? 'Edit Shipment' : 'Create FedEx Shipment'}
                                             </button>
                                             <button
                                                 onClick={() => { setFedexMode('manual'); setFedexSubModal(true); }}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded-md transition-colors border border-gray-300"
+                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f5f2f1] hover:bg-[#e2e2e2] text-[#505454] text-xs font-medium rounded-[4px] transition-colors border border-[#e2e2e2]"
                                             >
                                                 <Edit className="w-3.5 h-3.5" />
                                                 Enter Manually
@@ -616,7 +616,7 @@ export default function FinalizeReturnPage() {
                                             )}
                                         </div>
                                         {finalizeStepsDone.fedexEntered && (finalizeForm.fedexTracking.trim() || tx.fedexTracking) && (
-                                            <div className="mt-2 p-2 bg-gray-50 rounded-md border border-gray-200 text-xs text-gray-700 space-y-0.5">
+                                            <div className="mt-2 p-2 bg-[#f5f2f1] rounded-[4px] border border-[#e2e2e2] text-xs text-[#505454] space-y-0.5">
                                                 <p><span className="font-semibold">Tracking:</span> <span className="font-mono">{fedexForm.prpNumber || finalizeForm.fedexTracking || tx.fedexTracking || '—'}</span></p>
                                                 <p><span className="font-semibold">Boxes:</span> {finalizeForm.boxCount || tx.boxCount || '—'}</p>
                                                 {fedexForm.packages.filter((p: string) => p.trim()).length > 0 && (
@@ -629,21 +629,21 @@ export default function FinalizeReturnPage() {
                             </div>
 
                             {/* ── Step 3: Print Job Sheets ── */}
-                            <div className={`border rounded-lg p-4 transition-all ${!finalizeStepsDone.fedexEntered ? 'opacity-50 pointer-events-none' : ''} ${finalizeStepsDone.printJobSheets ? 'border-green-300 bg-green-50' : 'border-gray-300 bg-white'}`}>
+                            <div className={`border rounded-[4px] p-4 transition-all ${!finalizeStepsDone.fedexEntered ? 'opacity-50 pointer-events-none' : ''} ${finalizeStepsDone.printJobSheets ? 'border-green-300 bg-green-50' : 'border-[#e2e2e2] bg-white'}`}>
                                 <div className="flex items-start gap-3">
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${finalizeStepsDone.printJobSheets ? 'bg-green-500 text-white' : finalizeStepsDone.fedexEntered ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600'}`}>
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${finalizeStepsDone.printJobSheets ? 'bg-green-500 text-white' : finalizeStepsDone.fedexEntered ? 'bg-[#516057] text-white' : 'bg-gray-300 text-[#505454]'}`}>
                                         {finalizeStepsDone.printJobSheets ? <CheckCircle className="w-4 h-4" /> : '3'}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className={`text-sm font-bold ${finalizeStepsDone.printJobSheets ? 'text-green-800' : 'text-gray-800'}`}>
+                                        <p className={`text-sm font-bold ${finalizeStepsDone.printJobSheets ? 'text-green-800' : 'text-[#000000]'}`}>
                                             Print Job Sheets
                                         </p>
-                                        <p className="text-xs text-gray-600 mt-0.5">Print job sheets for all outgoing boxes.</p>
+                                        <p className="text-xs text-[#505454] mt-0.5">Print job sheets for all outgoing boxes.</p>
                                         <div className="flex items-center gap-2 mt-2 flex-wrap">
                                             <button
                                                 onClick={() => printJobSheet()}
                                                 disabled={pdfLoading === 'job-sheet'}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#516057] hover:bg-[#505454] text-white text-xs font-medium rounded-[4px] transition-colors disabled:opacity-50"
                                             >
                                                 {pdfLoading === 'job-sheet' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
                                                 Print Job Sheet
@@ -653,7 +653,7 @@ export default function FinalizeReturnPage() {
                                                 <button
                                                     onClick={() => downloadPdf('dea-form-222', `dea-form-222-${tx.licensePlate}.pdf`)}
                                                     disabled={pdfLoading === 'dea-form-222'}
-                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-medium rounded-[4px] transition-colors disabled:opacity-50"
                                                 >
                                                     {pdfLoading === 'dea-form-222' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
                                                     Print DEA Form 222
@@ -671,25 +671,25 @@ export default function FinalizeReturnPage() {
                             </div>
 
                             {/* ── Step 4: Finalize Return ── */}
-                            <div className={`border-2 rounded-lg p-4 transition-all ${!finalizeStepsDone.printJobSheets ? 'opacity-50 pointer-events-none' : ''} ${canFinalize ? 'border-green-300 bg-green-50' : 'border-dashed border-gray-300 bg-gray-50'}`}>
+                            <div className={`border-2 rounded-[4px] p-4 transition-all ${!finalizeStepsDone.printJobSheets ? 'opacity-50 pointer-events-none' : ''} ${canFinalize ? 'border-green-300 bg-green-50' : 'border-dashed border-[#e2e2e2] bg-[#f5f2f1]'}`}>
                                 <div className="flex items-start gap-3">
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${canFinalize ? 'bg-green-500 text-white' : finalizeStepsDone.printJobSheets ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-500'}`}>
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${canFinalize ? 'bg-green-500 text-white' : finalizeStepsDone.printJobSheets ? 'bg-[#516057] text-white' : 'bg-gray-300 text-[#6b7280]'}`}>
                                         {canFinalize ? <CheckCircle className="w-4 h-4" /> : '4'}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className={`text-sm font-bold ${canFinalize ? 'text-green-800' : 'text-gray-500'}`}>
+                                        <p className={`text-sm font-bold ${canFinalize ? 'text-green-800' : 'text-[#6b7280]'}`}>
                                             Finalize Return
                                         </p>
-                                        <p className={`text-xs mt-0.5 ${canFinalize ? 'text-green-700' : 'text-gray-500'}`}>
+                                        <p className={`text-xs mt-0.5 ${canFinalize ? 'text-green-700' : 'text-[#6b7280]'}`}>
                                             Lock this return permanently. This cannot be undone.
                                         </p>
                                         {!allStepsDone && (
-                                            <p className="text-xs text-gray-500 mt-1">Complete steps 1 – 3 above to enable finalization.</p>
+                                            <p className="text-xs text-[#6b7280] mt-1">Complete steps 1 – 3 above to enable finalization.</p>
                                         )}
                                         {allStepsDone && (
                                             <div className="mt-3">
                                                 {/* NOTE: TBD items warning removed - handled by warehouse verification */}
-                                                <div className="bg-yellow-50 border border-yellow-200 rounded-md p-2 flex items-start gap-1.5 mb-3">
+                                                <div className="bg-yellow-50 border border-yellow-200 rounded-[4px] p-2 flex items-start gap-1.5 mb-3">
                                                     <AlertTriangle className="w-3.5 h-3.5 text-yellow-600 flex-shrink-0 mt-0.5" />
                                                     <p className="text-xs text-yellow-800">
                                                         Once finalized, items and shipping details can no longer be edited.
@@ -698,7 +698,7 @@ export default function FinalizeReturnPage() {
                                                 <button
                                                     onClick={handleFinalize}
                                                     disabled={isActionLoading || !canFinalize}
-                                                    className="inline-flex items-center gap-1 px-4 py-2 text-sm rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                                    className="inline-flex items-center gap-1 px-4 py-2 text-sm rounded bg-[#516057] text-white hover:bg-[#505454] disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#516057]"
                                                 >
                                                     {isActionLoading
                                                         ? <><Loader2 className="w-4 h-4 animate-spin mr-1" />Finalizing...</>
@@ -717,11 +717,11 @@ export default function FinalizeReturnPage() {
                     {/* ── FedEx / USPS Tracking Sub-Modal ─────────── */}
                     {fedexSubModal && (
                         <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-[60] p-4" onClick={() => { if (!fedexApiLoading && !pickupLoading) setFedexSubModal(false); }}>
-                            <div className="bg-white rounded-lg max-w-2xl w-full shadow-xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                            <div className="bg-white rounded-[4px] max-w-2xl w-full shadow-xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
 
                                 {/* Header */}
-                                <div className={`p-4 rounded-t-lg ${fedexMode === 'api' ? 'bg-blue-600' : 'bg-amber-400'}`}>
-                                    <h2 className={`text-center text-base font-bold ${fedexMode === 'api' ? 'text-white' : 'text-gray-900'}`}>
+                                <div className={`p-4 rounded-t-lg ${fedexMode === 'api' ? 'bg-[#516057]' : 'bg-amber-400'}`}>
+                                    <h2 className={`text-center text-base font-bold ${fedexMode === 'api' ? 'text-white' : 'text-[#000000]'}`}>
                                         {fedexMode === 'api' ? 'FedEx API Shipment' : 'FedEx or USPS Info'} — <span className="underline font-mono text-sm">{tx.licensePlate}</span>
                                     </h2>
                                 </div>
@@ -733,24 +733,24 @@ export default function FinalizeReturnPage() {
                                         <>
                                             {!fedexApiResult ? (
                                                 <>
-                                                    <p className="text-xs text-gray-600 text-center">
+                                                    <p className="text-xs text-[#505454] text-center">
                                                         Create a FedEx Ground shipment via the FedEx API. Tracking numbers and shipping labels will be generated automatically.
                                                     </p>
 
                                                     <div className="flex items-center justify-center gap-3">
-                                                        <label className="text-xs font-medium text-gray-700">Number of Boxes:</label>
+                                                        <label className="text-xs font-medium text-[#505454]">Number of Boxes:</label>
                                                         <input
                                                             type="number"
                                                             min="1"
                                                             max="99"
                                                             value={fedexForm.boxCount}
                                                             onChange={e => setFedexForm(prev => ({ ...prev, boxCount: e.target.value }))}
-                                                            className="w-20 px-2 py-1 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+                                                            className="w-20 px-2 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] text-center"
                                                             disabled={fedexApiLoading}
                                                         />
                                                     </div>
 
-                                                    <div className="bg-blue-50 border border-blue-200 rounded-md p-2 text-xs text-blue-800 text-center space-y-0.5">
+                                                    <div className="bg-blue-50 border border-blue-200 rounded-[4px] p-2 text-xs text-blue-800 text-center space-y-0.5">
                                                         <p>The shipment will be created as <strong>FedEx Ground</strong> from the pharmacy address to the warehouse.</p>
                                                         <p>Make sure both pharmacy and warehouse addresses are configured correctly.</p>
                                                     </div>
@@ -759,7 +759,7 @@ export default function FinalizeReturnPage() {
                                                         <button
                                                             onClick={() => createFedexShipment(parseInt(fedexForm.boxCount) || 1)}
                                                             disabled={fedexApiLoading || !fedexForm.boxCount}
-                                                            className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-xs font-medium rounded-lg transition-colors"
+                                                            className="flex items-center gap-1.5 px-4 py-2 bg-[#516057] hover:bg-[#505454] disabled:bg-blue-400 text-white text-xs font-medium rounded-[4px] transition-colors"
                                                         >
                                                             {fedexApiLoading ? (
                                                                 <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Creating Shipment...</>
@@ -771,42 +771,42 @@ export default function FinalizeReturnPage() {
                                                 </>
                                             ) : (
                                                 <>
-                                                    <div className="bg-green-50 border border-green-200 rounded-lg p-3 space-y-2">
+                                                    <div className="bg-green-50 border border-green-200 rounded-[4px] p-3 space-y-2">
                                                         <div className="flex items-center gap-2">
                                                             <CheckCircle className="w-4 h-4 text-green-600" />
                                                             <p className="text-xs font-semibold text-green-800">Shipment Created Successfully</p>
                                                         </div>
                                                         <div className="grid grid-cols-2 gap-2 text-xs">
                                                             <div>
-                                                                <span className="text-gray-500">Master Tracking:</span>
-                                                                <span className="ml-1 font-mono font-medium text-gray-900">{fedexApiResult.masterTrackingNumber}</span>
+                                                                <span className="text-[#6b7280]">Master Tracking:</span>
+                                                                <span className="ml-1 font-mono font-medium text-[#000000]">{fedexApiResult.masterTrackingNumber}</span>
                                                             </div>
                                                             <div>
-                                                                <span className="text-gray-500">Packages:</span>
-                                                                <span className="ml-1 font-medium text-gray-900">{fedexApiResult.packages.length}</span>
+                                                                <span className="text-[#6b7280]">Packages:</span>
+                                                                <span className="ml-1 font-medium text-[#000000]">{fedexApiResult.packages.length}</span>
                                                             </div>
                                                         </div>
                                                     </div>
 
                                                     <div className="space-y-2">
-                                                        <p className="text-xs font-medium text-gray-700">Package Tracking Numbers:</p>
+                                                        <p className="text-xs font-medium text-[#505454]">Package Tracking Numbers:</p>
                                                         <div className="grid grid-cols-2 gap-2 text-xs">
                                                             {fedexApiResult.packages.map((pkg: any, idx: number) => (
-                                                                <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-200">
-                                                                    <span className="text-gray-600">Package {idx + 1}:</span>
-                                                                    <span className="font-mono text-gray-900">{pkg.trackingNumber}</span>
+                                                                <div key={idx} className="flex items-center justify-between p-2 bg-[#f5f2f1] rounded border border-[#e2e2e2]">
+                                                                    <span className="text-[#505454]">Package {idx + 1}:</span>
+                                                                    <span className="font-mono text-[#000000]">{pkg.trackingNumber}</span>
                                                                 </div>
                                                             ))}
                                                         </div>
                                                     </div>
 
                                                     <div className="space-y-2">
-                                                        <p className="text-xs font-medium text-gray-700">Shipping Labels:</p>
+                                                        <p className="text-xs font-medium text-[#505454]">Shipping Labels:</p>
                                                         <div className="flex flex-wrap gap-2">
                                                             <button
                                                                 onClick={printShippingLabels}
                                                                 disabled={pdfLoading === 'shipping-labels'}
-                                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+                                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#516057] hover:bg-[#505454] text-white text-xs font-medium rounded-[4px] transition-colors disabled:opacity-50"
                                                             >
                                                                 {pdfLoading === 'shipping-labels' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
                                                                 Print All Labels
@@ -816,7 +816,7 @@ export default function FinalizeReturnPage() {
                                                                     key={idx}
                                                                     onClick={() => printSingleLabel(idx + 1)}
                                                                     disabled={pdfLoading === `shipping-label-${idx + 1}`}
-                                                                    className="flex items-center gap-1 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded border border-gray-300 transition-colors disabled:opacity-50"
+                                                                    className="flex items-center gap-1 px-2 py-1 bg-[#f5f2f1] hover:bg-[#e2e2e2] text-[#505454] text-xs font-medium rounded border border-[#e2e2e2] transition-colors disabled:opacity-50"
                                                                 >
                                                                     {pdfLoading === `shipping-label-${idx + 1}` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Printer className="w-3 h-3" />}
                                                                     Label {idx + 1}
@@ -826,36 +826,36 @@ export default function FinalizeReturnPage() {
                                                     </div>
 
                                                     {/* Schedule Pickup */}
-                                                    <div className="border-t border-gray-200 pt-3 space-y-2">
-                                                        <p className="text-xs font-medium text-gray-700">Schedule FedEx Pickup (Optional):</p>
+                                                    <div className="border-t border-[#e2e2e2] pt-3 space-y-2">
+                                                        <p className="text-xs font-medium text-[#505454]">Schedule FedEx Pickup (Optional):</p>
                                                         <div className="grid grid-cols-3 gap-2">
                                                             <div>
-                                                                <label className="text-xs text-gray-600">Pickup Date:</label>
+                                                                <label className="text-xs text-[#505454]">Pickup Date:</label>
                                                                 <input
                                                                     type="date"
                                                                     value={pickupForm.date}
                                                                     onChange={e => setPickupForm(prev => ({ ...prev, date: e.target.value }))}
-                                                                    className="w-full px-2 py-1 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                                    className="w-full px-2 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057]"
                                                                     disabled={pickupLoading}
                                                                 />
                                                             </div>
                                                             <div>
-                                                                <label className="text-xs text-gray-600">Ready Time:</label>
+                                                                <label className="text-xs text-[#505454]">Ready Time:</label>
                                                                 <input
                                                                     type="time"
                                                                     value={pickupForm.readyTime}
                                                                     onChange={e => setPickupForm(prev => ({ ...prev, readyTime: e.target.value }))}
-                                                                    className="w-full px-2 py-1 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                                    className="w-full px-2 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057]"
                                                                     disabled={pickupLoading}
                                                                 />
                                                             </div>
                                                             <div>
-                                                                <label className="text-xs text-gray-600">Close Time:</label>
+                                                                <label className="text-xs text-[#505454]">Close Time:</label>
                                                                 <input
                                                                     type="time"
                                                                     value={pickupForm.closeTime}
                                                                     onChange={e => setPickupForm(prev => ({ ...prev, closeTime: e.target.value }))}
-                                                                    className="w-full px-2 py-1 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                                    className="w-full px-2 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057]"
                                                                     disabled={pickupLoading}
                                                                 />
                                                             </div>
@@ -863,7 +863,7 @@ export default function FinalizeReturnPage() {
                                                         <button
                                                             onClick={scheduleFedexPickup}
                                                             disabled={pickupLoading || !pickupForm.date}
-                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white text-xs font-medium rounded-md transition-colors"
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white text-xs font-medium rounded-[4px] transition-colors"
                                                         >
                                                             {pickupLoading ? <><Loader2 className="w-3 h-3 animate-spin" /> Scheduling...</> : 'Schedule Pickup'}
                                                         </button>
@@ -878,30 +878,30 @@ export default function FinalizeReturnPage() {
                                         <>
                                             <div className="space-y-3">
                                                 <div>
-                                                    <label className="text-xs font-medium text-gray-700">PRP Number / Master Tracking:</label>
+                                                    <label className="text-xs font-medium text-[#505454]">PRP Number / Master Tracking:</label>
                                                     <input
                                                         type="text"
                                                         value={fedexForm.prpNumber}
                                                         onChange={e => setFedexForm(prev => ({ ...prev, prpNumber: e.target.value }))}
                                                         placeholder="Enter PRP tracking number"
-                                                        className="w-full px-3 py-2 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                        className="w-full px-3 py-2 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057]"
                                                     />
                                                 </div>
 
                                                 <div>
-                                                    <label className="text-xs font-medium text-gray-700">Number of Boxes:</label>
+                                                    <label className="text-xs font-medium text-[#505454]">Number of Boxes:</label>
                                                     <input
                                                         type="number"
                                                         min="1"
                                                         max="99"
                                                         value={fedexForm.boxCount}
                                                         onChange={e => setFedexForm(prev => ({ ...prev, boxCount: e.target.value }))}
-                                                        className="w-full px-3 py-2 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                        className="w-full px-3 py-2 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057]"
                                                     />
                                                 </div>
 
                                                 <div>
-                                                    <label className="text-xs font-medium text-gray-700 mb-1 block">Individual Package Tracking Numbers (Optional):</label>
+                                                    <label className="text-xs font-medium text-[#505454] mb-1 block">Individual Package Tracking Numbers (Optional):</label>
                                                     <div className="grid grid-cols-2 gap-2">
                                                         {fedexForm.packages.slice(0, 12).map((pkg, idx) => (
                                                             <input
@@ -914,7 +914,7 @@ export default function FinalizeReturnPage() {
                                                                     setFedexForm(prev => ({ ...prev, packages: updated }));
                                                                 }}
                                                                 placeholder={`Package ${idx + 1}`}
-                                                                className="px-2 py-1 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                                className="px-2 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057]"
                                                             />
                                                         ))}
                                                     </div>
@@ -926,7 +926,7 @@ export default function FinalizeReturnPage() {
                                 </div>
 
                                 {/* Footer */}
-                                <div className="flex justify-between items-center p-3 border-t border-gray-200 bg-gray-50">
+                                <div className="flex justify-between items-center p-3 border-t border-[#e2e2e2] bg-[#f5f2f1]">
                                     {fedexMode === 'manual' ? (
                                         <button
                                             onClick={() => {
@@ -940,7 +940,7 @@ export default function FinalizeReturnPage() {
                                                 setFedexSubModal(false);
                                             }}
                                             disabled={!fedexForm.prpNumber.trim()}
-                                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded bg-[#516057] text-white hover:bg-[#505454] disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#516057]"
                                         >
                                             <Truck className="w-3.5 h-3.5" />
                                             Save FedEx or USPS Info
@@ -951,7 +951,7 @@ export default function FinalizeReturnPage() {
                                     <button
                                         onClick={() => setFedexSubModal(false)}
                                         disabled={fedexApiLoading || pickupLoading}
-                                        className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                                        className="px-3 py-1.5 text-xs rounded border border-[#e2e2e2] text-[#505454] hover:bg-[#f5f2f1] transition-colors"
                                     >
                                         {fedexApiResult ? 'Close' : 'Cancel'}
                                     </button>

@@ -146,7 +146,7 @@ export default function WineCellarPage() {
             <Card>
               <CardContent className="pt-4 pb-3 px-4 text-center">
                 <p className="text-xs text-muted-foreground">Total Value</p>
-                <p className="text-xl font-bold text-gray-900">{formatCurrency(stats.totalValue)}</p>
+                <p className="text-xl font-bold text-[#000000]">{formatCurrency(stats.totalValue)}</p>
               </CardContent>
             </Card>
           </div>
@@ -168,7 +168,7 @@ export default function WineCellarPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-                className="px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="px-3 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057]"
               >
                 {STATUS_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
@@ -194,7 +194,7 @@ export default function WineCellarPage() {
           <CardContent className="p-0">
             {loading ? (
               <div className="flex justify-center py-16">
-                <Loader2 className="w-6 h-6 animate-spin text-teal-600" />
+                <Loader2 className="w-6 h-6 animate-spin text-[#516057]" />
               </div>
             ) : error ? (
               <div className="text-center py-16">

@@ -119,21 +119,21 @@ export default function BranchesPage() {
             <h1 className="text-xl font-bold">Branch Pharmacies</h1>
             <p className="text-sm text-muted-foreground">{total} branch{total !== 1 ? 'es' : ''} total</p>
           </div>
-          <button className="inline-flex items-center gap-1 px-3 py-1.5 rounded text-xs font-medium bg-teal-600 text-white hover:bg-teal-700 transition-colors" onClick={() => setShowCreateModal(true)}>
+          <button className="inline-flex items-center gap-1 px-3 py-1.5 rounded text-xs font-medium bg-[#516057] text-white hover:bg-[#505454] transition-colors" onClick={() => setShowCreateModal(true)}>
             <Plus className="h-4 w-4" /> Add Branch
           </button>
         </div>
 
         {/* Pending Invites */}
         {pendingInvites.length > 0 && (
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <div className="bg-amber-50 border border-amber-200 rounded-[4px] p-4">
             <div className="flex items-center gap-2 mb-3">
               <Clock className="h-4 w-4 text-amber-600" />
               <h3 className="text-sm font-semibold text-amber-800">Pending Invites ({pendingInvites.length})</h3>
             </div>
             <div className="space-y-2">
               {pendingInvites.map((inv) => (
-                <div key={inv.id} className="flex items-center justify-between bg-white rounded-md px-3 py-2 text-sm">
+                <div key={inv.id} className="flex items-center justify-between bg-white rounded-[4px] px-3 py-2 text-sm">
                   <div>
                     <span className="font-medium">{inv.pharmacyName}</span>
                     <span className="text-muted-foreground ml-2">{inv.email}</span>
@@ -167,7 +167,7 @@ export default function BranchesPage() {
           <select
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}
-            className="flex h-10 rounded-lg border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+            className="flex h-10 rounded-[4px] border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
           >
             <option value="all">All Statuses</option>
             <option value="active">Active</option>
@@ -176,11 +176,11 @@ export default function BranchesPage() {
         </div>
 
         {/* Table */}
-        <div className="bg-card border rounded-lg overflow-hidden">
+        <div className="bg-card border rounded-[4px] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full table-auto">
               <thead>
-                <tr className="bg-gradient-to-r from-teal-600 to-teal-700 border-b-2 border-teal-800">
+                <tr className="bg-[#516057] border-b-2 border-[#516057]">
                   <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Branch</th>
                   <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider hidden md:table-cell">Email</th>
                   <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Status</th>
@@ -191,20 +191,20 @@ export default function BranchesPage() {
               </thead>
               <tbody>
                 {isLoading ? (
-                  <tr><td colSpan={6} className="text-center py-12 text-sm text-gray-600"><Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" />Loading...</td></tr>
+                  <tr><td colSpan={6} className="text-center py-12 text-sm text-[#505454]"><Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" />Loading...</td></tr>
                 ) : branches.length === 0 ? (
-                  <tr><td colSpan={6} className="text-center py-12 text-sm text-gray-600">
+                  <tr><td colSpan={6} className="text-center py-12 text-sm text-[#505454]">
                     <Building2 className="h-8 w-8 mx-auto mb-2 opacity-40" />
                     No branches found
                   </td></tr>
                 ) : (
                   branches.map((b, idx) => (
-                    <tr key={b.id} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-teal-50/40'} hover:bg-teal-50 transition-colors border-b border-gray-100 cursor-pointer`} onClick={() => router.push(`/branches/${b.id}`)}>
+                    <tr key={b.id} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]/40'} hover:bg-[#f5f2f1] transition-colors border-b border-[#f3f4f6] cursor-pointer`} onClick={() => router.push(`/branches/${b.id}`)}>
                       <td className="px-4 py-3">
-                        <div className="text-sm text-gray-900 font-medium">{b.pharmacyName}</div>
-                        <div className="text-xs text-gray-600 md:hidden">{b.email}</div>
+                        <div className="text-sm text-[#000000] font-medium">{b.pharmacyName}</div>
+                        <div className="text-xs text-[#505454] md:hidden">{b.email}</div>
                       </td>
-                      <td className="px-4 py-3 hidden md:table-cell text-sm text-gray-600">{b.email}</td>
+                      <td className="px-4 py-3 hidden md:table-cell text-sm text-[#505454]">{b.email}</td>
                       <td className="px-4 py-3">
                         <Badge variant={b.status === 'active' ? 'success' : 'warning'}>
                           {b.status}
@@ -217,9 +217,9 @@ export default function BranchesPage() {
                               <Badge key={r.roleId} variant="info">{r.roleName}</Badge>
                             ))}
                           </div>
-                        ) : <span className="text-gray-600 text-xs">No roles</span>}
+                        ) : <span className="text-[#505454] text-xs">No roles</span>}
                       </td>
-                      <td className="px-4 py-3 hidden lg:table-cell text-sm text-gray-600">
+                      <td className="px-4 py-3 hidden lg:table-cell text-sm text-[#505454]">
                         {new Date(b.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-4 py-3 text-right">
@@ -229,7 +229,7 @@ export default function BranchesPage() {
                             onClick={(e) => {
                               setActionMenuId(actionMenuId === b.id ? null : b.id)
                             }}
-                            className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded transition-colors"
+                            className="p-1.5 text-[#9ca3af] hover:text-[#516057] hover:bg-[#f5f2f1] rounded transition-colors"
                           >
                             <MoreVertical className="h-4 w-4" />
                           </button>
@@ -263,7 +263,7 @@ export default function BranchesPage() {
           <>
             <div className="fixed inset-0 z-40" onClick={() => setActionMenuId(null)} />
             <div 
-              className="fixed w-40 bg-white border border-gray-200 rounded-lg shadow-xl z-50"
+              className="fixed w-40 bg-white border border-[#e2e2e2] rounded-[4px] shadow-xl z-50"
               style={{
                 top: (() => {
                   const btn = document.getElementById(`menu-btn-${actionMenuId}`)
@@ -288,11 +288,11 @@ export default function BranchesPage() {
                   <div key={b.id}>
                     <button
                       onClick={() => { router.push(`/branches/${b.id}`); setActionMenuId(null) }}
-                      className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors rounded-t-lg"
+                      className="w-full text-left px-4 py-2.5 text-sm hover:bg-[#f5f2f1] transition-colors rounded-t-lg"
                     >View Details</button>
                     <button
                       onClick={() => handleStatusToggle(b)}
-                      className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors rounded-b-lg ${b.status === 'active' ? 'text-amber-600 font-medium' : 'text-emerald-600 font-medium'}`}
+                      className={`w-full text-left px-4 py-2.5 text-sm hover:bg-[#f5f2f1] transition-colors rounded-b-lg ${b.status === 'active' ? 'text-amber-600 font-medium' : 'text-[#516057] font-medium'}`}
                     >{b.status === 'active' ? 'Suspend' : 'Activate'}</button>
                   </div>
                 ) : null

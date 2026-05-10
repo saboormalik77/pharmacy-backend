@@ -129,14 +129,14 @@ function CreatePackagePageContent() {
     <DashboardLayout>
       <div className="space-y-3">
         {/* Professional Medical Header */}
-        <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-teal-50 via-cyan-50 to-teal-50 border-2 border-teal-200">
+        <div className="flex items-center justify-between p-4 rounded-[4px] bg-[#f5f2f1] border-2 border-[#e2e2e2]">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-teal-100">
-              <Package className="h-5 w-5 text-teal-600" />
+            <div className="p-2 rounded-[4px] bg-[#f5f2f1]">
+              <Package className="h-5 w-5 text-[#516057]" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Create Expired Medication Package</h1>
-              <p className="text-xs text-gray-600 mt-0.5">Package expired medications for warehouse disposal</p>
+              <h1 className="text-xl font-bold text-[#000000]">Create Expired Medication Package</h1>
+              <p className="text-xs text-[#505454] mt-0.5">Package expired medications for warehouse disposal</p>
             </div>
           </div>
           <Button variant="outline" size="sm" className="bg-white" onClick={() => router.back()}>
@@ -157,21 +157,21 @@ function CreatePackagePageContent() {
         )}
 
         {/* Professional Info */}
-        <div className="p-3 rounded-lg border-2 border-cyan-200 bg-gradient-to-br from-cyan-50 to-teal-50 text-xs">
+        <div className="p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1] text-xs">
           <div className="flex items-start gap-2">
-            <div className="p-1.5 rounded-lg bg-cyan-100">
-              <Info className="h-4 w-4 text-cyan-600" />
+            <div className="p-1.5 rounded-[4px] bg-[#f5f2f1]">
+              <Info className="h-4 w-4 text-[#516057]" />
             </div>
             <div>
-              <p className="font-bold text-cyan-900 mb-1">FDA Compliance Notice</p>
-              <p className="text-cyan-800">Expired medications must be properly packaged and sent to authorized warehouse facilities for destruction per FDA regulations (21 CFR Part 1317).</p>
+              <p className="font-bold text-[#000000] mb-1">FDA Compliance Notice</p>
+              <p className="text-[#505454]">Expired medications must be properly packaged and sent to authorized warehouse facilities for destruction per FDA regulations (21 CFR Part 1317).</p>
             </div>
           </div>
         </div>
 
         {/* Professional Package Summary */}
         {selectedItems.size > 0 && (
-          <Card className="border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50">
+          <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1]">
             <CardContent className="p-3">
               <div className="flex items-center justify-between">
                 <div>
@@ -188,24 +188,24 @@ function CreatePackagePageContent() {
         )}
 
             {/* Professional Table */}
-            <Card className="border-2 border-teal-200 bg-gradient-to-br from-white to-teal-50/30">
+            <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1]">
               <CardContent className="p-3">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-teal-100">
-                      <Package className="h-4 w-4 text-teal-600" />
+                    <div className="p-1.5 rounded-[4px] bg-[#f5f2f1]">
+                      <Package className="h-4 w-4 text-[#516057]" />
                     </div>
-                    <h3 className="font-bold text-base text-gray-900">Expired Items ({inventory.length})</h3>
+                    <h3 className="font-bold text-base text-[#000000]">Expired Items ({inventory.length})</h3>
                   </div>
                   {selectedItems.size > 0 && (
-                    <Button size="sm" onClick={createPackage} disabled={loading} className="bg-emerald-600 hover:bg-emerald-700 text-white border-0">
+                    <Button size="sm" onClick={createPackage} disabled={loading} className="bg-[#516057] hover:bg-[#505454] text-white border-0">
                       <Truck className="mr-1 h-3 w-3" />
                       Create Package ({selectedItems.size})
                     </Button>
                   )}
                 </div>
                 {inventory.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500 text-sm bg-gray-50 rounded-lg">
+                  <div className="text-center py-8 text-[#6b7280] text-sm bg-[#f5f2f1] rounded-[4px]">
                     <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
                     <p>No expired items found</p>
                   </div>
@@ -213,8 +213,8 @@ function CreatePackagePageContent() {
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs">
                       <thead>
-                        <tr className="bg-gradient-to-r from-teal-100 to-cyan-100 border-b-2 border-teal-200">
-                          <th className="text-left p-2 font-bold text-teal-900 w-6">
+                        <tr className="bg-[#f5f2f1] border-b-2 border-[#e2e2e2]">
+                          <th className="text-left p-2 font-bold text-[#000000] w-6">
                         <input type="checkbox" onChange={(e) => {
                           if (e.target.checked) {
                             const newMap = new Map<string, number>();
@@ -225,14 +225,14 @@ function CreatePackagePageContent() {
                           }
                         }} />
                       </th>
-                          <th className="text-left p-2 font-bold text-teal-900">Product</th>
-                          <th className="text-left p-2 font-bold text-teal-900">NDC</th>
-                          <th className="text-left p-2 font-bold text-teal-900">Lot</th>
-                          <th className="text-left p-2 font-bold text-teal-900">Qty</th>
-                          <th className="text-left p-2 font-bold text-teal-900">Expired</th>
-                          <th className="text-left p-2 font-bold text-teal-900">Days</th>
-                          <th className="text-left p-2 font-bold text-teal-900">Location</th>
-                          <th className="text-left p-2 font-bold text-teal-900">Select Qty</th>
+                          <th className="text-left p-2 font-bold text-[#000000]">Product</th>
+                          <th className="text-left p-2 font-bold text-[#000000]">NDC</th>
+                          <th className="text-left p-2 font-bold text-[#000000]">Lot</th>
+                          <th className="text-left p-2 font-bold text-[#000000]">Qty</th>
+                          <th className="text-left p-2 font-bold text-[#000000]">Expired</th>
+                          <th className="text-left p-2 font-bold text-[#000000]">Days</th>
+                          <th className="text-left p-2 font-bold text-[#000000]">Location</th>
+                          <th className="text-left p-2 font-bold text-[#000000]">Select Qty</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -240,38 +240,38 @@ function CreatePackagePageContent() {
                       const isSelected = selectedItems.has(item.id);
                       const selectedQuantity = selectedItems.get(item.id) || 0;
                       return (
-                            <tr key={item.id} className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} ${isSelected ? 'bg-teal-50 border-teal-200' : ''} hover:bg-teal-50 transition-colors`}>
+                            <tr key={item.id} className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]/50'} ${isSelected ? 'bg-[#f5f2f1] border-[#e2e2e2]' : ''} hover:bg-[#f5f2f1] transition-colors`}>
                           <td className="p-2">
                             <input type="checkbox" checked={isSelected} onChange={() => toggleItem(item)} />
                           </td>
                           <td className="p-2">
-                            <div className="font-semibold text-gray-900">{item.product.proprietaryName || item.product.nonProprietaryName}</div>
-                            <div className="text-gray-600 text-xs">{item.product.manufacturerName}</div>
+                            <div className="font-semibold text-[#000000]">{item.product.proprietaryName || item.product.nonProprietaryName}</div>
+                            <div className="text-[#505454] text-xs">{item.product.manufacturerName}</div>
                           </td>
-                          <td className="p-2 font-mono text-gray-700">{item.product.ndc}</td>
-                          <td className="p-2 text-gray-700">{item.lotNumber}</td>
+                          <td className="p-2 font-mono text-[#505454]">{item.product.ndc}</td>
+                          <td className="p-2 text-[#505454]">{item.lotNumber}</td>
                               <td className="p-2">
                                 <span className="px-2 py-0.5 rounded bg-red-100 text-red-700 font-medium">
                                   {item.quantity} {item.product.packageUnit}
                                 </span>
                               </td>
-                              <td className="p-2 text-gray-700">{formatDate(item.expirationDate)}</td>
+                              <td className="p-2 text-[#505454]">{formatDate(item.expirationDate)}</td>
                               <td className="p-2 font-bold text-red-600">{Math.abs(item.daysUntilExpiration)} days</td>
-                          <td className="p-2 text-gray-600">{item.location || '-'}</td>
+                          <td className="p-2 text-[#505454]">{item.location || '-'}</td>
                           <td className="p-2">
                             {isSelected ? (
                               <div className="flex items-center gap-1">
-                                    <Button variant="outline" size="sm" className="h-5 w-5 p-0 border-teal-300 hover:bg-teal-50" onClick={() => handleQuantityChange(item.id, selectedQuantity - 1)} disabled={selectedQuantity <= 1}>
+                                    <Button variant="outline" size="sm" className="h-5 w-5 p-0 border-[#e2e2e2] hover:bg-[#f5f2f1]" onClick={() => handleQuantityChange(item.id, selectedQuantity - 1)} disabled={selectedQuantity <= 1}>
                                       <Minus className="h-3 w-3" />
                                     </Button>
-                                    <Input type="number" value={selectedQuantity} onChange={(e) => handleQuantityChange(item.id, parseInt(e.target.value) || 0)} min="1" max={item.availableQuantity} className="w-12 h-5 text-center text-xs border-teal-200" />
-                                    <Button variant="outline" size="sm" className="h-5 w-5 p-0 border-teal-300 hover:bg-teal-50" onClick={() => handleQuantityChange(item.id, selectedQuantity + 1)} disabled={selectedQuantity >= item.availableQuantity}>
+                                    <Input type="number" value={selectedQuantity} onChange={(e) => handleQuantityChange(item.id, parseInt(e.target.value) || 0)} min="1" max={item.availableQuantity} className="w-12 h-5 text-center text-xs border-[#e2e2e2]" />
+                                    <Button variant="outline" size="sm" className="h-5 w-5 p-0 border-[#e2e2e2] hover:bg-[#f5f2f1]" onClick={() => handleQuantityChange(item.id, selectedQuantity + 1)} disabled={selectedQuantity >= item.availableQuantity}>
                                   <Plus className="h-3 w-3" />
                                 </Button>
-                                <span className="text-xs text-gray-500 ml-1">/ {item.availableQuantity}</span>
+                                <span className="text-xs text-[#6b7280] ml-1">/ {item.availableQuantity}</span>
                               </div>
                             ) : (
-                              <span className="text-gray-400 text-xs">-</span>
+                              <span className="text-[#9ca3af] text-xs">-</span>
                             )}
                           </td>
                         </tr>
@@ -294,8 +294,8 @@ function CreatePackagePageContent() {
 
             {/* Professional Actions */}
             <div className="flex justify-end gap-2">
-              <Button variant="outline" size="sm" className="border-gray-300 hover:bg-gray-100" onClick={() => router.back()}>Cancel</Button>
-              <Button size="sm" onClick={createPackage} disabled={selectedItems.size === 0 || loading} className="bg-emerald-600 hover:bg-emerald-700 text-white border-0">
+              <Button variant="outline" size="sm" className="border-[#e2e2e2] hover:bg-[#f5f2f1]" onClick={() => router.back()}>Cancel</Button>
+              <Button size="sm" onClick={createPackage} disabled={selectedItems.size === 0 || loading} className="bg-[#516057] hover:bg-[#505454] text-white border-0">
             {loading ? 'Creating...' : (
               <>
                 <Truck className="mr-1 h-3 w-3" />
@@ -315,8 +315,8 @@ export default function CreatePackagePage() {
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
           <div className="flex flex-col items-center gap-3">
-            <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
-            <p className="text-sm text-gray-600">Loading...</p>
+            <Loader2 className="h-8 w-8 animate-spin text-[#516057]" />
+            <p className="text-sm text-[#505454]">Loading...</p>
           </div>
         </div>
       </DashboardLayout>

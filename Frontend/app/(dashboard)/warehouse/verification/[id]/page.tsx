@@ -332,7 +332,7 @@ export default function VerificationSessionPage() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center py-24">
-          <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#516057]" />
         </div>
       </DashboardLayout>
     );
@@ -345,26 +345,26 @@ export default function VerificationSessionPage() {
         <div className="space-y-4 max-w-lg mx-auto mt-8">
           <Link
             href="/warehouse/verification"
-            className="inline-flex items-center gap-1 text-sm text-teal-600 hover:underline"
+            className="inline-flex items-center gap-1 text-sm text-[#516057] hover:underline"
           >
             <ArrowLeft className="h-4 w-4" /> Back to list
           </Link>
-          <Card className="border-2 border-teal-200">
+          <Card className="border-2 border-[#e2e2e2]">
             <CardContent className="p-6 space-y-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-teal-100">
-                  <BoxIcon className="h-5 w-5 text-teal-600" />
+                <div className="p-2 rounded-[4px] bg-[#f5f2f1]">
+                  <BoxIcon className="h-5 w-5 text-[#516057]" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-gray-900">
+                  <h2 className="text-lg font-bold text-[#000000]">
                     Start Verification
                   </h2>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-[#6b7280]">
                     How many boxes did you physically receive?
                   </p>
                   {summary.transaction?.boxCount != null &&
                     Number(summary.transaction.boxCount) > 0 && (
-                      <p className="text-xs text-gray-600 mt-1">
+                      <p className="text-xs text-[#505454] mt-1">
                         Expected on return manifest:{" "}
                         <span className="font-semibold">
                           {summary.transaction.boxCount}
@@ -380,10 +380,10 @@ export default function VerificationSessionPage() {
                 placeholder="Enter box count..."
                 value={boxCount}
                 onChange={(e) => setBoxCount(e.target.value)}
-                className="border-teal-200"
+                className="border-[#e2e2e2]"
               />
               {boxResult && !boxResult.boxCountMatch && (
-                <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+                <div className="p-3 rounded-[4px] bg-amber-50 border border-amber-200 text-amber-800 text-sm">
                   <AlertTriangle className="h-4 w-4 inline mr-1" />
                   Expected {boxResult.expectedBoxes} boxes, you received{" "}
                   {boxResult.receivedBoxes} — a discrepancy has been
@@ -391,7 +391,7 @@ export default function VerificationSessionPage() {
                 </div>
               )}
               <Button
-                className="w-full bg-teal-600 hover:bg-teal-700"
+                className="w-full bg-[#516057] hover:bg-[#505454]"
                 disabled={startingVerification || !boxCount}
                 onClick={handleStartVerification}
               >
@@ -415,14 +415,14 @@ export default function VerificationSessionPage() {
           <Card className="border-2 border-green-200">
             <CardContent className="p-6 space-y-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-green-100">
+                <div className="p-2 rounded-[4px] bg-green-100">
                   <CheckCircle className="h-6 w-6 text-green-600" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-gray-900">
+                  <h2 className="text-lg font-bold text-[#000000]">
                     Verification Complete
                   </h2>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-[#6b7280]">
                     Summary of verification results
                   </p>
                 </div>
@@ -432,7 +432,7 @@ export default function VerificationSessionPage() {
                   {
                     label: "Total Items",
                     value: completeSummary.totalItems,
-                    color: "text-gray-900",
+                    color: "text-[#000000]",
                   },
                   {
                     label: "Correct",
@@ -447,7 +447,7 @@ export default function VerificationSessionPage() {
                   {
                     label: "Missing",
                     value: completeSummary.missingItems,
-                    color: "text-gray-500",
+                    color: "text-[#6b7280]",
                   },
                   {
                     label: "Wrong Items",
@@ -462,15 +462,15 @@ export default function VerificationSessionPage() {
                 ].map((s) => (
                   <div
                     key={s.label}
-                    className="p-3 rounded-lg border bg-gray-50"
+                    className="p-3 rounded-[4px] border bg-[#f5f2f1]"
                   >
-                    <p className="text-xs text-gray-500">{s.label}</p>
+                    <p className="text-xs text-[#6b7280]">{s.label}</p>
                     <p className={`text-xl font-bold ${s.color}`}>{s.value ?? 0}</p>
                   </div>
                 ))}
               </div>
               {completeSummary.correctItemsValue != null && (
-                <div className="p-3 rounded-lg bg-green-50 border border-green-200 text-center">
+                <div className="p-3 rounded-[4px] bg-green-50 border border-green-200 text-center">
                   <p className="text-xs text-green-700">Correct Items Value</p>
                   <p className="text-2xl font-bold text-green-900">
                     {formatCurrency(completeSummary.correctItemsValue)}
@@ -478,19 +478,19 @@ export default function VerificationSessionPage() {
                 </div>
               )}
               {(completeSummary.excludedFromBatch ?? 0) > 0 && (
-                <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 text-sm flex items-start gap-2">
+                <div className="p-3 rounded-[4px] bg-blue-50 border border-blue-200 text-blue-800 text-sm flex items-start gap-2">
                   <Package className="h-4 w-4 flex-shrink-0 mt-0.5" />
                   <span>{completeSummary.excludedFromBatch} non-correct item(s) have been excluded from batching and will not appear in debit memos.</span>
                 </div>
               )}
               {completeSummary.openDiscrepancies > 0 && (
-                <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+                <div className="p-3 rounded-[4px] bg-amber-50 border border-amber-200 text-amber-800 text-sm">
                   <AlertTriangle className="h-4 w-4 inline mr-1" />
                   {completeSummary.openDiscrepancies} open discrepancies remain.
                 </div>
               )}
               <Link href="/warehouse/verification">
-                <Button className="w-full bg-teal-600 hover:bg-teal-700 mt-2">
+                <Button className="w-full bg-[#516057] hover:bg-[#505454] mt-2">
                   <ArrowLeft className="h-4 w-4 mr-2" /> Back to Received List
                 </Button>
               </Link>
@@ -504,7 +504,7 @@ export default function VerificationSessionPage() {
   if (!summary) {
     return (
       <DashboardLayout>
-        <div className="text-center py-16 text-gray-500">
+        <div className="text-center py-16 text-[#6b7280]">
           <p>Could not load verification data.</p>
           <Link href="/warehouse/verification">
             <Button variant="outline" className="mt-4">
@@ -531,11 +531,11 @@ export default function VerificationSessionPage() {
       case "damaged":
         return "bg-red-100 text-red-700 border-red-300";
       case "missing":
-        return "bg-gray-200 text-gray-600 border-gray-400";
+        return "bg-[#e2e2e2] text-[#505454] border-gray-400";
       case "wrong_item":
         return "bg-orange-100 text-orange-700 border-orange-300";
       default:
-        return "bg-white text-gray-400 border-gray-200";
+        return "bg-white text-[#9ca3af] border-[#e2e2e2]";
     }
   };
 
@@ -549,7 +549,7 @@ export default function VerificationSessionPage() {
       case "extra":
         return "bg-blue-100 text-blue-700";
       default:
-        return "bg-gray-100 text-gray-600";
+        return "bg-[#f5f2f1] text-[#505454]";
     }
   };
 
@@ -557,19 +557,19 @@ export default function VerificationSessionPage() {
     <DashboardLayout>
       <div className="space-y-3">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-teal-50 via-cyan-50 to-teal-50 border-2 border-teal-200">
+        <div className="flex items-center justify-between p-4 rounded-[4px] bg-[#f5f2f1] border-2 border-[#e2e2e2]">
           <div className="flex items-center gap-3">
             <Link
               href="/warehouse/verification"
-              className="p-1.5 rounded-lg hover:bg-teal-100 transition"
+              className="p-1.5 rounded-[4px] hover:bg-[#f5f2f1] transition"
             >
-              <ArrowLeft className="h-5 w-5 text-teal-600" />
+              <ArrowLeft className="h-5 w-5 text-[#516057]" />
             </Link>
             <div>
-              <h1 className="text-lg font-bold text-gray-900">
+              <h1 className="text-lg font-bold text-[#000000]">
                 Verification Session
               </h1>
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-[#505454]">
                 {summary.transaction?.licensePlate || returnId}
                 {summary.transaction?.pharmacyName &&
                   ` — ${summary.transaction.pharmacyName}`}
@@ -579,20 +579,20 @@ export default function VerificationSessionPage() {
         </div>
 
         {/* Progress */}
-        <Card className="border-2 border-teal-200">
+        <Card className="border-2 border-[#e2e2e2]">
           <CardContent className="p-3">
             <div className="flex items-center gap-3">
-              <BarChart3 className="h-4 w-4 text-teal-600" />
+              <BarChart3 className="h-4 w-4 text-[#516057]" />
               <div className="flex-1">
                 <div className="flex justify-between text-xs mb-1">
-                  <span className="font-medium text-gray-700">
+                  <span className="font-medium text-[#505454]">
                     {verified} / {counts.totalItems} items verified
                   </span>
-                  <span className="font-bold text-teal-700">{progressPct}%</span>
+                  <span className="font-bold text-[#516057]">{progressPct}%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-[#e2e2e2] rounded-full h-2">
                   <div
-                    className="bg-teal-500 h-2 rounded-full transition-all duration-300"
+                    className="bg-[#516057] h-2 rounded-full transition-all duration-300"
                     style={{ width: `${progressPct}%` }}
                   />
                 </div>
@@ -605,7 +605,7 @@ export default function VerificationSessionPage() {
               <span className="text-red-700 font-medium">
                 {counts.damaged} damaged
               </span>
-              <span className="text-gray-500 font-medium">
+              <span className="text-[#6b7280] font-medium">
                 {counts.missing} missing
               </span>
               <span className="text-orange-700 font-medium">
@@ -619,7 +619,7 @@ export default function VerificationSessionPage() {
         </Card>
 
         {/* Tabs */}
-        <div className="flex gap-2 border-b-2 border-gray-200 bg-white rounded-t-lg p-1">
+        <div className="flex gap-2 border-b-2 border-[#e2e2e2] bg-white rounded-t-lg p-1">
           {(
             [
               { key: "items" as ActiveTab, label: "Items", count: counts.totalItems },
@@ -638,10 +638,10 @@ export default function VerificationSessionPage() {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`px-3 py-1.5 text-sm font-medium rounded-lg border-2 transition-all ${
+              className={`px-3 py-1.5 text-sm font-medium rounded-[4px] border-2 transition-all ${
                 activeTab === tab.key
-                  ? "bg-teal-100 text-teal-700 border-teal-300 shadow-md"
-                  : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                  ? "bg-[#f5f2f1] text-[#516057] border-[#e2e2e2] shadow-md"
+                  : "bg-white text-[#505454] border-[#e2e2e2] hover:bg-[#f5f2f1]"
               }`}
             >
               {tab.label}{" "}
@@ -652,31 +652,31 @@ export default function VerificationSessionPage() {
 
         {/* ITEMS TAB */}
         {activeTab === "items" && (
-          <Card className="border-2 border-teal-200">
+          <Card className="border-2 border-[#e2e2e2]">
             <CardContent className="p-3">
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="bg-gradient-to-r from-teal-100 to-cyan-100 border-b-2 border-teal-200">
-                      <th className="text-left p-2 font-bold text-teal-900">
+                    <tr className="bg-[#f5f2f1] border-b-2 border-[#e2e2e2]">
+                      <th className="text-left p-2 font-bold text-[#000000]">
                         Product
                       </th>
-                      <th className="text-left p-2 font-bold text-teal-900">
+                      <th className="text-left p-2 font-bold text-[#000000]">
                         NDC
                       </th>
-                      <th className="text-left p-2 font-bold text-teal-900">
+                      <th className="text-left p-2 font-bold text-[#000000]">
                         Lot
                       </th>
-                      <th className="text-left p-2 font-bold text-teal-900">
+                      <th className="text-left p-2 font-bold text-[#000000]">
                         Exp
                       </th>
-                      <th className="text-left p-2 font-bold text-teal-900">
+                      <th className="text-left p-2 font-bold text-[#000000]">
                         Qty
                       </th>
-                      <th className="text-left p-2 font-bold text-teal-900">
+                      <th className="text-left p-2 font-bold text-[#000000]">
                         Status
                       </th>
-                      <th className="text-left p-2 font-bold text-teal-900">
+                      <th className="text-left p-2 font-bold text-[#000000]">
                         Actions
                       </th>
                     </tr>
@@ -686,24 +686,24 @@ export default function VerificationSessionPage() {
                       <tr
                         key={item.id}
                         className={`border-b ${
-                          idx % 2 === 0 ? "bg-white" : "bg-gray-50/50"
-                        } hover:bg-teal-50 transition-colors`}
+                          idx % 2 === 0 ? "bg-white" : "bg-[#f5f2f1]/50"
+                        } hover:bg-[#f5f2f1] transition-colors`}
                       >
                         <td className="p-2">
-                          <div className="font-medium text-gray-900">
+                          <div className="font-medium text-[#000000]">
                             {item.proprietaryName || item.genericName}
                           </div>
                           {item.manufacturer && (
-                            <div className="text-gray-400">
+                            <div className="text-[#9ca3af]">
                               {item.manufacturer}
                             </div>
                           )}
                         </td>
-                        <td className="p-2 font-mono text-gray-600">
+                        <td className="p-2 font-mono text-[#505454]">
                           {item.ndc}
                         </td>
-                        <td className="p-2 text-gray-600">{item.lotNumber}</td>
-                        <td className="p-2 text-gray-600">
+                        <td className="p-2 text-[#505454]">{item.lotNumber}</td>
+                        <td className="p-2 text-[#505454]">
                           {item.expirationDate
                             ? formatDate(item.expirationDate)
                             : "—"}
@@ -724,7 +724,7 @@ export default function VerificationSessionPage() {
                           {!item.verificationStatus ? (
                             <Button
                               size="sm"
-                              className="h-6 px-2 text-xs bg-teal-600 hover:bg-teal-700"
+                              className="h-6 px-2 text-xs bg-[#516057] hover:bg-[#505454]"
                               onClick={() => openVerifyItem(item)}
                             >
                               Verify
@@ -733,7 +733,7 @@ export default function VerificationSessionPage() {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="h-6 px-2 text-xs border-gray-300"
+                              className="h-6 px-2 text-xs border-[#e2e2e2]"
                               onClick={() => openVerifyItem(item)}
                             >
                               Edit
@@ -752,12 +752,12 @@ export default function VerificationSessionPage() {
         {/* VERIFY ITEM MODAL */}
         {verifyingItemId && (
           <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-            <Card className="w-full max-w-md border-2 border-teal-200">
+            <Card className="w-full max-w-md border-2 border-[#e2e2e2]">
               <CardContent className="p-5 space-y-4">
-                <h3 className="font-bold text-base text-gray-900">
+                <h3 className="font-bold text-base text-[#000000]">
                   Verify Item
                 </h3>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-[#6b7280]">
                   {items.find((i) => i.id === verifyingItemId)?.proprietaryName ||
                     items.find((i) => i.id === verifyingItemId)?.genericName}
                 </p>
@@ -782,8 +782,8 @@ export default function VerificationSessionPage() {
                         value: "missing",
                         label: "Missing",
                         icon: HelpCircle,
-                        color: "border-gray-400 bg-gray-50 text-gray-700 hover:bg-gray-100",
-                        activeColor: "border-gray-500 bg-gray-300 text-gray-900 ring-2 ring-gray-400",
+                        color: "border-gray-400 bg-[#f5f2f1] text-[#505454] hover:bg-[#f5f2f1]",
+                        activeColor: "border-gray-500 bg-gray-300 text-[#000000] ring-2 ring-gray-400",
                       },
                       {
                         value: "wrong_item",
@@ -803,7 +803,7 @@ export default function VerificationSessionPage() {
                           setVerifyStatus(opt.value);
                           if (opt.value === "missing") setVerifyActualQty("0");
                         }}
-                        className={`flex items-center gap-2 p-2.5 rounded-lg border-2 text-sm font-medium transition-all ${
+                        className={`flex items-center gap-2 p-2.5 rounded-[4px] border-2 text-sm font-medium transition-all ${
                           verifyStatus === opt.value
                             ? opt.activeColor
                             : opt.color
@@ -817,7 +817,7 @@ export default function VerificationSessionPage() {
                 </div>
                 {verifyStatus && verifyStatus !== "missing" && (
                   <div>
-                    <label className="text-xs font-medium text-gray-700">
+                    <label className="text-xs font-medium text-[#505454]">
                       Actual Quantity (if different)
                     </label>
                     <Input
@@ -832,11 +832,11 @@ export default function VerificationSessionPage() {
                 {(verifyStatus === "damaged" ||
                   verifyStatus === "wrong_item") && (
                   <div>
-                    <label className="text-xs font-medium text-gray-700">
+                    <label className="text-xs font-medium text-[#505454]">
                       Condition Notes
                     </label>
                     <textarea
-                      className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-200"
+                      className="mt-1 w-full rounded-[4px] border border-[#e2e2e2] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#e2e2e2]"
                       rows={2}
                       placeholder="Describe the issue..."
                       value={verifyNotes}
@@ -854,7 +854,7 @@ export default function VerificationSessionPage() {
                   </Button>
                   <Button
                     size="sm"
-                    className="bg-teal-600 hover:bg-teal-700"
+                    className="bg-[#516057] hover:bg-[#505454]"
                     disabled={!verifyStatus || submittingVerify}
                     onClick={handleVerifyItem}
                   >
@@ -886,12 +886,12 @@ export default function VerificationSessionPage() {
             {showSurplusForm && (
               <Card className="border-2 border-blue-200">
                 <CardContent className="p-4 space-y-3">
-                  <h3 className="font-bold text-sm text-gray-900">
+                  <h3 className="font-bold text-sm text-[#000000]">
                     Add Surplus Item
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs font-medium text-gray-700">
+                      <label className="text-xs font-medium text-[#505454]">
                         NDC
                       </label>
                       <Input
@@ -904,7 +904,7 @@ export default function VerificationSessionPage() {
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-gray-700">
+                      <label className="text-xs font-medium text-[#505454]">
                         Product Name
                       </label>
                       <Input
@@ -919,7 +919,7 @@ export default function VerificationSessionPage() {
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-gray-700">
+                      <label className="text-xs font-medium text-[#505454]">
                         Manufacturer
                       </label>
                       <Input
@@ -934,7 +934,7 @@ export default function VerificationSessionPage() {
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-gray-700">
+                      <label className="text-xs font-medium text-[#505454]">
                         Lot Number
                       </label>
                       <Input
@@ -949,7 +949,7 @@ export default function VerificationSessionPage() {
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-gray-700">
+                      <label className="text-xs font-medium text-[#505454]">
                         Expiration Date
                       </label>
                       <Input
@@ -965,7 +965,7 @@ export default function VerificationSessionPage() {
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-gray-700">
+                      <label className="text-xs font-medium text-[#505454]">
                         Quantity
                       </label>
                       <Input
@@ -982,7 +982,7 @@ export default function VerificationSessionPage() {
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-gray-700">
+                      <label className="text-xs font-medium text-[#505454]">
                         Warehouse Location *
                       </label>
                       <Input
@@ -998,7 +998,7 @@ export default function VerificationSessionPage() {
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-gray-700">
+                      <label className="text-xs font-medium text-[#505454]">
                         Condition
                       </label>
                       <select
@@ -1009,7 +1009,7 @@ export default function VerificationSessionPage() {
                             condition: e.target.value,
                           }))
                         }
-                        className="mt-1 w-full h-10 rounded-lg border border-gray-300 px-3 text-sm"
+                        className="mt-1 w-full h-10 rounded-[4px] border border-[#e2e2e2] px-3 text-sm"
                       >
                         <option value="good">Good</option>
                         <option value="damaged">Damaged</option>
@@ -1018,11 +1018,11 @@ export default function VerificationSessionPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-gray-700">
+                    <label className="text-xs font-medium text-[#505454]">
                       Notes
                     </label>
                     <textarea
-                      className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+                      className="mt-1 w-full rounded-[4px] border border-[#e2e2e2] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
                       rows={2}
                       value={surplusForm.notes}
                       onChange={(e) =>
@@ -1058,14 +1058,14 @@ export default function VerificationSessionPage() {
             <Card className="border-2 border-blue-200">
               <CardContent className="p-3">
                 {surplus.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500 text-sm">
+                  <div className="text-center py-8 text-[#6b7280] text-sm">
                     No surplus items recorded yet
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs">
                       <thead>
-                        <tr className="bg-gradient-to-r from-blue-100 to-cyan-100 border-b-2 border-blue-200">
+                        <tr className="bg-[#f5f2f1] border-b-2 border-blue-200">
                           <th className="text-left p-2 font-bold text-blue-900">
                             Product
                           </th>
@@ -1091,20 +1091,20 @@ export default function VerificationSessionPage() {
                           <tr
                             key={s.id}
                             className={`border-b ${
-                              idx % 2 === 0 ? "bg-white" : "bg-gray-50/50"
+                              idx % 2 === 0 ? "bg-white" : "bg-[#f5f2f1]/50"
                             }`}
                           >
-                            <td className="p-2 font-medium text-gray-900">
+                            <td className="p-2 font-medium text-[#000000]">
                               {s.productName || "—"}
                             </td>
-                            <td className="p-2 font-mono text-gray-600">
+                            <td className="p-2 font-mono text-[#505454]">
                               {s.ndc || "—"}
                             </td>
-                            <td className="p-2 text-gray-600">
+                            <td className="p-2 text-[#505454]">
                               {s.lotNumber || "—"}
                             </td>
                             <td className="p-2 font-medium">{s.quantity}</td>
-                            <td className="p-2 text-gray-600">
+                            <td className="p-2 text-[#505454]">
                               {s.warehouseLocation}
                             </td>
                             <td className="p-2">
@@ -1114,7 +1114,7 @@ export default function VerificationSessionPage() {
                                     ? "bg-green-100 text-green-700"
                                     : s.condition === "damaged"
                                     ? "bg-red-100 text-red-700"
-                                    : "bg-gray-100 text-gray-600"
+                                    : "bg-[#f5f2f1] text-[#505454]"
                                 }`}
                               >
                                 {s.condition}
@@ -1136,7 +1136,7 @@ export default function VerificationSessionPage() {
           <Card className="border-2 border-amber-200">
             <CardContent className="p-3">
               {discrepancies.length === 0 ? (
-                <div className="text-center py-8 text-gray-500 text-sm">
+                <div className="text-center py-8 text-[#6b7280] text-sm">
                   No discrepancies recorded
                 </div>
               ) : (
@@ -1169,7 +1169,7 @@ export default function VerificationSessionPage() {
                         <tr
                           key={d.id}
                           className={`border-b ${
-                            idx % 2 === 0 ? "bg-white" : "bg-gray-50/50"
+                            idx % 2 === 0 ? "bg-white" : "bg-[#f5f2f1]/50"
                           }`}
                         >
                           <td className="p-2">
@@ -1179,7 +1179,7 @@ export default function VerificationSessionPage() {
                               {d.type}
                             </Badge>
                           </td>
-                          <td className="p-2 text-gray-900">
+                          <td className="p-2 text-[#000000]">
                             {d.productName || d.ndc || "—"}
                           </td>
                           <td className="p-2 font-medium">
@@ -1204,7 +1204,7 @@ export default function VerificationSessionPage() {
                               resolvingId === d.id ? (
                                 <div className="space-y-2">
                                   <textarea
-                                    className="w-full rounded border border-gray-300 px-2 py-1 text-xs"
+                                    className="w-full rounded border border-[#e2e2e2] px-2 py-1 text-xs"
                                     rows={2}
                                     placeholder="Resolution notes..."
                                     value={resolveNotes}
@@ -1228,7 +1228,7 @@ export default function VerificationSessionPage() {
                                     </Button>
                                     <Button
                                       size="sm"
-                                      className="h-5 px-2 text-[10px] bg-gray-500 hover:bg-gray-600"
+                                      className="h-5 px-2 text-[10px] bg-[#f5f2f1]0 hover:bg-gray-600"
                                       disabled={submittingResolve}
                                       onClick={() =>
                                         handleResolveDiscrepancy(
@@ -1264,7 +1264,7 @@ export default function VerificationSessionPage() {
                                 </Button>
                               )
                             ) : (
-                              <span className="text-xs text-gray-400">
+                              <span className="text-xs text-[#9ca3af]">
                                 {d.resolution}
                                 {d.resolutionNotes && ` — ${d.resolutionNotes}`}
                               </span>
@@ -1291,11 +1291,11 @@ export default function VerificationSessionPage() {
             </CardContent>
           </Card>
         ) : (
-          <Card className="border-2 border-teal-200">
+          <Card className="border-2 border-[#e2e2e2]">
             <CardContent className="p-4">
               {showCompleteConfirm ? (
                 <div className="space-y-3">
-                  <h3 className="font-bold text-sm text-gray-900">
+                  <h3 className="font-bold text-sm text-[#000000]">
                     Confirm Complete Verification
                   </h3>
                   <div className="grid grid-cols-3 gap-2 text-xs">
@@ -1307,17 +1307,17 @@ export default function VerificationSessionPage() {
                       <span className="text-red-700">Damaged:</span>{" "}
                       <strong>{counts.damaged}</strong>
                     </div>
-                    <div className="p-2 bg-gray-50 rounded border border-gray-200">
-                      <span className="text-gray-600">Missing:</span>{" "}
+                    <div className="p-2 bg-[#f5f2f1] rounded border border-[#e2e2e2]">
+                      <span className="text-[#505454]">Missing:</span>{" "}
                       <strong>{counts.missing}</strong>
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-gray-700">
+                    <label className="text-xs font-medium text-[#505454]">
                       Completion Notes (optional)
                     </label>
                     <textarea
-                      className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-200"
+                      className="mt-1 w-full rounded-[4px] border border-[#e2e2e2] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#e2e2e2]"
                       rows={2}
                       value={completeNotes}
                       onChange={(e) => setCompleteNotes(e.target.value)}
@@ -1347,7 +1347,7 @@ export default function VerificationSessionPage() {
                 </div>
               ) : (
                 <div className="flex items-center justify-between">
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-[#6b7280]">
                     {counts.unverified > 0
                       ? `${counts.unverified} items still unverified`
                       : "All items verified — ready to complete"}

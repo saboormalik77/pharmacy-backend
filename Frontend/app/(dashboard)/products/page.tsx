@@ -1016,12 +1016,12 @@ export default function ProductsPage() {
       <PermissionGuard permission="products:view">
       <div className="space-y-3 sm:space-y-4">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:py-2 sm:px-4 rounded-lg bg-gradient-to-r from-teal-50 via-cyan-50 to-teal-50 border-2 border-teal-200">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:py-2 sm:px-4 rounded-[4px] bg-[#f5f2f1] border-2 border-[#e2e2e2]">
           <div>
-            <h1 className="text-lg sm:text-md font-bold text-gray-900">
+            <h1 className="text-lg sm:text-md font-bold text-[#000000]">
               My Products
             </h1>
-            {/* <p className="text-xs sm:text-sm text-gray-600 mt-0.5">
+            {/* <p className="text-xs sm:text-sm text-[#505454] mt-0.5">
               Manage products for return optimization
             </p> */}
           </div>
@@ -1033,7 +1033,7 @@ export default function ProductsPage() {
                 setEntryMode("initial");
                 setActiveTab("scan");
               }}
-            className="mt-3 sm:mt-0 px-2 py-1 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
+            className="mt-3 sm:mt-0 px-2 py-1 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
           >
             <Plus className="h-3 w-3" />
             <span>Add Product</span>
@@ -1072,7 +1072,7 @@ export default function ProductsPage() {
         )}
 
         {/* Products Table - First Section */}
-        <Card className="border-2 border-teal-200">
+        <Card className="border-2 border-[#e2e2e2]">
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
@@ -1083,7 +1083,7 @@ export default function ProductsPage() {
               </div>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                 <div className="relative w-full sm:w-auto">
-                  <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9ca3af]" />
                   <Input
                     placeholder="Search products..."
                     value={searchQuery}
@@ -1096,7 +1096,7 @@ export default function ProductsPage() {
                     <button
                       onClick={() => setShowClearAllModal(true)}
                       disabled={loading.clearAll || loading.products}
-                      className="px-2 py-1 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs flex-1 sm:flex-initial"
+                      className="px-2 py-1 border border-red-300 text-red-700 rounded-[4px] hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs flex-1 sm:flex-initial"
                     >
                       <Trash2 className="h-3 w-3" />
                       <span className="hidden sm:inline">Clear All</span>
@@ -1107,7 +1107,7 @@ export default function ProductsPage() {
                       className="flex-1 sm:flex-initial"
                     >
                       <button
-                        className="w-full sm:w-auto px-2 py-1 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
+                        className="w-full sm:w-auto px-2 py-1 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
                       >
                         <Search className="h-3 w-3" />
                         <span className="sm:inline">Search</span>
@@ -1120,17 +1120,17 @@ export default function ProductsPage() {
             <div className="flex center justify-center gap-2 pt-2">
               <button
                 onClick={() => setExpirationFilter("all")}
-                className={`px-2 py-1 rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs ${
+                className={`px-2 py-1 rounded-[4px] hover:bg-[#505454] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs ${
                   expirationFilter === "all"
-                    ? "bg-teal-600 text-white"
-                    : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                    ? "bg-[#516057] text-white"
+                    : "bg-white border border-[#e2e2e2] text-[#505454] hover:bg-[#f5f2f1]"
                 }`}
               >
                 All
               </button>
               <button
                 onClick={() => setExpirationFilter("expired")}
-                className={`px-2 py-1 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs ${
+                className={`px-2 py-1 rounded-[4px] hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs ${
                   expirationFilter === "expired"
                     ? "bg-red-600 text-white"
                     : "bg-white border border-red-300 text-red-700 hover:bg-red-50"
@@ -1143,62 +1143,62 @@ export default function ProductsPage() {
           <CardContent>
             {loading.products ? (
               <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-teal-600" />
-                <span className="ml-2 text-xs text-gray-600">
+                <Loader2 className="h-6 w-6 animate-spin text-[#516057]" />
+                <span className="ml-2 text-xs text-[#505454]">
                   Loading products...
                 </span>
               </div>
             ) : filteredProducts.length === 0 ? (
-              <div className="text-center py-8 text-gray-500 text-xs">
+              <div className="text-center py-8 text-[#6b7280] text-xs">
                 No products yet. Add products using the button above.
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[800px]">
                   <thead>
-                    <tr className="border-b-2 border-gray-200">
-                      <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-gray-700">Product Name</th>
-                      <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-gray-700">NDC</th>
-                      <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-gray-700">Full Units</th>
-                      <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-gray-700">Partial Units</th>
-                      <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-gray-700">Recommended Distributor</th>
-                      <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-gray-700">Price per unit</th>
-                      <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-gray-700">Lot Number</th>
-                      <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-gray-700">Expiration Date</th>
-                      <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-gray-700">Actions</th>
+                    <tr className="border-b-2 border-[#e2e2e2]">
+                      <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-[#505454]">Product Name</th>
+                      <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-[#505454]">NDC</th>
+                      <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-[#505454]">Full Units</th>
+                      <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-[#505454]">Partial Units</th>
+                      <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-[#505454]">Recommended Distributor</th>
+                      <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-[#505454]">Price per unit</th>
+                      <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-[#505454]">Lot Number</th>
+                      <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-[#505454]">Expiration Date</th>
+                      <th className="text-left py-3 px-2 sm:px-4 text-xs font-semibold text-[#505454]">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredProducts.map((product: any) => (
                       <tr
                         key={product.id}
-                        className="border-b border-gray-100 hover:bg-teal-50/50 transition-colors"
+                        className="border-b border-[#f3f4f6] hover:bg-[#f5f2f1]/50 transition-colors"
                       >
                         <td className="py-3 px-2 sm:px-4">
-                          <span className="text-xs font-medium text-gray-900">{product.productName}</span>
+                          <span className="text-xs font-medium text-[#000000]">{product.productName}</span>
                         </td>
                         <td className="py-3 px-2 sm:px-4">
-                          <span className="text-xs text-gray-600 font-mono">{product.ndc}</span>
+                          <span className="text-xs text-[#505454] font-mono">{product.ndc}</span>
                         </td>
                         <td className="py-3 px-2 sm:px-4">
-                          <span className="text-xs text-gray-600">{(product as any).full_units ?? (product as any).fullUnits ?? (product as any).full ?? 0}</span>
+                          <span className="text-xs text-[#505454]">{(product as any).full_units ?? (product as any).fullUnits ?? (product as any).full ?? 0}</span>
                         </td>
                         <td className="py-3 px-2 sm:px-4">
-                          <span className="text-xs text-gray-600">{(product as any).partial_units ?? (product as any).partialUnits ?? (product as any).partial ?? 0}</span>
+                          <span className="text-xs text-[#505454]">{(product as any).partial_units ?? (product as any).partialUnits ?? (product as any).partial ?? 0}</span>
                         </td>
                         <td className="py-3 px-2 sm:px-4">
-                          <span className="text-xs text-gray-600">{product.recommendedDistributor || '-'}</span>
+                          <span className="text-xs text-[#505454]">{product.recommendedDistributor || '-'}</span>
                         </td>
                         <td className="py-3 px-2 sm:px-4">
-                          <span className="text-xs text-gray-600 font-semibold">
+                          <span className="text-xs text-[#505454] font-semibold">
                             {product.price ? formatCurrency(product.price) : '-'}
                           </span>
                         </td>
                         <td className="py-3 px-2 sm:px-4">
-                          <span className="text-xs text-gray-600">{product.lotNumber || '-'}</span>
+                          <span className="text-xs text-[#505454]">{product.lotNumber || '-'}</span>
                         </td>
                         <td className="py-3 px-2 sm:px-4">
-                          <span className="text-xs text-gray-600">
+                          <span className="text-xs text-[#505454]">
                             {product.expirationDate ? formatDate(product.expirationDate) : '-'}
                           </span>
                         </td>
@@ -1211,7 +1211,7 @@ export default function ProductsPage() {
                                 setIsAddProductModalOpen(true);
                                 setActiveTab("manual");
                               }}
-                              className="p-1 hover:bg-teal-100 rounded text-teal-600 transition-colors"
+                              className="p-1 hover:bg-[#f5f2f1] rounded text-[#516057] transition-colors"
                               title="Edit product"
                             >
                               <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -1244,27 +1244,27 @@ export default function ProductsPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => {
             resetModalState();
           }}>
-            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-white rounded-[4px] shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
               {/* Modal Header */}
-              <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
+              <div className="flex items-center justify-between p-4 border-b border-[#e2e2e2] flex-shrink-0">
                 <div className="flex-1">
-                  <h2 className="text-sm font-bold text-gray-900">
+                  <h2 className="text-sm font-bold text-[#000000]">
                     {modalStep === 1 
                       ? (editingProductId ? "Edit Product" : "Add Product")
                       : "Create Package"}
                   </h2>
                   {modalStep === 1 && entryMode !== "initial" && (
-                    <p className="text-xs text-gray-600 mt-1">
+                    <p className="text-xs text-[#505454] mt-1">
                       {entryMode === "scan" ? "Scan barcode" : "Enter product details manually"}
                     </p>
                   )}
                   {modalStep === 2 && (
                     <div className="flex items-center gap-2 mt-1">
-                      <div className="flex items-center gap-1 text-[10px] text-teal-600 font-semibold">
+                      <div className="flex items-center gap-1 text-[10px] text-[#516057] font-semibold">
                         <CheckCircle className="h-3 w-3" />
                         <span>Product Added</span>
                       </div>
-                      <ArrowRight className="h-2.5 w-2.5 text-gray-400" />
+                      <ArrowRight className="h-2.5 w-2.5 text-[#9ca3af]" />
                       <div className="flex items-center gap-1 text-[10px] text-blue-600 font-semibold">
                         <span className="w-3 h-3 rounded-full border-2 border-current flex items-center justify-center text-[8px]">2</span>
                         <span>Choose Package</span>
@@ -1276,9 +1276,9 @@ export default function ProductsPage() {
                   onClick={() => {
                     resetModalState();
                   }}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-2 hover:bg-[#f5f2f1] rounded-[4px] transition-colors"
                 >
-                  <X className="h-5 w-5 text-gray-500" />
+                  <X className="h-5 w-5 text-[#6b7280]" />
                 </button>
               </div>
 
@@ -1308,7 +1308,7 @@ export default function ProductsPage() {
                         setActiveTab("scan");
                         setShowScanner(true);
                       }}
-                      className="w-full px-2 py-1 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
+                      className="w-full px-2 py-1 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
                     >
                       <Camera className="h-3 w-3" />
                       <span>Scan Barcode</span>
@@ -1318,7 +1318,7 @@ export default function ProductsPage() {
                         setEntryMode("manual");
                         setActiveTab("manual");
                       }}
-                      className="w-full px-2 py-1 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
+                      className="w-full px-2 py-1 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
                     >
                       <Keyboard className="h-3 w-3" />
                       <span>Manual Entry</span>
@@ -1335,7 +1335,7 @@ export default function ProductsPage() {
                       setEntryMode("initial");
                       setShowScanner(false);
                     }}
-                    className="px-2 py-1 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
+                    className="px-2 py-1 bg-white border border-[#e2e2e2] text-[#505454] rounded-[4px] hover:bg-[#f5f2f1] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
                   >
                     <ArrowLeft className="h-3 w-3" />
                     <span>Back</span>
@@ -1351,32 +1351,32 @@ export default function ProductsPage() {
                     <div className="space-y-6">
                       <div>
                         <h3 className="text-xs font-semibold mb-2">Scanning Barcode</h3>
-                        <p className="text-xs text-gray-600 mb-4">Position the barcode in front of your camera</p>
+                        <p className="text-xs text-[#505454] mb-4">Position the barcode in front of your camera</p>
                       </div>
 
                       {/* Scanned Data Display */}
                       {ndcInput && isFromScan && (
-                        <div className="p-4 bg-teal-50 border border-teal-200 rounded-lg">
-                          <p className="text-xs font-medium text-gray-700 mb-3">Scanned from Barcode:</p>
+                        <div className="p-4 bg-[#f5f2f1] border border-[#e2e2e2] rounded-[4px]">
+                          <p className="text-xs font-medium text-[#505454] mb-3">Scanned from Barcode:</p>
                           <div className="space-y-2 text-xs">
                             <div>
-                              <span className="text-gray-600">NDC Code:</span>
-                              <span className="ml-2 font-mono font-bold text-teal-700">{ndcInput}</span>
+                              <span className="text-[#505454]">NDC Code:</span>
+                              <span className="ml-2 font-mono font-bold text-[#516057]">{ndcInput}</span>
                             </div>
                             {lotNumber && (
                               <div>
-                                <span className="text-gray-600">Lot Number:</span>
-                                <span className="ml-2 font-mono text-teal-700">{lotNumber}</span>
+                                <span className="text-[#505454]">Lot Number:</span>
+                                <span className="ml-2 font-mono text-[#516057]">{lotNumber}</span>
                               </div>
                             )}
                             {expirationDate && (
                               <div>
-                                <span className="text-gray-600">Expiration Date:</span>
-                                <span className="ml-2 font-mono text-teal-700">{expirationDate}</span>
+                                <span className="text-[#505454]">Expiration Date:</span>
+                                <span className="ml-2 font-mono text-[#516057]">{expirationDate}</span>
                               </div>
                             )}
                           </div>
-                          <p className="text-xs text-gray-600 mt-4">
+                          <p className="text-xs text-[#505454] mt-4">
                             Switch to "Manual Entry" tab to complete and submit the product information.
                           </p>
                         </div>
@@ -1389,7 +1389,7 @@ export default function ProductsPage() {
                     <div ref={manualEntryRef} className="space-y-6">
                     <div>
                       <h3 className="text-xs font-semibold mb-2">Manual NDC Entry</h3>
-                      <p className="text-xs text-gray-600 mb-4">Enter NDC codes manually or paste from clipboard</p>
+                      <p className="text-xs text-[#505454] mb-4">Enter NDC codes manually or paste from clipboard</p>
                     </div>
 
                     <div className="space-y-4">
@@ -1423,14 +1423,14 @@ export default function ProductsPage() {
                             />
                             {loading.ndcLookup && (
                               <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                <Loader2 className="h-4 w-4 animate-spin text-teal-600" />
+                                <Loader2 className="h-4 w-4 animate-spin text-[#516057]" />
                               </div>
                             )}
                           </div>
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="text-xs text-[#6b7280] mt-1">
                             Format: XXXXX-XXXX-XX (dashes optional)
                             {loading.ndcLookup && (
-                              <span className="ml-2 text-teal-600">Looking up product name...</span>
+                              <span className="ml-2 text-[#516057]">Looking up product name...</span>
                             )}
                           </p>
                         </div>
@@ -1469,9 +1469,9 @@ export default function ProductsPage() {
                                       setPartialUnits(0);
                                     }
                                   }}
-                                  className="w-4 h-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
+                                  className="w-4 h-4 text-[#516057] border-[#e2e2e2] rounded focus:ring-[#516057]"
                                 />
-                                <label htmlFor="fullCheckbox" className="text-xs font-medium text-gray-700">
+                                <label htmlFor="fullCheckbox" className="text-xs font-medium text-[#505454]">
                                   Full
                                 </label>
                               </div>
@@ -1507,9 +1507,9 @@ export default function ProductsPage() {
                                       setFullUnits(0);
                                     }
                                   }}
-                                  className="w-4 h-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
+                                  className="w-4 h-4 text-[#516057] border-[#e2e2e2] rounded focus:ring-[#516057]"
                                 />
-                                <label htmlFor="partialCheckbox" className="text-xs font-medium text-gray-700">
+                                <label htmlFor="partialCheckbox" className="text-xs font-medium text-[#505454]">
                                   Partial
                                 </label>
                               </div>
@@ -1586,7 +1586,7 @@ export default function ProductsPage() {
                           <div>
                             <label className="text-xs font-medium mb-2 block">Notes (Optional)</label>
                             <textarea
-                              className="w-full px-3 py-2 border border-input rounded-lg text-xs min-h-[80px]"
+                              className="w-full px-3 py-2 border border-input rounded-[4px] text-xs min-h-[80px]"
                               placeholder="Additional notes..."
                               value={notes}
                               onChange={(e) => setNotes(e.target.value)}
@@ -1599,7 +1599,7 @@ export default function ProductsPage() {
                         <div className="flex gap-3 pt-4">
                           <button
                             onClick={handleAddProduct}
-                            className="flex-1 px-2 py-1 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
+                            className="flex-1 px-2 py-1 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
                             disabled={loading.products}
                           >
                             {loading.products ? (
@@ -1621,7 +1621,7 @@ export default function ProductsPage() {
                           </button>
                           <button
                             onClick={handleClearForm}
-                            className="px-2 py-1 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
+                            className="px-2 py-1 bg-white border border-[#e2e2e2] text-[#505454] rounded-[4px] hover:bg-[#f5f2f1] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
                           >
                             Clear
                           </button>
@@ -1638,20 +1638,20 @@ export default function ProductsPage() {
                 <div className="flex-1 flex flex-col overflow-hidden">
                   {loadingPackages ? (
                     <div className="flex-1 flex flex-col items-center justify-center py-12">
-                      <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
-                      <p className="text-sm text-gray-600 mt-4">Loading package suggestions...</p>
+                      <Loader2 className="h-8 w-8 animate-spin text-[#516057]" />
+                      <p className="text-sm text-[#505454] mt-4">Loading package suggestions...</p>
                     </div>
                   ) : packageSuggestions && packageSuggestions.packages.length > 0 ? (
                     <>
                       {/* Tabs - Show if there are existing packages */}
                       {packageSuggestions.summary.packagesAlreadyCreated > 0 && (
-                        <div className="flex border-b border-gray-200 flex-shrink-0 px-6 pt-4">
+                        <div className="flex border-b border-[#e2e2e2] flex-shrink-0 px-6 pt-4">
                           <button
                             onClick={() => setActivePackageTab('existing')}
                             className={`flex-1 px-4 py-2 text-xs font-semibold transition-colors ${
                               activePackageTab === 'existing'
-                                ? 'bg-teal-50 text-teal-700 border-b-2 border-teal-600'
-                                : 'text-gray-600 hover:bg-gray-50'
+                                ? 'bg-[#f5f2f1] text-[#516057] border-b-2 border-[#516057]'
+                                : 'text-[#505454] hover:bg-[#f5f2f1]'
                             }`}
                           >
                             Existing
@@ -1660,8 +1660,8 @@ export default function ProductsPage() {
                             onClick={() => setActivePackageTab('new')}
                             className={`flex-1 px-4 py-2 text-xs font-semibold transition-colors ${
                               activePackageTab === 'new'
-                                ? 'bg-teal-50 text-teal-700 border-b-2 border-teal-600'
-                                : 'text-gray-600 hover:bg-gray-50'
+                                ? 'bg-[#f5f2f1] text-[#516057] border-b-2 border-[#516057]'
+                                : 'text-[#505454] hover:bg-[#f5f2f1]'
                             }`}
                           >
                             New
@@ -1687,14 +1687,14 @@ export default function ProductsPage() {
                           return (
                           <div
                             key={idx}
-                            className="border border-gray-300 rounded-lg p-4 bg-white hover:shadow-md transition-shadow"
+                            className="border border-[#e2e2e2] rounded-[4px] p-4 bg-white hover:shadow-md transition-shadow"
                           >
                             <div className="flex items-start justify-between mb-3">
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
-                                  <h4 className="text-sm font-semibold text-gray-900">{pkg.distributorName} {pkg.recommended && <Badge variant="success" className="text-[10px] px-1.5 py-0.5 border-2">Recommended</Badge>}</h4>
+                                  <h4 className="text-sm font-semibold text-[#000000]">{pkg.distributorName} {pkg.recommended && <Badge variant="success" className="text-[10px] px-1.5 py-0.5 border-2">Recommended</Badge>}</h4>
                                 </div>
-                                <div className="space-y-1 text-xs text-gray-600">
+                                <div className="space-y-1 text-xs text-[#505454]">
                                   {pkg.distributorContact.email && (
                                     <div className="flex items-center gap-1">
                                       <Mail className="h-3 w-3" />
@@ -1716,8 +1716,8 @@ export default function ProductsPage() {
                                 </div>
                               </div>
                               <div className="text-right">
-                                <p className="text-xs text-gray-600">Total Items</p>
-                                <p className="text-lg font-bold text-teal-600">{pkg.totalItems}</p>
+                                <p className="text-xs text-[#505454]">Total Items</p>
+                                <p className="text-lg font-bold text-[#516057]">{pkg.totalItems}</p>
                               </div>
                             </div>
 
@@ -1725,35 +1725,35 @@ export default function ProductsPage() {
                             {activePackageTab === 'existing' && pkg.alreadyCreated && pkg.existingPackage ? (
                               // Existing Package Tab - Show only existing package details
                               <div className="space-y-3">
-                                <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                                  <h5 className="text-xs font-semibold text-gray-900 mb-2">Existing Package Details</h5>
+                                <div className="p-3 bg-[#f5f2f1] border border-[#e2e2e2] rounded-[4px]">
+                                  <h5 className="text-xs font-semibold text-[#000000] mb-2">Existing Package Details</h5>
                                   <div className="grid grid-cols-2 gap-2 text-xs">
                                     <div>
-                                      <p className="text-gray-600">Package Number</p>
-                                      <p className="font-semibold text-gray-900">{pkg.existingPackage.packageNumber}</p>
+                                      <p className="text-[#505454]">Package Number</p>
+                                      <p className="font-semibold text-[#000000]">{pkg.existingPackage.packageNumber}</p>
                                     </div>
                                     <div>
-                                      <p className="text-gray-600">Current Items</p>
-                                      <p className="font-semibold text-gray-900">{pkg.existingPackage.totalItems}</p>
+                                      <p className="text-[#505454]">Current Items</p>
+                                      <p className="font-semibold text-[#000000]">{pkg.existingPackage.totalItems}</p>
                                     </div>
                                     <div>
-                                      <p className="text-gray-600">Current Value</p>
-                                      <p className="font-semibold text-gray-900">{formatCurrency(pkg.existingPackage.totalEstimatedValue)}</p>
+                                      <p className="text-[#505454]">Current Value</p>
+                                      <p className="font-semibold text-[#000000]">{formatCurrency(pkg.existingPackage.totalEstimatedValue)}</p>
                                     </div>
                                     <div>
-                                      <p className="text-gray-600">Created</p>
-                                      <p className="font-semibold text-gray-900">{new Date(pkg.existingPackage.createdAt).toLocaleDateString()}</p>
+                                      <p className="text-[#505454]">Created</p>
+                                      <p className="font-semibold text-[#000000]">{new Date(pkg.existingPackage.createdAt).toLocaleDateString()}</p>
                                     </div>
                                     {pkg.existingPackage.feeRate !== undefined && pkg.existingPackage.feeRate !== null && (
                                       <div>
-                                        <p className="text-gray-600">Fee Rate</p>
-                                        <p className="font-semibold text-gray-900">{pkg.existingPackage.feeRate}%</p>
+                                        <p className="text-[#505454]">Fee Rate</p>
+                                        <p className="font-semibold text-[#000000]">{pkg.existingPackage.feeRate}%</p>
                                       </div>
                                     )}
                                     {pkg.existingPackage.feeDuration !== undefined && pkg.existingPackage.feeDuration !== null && (
                                       <div>
-                                        <p className="text-gray-600">Fee Duration</p>
-                                        <p className="font-semibold text-gray-900">{pkg.existingPackage.feeDuration} days</p>
+                                        <p className="text-[#505454]">Fee Duration</p>
+                                        <p className="font-semibold text-[#000000]">{pkg.existingPackage.feeDuration} days</p>
                                       </div>
                                     )}
                                   </div>
@@ -1765,34 +1765,34 @@ export default function ProductsPage() {
                                 {/* Distributor Name */}
                            
 {/* {pkg.recommended && <Badge variant="success" className="text-[10px] px-1.5 py-0.5 border-2">Recommended</Badge>} */}
-                                <div className="grid grid-cols-2 gap-3 mb-3 p-3 bg-white rounded border border-gray-200">
+                                <div className="grid grid-cols-2 gap-3 mb-3 p-3 bg-white rounded border border-[#e2e2e2]">
                                   <div>
-                                    <p className="text-xs text-gray-600">New Total Value</p>
+                                    <p className="text-xs text-[#505454]">New Total Value</p>
                                     {(() => {
                                       const selectedFee = selectedFeeRates.get(pkg.distributorId);
                                       if (selectedFee && selectedFee.feeRate) {
                                         const discountedValue = pkg.totalEstimatedValue * (1 - selectedFee.feeRate / 100);
                                         return (
                                           <div className="flex flex-col">
-                                            <p className="text-sm font-semibold text-gray-900 line-through text-gray-400">
+                                            <p className="text-sm font-semibold text-[#000000] line-through text-[#9ca3af]">
                                               {formatCurrency(pkg.totalEstimatedValue)}
                                             </p>
-                                            <p className="text-sm font-semibold text-teal-600">
+                                            <p className="text-sm font-semibold text-[#516057]">
                                               {formatCurrency(discountedValue)}
                                             </p>
                                           </div>
                                         );
                                       }
                                       return (
-                                        <p className="text-sm font-semibold text-gray-900">
+                                        <p className="text-sm font-semibold text-[#000000]">
                                           {formatCurrency(pkg.totalEstimatedValue)}
                                         </p>
                                       );
                                     })()}
                                   </div>
                                   <div>
-                                    <p className="text-xs text-gray-600">Avg Price/Unit</p>
-                                    <p className="text-sm font-semibold text-gray-900">
+                                    <p className="text-xs text-[#505454]">Avg Price/Unit</p>
+                                    <p className="text-sm font-semibold text-[#000000]">
                                       {formatCurrency(pkg.averagePricePerUnit)}
                                     </p>
                                   </div>
@@ -1800,8 +1800,8 @@ export default function ProductsPage() {
 
                                 {/* Fee Rate Selection */}
                                 {pkg.distributorContact && pkg.distributorContact.feeRates && Object.keys(pkg.distributorContact.feeRates).length > 0 && (
-                                  <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                                    <label className="text-xs font-semibold text-gray-700 mb-2 block">
+                                  <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-[4px]">
+                                    <label className="text-xs font-semibold text-[#505454] mb-2 block">
                                       Select Fee Rate:
                                     </label>
                                     <select
@@ -1825,7 +1825,7 @@ export default function ProductsPage() {
                                           setSelectedFeeRates(newMap);
                                         }
                                       }}
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                      className="w-full px-3 py-2 border border-[#e2e2e2] rounded-[4px] text-xs focus:outline-none focus:ring-2 focus:ring-[#516057]"
                                     >
                                       <option value="">Select fee rate...</option>
                                       {Object.entries(pkg.distributorContact.feeRates).map(([duration, rate]) => (
@@ -1835,7 +1835,7 @@ export default function ProductsPage() {
                                       ))}
                                     </select>
                                     {selectedFeeRates.get(pkg.distributorId) && (
-                                      <p className="text-xs text-teal-600 mt-1">
+                                      <p className="text-xs text-[#516057] mt-1">
                                         Selected: {selectedFeeRates.get(pkg.distributorId)?.feeRate}% for {selectedFeeRates.get(pkg.distributorId)?.feeDuration} days
                                       </p>
                                     )}
@@ -1851,7 +1851,7 @@ export default function ProductsPage() {
                                   // Set default tab: 'existing' if existing package exists, otherwise 'create'
                                   setActiveModalTab(pkg.alreadyCreated && pkg.existingPackage ? 'existing' : 'create');
                                 }}
-                                className="flex-1 px-3 py-2 bg-white border border-teal-600 text-teal-600 rounded-lg hover:bg-teal-50 text-xs font-medium flex items-center justify-center gap-1"
+                                className="flex-1 px-3 py-2 bg-white border border-[#516057] text-[#516057] rounded-[4px] hover:bg-[#f5f2f1] text-xs font-medium flex items-center justify-center gap-1"
                               >
                                 <Eye className="h-3 w-3" />
                                 View Details
@@ -1862,7 +1862,7 @@ export default function ProductsPage() {
                                 <button
                                   onClick={() => handleCreatePackage(pkg, true)}
                                   disabled={creatingPackage}
-                                  className="flex-1 px-3 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-medium flex items-center justify-center gap-1"
+                                  className="flex-1 px-3 py-2 bg-[#516057] text-white rounded-[4px] hover:bg-[#516057] disabled:opacity-50 disabled:cursor-not-allowed text-xs font-medium flex items-center justify-center gap-1"
                                 >
                                   {creatingPackage ? (
                                     <>
@@ -1881,7 +1881,7 @@ export default function ProductsPage() {
                                 <button
                                   onClick={() => handleCreatePackage(pkg, false)}
                                   disabled={creatingPackage || !selectedFeeRates.get(pkg.distributorId)}
-                                  className="flex-1 px-3 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-medium flex items-center justify-center gap-1"
+                                  className="flex-1 px-3 py-2 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] disabled:opacity-50 disabled:cursor-not-allowed text-xs font-medium flex items-center justify-center gap-1"
                                   title={!selectedFeeRates.get(pkg.distributorId) ? "Please select a fee rate first" : ""}
                                 >
                                   {creatingPackage ? (
@@ -1906,11 +1906,11 @@ export default function ProductsPage() {
                     </>
                   ) : (
                     <div className="flex flex-col items-center justify-center py-12">
-                      <AlertTriangle className="h-12 w-12 text-gray-400 mb-4" />
-                      <p className="text-sm text-gray-600 mb-4">No package suggestions available</p>
+                      <AlertTriangle className="h-12 w-12 text-[#9ca3af] mb-4" />
+                      <p className="text-sm text-[#505454] mb-4">No package suggestions available</p>
                       <button
                         onClick={resetModalState}
-                        className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 text-xs"
+                        className="px-4 py-2 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] text-xs"
                       >
                         Close
                       </button>
@@ -1925,33 +1925,33 @@ export default function ProductsPage() {
         {/* Package Details Modal */}
         {selectedPackage && (
           <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="bg-white rounded-[4px] shadow-xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
               {/* Modal Header */}
-              <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
+              <div className="flex items-center justify-between p-4 border-b border-[#e2e2e2] flex-shrink-0">
                 <div>
-                  <h3 className="text-sm font-bold text-gray-900">Package Details</h3>
-                  <p className="text-xs text-gray-600 mt-1">{selectedPackage.distributorName}</p>
+                  <h3 className="text-sm font-bold text-[#000000]">Package Details</h3>
+                  <p className="text-xs text-[#505454] mt-1">{selectedPackage.distributorName}</p>
                 </div>
                 <button
                   onClick={() => {
                     setSelectedPackage(null);
                     setActiveModalTab('create');
                   }}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-2 hover:bg-[#f5f2f1] rounded-[4px] transition-colors"
                 >
-                  <X className="h-5 w-5 text-gray-500" />
+                  <X className="h-5 w-5 text-[#6b7280]" />
                 </button>
               </div>
 
               {/* Tabs - Only show if existing package exists */}
               {selectedPackage.alreadyCreated && selectedPackage.existingPackage && (
-                <div className="flex border-b border-gray-200 flex-shrink-0">
+                <div className="flex border-b border-[#e2e2e2] flex-shrink-0">
                   <button
                     onClick={() => setActiveModalTab('existing')}
                     className={`flex-1 px-4 py-2 text-xs font-semibold transition-colors ${
                       activeModalTab === 'existing'
-                        ? 'bg-teal-50 text-teal-700 border-b-2 border-teal-600'
-                        : 'text-gray-600 hover:bg-gray-50'
+                        ? 'bg-[#f5f2f1] text-[#516057] border-b-2 border-[#516057]'
+                        : 'text-[#505454] hover:bg-[#f5f2f1]'
                     }`}
                   >
                     Existing Package
@@ -1960,8 +1960,8 @@ export default function ProductsPage() {
                     onClick={() => setActiveModalTab('create')}
                     className={`flex-1 px-4 py-2 text-xs font-semibold transition-colors ${
                       activeModalTab === 'create'
-                        ? 'bg-teal-50 text-teal-700 border-b-2 border-teal-600'
-                        : 'text-gray-600 hover:bg-gray-50'
+                        ? 'bg-[#f5f2f1] text-[#516057] border-b-2 border-[#516057]'
+                        : 'text-[#505454] hover:bg-[#f5f2f1]'
                     }`}
                   >
                     Create New
@@ -1974,39 +1974,39 @@ export default function ProductsPage() {
                 {selectedPackage.alreadyCreated && selectedPackage.existingPackage && activeModalTab === 'existing' ? (
                   // Existing Package Tab
                   <div className="space-y-3">
-                    <div className="border border-gray-200 rounded-lg p-3">
-                      <h4 className="text-sm font-bold text-gray-900 mb-3">{selectedPackage.distributorName}</h4>
+                    <div className="border border-[#e2e2e2] rounded-[4px] p-3">
+                      <h4 className="text-sm font-bold text-[#000000] mb-3">{selectedPackage.distributorName}</h4>
                       
                       {/* Existing Package Info */}
-                      <div className="mb-4 p-3 border border-gray-200 bg-yellow-50 rounded-lg">
-                        <h5 className="text-xs font-semibold text-gray-900 mb-3">Existing Package Details</h5>
+                      <div className="mb-4 p-3 border border-[#e2e2e2] bg-yellow-50 rounded-[4px]">
+                        <h5 className="text-xs font-semibold text-[#000000] mb-3">Existing Package Details</h5>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
                           <div>
-                            <p className="text-gray-600">Package Number</p>
-                            <p className="font-semibold text-gray-900">{selectedPackage.existingPackage.packageNumber}</p>
+                            <p className="text-[#505454]">Package Number</p>
+                            <p className="font-semibold text-[#000000]">{selectedPackage.existingPackage.packageNumber}</p>
                           </div>
                           <div>
-                            <p className="text-gray-600">Current Items</p>
-                            <p className="font-semibold text-gray-900">{selectedPackage.existingPackage.totalItems}</p>
+                            <p className="text-[#505454]">Current Items</p>
+                            <p className="font-semibold text-[#000000]">{selectedPackage.existingPackage.totalItems}</p>
                           </div>
                           <div>
-                            <p className="text-gray-600">Current Value</p>
-                            <p className="font-semibold text-gray-900">{formatCurrency(selectedPackage.existingPackage.totalEstimatedValue)}</p>
+                            <p className="text-[#505454]">Current Value</p>
+                            <p className="font-semibold text-[#000000]">{formatCurrency(selectedPackage.existingPackage.totalEstimatedValue)}</p>
                           </div>
                           <div>
-                            <p className="text-gray-600">Created</p>
-                            <p className="font-semibold text-gray-900">{new Date(selectedPackage.existingPackage.createdAt).toLocaleDateString()}</p>
+                            <p className="text-[#505454]">Created</p>
+                            <p className="font-semibold text-[#000000]">{new Date(selectedPackage.existingPackage.createdAt).toLocaleDateString()}</p>
                           </div>
                           {selectedPackage.existingPackage.feeRate !== undefined && selectedPackage.existingPackage.feeRate !== null && (
                             <div>
-                              <p className="text-gray-600">Fee Rate</p>
-                              <p className="font-semibold text-gray-900">{selectedPackage.existingPackage.feeRate}%</p>
+                              <p className="text-[#505454]">Fee Rate</p>
+                              <p className="font-semibold text-[#000000]">{selectedPackage.existingPackage.feeRate}%</p>
                             </div>
                           )}
                           {selectedPackage.existingPackage.feeDuration !== undefined && selectedPackage.existingPackage.feeDuration !== null && (
                             <div>
-                              <p className="text-gray-600">Fee Duration</p>
-                              <p className="font-semibold text-gray-900">{selectedPackage.existingPackage.feeDuration} days</p>
+                              <p className="text-[#505454]">Fee Duration</p>
+                              <p className="font-semibold text-[#000000]">{selectedPackage.existingPackage.feeDuration} days</p>
                             </div>
                           )}
                         </div>
@@ -2014,24 +2014,24 @@ export default function ProductsPage() {
 
                       {/* Distributor Contact Info */}
                       {selectedPackage.distributorContact && (
-                        <div className="mb-3 p-2 bg-gray-50 rounded text-xs">
+                        <div className="mb-3 p-2 bg-[#f5f2f1] rounded text-xs">
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                             {selectedPackage.distributorContact.email && (
                               <div className="flex items-center gap-2">
-                                <Mail className="h-3 w-3 text-gray-500 flex-shrink-0" />
-                                <span className="text-gray-700 truncate">{selectedPackage.distributorContact.email}</span>
+                                <Mail className="h-3 w-3 text-[#6b7280] flex-shrink-0" />
+                                <span className="text-[#505454] truncate">{selectedPackage.distributorContact.email}</span>
                               </div>
                             )}
                             {selectedPackage.distributorContact.phone && (
                               <div className="flex items-center gap-2">
-                                <Phone className="h-3 w-3 text-gray-500 flex-shrink-0" />
-                                <span className="text-gray-700">{selectedPackage.distributorContact.phone}</span>
+                                <Phone className="h-3 w-3 text-[#6b7280] flex-shrink-0" />
+                                <span className="text-[#505454]">{selectedPackage.distributorContact.phone}</span>
                               </div>
                             )}
                             {selectedPackage.distributorContact.location && (
                               <div className="flex items-center gap-2">
-                                <MapPin className="h-3 w-3 text-gray-500 flex-shrink-0" />
-                                <span className="text-gray-700 truncate">{selectedPackage.distributorContact.location}</span>
+                                <MapPin className="h-3 w-3 text-[#6b7280] flex-shrink-0" />
+                                <span className="text-[#505454] truncate">{selectedPackage.distributorContact.location}</span>
                               </div>
                             )}
                           </div>
@@ -2042,29 +2042,29 @@ export default function ProductsPage() {
                 ) : (
                   // Create New Tab (or default if no existing package)
                   <div className="space-y-3">
-                    <div className="border border-gray-200 rounded-lg p-3">
-                      <h4 className="text-sm font-bold text-gray-900 mb-3">{selectedPackage.distributorName}</h4>
+                    <div className="border border-[#e2e2e2] rounded-[4px] p-3">
+                      <h4 className="text-sm font-bold text-[#000000] mb-3">{selectedPackage.distributorName}</h4>
 
                       {/* Distributor Contact Info */}
                       {selectedPackage.distributorContact && (
-                        <div className="mb-3 p-2 bg-gray-50 rounded text-xs">
+                        <div className="mb-3 p-2 bg-[#f5f2f1] rounded text-xs">
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                             {selectedPackage.distributorContact.email && (
                               <div className="flex items-center gap-2">
-                                <Mail className="h-3 w-3 text-gray-500 flex-shrink-0" />
-                                <span className="text-gray-700 truncate">{selectedPackage.distributorContact.email}</span>
+                                <Mail className="h-3 w-3 text-[#6b7280] flex-shrink-0" />
+                                <span className="text-[#505454] truncate">{selectedPackage.distributorContact.email}</span>
                               </div>
                             )}
                             {selectedPackage.distributorContact.phone && (
                               <div className="flex items-center gap-2">
-                                <Phone className="h-3 w-3 text-gray-500 flex-shrink-0" />
-                                <span className="text-gray-700">{selectedPackage.distributorContact.phone}</span>
+                                <Phone className="h-3 w-3 text-[#6b7280] flex-shrink-0" />
+                                <span className="text-[#505454]">{selectedPackage.distributorContact.phone}</span>
                               </div>
                             )}
                             {selectedPackage.distributorContact.location && (
                               <div className="flex items-center gap-2">
-                                <MapPin className="h-3 w-3 text-gray-500 flex-shrink-0" />
-                                <span className="text-gray-700 truncate">{selectedPackage.distributorContact.location}</span>
+                                <MapPin className="h-3 w-3 text-[#6b7280] flex-shrink-0" />
+                                <span className="text-[#505454] truncate">{selectedPackage.distributorContact.location}</span>
                               </div>
                             )}
                           </div>
@@ -2073,8 +2073,8 @@ export default function ProductsPage() {
 
                       {/* Fee Rate Selection */}
                       {selectedPackage.distributorContact?.feeRates && Object.keys(selectedPackage.distributorContact.feeRates).length > 0 && (
-                        <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                          <label className="text-xs font-semibold text-gray-700 mb-2 block">
+                        <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-[4px]">
+                          <label className="text-xs font-semibold text-[#505454] mb-2 block">
                             Select Fee Rate:
                           </label>
                           <select
@@ -2098,7 +2098,7 @@ export default function ProductsPage() {
                                 setSelectedFeeRates(newMap);
                               }
                             }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-teal-500"
+                            className="w-full px-3 py-2 border border-[#e2e2e2] rounded-[4px] text-xs focus:outline-none focus:ring-2 focus:ring-[#516057]"
                           >
                             <option value="">Select fee rate...</option>
                             {Object.entries(selectedPackage.distributorContact.feeRates).map(([duration, rate]) => (
@@ -2108,7 +2108,7 @@ export default function ProductsPage() {
                             ))}
                           </select>
                           {selectedFeeRates.get(selectedPackage.distributorId) && (
-                            <p className="text-xs text-teal-600 mt-1">
+                            <p className="text-xs text-[#516057] mt-1">
                               Selected: {selectedFeeRates.get(selectedPackage.distributorId)?.feeRate}% for {selectedFeeRates.get(selectedPackage.distributorId)?.feeDuration} days
                             </p>
                           )}
@@ -2117,30 +2117,30 @@ export default function ProductsPage() {
 
                       {/* Products Table */}
                       <div className="mt-3">
-                        <h4 className="text-xs font-semibold text-gray-900 mb-3">Products in Package</h4>
+                        <h4 className="text-xs font-semibold text-[#000000] mb-3">Products in Package</h4>
                         <div className="overflow-x-auto">
                           <table className="w-full border-collapse">
                             <thead>
-                              <tr className="bg-gray-50 border-b border-gray-200">
-                                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">Product Name</th>
-                                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">NDC</th>
-                                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">Full</th>
-                                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">Partial</th>
-                                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">Price/Unit</th>
-                                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">Total Value</th>
+                              <tr className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
+                                <th className="px-3 py-2 text-left text-xs font-semibold text-[#505454]">Product Name</th>
+                                <th className="px-3 py-2 text-left text-xs font-semibold text-[#505454]">NDC</th>
+                                <th className="px-3 py-2 text-left text-xs font-semibold text-[#505454]">Full</th>
+                                <th className="px-3 py-2 text-left text-xs font-semibold text-[#505454]">Partial</th>
+                                <th className="px-3 py-2 text-left text-xs font-semibold text-[#505454]">Price/Unit</th>
+                                <th className="px-3 py-2 text-left text-xs font-semibold text-[#505454]">Total Value</th>
                               </tr>
                             </thead>
                             <tbody>
                               {selectedPackage.products.map((product, idx) => (
-                                <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50">
-                                  <td className="px-3 py-2 text-xs text-gray-900">{product.productName}</td>
-                                  <td className="px-3 py-2 text-xs font-mono text-gray-600">{product.ndc}</td>
-                                  <td className="px-3 py-2 text-xs text-gray-700">{product.full}</td>
-                                  <td className="px-3 py-2 text-xs text-gray-700">{product.partial}</td>
-                                  <td className="px-3 py-2 text-xs text-gray-700 font-semibold">
+                                <tr key={idx} className="border-b border-[#f3f4f6] hover:bg-[#f5f2f1]">
+                                  <td className="px-3 py-2 text-xs text-[#000000]">{product.productName}</td>
+                                  <td className="px-3 py-2 text-xs font-mono text-[#505454]">{product.ndc}</td>
+                                  <td className="px-3 py-2 text-xs text-[#505454]">{product.full}</td>
+                                  <td className="px-3 py-2 text-xs text-[#505454]">{product.partial}</td>
+                                  <td className="px-3 py-2 text-xs text-[#505454] font-semibold">
                                     {formatCurrency(product.pricePerUnit)}
                                   </td>
-                                  <td className="px-3 py-2 text-xs text-gray-700 font-semibold">
+                                  <td className="px-3 py-2 text-xs text-[#505454] font-semibold">
                                     {formatCurrency(product.totalValue)}
                                   </td>
                                 </tr>
@@ -2155,13 +2155,13 @@ export default function ProductsPage() {
               </div>
 
               {/* Modal Footer */}
-              <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-200 flex-shrink-0">
+              <div className="flex items-center justify-end gap-3 p-4 border-t border-[#e2e2e2] flex-shrink-0">
                 <button
                   onClick={() => {
                     setSelectedPackage(null);
                     setActiveModalTab('create');
                   }}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-xs font-medium"
+                  className="px-4 py-2 bg-[#f5f2f1] text-[#505454] rounded-[4px] hover:bg-[#e2e2e2] text-xs font-medium"
                 >
                   Close
                 </button>
@@ -2180,7 +2180,7 @@ export default function ProductsPage() {
                           setActiveModalTab('create');
                         }}
                         disabled={creatingPackage}
-                        className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-medium flex items-center gap-2"
+                        className="px-4 py-2 bg-[#516057] text-white rounded-[4px] hover:bg-[#516057] disabled:opacity-50 disabled:cursor-not-allowed text-xs font-medium flex items-center gap-2"
                       >
                         {creatingPackage ? (
                           <>
@@ -2205,7 +2205,7 @@ export default function ProductsPage() {
                           setActiveModalTab('create');
                         }}
                         disabled={creatingPackage || !selectedFeeRates.get(selectedPackage.distributorId)}
-                        className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-medium flex items-center gap-2"
+                        className="px-4 py-2 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] disabled:opacity-50 disabled:cursor-not-allowed text-xs font-medium flex items-center gap-2"
                         title={!selectedFeeRates.get(selectedPackage.distributorId) ? "Please select a fee rate first" : ""}
                       >
                         {creatingPackage ? (
@@ -2231,10 +2231,10 @@ export default function ProductsPage() {
         {/* Create New List Modal */}
         {showCreateListModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-4">
-            <div className="relative w-full max-w-2xl bg-white rounded-lg shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="relative w-full max-w-2xl bg-white rounded-[4px] shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
               <div className="flex items-center justify-between p-3 sm:p-4 border-b flex-shrink-0">
                 <div className="flex items-center gap-2 min-w-0">
-                  <Package className="h-4 w-4 sm:h-5 sm:w-5 text-teal-600 flex-shrink-0" />
+                  <Package className="h-4 w-4 sm:h-5 sm:w-5 text-[#516057] flex-shrink-0" />
                   <h3 className="font-bold text-sm truncate">
                     Create New Product List
                   </h3>
@@ -2245,7 +2245,7 @@ export default function ProductsPage() {
                     setNewListName("");
                     setSelectedProductsForList(new Set());
                   }}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+                  className="p-2 hover:bg-[#f5f2f1] rounded-[4px] transition-colors flex-shrink-0"
                 >
                   <X className="h-4 w-4 sm:h-5 sm:w-5" />
                 </button>
@@ -2265,9 +2265,9 @@ export default function ProductsPage() {
                   <label className="text-xs font-medium mb-2 block">
                     Select Products ({selectedProductsForList.size} selected)
                   </label>
-                  <div className="border rounded-lg p-2 sm:p-3 max-h-48 sm:max-h-64 overflow-y-auto space-y-2">
+                  <div className="border border-[#e2e2e2] rounded-[4px]-[4px] p-2 sm:p-3 max-h-48 sm:max-h-64 overflow-y-auto space-y-2">
                     {products.length === 0 ? (
-                      <p className="text-xs text-gray-500 text-center py-4">
+                      <p className="text-xs text-[#6b7280] text-center py-4">
                         No products available. Add products first.
                       </p>
                     ) : (
@@ -2285,7 +2285,7 @@ export default function ProductsPage() {
                                 );
                               }
                             }}
-                            className="text-xs text-teal-600 hover:text-teal-700"
+                            className="text-xs text-[#516057] hover:text-[#516057]"
                           >
                             {selectedProductsForList.size === products.length
                               ? "Deselect All"
@@ -2295,7 +2295,7 @@ export default function ProductsPage() {
                         {products.map((product) => (
                           <label
                             key={product.id}
-                            className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer"
+                            className="flex items-center gap-2 p-2 hover:bg-[#f5f2f1] rounded cursor-pointer"
                           >
                             <input
                               type="checkbox"
@@ -2315,7 +2315,7 @@ export default function ProductsPage() {
                               <p className="text-xs font-medium truncate">
                                 {product.productName}
                               </p>
-                              <p className="text-[10px] text-gray-600">
+                              <p className="text-[10px] text-[#505454]">
                                 NDC: {product.ndc} • Qty: {product.quantity}
                               </p>
                             </div>
@@ -2324,7 +2324,7 @@ export default function ProductsPage() {
                       </>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500 mt-2">
+                  <p className="text-xs text-[#6b7280] mt-2">
                     {selectedProductsForList.size === 0
                       ? "No products selected. All current products will be added to the list."
                       : `${selectedProductsForList.size} product(s) selected.`}
@@ -2333,7 +2333,7 @@ export default function ProductsPage() {
                 <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t flex-shrink-0">
                   <button
                     onClick={handleCreateList}
-                    className="flex-1 px-2 py-1 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
+                    className="flex-1 px-2 py-1 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
                     disabled={!newListName.trim()}
                   >
                     <Check className="h-3 w-3" />
@@ -2345,7 +2345,7 @@ export default function ProductsPage() {
                       setNewListName("");
                       setSelectedProductsForList(new Set());
                     }}
-                    className="w-full sm:w-auto px-2 py-1 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
+                    className="w-full sm:w-auto px-2 py-1 bg-white border border-[#e2e2e2] text-[#505454] rounded-[4px] hover:bg-[#f5f2f1] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
                   >
                     Cancel
                   </button>
@@ -2368,7 +2368,7 @@ export default function ProductsPage() {
         {/* Clear All Confirmation Modal */}
         {showClearAllModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="bg-white rounded-[4px] shadow-xl max-w-md w-full">
               <div className="p-6">
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0">
@@ -2377,17 +2377,17 @@ export default function ProductsPage() {
                     </div>
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-xs font-bold text-gray-900 mb-2">
+                    <h3 className="text-xs font-bold text-[#000000] mb-2">
                       Clear All Products
                     </h3>
-                    <p className="text-xs text-gray-700 mb-4">
+                    <p className="text-xs text-[#505454] mb-4">
                       Are you sure you want to delete all {products.length} product(s)? This action cannot be undone.
                     </p>
                     <div className="flex gap-3">
                       <button
                         onClick={handleClearAll}
                         disabled={loading.clearAll}
-                        className="flex-1 px-2 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
+                        className="flex-1 px-2 py-1 bg-red-600 text-white rounded-[4px] hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
                       >
                         {loading.clearAll ? (
                           <>
@@ -2404,7 +2404,7 @@ export default function ProductsPage() {
                       <button
                         onClick={() => setShowClearAllModal(false)}
                         disabled={loading.clearAll}
-                        className="flex-1 px-2 py-1 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
+                        className="flex-1 px-2 py-1 bg-white border border-[#e2e2e2] text-[#505454] rounded-[4px] hover:bg-[#f5f2f1] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
                       >
                         Cancel
                       </button>

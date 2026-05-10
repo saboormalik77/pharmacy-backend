@@ -218,7 +218,7 @@ function CheckoutContent() {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-10 w-10 animate-spin text-teal-600 mx-auto mb-4" />
+          <Loader2 className="h-10 w-10 animate-spin text-[#516057] mx-auto mb-4" />
           <p className="text-muted-foreground">Loading checkout...</p>
         </div>
       </div>
@@ -231,7 +231,7 @@ function CheckoutContent() {
       <div className="flex items-center gap-4 mb-8">
         <button
           onClick={() => router.push('/marketplace')}
-          className="p-2 hover:bg-muted rounded-lg transition-colors"
+          className="p-2 hover:bg-muted rounded-[4px] transition-colors"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
@@ -243,7 +243,7 @@ function CheckoutContent() {
 
       {/* Canceled message */}
       {canceled && (
-        <div className="mb-6 p-4 bg-amber-100 dark:bg-amber-900/60 border-2 border-amber-300 dark:border-amber-700 rounded-lg flex items-start gap-3">
+        <div className="mb-6 p-4 bg-amber-100 dark:bg-amber-900/60 border-2 border-amber-300 dark:border-amber-700 rounded-[4px] flex items-start gap-3">
           <AlertCircle className="h-5 w-5 text-amber-700 dark:text-amber-300 flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-semibold text-amber-900 dark:text-amber-100">Payment canceled</p>
@@ -256,7 +256,7 @@ function CheckoutContent() {
 
       {/* Error message */}
       {error && (
-        <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-start gap-3">
+        <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-[4px] flex items-start gap-3">
           <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-medium text-destructive">{error}</p>
@@ -266,7 +266,7 @@ function CheckoutContent() {
 
       {/* Validation issues */}
       {validationIssues.length > 0 && (
-        <div className="mb-6 p-4 bg-amber-100 dark:bg-amber-900/60 border-2 border-amber-300 dark:border-amber-700 rounded-lg">
+        <div className="mb-6 p-4 bg-amber-100 dark:bg-amber-900/60 border-2 border-amber-300 dark:border-amber-700 rounded-[4px]">
           <p className="font-semibold text-amber-900 dark:text-amber-100 mb-2">
             Some items need attention:
           </p>
@@ -298,7 +298,7 @@ function CheckoutContent() {
               <div className="divide-y">
                 {cartItems.map((item) => (
                   <div key={item.id} className="p-4 flex gap-4">
-                    <div className="w-20 h-20 bg-muted rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                    <div className="w-20 h-20 bg-muted rounded-[4px] flex items-center justify-center overflow-hidden flex-shrink-0">
                       <img
                         src={item.imageUrl || `https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=160&h=160&fit=crop&q=80`}
                         alt={item.productName}
@@ -336,7 +336,7 @@ function CheckoutContent() {
                 <Truck className="h-5 w-5" />
                 Shipping
               </h2>
-              <div className="flex items-center justify-between py-2 px-3 bg-green-100 dark:bg-green-900/60 border border-green-200 dark:border-green-700 rounded-lg">
+              <div className="flex items-center justify-between py-2 px-3 bg-green-100 dark:bg-green-900/60 border border-green-200 dark:border-green-700 rounded-[4px]">
                 <span className="text-sm font-semibold text-green-800 dark:text-green-100">
                   Free Standard Shipping
                 </span>
@@ -384,7 +384,7 @@ function CheckoutContent() {
                 <button
                   onClick={handleCheckout}
                   disabled={isProcessing || validationIssues.length > 0 || cartItems.length === 0}
-                  className="w-full py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium transition-all shadow-sm"
+                  className="w-full py-3 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium transition-all shadow-sm"
                 >
                   {isProcessing ? (
                     <>
@@ -428,7 +428,7 @@ export default function CheckoutPage() {
     <Suspense fallback={
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-10 w-10 animate-spin text-teal-600 mx-auto mb-4" />
+          <Loader2 className="h-10 w-10 animate-spin text-[#516057] mx-auto mb-4" />
           <p className="text-muted-foreground">Loading checkout...</p>
         </div>
       </div>

@@ -1,10 +1,25 @@
 import type { Metadata } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
+import { Newsreader, Manrope } from 'next/font/google'
 import { ToastContainer } from 'react-toastify'
 import './globals.css'
 import 'react-toastify/dist/ReactToastify.css'
 import TenantGate from '@/components/auth/TenantGate'
 import BrandingHead from '@/components/layout/BrandingHead'
+
+const newsreader = Newsreader({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-newsreader',
+  display: 'swap',
+})
+
+const manrope = Manrope({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-manrope',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'PharmAnalytics',
@@ -28,8 +43,8 @@ export default function RootLayout({
         signUpFallbackRedirectUrl="/login?oauthError=no-account"
         afterSignOutUrl="/login"
       >
-        <html lang="en">
-          <body>
+        <html lang="en" className={`${newsreader.variable} ${manrope.variable}`}>
+          <body className="font-sans">
             <BrandingHead />
             <TenantGate>{children}</TenantGate>
             <ToastContainer
@@ -51,8 +66,8 @@ export default function RootLayout({
   }
 
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" className={`${newsreader.variable} ${manrope.variable}`}>
+      <body className="font-sans">
         <BrandingHead />
         <TenantGate>{children}</TenantGate>
         <ToastContainer

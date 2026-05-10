@@ -97,7 +97,7 @@ export default function DocumentDetailPage() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-[400px]">
-          <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#516057]" />
         </div>
       </DashboardLayout>
     );
@@ -109,7 +109,7 @@ export default function DocumentDetailPage() {
         <div className="text-center py-12">
           <AlertCircle className="h-12 w-12 mx-auto mb-4 text-red-500" />
           <h2 className="text-xl font-bold mb-2">Document Not Found</h2>
-          <p className="text-gray-600 mb-4">The document you're looking for doesn't exist.</p>
+          <p className="text-[#505454] mb-4">The document you're looking for doesn't exist.</p>
           <Link href="/documents">
             <Button variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -129,7 +129,7 @@ export default function DocumentDetailPage() {
     <DashboardLayout>
       <div className="space-y-3">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-teal-50 via-cyan-50 to-teal-50 border-2 border-teal-200">
+        <div className="flex items-center justify-between p-4 rounded-[4px] bg-[#f5f2f1] border-2 border-[#e2e2e2]">
           <div className="flex items-center gap-3">
             <Link href="/documents">
               <Button variant="ghost" size="sm">
@@ -137,13 +137,13 @@ export default function DocumentDetailPage() {
               </Button>
             </Link>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Document Details</h1>
-              <p className="text-xs text-gray-600 mt-0.5">View complete document information</p>
+              <h1 className="text-xl font-bold text-[#000000]">Document Details</h1>
+              <p className="text-xs text-[#505454] mt-0.5">View complete document information</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             {document.status === 'completed' && (
-              <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white border-0">
+              <Button size="sm" className="bg-[#516057] hover:bg-[#505454] text-white border-0">
                 <Download className="mr-1 h-3 w-3" />
                 Download
               </Button>
@@ -161,19 +161,19 @@ export default function DocumentDetailPage() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-3">
             {/* Document Information */}
-            <Card className="border-2 border-teal-200">
+            <Card className="border-2 border-[#e2e2e2]">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className={`p-3 rounded-lg ${
-                      document.status === 'completed' ? 'bg-emerald-100' :
-                      document.status === 'processing' || document.status === 'uploading' ? 'bg-cyan-100' :
+                    <div className={`p-3 rounded-[4px] ${
+                      document.status === 'completed' ? 'bg-[#f5f2f1]' :
+                      document.status === 'processing' || document.status === 'uploading' ? 'bg-[#f5f2f1]' :
                       document.status === 'failed' ? 'bg-red-100' :
                       'bg-amber-100'
                     }`}>
                       <StatusIcon className={`h-6 w-6 ${
-                        document.status === 'completed' ? 'text-emerald-600' :
-                        document.status === 'processing' || document.status === 'uploading' ? 'text-cyan-600 animate-spin' :
+                        document.status === 'completed' ? 'text-[#516057]' :
+                        document.status === 'processing' || document.status === 'uploading' ? 'text-[#516057] animate-spin' :
                         document.status === 'failed' ? 'text-red-600' :
                         'text-amber-600'
                       }`} />
@@ -190,24 +190,24 @@ export default function DocumentDetailPage() {
               <CardContent className="space-y-4">
                 {/* Processing Progress */}
                 {isProcessing && document.processingProgress !== undefined && (
-                  <div className="p-4 bg-cyan-50 border border-cyan-200 rounded-lg">
+                  <div className="p-4 bg-[#f5f2f1] border border-[#e2e2e2] rounded-[4px]">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-cyan-900">Processing Document</span>
-                      <span className="text-sm font-bold text-cyan-700">{document.processingProgress}%</span>
+                      <span className="text-sm font-medium text-[#000000]">Processing Document</span>
+                      <span className="text-sm font-bold text-[#516057]">{document.processingProgress}%</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div className="w-full bg-[#e2e2e2] rounded-full h-3">
                       <div
-                        className="bg-cyan-600 h-3 rounded-full transition-all"
+                        className="bg-[#516057] h-3 rounded-full transition-all"
                         style={{ width: `${document.processingProgress}%` }}
                       />
                     </div>
-                    <p className="text-xs text-cyan-700 mt-2">Extracting data from document...</p>
+                    <p className="text-xs text-[#516057] mt-2">Extracting data from document...</p>
                   </div>
                 )}
 
                 {/* Error Message */}
                 {document.errorMessage && (
-                  <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-[4px]">
                     <div className="flex items-start gap-2">
                       <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
                       <div>
@@ -221,32 +221,32 @@ export default function DocumentDetailPage() {
                 {/* Document Metadata */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs font-medium text-gray-600 mb-1">File Name</p>
-                    <p className="text-sm font-semibold text-gray-900">{document.fileName}</p>
+                    <p className="text-xs font-medium text-[#505454] mb-1">File Name</p>
+                    <p className="text-sm font-semibold text-[#000000]">{document.fileName}</p>
                   </div>
                   <div>
-                    <p className="text-xs font-medium text-gray-600 mb-1">File Size</p>
-                    <p className="text-sm text-gray-900">{formatFileSize(document.fileSize)}</p>
+                    <p className="text-xs font-medium text-[#505454] mb-1">File Size</p>
+                    <p className="text-sm text-[#000000]">{formatFileSize(document.fileSize)}</p>
                   </div>
                   <div>
-                    <p className="text-xs font-medium text-gray-600 mb-1">File Type</p>
-                    <p className="text-sm text-gray-900">{document.fileType}</p>
+                    <p className="text-xs font-medium text-[#505454] mb-1">File Type</p>
+                    <p className="text-sm text-[#000000]">{document.fileType}</p>
                   </div>
                   <div>
-                    <p className="text-xs font-medium text-gray-600 mb-1">Upload Source</p>
+                    <p className="text-xs font-medium text-[#505454] mb-1">Upload Source</p>
                     <div className="flex items-center gap-2">
-                      <SourceIcon className="h-4 w-4 text-gray-600" />
-                      <p className="text-sm text-gray-900 capitalize">{document.source.replace('_', ' ')}</p>
+                      <SourceIcon className="h-4 w-4 text-[#505454]" />
+                      <p className="text-sm text-[#000000] capitalize">{document.source.replace('_', ' ')}</p>
                     </div>
                   </div>
                   <div>
-                    <p className="text-xs font-medium text-gray-600 mb-1">Uploaded At</p>
-                    <p className="text-sm text-gray-900">{formatDateTime(document.uploadedAt)}</p>
+                    <p className="text-xs font-medium text-[#505454] mb-1">Uploaded At</p>
+                    <p className="text-sm text-[#000000]">{formatDateTime(document.uploadedAt)}</p>
                   </div>
                   {document.processedAt && (
                     <div>
-                      <p className="text-xs font-medium text-gray-600 mb-1">Processed At</p>
-                      <p className="text-sm text-gray-900">{formatDateTime(document.processedAt)}</p>
+                      <p className="text-xs font-medium text-[#505454] mb-1">Processed At</p>
+                      <p className="text-sm text-[#000000]">{formatDateTime(document.processedAt)}</p>
                     </div>
                   )}
                 </div>
@@ -254,12 +254,12 @@ export default function DocumentDetailPage() {
                 {/* Reverse Distributor Information */}
                 <div className="pt-4 border-t">
                   <div className="flex items-center gap-2 mb-3">
-                    <Building2 className="h-5 w-5 text-teal-600" />
+                    <Building2 className="h-5 w-5 text-[#516057]" />
                     <CardTitle className="text-base">Reverse Distributor</CardTitle>
                   </div>
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <p className="text-sm font-semibold text-gray-900">{document.reverseDistributorName}</p>
-                    <p className="text-xs text-gray-600 mt-1">ID: {document.reverseDistributorId}</p>
+                  <div className="p-3 bg-[#f5f2f1] rounded-[4px]">
+                    <p className="text-sm font-semibold text-[#000000]">{document.reverseDistributorName}</p>
+                    <p className="text-xs text-[#505454] mt-1">ID: {document.reverseDistributorId}</p>
                   </div>
                 </div>
               </CardContent>
@@ -267,17 +267,17 @@ export default function DocumentDetailPage() {
 
             {/* Extracted Items */}
             {extractedItems.length > 0 && (
-              <Card className="border-2 border-emerald-200">
+              <Card className="border-2 border-[#e2e2e2]">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Package className="h-5 w-5 text-emerald-600" />
+                      <Package className="h-5 w-5 text-[#516057]" />
                       <CardTitle className="text-base">Extracted Items ({extractedItems.length})</CardTitle>
                     </div>
                     {document.totalCreditAmount && (
                       <div className="text-right">
-                        <p className="text-xs text-gray-600">Total Credit</p>
-                        <p className="text-lg font-bold text-emerald-700">
+                        <p className="text-xs text-[#505454]">Total Credit</p>
+                        <p className="text-lg font-bold text-[#516057]">
                           {formatCurrency(document.totalCreditAmount)}
                         </p>
                       </div>
@@ -288,31 +288,31 @@ export default function DocumentDetailPage() {
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="bg-gradient-to-r from-emerald-100 to-teal-100 border-b-2 border-emerald-200">
-                          <th className="text-left p-2 font-bold text-emerald-900">NDC</th>
-                          <th className="text-left p-2 font-bold text-emerald-900">Product Name</th>
-                          <th className="text-left p-2 font-bold text-emerald-900">Manufacturer</th>
-                          <th className="text-left p-2 font-bold text-emerald-900">Lot Number</th>
-                          <th className="text-left p-2 font-bold text-emerald-900">Quantity</th>
-                          <th className="text-left p-2 font-bold text-emerald-900">Price/Unit</th>
-                          <th className="text-left p-2 font-bold text-emerald-900">Credit Amount</th>
+                        <tr className="bg-[#f5f2f1] border-b-2 border-[#e2e2e2]">
+                          <th className="text-left p-2 font-bold text-[#000000]">NDC</th>
+                          <th className="text-left p-2 font-bold text-[#000000]">Product Name</th>
+                          <th className="text-left p-2 font-bold text-[#000000]">Manufacturer</th>
+                          <th className="text-left p-2 font-bold text-[#000000]">Lot Number</th>
+                          <th className="text-left p-2 font-bold text-[#000000]">Quantity</th>
+                          <th className="text-left p-2 font-bold text-[#000000]">Price/Unit</th>
+                          <th className="text-left p-2 font-bold text-[#000000]">Credit Amount</th>
                         </tr>
                       </thead>
                       <tbody>
                         {extractedItems.map((item, idx) => (
                           <tr
                             key={item.id}
-                            className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-emerald-50 transition-colors`}
+                            className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]/50'} hover:bg-[#f5f2f1] transition-colors`}
                           >
                             <td className="p-2 font-mono text-xs">{item.ndc}</td>
                             <td className="p-2 font-medium">{item.productName}</td>
-                            <td className="p-2 text-gray-700">{item.manufacturer}</td>
-                            <td className="p-2 text-gray-600">{item.lotNumber}</td>
+                            <td className="p-2 text-[#505454]">{item.manufacturer}</td>
+                            <td className="p-2 text-[#505454]">{item.lotNumber}</td>
                             <td className="p-2">{item.quantity}</td>
-                            <td className="p-2 font-semibold text-emerald-700">
+                            <td className="p-2 font-semibold text-[#516057]">
                               {formatCurrency(item.pricePerUnit)}
                             </td>
-                            <td className="p-2 font-bold text-emerald-700">
+                            <td className="p-2 font-bold text-[#516057]">
                               {formatCurrency(item.creditAmount)}
                             </td>
                           </tr>
@@ -320,11 +320,11 @@ export default function DocumentDetailPage() {
                       </tbody>
                       {document.totalCreditAmount && (
                         <tfoot>
-                          <tr className="bg-emerald-100 border-t-2 border-emerald-200">
-                            <td colSpan={6} className="p-2 text-right font-bold text-emerald-900">
+                          <tr className="bg-[#f5f2f1] border-t-2 border-[#e2e2e2]">
+                            <td colSpan={6} className="p-2 text-right font-bold text-[#000000]">
                               Total:
                             </td>
-                            <td className="p-2 font-bold text-lg text-emerald-900">
+                            <td className="p-2 font-bold text-lg text-[#000000]">
                               {formatCurrency(document.totalCreditAmount)}
                             </td>
                           </tr>
@@ -341,7 +341,7 @@ export default function DocumentDetailPage() {
               <Card className="border-2 border-amber-200">
                 <CardContent className="p-8 text-center">
                   <Info className="h-12 w-12 mx-auto mb-4 text-amber-500" />
-                  <p className="text-gray-600 text-sm">No items were extracted from this document.</p>
+                  <p className="text-[#505454] text-sm">No items were extracted from this document.</p>
                 </CardContent>
               </Card>
             )}
@@ -350,43 +350,43 @@ export default function DocumentDetailPage() {
           {/* Sidebar */}
           <div className="space-y-3">
             {/* Summary Card */}
-            <Card className="border-2 border-teal-200">
+            <Card className="border-2 border-[#e2e2e2]">
               <CardHeader>
                 <CardTitle className="text-base">Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                <div className="flex items-center justify-between p-2 bg-[#f5f2f1] rounded">
                   <div className="flex items-center gap-2">
-                    <Package className="h-4 w-4 text-gray-600" />
-                    <span className="text-sm text-gray-600">Items Extracted</span>
+                    <Package className="h-4 w-4 text-[#505454]" />
+                    <span className="text-sm text-[#505454]">Items Extracted</span>
                   </div>
-                  <span className="font-bold text-gray-900">{document.extractedItems}</span>
+                  <span className="font-bold text-[#000000]">{document.extractedItems}</span>
                 </div>
                 {document.totalCreditAmount && (
-                  <div className="flex items-center justify-between p-2 bg-emerald-50 rounded">
+                  <div className="flex items-center justify-between p-2 bg-[#f5f2f1] rounded">
                     <div className="flex items-center gap-2">
-                      <DollarSign className="h-4 w-4 text-emerald-600" />
-                      <span className="text-sm text-emerald-700 font-medium">Total Credit</span>
+                      <DollarSign className="h-4 w-4 text-[#516057]" />
+                      <span className="text-sm text-[#516057] font-medium">Total Credit</span>
                     </div>
-                    <span className="font-bold text-lg text-emerald-700">
+                    <span className="font-bold text-lg text-[#516057]">
                       {formatCurrency(document.totalCreditAmount)}
                     </span>
                   </div>
                 )}
-                <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                <div className="flex items-center justify-between p-2 bg-[#f5f2f1] rounded">
                   <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-gray-600" />
-                    <span className="text-sm text-gray-600">Upload Date</span>
+                    <Calendar className="h-4 w-4 text-[#505454]" />
+                    <span className="text-sm text-[#505454]">Upload Date</span>
                   </div>
-                  <span className="text-xs text-gray-900">{formatDate(document.uploadedAt)}</span>
+                  <span className="text-xs text-[#000000]">{formatDate(document.uploadedAt)}</span>
                 </div>
                 {document.processedAt && (
-                  <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                  <div className="flex items-center justify-between p-2 bg-[#f5f2f1] rounded">
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-gray-600" />
-                      <span className="text-sm text-gray-600">Processed Date</span>
+                      <CheckCircle2 className="h-4 w-4 text-[#505454]" />
+                      <span className="text-sm text-[#505454]">Processed Date</span>
                     </div>
-                    <span className="text-xs text-gray-900">{formatDate(document.processedAt)}</span>
+                    <span className="text-xs text-[#000000]">{formatDate(document.processedAt)}</span>
                   </div>
                 )}
               </CardContent>
@@ -394,18 +394,18 @@ export default function DocumentDetailPage() {
 
             {/* Processing Time */}
             {document.processedAt && (
-              <Card className="border-2 border-cyan-200">
+              <Card className="border-2 border-[#e2e2e2]">
                 <CardHeader>
                   <CardTitle className="text-base">Processing Time</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-cyan-700">
+                    <p className="text-2xl font-bold text-[#516057]">
                       {Math.round(
                         (new Date(document.processedAt).getTime() - new Date(document.uploadedAt).getTime()) / 1000
                       )}s
                     </p>
-                    <p className="text-xs text-gray-600 mt-1">Time to process document</p>
+                    <p className="text-xs text-[#505454] mt-1">Time to process document</p>
                   </div>
                 </CardContent>
               </Card>

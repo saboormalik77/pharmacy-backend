@@ -139,7 +139,7 @@ export function CartDrawer() {
           </div>
           <button
             onClick={closeCart}
-            className="p-1.5 hover:bg-accent rounded-lg transition-colors"
+            className="p-1.5 hover:bg-accent rounded-[4px] transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
@@ -166,7 +166,7 @@ export function CartDrawer() {
             <p className="text-sm text-muted-foreground mb-4">Add some deals to get started!</p>
             <button
               onClick={closeCart}
-              className="px-3 py-1.5 bg-teal-600 text-white rounded-md hover:bg-teal-700 text-xs font-medium transition-all shadow-sm"
+              className="px-3 py-1.5 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] text-xs font-medium transition-all shadow-sm"
             >
               Browse Deals
             </button>
@@ -182,7 +182,7 @@ export function CartDrawer() {
                 return (
                   <div
                     key={item.id}
-                    className={`grid grid-cols-[60px_1fr_auto] gap-3 p-2.5 bg-muted/50 rounded-lg border ${isRemoving ? 'opacity-50' : ''}`}
+                    className={`grid grid-cols-[60px_1fr_auto] gap-3 p-2.5 bg-muted/50 rounded-[4px] border ${isRemoving ? 'opacity-50' : ''}`}
                   >
                     {/* Image */}
                     <div className="w-[60px] h-[60px] bg-card rounded border flex items-center justify-center overflow-hidden relative">
@@ -338,7 +338,7 @@ export function CartDrawer() {
                   router.push('/marketplace/checkout')
                 }}
                 disabled={isCartLoading}
-                className="w-full px-3 py-1.5 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 flex items-center justify-center gap-1 text-xs font-medium transition-all shadow-sm"
+                className="w-full px-3 py-1.5 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] disabled:opacity-50 flex items-center justify-center gap-1 text-xs font-medium transition-all shadow-sm"
               >
                 Proceed to Checkout
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -348,14 +348,14 @@ export function CartDrawer() {
               <div className="flex gap-2">
                 <button
                   onClick={closeCart}
-                  className="flex-1 px-3 py-1.5 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md text-xs font-medium transition-all"
+                  className="flex-1 px-3 py-1.5 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-[4px] text-xs font-medium transition-all"
                 >
                   Continue Shopping
                 </button>
                 <button
                   onClick={handleClearCart}
                   disabled={isCartLoading}
-                  className="px-3 py-1.5 border border-destructive/30 text-destructive hover:bg-destructive/10 rounded-md text-xs font-medium transition-all disabled:opacity-50"
+                  className="px-3 py-1.5 border border-destructive/30 text-destructive hover:bg-destructive/10 rounded-[4px] text-xs font-medium transition-all disabled:opacity-50"
                 >
                   Clear Cart
                 </button>

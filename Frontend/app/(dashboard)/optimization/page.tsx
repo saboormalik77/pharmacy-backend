@@ -489,7 +489,7 @@ export default function OptimizationPage() {
       <style jsx>{scrollbarStyles}</style>
       <div className="space-y-2 p-2">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <h1 className="text-lg sm:text-xl font-bold text-gray-900">Search Recommendations</h1>
+          <h1 className="text-lg sm:text-xl font-bold text-[#000000]">Search Recommendations</h1>
           <div className="flex flex-wrap items-center justify-end gap-1">
             {/* <button
               onClick={() => router.push('/packages')}
@@ -501,7 +501,7 @@ export default function OptimizationPage() {
             <button
               onClick={handleExportReport}
               disabled={!recommendation || loading}
-              className="px-2 py-1 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-xs"
+              className="px-2 py-1 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-xs"
             >
               <Download className="h-3 w-3" />
               <span className="sm:inline">Export</span>
@@ -510,12 +510,12 @@ export default function OptimizationPage() {
         </div>
 
         {/* Search Bar - Simplified */}
-        <Card className="border-2 border-teal-200">
+        <Card className="border-2 border-[#e2e2e2]">
             <CardContent className="p-2">
               <div className="space-y-2">
                 {/* Error Message */}
                 {error && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-2 flex items-start gap-2">
+                  <div className="bg-red-50 border border-red-200 rounded-[4px] p-2 flex items-start gap-2">
                     <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
                     <div className="flex-1">
                       <p className="text-xs text-red-800">{error}</p>
@@ -535,12 +535,12 @@ export default function OptimizationPage() {
                     {selectedNdcs.map((item, index) => (
                       <div
                         key={index}
-                        className="flex items-center gap-1 bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full text-xs"
+                        className="flex items-center gap-1 bg-[#f5f2f1] text-[#516057] px-2 py-0.5 rounded-full text-xs"
                       >
                         <span>{item.ndc}</span>
                         <button
                           onClick={() => handleRemoveNdc(item.ndc)}
-                          className="hover:bg-teal-200 rounded-full p-0.5 transition-colors"
+                          className="hover:bg-[#e2e2e2] rounded-full p-0.5 transition-colors"
                           aria-label={`Remove ${item.ndc}`}
                         >
                           <X className="h-2.5 w-2.5" />
@@ -553,7 +553,7 @@ export default function OptimizationPage() {
                 <div className="space-y-2">
                   {/* NDC Input */}
                   <div className="flex-1 relative">
-                    <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-gray-400" />
+                    <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-[#9ca3af]" />
                     <input
                       type="text"
                       placeholder="Enter NDC code"
@@ -564,7 +564,7 @@ export default function OptimizationPage() {
                           handleAddNdc();
                         }
                       }}
-                      className="w-full pl-8 pr-2 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      className="w-full pl-8 pr-2 py-1.5 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
                     />
                   </div>
 
@@ -576,7 +576,7 @@ export default function OptimizationPage() {
                         !ndcSearchInput.trim() || 
                         isDuplicateNdc(ndcSearchInput.trim())
                       }
-                      className="px-3 py-1 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs font-medium"
+                      className="px-3 py-1 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs font-medium"
                     >
                       <Plus className="h-3 w-3" />
                       <span>Add</span>
@@ -584,7 +584,7 @@ export default function OptimizationPage() {
                     <button
                       onClick={handleCustomSearch}
                       disabled={selectedNdcs.length === 0 || searchLoading}
-                      className="px-3 py-1 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs font-medium"
+                      className="px-3 py-1 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs font-medium"
                     >
                       {searchLoading ? (
                         <>
@@ -601,7 +601,7 @@ export default function OptimizationPage() {
                     {activeNdcFilter && (
                       <button
                         onClick={handleClearSearch}
-                        className="px-3 py-1 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs font-medium"
+                        className="px-3 py-1 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs font-medium"
                       >
                         <X className="h-3 w-3" />
                         <span className=" sm:inline">Clear</span>
@@ -614,28 +614,28 @@ export default function OptimizationPage() {
           </Card>
 
         {/* Total Potential Savings */}
-        {/* <Card className="bg-gradient-to-r from-teal-50 to-cyan-50 border-2 border-teal-200">
+        {/* <Card className="bg-[#f5f2f1] border-2 border-[#e2e2e2]">
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div className="flex-1 min-w-0">
-                <p className="text-xs sm:text-sm text-gray-600 mb-1">Total Potential Savings</p>
+                <p className="text-xs sm:text-sm text-[#505454] mb-1">Total Potential Savings</p>
                 {loading || searchLoading ? (
                   <div className="flex items-center gap-2">
-                    <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin text-teal-600" />
+                    <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin text-[#516057]" />
                   </div>
                 ) : recommendation ? (
                   <div className="space-y-2">
-                    <p className="text-2xl sm:text-3xl font-bold text-teal-700 break-words">{formatCurrency(topDistributorTotal)}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-[#516057] break-words">{formatCurrency(topDistributorTotal)}</p>
                     {lossAmount > 0 && (
                       <div className="flex flex-wrap items-center gap-2">
                         <TrendingDown className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 flex-shrink-0" />
-                        <p className="text-xs sm:text-sm text-gray-600">Loss from distributor:</p>
+                        <p className="text-xs sm:text-sm text-[#505454]">Loss from distributor:</p>
                         <p className="text-base sm:text-lg font-semibold text-red-600">{formatCurrency(lossAmount)}</p>
                       </div>
                     )}
                   </div>
                 ) : (
-                  <p className="text-2xl sm:text-3xl font-bold text-teal-700">$0.00</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-[#516057]">$0.00</p>
                 )}
               </div>
             </div>
@@ -648,16 +648,16 @@ export default function OptimizationPage() {
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full border-collapse">
                 <thead>
-                  <tr className="bg-gray-50 border-b border-gray-200">
-                    <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 w-[180px]">Product Name</th>
-                    <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 w-[120px]">NDC</th>
-                    <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 w-[100px]">Full Qty</th>
-                    <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 w-[100px]">Partial Qty</th>
-                    <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 w-[200px]">Recommended Distributor</th>
-                    <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 w-[100px]">Full Price</th>
-                    <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 w-[100px]">Partial Price</th>
-                    <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 w-[100px]">Total Price</th>
-                    <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700 w-[100px]">Actions</th>
+                  <tr className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
+                    <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454] w-[180px]">Product Name</th>
+                    <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454] w-[120px]">NDC</th>
+                    <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454] w-[100px]">Full Qty</th>
+                    <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454] w-[100px]">Partial Qty</th>
+                    <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454] w-[200px]">Recommended Distributor</th>
+                    <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454] w-[100px]">Full Price</th>
+                    <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454] w-[100px]">Partial Price</th>
+                    <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454] w-[100px]">Total Price</th>
+                    <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454] w-[100px]">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -665,8 +665,8 @@ export default function OptimizationPage() {
                     <tr>
                       <td colSpan={9} className="px-2 py-8 text-center">
                         <div className="flex flex-col items-center gap-2">
-                          <Loader2 className="h-6 w-6 animate-spin text-teal-600" />
-                          <p className="text-xs text-gray-600">Searching recommendations...</p>
+                          <Loader2 className="h-6 w-6 animate-spin text-[#516057]" />
+                          <p className="text-xs text-[#505454]">Searching recommendations...</p>
                         </div>
                       </td>
                     </tr>
@@ -675,7 +675,7 @@ export default function OptimizationPage() {
                       <td colSpan={9} className="px-2 py-8 text-center">
                         <div className="flex flex-col items-center gap-2">
                           <AlertCircle className="h-6 w-6 text-red-600" />
-                          <p className="text-xs text-gray-600">{error || 'No recommendations available'}</p>
+                          <p className="text-xs text-[#505454]">{error || 'No recommendations available'}</p>
                           <button
                             onClick={() => {
                               const items = selectedNdcs.map(item => ({
@@ -683,7 +683,7 @@ export default function OptimizationPage() {
                               }));
                               fetchRecommendations(items);
                             }}
-                            className="px-2 py-1 bg-teal-600 text-white rounded hover:bg-teal-700 flex items-center gap-1 text-xs"
+                            className="px-2 py-1 bg-[#516057] text-white rounded hover:bg-[#505454] flex items-center gap-1 text-xs"
                           >
                             <RefreshCw className="h-3 w-3" />
                             Retry
@@ -697,10 +697,10 @@ export default function OptimizationPage() {
                       return (
                         <tr
                           key={`${rec.ndc}-${index}`}
-                          className="border-b border-gray-100 hover:bg-gray-50"
+                          className="border-b border-[#f3f4f6] hover:bg-[#f5f2f1]"
                         >
-                          <td className="px-2 py-1.5 text-xs text-gray-900">{rec.productName}</td>
-                          <td className="px-2 py-1.5 text-xs font-mono text-gray-600">{rec.ndc}</td>
+                          <td className="px-2 py-1.5 text-xs text-[#000000]">{rec.productName}</td>
+                          <td className="px-2 py-1.5 text-xs font-mono text-[#505454]">{rec.ndc}</td>
                           <td className="px-2 py-1.5">
                             <input
                               type="number"
@@ -710,7 +710,7 @@ export default function OptimizationPage() {
                                 const newQuantity = parseInt(e.target.value) || 0;
                                 handleFullQuantityChange(rec.ndc, newQuantity);
                               }}
-                              className="w-14 px-1.5 py-0.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                              className="w-14 px-1.5 py-0.5 text-xs border border-[#e2e2e2] rounded focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
                             />
                           </td>
                           <td className="px-2 py-1.5">
@@ -722,7 +722,7 @@ export default function OptimizationPage() {
                                 const newQuantity = parseInt(e.target.value) || 0;
                                 handlePartialQuantityChange(rec.ndc, newQuantity);
                               }}
-                              className="w-14 px-1.5 py-0.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                              className="w-14 px-1.5 py-0.5 text-xs border border-[#e2e2e2] rounded focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
                             />
                           </td>
                           <td className="px-2 py-1.5">
@@ -758,28 +758,28 @@ export default function OptimizationPage() {
                                     setOpenDropdown(rec.ndc);
                                   }
                                 }}
-                                className="w-full min-w-[160px] px-2 py-1 text-xs border-2 border-teal-200 rounded-lg bg-white text-gray-900 hover:border-teal-300 transition-all font-medium shadow-sm hover:shadow-md flex items-center justify-between gap-1"
+                                className="w-full min-w-[160px] px-2 py-1 text-xs border-2 border-[#e2e2e2] rounded-[4px] bg-white text-[#000000] hover:border-[#e2e2e2] transition-all font-medium shadow-sm hover:shadow-md flex items-center justify-between gap-1"
                               >
                                 <div className="flex items-center gap-1 flex-1">
                                   <span className="truncate">{displayedData.distributor}</span>
                                   {getAllDistributors(rec).find(d => d.name === (selectedDistributors[rec.ndc] || rec.recommendedDistributor))?.isRecommended && (
-                                    <span className="text-[10px] bg-teal-600 text-white px-1.5 py-0.5 rounded-full font-semibold flex-shrink-0">
+                                    <span className="text-[10px] bg-[#516057] text-white px-1.5 py-0.5 rounded-full font-semibold flex-shrink-0">
                                       <Check className="h-2.5 w-2.5 inline mr-0.5" />
                                       Rec
                                     </span>
                                   )}
                                 </div>
-                                <ChevronDown className={`h-2.5 w-2.5 text-teal-600 flex-shrink-0 transition-transform ${openDropdown === rec.ndc ? 'rotate-180' : ''}`} />
+                                <ChevronDown className={`h-2.5 w-2.5 text-[#516057] flex-shrink-0 transition-transform ${openDropdown === rec.ndc ? 'rotate-180' : ''}`} />
                               </button>
                             </div>
                           </td>
-                          <td className="px-2 py-1.5 text-xs font-semibold text-teal-700">{formatCurrency(displayedData.fullPrice)}</td>
-                          <td className="px-2 py-1.5 text-xs font-semibold text-teal-700">{formatCurrency(displayedData.partialPrice)}</td>
-                          <td className="px-2 py-1.5 text-xs font-semibold text-gray-900">{formatCurrency(displayedData.totalPrice)}</td>
+                          <td className="px-2 py-1.5 text-xs font-semibold text-[#516057]">{formatCurrency(displayedData.fullPrice)}</td>
+                          <td className="px-2 py-1.5 text-xs font-semibold text-[#516057]">{formatCurrency(displayedData.partialPrice)}</td>
+                          <td className="px-2 py-1.5 text-xs font-semibold text-[#000000]">{formatCurrency(displayedData.totalPrice)}</td>
                           <td className="px-2 py-1.5">
                               <button
                                 onClick={() => handleViewStats(rec)}
-                              className="px-2 py-0.5 bg-teal-600 text-white text-xs rounded-lg hover:bg-teal-700 flex items-center gap-1 shadow-sm hover:shadow-md transition-all"
+                              className="px-2 py-0.5 bg-[#516057] text-white text-xs rounded-[4px] hover:bg-[#505454] flex items-center gap-1 shadow-sm hover:shadow-md transition-all"
                               >
                                 <BarChart3 className="h-3 w-3" />
                                 Stats
@@ -790,7 +790,7 @@ export default function OptimizationPage() {
                     })
                   ) : (
                     <tr>
-                      <td colSpan={9} className="px-2 py-6 text-center text-xs text-gray-500">
+                      <td colSpan={9} className="px-2 py-6 text-center text-xs text-[#6b7280]">
                         {!recommendation && !loading && !searchLoading ? 'Enter NDC codes above and click Search to view recommendations' : 'No data available'}
                       </td>
                     </tr>
@@ -803,16 +803,16 @@ export default function OptimizationPage() {
             <div className="md:hidden overflow-x-auto">
               <table className="w-full border-collapse min-w-[900px]">
                 <thead>
-                  <tr className="bg-gray-50 border-b border-gray-200">
-                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700 w-[140px]">Product</th>
-                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700 w-[100px]">NDC</th>
-                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700 w-[70px]">Full Qty</th>
-                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700 w-[80px]">Partial Qty</th>
-                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700 w-[160px]">Distributor</th>
-                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700 w-[80px]">Full Price</th>
-                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700 w-[80px]">Partial Price</th>
-                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700 w-[80px]">Total</th>
-                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700 w-[80px]">Actions</th>
+                  <tr className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
+                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454] w-[140px]">Product</th>
+                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454] w-[100px]">NDC</th>
+                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454] w-[70px]">Full Qty</th>
+                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454] w-[80px]">Partial Qty</th>
+                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454] w-[160px]">Distributor</th>
+                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454] w-[80px]">Full Price</th>
+                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454] w-[80px]">Partial Price</th>
+                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454] w-[80px]">Total</th>
+                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454] w-[80px]">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -820,8 +820,8 @@ export default function OptimizationPage() {
                     <tr>
                       <td colSpan={9} className="px-2 py-8 text-center">
                         <div className="flex flex-col items-center gap-2">
-                          <Loader2 className="h-6 w-6 animate-spin text-teal-600" />
-                          <p className="text-[10px] text-gray-600">Searching recommendations...</p>
+                          <Loader2 className="h-6 w-6 animate-spin text-[#516057]" />
+                          <p className="text-[10px] text-[#505454]">Searching recommendations...</p>
                         </div>
                       </td>
                     </tr>
@@ -830,7 +830,7 @@ export default function OptimizationPage() {
                       <td colSpan={9} className="px-2 py-8 text-center">
                         <div className="flex flex-col items-center gap-2">
                           <AlertCircle className="h-6 w-6 text-red-600" />
-                          <p className="text-[10px] text-gray-600">{error || 'No recommendations available'}</p>
+                          <p className="text-[10px] text-[#505454]">{error || 'No recommendations available'}</p>
                           <button
                             onClick={() => {
                               const items = selectedNdcs.map(item => ({
@@ -838,7 +838,7 @@ export default function OptimizationPage() {
                               }));
                               fetchRecommendations(items);
                             }}
-                            className="px-2 py-1 bg-teal-600 text-white rounded hover:bg-teal-700 flex items-center gap-1 text-[10px]"
+                            className="px-2 py-1 bg-[#516057] text-white rounded hover:bg-[#505454] flex items-center gap-1 text-[10px]"
                           >
                             <RefreshCw className="h-2.5 w-2.5" />
                             Retry
@@ -852,12 +852,12 @@ export default function OptimizationPage() {
                       return (
                         <tr
                           key={`${rec.ndc}-${index}`}
-                          className="border-b border-gray-100 hover:bg-gray-50"
+                          className="border-b border-[#f3f4f6] hover:bg-[#f5f2f1]"
                         >
-                          <td className="px-2 py-1 text-[10px] text-gray-900 max-w-[120px] truncate" title={rec.productName}>
+                          <td className="px-2 py-1 text-[10px] text-[#000000] max-w-[120px] truncate" title={rec.productName}>
                             {rec.productName}
                           </td>
-                          <td className="px-2 py-1 text-[10px] font-mono text-gray-600">{rec.ndc}</td>
+                          <td className="px-2 py-1 text-[10px] font-mono text-[#505454]">{rec.ndc}</td>
                           <td className="px-2 py-1">
                             <input
                               type="number"
@@ -867,7 +867,7 @@ export default function OptimizationPage() {
                                 const newQuantity = parseInt(e.target.value) || 0;
                                 handleFullQuantityChange(rec.ndc, newQuantity);
                               }}
-                              className="w-10 px-1 py-0.5 text-[10px] border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                              className="w-10 px-1 py-0.5 text-[10px] border border-[#e2e2e2] rounded focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
                             />
                           </td>
                           <td className="px-2 py-1">
@@ -879,7 +879,7 @@ export default function OptimizationPage() {
                                 const newQuantity = parseInt(e.target.value) || 0;
                                 handlePartialQuantityChange(rec.ndc, newQuantity);
                               }}
-                              className="w-10 px-1 py-0.5 text-[10px] border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                              className="w-10 px-1 py-0.5 text-[10px] border border-[#e2e2e2] rounded focus:outline-none focus:ring-2 focus:ring-[#516057] focus:border-transparent"
                             />
                           </td>
                           <td className="px-2 py-1">
@@ -915,27 +915,27 @@ export default function OptimizationPage() {
                                     setOpenDropdown(rec.ndc);
                                   }
                                 }}
-                                className="w-full min-w-[120px] px-1.5 py-0.5 text-[10px] border-2 border-teal-200 rounded-lg bg-white text-gray-900 hover:border-teal-300 transition-all font-medium shadow-sm hover:shadow-md flex items-center justify-between gap-0.5"
+                                className="w-full min-w-[120px] px-1.5 py-0.5 text-[10px] border-2 border-[#e2e2e2] rounded-[4px] bg-white text-[#000000] hover:border-[#e2e2e2] transition-all font-medium shadow-sm hover:shadow-md flex items-center justify-between gap-0.5"
                               >
                                 <div className="flex items-center gap-0.5 flex-1 min-w-0">
                                   <span className="truncate text-[10px]">{displayedData.distributor}</span>
                                   {getAllDistributors(rec).find(d => d.name === (selectedDistributors[rec.ndc] || rec.recommendedDistributor))?.isRecommended && (
-                                    <span className="text-[8px] bg-teal-600 text-white px-1 py-0.5 rounded-full font-semibold flex-shrink-0">
+                                    <span className="text-[8px] bg-[#516057] text-white px-1 py-0.5 rounded-full font-semibold flex-shrink-0">
                                       <Check className="h-2 w-2 inline" />
                                     </span>
                                   )}
                                 </div>
-                                <ChevronDown className={`h-2.5 w-2.5 text-teal-600 flex-shrink-0 transition-transform ${openDropdown === rec.ndc ? 'rotate-180' : ''}`} />
+                                <ChevronDown className={`h-2.5 w-2.5 text-[#516057] flex-shrink-0 transition-transform ${openDropdown === rec.ndc ? 'rotate-180' : ''}`} />
                               </button>
                             </div>
                           </td>
-                          <td className="px-2 py-1 text-[10px] font-semibold text-teal-700">{formatCurrency(displayedData.fullPrice)}</td>
-                          <td className="px-2 py-1 text-[10px] font-semibold text-teal-700">{formatCurrency(displayedData.partialPrice)}</td>
-                          <td className="px-2 py-1 text-[10px] font-semibold text-gray-900">{formatCurrency(displayedData.totalPrice)}</td>
+                          <td className="px-2 py-1 text-[10px] font-semibold text-[#516057]">{formatCurrency(displayedData.fullPrice)}</td>
+                          <td className="px-2 py-1 text-[10px] font-semibold text-[#516057]">{formatCurrency(displayedData.partialPrice)}</td>
+                          <td className="px-2 py-1 text-[10px] font-semibold text-[#000000]">{formatCurrency(displayedData.totalPrice)}</td>
                           <td className="px-2 py-1">
                               <button
                                 onClick={() => handleViewStats(rec)}
-                              className="px-1.5 py-0.5 bg-teal-600 text-white text-[10px] rounded-lg hover:bg-teal-700 flex items-center gap-0.5 shadow-sm hover:shadow-md transition-all"
+                              className="px-1.5 py-0.5 bg-[#516057] text-white text-[10px] rounded-[4px] hover:bg-[#505454] flex items-center gap-0.5 shadow-sm hover:shadow-md transition-all"
                                 title="View Stats"
                               >
                                 <BarChart3 className="h-2.5 w-2.5" />
@@ -946,7 +946,7 @@ export default function OptimizationPage() {
                     })
                   ) : (
                     <tr>
-                      <td colSpan={9} className="px-2 py-6 text-center text-[10px] text-gray-500">
+                      <td colSpan={9} className="px-2 py-6 text-center text-[10px] text-[#6b7280]">
                         {!recommendation && !loading && !searchLoading ? 'Enter NDC codes above and click Search to view recommendations' : 'No data available'}
                       </td>
                     </tr>
@@ -972,7 +972,7 @@ export default function OptimizationPage() {
                 }}
               />
               <div 
-                className="fixed z-50 bg-white border-2 border-teal-200 rounded-lg shadow-2xl distributor-menu-overlay"
+                className="fixed z-50 bg-white border-2 border-[#e2e2e2] rounded-[4px] shadow-2xl distributor-menu-overlay"
                 style={{
                   top: `${dropdownPosition.top}px`,
                   left: `${dropdownPosition.left}px`,
@@ -1004,24 +1004,24 @@ export default function OptimizationPage() {
                           setOpenDropdown(null);
                           setDropdownPosition(null);
                         }}
-                        className={`w-full text-left px-2 py-1.5 hover:bg-teal-50 transition-colors border-l-4 ${
+                        className={`w-full text-left px-2 py-1.5 hover:bg-[#f5f2f1] transition-colors border-l-4 ${
                           isSelected
-                            ? 'border-teal-600 bg-teal-50'
+                            ? 'border-[#516057] bg-[#f5f2f1]'
                             : 'border-transparent'
                         }`}
                       >
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-1.5 flex-1 min-w-0">
                             {isSelected && (
-                              <Check className="h-3 w-3 text-teal-600 flex-shrink-0" />
+                              <Check className="h-3 w-3 text-[#516057] flex-shrink-0" />
                             )}
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1 flex-wrap">
-                                <span className={`font-semibold text-xs ${isSelected ? 'text-teal-700' : 'text-gray-900'}`}>
+                                <span className={`font-semibold text-xs ${isSelected ? 'text-[#516057]' : 'text-[#000000]'}`}>
                                   {dist.name}
                                 </span>
                                 {dist.isRecommended && (
-                                  <span className="text-[10px] bg-teal-600 text-white px-1.5 py-0.5 rounded-full font-semibold flex items-center gap-0.5 flex-shrink-0">
+                                  <span className="text-[10px] bg-[#516057] text-white px-1.5 py-0.5 rounded-full font-semibold flex items-center gap-0.5 flex-shrink-0">
                                     <Check className="h-2.5 w-2.5" />
                                     Recommended
                                   </span>
@@ -1030,7 +1030,7 @@ export default function OptimizationPage() {
                             </div>
                           </div>
                           <div className="text-right flex-shrink-0">
-                            <div className={`text-xs font-bold ${isSelected ? 'text-teal-700' : 'text-gray-900'}`}>
+                            <div className={`text-xs font-bold ${isSelected ? 'text-[#516057]' : 'text-[#000000]'}`}>
                               {formatCurrency(totalPrice)}
                         </div>
                     </div>
@@ -1047,13 +1047,13 @@ export default function OptimizationPage() {
         {/* Stats Modal */}
         {statsModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2">
-            <div className="relative w-full max-w-4xl bg-white rounded-lg shadow-xl max-h-[90vh] flex flex-col">
+            <div className="relative w-full max-w-4xl bg-white rounded-[4px] shadow-xl max-h-[90vh] flex flex-col">
               {/* Modal Header */}
-              <div className="flex items-center justify-between p-2 border-b border-gray-200 flex-shrink-0">
+              <div className="flex items-center justify-between p-2 border-b border-[#e2e2e2] flex-shrink-0">
                 <div className="flex-1 min-w-0 pr-2">
-                  <h3 className="text-sm font-bold text-gray-900 truncate">Distributor Stats</h3>
+                  <h3 className="text-sm font-bold text-[#000000] truncate">Distributor Stats</h3>
                   {statsProduct && (
-                    <p className="text-xs text-gray-600 mt-0.5 truncate">
+                    <p className="text-xs text-[#505454] mt-0.5 truncate">
                       {statsProduct.productName} - {statsProduct.distributorName}
                     </p>
                   )}
@@ -1066,7 +1066,7 @@ export default function OptimizationPage() {
                     setStatsSummary(null);
                     setError(null);
                   }}
-                  className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+                  className="p-1.5 hover:bg-[#f5f2f1] rounded-[4px] transition-colors flex-shrink-0"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -1075,7 +1075,7 @@ export default function OptimizationPage() {
               {/* Modal Content */}
               <div className="flex-1 p-2 overflow-y-auto">
                 {error && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-2 mb-2 flex items-start gap-2">
+                  <div className="bg-red-50 border border-red-200 rounded-[4px] p-2 mb-2 flex items-start gap-2">
                     <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
                     <div className="flex-1">
                       <p className="text-xs text-red-800 font-medium">Error</p>
@@ -1092,28 +1092,28 @@ export default function OptimizationPage() {
 
                 {statsLoading ? (
                   <div className="flex flex-col items-center justify-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin text-teal-600 mb-2" />
-                    <p className="text-xs text-gray-600">Loading stats...</p>
+                    <Loader2 className="h-6 w-6 animate-spin text-[#516057] mb-2" />
+                    <p className="text-xs text-[#505454]">Loading stats...</p>
                   </div>
                 ) : statsData.length > 0 ? (
                   <div className="space-y-2">
                     {/* Price Stats at Top */}
                     {statsSummary?.priceStats && (
-                      <Card className="bg-gradient-to-r from-teal-50 via-cyan-50 to-teal-50 border-2 border-teal-200">
+                      <Card className="bg-[#f5f2f1] border-2 border-[#e2e2e2]">
                         <CardContent className="p-2">
-                          <h4 className="text-xs font-semibold text-gray-900 mb-2">Price Statistics</h4>
+                          <h4 className="text-xs font-semibold text-[#000000] mb-2">Price Statistics</h4>
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                            <div className="bg-white rounded-lg p-2 border border-teal-100">
-                              <p className="text-[10px] text-gray-500 mb-0.5">Minimum</p>
-                              <p className="text-sm font-bold text-teal-700">{formatCurrency(statsSummary.priceStats.min || 0)}</p>
+                            <div className="bg-white rounded-[4px] p-2 border border-[#e2e2e2]">
+                              <p className="text-[10px] text-[#6b7280] mb-0.5">Minimum</p>
+                              <p className="text-sm font-bold text-[#516057]">{formatCurrency(statsSummary.priceStats.min || 0)}</p>
                             </div>
-                            <div className="bg-white rounded-lg p-2 border border-teal-100">
-                              <p className="text-[10px] text-gray-500 mb-0.5">Average</p>
-                              <p className="text-sm font-bold text-teal-700">{formatCurrency(statsSummary.priceStats.average || 0)}</p>
+                            <div className="bg-white rounded-[4px] p-2 border border-[#e2e2e2]">
+                              <p className="text-[10px] text-[#6b7280] mb-0.5">Average</p>
+                              <p className="text-sm font-bold text-[#516057]">{formatCurrency(statsSummary.priceStats.average || 0)}</p>
                             </div>
-                            <div className="bg-white rounded-lg p-2 border border-teal-100">
-                              <p className="text-[10px] text-gray-500 mb-0.5">Maximum</p>
-                              <p className="text-sm font-bold text-teal-700">{formatCurrency(statsSummary.priceStats.max || 0)}</p>
+                            <div className="bg-white rounded-[4px] p-2 border border-[#e2e2e2]">
+                              <p className="text-[10px] text-[#6b7280] mb-0.5">Maximum</p>
+                              <p className="text-sm font-bold text-[#516057]">{formatCurrency(statsSummary.priceStats.max || 0)}</p>
                             </div>
                           </div>
                         </CardContent>
@@ -1126,15 +1126,15 @@ export default function OptimizationPage() {
                     {statsSummary?.dateRange && (
                       <Card>
                         <CardContent className="p-2">
-                          <h4 className="text-xs font-semibold text-gray-700 mb-2">Date Range</h4>
+                          <h4 className="text-xs font-semibold text-[#505454] mb-2">Date Range</h4>
                           <div className="grid grid-cols-2 gap-2">
                             <div>
-                              <p className="text-[10px] text-gray-500 mb-0.5">Earliest</p>
-                              <p className="text-xs font-medium text-gray-900">{statsSummary.dateRange.earliest || 'N/A'}</p>
+                              <p className="text-[10px] text-[#6b7280] mb-0.5">Earliest</p>
+                              <p className="text-xs font-medium text-[#000000]">{statsSummary.dateRange.earliest || 'N/A'}</p>
                             </div>
                             <div>
-                              <p className="text-[10px] text-gray-500 mb-0.5">Latest</p>
-                              <p className="text-xs font-medium text-gray-900">{statsSummary.dateRange.latest || 'N/A'}</p>
+                              <p className="text-[10px] text-[#6b7280] mb-0.5">Latest</p>
+                              <p className="text-xs font-medium text-[#000000]">{statsSummary.dateRange.latest || 'N/A'}</p>
                             </div>
                           </div>
                         </CardContent>
@@ -1144,7 +1144,7 @@ export default function OptimizationPage() {
                     {/* Bar Chart from dataPoints */}
                     <Card>
                       <CardContent className="p-2">
-                        <h4 className="text-xs font-semibold text-gray-700 mb-2">Price Per Unit Over Time</h4>
+                        <h4 className="text-xs font-semibold text-[#505454] mb-2">Price Per Unit Over Time</h4>
                         <ResponsiveContainer width="100%" height={250}>
                           <BarChart data={statsData} barCategoryGap={statsData.length === 1 ? "50%" : "20%"}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -1174,14 +1174,14 @@ export default function OptimizationPage() {
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-8">
-                    <BarChart3 className="h-8 w-8 text-gray-400 mb-2" />
-                    <p className="text-xs text-gray-600">No stats data available</p>
+                    <BarChart3 className="h-8 w-8 text-[#9ca3af] mb-2" />
+                    <p className="text-xs text-[#505454]">No stats data available</p>
                   </div>
                 )}
               </div>
 
               {/* Modal Footer */}
-              <div className="flex items-center justify-end gap-2 p-2 border-t border-gray-200 flex-shrink-0">
+              <div className="flex items-center justify-end gap-2 p-2 border-t border-[#e2e2e2] flex-shrink-0">
                 <button
                   onClick={() => {
                     setStatsModalOpen(false);
@@ -1190,7 +1190,7 @@ export default function OptimizationPage() {
                     setStatsSummary(null);
                     setError(null);
                   }}
-                  className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-xs"
+                  className="px-3 py-1 bg-[#e2e2e2] text-[#505454] rounded hover:bg-gray-300 text-xs"
                 >
                   Close
                 </button>

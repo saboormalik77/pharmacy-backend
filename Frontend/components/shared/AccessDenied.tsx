@@ -13,7 +13,7 @@ export function AccessDenied({ message }: { message?: string }) {
       </p>
       <Link
         href="/portal"
-        className="px-5 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors text-sm font-medium"
+        className="px-5 py-2.5 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] transition-colors text-sm font-medium"
       >
         Go to home
       </Link>

@@ -19,7 +19,6 @@ export function DealHero({ deal, onShowToast, dealType = 'day' }: DealHeroProps)
   const [isAdding, setIsAdding] = useState(false)
   const { addToCart, openDealModal } = useMarketplaceStore()
 
-  // Calculate expiry countdown
   const expiryDate = new Date(deal.expiryDate)
   
   useEffect(() => {
@@ -53,7 +52,7 @@ export function DealHero({ deal, onShowToast, dealType = 'day' }: DealHeroProps)
     }
 
     updateCountdown()
-    const interval = setInterval(updateCountdown, 60000) // Update every minute
+    const interval = setInterval(updateCountdown, 60000)
     return () => clearInterval(interval)
   }, [expiryDate])
 
@@ -65,9 +64,6 @@ export function DealHero({ deal, onShowToast, dealType = 'day' }: DealHeroProps)
     
     const minQty = deal.minimumBuyQuantity || 1
     const availableQty = deal.quantity
-    
-    // If available quantity is less than minimum, use available quantity
-    // Otherwise, use minimum quantity
     const quantityToAdd = availableQty < minQty ? availableQty : minQty
     
     setIsAdding(true)
@@ -83,62 +79,57 @@ export function DealHero({ deal, onShowToast, dealType = 'day' }: DealHeroProps)
 
   const isDisabled = deal.status !== 'active' || isAdding
 
+  const getBadgeStyles = () => {
+    switch (dealType) {
+      case 'day':
+        return 'bg-[#ad916a] text-white'
+      case 'week':
+        return 'bg-[#516057] text-white'
+      case 'month':
+        return 'bg-[#1d2222] text-white'
+      default:
+        return 'bg-[#516057] text-white'
+    }
+  }
+
   return (
-    <Card className="bg-primary/5 border-primary/20 relative overflow-hidden">
+    <Card className="bg-white border border-[#e2e2e2] relative overflow-hidden rounded-[4px]">
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
-            {/* Flashy Featured Deal Badge */}
-            <div className="relative">
-              <div className={`absolute inset-0 rounded-full blur-md opacity-70 animate-pulse ${
-                dealType === 'day' 
-                  ? 'bg-gradient-to-r from-orange-500 via-red-500 to-orange-500'
-                  : dealType === 'week'
-                  ? 'bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500'
-                  : 'bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500'
-              }`}></div>
-              <div className={`relative text-white px-5 py-2 rounded-full font-extrabold text-sm sm:text-base shadow-2xl animate-pulse border-2 border-white/30 ${
-                dealType === 'day'
-                  ? 'bg-gradient-to-r from-orange-500 to-red-500'
-                  : dealType === 'week'
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-500'
-                  : 'bg-gradient-to-r from-emerald-500 to-teal-500'
-              }`}>
-                <span className="mr-1.5">{dealType === 'day' ? '🔥' : dealType === 'week' ? '⭐' : '🏆'}</span>
-                {dealType === 'day' ? 'DEAL OF THE DAY' : dealType === 'week' ? 'DEAL OF THE WEEK' : 'DEAL OF THE MONTH'}
-              </div>
+            {/* Featured Deal Badge */}
+            <div className={`relative text-white px-5 py-2 rounded-full font-extrabold text-sm sm:text-base shadow-md border-2 border-white/30 ${getBadgeStyles()}`}>
+              <span className="mr-1.5">{dealType === 'day' ? '🔥' : dealType === 'week' ? '⭐' : '🏆'}</span>
+              {dealType === 'day' ? 'DEAL OF THE DAY' : dealType === 'week' ? 'DEAL OF THE WEEK' : 'DEAL OF THE MONTH'}
             </div>
             {deal.inCart && (
-              <Badge variant="success" className="text-xs">
+              <Badge className="text-xs rounded-full bg-[#516057] text-white">
                 <Check className="h-3 w-3 mr-1" />
                 In Cart ({deal.cartQuantity})
               </Badge>
             )}
           </div>
           <div className="flex items-center gap-2 text-xs">
-            <Clock className={`h-3 w-3 ${urgency === 'urgent' ? 'text-destructive' : 'text-muted-foreground'}`} />
-            <span className={`font-mono font-semibold ${urgency === 'urgent' ? 'text-destructive' : 'text-muted-foreground'}`}>
+            <Clock className={`h-3 w-3 ${urgency === 'urgent' ? 'text-red-500' : 'text-[#9ca3af]'}`} />
+            <span className={`font-mono font-semibold ${urgency === 'urgent' ? 'text-red-500' : 'text-[#9ca3af]'}`}>
               Expires: {new Date(deal.featuredUntil).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
             </span>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-[350px_1fr] gap-4">
-          {/* Product Image - Increased Height */}
-          <div className="relative w-full h-[350px] bg-muted rounded-lg overflow-hidden border-2 border-teal-200 shadow-md">
+          {/* Product Image */}
+          <div className="relative w-full h-[350px] bg-[#f5f2f1] rounded-[4px] overflow-hidden border border-[#e2e2e2] shadow-sm">
             <img 
               src={deal.imageUrl || `https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&h=500&fit=crop&q=80`} 
               alt={deal.productName} 
               className="w-full h-full object-cover" 
             />
-            {/* Overlay Badge on Image - Flashy Circular Badge */}
+            {/* Discount Badge */}
             <div className="absolute top-3 right-3 z-10">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-orange-500 rounded-full blur-lg opacity-70 animate-pulse"></div>
-                <div className="relative bg-gradient-to-r from-red-500 via-orange-500 to-red-500 text-white w-24 h-24 rounded-full flex flex-col items-center justify-center font-bold shadow-2xl transform hover:scale-110 transition-transform animate-bounce-glow border-4 border-white">
-                  <span className="text-3xl leading-none">{deal.savings}%</span>
-                  <span className="text-xs font-extrabold">OFF</span>
-                </div>
+              <div className="bg-[#ad916a] text-white w-24 h-24 rounded-full flex flex-col items-center justify-center font-bold shadow-lg border-4 border-white">
+                <span className="text-3xl leading-none">{deal.savings}%</span>
+                <span className="text-xs font-extrabold">OFF</span>
               </div>
             </div>
           </div>
@@ -148,11 +139,11 @@ export function DealHero({ deal, onShowToast, dealType = 'day' }: DealHeroProps)
             <div className="flex-1 space-y-3">
               {/* Title & Meta */}
               <div>
-                <h3 className="text-lg font-bold mb-1">{deal.productName}</h3>
-                <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                <h3 className="text-lg font-bold mb-1 text-[#000000] font-serif">{deal.productName}</h3>
+                <div className="flex flex-wrap gap-3 text-xs text-[#6b7280]">
                   {deal.ndc && (
                     <>
-                      <span className="font-mono font-semibold">NDC: {deal.ndc}</span>
+                      <span className="font-mono font-semibold text-[#505454]">NDC: {deal.ndc}</span>
                       <span>•</span>
                     </>
                   )}
@@ -167,15 +158,15 @@ export function DealHero({ deal, onShowToast, dealType = 'day' }: DealHeroProps)
               {/* Pricing */}
               <div className="flex items-center gap-4">
                 <div>
-                  <p className="text-xs text-muted-foreground mb-0.5">Regular Price</p>
-                  <p className="text-sm text-muted-foreground line-through">{formatCurrency(deal.originalPrice)}</p>
+                  <p className="text-xs text-[#9ca3af] mb-0.5">Regular Price</p>
+                  <p className="text-sm text-[#9ca3af] line-through">{formatCurrency(deal.originalPrice)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground mb-0.5">Deal Price</p>
-                  <p className="text-2xl font-bold text-primary">{formatCurrency(deal.dealPrice)}<span className="text-xs font-normal text-muted-foreground ml-1">/{deal.unit}</span></p>
+                  <p className="text-xs text-[#9ca3af] mb-0.5">Deal Price</p>
+                  <p className="text-2xl font-bold text-[#516057]">{formatCurrency(deal.dealPrice)}<span className="text-xs font-normal text-[#6b7280] ml-1">/{deal.unit}</span></p>
                 </div>
                 <div className="ml-auto">
-                  <Badge variant="success" className="text-xs">
+                  <Badge className="text-xs rounded-full bg-[#516057]/10 text-[#516057]">
                     <TrendingDown className="h-3 w-3 mr-1" />
                     Save {formatCurrency(deal.totalSavingsAmount)}
                   </Badge>
@@ -185,16 +176,16 @@ export function DealHero({ deal, onShowToast, dealType = 'day' }: DealHeroProps)
               {/* Availability */}
               <div>
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-xs font-medium text-muted-foreground">Availability</span>
-                  <span className="text-xs font-semibold">{deal.quantity} {deal.unit} remaining</span>
+                  <span className="text-xs font-medium text-[#6b7280]">Availability</span>
+                  <span className="text-xs font-semibold text-[#000000]">{deal.quantity} {deal.unit} remaining</span>
                 </div>
-                <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-[#f5f2f1] rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all ${
                       deal.quantity > 50
-                        ? 'bg-teal-600'
+                        ? 'bg-[#516057]'
                         : deal.quantity > 20
-                        ? 'bg-yellow-500'
+                        ? 'bg-[#ad916a]'
                         : 'bg-red-500'
                     }`}
                     style={{ width: `${Math.min(100, deal.quantity)}%` }}
@@ -203,35 +194,35 @@ export function DealHero({ deal, onShowToast, dealType = 'day' }: DealHeroProps)
               </div>
 
               {/* Specifications Grid */}
-              <div className="grid grid-cols-3 gap-2 py-2 border-t">
+              <div className="grid grid-cols-3 gap-2 py-2 border-t border-[#e2e2e2]">
                 <div className="text-xs">
-                  <p className="text-muted-foreground mb-0.5">Min Order</p>
-                  <p className="font-semibold">{deal.minimumBuyQuantity || 1} {deal.unit}</p>
+                  <p className="text-[#6b7280] mb-0.5">Min Order</p>
+                  <p className="font-semibold text-[#000000]">{deal.minimumBuyQuantity || 1} {deal.unit}</p>
                 </div>
                 <div className="text-xs">
-                  <p className="text-muted-foreground mb-0.5">Expiry</p>
-                  <p className="font-semibold">{deal.expiryDate}</p>
+                  <p className="text-[#6b7280] mb-0.5">Expiry</p>
+                  <p className="font-semibold text-[#000000]">{deal.expiryDate}</p>
                 </div>
                 <div className="text-xs">
-                  <p className="text-muted-foreground mb-0.5">Status</p>
-                  <p className="font-semibold capitalize">{deal.status}</p>
+                  <p className="text-[#6b7280] mb-0.5">Status</p>
+                  <p className="font-semibold text-[#000000] capitalize">{deal.status}</p>
                 </div>
               </div>
 
               {/* Notes */}
               {deal.notes && (
-                <div className="text-xs bg-muted/50 p-2 rounded-lg">
-                  <p className="text-muted-foreground">{deal.notes}</p>
+                <div className="text-xs bg-[#f5f2f1] p-2 rounded-[4px]">
+                  <p className="text-[#505454]">{deal.notes}</p>
                 </div>
               )}
             </div>
 
-            {/* Actions - Fixed at bottom with proper spacing */}
+            {/* Actions */}
             <div className="flex gap-2 pt-3 mt-auto">
               <button
                 onClick={handleAddToCart}
                 disabled={isDisabled}
-                className="flex-1 px-2 py-1 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs font-medium transition-all shadow-sm"
+                className="flex-1 px-2 py-1 bg-[#516057] text-white rounded-[4px] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs font-medium transition-all shadow-sm"
               >
                 {isAdding ? (
                   <>
@@ -252,7 +243,7 @@ export function DealHero({ deal, onShowToast, dealType = 'day' }: DealHeroProps)
               </button>
               <button
                 onClick={() => openDealModal(deal)}
-                className="px-2 py-1 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md flex items-center justify-center gap-1 text-xs font-medium transition-all"
+                className="px-2 py-1 border border-[#e2e2e2] bg-white hover:bg-[#f5f2f1] text-[#505454] rounded-[4px] flex items-center justify-center gap-1 text-xs font-medium transition-all"
               >
                 <Eye className="h-3 w-3" />
                 Details
@@ -264,4 +255,3 @@ export function DealHero({ deal, onShowToast, dealType = 'day' }: DealHeroProps)
     </Card>
   )
 }
-

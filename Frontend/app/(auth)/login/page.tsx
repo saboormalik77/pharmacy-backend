@@ -160,7 +160,7 @@ function LoginForm() {
       <CardHeader className="space-y-1">
         <div className="flex flex-col items-center justify-center mb-4 gap-3">
           {branding?.logoUrl && (
-            <img src={branding.logoUrl} alt="Logo" className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-contain" />
+            <img src={branding.logoUrl} alt="Logo" className="w-16 h-16 sm:w-20 sm:h-20 rounded-[4px] object-contain" />
           )}
           <div className="text-2xl font-bold text-primary">{branding?.businessName || 'PharmAnalytics'}</div>
         </div>
@@ -175,7 +175,7 @@ function LoginForm() {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={googleLoading || authBlocked}
-            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-gray-300 rounded-[4px] bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
           >
             <GoogleIcon />
             {googleLoading ? 'Signing in...' : 'Sign in with Google'}
@@ -239,7 +239,7 @@ function LoginForm() {
             </div>
           </div>
           {error && (
-            <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+            <div className="text-sm text-red-600 bg-red-50 p-3 rounded-[4px]">
               {error}
             </div>
           )}
@@ -256,7 +256,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-teal-50 to-emerald-100 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-[#f5f2f1] p-4">
       <Suspense fallback={<TenantInfoLoadingScreen />}>
         <LoginForm />
       </Suspense>

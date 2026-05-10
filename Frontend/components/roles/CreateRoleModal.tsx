@@ -89,18 +89,18 @@ export function CreateRoleModal({ isOpen, onClose, onSuccess, editRole }: Create
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div
-        className={`bg-card rounded-xl shadow-xl max-w-2xl w-full max-h-[85vh] overflow-y-auto ${thinScroll}`}
+        className={`bg-card rounded-[4px] shadow-xl max-w-2xl w-full max-h-[85vh] overflow-y-auto ${thinScroll}`}
       >
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b-[0.5px] border-gray-200 bg-gradient-to-r from-emerald-50 to-teal-50 bg-card p-4">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b-[0.5px] border-gray-200 bg-[#f5f2f1] bg-card p-4">
           <h2 className="text-base font-bold text-gray-900">{editRole ? 'Edit Role' : 'Create New Role'}</h2>
-          <button onClick={onClose} className="p-1 hover:bg-white/50 rounded-lg transition-colors">
+          <button onClick={onClose} className="p-1 hover:bg-white/50 rounded-[4px] transition-colors">
             <X className="h-4 w-4 text-gray-600" />
           </button>
         </div>
 
         <div className="p-4 space-y-4">
           {error && (
-            <div className="rounded-lg border-[0.5px] border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+            <div className="rounded-[4px] border-[0.5px] border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
               {error}
             </div>
           )}
@@ -117,14 +117,14 @@ export function CreateRoleModal({ isOpen, onClose, onSuccess, editRole }: Create
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe the role and its responsibilities..."
                 rows={2}
-                className="flex w-full rounded-lg border border-input bg-background px-2 py-1.5 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500 resize-none"
+                className="flex w-full rounded-[4px] border border-input bg-background px-2 py-1.5 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#516057]/20 focus-visible:border-[#516057] resize-none"
               />
             </div>
           </div>
 
           <div>
             <h3 className="text-xs font-bold text-gray-900 mb-2 flex items-center gap-2">
-              <span className="inline-block w-1 h-3.5 bg-emerald-600 rounded"></span>
+              <span className="inline-block w-1 h-3.5 bg-[#516057] rounded"></span>
               Permissions
             </h3>
             {loadingPerms ? (
@@ -153,7 +153,7 @@ export function CreateRoleModal({ isOpen, onClose, onSuccess, editRole }: Create
             Cancel
           </Button>
           <Button 
-            className="bg-emerald-600 hover:bg-emerald-700 text-white h-8 text-xs px-4"
+            className="bg-[#516057] hover:bg-[#505454] text-white h-8 text-xs px-4"
             onClick={handleSubmit} 
             disabled={isSubmitting}
           >

@@ -36,9 +36,9 @@ export function PharmacySwitcher() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm hover:bg-accent transition-colors border border-border"
+        className="flex items-center gap-2 rounded-[4px] px-2.5 py-1.5 text-sm hover:bg-accent transition-colors border border-border"
       >
-        <ArrowLeftRight className="h-4 w-4 text-teal-600" />
+        <ArrowLeftRight className="h-4 w-4 text-[#516057]" />
         <span className="hidden sm:inline text-sm font-medium truncate max-w-[140px]">
           Switch Branch
         </span>
@@ -46,7 +46,7 @@ export function PharmacySwitcher() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 rounded-md shadow-lg bg-card border border-border z-50 overflow-hidden">
+        <div className="absolute right-0 mt-2 w-64 rounded-[4px] shadow-lg bg-card border border-border z-50 overflow-hidden">
           <div className="py-1">
             <div className="px-4 py-2 border-b border-border">
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Switch to Branch</p>

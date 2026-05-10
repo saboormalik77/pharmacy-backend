@@ -203,7 +203,7 @@ export default function OnSiteServicePage() {
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="flex flex-col items-center gap-3">
-            <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+            <Loader2 className="h-8 w-8 animate-spin text-[#516057]" />
             <p className="text-sm text-muted-foreground">Loading...</p>
           </div>
         </div>
@@ -216,7 +216,7 @@ export default function OnSiteServicePage() {
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="flex flex-col items-center gap-3">
-            <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+            <Loader2 className="h-8 w-8 animate-spin text-[#516057]" />
             <p className="text-sm text-muted-foreground">Loading permissions...</p>
           </div>
         </div>
@@ -230,10 +230,10 @@ export default function OnSiteServicePage() {
         <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
           <AlertCircle className="h-12 w-12 text-orange-500 mb-4" />
           <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
-          <p className="text-gray-600 mb-4">
+          <p className="text-[#505454] mb-4">
             You don't have permission to access the On-Site Service feature.
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-[#6b7280]">
             Please contact your administrator to request access.
           </p>
         </div>
@@ -286,7 +286,7 @@ export default function OnSiteServicePage() {
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <Truck className="w-6 h-6 text-teal-600" />
+              <Truck className="w-6 h-6 text-[#516057]" />
               On-Site Service
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
@@ -296,7 +296,7 @@ export default function OnSiteServicePage() {
           {hasCreatePermission && (
             <button
               onClick={() => router.push('/on-site-service/new')}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded text-xs font-medium bg-teal-600 text-white hover:bg-teal-700 transition-colors"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded text-xs font-medium bg-[#516057] text-white hover:bg-[#505454] transition-colors"
             >
               <Plus className="w-4 h-4" />
               New Request
@@ -305,10 +305,10 @@ export default function OnSiteServicePage() {
         </div>
 
         {/* Info banner */}
-        <Card className="border-teal-200 bg-teal-50/60">
+        <Card className="border-[#e2e2e2] bg-[#f5f2f1]/60">
           <CardContent className="p-4 flex items-start gap-3 text-sm">
-            <Info className="w-5 h-5 text-teal-600 flex-shrink-0 mt-0.5" />
-            <div className="text-teal-900">
+            <Info className="w-5 h-5 text-[#516057] flex-shrink-0 mt-0.5" />
+            <div className="text-[#000000]">
               <strong>How this works:</strong> When you submit a request, it is automatically routed to every
               field representative assigned to your store. The first rep to claim and schedule it owns the
               visit. You'll receive an email once a rep confirms a date.
@@ -327,7 +327,7 @@ export default function OnSiteServicePage() {
                   setStatusFilter(e.target.value);
                   setPage(1);
                 }}
-                className="h-9 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="h-9 rounded-[4px] border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#516057]"
               >
                 {STATUS_FILTERS.map((s) => (
                   <option key={s.value} value={s.value}>{s.label}</option>
@@ -347,7 +347,7 @@ export default function OnSiteServicePage() {
           </CardHeader>
           <CardContent>
             {error && (
-              <div className="flex items-center gap-2 p-3 rounded-md border border-red-200 bg-red-50 text-red-800 text-sm mb-3">
+              <div className="flex items-center gap-2 p-3 rounded-[4px] border border-red-200 bg-red-50 text-red-800 text-sm mb-3">
                 <AlertCircle className="w-4 h-4" /> {error}
               </div>
             )}
@@ -363,7 +363,7 @@ export default function OnSiteServicePage() {
               <div className="overflow-x-auto">
                 <table className="w-full table-auto">
                   <thead>
-                    <tr className="bg-gradient-to-r from-teal-600 to-teal-700 border-b-2 border-teal-800">
+                    <tr className="bg-[#516057] border-b-2 border-[#516057]">
                       <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Requested</th>
                       <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Requested Date</th>
                       <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Scheduled</th>
@@ -379,24 +379,24 @@ export default function OnSiteServicePage() {
                       return (
                       <tr
                         key={r.id}
-                        className={`border-b border-gray-100 hover:bg-teal-50 transition-colors cursor-pointer ${isEven ? 'bg-white' : 'bg-teal-50/40'}`}
+                        className={`border-b border-[#f3f4f6] hover:bg-[#f5f2f1] transition-colors cursor-pointer ${isEven ? 'bg-white' : 'bg-[#f5f2f1]/40'}`}
                         onClick={() => openDetail(r.id)}
                       >
                         <td className="px-4 py-3">
-                          <span className="text-sm text-gray-600">{formatDate(r.created_at)}</span>
+                          <span className="text-sm text-[#505454]">{formatDate(r.created_at)}</span>
                         </td>
                         <td className="px-4 py-3">
-                          <span className="text-sm text-gray-900">{formatDate(r.requested_date)}</span>
+                          <span className="text-sm text-[#000000]">{formatDate(r.requested_date)}</span>
                         </td>
                         <td className="px-4 py-3">
-                          {r.scheduled_date ? <span className="text-sm text-gray-900">{formatDate(r.scheduled_date)}</span> : <span className="text-sm text-gray-600">—</span>}
+                          {r.scheduled_date ? <span className="text-sm text-[#000000]">{formatDate(r.scheduled_date)}</span> : <span className="text-sm text-[#505454]">—</span>}
                         </td>
                         <td className="px-4 py-3">
-                          {r.claimed_processor_name ? <span className="text-sm text-gray-900">{r.claimed_processor_name}</span> : <span className="text-sm text-gray-600">—</span>}
+                          {r.claimed_processor_name ? <span className="text-sm text-[#000000]">{r.claimed_processor_name}</span> : <span className="text-sm text-[#505454]">—</span>}
                         </td>
                         <td className="px-4 py-3">{getStatusBadge(r.status)}</td>
                         <td className="px-4 py-3">
-                          <span className="text-sm text-gray-600">{r.branch_business_name || r.branch_name || 'Main'}</span>
+                          <span className="text-sm text-[#505454]">{r.branch_business_name || r.branch_name || 'Main'}</span>
                         </td>
                         <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                           {r.status === 'pending' && (
@@ -417,22 +417,22 @@ export default function OnSiteServicePage() {
             )}
 
             {!loading && totalPages > 1 && (
-              <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50">
-                <span className="text-sm text-gray-600 font-medium">
+              <div className="flex items-center justify-between px-4 py-3 border-t border-[#f3f4f6] bg-[#f5f2f1]">
+                <span className="text-sm text-[#505454] font-medium">
                   Page {page} of {totalPages}
                 </span>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded transition-colors disabled:opacity-50"
+                    className="p-1.5 text-[#9ca3af] hover:text-[#516057] hover:bg-[#f5f2f1] rounded transition-colors disabled:opacity-50"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={page >= totalPages}
-                    className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded transition-colors disabled:opacity-50"
+                    className="p-1.5 text-[#9ca3af] hover:text-[#516057] hover:bg-[#f5f2f1] rounded transition-colors disabled:opacity-50"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -454,7 +454,7 @@ export default function OnSiteServicePage() {
       )}
       {detailLoading && !detail && (
         <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50 p-4">
-          <Loader2 className="w-8 h-8 text-teal-600 animate-spin" />
+          <Loader2 className="w-8 h-8 text-[#516057] animate-spin" />
         </div>
       )}
     </DashboardLayout>
@@ -484,13 +484,13 @@ function DetailModal({
       onClick={onClose}
     >
       <div 
-        className="bg-white rounded-lg max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto"
+        className="bg-white rounded-[4px] max-w-lg w-full shadow-xl max-h-[88vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-[#e2e2e2] bg-[#f5f2f1]">
           <div>
-            <h2 className="text-sm font-semibold text-gray-900">Service Request Details</h2>
-            <div className="mt-1 flex items-center gap-2 text-xs text-gray-600">
+            <h2 className="text-sm font-semibold text-[#000000]">Service Request Details</h2>
+            <div className="mt-1 flex items-center gap-2 text-xs text-[#505454]">
               ID: {detail.id.slice(0, 8)}… · Created {formatDate(detail.created_at)}
             </div>
           </div>
@@ -499,7 +499,7 @@ function DetailModal({
             <button
               type="button"
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-[#9ca3af] hover:text-[#505454]"
               aria-label="Close"
             >
               <X className="w-5 h-5" />
@@ -538,7 +538,7 @@ function DetailModal({
                 <Row icon={<Mail className="w-4 h-4" />} label="Email">
                   <a
                     href={`mailto:${detail.claimed_processor.email}`}
-                    className="text-teal-700 hover:underline"
+                    className="text-[#516057] hover:underline"
                   >
                     {detail.claimed_processor.email}
                   </a>
@@ -548,7 +548,7 @@ function DetailModal({
                 <Row icon={<Phone className="w-4 h-4" />} label="Phone">
                   <a
                     href={`tel:${detail.claimed_processor.phone}`}
-                    className="text-teal-700 hover:underline"
+                    className="text-[#516057] hover:underline"
                   >
                     {detail.claimed_processor.phone}
                   </a>
@@ -595,7 +595,7 @@ function DetailModal({
           )}
         </div>
 
-        <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-200 bg-gray-50">
+        <div className="flex justify-end gap-2 px-4 py-3 border-t border-[#e2e2e2] bg-[#f5f2f1]">
           {canCancel && (
             <button
               onClick={onCancel}
@@ -606,7 +606,7 @@ function DetailModal({
           )}
           <button
             onClick={onClose}
-            className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+            className="px-3 py-1.5 text-xs rounded border border-[#e2e2e2] text-[#505454] hover:bg-[#f5f2f1] transition-colors"
           >
             Close
           </button>

@@ -493,7 +493,7 @@ export default function SettingsPage() {
     if (warning.includes('expires in')) {
       return { bg: 'bg-yellow-50', border: 'border-yellow-300', text: 'text-yellow-800', icon: 'text-yellow-600' };
     }
-    return { bg: 'bg-gray-50', border: 'border-gray-300', text: 'text-gray-700', icon: 'text-gray-500' };
+    return { bg: 'bg-[#f5f2f1]', border: 'border-[#e2e2e2]', text: 'text-[#505454]', icon: 'text-[#6b7280]' };
   };
 
   const SERVICE_TYPES = [
@@ -503,9 +503,9 @@ export default function SettingsPage() {
   ];
 
   const tabs = [
-    { id: 'profile', label: 'Profile', icon: User, color: 'bg-teal-600 text-white border-teal-600' },
-    { id: 'store', label: 'Store Settings', icon: Store, color: 'bg-teal-600 text-white border-teal-600' },
-    { id: 'security', label: 'Security', icon: Shield, color: 'bg-teal-600 text-white border-teal-600' },
+    { id: 'profile', label: 'Profile', icon: User, color: 'bg-[#516057] text-white border-[#516057]' },
+    { id: 'store', label: 'Store Settings', icon: Store, color: 'bg-[#516057] text-white border-[#516057]' },
+    { id: 'security', label: 'Security', icon: Shield, color: 'bg-[#516057] text-white border-[#516057]' },
   ];
 
   return (
@@ -513,20 +513,20 @@ export default function SettingsPage() {
       <PermissionGuard permission="settings:view">
       <div className="space-y-3">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-slate-50 via-gray-50 to-zinc-50 border-2 border-slate-200">
+        <div className="flex items-center justify-between p-4 rounded-[4px] bg-gradient-to-r from-slate-50 via-gray-50 to-zinc-50 border-2 border-slate-200">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-slate-100">
+            <div className="p-2 rounded-[4px] bg-slate-100">
               <SettingsIcon className="h-5 w-5 text-slate-600" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">My Profile</h1>
-              <p className="text-xs text-gray-600 mt-0.5">Please verify the information below and fill in any missing fields. The RA and shipping label will be sent to the email entered here, so please ensure it is entered correctly.</p>
+              <h1 className="text-xl font-bold text-[#000000]">My Profile</h1>
+              <p className="text-xs text-[#505454] mt-0.5">Please verify the information below and fill in any missing fields. The RA and shipping label will be sent to the email entered here, so please ensure it is entered correctly.</p>
             </div>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 border-b-2 border-gray-200 bg-white rounded-t-lg p-1">
+        <div className="flex gap-2 border-b-2 border-[#e2e2e2] bg-white rounded-t-lg p-1">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -539,10 +539,10 @@ export default function SettingsPage() {
                   setPasswordError(null);
                   setSaved(false);
                 }}
-                className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg border-2 transition-all ${
+                className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-[4px] border-2 transition-all ${
                   isActive
                     ? `${tab.color} shadow-md scale-105`
-                    : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                    : 'bg-white text-[#505454] border-[#e2e2e2] hover:bg-[#f5f2f1]'
                 }`}
               >
                 <Icon className="h-4 w-4 flex-shrink-0" />
@@ -557,18 +557,18 @@ export default function SettingsPage() {
           <div className="space-y-4">
             {/* Edit / Save controls */}
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-gray-900">Account Information - Verify Profile Information</h2>
+              <h2 className="text-lg font-bold text-[#000000]">Account Information - Verify Profile Information</h2>
               {!isEditing ? (
-                <Button variant="outline" size="sm" onClick={() => setIsEditing(true)} className="bg-teal-600 hover:bg-teal-700 text-white border-teal-600 rounded-lg">
+                <Button variant="outline" size="sm" onClick={() => setIsEditing(true)} className="bg-[#516057] hover:bg-[#505454] text-white border-[#516057] rounded-[4px]">
                   <Edit className="mr-1 h-3 w-3" />
                   Edit
                 </Button>
               ) : (
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={handleCancel} disabled={loading} className="rounded-lg">
+                  <Button variant="outline" size="sm" onClick={handleCancel} disabled={loading} className="rounded-[4px]">
                     Cancel
                   </Button>
-                  <Button size="sm" onClick={handleSave} disabled={loading} className="bg-teal-600 hover:bg-teal-700 text-white border-0 rounded-lg">
+                  <Button size="sm" onClick={handleSave} disabled={loading} className="bg-[#516057] hover:bg-[#505454] text-white border-0 rounded-[4px]">
                     <Save className="mr-1 h-3 w-3" />
                     {loading ? 'Saving...' : 'Save'}
                   </Button>
@@ -577,69 +577,69 @@ export default function SettingsPage() {
             </div>
 
             {error && (
-              <div className="p-2 bg-red-50 border-2 border-red-200 rounded-lg flex items-center gap-2 text-red-800 text-xs">
+              <div className="p-2 bg-red-50 border-2 border-red-200 rounded-[4px] flex items-center gap-2 text-red-800 text-xs">
                 <AlertCircle className="h-4 w-4" />
                 <span>{error}</span>
               </div>
             )}
 
             {saved && (
-              <div className="p-2 bg-green-50 border-2 border-green-200 rounded-lg flex items-center gap-2 text-green-800 text-xs">
+              <div className="p-2 bg-green-50 border-2 border-green-200 rounded-[4px] flex items-center gap-2 text-green-800 text-xs">
                 <CheckCircle className="h-4 w-4" />
                 <span>Settings saved successfully!</span>
               </div>
             )}
 
             {loadingSettings ? (
-              <div className="p-4 text-center text-sm text-gray-600">Loading settings...</div>
+              <div className="p-4 text-center text-sm text-[#505454]">Loading settings...</div>
             ) : (
             <>
             {/* LICENSE INFO */}
             <Card className="border-2 border-slate-200">
               <CardContent className="p-4">
-                <h3 className="font-bold text-base text-gray-900 mb-3">LICENSE INFO</h3>
+                <h3 className="font-bold text-base text-[#000000] mb-3">LICENSE INFO</h3>
                 <div className="grid gap-3 md:grid-cols-2">
                   <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">DEA Number</label>
+                    <label className="block text-xs font-bold text-[#000000] mb-1">DEA Number</label>
                     <div className="relative">
-                      {!isEditing && <Lock className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />}
+                      {!isEditing && <Lock className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#9ca3af]" />}
                       <Input
                         value={profile.deaNumber}
                         onChange={(e) => setProfile({ ...profile, deaNumber: e.target.value })}
                         disabled={!isEditing}
-                        className={`text-xs h-8 ${!isEditing ? 'pl-7 bg-gray-100' : ''}`}
+                        className={`text-xs h-8 ${!isEditing ? 'pl-7 bg-[#f5f2f1]' : ''}`}
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">DEA Expiration</label>
+                    <label className="block text-xs font-bold text-[#000000] mb-1">DEA Expiration</label>
                     <Input
                       value={storeSettings?.deaExpirationDate || ''}
                       disabled
-                      className="text-xs h-8 bg-gray-100"
+                      className="text-xs h-8 bg-[#f5f2f1]"
                     />
-                    <p className="text-xs text-gray-500 mt-0.5">Edit in Store Settings tab</p>
+                    <p className="text-xs text-[#6b7280] mt-0.5">Edit in Store Settings tab</p>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">State Pharmacy License Number</label>
+                    <label className="block text-xs font-bold text-[#000000] mb-1">State Pharmacy License Number</label>
                     <div className="relative">
-                      {!isEditing && <Lock className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />}
+                      {!isEditing && <Lock className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#9ca3af]" />}
                       <Input
                         value={profile.stateLicenseNumber}
                         onChange={(e) => setProfile({ ...profile, stateLicenseNumber: e.target.value })}
                         disabled={!isEditing}
-                        className={`text-xs h-8 ${!isEditing ? 'pl-7 bg-gray-100' : ''}`}
+                        className={`text-xs h-8 ${!isEditing ? 'pl-7 bg-[#f5f2f1]' : ''}`}
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">State Pharmacy License Expiration</label>
+                    <label className="block text-xs font-bold text-[#000000] mb-1">State Pharmacy License Expiration</label>
                     <Input
                       type={isEditing ? 'date' : 'text'}
                       value={profile.licenseExpiryDate}
                       onChange={(e) => setProfile({ ...profile, licenseExpiryDate: e.target.value })}
                       disabled={!isEditing}
-                      className={`text-xs h-8 ${!isEditing ? 'bg-gray-100' : ''}`}
+                      className={`text-xs h-8 ${!isEditing ? 'bg-[#f5f2f1]' : ''}`}
                     />
                   </div>
                 </div>
@@ -649,10 +649,10 @@ export default function SettingsPage() {
             {/* PHARMACY / FACILITY INFORMATION */}
             <Card className="border-2 border-slate-200">
               <CardContent className="p-4">
-                <h3 className="font-bold text-base text-gray-900 mb-3">PHARMACY / FACILITY INFORMATION</h3>
+                <h3 className="font-bold text-base text-[#000000] mb-3">PHARMACY / FACILITY INFORMATION</h3>
                 <div className="grid gap-3 md:grid-cols-2">
                   <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">Pharmacy / Facility Name</label>
+                    <label className="block text-xs font-bold text-[#000000] mb-1">Pharmacy / Facility Name</label>
                     <Input
                       value={profile.pharmacyName}
                       onChange={(e) => setProfile({ ...profile, pharmacyName: e.target.value })}
@@ -662,7 +662,7 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">Pharmacy Physical Address</label>
+                    <label className="block text-xs font-bold text-[#000000] mb-1">Pharmacy Physical Address</label>
                     <Input
                       value={profile.physicalAddress.street}
                       onChange={(e) => setProfile({
@@ -675,7 +675,7 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">City</label>
+                    <label className="block text-xs font-bold text-[#000000] mb-1">City</label>
                     <Input
                       value={profile.physicalAddress.city}
                       onChange={(e) => setProfile({
@@ -687,7 +687,7 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">State</label>
+                    <label className="block text-xs font-bold text-[#000000] mb-1">State</label>
                     <select
                       value={profile.physicalAddress.state}
                       onChange={(e) => setProfile({
@@ -695,7 +695,7 @@ export default function SettingsPage() {
                         physicalAddress: { ...profile.physicalAddress, state: e.target.value }
                       })}
                       disabled={!isEditing}
-                      className="w-full h-8 px-2 py-1 text-xs border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full h-8 px-2 py-1 text-xs border border-input bg-background rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <option value="">Select a state</option>
                       {US_STATES.map((state) => (
@@ -706,7 +706,7 @@ export default function SettingsPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">Zip</label>
+                    <label className="block text-xs font-bold text-[#000000] mb-1">Zip</label>
                     <Input
                       value={profile.physicalAddress.zip}
                       onChange={(e) => setProfile({
@@ -718,7 +718,7 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-bold text-gray-900 mb-1">Corporate Name (If different than Pharmacy / Facility Name)</label>
+                    <label className="block text-xs font-bold text-[#000000] mb-1">Corporate Name (If different than Pharmacy / Facility Name)</label>
                     <Input
                       value={profile.corporateName}
                       onChange={(e) => setProfile({ ...profile, corporateName: e.target.value })}
@@ -728,7 +728,7 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-bold text-gray-900 mb-1">Mailing Address (If different than Pharmacy Address)</label>
+                    <label className="block text-xs font-bold text-[#000000] mb-1">Mailing Address (If different than Pharmacy Address)</label>
                     <Input
                       value={profile.mailingAddress}
                       onChange={(e) => setProfile({ ...profile, mailingAddress: e.target.value })}
@@ -738,16 +738,16 @@ export default function SettingsPage() {
                     />
                   </div>
                   {/* <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">Buying Group</label>
+                    <label className="block text-xs font-bold text-[#000000] mb-1">Buying Group</label>
                     <Input
                       value={storeSettings?.gpoAffiliation || ''}
                       disabled
-                      className="text-xs h-8 bg-gray-50"
+                      className="text-xs h-8 bg-[#f5f2f1]"
                     />
-                    <p className="text-xs text-gray-500 mt-0.5">Edit in Store Settings tab</p>
+                    <p className="text-xs text-[#6b7280] mt-0.5">Edit in Store Settings tab</p>
                   </div> */}
                   <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">Store Hours</label>
+                    <label className="block text-xs font-bold text-[#000000] mb-1">Store Hours</label>
                     <Input
                       value={profile.storeHours}
                       onChange={(e) => setProfile({ ...profile, storeHours: e.target.value })}
@@ -763,10 +763,10 @@ export default function SettingsPage() {
             {/* CONTACT INFORMATION */}
             <Card className="border-2 border-slate-200">
               <CardContent className="p-4">
-                <h3 className="font-bold text-base text-gray-900 mb-3">CONTACT INFORMATION</h3>
+                <h3 className="font-bold text-base text-[#000000] mb-3">CONTACT INFORMATION</h3>
                 <div className="grid gap-3 md:grid-cols-2">
                   <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">Full Name</label>
+                    <label className="block text-xs font-bold text-[#000000] mb-1">Full Name</label>
                     <Input
                       value={profile.name}
                       onChange={(e) => setProfile({ ...profile, name: e.target.value })}
@@ -775,7 +775,7 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">Email</label>
+                    <label className="block text-xs font-bold text-[#000000] mb-1">Email</label>
                     <Input
                       type="email"
                       value={profile.email}
@@ -785,7 +785,7 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">Phone Number</label>
+                    <label className="block text-xs font-bold text-[#000000] mb-1">Phone Number</label>
                     <Input
                       type="tel"
                       value={profile.phone}
@@ -795,13 +795,13 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">Fax</label>
+                    <label className="block text-xs font-bold text-[#000000] mb-1">Fax</label>
                     <Input
                       value={storeSettings?.faxNumber || ''}
                       disabled
-                      className="text-xs h-8 bg-gray-50"
+                      className="text-xs h-8 bg-[#f5f2f1]"
                     />
-                    <p className="text-xs text-gray-500 mt-0.5">Edit in Store Settings tab</p>
+                    <p className="text-xs text-[#6b7280] mt-0.5">Edit in Store Settings tab</p>
                   </div>
                 </div>
               </CardContent>
@@ -810,12 +810,12 @@ export default function SettingsPage() {
             {/* MY DOCUMENTS */}
             <Card className="border-2 border-slate-200">
               <CardContent className="p-4">
-                <h3 className="font-bold text-base text-gray-900 mb-3">MY DOCUMENTS</h3>
+                <h3 className="font-bold text-base text-[#000000] mb-3">MY DOCUMENTS</h3>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-2">Upload DEA</label>
+                    <label className="block text-xs font-bold text-[#000000] mb-2">Upload DEA</label>
                     <div
-                      className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-teal-400 transition-colors"
+                      className="border-2 border-dashed border-[#e2e2e2] rounded-[4px] p-6 text-center cursor-pointer hover:border-[#e2e2e2] transition-colors"
                       onClick={() => deaFileRef.current?.click()}
                     >
                       <input
@@ -829,8 +829,8 @@ export default function SettingsPage() {
                           e.target.value = '';
                         }}
                       />
-                      <Upload className="h-8 w-8 mx-auto text-teal-600 mb-2" />
-                      <p className="text-xs text-gray-600">
+                      <Upload className="h-8 w-8 mx-auto text-[#516057] mb-2" />
+                      <p className="text-xs text-[#505454]">
                         {uploadingDea ? 'Uploading...' : profile.deaFileUrl ? 'File uploaded - Click to replace' : 'Choose DEA File'}
                       </p>
                       {profile.deaFileUrl && (
@@ -838,7 +838,7 @@ export default function SettingsPage() {
                           href={profile.deaFileUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-teal-600 underline mt-1 inline-block"
+                          className="text-xs text-[#516057] underline mt-1 inline-block"
                           onClick={(e) => e.stopPropagation()}
                         >
                           View current file
@@ -847,9 +847,9 @@ export default function SettingsPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-2">State Pharmacy License</label>
+                    <label className="block text-xs font-bold text-[#000000] mb-2">State Pharmacy License</label>
                     <div
-                      className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-teal-400 transition-colors"
+                      className="border-2 border-dashed border-[#e2e2e2] rounded-[4px] p-6 text-center cursor-pointer hover:border-[#e2e2e2] transition-colors"
                       onClick={() => licenseFileRef.current?.click()}
                     >
                       <input
@@ -863,8 +863,8 @@ export default function SettingsPage() {
                           e.target.value = '';
                         }}
                       />
-                      <Upload className="h-8 w-8 mx-auto text-teal-600 mb-2" />
-                      <p className="text-xs text-gray-600">
+                      <Upload className="h-8 w-8 mx-auto text-[#516057] mb-2" />
+                      <p className="text-xs text-[#505454]">
                         {uploadingLicense ? 'Uploading...' : profile.licenseFileUrl ? 'File uploaded - Click to replace' : 'Choose License File'}
                       </p>
                       {profile.licenseFileUrl && (
@@ -872,7 +872,7 @@ export default function SettingsPage() {
                           href={profile.licenseFileUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-teal-600 underline mt-1 inline-block"
+                          className="text-xs text-[#516057] underline mt-1 inline-block"
                           onClick={(e) => e.stopPropagation()}
                         >
                           View current file
@@ -895,7 +895,7 @@ export default function SettingsPage() {
               const style = getDeaWarningStyle(storeSettings.deaExpirationWarning);
               if (!style) return null;
               return (
-                <div className={`p-3 ${style.bg} border-2 ${style.border} rounded-lg flex items-center gap-3`}>
+                <div className={`p-3 ${style.bg} border-2 ${style.border} rounded-[4px] flex items-center gap-3`}>
                   <AlertTriangle className={`h-5 w-5 ${style.icon} flex-shrink-0`} />
                   <div>
                     <p className={`font-bold text-sm ${style.text}`}>DEA License Warning</p>
@@ -909,22 +909,22 @@ export default function SettingsPage() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-indigo-100">
+                    <div className="p-1.5 rounded-[4px] bg-indigo-100">
                       <Store className="h-4 w-4 text-indigo-600" />
                     </div>
-                    <h3 className="font-bold text-base text-gray-900">FCR Store Settings</h3>
+                    <h3 className="font-bold text-base text-[#000000]">FCR Store Settings</h3>
                   </div>
                   {!isEditingStore ? (
-                    <Button variant="outline" size="sm" onClick={() => setIsEditingStore(true)} className="bg-teal-600 hover:bg-teal-700 text-white border-teal-600 rounded-lg" disabled={loadingStoreSettings}>
+                    <Button variant="outline" size="sm" onClick={() => setIsEditingStore(true)} className="bg-[#516057] hover:bg-[#505454] text-white border-[#516057] rounded-[4px]" disabled={loadingStoreSettings}>
                       <Edit className="mr-1 h-3 w-3" />
                       Edit
                     </Button>
                   ) : (
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" onClick={handleStoreSettingsCancel} disabled={savingStoreSettings} className="rounded-lg">
+                      <Button variant="outline" size="sm" onClick={handleStoreSettingsCancel} disabled={savingStoreSettings} className="rounded-[4px]">
                         Cancel
                       </Button>
-                      <Button size="sm" onClick={handleStoreSettingsSave} disabled={savingStoreSettings} className="bg-teal-600 hover:bg-teal-700 text-white border-0 rounded-lg">
+                      <Button size="sm" onClick={handleStoreSettingsSave} disabled={savingStoreSettings} className="bg-[#516057] hover:bg-[#505454] text-white border-0 rounded-[4px]">
                         <Save className="mr-1 h-3 w-3" />
                         {savingStoreSettings ? 'Saving...' : 'Save'}
                       </Button>
@@ -933,28 +933,28 @@ export default function SettingsPage() {
                 </div>
 
                 {storeError && (
-                  <div className="p-2 mb-3 bg-red-50 border-2 border-red-200 rounded-lg flex items-center gap-2 text-red-800 text-xs">
+                  <div className="p-2 mb-3 bg-red-50 border-2 border-red-200 rounded-[4px] flex items-center gap-2 text-red-800 text-xs">
                     <AlertCircle className="h-4 w-4" />
                     <span>{storeError}</span>
                   </div>
                 )}
 
                 {storeSaved && (
-                  <div className="p-2 mb-3 bg-green-50 border-2 border-green-200 rounded-lg flex items-center gap-2 text-green-800 text-xs">
+                  <div className="p-2 mb-3 bg-green-50 border-2 border-green-200 rounded-[4px] flex items-center gap-2 text-green-800 text-xs">
                     <CheckCircle className="h-4 w-4" />
                     <span>Store settings saved successfully!</span>
                   </div>
                 )}
 
                 {loadingStoreSettings ? (
-                  <div className="p-4 text-center text-sm text-gray-600">Loading store settings...</div>
+                  <div className="p-4 text-center text-sm text-[#505454]">Loading store settings...</div>
                 ) : !storeSettings ? (
-                  <div className="p-4 text-center text-sm text-gray-500">Unable to load store settings. Please try again.</div>
+                  <div className="p-4 text-center text-sm text-[#6b7280]">Unable to load store settings. Please try again.</div>
                 ) : (
                   <div className="space-y-4">
                     <div className="grid gap-3 md:grid-cols-2">
                       <div>
-                        <label className="block text-xs font-bold text-gray-900 mb-1">Store Number</label>
+                        <label className="block text-xs font-bold text-[#000000] mb-1">Store Number</label>
                         <Input
                           value={storeSettings.storeNumber || ''}
                           onChange={(e) => updateStoreField('storeNumber', e.target.value)}
@@ -963,15 +963,15 @@ export default function SettingsPage() {
                           placeholder="e.g. 5544"
                           maxLength={10}
                         />
-                        <p className="text-xs text-gray-500 mt-0.5">Unique 4-digit store identifier</p>
+                        <p className="text-xs text-[#6b7280] mt-0.5">Unique 4-digit store identifier</p>
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-gray-900 mb-1">Service Type</label>
+                        <label className="block text-xs font-bold text-[#000000] mb-1">Service Type</label>
                         <select
                           value={storeSettings.serviceType || 'full_service'}
                           onChange={(e) => updateStoreField('serviceType', e.target.value)}
                           disabled={!isEditingStore}
-                          className="w-full h-7 px-2 py-1 text-xs border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full h-7 px-2 py-1 text-xs border border-input bg-background rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {SERVICE_TYPES.map((type) => (
                             <option key={type.value} value={type.value}>
@@ -985,11 +985,11 @@ export default function SettingsPage() {
                     <div className="pt-3 border-t-2 border-indigo-200">
                       <div className="flex items-center gap-2 mb-3">
                         <Truck className="h-4 w-4 text-indigo-600" />
-                        <h4 className="font-bold text-sm text-gray-900">Wholesaler Information</h4>
+                        <h4 className="font-bold text-sm text-[#000000]">Wholesaler Information</h4>
                       </div>
                       <div className="grid gap-3 md:grid-cols-2">
                         <div>
-                          <label className="block text-xs font-bold text-gray-900 mb-1">Primary Wholesaler</label>
+                          <label className="block text-xs font-bold text-[#000000] mb-1">Primary Wholesaler</label>
                           <Input
                             value={storeSettings.primaryWholesaler || ''}
                             onChange={(e) => updateStoreField('primaryWholesaler', e.target.value)}
@@ -999,7 +999,7 @@ export default function SettingsPage() {
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-gray-900 mb-1">
+                          <label className="block text-xs font-bold text-[#000000] mb-1">
                             Wholesaler Account Number
                             <span className="text-red-500 ml-0.5">*</span>
                           </label>
@@ -1010,10 +1010,10 @@ export default function SettingsPage() {
                             className="text-xs h-7"
                             placeholder="e.g. CH-987654"
                           />
-                          <p className="text-xs text-gray-500 mt-0.5">Required for return processing</p>
+                          <p className="text-xs text-[#6b7280] mt-0.5">Required for return processing</p>
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-xs font-bold text-gray-900 mb-1">Secondary Wholesaler</label>
+                          <label className="block text-xs font-bold text-[#000000] mb-1">Secondary Wholesaler</label>
                           <Input
                             value={storeSettings.secondaryWholesaler || ''}
                             onChange={(e) => updateStoreField('secondaryWholesaler', e.target.value)}
@@ -1028,11 +1028,11 @@ export default function SettingsPage() {
                     <div className="pt-3 border-t-2 border-indigo-200">
                       <div className="flex items-center gap-2 mb-3">
                         <Calendar className="h-4 w-4 text-indigo-600" />
-                        <h4 className="font-bold text-sm text-gray-900">Visit Schedule & Contact</h4>
+                        <h4 className="font-bold text-sm text-[#000000]">Visit Schedule & Contact</h4>
                       </div>
                       <div className="grid gap-3 md:grid-cols-2">
                         <div>
-                          <label className="block text-xs font-bold text-gray-900 mb-1">Days Between Visits</label>
+                          <label className="block text-xs font-bold text-[#000000] mb-1">Days Between Visits</label>
                           <Input
                             type="number"
                             min={1}
@@ -1047,10 +1047,10 @@ export default function SettingsPage() {
                             disabled={!isEditingStore}
                             className="text-xs h-7"
                           />
-                          <p className="text-xs text-gray-500 mt-0.5">Default: 120 days</p>
+                          <p className="text-xs text-[#6b7280] mt-0.5">Default: 120 days</p>
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-gray-900 mb-1">Fax Number</label>
+                          <label className="block text-xs font-bold text-[#000000] mb-1">Fax Number</label>
                           <Input
                             value={storeSettings.faxNumber || ''}
                             onChange={(e) => updateStoreField('faxNumber', e.target.value)}
@@ -1060,24 +1060,24 @@ export default function SettingsPage() {
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-gray-900 mb-1">Last Visit Date</label>
+                          <label className="block text-xs font-bold text-[#000000] mb-1">Last Visit Date</label>
                           <Input
                             type="date"
                             value={storeSettings.lastVisitDate || ''}
                             disabled
-                            className="text-xs h-7 bg-gray-50"
+                            className="text-xs h-7 bg-[#f5f2f1]"
                           />
-                          <p className="text-xs text-gray-500 mt-0.5">Set by processor</p>
+                          <p className="text-xs text-[#6b7280] mt-0.5">Set by processor</p>
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-gray-900 mb-1">Next Visit Date</label>
+                          <label className="block text-xs font-bold text-[#000000] mb-1">Next Visit Date</label>
                           <Input
                             type="date"
                             value={storeSettings.nextVisitDate || ''}
                             disabled
-                            className="text-xs h-7 bg-gray-50"
+                            className="text-xs h-7 bg-[#f5f2f1]"
                           />
-                          <p className="text-xs text-gray-500 mt-0.5">Auto-calculated</p>
+                          <p className="text-xs text-[#6b7280] mt-0.5">Auto-calculated</p>
                         </div>
                       </div>
                     </div>
@@ -1095,20 +1095,20 @@ export default function SettingsPage() {
             <Card className="border-2 border-red-200 bg-gradient-to-br from-white to-red-50/30">
               <CardContent className="p-3">
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="p-1.5 rounded-lg bg-red-100">
+                  <div className="p-1.5 rounded-[4px] bg-red-100">
                     <Key className="h-4 w-4 text-red-600" />
                   </div>
-                  <h3 className="font-bold text-base text-gray-900">Change Password</h3>
+                  <h3 className="font-bold text-base text-[#000000]">Change Password</h3>
                 </div>
                 {error && (
-                  <div className="p-2 mb-3 bg-red-50 border-2 border-red-200 rounded-lg flex items-center gap-2 text-red-800 text-xs">
+                  <div className="p-2 mb-3 bg-red-50 border-2 border-red-200 rounded-[4px] flex items-center gap-2 text-red-800 text-xs">
                     <AlertCircle className="h-4 w-4" />
                     <span>{error}</span>
                   </div>
                 )}
 
                 {saved && (
-                  <div className="p-2 mb-3 bg-green-50 border-2 border-green-200 rounded-lg flex items-center gap-2 text-green-800 text-xs">
+                  <div className="p-2 mb-3 bg-green-50 border-2 border-green-200 rounded-[4px] flex items-center gap-2 text-green-800 text-xs">
                     <CheckCircle className="h-4 w-4" />
                     <span>Password changed successfully!</span>
                   </div>
@@ -1116,7 +1116,7 @@ export default function SettingsPage() {
 
                 <div className="space-y-2">
                   <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">Current Password</label>
+                    <label className="block text-xs font-bold text-[#000000] mb-1">Current Password</label>
                     <div className="relative">
                       <Input 
                         type={showCurrentPassword ? 'text' : 'password'} 
@@ -1131,7 +1131,7 @@ export default function SettingsPage() {
                       <button
                         type="button"
                         onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-[#6b7280] hover:text-[#505454] focus:outline-none"
                       >
                         {showCurrentPassword ? (
                           <EyeOff className="h-3 w-3" />
@@ -1142,7 +1142,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">New Password</label>
+                    <label className="block text-xs font-bold text-[#000000] mb-1">New Password</label>
                     <div className="relative">
                       <Input 
                         type={showNewPassword ? 'text' : 'password'} 
@@ -1154,7 +1154,7 @@ export default function SettingsPage() {
                       <button
                         type="button"
                         onClick={() => setShowNewPassword(!showNewPassword)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-[#6b7280] hover:text-[#505454] focus:outline-none"
                       >
                         {showNewPassword ? (
                           <EyeOff className="h-3 w-3" />
@@ -1176,13 +1176,13 @@ export default function SettingsPage() {
                       </p>
                     )}
                     {!passwordData.newPassword && (
-                      <p className="text-xs text-gray-500 mt-0.5">
+                      <p className="text-xs text-[#6b7280] mt-0.5">
                         Must be at least 8 characters with uppercase, lowercase, and numbers
                       </p>
                     )}
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1">Confirm New Password</label>
+                    <label className="block text-xs font-bold text-[#000000] mb-1">Confirm New Password</label>
                     <div className="relative">
                       <Input 
                         type={showConfirmPassword ? 'text' : 'password'} 
@@ -1194,7 +1194,7 @@ export default function SettingsPage() {
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-[#6b7280] hover:text-[#505454] focus:outline-none"
                       >
                         {showConfirmPassword ? (
                           <EyeOff className="h-3 w-3" />
@@ -1220,7 +1220,7 @@ export default function SettingsPage() {
                     onClick={handleChangePassword} 
                     disabled={loading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword || !!passwordError}
                     size="sm" 
-                    className="bg-teal-600 hover:bg-teal-700 text-white border-0 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-[#516057] hover:bg-[#505454] text-white border-0 rounded-[4px] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Key className="mr-1 h-3 w-3" />
                     {loading ? 'Updating...' : 'Update Password'}

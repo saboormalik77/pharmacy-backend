@@ -15,13 +15,10 @@ export function DealModal({ onShowToast }: DealModalProps) {
   const [quantity, setQuantity] = useState(1)
   const [isAdding, setIsAdding] = useState(false)
 
-  // Reset quantity when deal changes
   useEffect(() => {
     if (selectedDeal) {
       const minQty = selectedDeal.minimumBuyQuantity || 1
       const availableQty = selectedDeal.quantity
-      // If available quantity is less than minimum, use available quantity
-      // Otherwise, use minimum quantity
       const effectiveMinQty = availableQty < minQty ? availableQty : minQty
       setQuantity(effectiveMinQty)
     }
@@ -31,7 +28,6 @@ export function DealModal({ onShowToast }: DealModalProps) {
 
   const minQuantity = selectedDeal.minimumBuyQuantity || 1
   const availableQty = selectedDeal.quantity
-  // If available quantity is less than minimum, allow selecting available quantity
   const effectiveMinQuantity = availableQty < minQuantity ? availableQty : minQuantity
   const totalPrice = quantity * selectedDeal.dealPrice
   const savings = (selectedDeal.originalPrice - selectedDeal.dealPrice) * quantity
@@ -81,23 +77,23 @@ export function DealModal({ onShowToast }: DealModalProps) {
 
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="bg-card rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300 border">
+        <div className="bg-white rounded-[4px] shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300 border border-[#e2e2e2]">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b">
+          <div className="flex items-center justify-between p-4 border-b border-[#e2e2e2]">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold">Deal Details</h2>
-              <Badge variant="secondary" className="text-xs">{selectedDeal.dealNumber}</Badge>
+              <h2 className="text-lg font-bold text-[#000000] font-serif">Deal Details</h2>
+              <Badge className="text-xs rounded-full bg-[#f5f2f1] text-[#505454]">{selectedDeal.dealNumber}</Badge>
               {selectedDeal.status !== 'active' && (
-                <Badge variant={selectedDeal.status === 'sold' ? 'secondary' : 'destructive'} className="text-xs capitalize">
+                <Badge className={`text-xs rounded-full capitalize ${selectedDeal.status === 'sold' ? 'bg-[#516057] text-white' : 'bg-red-500 text-white'}`}>
                   {selectedDeal.status}
                 </Badge>
               )}
             </div>
             <button
               onClick={closeDealModal}
-              className="p-1.5 hover:bg-accent rounded-lg transition-colors"
+              className="p-1.5 hover:bg-[#f5f2f1] rounded-[4px] transition-colors"
             >
-              <X className="h-5 w-5" />
+              <X className="h-5 w-5 text-[#505454]" />
             </button>
           </div>
 
@@ -106,7 +102,7 @@ export function DealModal({ onShowToast }: DealModalProps) {
             <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4">
               {/* Image Gallery */}
               <div>
-                <div className="w-full h-[300px] bg-muted rounded-lg border overflow-hidden mb-2 relative">
+                <div className="w-full h-[300px] bg-[#f5f2f1] rounded-[4px] border border-[#e2e2e2] overflow-hidden mb-2 relative">
                   <img 
                     src={selectedDeal.imageUrl || `https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop&q=80&${selectedDeal.id}`} 
                     alt={selectedDeal.productName} 
@@ -114,7 +110,7 @@ export function DealModal({ onShowToast }: DealModalProps) {
                   />
                   {selectedDeal.inCart && (
                     <div className="absolute top-2 left-2">
-                      <Badge variant="success" className="text-xs">
+                      <Badge className="text-xs rounded-full bg-[#516057] text-white">
                         <Check className="h-3 w-3 mr-1" />
                         In Cart ({selectedDeal.cartQuantity})
                       </Badge>
@@ -127,52 +123,52 @@ export function DealModal({ onShowToast }: DealModalProps) {
               <div className="space-y-4">
                 {/* Discount Badge */}
                 <div className="inline-flex gap-2">
-                  <Badge variant="destructive">{selectedDeal.savings}% OFF</Badge>
-                  <Badge variant="secondary">{selectedDeal.category}</Badge>
+                  <Badge className="rounded-full bg-red-500 text-white">{selectedDeal.savings}% OFF</Badge>
+                  <Badge className="rounded-full bg-[#f5f2f1] text-[#505454]">{selectedDeal.category}</Badge>
                 </div>
 
                 {/* Title */}
-                <h3 className="text-xl font-bold">{selectedDeal.productName}</h3>
+                <h3 className="text-xl font-bold text-[#000000] font-serif">{selectedDeal.productName}</h3>
 
                 {/* Meta Grid */}
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   {selectedDeal.ndc && (
                     <div>
-                      <p className="text-muted-foreground mb-0.5">NDC Code</p>
-                      <p className="font-mono font-semibold">{selectedDeal.ndc}</p>
+                      <p className="text-[#6b7280] mb-0.5">NDC Code</p>
+                      <p className="font-mono font-semibold text-[#505454]">{selectedDeal.ndc}</p>
                     </div>
                   )}
                   <div>
-                    <p className="text-muted-foreground mb-0.5">Distributor</p>
-                    <p className="font-semibold">{selectedDeal.distributor}</p>
+                    <p className="text-[#6b7280] mb-0.5">Distributor</p>
+                    <p className="font-semibold text-[#000000]">{selectedDeal.distributor}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground mb-0.5">Unit Type</p>
-                    <p className="font-semibold capitalize">{selectedDeal.unit}</p>
+                    <p className="text-[#6b7280] mb-0.5">Unit Type</p>
+                    <p className="font-semibold text-[#000000] capitalize">{selectedDeal.unit}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground mb-0.5">Available</p>
-                    <p className="font-semibold">{selectedDeal.quantity} {selectedDeal.unit}</p>
+                    <p className="text-[#6b7280] mb-0.5">Available</p>
+                    <p className="font-semibold text-[#000000]">{selectedDeal.quantity} {selectedDeal.unit}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground mb-0.5">Product Expiry</p>
-                    <p className="font-semibold">{selectedDeal.expiryDate}</p>
+                    <p className="text-[#6b7280] mb-0.5">Product Expiry</p>
+                    <p className="font-semibold text-[#000000]">{selectedDeal.expiryDate}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground mb-0.5">Posted Date</p>
-                    <p className="font-semibold">{selectedDeal.postedDate}</p>
+                    <p className="text-[#6b7280] mb-0.5">Posted Date</p>
+                    <p className="font-semibold text-[#000000]">{selectedDeal.postedDate}</p>
                   </div>
                 </div>
 
-                {/* Minimum Order Quantity - Prominent Display */}
+                {/* Minimum Order Quantity */}
                 {minQuantity > 1 && (
-                  <div className="flex items-center gap-2 px-3 py-2 bg-amber-100 dark:bg-amber-900/40 border-2 border-amber-300 dark:border-amber-700 rounded-lg">
-                    <Package className="h-4 w-4 text-amber-700 dark:text-amber-300" />
+                  <div className="flex items-center gap-2 px-3 py-2 bg-[#ad916a]/20 border border-[#ad916a]/30 rounded-[4px]">
+                    <Package className="h-4 w-4 text-[#6b5a3f]" />
                     <div>
-                      <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">
+                      <p className="text-sm font-semibold text-[#6b5a3f]">
                         Minimum Order: {minQuantity} {selectedDeal.unit}
                       </p>
-                      <p className="text-xs text-amber-800 dark:text-amber-200">
+                      <p className="text-xs text-[#6b5a3f]/80">
                         This deal requires a minimum purchase quantity
                       </p>
                     </div>
@@ -182,30 +178,30 @@ export function DealModal({ onShowToast }: DealModalProps) {
                 {/* Description/Notes */}
                 {selectedDeal.notes && (
                   <div>
-                    <h4 className="text-sm font-bold mb-1.5">Notes</h4>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
+                    <h4 className="text-sm font-bold mb-1.5 text-[#000000]">Notes</h4>
+                    <p className="text-xs text-[#505454] leading-relaxed">
                       {selectedDeal.notes}
                     </p>
                   </div>
                 )}
 
                 {/* Pricing Breakdown */}
-                <div className="bg-muted/50 p-3 rounded-lg">
-                  <h4 className="text-sm font-bold mb-2">Pricing Breakdown</h4>
+                <div className="bg-[#f5f2f1] p-3 rounded-[4px]">
+                  <h4 className="text-sm font-bold mb-2 text-[#000000]">Pricing Breakdown</h4>
                   <div className="space-y-1.5 text-xs">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Original Price</span>
-                      <span className="font-semibold text-muted-foreground line-through">{formatCurrency(selectedDeal.originalPrice)}/{selectedDeal.unit}</span>
+                      <span className="text-[#6b7280]">Original Price</span>
+                      <span className="font-semibold text-[#9ca3af] line-through">{formatCurrency(selectedDeal.originalPrice)}/{selectedDeal.unit}</span>
                     </div>
-                    <div className="flex justify-between text-orange-600 font-semibold">
+                    <div className="flex justify-between text-[#ad916a] font-semibold">
                       <span>Discount ({selectedDeal.savings}%)</span>
                       <span>−{formatCurrency(selectedDeal.originalPrice - selectedDeal.dealPrice)}</span>
                     </div>
-                    <div className="flex justify-between text-sm font-bold pt-1.5 border-t">
+                    <div className="flex justify-between text-sm font-bold pt-1.5 border-t border-[#e2e2e2]">
                       <span>Discounted Price</span>
-                      <span className="text-primary">{formatCurrency(selectedDeal.dealPrice)}/{selectedDeal.unit}</span>
+                      <span className="text-[#516057]">{formatCurrency(selectedDeal.dealPrice)}/{selectedDeal.unit}</span>
                     </div>
-                    <Badge variant="success" className="w-full justify-center mt-1.5">
+                    <Badge className="w-full justify-center mt-1.5 rounded-full bg-[#516057]/10 text-[#516057]">
                       Save {formatCurrency(selectedDeal.totalSavingsAmount)} per {selectedDeal.unit}
                     </Badge>
                   </div>
@@ -214,14 +210,14 @@ export function DealModal({ onShowToast }: DealModalProps) {
                 {/* Quantity Selector */}
                 {selectedDeal.status === 'active' && (
                   <div>
-                    <h4 className="text-sm font-bold mb-2">Select Quantity</h4>
+                    <h4 className="text-sm font-bold mb-2 text-[#000000]">Select Quantity</h4>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setQuantity(Math.max(effectiveMinQuantity, quantity - 1))}
                         disabled={quantity <= effectiveMinQuantity}
-                        className="w-8 h-8 border rounded hover:bg-accent flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-8 h-8 border border-[#e2e2e2] rounded-[4px] hover:bg-[#f5f2f1] flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <Minus className="h-4 w-4" />
+                        <Minus className="h-4 w-4 text-[#505454]" />
                       </button>
                       <input
                         type="number"
@@ -230,21 +226,21 @@ export function DealModal({ onShowToast }: DealModalProps) {
                           const val = parseInt(e.target.value) || effectiveMinQuantity
                           if (val >= effectiveMinQuantity && val <= maxQuantity) setQuantity(val)
                         }}
-                        className="w-16 h-8 text-center border rounded text-sm font-bold bg-card"
+                        className="w-16 h-8 text-center border border-[#e2e2e2] rounded-[4px] text-sm font-bold bg-white"
                         min={effectiveMinQuantity}
                         max={maxQuantity}
                       />
                       <button
                         onClick={() => setQuantity(Math.min(maxQuantity, quantity + 1))}
                         disabled={quantity >= maxQuantity}
-                        className="w-8 h-8 border rounded hover:bg-accent flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-8 h-8 border border-[#e2e2e2] rounded-[4px] hover:bg-[#f5f2f1] flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <Plus className="h-4 w-4" />
+                        <Plus className="h-4 w-4 text-[#505454]" />
                       </button>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-xs text-[#6b7280] mt-1">
                       {availableQty < minQuantity ? (
-                        <span className="text-amber-600">
+                        <span className="text-[#ad916a]">
                           Only {availableQty} {selectedDeal.unit} remaining (minimum order was {minQuantity} {selectedDeal.unit})
                         </span>
                       ) : (
@@ -254,19 +250,19 @@ export function DealModal({ onShowToast }: DealModalProps) {
                       )}
                     </p>
                     {quantity < effectiveMinQuantity && (
-                      <p className="text-xs text-destructive mt-1">
+                      <p className="text-xs text-red-600 mt-1">
                         {availableQty < minQuantity
                           ? `Only ${availableQty} ${selectedDeal.unit} available`
                           : `Minimum order quantity is ${minQuantity} ${selectedDeal.unit}`
                         }
                       </p>
                     )}
-                    <div className="bg-primary/5 p-2 rounded-lg mt-2">
+                    <div className="bg-[#516057]/10 p-2 rounded-[4px] mt-2">
                       <div className="flex justify-between text-sm font-bold">
                         <span>Total:</span>
-                        <span className="text-primary">{formatCurrency(totalPrice)}</span>
+                        <span className="text-[#516057]">{formatCurrency(totalPrice)}</span>
                       </div>
-                      <div className="flex justify-between text-xs text-green-600 mt-1">
+                      <div className="flex justify-between text-xs text-[#516057] mt-1">
                         <span>You save:</span>
                         <span>{formatCurrency(savings)}</span>
                       </div>
@@ -276,7 +272,7 @@ export function DealModal({ onShowToast }: DealModalProps) {
 
                 {/* Deal Terms */}
                 <div>
-                  <h4 className="text-sm font-bold mb-2">Deal Terms</h4>
+                  <h4 className="text-sm font-bold mb-2 text-[#000000]">Deal Terms</h4>
                   <ul className="space-y-1 text-xs">
                     {[
                       `Available quantity: ${selectedDeal.quantity} ${selectedDeal.unit}`,
@@ -284,8 +280,8 @@ export function DealModal({ onShowToast }: DealModalProps) {
                       'Free shipping on orders over $2,500',
                       'FDA approved and licensed distributors'
                     ].map((term, idx) => (
-                      <li key={idx} className="flex items-start gap-1.5 text-muted-foreground">
-                        <Check className="h-3.5 w-3.5 text-green-600 flex-shrink-0 mt-0.5" />
+                      <li key={idx} className="flex items-start gap-1.5 text-[#505454]">
+                        <Check className="h-3.5 w-3.5 text-[#516057] flex-shrink-0 mt-0.5" />
                         <span>{term}</span>
                       </li>
                     ))}
@@ -296,10 +292,10 @@ export function DealModal({ onShowToast }: DealModalProps) {
           </div>
 
           {/* Footer */}
-          <div className="p-3 border-t flex justify-end gap-2">
+          <div className="p-3 border-t border-[#e2e2e2] flex justify-end gap-2">
             <button
               onClick={closeDealModal}
-              className="px-3 py-1.5 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md text-xs font-medium transition-all"
+              className="px-3 py-1.5 border border-[#e2e2e2] bg-white hover:bg-[#f5f2f1] text-[#505454] rounded-[4px] text-xs font-medium transition-all"
             >
               Close
             </button>
@@ -307,7 +303,7 @@ export function DealModal({ onShowToast }: DealModalProps) {
               <button
                 onClick={handleAddToCart}
                 disabled={isDisabled}
-                className="px-3 py-1.5 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-xs font-medium transition-all shadow-sm"
+                className="px-3 py-1.5 bg-[#516057] text-white rounded-[4px] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-xs font-medium transition-all shadow-sm"
               >
                 {isAdding ? (
                   <>

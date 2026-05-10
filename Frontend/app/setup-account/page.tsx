@@ -136,7 +136,7 @@ function SetupAccountContent() {
           )}
           <button
             onClick={() => router.push('/login')}
-            className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-[4px] hover:bg-blue-700 transition-colors"
           >
             Go to Login
           </button>
@@ -160,7 +160,7 @@ function SetupAccountContent() {
           </p>
           <button
             onClick={() => router.push('/login')}
-            className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-[4px] hover:bg-blue-700 transition-colors"
           >
             Log In Now
           </button>
@@ -187,11 +187,11 @@ function SetupAccountContent() {
         <div className="p-8 space-y-6">
           {/* Branch parent info */}
           {isBranchInvite && inviteData?.parentPharmacyName && (
-            <div className="bg-teal-50 border border-teal-200 rounded-lg p-4 flex items-center gap-3">
-              <GitBranch className="w-5 h-5 text-teal-600 flex-shrink-0" />
+            <div className="bg-[#f5f2f1] border border-[#e2e2e2] rounded-[4px] p-4 flex items-center gap-3">
+              <GitBranch className="w-5 h-5 text-[#516057] flex-shrink-0" />
               <div>
-                <p className="text-sm font-medium text-teal-800">Branch Account</p>
-                <p className="text-sm text-teal-600">
+                <p className="text-sm font-medium text-[#505454]">Branch Account</p>
+                <p className="text-sm text-[#516057]">
                   Your account was created by <strong>{inviteData.parentPharmacyName}</strong>
                 </p>
               </div>
@@ -199,7 +199,7 @@ function SetupAccountContent() {
           )}
 
           {/* Pharmacy Info */}
-          <div className="bg-gray-50 rounded-lg p-5 space-y-3">
+          <div className="bg-gray-50 rounded-[4px] p-5 space-y-3">
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Your Pharmacy Details</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               <div className="flex items-start gap-2">
@@ -253,7 +253,7 @@ function SetupAccountContent() {
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Set Your Password</h2>
 
             {formError && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-4">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[4px] text-sm mb-4">
                 {formError}
               </div>
             )}
@@ -266,7 +266,7 @@ function SetupAccountContent() {
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={e => setPassword(e.target.value)}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
                     placeholder="Enter your password"
                   />
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -281,7 +281,7 @@ function SetupAccountContent() {
                   type={showPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-[4px] focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Confirm your password"
                 />
               </div>
@@ -311,7 +311,7 @@ function SetupAccountContent() {
           <button
             onClick={handleSubmit}
             disabled={isSubmitting || !hasMinLength || !hasUppercase || !hasLowercase || !hasNumber || !passwordsMatch}
-            className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full py-3 bg-blue-600 text-white font-semibold rounded-[4px] hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {isSubmitting ? (
               <><Loader2 className="w-5 h-5 animate-spin" /> Setting up your account...</>

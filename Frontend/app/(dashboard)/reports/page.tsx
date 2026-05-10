@@ -356,10 +356,10 @@ export default function ReportsPage() {
     <DashboardLayout>
       <div className="space-y-3">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-teal-50 via-cyan-50 to-teal-50 border-2 border-teal-200">
+        <div className="flex items-center justify-between p-4 rounded-[4px] bg-[#f5f2f1] border-2 border-[#e2e2e2]">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Analytics & Reports</h1>
-            <p className="text-xs text-gray-600 mt-0.5">Price comparisons and market insights</p>
+            <h1 className="text-xl font-bold text-[#000000]">Analytics & Reports</h1>
+            <p className="text-xs text-[#505454] mt-0.5">Price comparisons and market insights</p>
           </div>
           <div className="flex gap-2">
             <Button
@@ -367,14 +367,14 @@ export default function ReportsPage() {
               size="sm"
               onClick={() => fetchOptimizationData()}
               disabled={loading}
-              className="border-teal-300 text-teal-700 hover:bg-teal-50"
+              className="border-[#e2e2e2] text-[#516057] hover:bg-[#f5f2f1]"
             >
               <RefreshCw className={`mr-1 h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
             <Button 
               size="sm" 
-              className="bg-teal-600 hover:bg-teal-700 text-white border-0"
+              className="bg-[#516057] hover:bg-[#505454] text-white border-0"
               onClick={handleExportReport}
               disabled={!optimizationData || loading}
             >
@@ -385,12 +385,12 @@ export default function ReportsPage() {
         </div>
 
         {/* Filters */}
-        <Card className="border-2 border-teal-200">
+        <Card className="border-2 border-[#e2e2e2]">
           <CardContent className="p-3">
             <div className="flex gap-2">
               {searchMode === 'single' ? (
                 <div className="relative flex-1">
-                  <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-teal-500" />
+                  <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6b7280]" />
                   <Input
                     placeholder="Search by NDC code"
                     value={searchQuery}
@@ -401,7 +401,7 @@ export default function ReportsPage() {
               ) : (
                 <div className="relative flex-1 flex gap-2">
                   <div className="relative flex-1">
-                    <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-teal-500" />
+                    <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6b7280]" />
                     <Input
                       placeholder="Enter NDC codes (comma-separated)"
                       value={multipleNdcInput}
@@ -413,7 +413,7 @@ export default function ReportsPage() {
                     size="sm" 
                     onClick={handleMultipleNdcSearch}
                     disabled={!multipleNdcInput.trim() || loading}
-                    className="bg-teal-600 hover:bg-teal-700 text-white"
+                    className="bg-[#516057] hover:bg-[#505454] text-white"
                   >
                     Search
                   </Button>
@@ -430,10 +430,10 @@ export default function ReportsPage() {
                   <ChevronDown className={`ml-1 h-3 w-3 transition-transform ${showFilterDropdown ? 'rotate-180' : ''}`} />
                 </Button>
                 {showFilterDropdown && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white border-2 border-teal-200 rounded-lg shadow-lg z-50">
+                  <div className="absolute right-0 mt-2 w-64 bg-white border-2 border-[#e2e2e2] rounded-[4px] shadow-lg z-50">
                     <div className="p-3 space-y-3">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-semibold text-gray-900">Search Mode</h3>
+                        <h3 className="text-sm font-semibold text-[#000000]">Search Mode</h3>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -446,28 +446,28 @@ export default function ReportsPage() {
                       <div className="space-y-2">
                         <button
                           onClick={() => handleSearchModeChange('single')}
-                          className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                          className={`w-full text-left px-3 py-2 rounded-[4px] text-sm transition-colors ${
                             searchMode === 'single'
-                              ? 'bg-teal-100 border-2 border-teal-500 text-teal-900'
-                              : 'bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100'
+                              ? 'bg-[#f5f2f1] border-2 border-[#e2e2e2] text-[#000000]'
+                              : 'bg-[#f5f2f1] border border-[#e2e2e2] text-[#505454] hover:bg-[#f5f2f1]'
                           }`}
                         >
                           Single NDC
                         </button>
                         <button
                           onClick={() => handleSearchModeChange('multiple')}
-                          className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                          className={`w-full text-left px-3 py-2 rounded-[4px] text-sm transition-colors ${
                             searchMode === 'multiple'
-                              ? 'bg-teal-100 border-2 border-teal-500 text-teal-900'
-                              : 'bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100'
+                              ? 'bg-[#f5f2f1] border-2 border-[#e2e2e2] text-[#000000]'
+                              : 'bg-[#f5f2f1] border border-[#e2e2e2] text-[#505454] hover:bg-[#f5f2f1]'
                           }`}
                         >
                           Multiple NDC
                         </button>
                       </div>
                       {searchMode === 'multiple' && (
-                        <div className="pt-2 border-t border-gray-200">
-                          <p className="text-xs text-gray-600">
+                        <div className="pt-2 border-t border-[#e2e2e2]">
+                          <p className="text-xs text-[#505454]">
                             Enter multiple NDC codes separated by commas (e.g., 12345-6789-01, 98765-4321-10)
                           </p>
                         </div>
@@ -482,10 +482,10 @@ export default function ReportsPage() {
 
         {/* Loading State */}
         {loading && (
-          <Card className="border-2 border-teal-200">
+          <Card className="border-2 border-[#e2e2e2]">
             <CardContent className="p-8 text-center">
-              <Loader2 className="h-12 w-12 mx-auto mb-4 text-teal-600 animate-spin" />
-              <p className="text-gray-600">Loading optimization recommendations...</p>
+              <Loader2 className="h-12 w-12 mx-auto mb-4 text-[#516057] animate-spin" />
+              <p className="text-[#505454]">Loading optimization recommendations...</p>
             </CardContent>
           </Card>
         )}
@@ -507,24 +507,24 @@ export default function ReportsPage() {
         {optimizationData && !loading && (
           <>
             {/* Summary Card */}
-            <Card className="border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50">
+            <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1]">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-emerald-700 font-medium mb-1">Total Potential Savings</p>
-                    <p className="text-3xl font-bold text-emerald-900">
+                    <p className="text-sm text-[#516057] font-medium mb-1">Total Potential Savings</p>
+                    <p className="text-3xl font-bold text-[#000000]">
                       {formatCurrency(calculateTotalSavings())}
                     </p>
-                    <p className="text-xs text-emerald-700 mt-1">
+                    <p className="text-xs text-[#516057] mt-1">
                       Based on {filteredByDistributor.length} {filteredByDistributor.length === 1 ? 'product' : 'products'} 
                       {searchQuery || selectedDistributor !== 'all' ? ' (filtered)' : ''}
                     </p>
-                    <p className="text-xs text-emerald-600 mt-1">
+                    <p className="text-xs text-[#516057] mt-1">
                       Generated: {formatDate(optimizationData.generatedAt)}
                     </p>
                   </div>
-                  <div className="p-4 bg-white rounded-lg border-2 border-emerald-200">
-                    <Sparkles className="h-12 w-12 text-emerald-600" />
+                  <div className="p-4 bg-white rounded-[4px] border-2 border-[#e2e2e2]">
+                    <Sparkles className="h-12 w-12 text-[#516057]" />
                   </div>
                 </div>
               </CardContent>
@@ -533,22 +533,22 @@ export default function ReportsPage() {
             {/* Price Comparisons */}
             <div className="space-y-3">
               {filteredByDistributor.length === 0 ? (
-                <Card className="border-2 border-teal-200">
+                <Card className="border-2 border-[#e2e2e2]">
                   <CardContent className="p-8 text-center">
-                    <BarChart3 className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                    <p className="text-gray-500">No recommendations found</p>
+                    <BarChart3 className="h-12 w-12 mx-auto mb-4 text-[#9ca3af]" />
+                    <p className="text-[#6b7280]">No recommendations found</p>
                   </CardContent>
                 </Card>
               ) : (
                 filteredByDistributor.map((rec, idx) => {
                   const processedRec = getProcessedRecommendation(rec);
                   return (
-                  <Card key={idx} className="border-2 border-teal-200">
+                  <Card key={idx} className="border-2 border-[#e2e2e2]">
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <CardTitle className="text-base">{processedRec.productName}</CardTitle>
-                          <p className="text-sm text-gray-600 mt-1">
+                          <p className="text-sm text-[#505454] mt-1">
                             NDC: <span className="font-mono">{processedRec.ndc}</span>
                           </p>
                         </div>
@@ -560,15 +560,15 @@ export default function ReportsPage() {
                     <CardContent>
                       <div className="space-y-3">
                         {/* Recommended Distributor */}
-                        <div className="p-3 bg-emerald-50 border-2 border-emerald-200 rounded-lg">
+                        <div className="p-3 bg-[#f5f2f1] border-2 border-[#e2e2e2] rounded-[4px]">
                           <div className="flex items-center gap-2 mb-2">
-                            <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                            <p className="text-sm font-semibold text-emerald-900">Recommended Distributor</p>
+                            <CheckCircle2 className="h-5 w-5 text-[#516057]" />
+                            <p className="text-sm font-semibold text-[#000000]">Recommended Distributor</p>
                           </div>
                           <div className="flex items-center justify-between">
                             <div className="flex-1">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <p className="text-base font-bold text-emerald-900">
+                                <p className="text-base font-bold text-[#000000]">
                                   {processedRec.recommendedDistributor}
                                 </p>
                                 {processedRec.available ? (
@@ -581,13 +581,13 @@ export default function ReportsPage() {
                                   </Badge>
                                 )}
                               </div>
-                              <p className="text-sm text-emerald-700 mt-1">
+                              <p className="text-sm text-[#516057] mt-1">
                                 Expected Price: {formatCurrency(processedRec.expectedPrice)} per unit
                               </p>
                             </div>
                             <div className="text-right">
-                              <p className="text-xs text-emerald-600">Potential Savings</p>
-                              <p className="text-lg font-bold text-emerald-700">
+                              <p className="text-xs text-[#516057]">Potential Savings</p>
+                              <p className="text-lg font-bold text-[#516057]">
                                 {formatCurrency(processedRec.savings)}
                               </p>
                             </div>
@@ -597,7 +597,7 @@ export default function ReportsPage() {
                         {/* Alternative Distributors */}
                         {processedRec.alternativeDistributors.length > 0 && (
                           <div>
-                            <p className="text-sm font-medium text-gray-700 mb-2">Alternative Options:</p>
+                            <p className="text-sm font-medium text-[#505454] mb-2">Alternative Options:</p>
                             <div className={`grid gap-3 ${
                               processedRec.alternativeDistributors.length === 1 
                                 ? 'grid-cols-1' 
@@ -611,18 +611,18 @@ export default function ReportsPage() {
                                   <div
                                     key={altIdx}
                                     onClick={() => alt.available && handleDistributorSelect(processedRec.ndc, alt.name)}
-                                    className={`p-3 rounded-lg border-2 transition-all ${
+                                    className={`p-3 rounded-[4px] border-2 transition-all ${
                                       !alt.available 
-                                        ? 'border-gray-300 bg-gray-100 opacity-75 cursor-not-allowed' 
+                                        ? 'border-[#e2e2e2] bg-[#f5f2f1] opacity-75 cursor-not-allowed' 
                                         : isBetter
                                         ? 'border-green-300 bg-green-50 cursor-pointer hover:border-green-400 hover:bg-green-100'
-                                        : 'border-gray-200 bg-gray-50 cursor-pointer hover:border-teal-300 hover:bg-teal-50'
+                                        : 'border-[#e2e2e2] bg-[#f5f2f1] cursor-pointer hover:border-[#e2e2e2] hover:bg-[#f5f2f1]'
                                     }`}
                                   >
                                     <div className="flex items-center justify-between mb-2">
                                       <div className="flex items-center gap-2 flex-wrap">
                                         <p className={`text-sm font-semibold ${
-                                          !alt.available ? 'text-gray-500' : ''
+                                          !alt.available ? 'text-[#6b7280]' : ''
                                         }`}>
                                           {alt.name}
                                         </p>
@@ -640,15 +640,15 @@ export default function ReportsPage() {
                                     </div>
                                     <div className="space-y-1">
                                       <div className="flex items-center justify-start">
-                                        {/* <span className="text-xs text-gray-600">Price: </span> */}
+                                        {/* <span className="text-xs text-[#505454]">Price: </span> */}
                                         <span className={`text-sm font-bold ${
-                                          !alt.available ? 'text-gray-500' : 'text-emerald-700'
+                                          !alt.available ? 'text-[#6b7280]' : 'text-[#516057]'
                                         }`}>
                                          Price:  {formatCurrency(alt.price)}/unit
                                         </span>
                                       </div>
                                       {alt.available && (
-                                        <div className="flex items-center gap-1 mt-2 pt-2 border-t border-gray-200">
+                                        <div className="flex items-center gap-1 mt-2 pt-2 border-t border-[#e2e2e2]">
                                           {isBetter ? (
                                             <>
                                               <TrendingUp className="h-3 w-3 text-green-600" />
@@ -667,8 +667,8 @@ export default function ReportsPage() {
                                         </div>
                                       )}
                                       {alt.available && (
-                                        <div className="mt-2 pt-2 border-t border-gray-200">
-                                          <span className="text-xs text-teal-600 font-medium">
+                                        <div className="mt-2 pt-2 border-t border-[#e2e2e2]">
+                                          <span className="text-xs text-[#516057] font-medium">
                                             Click to select as recommended
                                           </span>
                                         </div>
@@ -682,7 +682,7 @@ export default function ReportsPage() {
                         )}
 
                         {/* Recommendation Summary */}
-                        <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="p-3 bg-blue-50 border border-blue-200 rounded-[4px]">
                           <div className="flex items-start gap-2">
                             <TrendingUp className="h-5 w-5 text-blue-600 mt-0.5" />
                             <div className="flex-1">
@@ -709,31 +709,31 @@ export default function ReportsPage() {
         {/* Summary Statistics */}
         {optimizationData && !loading && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-            <Card className="border-2 border-teal-200">
+            <Card className="border-2 border-[#e2e2e2]">
               <CardContent className="p-3">
                 <div className="flex items-center gap-2 mb-2">
-                  <Package className="h-4 w-4 text-teal-600" />
-                  <p className="text-xs font-medium text-teal-700">Products Analyzed</p>
+                  <Package className="h-4 w-4 text-[#516057]" />
+                  <p className="text-xs font-medium text-[#516057]">Products Analyzed</p>
                 </div>
-                <p className="text-xl font-bold text-teal-900">{filteredByDistributor.length}</p>
+                <p className="text-xl font-bold text-[#000000]">{filteredByDistributor.length}</p>
               </CardContent>
             </Card>
-            <Card className="border-2 border-cyan-200">
+            <Card className="border-2 border-[#e2e2e2]">
               <CardContent className="p-3">
                 <div className="flex items-center gap-2 mb-2">
-                  <Building2 className="h-4 w-4 text-cyan-600" />
-                  <p className="text-xs font-medium text-cyan-700">Distributors</p>
+                  <Building2 className="h-4 w-4 text-[#516057]" />
+                  <p className="text-xs font-medium text-[#516057]">Distributors</p>
                 </div>
-                <p className="text-xl font-bold text-cyan-900">{allDistributors.length}</p>
+                <p className="text-xl font-bold text-[#000000]">{allDistributors.length}</p>
               </CardContent>
             </Card>
-            <Card className="border-2 border-emerald-200">
+            <Card className="border-2 border-[#e2e2e2]">
               <CardContent className="p-3">
                 <div className="flex items-center gap-2 mb-2">
-                  <DollarSign className="h-4 w-4 text-emerald-600" />
-                  <p className="text-xs font-medium text-emerald-700">Total Recommendations</p>
+                  <DollarSign className="h-4 w-4 text-[#516057]" />
+                  <p className="text-xs font-medium text-[#516057]">Total Recommendations</p>
                 </div>
-                <p className="text-xl font-bold text-emerald-900">{optimizationData.recommendations.length}</p>
+                <p className="text-xl font-bold text-[#000000]">{optimizationData.recommendations.length}</p>
               </CardContent>
             </Card>
             <Card className="border-2 border-purple-200">

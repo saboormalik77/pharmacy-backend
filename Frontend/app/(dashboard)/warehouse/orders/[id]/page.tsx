@@ -204,12 +204,12 @@ export default function WarehouseOrderDetailPage() {
   const getStatusColor = (status: WarehouseOrder['status']) => {
     switch (status) {
       case 'completed': return 'bg-green-100 text-green-700 border-green-300';
-      case 'processing': return 'bg-cyan-100 text-cyan-700 border-cyan-300';
-      case 'classifying': return 'bg-teal-100 text-teal-700 border-teal-300';
+      case 'processing': return 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2]';
+      case 'classifying': return 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2]';
       case 'inspecting': return 'bg-amber-100 text-amber-700 border-amber-300';
-      case 'received': return 'bg-cyan-100 text-cyan-700 border-cyan-300';
+      case 'received': return 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2]';
       case 'exception': return 'bg-red-100 text-red-700 border-red-300';
-      default: return 'bg-gray-100 text-gray-700 border-gray-300';
+      default: return 'bg-[#f5f2f1] text-[#505454] border-[#e2e2e2]';
     }
   };
 
@@ -230,12 +230,12 @@ export default function WarehouseOrderDetailPage() {
   };
 
   const statusSteps = [
-    { key: 'pending', label: 'Pending', icon: Clock, color: 'bg-gray-500', bgColor: 'bg-gray-50', textColor: 'text-gray-700', borderColor: 'border-gray-300' },
-    { key: 'received', label: 'Received', icon: Package, color: 'bg-cyan-500', bgColor: 'bg-cyan-50', textColor: 'text-cyan-700', borderColor: 'border-cyan-300' },
+    { key: 'pending', label: 'Pending', icon: Clock, color: 'bg-[#f5f2f1]0', bgColor: 'bg-[#f5f2f1]', textColor: 'text-[#505454]', borderColor: 'border-[#e2e2e2]' },
+    { key: 'received', label: 'Received', icon: Package, color: 'bg-[#f5f2f1]0', bgColor: 'bg-[#f5f2f1]', textColor: 'text-[#516057]', borderColor: 'border-[#e2e2e2]' },
     { key: 'inspecting', label: 'Inspecting', icon: Eye, color: 'bg-amber-500', bgColor: 'bg-amber-50', textColor: 'text-amber-700', borderColor: 'border-amber-300' },
-    { key: 'classifying', label: 'Classifying', icon: FileText, color: 'bg-teal-500', bgColor: 'bg-teal-50', textColor: 'text-teal-700', borderColor: 'border-teal-300' },
-    { key: 'processing', label: 'Processing', icon: Activity, color: 'bg-cyan-500', bgColor: 'bg-cyan-50', textColor: 'text-cyan-700', borderColor: 'border-cyan-300' },
-    { key: 'completed', label: 'Completed', icon: CheckCircle2, color: 'bg-emerald-500', bgColor: 'bg-emerald-50', textColor: 'text-emerald-700', borderColor: 'border-emerald-300' },
+    { key: 'classifying', label: 'Classifying', icon: FileText, color: 'bg-[#516057]', bgColor: 'bg-[#f5f2f1]', textColor: 'text-[#516057]', borderColor: 'border-[#e2e2e2]' },
+    { key: 'processing', label: 'Processing', icon: Activity, color: 'bg-[#f5f2f1]0', bgColor: 'bg-[#f5f2f1]', textColor: 'text-[#516057]', borderColor: 'border-[#e2e2e2]' },
+    { key: 'completed', label: 'Completed', icon: CheckCircle2, color: 'bg-[#f5f2f1]0', bgColor: 'bg-[#f5f2f1]', textColor: 'text-[#516057]', borderColor: 'border-[#e2e2e2]' },
   ];
 
   const currentStatusIndex = statusSteps.findIndex(step => step.key === order?.status) || 0;
@@ -255,8 +255,8 @@ export default function WarehouseOrderDetailPage() {
     return (
       <DashboardLayout>
         <div className="text-center py-12">
-          <AlertTriangle className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-          <p className="text-gray-500 text-sm">Order not found</p>
+          <AlertTriangle className="h-8 w-8 mx-auto mb-2 text-[#9ca3af]" />
+          <p className="text-[#6b7280] text-sm">Order not found</p>
           <Button variant="outline" size="sm" className="mt-2" onClick={() => router.back()}>
             <ArrowLeft className="mr-1 h-3 w-3" />
             Back
@@ -270,23 +270,23 @@ export default function WarehouseOrderDetailPage() {
     <DashboardLayout>
       <div className="space-y-3">
         {/* Professional Medical Header */}
-        <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-teal-50 via-cyan-50 to-teal-50 border-2 border-teal-200">
+        <div className="flex items-center justify-between p-4 rounded-[4px] bg-[#f5f2f1] border-2 border-[#e2e2e2]">
           <div className="flex items-center gap-3">
             <Button variant="outline" size="sm" className="bg-white" onClick={() => router.back()}>
               <ArrowLeft className="mr-1 h-3 w-3" />
               Back
             </Button>
-            <div className="p-2 rounded-lg bg-teal-100">
-              <Warehouse className="h-5 w-5 text-teal-600" />
+            <div className="p-2 rounded-[4px] bg-[#f5f2f1]">
+              <Warehouse className="h-5 w-5 text-[#516057]" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold text-gray-900">{order.orderNumber}</h1>
+                <h1 className="text-xl font-bold text-[#000000]">{order.orderNumber}</h1>
                 <Badge variant={getStatusVariant(order.status)} className={`text-xs border-2 ${getStatusColor(order.status)}`}>
                   {getStatusLabel(order.status)}
                 </Badge>
               </div>
-              <p className="text-xs text-gray-600 mt-0.5">Comprehensive order tracking and process visibility</p>
+              <p className="text-xs text-[#505454] mt-0.5">Comprehensive order tracking and process visibility</p>
             </div>
           </div>
           <Button variant="outline" size="sm" className="border-green-300 text-green-700 hover:bg-green-50">
@@ -297,57 +297,57 @@ export default function WarehouseOrderDetailPage() {
 
         {/* Professional Metrics */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
-          <div className="p-3 rounded-lg border-2 border-teal-200 bg-gradient-to-br from-teal-50 to-teal-100">
+          <div className="p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1]">
             <div className="flex items-center gap-1 mb-1">
-              <Package className="h-3 w-3 text-teal-600" />
-              <p className="text-xs text-teal-700 font-medium">Total Items</p>
+              <Package className="h-3 w-3 text-[#516057]" />
+              <p className="text-xs text-[#516057] font-medium">Total Items</p>
             </div>
-            <p className="text-xl font-bold text-teal-900">{order.totalItems}</p>
+            <p className="text-xl font-bold text-[#000000]">{order.totalItems}</p>
           </div>
-          <div className="p-3 rounded-lg border-2 border-cyan-200 bg-gradient-to-br from-cyan-50 to-cyan-100">
+          <div className="p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1]">
             <div className="flex items-center gap-1 mb-1">
-              <Package className="h-3 w-3 text-cyan-600" />
-              <p className="text-xs text-cyan-700 font-medium">Packages</p>
+              <Package className="h-3 w-3 text-[#516057]" />
+              <p className="text-xs text-[#516057] font-medium">Packages</p>
             </div>
-            <p className="text-xl font-bold text-cyan-900">{order.packages.length}</p>
+            <p className="text-xl font-bold text-[#000000]">{order.packages.length}</p>
           </div>
-          <div className="p-3 rounded-lg border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100">
+          <div className="p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1]">
             <div className="flex items-center gap-1 mb-1">
-              <CheckCircle className="h-3 w-3 text-emerald-600" />
-              <p className="text-xs text-emerald-700 font-medium">Refundable</p>
+              <CheckCircle className="h-3 w-3 text-[#516057]" />
+              <p className="text-xs text-[#516057] font-medium">Refundable</p>
             </div>
-            <p className="text-xl font-bold text-emerald-900">{order.refundableItems}</p>
+            <p className="text-xl font-bold text-[#000000]">{order.refundableItems}</p>
           </div>
-          <div className="p-3 rounded-lg border-2 border-red-200 bg-gradient-to-br from-red-50 to-red-100">
+          <div className="p-3 rounded-[4px] border-2 border-red-200 bg-gradient-to-br from-red-50 to-red-100">
             <div className="flex items-center gap-1 mb-1">
               <XCircle className="h-3 w-3 text-red-600" />
               <p className="text-xs text-red-700 font-medium">Non-Refund</p>
             </div>
             <p className="text-xl font-bold text-red-900">{order.nonRefundableItems}</p>
           </div>
-          <div className="p-3 rounded-lg border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100">
+          <div className="p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1]">
             <div className="flex items-center gap-1 mb-1">
-              <DollarSign className="h-3 w-3 text-emerald-600" />
-              <p className="text-xs text-emerald-700 font-medium">Est. Credit</p>
+              <DollarSign className="h-3 w-3 text-[#516057]" />
+              <p className="text-xs text-[#516057] font-medium">Est. Credit</p>
             </div>
-            <p className="text-lg font-bold text-emerald-900">{formatCurrency(order.totalEstimatedCredit)}</p>
+            <p className="text-lg font-bold text-[#000000]">{formatCurrency(order.totalEstimatedCredit)}</p>
           </div>
           {order.actualCredit !== undefined && (
-            <div className="p-3 rounded-lg border-2 border-cyan-200 bg-gradient-to-br from-cyan-50 to-cyan-100">
+            <div className="p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1]">
               <div className="flex items-center gap-1 mb-1">
-                <DollarSign className="h-3 w-3 text-cyan-600" />
-                <p className="text-xs text-cyan-700 font-medium">Actual Credit</p>
+                <DollarSign className="h-3 w-3 text-[#516057]" />
+                <p className="text-xs text-[#516057] font-medium">Actual Credit</p>
               </div>
-              <p className="text-lg font-bold text-cyan-900">{formatCurrency(order.actualCredit)}</p>
+              <p className="text-lg font-bold text-[#000000]">{formatCurrency(order.actualCredit)}</p>
             </div>
           )}
           {order.variance !== undefined && (
-            <div className={`p-3 rounded-lg border-2 ${order.variance >= 0 ? 'border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100' : 'border-red-200 bg-gradient-to-br from-red-50 to-red-100'}`}>
+            <div className={`p-3 rounded-[4px] border-2 ${order.variance >= 0 ? 'border-[#e2e2e2] bg-[#f5f2f1]' : 'border-red-200 bg-gradient-to-br from-red-50 to-red-100'}`}>
               <div className="flex items-center gap-1 mb-1">
-                <BarChart3 className={`h-3 w-3 ${order.variance >= 0 ? 'text-emerald-600' : 'text-red-600'}`} />
-                <p className={`text-xs font-medium ${order.variance >= 0 ? 'text-emerald-700' : 'text-red-700'}`}>Variance</p>
+                <BarChart3 className={`h-3 w-3 ${order.variance >= 0 ? 'text-[#516057]' : 'text-red-600'}`} />
+                <p className={`text-xs font-medium ${order.variance >= 0 ? 'text-[#516057]' : 'text-red-700'}`}>Variance</p>
               </div>
-              <p className={`text-lg font-bold ${order.variance >= 0 ? 'text-emerald-900' : 'text-red-900'}`}>
+              <p className={`text-lg font-bold ${order.variance >= 0 ? 'text-[#000000]' : 'text-red-900'}`}>
                 {order.variance >= 0 ? '+' : ''}{formatCurrency(order.variance)}
               </p>
             </div>
@@ -355,24 +355,24 @@ export default function WarehouseOrderDetailPage() {
         </div>
 
         {/* Enhanced Status Timeline */}
-        <Card className="border-2 border-teal-200 bg-gradient-to-br from-white to-teal-50">
+        <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1]">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-base text-gray-900">Status Timeline</h3>
+              <h3 className="font-bold text-base text-[#000000]">Status Timeline</h3>
               <div className="flex items-center gap-2">
-                <div className="h-2 w-32 bg-gray-200 rounded-full overflow-hidden">
+                <div className="h-2 w-32 bg-[#e2e2e2] rounded-full overflow-hidden">
                   <div 
-                    className="h-full bg-gradient-to-r from-teal-500 via-cyan-500 to-emerald-500 transition-all duration-500"
+                    className="h-full bg-gradient-to-r bg-[#516057] transition-all duration-500"
                     style={{ width: `${statusProgress}%` }}
                   />
                 </div>
-                <span className="text-xs font-medium text-gray-600">{Math.round(statusProgress)}%</span>
+                <span className="text-xs font-medium text-[#505454]">{Math.round(statusProgress)}%</span>
               </div>
             </div>
             <div className="relative">
-              <div className="absolute top-6 left-0 right-0 h-1 bg-gray-200 rounded-full">
+              <div className="absolute top-6 left-0 right-0 h-1 bg-[#e2e2e2] rounded-full">
                 <div 
-                  className="h-full bg-gradient-to-r from-teal-500 via-cyan-500 to-emerald-500 transition-all duration-500 rounded-full"
+                  className="h-full bg-gradient-to-r bg-[#516057] transition-all duration-500 rounded-full"
                   style={{ width: `${statusProgress}%` }}
                 />
               </div>
@@ -387,13 +387,13 @@ export default function WarehouseOrderDetailPage() {
                         w-12 h-12 rounded-full flex items-center justify-center border-4 transition-all duration-300
                         ${isActive 
                           ? `${step.bgColor} ${step.borderColor} border-4 shadow-lg scale-110` 
-                          : 'bg-white border-gray-300'
+                          : 'bg-white border-[#e2e2e2]'
                         }
                         ${isCurrent ? 'ring-4 ring-offset-2 ring-opacity-50 ' + step.color.replace('bg-', 'ring-') : ''}
                       `}>
-                        <Icon className={`h-5 w-5 ${isActive ? step.textColor : 'text-gray-400'}`} />
+                        <Icon className={`h-5 w-5 ${isActive ? step.textColor : 'text-[#9ca3af]'}`} />
                       </div>
-                      <div className={`mt-2 text-center ${isActive ? step.textColor : 'text-gray-400'}`}>
+                      <div className={`mt-2 text-center ${isActive ? step.textColor : 'text-[#9ca3af]'}`}>
                         <p className={`text-xs font-semibold ${isCurrent ? 'font-bold' : ''}`}>{step.label}</p>
                         {isCurrent && (
                           <p className="text-xs mt-0.5 font-medium animate-pulse">Current</p>
@@ -408,25 +408,25 @@ export default function WarehouseOrderDetailPage() {
         </Card>
 
         {/* Colorful Tabs */}
-        <div className="flex gap-2 border-b-2 border-gray-200 bg-white rounded-t-lg p-1">
+        <div className="flex gap-2 border-b-2 border-[#e2e2e2] bg-white rounded-t-lg p-1">
           {[
-            { id: 'overview', label: 'Overview', count: null, color: 'bg-teal-100 text-teal-700 border-teal-300' },
-            { id: 'packages', label: 'Packages', count: order.packages.length, color: 'bg-cyan-100 text-cyan-700 border-cyan-300' },
-            { id: 'timeline', label: 'Timeline', count: order.timeline.length, color: 'bg-teal-100 text-teal-700 border-teal-300' },
+            { id: 'overview', label: 'Overview', count: null, color: 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2]' },
+            { id: 'packages', label: 'Packages', count: order.packages.length, color: 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2]' },
+            { id: 'timeline', label: 'Timeline', count: order.timeline.length, color: 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2]' },
             { id: 'quality', label: 'Quality', count: order.qualityChecks.length, color: 'bg-amber-100 text-amber-700 border-amber-300' },
-            { id: 'compliance', label: 'Compliance', count: order.complianceChecks.length, color: 'bg-emerald-100 text-emerald-700 border-emerald-300' },
+            { id: 'compliance', label: 'Compliance', count: order.complianceChecks.length, color: 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2]' },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`px-3 py-1.5 text-sm font-medium rounded-lg border-2 transition-all ${
+              className={`px-3 py-1.5 text-sm font-medium rounded-[4px] border-2 transition-all ${
                 activeTab === tab.id
                   ? `${tab.color} shadow-md scale-105`
-                  : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                  : 'bg-white text-[#505454] border-[#e2e2e2] hover:bg-[#f5f2f1]'
               }`}
             >
               {tab.label}
-              {tab.count !== null && <span className={`ml-1 font-bold ${activeTab === tab.id ? '' : 'text-gray-400'}`}>({tab.count})</span>}
+              {tab.count !== null && <span className={`ml-1 font-bold ${activeTab === tab.id ? '' : 'text-[#9ca3af]'}`}>({tab.count})</span>}
             </button>
           ))}
         </div>
@@ -434,39 +434,39 @@ export default function WarehouseOrderDetailPage() {
         {/* Overview Tab - Colorful */}
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            <Card className="border-2 border-teal-200 bg-gradient-to-br from-white to-teal-50/30">
+            <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1]">
               <CardContent className="p-3">
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="p-1.5 rounded-lg bg-teal-100">
-                    <Info className="h-4 w-4 text-teal-600" />
+                  <div className="p-1.5 rounded-[4px] bg-[#f5f2f1]">
+                    <Info className="h-4 w-4 text-[#516057]" />
                   </div>
-                  <h3 className="font-bold text-base text-gray-900">Order Information</h3>
+                  <h3 className="font-bold text-base text-[#000000]">Order Information</h3>
                 </div>
                 <div className="space-y-2 text-xs">
-                  <div className="flex justify-between p-2 rounded bg-white/50"><span className="text-teal-700 font-medium">Order #:</span><span className="font-bold text-teal-900">{order.orderNumber}</span></div>
-                  <div className="flex justify-between p-2 rounded bg-white/50"><span className="text-teal-700 font-medium">Package ID:</span><span className="font-bold text-teal-900">{order.packageId}</span></div>
-                  {order.returnId && <div className="flex justify-between p-2 rounded bg-white/50"><span className="text-teal-700 font-medium">Return ID:</span><span className="font-bold text-teal-900">{order.returnId}</span></div>}
-                  <div className="flex justify-between p-2 rounded bg-white/50"><span className="text-teal-700 font-medium">Client:</span><span className="font-bold text-teal-900">{order.clientName}</span></div>
-                  <div className="flex justify-between p-2 rounded bg-white/50"><span className="text-teal-700 font-medium">Created:</span><span className="font-bold text-teal-900">{formatDate(order.createdAt)}</span></div>
-                  {order.receivedAt && <div className="flex justify-between p-2 rounded bg-white/50"><span className="text-teal-700 font-medium">Received:</span><span className="font-bold text-teal-900">{formatDate(order.receivedAt)}</span></div>}
+                  <div className="flex justify-between p-2 rounded bg-white/50"><span className="text-[#516057] font-medium">Order #:</span><span className="font-bold text-[#000000]">{order.orderNumber}</span></div>
+                  <div className="flex justify-between p-2 rounded bg-white/50"><span className="text-[#516057] font-medium">Package ID:</span><span className="font-bold text-[#000000]">{order.packageId}</span></div>
+                  {order.returnId && <div className="flex justify-between p-2 rounded bg-white/50"><span className="text-[#516057] font-medium">Return ID:</span><span className="font-bold text-[#000000]">{order.returnId}</span></div>}
+                  <div className="flex justify-between p-2 rounded bg-white/50"><span className="text-[#516057] font-medium">Client:</span><span className="font-bold text-[#000000]">{order.clientName}</span></div>
+                  <div className="flex justify-between p-2 rounded bg-white/50"><span className="text-[#516057] font-medium">Created:</span><span className="font-bold text-[#000000]">{formatDate(order.createdAt)}</span></div>
+                  {order.receivedAt && <div className="flex justify-between p-2 rounded bg-white/50"><span className="text-[#516057] font-medium">Received:</span><span className="font-bold text-[#000000]">{formatDate(order.receivedAt)}</span></div>}
                 </div>
               </CardContent>
             </Card>
-            <Card className="border-2 border-cyan-200 bg-gradient-to-br from-white to-cyan-50/30">
+            <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1]">
               <CardContent className="p-3">
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="p-1.5 rounded-lg bg-cyan-100">
-                    <User className="h-4 w-4 text-cyan-600" />
+                  <div className="p-1.5 rounded-[4px] bg-[#f5f2f1]">
+                    <User className="h-4 w-4 text-[#516057]" />
                   </div>
-                  <h3 className="font-bold text-base text-gray-900">Processing Team</h3>
+                  <h3 className="font-bold text-base text-[#000000]">Processing Team</h3>
                 </div>
                 <div className="space-y-2 text-xs">
-                  {order.receivedBy && <div className="flex justify-between p-2 rounded bg-white/50"><span className="text-cyan-700 font-medium">Received By:</span><span className="font-bold text-cyan-900">{order.receivedBy}</span></div>}
-                  {order.inspectedBy && <div className="flex justify-between p-2 rounded bg-white/50"><span className="text-cyan-700 font-medium">Inspected By:</span><span className="font-bold text-cyan-900">{order.inspectedBy}</span></div>}
-                  {order.processedBy && <div className="flex justify-between p-2 rounded bg-white/50"><span className="text-cyan-700 font-medium">Processed By:</span><span className="font-bold text-cyan-900">{order.processedBy}</span></div>}
+                  {order.receivedBy && <div className="flex justify-between p-2 rounded bg-white/50"><span className="text-[#516057] font-medium">Received By:</span><span className="font-bold text-[#000000]">{order.receivedBy}</span></div>}
+                  {order.inspectedBy && <div className="flex justify-between p-2 rounded bg-white/50"><span className="text-[#516057] font-medium">Inspected By:</span><span className="font-bold text-[#000000]">{order.inspectedBy}</span></div>}
+                  {order.processedBy && <div className="flex justify-between p-2 rounded bg-white/50"><span className="text-[#516057] font-medium">Processed By:</span><span className="font-bold text-[#000000]">{order.processedBy}</span></div>}
                 </div>
                 {order.notes && (
-                  <div className="mt-3 p-2 rounded-lg bg-amber-50 border-2 border-amber-200 text-xs">
+                  <div className="mt-3 p-2 rounded-[4px] bg-amber-50 border-2 border-amber-200 text-xs">
                     <strong className="text-amber-900">Notes:</strong> <span className="text-amber-800">{order.notes}</span>
                   </div>
                 )}
@@ -477,45 +477,45 @@ export default function WarehouseOrderDetailPage() {
 
         {/* Packages Tab - Colorful Table */}
         {activeTab === 'packages' && (
-          <Card className="border-2 border-cyan-200 bg-gradient-to-br from-white to-cyan-50/30">
+          <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1]">
             <CardContent className="p-3">
               <div className="flex items-center gap-2 mb-3">
-                <div className="p-1.5 rounded-lg bg-cyan-100">
-                  <Package className="h-4 w-4 text-cyan-600" />
+                <div className="p-1.5 rounded-[4px] bg-[#f5f2f1]">
+                  <Package className="h-4 w-4 text-[#516057]" />
                 </div>
-                <h3 className="font-bold text-base text-gray-900">Packages ({order.packages.length})</h3>
+                <h3 className="font-bold text-base text-[#000000]">Packages ({order.packages.length})</h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="bg-gradient-to-r from-cyan-100 to-teal-100 border-b-2 border-cyan-200">
-                      <th className="text-left p-2 font-bold text-cyan-900">Package</th>
-                      <th className="text-left p-2 font-bold text-cyan-900">Condition</th>
-                      <th className="text-left p-2 font-bold text-cyan-900">Items</th>
-                      <th className="text-left p-2 font-bold text-cyan-900">Weight</th>
-                      <th className="text-left p-2 font-bold text-cyan-900">Dimensions</th>
-                      <th className="text-left p-2 font-bold text-cyan-900">Received</th>
-                      <th className="text-left p-2 font-bold text-cyan-900">Inspected By</th>
+                    <tr className="bg-[#f5f2f1] border-b-2 border-[#e2e2e2]">
+                      <th className="text-left p-2 font-bold text-[#000000]">Package</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Condition</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Items</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Weight</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Dimensions</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Received</th>
+                      <th className="text-left p-2 font-bold text-[#000000]">Inspected By</th>
                     </tr>
                   </thead>
                   <tbody>
                     {order.packages.map((pkg, idx) => (
-                      <tr key={pkg.id} className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-cyan-50 transition-colors`}>
-                        <td className="p-2 font-semibold text-cyan-700">{pkg.packageNumber}</td>
+                      <tr key={pkg.id} className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]/50'} hover:bg-[#f5f2f1] transition-colors`}>
+                        <td className="p-2 font-semibold text-[#516057]">{pkg.packageNumber}</td>
                         <td className="p-2">
                           <Badge variant={pkg.condition === 'good' ? 'success' : 'warning'} className="text-xs border-2">
                             {pkg.condition}
                           </Badge>
                         </td>
                         <td className="p-2">
-                          <span className="px-2 py-0.5 rounded bg-cyan-100 text-cyan-700 font-medium">
+                          <span className="px-2 py-0.5 rounded bg-[#f5f2f1] text-[#516057] font-medium">
                             {pkg.items.length}
                           </span>
                         </td>
-                        <td className="p-2 text-gray-700">{pkg.weight ? `${pkg.weight} lbs` : '-'}</td>
-                        <td className="p-2 text-gray-700">{pkg.dimensions ? `${pkg.dimensions.length}"×${pkg.dimensions.width}"×${pkg.dimensions.height}"` : '-'}</td>
-                        <td className="p-2 text-gray-600">{formatDate(pkg.receivedDate)}</td>
-                        <td className="p-2 text-gray-700">{pkg.inspectedBy || '-'}</td>
+                        <td className="p-2 text-[#505454]">{pkg.weight ? `${pkg.weight} lbs` : '-'}</td>
+                        <td className="p-2 text-[#505454]">{pkg.dimensions ? `${pkg.dimensions.length}"×${pkg.dimensions.width}"×${pkg.dimensions.height}"` : '-'}</td>
+                        <td className="p-2 text-[#505454]">{formatDate(pkg.receivedDate)}</td>
+                        <td className="p-2 text-[#505454]">{pkg.inspectedBy || '-'}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -523,32 +523,32 @@ export default function WarehouseOrderDetailPage() {
               </div>
               {/* Package Items Detail */}
               {order.packages.map((pkg) => (
-                <div key={pkg.id} className="mt-3 p-3 rounded-lg border-2 border-cyan-200 bg-cyan-50">
-                  <div className="font-bold text-sm mb-2 text-cyan-900">Package {pkg.packageNumber} - Items</div>
+                <div key={pkg.id} className="mt-3 p-3 rounded-[4px] border-2 border-[#e2e2e2] bg-[#f5f2f1]">
+                  <div className="font-bold text-sm mb-2 text-[#000000]">Package {pkg.packageNumber} - Items</div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs">
                       <thead>
-                        <tr className="bg-gradient-to-r from-cyan-100 to-teal-100 border-b-2 border-cyan-200">
-                          <th className="text-left p-2 font-bold text-cyan-900">Drug Name</th>
-                          <th className="text-left p-2 font-bold text-cyan-900">NDC</th>
-                          <th className="text-left p-2 font-bold text-cyan-900">Lot</th>
-                          <th className="text-left p-2 font-bold text-cyan-900">Qty</th>
-                          <th className="text-left p-2 font-bold text-cyan-900">Expiration</th>
-                          <th className="text-left p-2 font-bold text-cyan-900">Classification</th>
+                        <tr className="bg-[#f5f2f1] border-b-2 border-[#e2e2e2]">
+                          <th className="text-left p-2 font-bold text-[#000000]">Drug Name</th>
+                          <th className="text-left p-2 font-bold text-[#000000]">NDC</th>
+                          <th className="text-left p-2 font-bold text-[#000000]">Lot</th>
+                          <th className="text-left p-2 font-bold text-[#000000]">Qty</th>
+                          <th className="text-left p-2 font-bold text-[#000000]">Expiration</th>
+                          <th className="text-left p-2 font-bold text-[#000000]">Classification</th>
                         </tr>
                       </thead>
                       <tbody>
                         {pkg.items.map((item, idx) => (
-                          <tr key={item.id} className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-cyan-50`}>
-                            <td className="p-2 font-medium text-gray-900">{item.drugName}</td>
-                            <td className="p-2 font-mono text-gray-700">{item.ndc}</td>
-                            <td className="p-2 text-gray-700">{item.lotNumber}</td>
+                          <tr key={item.id} className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]/50'} hover:bg-[#f5f2f1]`}>
+                            <td className="p-2 font-medium text-[#000000]">{item.drugName}</td>
+                            <td className="p-2 font-mono text-[#505454]">{item.ndc}</td>
+                            <td className="p-2 text-[#505454]">{item.lotNumber}</td>
                             <td className="p-2">
-                              <span className="px-2 py-0.5 rounded bg-cyan-100 text-cyan-700 font-medium">
+                              <span className="px-2 py-0.5 rounded bg-[#f5f2f1] text-[#516057] font-medium">
                                 {item.quantity} {item.unit}
                               </span>
                             </td>
-                            <td className="p-2 text-gray-700">{formatDate(item.expirationDate)}</td>
+                            <td className="p-2 text-[#505454]">{formatDate(item.expirationDate)}</td>
                             <td className="p-2">
                               <Badge variant={item.classification === 'returnable' ? 'success' : 'error'} className="text-xs border-2">
                                 {item.classification}
@@ -570,38 +570,38 @@ export default function WarehouseOrderDetailPage() {
           <Card className="border-2 border-blue-200 bg-gradient-to-br from-white to-blue-50/30">
             <CardContent className="p-3">
               <div className="flex items-center gap-2 mb-3">
-                <div className="p-1.5 rounded-lg bg-blue-100">
+                <div className="p-1.5 rounded-[4px] bg-blue-100">
                   <Clock className="h-4 w-4 text-blue-600" />
                 </div>
-                <h3 className="font-bold text-base text-gray-900">Timeline ({order.timeline.length} events)</h3>
+                <h3 className="font-bold text-base text-[#000000]">Timeline ({order.timeline.length} events)</h3>
               </div>
               <div className="space-y-3">
                 {order.timeline.map((event, index) => {
                   const Icon = getEventIcon(event.type);
                   const eventColors: Record<WarehouseOrderEvent['type'], string> = {
-                    received: 'bg-cyan-100 text-cyan-700 border-cyan-300',
+                    received: 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2]',
                     inspected: 'bg-amber-100 text-amber-700 border-amber-300',
-                    classified: 'bg-teal-100 text-teal-700 border-teal-300',
-                    processed: 'bg-cyan-100 text-cyan-700 border-cyan-300',
-                    completed: 'bg-emerald-100 text-emerald-700 border-emerald-300',
+                    classified: 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2]',
+                    processed: 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2]',
+                    completed: 'bg-[#f5f2f1] text-[#516057] border-[#e2e2e2]',
                     exception: 'bg-red-100 text-red-700 border-red-300',
                   };
                   return (
-                    <div key={event.id} className="flex gap-3 p-3 rounded-lg border-2 bg-white hover:shadow-md transition-all">
-                      <div className={`p-2 rounded-lg ${eventColors[event.type] || 'bg-gray-100 text-gray-700'}`}>
+                    <div key={event.id} className="flex gap-3 p-3 rounded-[4px] border-2 bg-white hover:shadow-md transition-all">
+                      <div className={`p-2 rounded-[4px] ${eventColors[event.type] || 'bg-[#f5f2f1] text-[#505454]'}`}>
                         <Icon className="h-4 w-4" />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-1">
-                          <span className="font-bold text-sm capitalize text-gray-900">{event.type}</span>
-                          <span className="text-xs text-gray-600">{formatDate(event.timestamp)}</span>
+                          <span className="font-bold text-sm capitalize text-[#000000]">{event.type}</span>
+                          <span className="text-xs text-[#505454]">{formatDate(event.timestamp)}</span>
                         </div>
-                        <p className="text-xs text-gray-700 mb-1">{event.description}</p>
-                        <p className="text-xs text-gray-600">By: <span className="font-medium">{event.performedBy}</span></p>
+                        <p className="text-xs text-[#505454] mb-1">{event.description}</p>
+                        <p className="text-xs text-[#505454]">By: <span className="font-medium">{event.performedBy}</span></p>
                         {event.metadata && Object.keys(event.metadata).length > 0 && (
-                          <div className="mt-2 p-2 rounded bg-gray-50 border border-gray-200 text-xs">
+                          <div className="mt-2 p-2 rounded bg-[#f5f2f1] border border-[#e2e2e2] text-xs">
                             {Object.entries(event.metadata).map(([key, value]) => (
-                              <span key={key} className="mr-3"><strong className="text-gray-700">{key}:</strong> <span className="text-gray-600">{String(value)}</span></span>
+                              <span key={key} className="mr-3"><strong className="text-[#505454]">{key}:</strong> <span className="text-[#505454]">{String(value)}</span></span>
                             ))}
                           </div>
                         )}
@@ -619,10 +619,10 @@ export default function WarehouseOrderDetailPage() {
           <Card className="border-2 border-orange-200 bg-gradient-to-br from-white to-orange-50/30">
             <CardContent className="p-3">
               <div className="flex items-center gap-2 mb-3">
-                <div className="p-1.5 rounded-lg bg-orange-100">
+                <div className="p-1.5 rounded-[4px] bg-orange-100">
                   <ClipboardCheck className="h-4 w-4 text-orange-600" />
                 </div>
-                <h3 className="font-bold text-base text-gray-900">Quality Checks ({order.qualityChecks.length})</h3>
+                <h3 className="font-bold text-base text-[#000000]">Quality Checks ({order.qualityChecks.length})</h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
@@ -637,16 +637,16 @@ export default function WarehouseOrderDetailPage() {
                   </thead>
                   <tbody>
                     {order.qualityChecks.map((check, idx) => (
-                      <tr key={check.id} className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-orange-50 transition-colors`}>
-                        <td className="p-2 font-medium text-gray-900 capitalize">{check.checkType.replace('_', ' ')}</td>
+                      <tr key={check.id} className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]/50'} hover:bg-orange-50 transition-colors`}>
+                        <td className="p-2 font-medium text-[#000000] capitalize">{check.checkType.replace('_', ' ')}</td>
                         <td className="p-2">
                           <Badge variant={check.status === 'pass' ? 'success' : check.status === 'fail' ? 'error' : 'warning'} className="text-xs border-2">
                             {check.status.toUpperCase()}
                           </Badge>
                         </td>
-                        <td className="p-2 text-gray-700">{check.performedBy}</td>
-                        <td className="p-2 text-gray-600">{formatDate(check.performedAt)}</td>
-                        <td className="p-2 text-gray-700">{check.notes}</td>
+                        <td className="p-2 text-[#505454]">{check.performedBy}</td>
+                        <td className="p-2 text-[#505454]">{formatDate(check.performedAt)}</td>
+                        <td className="p-2 text-[#505454]">{check.notes}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -661,15 +661,15 @@ export default function WarehouseOrderDetailPage() {
           <Card className="border-2 border-green-200 bg-gradient-to-br from-white to-green-50/30">
             <CardContent className="p-3">
               <div className="flex items-center gap-2 mb-3">
-                <div className="p-1.5 rounded-lg bg-green-100">
+                <div className="p-1.5 rounded-[4px] bg-green-100">
                   <Shield className="h-4 w-4 text-green-600" />
                 </div>
-                <h3 className="font-bold text-base text-gray-900">Compliance Checks ({order.complianceChecks.length})</h3>
+                <h3 className="font-bold text-base text-[#000000]">Compliance Checks ({order.complianceChecks.length})</h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="bg-gradient-to-r from-green-100 to-emerald-100 border-b-2 border-green-200">
+                    <tr className="bg-[#f5f2f1] border-b-2 border-green-200">
                       <th className="text-left p-2 font-bold text-green-900">Check Type</th>
                       <th className="text-left p-2 font-bold text-green-900">Status</th>
                       <th className="text-left p-2 font-bold text-green-900">Reference</th>
@@ -680,17 +680,17 @@ export default function WarehouseOrderDetailPage() {
                   </thead>
                   <tbody>
                     {order.complianceChecks.map((check, idx) => (
-                      <tr key={check.id} className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-green-50 transition-colors`}>
-                        <td className="p-2 font-medium text-gray-900 capitalize">{check.checkType.replace('_', ' ')}</td>
+                      <tr key={check.id} className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]/50'} hover:bg-green-50 transition-colors`}>
+                        <td className="p-2 font-medium text-[#000000] capitalize">{check.checkType.replace('_', ' ')}</td>
                         <td className="p-2">
                           <Badge variant={check.status === 'pass' ? 'success' : check.status === 'fail' ? 'error' : 'warning'} className="text-xs border-2">
                             {check.status.toUpperCase()}
                           </Badge>
                         </td>
-                        <td className="p-2 font-mono text-xs text-gray-700">{check.reference || '-'}</td>
-                        <td className="p-2 text-gray-700">{check.performedBy}</td>
-                        <td className="p-2 text-gray-600">{formatDate(check.performedAt)}</td>
-                        <td className="p-2 text-gray-700">{check.notes}</td>
+                        <td className="p-2 font-mono text-xs text-[#505454]">{check.reference || '-'}</td>
+                        <td className="p-2 text-[#505454]">{check.performedBy}</td>
+                        <td className="p-2 text-[#505454]">{formatDate(check.performedAt)}</td>
+                        <td className="p-2 text-[#505454]">{check.notes}</td>
                       </tr>
                     ))}
                   </tbody>

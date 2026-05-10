@@ -1013,11 +1013,11 @@ export default function PackagesPage() {
   return (
     <DashboardLayout>
       <div className="space-y-2 p-2">
-        <h1 className="text-lg sm:text-xl font-bold text-gray-900">Packages</h1>
+        <h1 className="text-lg sm:text-xl font-bold text-[#000000]">Packages</h1>
 
         {/* Success Message Toast - Fixed position above modals */}
         {successMessage && (
-          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[60] bg-green-50 border border-green-200 rounded-lg p-3 shadow-lg flex items-center justify-between min-w-[300px] max-w-[90%]">
+          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[60] bg-green-50 border border-green-200 rounded-[4px] p-3 shadow-lg flex items-center justify-between min-w-[300px] max-w-[90%]">
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
               <p className="text-xs text-green-800 font-medium">{successMessage}</p>
@@ -1033,7 +1033,7 @@ export default function PackagesPage() {
 
         {/* Error Message Toast - Fixed position above modals */}
         {error && (
-          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[60] bg-red-50 border border-red-200 rounded-lg p-3 shadow-lg flex items-center justify-between min-w-[300px] max-w-[90%]">
+          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[60] bg-red-50 border border-red-200 rounded-[4px] p-3 shadow-lg flex items-center justify-between min-w-[300px] max-w-[90%]">
             <div className="flex items-center gap-2">
               <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
               <p className="text-xs text-red-800 font-medium">{error}</p>
@@ -1061,25 +1061,25 @@ export default function PackagesPage() {
           const nonDeliveredPackages = packagesData.stats?.nonDeliveredPackages ?? 0;
           
           return (
-            <Card className="bg-gradient-to-r from-teal-50 to-cyan-50 border-2 border-teal-200">
+            <Card className="bg-[#f5f2f1] border-2 border-[#e2e2e2]">
               <CardContent className="p-2">
                 <div className={`grid gap-2 ${packageType === 'packages' ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-2'}`}>
                   <div>
-                    <p className="text-[10px] sm:text-xs text-gray-600 mb-0.5">Total Packages</p>
-                    <p className="text-base sm:text-lg font-bold text-teal-700">{totalPackages}</p>
+                    <p className="text-[10px] sm:text-xs text-[#505454] mb-0.5">Total Packages</p>
+                    <p className="text-base sm:text-lg font-bold text-[#516057]">{totalPackages}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] sm:text-xs text-gray-600 mb-0.5">Total Value</p>
-                    <p className="text-base sm:text-lg font-bold text-teal-700">{formatCurrency(totalValue)}</p>
+                    <p className="text-[10px] sm:text-xs text-[#505454] mb-0.5">Total Value</p>
+                    <p className="text-base sm:text-lg font-bold text-[#516057]">{formatCurrency(totalValue)}</p>
                   </div>
                   {packageType === 'packages' && (
                     <>
                       <div>
-                        <p className="text-[10px] sm:text-xs text-gray-600 mb-0.5">Delivered</p>
+                        <p className="text-[10px] sm:text-xs text-[#505454] mb-0.5">Delivered</p>
                         <p className="text-base sm:text-lg font-bold text-green-700">{deliveredPackages}</p>
                       </div>
                       <div>
-                        <p className="text-[10px] sm:text-xs text-gray-600 mb-0.5">Pending</p>
+                        <p className="text-[10px] sm:text-xs text-[#505454] mb-0.5">Pending</p>
                         <p className="text-base sm:text-lg font-bold text-green-700">{nonDeliveredPackages}</p>
                       </div>
                     </>
@@ -1093,23 +1093,23 @@ export default function PackagesPage() {
         {/* Toggle Buttons and Action Buttons - All in One Line */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           {/* Left Side - Package Type Toggle Buttons */}
-          <div className="flex gap-1 p-0.5 bg-gray-100 rounded-lg w-fit">
+          <div className="flex gap-1 p-0.5 bg-[#f5f2f1] rounded-[4px] w-fit">
             <button
               onClick={() => setPackageType('packages')}
-              className={`px-2 py-1 rounded-md text-xs font-medium transition-all ${
+              className={`px-2 py-1 rounded-[4px] text-xs font-medium transition-all ${
                 packageType === 'packages'
-                  ? 'bg-teal-600 text-white shadow-sm'
-                  : 'text-gray-700 hover:bg-gray-200'
+                  ? 'bg-[#516057] text-white shadow-sm'
+                  : 'text-[#505454] hover:bg-[#e2e2e2]'
               }`}
             >
               Packages
             </button>
             <button
               onClick={() => setPackageType('suggested')}
-              className={`px-2 py-1 rounded-md text-xs font-medium transition-all ${
+              className={`px-2 py-1 rounded-[4px] text-xs font-medium transition-all ${
                 packageType === 'suggested'
-                  ? 'bg-teal-600 text-white shadow-sm'
-                  : 'text-gray-700 hover:bg-gray-200'
+                  ? 'bg-[#516057] text-white shadow-sm'
+                  : 'text-[#505454] hover:bg-[#e2e2e2]'
               }`}
             >
               Suggested Packages
@@ -1122,7 +1122,7 @@ export default function PackagesPage() {
             {packageType === 'packages' && packagesData && packagesData.packages && packagesData.packages.length > 0 && (
               <button
                 onClick={handleExportToExcel}
-                className="px-2 py-1 bg-teal-600 text-white rounded-md hover:bg-teal-700 flex items-center gap-1 text-xs font-medium transition-all shadow-sm"
+                className="px-2 py-1 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] flex items-center gap-1 text-xs font-medium transition-all shadow-sm"
               >
                 <Download className="h-3 w-3" />
                 <span className=" sm:inline">Export All</span>
@@ -1131,7 +1131,7 @@ export default function PackagesPage() {
             {packageType === 'packages' && (
               <button
                 onClick={() => router.push('/packages/suggestions')}
-                className="px-2 py-1 bg-teal-600 text-white rounded-md hover:bg-teal-700 flex items-center gap-1 text-xs font-medium transition-all shadow-sm"
+                className="px-2 py-1 bg-[#516057] text-white rounded-[4px] hover:bg-[#505454] flex items-center gap-1 text-xs font-medium transition-all shadow-sm"
               >
                 <Plus className="h-3 w-3" />
                 <span className="hidden sm:inline">Create Package</span>
@@ -1143,7 +1143,7 @@ export default function PackagesPage() {
 
         {/* Error Banner */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-2 flex items-start gap-2">
+          <div className="bg-red-50 border border-red-200 rounded-[4px] p-2 flex items-start gap-2">
             <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
               <p className="text-xs sm:text-sm text-red-800 font-medium">Error</p>
@@ -1159,17 +1159,17 @@ export default function PackagesPage() {
         )}
 
         {/* Information Card */}
-        <Card className="bg-gradient-to-r from-teal-50 via-cyan-50 to-teal-50 border-2 border-teal-200">
+        <Card className="bg-[#f5f2f1] border-2 border-[#e2e2e2]">
           <CardContent className="p-2">
             <div className="flex items-start gap-2">
               <div className="flex-shrink-0 mt-0.5">
-                <PackageIcon className="h-4 w-4 text-teal-600" />
+                <PackageIcon className="h-4 w-4 text-[#516057]" />
               </div>
               <div className="flex-1">
-                <h3 className="text-xs font-semibold text-teal-600 mb-1">
+                <h3 className="text-xs font-semibold text-[#516057] mb-1">
                   About Packages
                 </h3>
-                <p className="text-[10px] sm:text-xs text-gray-700 leading-relaxed">
+                <p className="text-[10px] sm:text-xs text-[#505454] leading-relaxed">
                   Packages are optimized collections of pharmacy products grouped by distributor to maximize return value. They organize your inventory items (NDC codes, quantities, and prices) into bundles that should be sent to specific reverse distributors based on historical pricing data from return reports.
                 </p>
               </div>
@@ -1187,19 +1187,19 @@ export default function PackagesPage() {
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full border-collapse">
                 <thead>
-                  <tr className="bg-gray-50 border-b border-gray-200">
-                    <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Distributor</th>
-                    <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Total Items</th>
-                    <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Total Value</th>
+                  <tr className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
+                    <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Distributor</th>
+                    <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Total Items</th>
+                    <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Total Value</th>
                     {packageType === 'suggested' && (
-                      <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Fee Rate</th>
+                      <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Fee Rate</th>
                     )}
-                    {/* <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Avg Price/Unit</th> */}
+                    {/* <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Avg Price/Unit</th> */}
                     {packageType === 'packages' && (
-                      <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Deliver</th>
+                      <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Deliver</th>
                     )}
-                    {/* <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Contact</th> */}
-                        <th className="px-2 py-1.5 text-center text-xs font-semibold text-gray-700">Action</th>
+                    {/* <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Contact</th> */}
+                        <th className="px-2 py-1.5 text-center text-xs font-semibold text-[#505454]">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1207,8 +1207,8 @@ export default function PackagesPage() {
                     <tr>
                       <td colSpan={packageType === 'packages' ? 5 : 5} className="px-2 py-8 text-center">
                         <div className="flex flex-col items-center gap-2">
-                          <Loader2 className="h-6 w-6 animate-spin text-teal-600" />
-                          <p className="text-xs text-gray-600">Loading packages...</p>
+                          <Loader2 className="h-6 w-6 animate-spin text-[#516057]" />
+                          <p className="text-xs text-[#505454]">Loading packages...</p>
                         </div>
                       </td>
                     </tr>
@@ -1217,10 +1217,10 @@ export default function PackagesPage() {
                       <td colSpan={packageType === 'packages' ? 5 : 5} className="px-2 py-8 text-center">
                         <div className="flex flex-col items-center gap-2">
                           <AlertCircle className="h-6 w-6 text-red-600" />
-                          <p className="text-xs text-gray-600">{error || 'No packages available'}</p>
+                          <p className="text-xs text-[#505454]">{error || 'No packages available'}</p>
                           <button
                             onClick={handleRefresh}
-                            className="px-2 py-1 bg-teal-600 text-white rounded hover:bg-teal-700 flex items-center gap-1 text-xs"
+                            className="px-2 py-1 bg-[#516057] text-white rounded hover:bg-[#505454] flex items-center gap-1 text-xs"
                           >
                             <RefreshCw className="h-3 w-3" />
                             Retry
@@ -1243,15 +1243,15 @@ export default function PackagesPage() {
                       return (
                         <tr
                           key={`${pkg.distributorId}-${index}`}
-                          className="border-b border-gray-100 hover:bg-gray-50"
+                          className="border-b border-[#f3f4f6] hover:bg-[#f5f2f1]"
                         >
-                          <td className="px-2 py-1.5 text-xs text-gray-900">{pkg.distributorName}</td>
-                          <td className="px-2 py-1.5 text-xs text-gray-700">{((pkg as any).items || pkg.products || []).length}</td>
-                          <td className="px-2 py-1.5 text-xs text-gray-700">
+                          <td className="px-2 py-1.5 text-xs text-[#000000]">{pkg.distributorName}</td>
+                          <td className="px-2 py-1.5 text-xs text-[#505454]">{((pkg as any).items || pkg.products || []).length}</td>
+                          <td className="px-2 py-1.5 text-xs text-[#505454]">
                             {packageType === 'suggested' && feeRatePercentage > 0 ? (
                               <div className="flex flex-col">
-                                <span className="line-through text-gray-400 text-[10px]">{formatCurrency(pkg.totalEstimatedValue)}</span>
-                                <span className="font-semibold text-teal-700">{formatCurrency(adjustedTotalValue)}</span>
+                                <span className="line-through text-[#9ca3af] text-[10px]">{formatCurrency(pkg.totalEstimatedValue)}</span>
+                                <span className="font-semibold text-[#516057]">{formatCurrency(adjustedTotalValue)}</span>
                               </div>
                             ) : (
                               formatCurrency(pkg.totalEstimatedValue)
@@ -1270,7 +1270,7 @@ export default function PackagesPage() {
                                   }
                                   setSelectedFeeRates(newMap);
                                 }}
-                                className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
+                                className="w-full px-2 py-1 text-xs border border-[#e2e2e2] rounded focus:ring-1 focus:ring-[#516057] focus:border-[#e2e2e2]"
                                 disabled={!pkgAny.distributorContact?.feeRates}
                               >
                                 <option value="">Select</option>
@@ -1282,7 +1282,7 @@ export default function PackagesPage() {
                               </select>
                             </td>
                           )}
-                          {/* <td className="px-2 py-1.5 text-xs text-gray-700">{formatCurrency(pkg.averagePricePerUnit)}</td> */}
+                          {/* <td className="px-2 py-1.5 text-xs text-[#505454]">{formatCurrency(pkg.averagePricePerUnit)}</td> */}
                         {packageType === 'packages' && (
                           <td className="px-2 py-1.5">
                             {pkg.status === true ? (
@@ -1303,7 +1303,7 @@ export default function PackagesPage() {
                               <button
                                 onClick={() => setDeliveryPackage(pkg)}
                                 disabled={!pkg.id || updatingStatusId === (pkg.id || '')}
-                                className="px-2 py-0.5 bg-teal-600 text-white text-xs rounded hover:bg-teal-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-1"
+                                className="px-2 py-0.5 bg-[#516057] text-white text-xs rounded hover:bg-[#505454] disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-1"
                               >
                                 <Truck className="h-3 w-3" />
                                 Deliver
@@ -1311,17 +1311,17 @@ export default function PackagesPage() {
                             )}
                           </td>
                         )}
-                        {/* <td className="px-2 py-1.5 text-xs text-gray-700">
+                        {/* <td className="px-2 py-1.5 text-xs text-[#505454]">
                           <div className="flex flex-col gap-0.5">
                             {pkg.distributorContact?.email && (
                               <div className="flex items-center gap-1">
-                                <Mail className="h-2.5 w-2.5 text-gray-500" />
+                                <Mail className="h-2.5 w-2.5 text-[#6b7280]" />
                                 <span className="text-[10px]">{pkg.distributorContact.email}</span>
                               </div>
                             )}
                             {pkg.distributorContact?.phone && (
                               <div className="flex items-center gap-1">
-                                <Phone className="h-2.5 w-2.5 text-gray-500" />
+                                <Phone className="h-2.5 w-2.5 text-[#6b7280]" />
                                 <span className="text-[10px]">{pkg.distributorContact.phone}</span>
                               </div>
                             )}
@@ -1331,7 +1331,7 @@ export default function PackagesPage() {
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => setSelectedPackage(pkg)}
-                              className="px-2 py-0.5 bg-teal-600 text-white text-xs rounded hover:bg-teal-700 flex items-center gap-1"
+                              className="px-2 py-0.5 bg-[#516057] text-white text-xs rounded hover:bg-[#505454] flex items-center gap-1"
                             >
                               <Eye className="h-3 w-3" />
                               View
@@ -1339,7 +1339,7 @@ export default function PackagesPage() {
                             {packageType === 'packages' && (
                               <button
                                 onClick={() => handleExportSinglePackage(pkg)}
-                                className="px-2 py-0.5 bg-teal-600 text-white text-xs rounded hover:bg-teal-700 flex items-center gap-1"
+                                className="px-2 py-0.5 bg-[#516057] text-white text-xs rounded hover:bg-[#505454] flex items-center gap-1"
                                 title="Export this package to Excel"
                               >
                                 <Download className="h-3 w-3" />
@@ -1357,7 +1357,7 @@ export default function PackagesPage() {
                                   // Disable if fee rates exist but none is selected, or if already selecting
                                   return selectingPackageId === pkg.distributorId || (hasFeeRates && !hasSelectedFeeRate);
                                 })()}
-                                className="px-2 py-0.5 bg-teal-600 text-white text-xs rounded hover:bg-teal-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-1"
+                                className="px-2 py-0.5 bg-[#516057] text-white text-xs rounded hover:bg-[#505454] disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-1"
                                 title={(() => {
                                   const pkgAny = pkg as any;
                                   const feeRates = pkgAny.distributorContact?.feeRates;
@@ -1398,7 +1398,7 @@ export default function PackagesPage() {
                   })
                   ) : (
                     <tr>
-                      <td colSpan={packageType === 'packages' ? 5 : 5} className="px-2 py-6 text-center text-xs text-gray-500">
+                      <td colSpan={packageType === 'packages' ? 5 : 5} className="px-2 py-6 text-center text-xs text-[#6b7280]">
                         No packages available
                       </td>
                     </tr>
@@ -1411,17 +1411,17 @@ export default function PackagesPage() {
             <div className="md:hidden overflow-x-auto">
               <table className="w-full border-collapse min-w-[700px]">
                 <thead>
-                  <tr className="bg-gray-50 border-b border-gray-200">
-                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700">Distributor</th>
-                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700">Items</th>
-                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700">Value</th>
+                  <tr className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
+                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454]">Distributor</th>
+                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454]">Items</th>
+                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454]">Value</th>
                     {packageType === 'suggested' && (
-                      <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700">Fee Rate</th>
+                      <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454]">Fee Rate</th>
                     )}
                     {packageType === 'packages' && (
-                      <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700">Deliver</th>
+                      <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454]">Deliver</th>
                     )}
-                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-gray-700">Actions</th>
+                    <th className="px-2 py-1 text-left text-[10px] font-semibold text-[#505454]">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1429,8 +1429,8 @@ export default function PackagesPage() {
                     <tr>
                       <td colSpan={packageType === 'packages' ? 5 : 5} className="px-2 py-8 text-center">
                         <div className="flex flex-col items-center gap-2">
-                          <Loader2 className="h-6 w-6 animate-spin text-teal-600" />
-                          <p className="text-[10px] text-gray-600">Loading packages...</p>
+                          <Loader2 className="h-6 w-6 animate-spin text-[#516057]" />
+                          <p className="text-[10px] text-[#505454]">Loading packages...</p>
                         </div>
                       </td>
                     </tr>
@@ -1439,10 +1439,10 @@ export default function PackagesPage() {
                       <td colSpan={packageType === 'packages' ? 5 : 5} className="px-2 py-8 text-center">
                         <div className="flex flex-col items-center gap-2">
                           <AlertCircle className="h-6 w-6 text-red-600" />
-                          <p className="text-[10px] text-gray-600">{error || 'No packages available'}</p>
+                          <p className="text-[10px] text-[#505454]">{error || 'No packages available'}</p>
                           <button
                             onClick={handleRefresh}
-                            className="px-2 py-1 bg-teal-600 text-white rounded hover:bg-teal-700 flex items-center gap-1 text-[10px]"
+                            className="px-2 py-1 bg-[#516057] text-white rounded hover:bg-[#505454] flex items-center gap-1 text-[10px]"
                           >
                             <RefreshCw className="h-3 w-3" />
                             Retry
@@ -1465,15 +1465,15 @@ export default function PackagesPage() {
                       return (
                         <tr
                           key={`${pkg.distributorId}-${index}`}
-                          className="border-b border-gray-100 hover:bg-gray-50"
+                          className="border-b border-[#f3f4f6] hover:bg-[#f5f2f1]"
                         >
-                          <td className="px-2 py-1 text-[10px] text-gray-900">{pkg.distributorName}</td>
-                          <td className="px-2 py-1 text-[10px] text-gray-700">{((pkg as any).items || pkg.products || []).length}</td>
-                          <td className="px-2 py-1 text-[10px] text-gray-700">
+                          <td className="px-2 py-1 text-[10px] text-[#000000]">{pkg.distributorName}</td>
+                          <td className="px-2 py-1 text-[10px] text-[#505454]">{((pkg as any).items || pkg.products || []).length}</td>
+                          <td className="px-2 py-1 text-[10px] text-[#505454]">
                             {packageType === 'suggested' && feeRatePercentage > 0 ? (
                               <div className="flex flex-col">
-                                <span className="line-through text-gray-400 text-[9px]">{formatCurrency(pkg.totalEstimatedValue)}</span>
-                                <span className="font-semibold text-teal-700">{formatCurrency(adjustedTotalValue)}</span>
+                                <span className="line-through text-[#9ca3af] text-[9px]">{formatCurrency(pkg.totalEstimatedValue)}</span>
+                                <span className="font-semibold text-[#516057]">{formatCurrency(adjustedTotalValue)}</span>
                               </div>
                             ) : (
                               formatCurrency(pkg.totalEstimatedValue)
@@ -1492,7 +1492,7 @@ export default function PackagesPage() {
                                   }
                                   setSelectedFeeRates(newMap);
                                 }}
-                                className="w-full px-1.5 py-0.5 text-[10px] border border-gray-300 rounded focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
+                                className="w-full px-1.5 py-0.5 text-[10px] border border-[#e2e2e2] rounded focus:ring-1 focus:ring-[#516057] focus:border-[#e2e2e2]"
                                 disabled={!pkgAny.distributorContact?.feeRates}
                               >
                                 <option value="">Select</option>
@@ -1524,7 +1524,7 @@ export default function PackagesPage() {
                               <button
                                 onClick={() => setDeliveryPackage(pkg)}
                                 disabled={!pkg.id || updatingStatusId === (pkg.id || '')}
-                                className="px-1.5 py-0.5 bg-teal-600 text-white text-[10px] rounded hover:bg-teal-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-0.5"
+                                className="px-1.5 py-0.5 bg-[#516057] text-white text-[10px] rounded hover:bg-[#505454] disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-0.5"
                               >
                                 <Truck className="h-2.5 w-2.5" />
                                 Deliver
@@ -1536,7 +1536,7 @@ export default function PackagesPage() {
                           <div className="flex items-center gap-0.5 flex-wrap">
                             <button
                               onClick={() => setSelectedPackage(pkg)}
-                              className="px-1.5 py-0.5 bg-teal-600 text-white text-[10px] rounded hover:bg-teal-700 flex items-center gap-0.5"
+                              className="px-1.5 py-0.5 bg-[#516057] text-white text-[10px] rounded hover:bg-[#505454] flex items-center gap-0.5"
                             >
                               <Eye className="h-2.5 w-2.5" />
                               View
@@ -1544,7 +1544,7 @@ export default function PackagesPage() {
                             {packageType === 'packages' && (
                               <button
                                 onClick={() => handleExportSinglePackage(pkg)}
-                                className="px-1.5 py-0.5 bg-teal-600 text-white text-[10px] rounded hover:bg-teal-700 flex items-center gap-0.5"
+                                className="px-1.5 py-0.5 bg-[#516057] text-white text-[10px] rounded hover:bg-[#505454] flex items-center gap-0.5"
                                 title="Export this package to Excel"
                               >
                                 <Download className="h-2.5 w-2.5" />
@@ -1561,7 +1561,7 @@ export default function PackagesPage() {
                                   // Disable if fee rates exist but none is selected, or if already selecting
                                   return selectingPackageId === pkg.distributorId || (hasFeeRates && !hasSelectedFeeRate);
                                 })()}
-                                className="px-1.5 py-0.5 bg-teal-600 text-white text-[10px] rounded hover:bg-teal-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-0.5"
+                                className="px-1.5 py-0.5 bg-[#516057] text-white text-[10px] rounded hover:bg-[#505454] disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-0.5"
                                 title={(() => {
                                   const pkgAny = pkg as any;
                                   const feeRates = pkgAny.distributorContact?.feeRates;
@@ -1601,7 +1601,7 @@ export default function PackagesPage() {
                   })
                   ) : (
                     <tr>
-                      <td colSpan={packageType === 'packages' ? 5 : 5} className="px-2 py-6 text-center text-[10px] text-gray-500">
+                      <td colSpan={packageType === 'packages' ? 5 : 5} className="px-2 py-6 text-center text-[10px] text-[#6b7280]">
                         No packages available
                       </td>
                     </tr>
@@ -1615,18 +1615,18 @@ export default function PackagesPage() {
         {/* Modal for Viewing Products */}
         {selectedPackage && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2">
-            <div className="relative w-full max-w-4xl bg-white rounded-lg shadow-xl max-h-[90vh] flex flex-col">
+            <div className="relative w-full max-w-4xl bg-white rounded-[4px] shadow-xl max-h-[90vh] flex flex-col">
               {/* Modal Header */}
-              <div className="flex items-center justify-between p-2 border-b border-gray-200 flex-shrink-0">
+              <div className="flex items-center justify-between p-2 border-b border-[#e2e2e2] flex-shrink-0">
                 <div className="flex-1 min-w-0 pr-2">
-                  <h3 className="text-sm font-bold text-gray-900 truncate">Products</h3>
-                  <p className="text-xs text-gray-600 mt-0.5 truncate">
+                  <h3 className="text-sm font-bold text-[#000000] truncate">Products</h3>
+                  <p className="text-xs text-[#505454] mt-0.5 truncate">
                     {selectedPackage.distributorName}
                   </p>
                 </div>
                 <button
                   onClick={() => setSelectedPackage(null)}
-                  className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+                  className="p-1.5 hover:bg-[#f5f2f1] rounded-[4px] transition-colors flex-shrink-0"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -1634,38 +1634,38 @@ export default function PackagesPage() {
 
               {/* Distributor Contact Info */}
               {selectedPackage.distributorContact && (
-                <div className="p-2 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+                <div className="p-2 border-b border-[#e2e2e2] bg-[#f5f2f1] flex-shrink-0">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                     {selectedPackage.distributorContact.email && (
                       <div className="flex items-center gap-1.5">
-                        <Mail className="h-3 w-3 text-gray-500 flex-shrink-0" />
-                        <span className="text-gray-700 truncate text-xs">{selectedPackage.distributorContact.email}</span>
+                        <Mail className="h-3 w-3 text-[#6b7280] flex-shrink-0" />
+                        <span className="text-[#505454] truncate text-xs">{selectedPackage.distributorContact.email}</span>
                       </div>
                     )}
                     {selectedPackage.distributorContact.phone && (
                       <div className="flex items-center gap-1.5">
-                        <Phone className="h-3 w-3 text-gray-500 flex-shrink-0" />
-                        <span className="text-gray-700 text-xs">{selectedPackage.distributorContact.phone}</span>
+                        <Phone className="h-3 w-3 text-[#6b7280] flex-shrink-0" />
+                        <span className="text-[#505454] text-xs">{selectedPackage.distributorContact.phone}</span>
                       </div>
                     )}
                   </div>
                   {selectedPackage.distributorContact.location && (
-                    <div className="mt-2 pt-2 border-t border-gray-200">
+                    <div className="mt-2 pt-2 border-t border-[#e2e2e2]">
                       <div className="flex items-start gap-1.5">
-                        <MapPin className="h-3 w-3 text-gray-500 flex-shrink-0 mt-0.5" />
+                        <MapPin className="h-3 w-3 text-[#6b7280] flex-shrink-0 mt-0.5" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-[10px] text-gray-500 mb-0.5">Location</p>
-                          <p className="text-xs text-gray-700 break-words">{selectedPackage.distributorContact.location}</p>
+                          <p className="text-[10px] text-[#6b7280] mb-0.5">Location</p>
+                          <p className="text-xs text-[#505454] break-words">{selectedPackage.distributorContact.location}</p>
                         </div>
                         <button
                           onClick={() => handleCopyAddress(selectedPackage.distributorContact?.location || '')}
-                          className="p-1 hover:bg-gray-200 rounded-lg transition-colors flex-shrink-0"
+                          className="p-1 hover:bg-[#e2e2e2] rounded-[4px] transition-colors flex-shrink-0"
                           title="Copy address"
                         >
                           {copiedAddress ? (
                             <CheckCircle className="h-3 w-3 text-green-600" />
                           ) : (
-                            <Copy className="h-3 w-3 text-gray-600" />
+                            <Copy className="h-3 w-3 text-[#505454]" />
                           )}
                         </button>
                       </div>
@@ -1680,15 +1680,15 @@ export default function PackagesPage() {
                 <div className="hidden md:block overflow-x-auto">
                   <table className="w-full border-collapse">
                     <thead>
-                      <tr className="bg-gray-50 border-b border-gray-200">
-                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Product Name</th>
-                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">NDC</th>
-                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Full Units</th>
-                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Partial Units</th>
-                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Price/Unit</th>
-                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Full Price</th>
-                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-gray-700">Partial Price</th>
-                        <th className="px-2 py-1.5 text-center text-xs font-semibold text-gray-700">Actions</th>
+                      <tr className="bg-[#f5f2f1] border-b border-[#e2e2e2]">
+                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Product Name</th>
+                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">NDC</th>
+                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Full Units</th>
+                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Partial Units</th>
+                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Price/Unit</th>
+                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Full Price</th>
+                        <th className="px-2 py-1.5 text-left text-xs font-semibold text-[#505454]">Partial Price</th>
+                        <th className="px-2 py-1.5 text-center text-xs font-semibold text-[#505454]">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1741,10 +1741,10 @@ export default function PackagesPage() {
                             return (
                             <tr
                               key={`${item.ndc}-${idx}`}
-                              className="border-b border-gray-100 hover:bg-gray-50"
+                              className="border-b border-[#f3f4f6] hover:bg-[#f5f2f1]"
                             >
-                              <td className="px-2 py-1.5 text-xs text-gray-900">{item.productName}</td>
-                              <td className="px-2 py-1.5 text-xs font-mono text-gray-600">{item.ndc}</td>
+                              <td className="px-2 py-1.5 text-xs text-[#000000]">{item.productName}</td>
+                              <td className="px-2 py-1.5 text-xs font-mono text-[#505454]">{item.ndc}</td>
                               <td className="px-2 py-1.5">
                                 <input
                                   type="number"
@@ -1756,7 +1756,7 @@ export default function PackagesPage() {
                                     handleUnitChange(packageId, itemId, item, 'full', value);
                                   }}
                                   disabled={!isEditing || isUpdating}
-                                  className="w-16 px-1.5 py-0.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:border-gray-200"
+                                  className="w-16 px-1.5 py-0.5 text-xs border border-[#e2e2e2] rounded focus:outline-none focus:ring-1 focus:ring-[#516057] disabled:bg-[#f5f2f1] disabled:cursor-not-allowed disabled:border-[#e2e2e2]"
                                 />
                               </td>
                               <td className="px-2 py-1.5">
@@ -1770,47 +1770,47 @@ export default function PackagesPage() {
                                     handleUnitChange(packageId, itemId, item, 'partial', value);
                                   }}
                                   disabled={!isEditing || isUpdating}
-                                  className="w-16 px-1.5 py-0.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:border-gray-200"
+                                  className="w-16 px-1.5 py-0.5 text-xs border border-[#e2e2e2] rounded focus:outline-none focus:ring-1 focus:ring-[#516057] disabled:bg-[#f5f2f1] disabled:cursor-not-allowed disabled:border-[#e2e2e2]"
                                 />
                               </td>
-                              <td className="px-2 py-1.5 text-xs text-gray-700">
+                              <td className="px-2 py-1.5 text-xs text-[#505454]">
                                 {pricePerUnit !== null ? formatCurrency(pricePerUnit) : '-'}
                               </td>
-                              <td className="px-2 py-1.5 text-xs text-gray-700 font-semibold">
+                              <td className="px-2 py-1.5 text-xs text-[#505454] font-semibold">
                                 {fullPrice > 0 ? formatCurrency(fullPrice) : '-'}
                               </td>
-                              <td className="px-2 py-1.5 text-xs text-gray-700 font-semibold">
+                              <td className="px-2 py-1.5 text-xs text-[#505454] font-semibold">
                                 {partialPrice > 0 ? formatCurrency(partialPrice) : '-'}
                               </td>
                               <td className="px-2 py-1.5 text-center">
                                 <div className="flex items-center justify-center gap-1">
                                   {isUpdating ? (
-                                    <Loader2 className="h-3 w-3 animate-spin text-teal-600" />
+                                    <Loader2 className="h-3 w-3 animate-spin text-[#516057]" />
                                   ) : isEditing ? (
                                     <>
                                       <button
                                         onClick={() => handleSubmitItem(packageId, itemId, item)}
-                                        className="p-1 hover:bg-teal-100 rounded transition-colors"
+                                        className="p-1 hover:bg-[#f5f2f1] rounded transition-colors"
                                         title="Submit changes"
                                       >
-                                        <Check className="h-3 w-3 text-teal-600" />
+                                        <Check className="h-3 w-3 text-[#516057]" />
                                       </button>
                                       <button
                                         onClick={() => handleCancelEdit(packageId, itemId)}
-                                        className="p-1 hover:bg-gray-100 rounded transition-colors"
+                                        className="p-1 hover:bg-[#f5f2f1] rounded transition-colors"
                                         title="Cancel editing"
                                       >
-                                        <X className="h-3 w-3 text-gray-600" />
+                                        <X className="h-3 w-3 text-[#505454]" />
                                       </button>
                                     </>
                                   ) : (
                                     <>
                                       <button
                                         onClick={() => handleEditItem(packageId, itemId, item)}
-                                        className="p-1 hover:bg-teal-100 rounded transition-colors"
+                                        className="p-1 hover:bg-[#f5f2f1] rounded transition-colors"
                                         title="Edit item"
                                       >
-                                        <Pencil className="h-3 w-3 text-teal-600" />
+                                        <Pencil className="h-3 w-3 text-[#516057]" />
                                       </button>
                                       <button
                                         onClick={() => handleDeleteItem(packageId, itemId, item.productName)}
@@ -1828,7 +1828,7 @@ export default function PackagesPage() {
                           })
                         ) : (
                           <tr>
-                            <td colSpan={8} className="px-2 py-6 text-center text-xs text-gray-500">
+                            <td colSpan={8} className="px-2 py-6 text-center text-xs text-[#6b7280]">
                               No products found
                             </td>
                           </tr>
@@ -1889,41 +1889,41 @@ export default function PackagesPage() {
                         return (
                         <div
                           key={`${item.ndc}-${idx}`}
-                          className="bg-gray-50 rounded-lg border border-gray-200 p-2"
+                          className="bg-[#f5f2f1] rounded-[4px] border border-[#e2e2e2] p-2"
                         >
                           <div className="flex items-start justify-between mb-1.5">
                             <div className="flex-1">
-                              <p className="text-xs font-medium text-gray-900">{item.productName}</p>
-                              <p className="text-[10px] font-mono text-gray-600 mt-0.5">NDC: {item.ndc}</p>
+                              <p className="text-xs font-medium text-[#000000]">{item.productName}</p>
+                              <p className="text-[10px] font-mono text-[#505454] mt-0.5">NDC: {item.ndc}</p>
                             </div>
                             <div className="flex items-center gap-1 ml-2">
                               {isUpdating ? (
-                                <Loader2 className="h-3 w-3 animate-spin text-teal-600" />
+                                <Loader2 className="h-3 w-3 animate-spin text-[#516057]" />
                               ) : isEditing ? (
                                 <>
                                   <button
                                     onClick={() => handleSubmitItem(packageId, itemId, item)}
-                                    className="p-1 hover:bg-teal-100 rounded transition-colors"
+                                    className="p-1 hover:bg-[#f5f2f1] rounded transition-colors"
                                     title="Submit changes"
                                   >
-                                    <Check className="h-3 w-3 text-teal-600" />
+                                    <Check className="h-3 w-3 text-[#516057]" />
                                   </button>
                                   <button
                                     onClick={() => handleCancelEdit(packageId, itemId)}
-                                    className="p-1 hover:bg-gray-100 rounded transition-colors"
+                                    className="p-1 hover:bg-[#f5f2f1] rounded transition-colors"
                                     title="Cancel editing"
                                   >
-                                    <X className="h-3 w-3 text-gray-600" />
+                                    <X className="h-3 w-3 text-[#505454]" />
                                   </button>
                                 </>
                               ) : (
                                 <>
                                   <button
                                     onClick={() => handleEditItem(packageId, itemId, item)}
-                                    className="p-1 hover:bg-teal-100 rounded transition-colors"
+                                    className="p-1 hover:bg-[#f5f2f1] rounded transition-colors"
                                     title="Edit item"
                                   >
-                                    <Pencil className="h-3 w-3 text-teal-600" />
+                                    <Pencil className="h-3 w-3 text-[#516057]" />
                                   </button>
                                   <button
                                     onClick={() => handleDeleteItem(packageId, itemId, item.productName)}
@@ -1938,7 +1938,7 @@ export default function PackagesPage() {
                           </div>
                           <div className="grid grid-cols-2 gap-2 text-xs">
                             <div>
-                              <p className="text-[10px] text-gray-500 mb-0.5">Full Units</p>
+                              <p className="text-[10px] text-[#6b7280] mb-0.5">Full Units</p>
                               <input
                                 type="number"
                                 min="0"
@@ -1949,11 +1949,11 @@ export default function PackagesPage() {
                                   handleUnitChange(packageId, itemId, item, 'full', value);
                                 }}
                                 disabled={!isEditing || isUpdating}
-                                className="w-full px-1.5 py-0.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:border-gray-200"
+                                className="w-full px-1.5 py-0.5 text-xs border border-[#e2e2e2] rounded focus:outline-none focus:ring-1 focus:ring-[#516057] disabled:bg-[#f5f2f1] disabled:cursor-not-allowed disabled:border-[#e2e2e2]"
                               />
                             </div>
                             <div>
-                              <p className="text-[10px] text-gray-500 mb-0.5">Partial Units</p>
+                              <p className="text-[10px] text-[#6b7280] mb-0.5">Partial Units</p>
                               <input
                                 type="number"
                                 min="0"
@@ -1964,24 +1964,24 @@ export default function PackagesPage() {
                                   handleUnitChange(packageId, itemId, item, 'partial', value);
                                 }}
                                 disabled={!isEditing || isUpdating}
-                                className="w-full px-1.5 py-0.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:border-gray-200"
+                                className="w-full px-1.5 py-0.5 text-xs border border-[#e2e2e2] rounded focus:outline-none focus:ring-1 focus:ring-[#516057] disabled:bg-[#f5f2f1] disabled:cursor-not-allowed disabled:border-[#e2e2e2]"
                               />
                             </div>
                             <div>
-                              <p className="text-[10px] text-gray-500">Price/Unit</p>
-                              <p className="font-medium text-gray-700 text-xs">
+                              <p className="text-[10px] text-[#6b7280]">Price/Unit</p>
+                              <p className="font-medium text-[#505454] text-xs">
                                 {pricePerUnit !== null ? formatCurrency(pricePerUnit) : '-'}
                               </p>
                             </div>
                             <div>
-                              <p className="text-[10px] text-gray-500">Full Price</p>
-                              <p className="font-semibold text-gray-700 text-xs">
+                              <p className="text-[10px] text-[#6b7280]">Full Price</p>
+                              <p className="font-semibold text-[#505454] text-xs">
                                 {fullPrice > 0 ? formatCurrency(fullPrice) : '-'}
                               </p>
                             </div>
                             <div>
-                              <p className="text-[10px] text-gray-500">Partial Price</p>
-                              <p className="font-semibold text-gray-700 text-xs">
+                              <p className="text-[10px] text-[#6b7280]">Partial Price</p>
+                              <p className="font-semibold text-[#505454] text-xs">
                                 {partialPrice > 0 ? formatCurrency(partialPrice) : '-'}
                               </p>
                             </div>
@@ -1990,7 +1990,7 @@ export default function PackagesPage() {
                         );
                       })
                     ) : (
-                      <div className="px-2 py-6 text-center text-xs text-gray-500">
+                      <div className="px-2 py-6 text-center text-xs text-[#6b7280]">
                         No products found
                       </div>
                     );
@@ -1999,10 +1999,10 @@ export default function PackagesPage() {
               </div>
 
               {/* Modal Footer */}
-              <div className="flex items-center justify-end gap-2 p-2 border-t border-gray-200 flex-shrink-0">
+              <div className="flex items-center justify-end gap-2 p-2 border-t border-[#e2e2e2] flex-shrink-0">
                 <button
                   onClick={() => setSelectedPackage(null)}
-                  className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-xs"
+                  className="px-3 py-1 bg-[#e2e2e2] text-[#505454] rounded hover:bg-gray-300 text-xs"
                 >
                   Close
                 </button>
@@ -2014,13 +2014,13 @@ export default function PackagesPage() {
         {/* Delete Confirmation Modal */}
         {packageToDelete && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2">
-            <div className="relative w-full max-w-md bg-white rounded-lg shadow-xl">
+            <div className="relative w-full max-w-md bg-white rounded-[4px] shadow-xl">
               {/* Modal Header */}
-              <div className="flex items-center justify-between p-2 border-b border-gray-200">
-                <h3 className="text-sm font-bold text-gray-900">Delete Package</h3>
+              <div className="flex items-center justify-between p-2 border-b border-[#e2e2e2]">
+                <h3 className="text-sm font-bold text-[#000000]">Delete Package</h3>
                 <button
                   onClick={closeDeleteModal}
-                  className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-1.5 hover:bg-[#f5f2f1] rounded-[4px] transition-colors"
                   disabled={deletingId === packageToDelete.packageId && !error}
                 >
                   <X className="h-4 w-4" />
@@ -2030,7 +2030,7 @@ export default function PackagesPage() {
               {/* Modal Content */}
               <div className="p-2">
                 {error ? (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-2 flex items-start gap-2">
+                  <div className="bg-red-50 border border-red-200 rounded-[4px] p-2 flex items-start gap-2">
                     <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
                     <div className="flex-1">
                       <p className="text-xs text-red-800 font-medium">Error</p>
@@ -2045,7 +2045,7 @@ export default function PackagesPage() {
                       </div>
                     </div>
                     <div className="flex-1">
-                      <p className="text-xs text-gray-700 mb-1">
+                      <p className="text-xs text-[#505454] mb-1">
                         Are you sure you want to delete the package from <span className="font-semibold">{packageToDelete.distributorName}</span>?
                       </p>
                       <p className="text-xs text-red-600 font-medium">
@@ -2057,11 +2057,11 @@ export default function PackagesPage() {
               </div>
 
               {/* Modal Footer */}
-              <div className="flex items-center justify-end gap-2 p-2 border-t border-gray-200">
+              <div className="flex items-center justify-end gap-2 p-2 border-t border-[#e2e2e2]">
                 <button
                   onClick={closeDeleteModal}
                   disabled={deletingId === packageToDelete.packageId && !error}
-                  className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-xs disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  className="px-3 py-1 bg-[#e2e2e2] text-[#505454] rounded hover:bg-gray-300 text-xs disabled:bg-[#f5f2f1] disabled:cursor-not-allowed"
                 >
                   {error ? 'Close' : 'Cancel'}
                 </button>
@@ -2090,18 +2090,18 @@ export default function PackagesPage() {
         {/* Delivery Information Modal */}
         {deliveryPackage && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2">
-            <div className="relative w-full max-w-2xl bg-white rounded-lg shadow-xl max-h-[90vh] flex flex-col">
+            <div className="relative w-full max-w-2xl bg-white rounded-[4px] shadow-xl max-h-[90vh] flex flex-col">
               {/* Modal Header */}
-              <div className="flex items-center justify-between p-2 border-b border-gray-200 flex-shrink-0">
+              <div className="flex items-center justify-between p-2 border-b border-[#e2e2e2] flex-shrink-0">
                 <div className="flex-1 min-w-0 pr-2">
-                  <h3 className="text-sm font-bold text-gray-900">Delivery Information</h3>
-                  <p className="text-xs text-gray-600 mt-0.5 truncate">
+                  <h3 className="text-sm font-bold text-[#000000]">Delivery Information</h3>
+                  <p className="text-xs text-[#505454] mt-0.5 truncate">
                     {deliveryPackage.distributorName}
                   </p>
                 </div>
                 <button
                   onClick={closeDeliveryModal}
-                  className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+                  className="p-1.5 hover:bg-[#f5f2f1] rounded-[4px] transition-colors flex-shrink-0"
                   disabled={updatingStatusId === deliveryPackage.id}
                 >
                   <X className="h-4 w-4" />
@@ -2111,7 +2111,7 @@ export default function PackagesPage() {
               {/* Modal Content */}
               <div className="flex-1 p-2 overflow-y-auto">
                 {error && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-2 mb-2 flex items-start gap-2">
+                  <div className="bg-red-50 border border-red-200 rounded-[4px] p-2 mb-2 flex items-start gap-2">
                     <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
                     <div className="flex-1">
                       <p className="text-xs text-red-800 font-medium">Error</p>
@@ -2129,7 +2129,7 @@ export default function PackagesPage() {
                 <div className="space-y-2">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div>
-                      <label className="text-xs font-medium text-gray-700 mb-1 block">
+                      <label className="text-xs font-medium text-[#505454] mb-1 block">
                         Received By *
                       </label>
                       <Input
@@ -2141,7 +2141,7 @@ export default function PackagesPage() {
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-gray-700 mb-1 block">
+                      <label className="text-xs font-medium text-[#505454] mb-1 block">
                         Delivery Date *
                       </label>
                       <Input
@@ -2157,7 +2157,7 @@ export default function PackagesPage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div>
-                      <label className="text-xs font-medium text-gray-700 mb-1 block">
+                      <label className="text-xs font-medium text-[#505454] mb-1 block">
                         Delivery Time
                       </label>
                       <Input
@@ -2168,11 +2168,11 @@ export default function PackagesPage() {
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-gray-700 mb-1 block">
+                      <label className="text-xs font-medium text-[#505454] mb-1 block">
                         Delivery Condition *
                       </label>
                       <select
-                        className="w-full px-2 py-1.5 border border-input rounded-lg text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2"
+                        className="w-full px-2 py-1.5 border border-input rounded-[4px] text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2"
                         value={deliveryFormData.deliveryCondition}
                         onChange={(e) => setDeliveryFormData({ ...deliveryFormData, deliveryCondition: e.target.value })}
                         required
@@ -2189,7 +2189,7 @@ export default function PackagesPage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div>
-                      <label className="text-xs font-medium text-gray-700 mb-1 block">
+                      <label className="text-xs font-medium text-[#505454] mb-1 block">
                         Tracking Number *
                       </label>
                       <Input
@@ -2201,11 +2201,11 @@ export default function PackagesPage() {
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-gray-700 mb-1 block">
+                      <label className="text-xs font-medium text-[#505454] mb-1 block">
                         Carrier *
                       </label>
                       <select
-                        className="w-full px-2 py-1.5 border border-input rounded-lg text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2"
+                        className="w-full px-2 py-1.5 border border-input rounded-[4px] text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2"
                         value={deliveryFormData.carrier}
                         onChange={(e) => setDeliveryFormData({ ...deliveryFormData, carrier: e.target.value })}
                         required
@@ -2221,11 +2221,11 @@ export default function PackagesPage() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-medium text-gray-700 mb-1 block">
+                    <label className="text-xs font-medium text-[#505454] mb-1 block">
                       Delivery Notes (Optional)
                     </label>
                     <textarea
-                      className="w-full px-2 py-1.5 border border-input rounded-lg text-xs min-h-[60px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2"
+                      className="w-full px-2 py-1.5 border border-input rounded-[4px] text-xs min-h-[60px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2"
                       placeholder="Package received in good condition..."
                       value={deliveryFormData.notes}
                       onChange={(e) => setDeliveryFormData({ ...deliveryFormData, notes: e.target.value })}
@@ -2235,18 +2235,18 @@ export default function PackagesPage() {
               </div>
 
               {/* Modal Footer */}
-              <div className="flex items-center justify-end gap-2 p-2 border-t border-gray-200 flex-shrink-0">
+              <div className="flex items-center justify-end gap-2 p-2 border-t border-[#e2e2e2] flex-shrink-0">
                 <button
                   onClick={closeDeliveryModal}
                   disabled={updatingStatusId === deliveryPackage.id}
-                  className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-xs disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  className="px-3 py-1 bg-[#e2e2e2] text-[#505454] rounded hover:bg-gray-300 text-xs disabled:bg-[#f5f2f1] disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDeliverySubmit}
                   disabled={updatingStatusId === deliveryPackage.id}
-                  className="px-3 py-1 bg-teal-600 text-white rounded hover:bg-teal-700 text-xs disabled:bg-teal-400 disabled:cursor-not-allowed flex items-center gap-1"
+                  className="px-3 py-1 bg-[#516057] text-white rounded hover:bg-[#505454] text-xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                 >
                   {updatingStatusId === deliveryPackage.id ? (
                     <>
@@ -2268,18 +2268,18 @@ export default function PackagesPage() {
         {/* Delivery Info Modal */}
         {deliveryInfoModal.open && deliveryInfoModal.data && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2">
-            <div className="relative w-full max-w-2xl bg-white rounded-lg shadow-xl max-h-[90vh] flex flex-col">
+            <div className="relative w-full max-w-2xl bg-white rounded-[4px] shadow-xl max-h-[90vh] flex flex-col">
               {/* Modal Header */}
-              <div className="flex items-center justify-between p-2 border-b border-gray-200 flex-shrink-0">
+              <div className="flex items-center justify-between p-2 border-b border-[#e2e2e2] flex-shrink-0">
                 <div className="flex-1 min-w-0 pr-2">
-                  <h3 className="text-sm font-bold text-gray-900">Delivery Information</h3>
-                  <p className="text-xs text-gray-600 mt-0.5">
+                  <h3 className="text-sm font-bold text-[#000000]">Delivery Information</h3>
+                  <p className="text-xs text-[#505454] mt-0.5">
                     Package delivery details
                   </p>
                 </div>
                 <button
                   onClick={() => setDeliveryInfoModal({ open: false, data: null })}
-                  className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+                  className="p-1.5 hover:bg-[#f5f2f1] rounded-[4px] transition-colors flex-shrink-0"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -2290,12 +2290,12 @@ export default function PackagesPage() {
                 <div className="space-y-2">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div>
-                      <p className="text-[10px] text-gray-500 mb-0.5">Received By</p>
-                      <p className="text-xs font-medium text-gray-900">{deliveryInfoModal.data.receivedBy || 'N/A'}</p>
+                      <p className="text-[10px] text-[#6b7280] mb-0.5">Received By</p>
+                      <p className="text-xs font-medium text-[#000000]">{deliveryInfoModal.data.receivedBy || 'N/A'}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-gray-500 mb-0.5">Delivery Date</p>
-                      <p className="text-xs font-medium text-gray-900">
+                      <p className="text-[10px] text-[#6b7280] mb-0.5">Delivery Date</p>
+                      <p className="text-xs font-medium text-[#000000]">
                         {deliveryInfoModal.data.deliveryDate 
                           ? new Date(deliveryInfoModal.data.deliveryDate).toLocaleString()
                           : 'N/A'}
@@ -2305,30 +2305,30 @@ export default function PackagesPage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div>
-                      <p className="text-[10px] text-gray-500 mb-0.5">Delivery Condition</p>
-                      <p className="text-xs font-medium text-gray-900">
+                      <p className="text-[10px] text-[#6b7280] mb-0.5">Delivery Condition</p>
+                      <p className="text-xs font-medium text-[#000000]">
                         {deliveryInfoModal.data.deliveryCondition 
                           ? deliveryInfoModal.data.deliveryCondition.split('_').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
                           : 'N/A'}
                       </p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-gray-500 mb-0.5">Carrier</p>
-                      <p className="text-xs font-medium text-gray-900">{deliveryInfoModal.data.carrier || 'N/A'}</p>
+                      <p className="text-[10px] text-[#6b7280] mb-0.5">Carrier</p>
+                      <p className="text-xs font-medium text-[#000000]">{deliveryInfoModal.data.carrier || 'N/A'}</p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div>
-                      <p className="text-[10px] text-gray-500 mb-0.5">Tracking Number</p>
-                      <p className="text-xs font-medium text-gray-900 font-mono">{deliveryInfoModal.data.trackingNumber || 'N/A'}</p>
+                      <p className="text-[10px] text-[#6b7280] mb-0.5">Tracking Number</p>
+                      <p className="text-xs font-medium text-[#000000] font-mono">{deliveryInfoModal.data.trackingNumber || 'N/A'}</p>
                     </div>
                   </div>
 
                   {deliveryInfoModal.data.deliveryNotes && (
                     <div>
-                      <p className="text-[10px] text-gray-500 mb-0.5">Delivery Notes</p>
-                      <p className="text-xs text-gray-900 bg-gray-50 p-2 rounded-lg border border-gray-200">
+                      <p className="text-[10px] text-[#6b7280] mb-0.5">Delivery Notes</p>
+                      <p className="text-xs text-[#000000] bg-[#f5f2f1] p-2 rounded-[4px] border border-[#e2e2e2]">
                         {deliveryInfoModal.data.deliveryNotes}
                       </p>
                     </div>
@@ -2337,10 +2337,10 @@ export default function PackagesPage() {
               </div>
 
               {/* Modal Footer */}
-              <div className="flex items-center justify-end gap-2 p-2 border-t border-gray-200 flex-shrink-0">
+              <div className="flex items-center justify-end gap-2 p-2 border-t border-[#e2e2e2] flex-shrink-0">
                 <button
                   onClick={() => setDeliveryInfoModal({ open: false, data: null })}
-                  className="px-3 py-1 bg-teal-600 text-white rounded hover:bg-teal-700 text-xs"
+                  className="px-3 py-1 bg-[#516057] text-white rounded hover:bg-[#505454] text-xs"
                 >
                   Close
                 </button>
@@ -2352,13 +2352,13 @@ export default function PackagesPage() {
         {/* Delete Item Confirmation Modal */}
         {deletingItemId && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2">
-            <div className="relative w-full max-w-md bg-white rounded-lg shadow-xl">
+            <div className="relative w-full max-w-md bg-white rounded-[4px] shadow-xl">
               {/* Modal Header */}
-              <div className="flex items-center justify-between p-2 border-b border-gray-200">
-                <h3 className="text-sm font-bold text-gray-900">Delete Item</h3>
+              <div className="flex items-center justify-between p-2 border-b border-[#e2e2e2]">
+                <h3 className="text-sm font-bold text-[#000000]">Delete Item</h3>
                 <button
                   onClick={closeDeleteItemModal}
-                  className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-1.5 hover:bg-[#f5f2f1] rounded-[4px] transition-colors"
                   disabled={updatingItem === deletingItemId.itemId && !error}
                 >
                   <X className="h-4 w-4" />
@@ -2368,7 +2368,7 @@ export default function PackagesPage() {
               {/* Modal Content */}
               <div className="p-2">
                 {error ? (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-2 flex items-start gap-2">
+                  <div className="bg-red-50 border border-red-200 rounded-[4px] p-2 flex items-start gap-2">
                     <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
                     <div className="flex-1">
                       <p className="text-xs text-red-800 font-medium">Error</p>
@@ -2383,7 +2383,7 @@ export default function PackagesPage() {
                       </div>
                     </div>
                     <div className="flex-1">
-                      <p className="text-xs text-gray-700 mb-1">
+                      <p className="text-xs text-[#505454] mb-1">
                         Are you sure you want to delete <span className="font-semibold">{deletingItemId.itemName}</span>?
                       </p>
                       <p className="text-xs text-red-600 font-medium">
@@ -2395,11 +2395,11 @@ export default function PackagesPage() {
               </div>
 
               {/* Modal Footer */}
-              <div className="flex items-center justify-end gap-2 p-2 border-t border-gray-200">
+              <div className="flex items-center justify-end gap-2 p-2 border-t border-[#e2e2e2]">
                 <button
                   onClick={closeDeleteItemModal}
                   disabled={updatingItem === deletingItemId.itemId}
-                  className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-xs disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  className="px-3 py-1 bg-[#e2e2e2] text-[#505454] rounded hover:bg-gray-300 text-xs disabled:bg-[#f5f2f1] disabled:cursor-not-allowed"
                 >
                   {error ? 'Close' : 'Cancel'}
                 </button>
