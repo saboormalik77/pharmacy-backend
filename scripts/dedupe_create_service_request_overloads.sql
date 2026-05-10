@@ -1,39 +1,31 @@
 -- ============================================================================
--- On-site service: optional "purpose" (Purpose of Visit)
+-- Dedupe create_service_request RPC overloads (run in Supabase SQL editor once)
 -- ============================================================================
--- Run against Supabase if CREATE fails without purpose / DB raises "purpose is required".
--- Matches Node RPC args: p_pharmacy_id, p_branch_id, p_requested_date, p_purpose,
--- p_special_instructions, p_requested_by_user_id
+-- PostgREST error: "Could not choose the best candidate function between ..."
+-- happens when two PostgreSQL functions share the same name but different
+-- parameter ORDER (e.g. branch before date vs date before branch).
+-- This drops all variants and keeps ONE canonical signature aligned with
+-- src/services/serviceRequestService.ts (p_pharmacy_id, p_requested_date, p_branch_id, …).
+--
+-- Buying group: pharmacy.created_by (admin id) — public.pharmacy has no buying_group_id column.
+-- Body matches sqlTable/service_requests.sql plus SECURITY DEFINER for RPC.
 -- ============================================================================
 
-ALTER TABLE service_requests
-  ALTER COLUMN purpose DROP NOT NULL;
-
-ALTER TABLE service_requests
-  DROP CONSTRAINT IF EXISTS service_requests_purpose_check;
-
-ALTER TABLE service_requests
-  ADD CONSTRAINT service_requests_purpose_check
-  CHECK (
-    purpose IS NULL
-    OR purpose IN (
-      'return_pickup',
-      'training',
-      'inventory_review',
-      'destruction_pickup',
-      'other'
-    )
-  );
+DROP FUNCTION IF EXISTS create_service_request(uuid, date, uuid, text, text);
+DROP FUNCTION IF EXISTS create_service_request(uuid, date, uuid, text, text, uuid);
+DROP FUNCTION IF EXISTS create_service_request(uuid, uuid, date, text, text);
+DROP FUNCTION IF EXISTS create_service_request(uuid, uuid, date, text, text, uuid);
 
 CREATE OR REPLACE FUNCTION create_service_request(
-    p_pharmacy_id          UUID,
-    p_branch_id            UUID,
-    p_requested_date       DATE,
-    p_purpose              TEXT,
-    p_special_instructions TEXT,
-    p_requested_by_user_id UUID
+    p_pharmacy_id UUID,
+    p_requested_date DATE,
+    p_branch_id UUID DEFAULT NULL,
+    p_purpose TEXT DEFAULT NULL,
+    p_special_instructions TEXT DEFAULT NULL,
+    p_requested_by_user_id UUID DEFAULT NULL
 ) RETURNS JSONB
 LANGUAGE plpgsql
+SECURITY DEFINER
 AS $$
 DECLARE
     v_request_id             UUID;
@@ -107,8 +99,7 @@ BEGIN
                 || ' requested an on-site visit for '
                 || to_char(p_requested_date, 'Mon DD, YYYY')
                 || CASE
-                    WHEN p_purpose IS NOT NULL
-                    THEN ' (' || INITCAP(REPLACE(p_purpose, '_', ' ')) || ')'
+                    WHEN p_purpose IS NOT NULL THEN ' (' || INITCAP(REPLACE(p_purpose, '_', ' ')) || ')'
                     ELSE ''
                 END,
             'service_request',
@@ -127,7 +118,7 @@ BEGIN
         NULL;
     END;
 
-    SELECT 
+    SELECT
         to_jsonb(sr.*) || jsonb_build_object(
             'pharmacy_name',     ph.pharmacy_name,
             'pharmacy_business_name', ph.name,
@@ -161,4 +152,6 @@ BEGIN
 END;
 $$;
 
-COMMENT ON COLUMN service_requests.purpose IS 'Optional label for the visit (nullable).';
+GRANT EXECUTE ON FUNCTION create_service_request TO service_role, authenticated;
+
+COMMENT ON FUNCTION create_service_request IS 'Creates on-site service request; single overload — pharmacy, requested_date, branch, …';

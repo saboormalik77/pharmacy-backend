@@ -66,8 +66,18 @@ const ensureAdmin = () => {
 };
 
 const mapRpcError = (error: any, fallbackStatus = 400): AppError => {
-  const msg = error?.message || 'Service request operation failed';
+  const raw = error?.message ?? '';
+  const msg = typeof raw === 'string' ? raw : 'Service request operation failed';
   const code = error?.code;
+
+  // PostgreSQL / PostgREST: duplicate overloaded RPC signatures — never expose raw SQL to clients
+  if (/could not choose the best candidate function/i.test(msg)) {
+    return new AppError(
+      "We couldn't submit your on-site request right now. Please try again in a few minutes. If this keeps happening, contact support.",
+      503
+    );
+  }
+
   if (code === '42501') return new AppError(msg, 403);
   if (code === '02000') return new AppError(msg, 404);
   if (code === '22023') return new AppError(msg, 400);
@@ -87,10 +97,12 @@ export const createServiceRequest = async (
   if (!input.pharmacyId) throw new AppError('pharmacy_id is required', 400);
   if (!input.requestedDate) throw new AppError('requested_date is required', 400);
 
+  // Parameter order must match a single DB signature (pharmacy → date → branch → …).
+  // See scripts/dedupe_create_service_request_overloads.sql if PostgREST reports overload ambiguity.
   const { data, error } = await sb.rpc('create_service_request', {
     p_pharmacy_id: input.pharmacyId,
-    p_branch_id: input.branchId ?? null,
     p_requested_date: input.requestedDate,
+    p_branch_id: input.branchId ?? null,
     p_purpose: input.purpose ?? null,
     p_special_instructions: input.specialInstructions ?? null,
     p_requested_by_user_id: input.requestedByUserId ?? null,

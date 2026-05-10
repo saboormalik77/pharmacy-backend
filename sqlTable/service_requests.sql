@@ -137,16 +137,14 @@ BEGIN
     -- branch context if passed; otherwise the main pharmacy itself.
     v_effective_pharmacy_id := COALESCE(p_branch_id, p_pharmacy_id);
 
-    -- Fetch buying_group_id + parent_pharmacy_id (ignore errors if columns missing)
-    BEGIN
-        SELECT buying_group_id, parent_pharmacy_id
-          INTO v_buying_group_id, v_parent_id
-        FROM pharmacy
-        WHERE id = v_effective_pharmacy_id;
-    EXCEPTION WHEN OTHERS THEN
-        v_buying_group_id := NULL;
-        v_parent_id := NULL;
-    END;
+    -- Buying group id matches processors.buying_group_id -> admin(id); stored on pharmacy as created_by (not pharmacy.buying_group_id).
+    SELECT
+        COALESCE(ph.created_by, par.created_by),
+        ph.parent_pharmacy_id
+      INTO v_buying_group_id, v_parent_id
+      FROM pharmacy ph
+      LEFT JOIN pharmacy par ON par.id = ph.parent_pharmacy_id
+     WHERE ph.id = v_effective_pharmacy_id;
 
     -- ---- Insert request -------------------------------------------------
     INSERT INTO service_requests (

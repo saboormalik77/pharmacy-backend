@@ -74,64 +74,6 @@ const NORDIC_TAN = "#ad916a";
 const RETURNABLE_COLORS = [NORDIC_SAGE, NORDIC_SAGE_LIGHT];
 const NON_RETURNABLE_COLORS = [NORDIC_TAN, "#6b5a3f", "#c4a882", "#e2d4c4"];
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-function CreditTypeCard({
-  type,
-  expected,
-  received,
-  index,
-  maxValue,
-}: {
-  type: string;
-  expected: number;
-  received: number;
-  index: number;
-  maxValue: number;
-}) {
-  const expectedWidth = maxValue > 0 ? Math.min((expected / maxValue) * 100, 100) : 0;
-  const receivedWidth = maxValue > 0 ? Math.min((received / maxValue) * 100, 100) : 0;
-
-  return (
-    <div className="bg-white border border-[#e2e2e2] rounded-[4px] p-4 hover:border-[#516057] hover:shadow-sm transition-all">
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-[#000000] leading-tight">{type}</span>
-        </div>
-        <span className="text-xs font-bold text-[#516057] bg-[#516057]/10 px-2 py-0.5 rounded-full border border-[#516057]/20">
-          ${expected.toFixed(2)}
-        </span>
-      </div>
-
-      <div className="mb-2">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-[10px] font-medium text-[#505454] uppercase tracking-wide">Expected</span>
-          <span className="text-[10px] text-[#6b7280]">${expected.toFixed(2)}</span>
-        </div>
-        <div className="w-full bg-[#f5f2f1] rounded-full h-2.5 overflow-hidden border border-[#e2e2e2]">
-          <div
-            className="h-full bg-[#516057] rounded-full transition-all duration-500"
-            style={{ width: `${expectedWidth}%` }}
-          />
-        </div>
-      </div>
-
-      <div>
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-[10px] font-medium text-[#516057] uppercase tracking-wide">Received</span>
-          <span className="text-[10px] text-[#516057]">${received.toFixed(2)}</span>
-        </div>
-        <div className="w-full bg-[#f5f2f1] rounded-full h-2.5 overflow-hidden border border-[#e2e2e2]">
-          <div
-            className="h-full bg-[#7fb399] rounded-full transition-all duration-500"
-            style={{ width: `${receivedWidth}%` }}
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function NewDashboardUI({ pharmacyName = "" }: { pharmacyName?: string }) {
@@ -220,32 +162,6 @@ export function NewDashboardUI({ pharmacyName = "" }: { pharmacyName?: string })
     ? selectedReturn.licensePlate.slice(-5)
     : "";
 
-  const creditTypes = returnDetail
-    ? [
-        {
-          type: "FCR OneCheck",
-          expected: returnDetail.creditSummary.fcrOneCheck.expected,
-          received: returnDetail.creditSummary.fcrOneCheck.received,
-        },
-        {
-          type: "Manufacturer Direct Credit",
-          expected: returnDetail.creditSummary.manufacturerDirect.expected,
-          received: returnDetail.creditSummary.manufacturerDirect.received,
-        },
-      ]
-    : [];
-
-  // Calculate max value for proportional bar widths
-  const maxCreditValue = returnDetail
-    ? Math.max(
-        returnDetail.creditSummary.fcrOneCheck.expected,
-        returnDetail.creditSummary.fcrOneCheck.received,
-        returnDetail.creditSummary.manufacturerDirect.expected,
-        returnDetail.creditSummary.manufacturerDirect.received,
-        1
-      )
-    : 1;
-
   const returnableDonutData = returnDetail
     ? [
         { name: "Returnable", value: returnDetail.productValueBreakdown.returnable },
@@ -268,10 +184,8 @@ export function NewDashboardUI({ pharmacyName = "" }: { pharmacyName?: string })
         "Total Items": returnDetail.returnTransaction.totalItems,
         "Returnable Value": returnDetail.productValueBreakdown.returnable,
         "Non-Returnable Value": returnDetail.productValueBreakdown.nonReturnable,
-        "FCR OneCheck Expected": returnDetail.creditSummary.fcrOneCheck.expected,
-        "FCR OneCheck Received": returnDetail.creditSummary.fcrOneCheck.received,
-        "Manufacturer Direct Expected": returnDetail.creditSummary.manufacturerDirect.expected,
-        "Manufacturer Direct Received": returnDetail.creditSummary.manufacturerDirect.received,
+        "Credit Expected": returnDetail.creditSummary.totalExpected,
+        "Credit Received": returnDetail.creditSummary.totalReceived,
         "Created": returnDetail.returnTransaction.createdAt,
       }] }],
       fileName
@@ -466,6 +380,7 @@ export function NewDashboardUI({ pharmacyName = "" }: { pharmacyName?: string })
               </button>
             </div>
 
+            {/* Totals row */}
             <div className="grid grid-cols-2 divide-x divide-[#e2e2e2] border-b border-[#e2e2e2] bg-[#f5f2f1]">
               {[
                 { label: "Total Expected", value: returnDetail.creditSummary.totalExpected, color: "text-[#516057]" },
@@ -478,18 +393,58 @@ export function NewDashboardUI({ pharmacyName = "" }: { pharmacyName?: string })
               ))}
             </div>
 
-            <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white">
-              {creditTypes.map((row, i) => (
-                <CreditTypeCard
-                  key={row.type}
-                  index={i}
-                  type={row.type}
-                  expected={row.expected}
-                  received={row.received}
-                  maxValue={maxCreditValue}
-                />
-              ))}
-            </div>
+            {/* Progress bars */}
+            {(() => {
+              const expected = returnDetail.creditSummary.totalExpected;
+              const received = returnDetail.creditSummary.totalReceived;
+              const receivedPct = expected > 0 ? Math.min((received / expected) * 100, 100) : 0;
+              return (
+                <div className="px-6 py-5 bg-white space-y-4">
+                  {/* Expected bar */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[10px] font-semibold text-[#505454] uppercase tracking-wide">Expected</span>
+                      <span className="text-[10px] font-bold text-[#516057]">${expected.toFixed(2)}</span>
+                    </div>
+                    <div className="w-full bg-[#f5f2f1] rounded-full h-3 overflow-hidden border border-[#e2e2e2]">
+                      <div
+                        className="h-full bg-[#516057] rounded-full transition-all duration-700"
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Received bar */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[10px] font-semibold text-[#7fb399] uppercase tracking-wide">Received</span>
+                      <span className="text-[10px] font-bold text-[#7fb399]">${received.toFixed(2)}</span>
+                    </div>
+                    <div className="w-full bg-[#f5f2f1] rounded-full h-3 overflow-hidden border border-[#e2e2e2]">
+                      <div
+                        className="h-full bg-[#7fb399] rounded-full transition-all duration-700"
+                        style={{ width: `${receivedPct}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Percentage received pill */}
+                  <div className="flex items-center justify-between pt-1 border-t border-[#e2e2e2]">
+                    <span className="text-[10px] text-[#6b7280]">Credit collection rate</span>
+                    <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
+                      receivedPct >= 80
+                        ? "bg-[#516057]/10 text-[#516057] border-[#516057]/20"
+                        : receivedPct >= 40
+                        ? "bg-[#ad916a]/10 text-[#ad916a] border-[#ad916a]/20"
+                        : "bg-red-50 text-red-600 border-red-200"
+                    }`}>
+                      {receivedPct.toFixed(1)}%
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
+
           </div>
         )}
 
