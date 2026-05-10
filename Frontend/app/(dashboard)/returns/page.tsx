@@ -10,6 +10,7 @@ import {
     Search, Plus, ChevronLeft, ChevronRight, Loader2, AlertCircle,
     Eye, X, Trash2, Edit, FileText,
     ClipboardList, DollarSign, Play, CheckCircle,
+    ArrowUpDown, ArrowUp, ArrowDown,
 } from 'lucide-react';
 import { apiClient } from '@/lib/api/client';
 import { formatDate, formatCurrency } from '@/lib/utils/format';
@@ -61,6 +62,15 @@ const STATUS_OPTIONS = [
     { value: 'closed_out', label: 'Closed Out' },
 ];
 
+const SORT_OPTIONS = [
+    { value: 'createdAt', label: 'Date Created' },
+    { value: 'updatedAt', label: 'Last Updated' },
+    { value: 'licensePlate', label: 'License Plate' },
+    { value: 'status', label: 'Status' },
+    { value: 'totalItems', label: 'Total Items' },
+    { value: 'totalReturnableValue', label: 'Returnable Value' },
+];
+
 function getStatusBadge(status: string): { variant: 'success' | 'warning' | 'error' | 'info' | 'default'; label: string } {
     switch (status) {
         case 'in_progress': return { variant: 'info', label: 'In Progress' };
@@ -99,6 +109,8 @@ export default function ReturnsPage() {
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
+    const [sortBy, setSortBy] = useState('createdAt');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [toasts, setToasts] = useState<Toast[]>([]);
 
     // Modals
@@ -150,6 +162,8 @@ export default function ReturnsPage() {
             const params: Record<string, any> = {
                 page: currentPage,
                 limit: 10,
+                sort: sortBy,
+                order: sortOrder,
             };
             if (debouncedSearch) params.search = debouncedSearch;
             if (statusFilter) params.status = statusFilter;
@@ -170,7 +184,7 @@ export default function ReturnsPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [currentPage, debouncedSearch, statusFilter, dateFrom, dateTo]);
+    }, [currentPage, debouncedSearch, statusFilter, dateFrom, dateTo, sortBy, sortOrder]);
 
     useEffect(() => {
         fetchReturns();
@@ -323,6 +337,24 @@ export default function ReturnsPage() {
                         className="px-3 py-2 text-sm border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] bg-white"
                         title="Date to"
                     />
+                    <select
+                        value={sortBy}
+                        onChange={e => { setSortBy(e.target.value); setCurrentPage(1); }}
+                        className="px-3 py-2 text-sm border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] bg-white"
+                        title="Sort by"
+                    >
+                        {SORT_OPTIONS.map(opt => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                    </select>
+                    <button
+                        onClick={() => { setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc'); setCurrentPage(1); }}
+                        className="flex items-center gap-1 px-3 py-2 text-sm border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] bg-white hover:bg-gray-50 transition-colors"
+                        title={`Sort ${sortOrder === 'asc' ? 'ascending' : 'descending'}`}
+                    >
+                        {sortOrder === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
+                        <span className="hidden sm:inline">{sortOrder === 'asc' ? 'Asc' : 'Desc'}</span>
+                    </button>
                 </div>
 
                 {/* Loading / Empty / Table */}
@@ -336,7 +368,7 @@ export default function ReturnsPage() {
                         <p className="text-sm text-[#505454] font-medium mb-1">No return transactions found</p>
                         <p className="text-xs text-[#9ca3af] mb-3">
                             {searchTerm || statusFilter || dateFrom || dateTo
-                                ? 'Try adjusting your filters.'
+                                ? 'Try adjusting your filters or sorting options.'
                                 : 'Create your first return transaction to get started.'}
                         </p>
                         {!searchTerm && !statusFilter && (
@@ -418,12 +450,82 @@ export default function ReturnsPage() {
                         <p className="text-sm text-[#6b7280] font-medium">
                             Page <span className="font-bold text-[#000000]">{pagination.page}</span> of <span className="font-bold text-[#000000]">{pagination.totalPages}</span> (<span className="font-bold text-[#000000]">{pagination.total}</span> total)
                         </p>
-                        <div className="flex items-center gap-2">
-                            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage <= 1} className="p-1.5 border border-[#e2e2e2] rounded-[4px] disabled:opacity-40 hover:bg-[var(--surface-container)] transition-colors">
+                        <div className="flex items-center gap-1">
+                            {/* Previous Button */}
+                            <button 
+                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))} 
+                                disabled={currentPage <= 1} 
+                                className="p-1.5 border border-[#e2e2e2] rounded-[4px] disabled:opacity-40 hover:bg-[var(--surface-container)] transition-colors"
+                                title="Previous page"
+                            >
                                 <ChevronLeft className="w-4 h-4 text-[#505454]" />
                             </button>
-                            <span className="text-sm font-semibold text-[#000000] px-2">{currentPage}</span>
-                            <button onClick={() => setCurrentPage(p => p + 1)} disabled={currentPage >= pagination.totalPages} className="p-1.5 border border-[#e2e2e2] rounded-[4px] disabled:opacity-40 hover:bg-[var(--surface-container)] transition-colors">
+
+                            {/* Page Numbers */}
+                            {(() => {
+                                const totalPages = pagination.totalPages;
+                                const current = currentPage;
+                                const pages = [];
+                                
+                                if (totalPages <= 7) {
+                                    // Show all pages if 7 or fewer
+                                    for (let i = 1; i <= totalPages; i++) {
+                                        pages.push(i);
+                                    }
+                                } else {
+                                    // Always show first page
+                                    pages.push(1);
+                                    
+                                    if (current <= 4) {
+                                        // Show pages 1,2,3,4,5...last
+                                        for (let i = 2; i <= 5; i++) {
+                                            pages.push(i);
+                                        }
+                                        if (totalPages > 6) pages.push('...');
+                                        pages.push(totalPages);
+                                    } else if (current >= totalPages - 3) {
+                                        // Show pages 1...last-4,last-3,last-2,last-1,last
+                                        if (totalPages > 6) pages.push('...');
+                                        for (let i = totalPages - 4; i <= totalPages; i++) {
+                                            pages.push(i);
+                                        }
+                                    } else {
+                                        // Show pages 1...current-1,current,current+1...last
+                                        pages.push('...');
+                                        for (let i = current - 1; i <= current + 1; i++) {
+                                            pages.push(i);
+                                        }
+                                        pages.push('...');
+                                        pages.push(totalPages);
+                                    }
+                                }
+                                
+                                return pages.map((page, index) => 
+                                    page === '...' ? (
+                                        <span key={`ellipsis-${index}`} className="px-2 py-1.5 text-sm text-[#9ca3af]">...</span>
+                                    ) : (
+                                        <button
+                                            key={page}
+                                            onClick={() => setCurrentPage(page as number)}
+                                            className={`px-3 py-1.5 text-sm border rounded-[4px] transition-colors ${
+                                                page === current
+                                                    ? 'border-[#516057] bg-[#516057] text-white font-semibold'
+                                                    : 'border-[#e2e2e2] text-[#505454] hover:bg-[var(--surface-container)]'
+                                            }`}
+                                        >
+                                            {page}
+                                        </button>
+                                    )
+                                );
+                            })()}
+
+                            {/* Next Button */}
+                            <button 
+                                onClick={() => setCurrentPage(p => p + 1)} 
+                                disabled={currentPage >= pagination.totalPages} 
+                                className="p-1.5 border border-[#e2e2e2] rounded-[4px] disabled:opacity-40 hover:bg-[var(--surface-container)] transition-colors"
+                                title="Next page"
+                            >
                                 <ChevronRight className="w-4 h-4 text-[#505454]" />
                             </button>
                         </div>

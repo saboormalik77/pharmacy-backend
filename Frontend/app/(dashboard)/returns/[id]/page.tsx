@@ -8,7 +8,7 @@ import {
     ArrowLeft, Loader2, AlertCircle, X, Play, CheckCircle, Lock,
     Trash2, Edit, ClipboardList, Building2, Package, Truck,
     Plus, Search, ScanLine, FileText, Download, AlertTriangle, Printer, QrCode,
-    ChevronLeft, ChevronRight,
+    ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
@@ -127,7 +127,17 @@ function getStatusBadge(status: string): { variant: 'success' | 'warning' | 'err
 }
 
 /** Products table on return detail — rows per page */
-const RETURN_DETAIL_ITEMS_PAGE_SIZE = 6;
+const RETURN_DETAIL_ITEMS_PAGE_SIZE = 10;
+
+const ITEM_SORT_OPTIONS = [
+    { value: 'createdAt', label: 'Date Added' },
+    { value: 'ndc', label: 'NDC' },
+    { value: 'proprietaryName', label: 'Product Name' },
+    { value: 'manufacturer', label: 'Manufacturer' },
+    { value: 'expirationDate', label: 'Expiration Date' },
+    { value: 'returnStatus', label: 'Status' },
+    { value: 'lotNumber', label: 'Lot Number' },
+];
 
 function getItemStatusBadge(status: string): { variant: 'success' | 'warning' | 'error' | 'info' | 'default'; label: string } {
     switch (status) {
@@ -153,6 +163,12 @@ export default function ReturnDetailPage() {
         totalNonReturnableValue: number;
         totalValue: number;
     } | null>(null);
+    const [itemsPagination, setItemsPagination] = useState<{
+        page: number;
+        limit: number;
+        totalItems: number;
+        totalPages: number;
+    } | null>(null);
     const [reverseDistributors, setReverseDistributors] = useState<ReverseDistributor[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isActionLoading, setIsActionLoading] = useState(false);
@@ -170,9 +186,11 @@ export default function ReturnDetailPage() {
     // Modal states
     const [pdfLoading, setPdfLoading] = useState<string | null>(null);
 
-    // Filters
+    // Filters and sorting
     const [itemSearch, setItemSearch] = useState('');
     const [itemStatusFilter, setItemStatusFilter] = useState('');
+    const [itemSortBy, setItemSortBy] = useState('createdAt');
+    const [itemSortOrder, setItemSortOrder] = useState<'asc' | 'desc'>('desc');
     const debouncedItemSearch = useDebounce(itemSearch, 300);
     const [itemsTablePage, setItemsTablePage] = useState(1);
 
@@ -226,7 +244,12 @@ export default function ReturnDetailPage() {
         if (!id) return;
         setIsItemsLoading(true);
         try {
-            const queryParams: any = {};
+            const queryParams: any = {
+                page: itemsTablePage,
+                limit: RETURN_DETAIL_ITEMS_PAGE_SIZE,
+                sort: itemSortBy,
+                order: itemSortOrder,
+            };
             if (debouncedItemSearch) queryParams.search = debouncedItemSearch;
             if (itemStatusFilter) queryParams.status = itemStatusFilter;
 
@@ -236,6 +259,10 @@ export default function ReturnDetailPage() {
                 if (res.data.summary) {
                     setItemsSummary(res.data.summary);
                 }
+                // Set pagination from API response
+                if (res.data.pagination) {
+                    setItemsPagination(res.data.pagination);
+                }
             } else {
                 throw new Error(res.message || 'Failed to fetch items');
             }
@@ -244,16 +271,18 @@ export default function ReturnDetailPage() {
         } finally {
             setIsItemsLoading(false);
         }
-    }, [id, debouncedItemSearch, itemStatusFilter]);
+    }, [id, debouncedItemSearch, itemStatusFilter, itemSortBy, itemSortOrder, itemsTablePage]);
 
     useEffect(() => {
         setItemsTablePage(1);
-    }, [debouncedItemSearch, itemStatusFilter]);
+    }, [debouncedItemSearch, itemStatusFilter, itemSortBy, itemSortOrder]);
 
     useEffect(() => {
-        const maxPage = Math.max(1, Math.ceil(items.length / RETURN_DETAIL_ITEMS_PAGE_SIZE));
-        setItemsTablePage((p) => Math.min(p, maxPage));
-    }, [items.length]);
+        if (itemsPagination) {
+            const maxPage = Math.max(1, itemsPagination.totalPages);
+            setItemsTablePage((p) => Math.min(p, maxPage));
+        }
+    }, [itemsPagination]);
 
     const fetchReverseDistributors = useCallback(async () => {
         try {
@@ -699,17 +728,16 @@ export default function ReturnDetailPage() {
         (tx.fedexLabels && Object.keys(tx.fedexLabels).length > 0)
     );
 
-    const itemsTableTotalPages = Math.max(1, Math.ceil(items.length / RETURN_DETAIL_ITEMS_PAGE_SIZE));
-    const paginatedItemsTable = items.slice(
-        (itemsTablePage - 1) * RETURN_DETAIL_ITEMS_PAGE_SIZE,
-        itemsTablePage * RETURN_DETAIL_ITEMS_PAGE_SIZE
-    );
-    const itemsTableRangeStart = items.length === 0
-        ? 0
+    // Use server-side pagination data
+    const itemsTableTotalPages = itemsPagination?.totalPages || 1;
+    const paginatedItemsTable = items; // Items are already paginated by server
+    const totalItemsCount = itemsPagination?.totalItems || items.length;
+    const itemsTableRangeStart = totalItemsCount === 0 
+        ? 0 
         : (itemsTablePage - 1) * RETURN_DETAIL_ITEMS_PAGE_SIZE + 1;
     const itemsTableRangeEnd = Math.min(
         itemsTablePage * RETURN_DETAIL_ITEMS_PAGE_SIZE,
-        items.length
+        totalItemsCount
     );
 
     return (
@@ -1096,6 +1124,24 @@ export default function ReturnDetailPage() {
                             <option value="non_returnable">Non-Returnable</option>
                             <option value="tbd">TBD</option>
                         </select>
+                        <select
+                            value={itemSortBy}
+                            onChange={e => setItemSortBy(e.target.value)}
+                            className="px-2.5 py-1.5 text-xs border border-[#e2e2e2] rounded focus:outline-none focus:ring-1 focus:ring-[#516057]"
+                            title="Sort by"
+                        >
+                            {ITEM_SORT_OPTIONS.map(opt => (
+                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                            ))}
+                        </select>
+                        <button
+                            onClick={() => setItemSortOrder(itemSortOrder === 'asc' ? 'desc' : 'asc')}
+                            className="flex items-center gap-1 px-2.5 py-1.5 text-xs border border-[#e2e2e2] rounded focus:outline-none focus:ring-1 focus:ring-[#516057] bg-white hover:bg-gray-50 transition-colors"
+                            title={`Sort ${itemSortOrder === 'asc' ? 'ascending' : 'descending'}`}
+                        >
+                            {itemSortOrder === 'asc' ? <ArrowUp className="w-3.5 h-3.5" /> : <ArrowDown className="w-3.5 h-3.5" />}
+                            <span className="hidden sm:inline">{itemSortOrder === 'asc' ? 'Asc' : 'Desc'}</span>
+                        </button>
                     </div>
 
                     {/* Items Table */}
@@ -1246,32 +1292,89 @@ export default function ReturnDetailPage() {
                                     })}
                                 </tbody>
                             </table>
-                            {items.length > 0 && itemsTableTotalPages > 1 && (
-                                <div className="flex items-center justify-between px-4 py-2.5 border-t border-gray-100 gap-2 bg-gray-50/80">
-                                    <p className="text-[10px] text-gray-500">
-                                        Showing {itemsTableRangeStart}–{itemsTableRangeEnd} of {items.length}
+                            {/* Pagination - Always show if there are items */}
+                            {items.length > 0 && (
+                                <div className="flex items-center justify-between px-4 py-3 border-t border-[#e2e2e2] bg-white">
+                                    <p className="text-sm text-[#6b7280]">
+                                        Showing {itemsTableRangeStart}–{itemsTableRangeEnd} of {totalItemsCount} items
+                                        {itemsTableTotalPages > 1 && (
+                                            <span className="ml-2">• Page {itemsTablePage} of {itemsTableTotalPages}</span>
+                                        )}
                                     </p>
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => setItemsTablePage((p) => Math.max(1, p - 1))}
-                                            disabled={itemsTablePage <= 1}
-                                            className="inline-flex items-center gap-0.5 px-2 py-1 text-[10px] font-medium rounded border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
-                                        >
-                                            <ChevronLeft className="w-3.5 h-3.5" /> Previous
-                                        </button>
-                                        <span className="text-[10px] text-gray-600 tabular-nums">
-                                            Page {itemsTablePage} of {itemsTableTotalPages}
-                                        </span>
-                                        <button
-                                            type="button"
-                                            onClick={() => setItemsTablePage((p) => Math.min(itemsTableTotalPages, p + 1))}
-                                            disabled={itemsTablePage >= itemsTableTotalPages}
-                                            className="inline-flex items-center gap-0.5 px-2 py-1 text-[10px] font-medium rounded border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
-                                        >
-                                            Next <ChevronRight className="w-3.5 h-3.5" />
-                                        </button>
-                                    </div>
+                                    
+                                    {itemsTableTotalPages > 1 && (
+                                        <div className="flex items-center gap-1">
+                                            {/* Previous Button */}
+                                            <button
+                                                onClick={() => setItemsTablePage(p => Math.max(1, p - 1))}
+                                                disabled={itemsTablePage <= 1}
+                                                className="p-1.5 border border-[#e2e2e2] rounded-[4px] disabled:opacity-40 hover:bg-[var(--surface-container)] transition-colors"
+                                                title="Previous page"
+                                            >
+                                                <ChevronLeft className="w-4 h-4 text-[#505454]" />
+                                            </button>
+
+                                            {/* Page Numbers */}
+                                            {(() => {
+                                                const totalPages = itemsTableTotalPages;
+                                                const current = itemsTablePage;
+                                                const pages = [];
+                                                
+                                                if (totalPages <= 5) {
+                                                    for (let i = 1; i <= totalPages; i++) {
+                                                        pages.push(i);
+                                                    }
+                                                } else {
+                                                    pages.push(1);
+                                                    if (current <= 3) {
+                                                        for (let i = 2; i <= 3; i++) {
+                                                            pages.push(i);
+                                                        }
+                                                        pages.push('...');
+                                                        pages.push(totalPages);
+                                                    } else if (current >= totalPages - 2) {
+                                                        pages.push('...');
+                                                        for (let i = totalPages - 2; i <= totalPages; i++) {
+                                                            pages.push(i);
+                                                        }
+                                                    } else {
+                                                        pages.push('...');
+                                                        pages.push(current);
+                                                        pages.push('...');
+                                                        pages.push(totalPages);
+                                                    }
+                                                }
+                                                
+                                                return pages.map((page, index) => 
+                                                    page === '...' ? (
+                                                        <span key={`ellipsis-${index}`} className="px-2 py-1.5 text-sm text-[#9ca3af]">...</span>
+                                                    ) : (
+                                                        <button
+                                                            key={page}
+                                                            onClick={() => setItemsTablePage(page as number)}
+                                                            className={`px-3 py-1.5 text-sm border rounded-[4px] transition-colors ${
+                                                                page === current
+                                                                    ? 'border-[#516057] bg-[#516057] text-white font-semibold'
+                                                                    : 'border-[#e2e2e2] text-[#505454] hover:bg-[var(--surface-container)]'
+                                                            }`}
+                                                        >
+                                                            {page}
+                                                        </button>
+                                                    )
+                                                );
+                                            })()}
+
+                                            {/* Next Button */}
+                                            <button
+                                                onClick={() => setItemsTablePage(p => Math.min(itemsTableTotalPages, p + 1))}
+                                                disabled={itemsTablePage >= itemsTableTotalPages}
+                                                className="p-1.5 border border-[#e2e2e2] rounded-[4px] disabled:opacity-40 hover:bg-[var(--surface-container)] transition-colors"
+                                                title="Next page"
+                                            >
+                                                <ChevronRight className="w-4 h-4 text-[#505454]" />
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
