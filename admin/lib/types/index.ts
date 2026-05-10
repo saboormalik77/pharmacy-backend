@@ -745,6 +745,12 @@ export interface ReturnTransactionItem {
 
 export interface ReturnTransactionItemsListResponse {
     items: ReturnTransactionItem[];
+    pagination?: {
+        page: number;
+        limit: number;
+        totalItems: number;
+        totalPages: number;
+    };
     summary: {
         totalItems: number;
         totalReturnableValue: number;

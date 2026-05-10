@@ -119,7 +119,7 @@ export default function ProcessorsPage() {
         if (!isAuthenticated) return;
         dispatch(fetchProcessors({
             page: currentPage,
-            limit: 15,
+            limit: 10,
             search: debouncedSearch || undefined,
             status: statusFilter !== 'all' ? statusFilter : undefined,
         }));
@@ -142,7 +142,7 @@ export default function ProcessorsPage() {
     // ── Handlers ───────────────────────────────────────────────
     const refresh = () => {
         dispatch(fetchProcessors({
-            page: currentPage, limit: 15,
+            page: currentPage, limit: 10,
             search: debouncedSearch || undefined,
             status: statusFilter !== 'all' ? statusFilter : undefined,
         }));
@@ -308,7 +308,7 @@ export default function ProcessorsPage() {
         const result = await dispatch(unassignStoreFromProcessor({ processorId: processor.id, pharmacyId }));
         if (unassignStoreFromProcessor.fulfilled.match(result)) {
             showToast('Store unassigned successfully!');
-            dispatch(fetchProcessors({ page: currentPage, limit: 15 }));
+            dispatch(fetchProcessors({ page: currentPage, limit: 10 }));
         } else {
             showToast(result.payload as string || 'Failed to unassign store', 'error');
         }
@@ -388,7 +388,7 @@ export default function ProcessorsPage() {
             if (successCount > 0) {
                 setAssignModal(null);
                 setSelectedPharmacyIds([]);
-                dispatch(fetchProcessors({ page: currentPage, limit: 15 }));
+                dispatch(fetchProcessors({ page: currentPage, limit: 10 }));
             }
         } finally {
             setIsAssigning(false);

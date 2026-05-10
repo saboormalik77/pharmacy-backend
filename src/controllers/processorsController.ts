@@ -10,14 +10,14 @@ export const getProcessorsHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const {
       page = '1',
-      limit = '20',
+      limit = '10',
       search,
       status,
     } = req.query;
 
     const result = await processorsService.getProcessors(
       parseInt(page as string, 10) || 1,
-      Math.min(parseInt(limit as string, 10) || 20, 100),
+      Math.min(parseInt(limit as string, 10) || 10, 100),
       search as string | undefined,
       status as string | undefined,
       req.adminBuyingGroupId ?? null

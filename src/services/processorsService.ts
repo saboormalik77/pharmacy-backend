@@ -91,7 +91,7 @@ function mapProcessor(row: any, storeCount: number = 0, totalReturns: number = 0
 
 export const getProcessors = async (
   page: number = 1,
-  limit: number = 20,
+  limit: number = 10,
   search?: string,
   status?: string,
   buyingGroupId?: string | null

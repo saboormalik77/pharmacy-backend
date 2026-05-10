@@ -22,10 +22,10 @@ export const getPharmaciesHandler = async (
   next: NextFunction
 ) => {
   try {
-    const { search, status = 'all', page = '1', limit = '20' } = req.query;
+    const { search, status = 'all', page = '1', limit = '10' } = req.query;
 
     const pageNum = parseInt(page as string, 10) || 1;
-    const limitNum = Math.min(parseInt(limit as string, 10) || 20, 100); // Max 100
+    const limitNum = Math.min(parseInt(limit as string, 10) || 10, 100); // Max 100
 
     // Normalize search parameter: trim whitespace, decode URL encoding, and collapse multiple spaces
     let normalizedSearch: string | undefined = undefined;

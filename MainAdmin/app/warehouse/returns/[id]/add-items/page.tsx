@@ -6,7 +6,7 @@ import { useRouter, useParams } from 'next/navigation';
 import {
     ArrowLeft, Loader2, ScanLine, Keyboard, CheckCircle,
     AlertTriangle, RotateCcw, X, Camera, Archive, ShieldCheck,
-    FileText, Ban, Info, Trash2,
+    FileText, Ban, Info, Trash2, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
@@ -99,6 +99,8 @@ export default function AddItemsPage() {
     const [itemCount, setItemCount] = useState(0);
     const [recentlyAddedItems, setRecentlyAddedItems] = useState<ReturnTransactionItem[]>([]);
     const [activeTab, setActiveTab] = useState<'list' | 'form'>('form');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
     const [lastWarning, setLastWarning] = useState('');
     const [lastClassification, setLastClassification] = useState<{ item: string; status: string; policyCheck?: ReturnabilityCheckResult; wineCellarItem?: any } | null>(null);
     const [scannedPrices, setScannedPrices] = useState<ScannedPrices | null>(null);
@@ -146,8 +148,13 @@ export default function AddItemsPage() {
 
     useEffect(() => {
         if (items) {
-            setRecentlyAddedItems(items);
-            setItemCount(items.length);
+            // Sort items in descending order by createdAt (newest first)
+            const sortedItems = [...items].sort(
+                (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+            );
+            setRecentlyAddedItems(sortedItems);
+            setItemCount(sortedItems.length);
+            setCurrentPage(1); // Reset to first page when items change
         }
     }, [items]);
 
@@ -760,7 +767,10 @@ export default function AddItemsPage() {
             {recentlyAddedItems.length > 0 && (
                 <div className="flex gap-2 border-b border-[var(--outline-variant)]">
                     <button
-                        onClick={() => setActiveTab('list')}
+                        onClick={() => {
+                            setActiveTab('list');
+                            setCurrentPage(1); // Reset to first page when switching to list
+                        }}
                         className={`px-4 py-2 text-xs font-semibold transition-colors border-b-2 ${
                             activeTab === 'list'
                                 ? 'border-primary-600 text-primary-700 bg-primary-50'
@@ -789,14 +799,22 @@ export default function AddItemsPage() {
             )}
 
             {/* Tab Content: Product List */}
-            {activeTab === 'list' && recentlyAddedItems.length > 0 && (
-                <div className="bg-[var(--surface-container-lowest)] rounded-[4px] shadow px-4 py-3">
-                    <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-xs font-semibold text-[var(--on-surface)]">Products Added in This Session</h2>
-                        <p className="text-[10px] text-[var(--on-surface-variant)]">{recentlyAddedItems.length} item{recentlyAddedItems.length !== 1 ? 's' : ''}</p>
-                    </div>
-                    <div className="space-y-2 max-h-[500px] overflow-y-auto">
-                        {recentlyAddedItems.map((item) => (
+            {activeTab === 'list' && recentlyAddedItems.length > 0 && (() => {
+                // Pagination logic
+                const totalPages = Math.ceil(recentlyAddedItems.length / itemsPerPage);
+                const startIndex = (currentPage - 1) * itemsPerPage;
+                const endIndex = startIndex + itemsPerPage;
+                const paginatedItems = recentlyAddedItems.slice(startIndex, endIndex);
+                const showPagination = totalPages > 1;
+                
+                return (
+                    <div className="bg-[var(--surface-container-lowest)] rounded-[4px] shadow px-4 py-3">
+                        <div className="flex items-center justify-between mb-3">
+                            <h2 className="text-xs font-semibold text-[var(--on-surface)]">Products Added in This Session</h2>
+                            <p className="text-[10px] text-[var(--on-surface-variant)]">{recentlyAddedItems.length} item{recentlyAddedItems.length !== 1 ? 's' : ''}</p>
+                        </div>
+                        <div className="space-y-2 max-h-[500px] overflow-y-auto">
+                            {paginatedItems.map((item) => (
                             <div key={item.id} className="flex items-start gap-2 p-3 border border-[var(--outline-variant)] rounded-[4px] hover:border-primary-300 hover:bg-[var(--surface-container-low)] transition-all">
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1.5">
@@ -842,10 +860,39 @@ export default function AddItemsPage() {
                                     <Trash2 className="w-4 h-4" />
                                 </button>
                             </div>
-                        ))}
+                            ))}
+                        </div>
+                        
+                        {/* Pagination Controls */}
+                        {showPagination && (
+                            <div className="flex items-center justify-between pt-3 mt-3 border-t border-[var(--outline-variant)]">
+                                <p className="text-[10px] text-[var(--on-surface-variant)]">
+                                    Showing {startIndex + 1}–{Math.min(endIndex, recentlyAddedItems.length)} of {recentlyAddedItems.length}
+                                </p>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                        disabled={currentPage === 1}
+                                        className="inline-flex items-center gap-0.5 px-2 py-1 text-[10px] font-medium rounded border border-[var(--outline)] text-[var(--on-surface)] bg-[var(--surface)] hover:bg-[var(--surface-container)] disabled:opacity-40 disabled:cursor-not-allowed"
+                                    >
+                                        <ChevronLeft className="w-3.5 h-3.5" /> Previous
+                                    </button>
+                                    <span className="text-[10px] text-[var(--on-surface-variant)] tabular-nums">
+                                        Page {currentPage} of {totalPages}
+                                    </span>
+                                    <button
+                                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                        disabled={currentPage === totalPages}
+                                        className="inline-flex items-center gap-0.5 px-2 py-1 text-[10px] font-medium rounded border border-[var(--outline)] text-[var(--on-surface)] bg-[var(--surface)] hover:bg-[var(--surface-container)] disabled:opacity-40 disabled:cursor-not-allowed"
+                                    >
+                                        Next <ChevronRight className="w-3.5 h-3.5" />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
-                </div>
-            )}
+                );
+            })()}
 
             {/* Tab Content: Scan & Add Form */}
             {(activeTab === 'form' || recentlyAddedItems.length === 0) && (

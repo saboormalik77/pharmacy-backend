@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { DollarSign, AlertTriangle, Clock, Search } from 'lucide-react';
+import { DollarSign, AlertTriangle, Clock, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatCurrency, formatNumber } from '@/lib/utils';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -25,6 +25,14 @@ export default function FinancialsPage() {
     const [unpaidLoading, setUnpaidLoading] = useState(false);
     const [unpaidError, setUnpaidError] = useState<string | null>(null);
     const [unpaidSearch, setUnpaidSearch] = useState('');
+    
+    // Pagination state for Ask vs Received
+    const [avrCurrentPage, setAvrCurrentPage] = useState(1);
+    const avrItemsPerPage = 10;
+    
+    // Pagination state for Unpaid Memos  
+    const [unpaidCurrentPage, setUnpaidCurrentPage] = useState(1);
+    const unpaidItemsPerPage = 10;
 
     const fetchAskVsReceived = useCallback(async () => {
         setAvrLoading(true);
@@ -33,7 +41,7 @@ export default function FinancialsPage() {
             const { apiClient } = await import('@/lib/api/apiClient');
             const response = await apiClient.get<any>('/admin/analytics/fcr-ask-vs-received', true, {
                 group_by: avrGroupBy,
-                limit: 20,
+                limit: 100, // Get more data for client-side pagination
             });
             setAvrData({ data: response.data, totals: response.totals, pagination: response.pagination });
         } catch (err: any) {
@@ -67,6 +75,15 @@ export default function FinancialsPage() {
             fetchUnpaidMemos();
         }
     }, [activeSection, unpaidData, unpaidLoading, fetchUnpaidMemos]);
+
+    // Reset pagination when data changes
+    useEffect(() => {
+        setAvrCurrentPage(1);
+    }, [avrData]);
+
+    useEffect(() => {
+        setUnpaidCurrentPage(1);
+    }, [unpaidData]);
 
     const LoadingSkeleton = () => (
         <div className="space-y-4">
@@ -176,41 +193,90 @@ export default function FinancialsPage() {
                             )}
 
                             {/* Data Table */}
-                            <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
-                                <h2 className="text-base font-semibold text-gray-900 mb-4">Details</h2>
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-sm border" style={{ borderColor: '#9ca3af' }}>
-                                        <thead className="bg-[#f4f5f5] border-b" style={{ borderColor: '#9ca3af', borderBottomWidth: '1.5px' }}>
-                                            <tr>
-                                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">
-                                                    {avrGroupBy === 'ndc' ? 'NDC' : avrGroupBy === 'destination' ? 'Destination' : 'Manufacturer'}
-                                                </th>
-                                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Ask</th>
-                                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Received</th>
-                                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Difference</th>
-                                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Pay %</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y" style={{ borderColor: '#d1d5db' }}>
-                                            {avrData.data.map((row) => (
-                                                <tr key={row.labelerName || row.ndc || row.destination} className="hover:bg-[#e9ebec] transition-colors" style={{ borderColor: '#d1d5db' }}>
-                                                    <td className="px-3 py-3 text-sm font-medium text-gray-900">
-                                                        {avrGroupBy === 'ndc' ? row.ndc : avrGroupBy === 'destination' ? row.destination : row.labelerName}
-                                                    </td>
-                                                    <td className="px-3 py-3 text-sm text-right">{formatCurrency(row.totalAsk ?? row.totalAskValue ?? 0)}</td>
-                                                    <td className="px-3 py-3 text-sm text-right text-green-600">{formatCurrency(row.totalReceived)}</td>
-                                                    <td className="px-3 py-3 text-sm text-right text-red-600">{formatCurrency(row.difference)}</td>
-                                                    <td className="px-3 py-3 text-sm text-right">
-                                                        <span className={`font-medium ${row.payPercent >= 90 ? 'text-green-600' : row.payPercent >= 70 ? 'text-yellow-600' : 'text-red-600'}`}>
-                                                            {row.payPercent}%
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                            {(() => {
+                                // Sort by totalAsk in descending order (highest ask amounts first)
+                                const sortedAvrData = [...avrData.data].sort((a, b) => {
+                                    const askA = a.totalAsk ?? a.totalAskValue ?? 0;
+                                    const askB = b.totalAsk ?? b.totalAskValue ?? 0;
+                                    return askB - askA;
+                                });
+                                
+                                // Pagination logic for Ask vs Received
+                                const totalAvrPages = Math.ceil(sortedAvrData.length / avrItemsPerPage);
+                                const startIndex = (avrCurrentPage - 1) * avrItemsPerPage;
+                                const endIndex = startIndex + avrItemsPerPage;
+                                const paginatedAvrData = sortedAvrData.slice(startIndex, endIndex);
+                                const showAvrPagination = totalAvrPages > 1;
+                                
+                                return (
+                                    <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h2 className="text-base font-semibold text-gray-900">Details</h2>
+                                            <p className="text-sm text-gray-500">{sortedAvrData.length} items</p>
+                                        </div>
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-sm border" style={{ borderColor: '#9ca3af' }}>
+                                                <thead className="bg-[#f4f5f5] border-b" style={{ borderColor: '#9ca3af', borderBottomWidth: '1.5px' }}>
+                                                    <tr>
+                                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">
+                                                            {avrGroupBy === 'ndc' ? 'NDC' : avrGroupBy === 'destination' ? 'Destination' : 'Manufacturer'}
+                                                        </th>
+                                                        <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Ask</th>
+                                                        <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Received</th>
+                                                        <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Difference</th>
+                                                        <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Pay %</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y" style={{ borderColor: '#d1d5db' }}>
+                                                    {paginatedAvrData.map((row) => (
+                                                        <tr key={row.labelerName || row.ndc || row.destination} className="hover:bg-[#e9ebec] transition-colors" style={{ borderColor: '#d1d5db' }}>
+                                                            <td className="px-3 py-3 text-sm font-medium text-gray-900">
+                                                                {avrGroupBy === 'ndc' ? row.ndc : avrGroupBy === 'destination' ? row.destination : row.labelerName}
+                                                            </td>
+                                                            <td className="px-3 py-3 text-sm text-right">{formatCurrency(row.totalAsk ?? row.totalAskValue ?? 0)}</td>
+                                                            <td className="px-3 py-3 text-sm text-right text-green-600">{formatCurrency(row.totalReceived)}</td>
+                                                            <td className="px-3 py-3 text-sm text-right text-red-600">{formatCurrency(row.difference)}</td>
+                                                            <td className="px-3 py-3 text-sm text-right">
+                                                                <span className={`font-medium ${row.payPercent >= 90 ? 'text-green-600' : row.payPercent >= 70 ? 'text-yellow-600' : 'text-red-600'}`}>
+                                                                    {row.payPercent}%
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        
+                                        {/* Pagination Controls */}
+                                        {showAvrPagination && (
+                                            <div className="flex items-center justify-between pt-4 mt-4 border-t border-gray-200">
+                                                <p className="text-sm text-gray-500">
+                                                    Showing {startIndex + 1}–{Math.min(endIndex, sortedAvrData.length)} of {sortedAvrData.length}
+                                                </p>
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => setAvrCurrentPage(prev => Math.max(1, prev - 1))}
+                                                        disabled={avrCurrentPage === 1}
+                                                        className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                                                    >
+                                                        <ChevronLeft className="w-4 h-4" /> Previous
+                                                    </button>
+                                                    <span className="text-sm text-gray-600 tabular-nums">
+                                                        Page {avrCurrentPage} of {totalAvrPages}
+                                                    </span>
+                                                    <button
+                                                        onClick={() => setAvrCurrentPage(prev => Math.min(totalAvrPages, prev + 1))}
+                                                        disabled={avrCurrentPage === totalAvrPages}
+                                                        className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                                                    >
+                                                        Next <ChevronRight className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })()}
                         </div>
                     ) : null}
                 </>
@@ -286,44 +352,91 @@ export default function FinancialsPage() {
                             )}
 
                             {/* Unpaid Memos Table */}
-                            <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
-                                <h2 className="text-base font-semibold text-gray-900 mb-4">Unpaid Memo Details</h2>
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-sm border" style={{ borderColor: '#9ca3af' }}>
-                                        <thead className="bg-[#f4f5f5] border-b" style={{ borderColor: '#9ca3af', borderBottomWidth: '1.5px' }}>
-                                            <tr>
-                                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Memo #</th>
-                                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Manufacturer</th>
-                                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Pharmacy</th>
-                                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Requested</th>
-                                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Received</th>
-                                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Outstanding</th>
-                                                <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Days</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y" style={{ borderColor: '#d1d5db' }}>
-                                            {unpaidData.data.map((item) => (
-                                                <tr key={item.id} className="hover:bg-[#e9ebec] transition-colors" style={{ borderColor: '#d1d5db' }}>
-                                                    <td className="px-3 py-3 text-sm font-mono">{item.memoNumber}</td>
-                                                    <td className="px-3 py-3 text-sm">{item.labelerName}</td>
-                                                    <td className="px-3 py-3 text-sm">{item.pharmacyName}</td>
-                                                    <td className="px-3 py-3 text-sm text-right">{formatCurrency(item.amountRequested)}</td>
-                                                    <td className="px-3 py-3 text-sm text-right text-green-600">{formatCurrency(item.amountReceived)}</td>
-                                                    <td className="px-3 py-3 text-sm text-right text-red-600 font-medium">{formatCurrency(item.outstandingAmount)}</td>
-                                                    <td className="px-3 py-3 text-sm text-right">
-                                                        <span className={`${item.daysOutstanding > 180 ? 'text-red-600 font-bold' : item.daysOutstanding > 90 ? 'text-orange-600' : ''}`}>
-                                                            {item.daysOutstanding}
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                    {unpaidData.data.length === 0 && (
-                                        <p className="text-center text-xs text-gray-500 py-6">No unpaid memos found</p>
-                                    )}
-                                </div>
-                            </div>
+                            {(() => {
+                                // Sort by outstandingAmount in descending order (highest outstanding amounts first)
+                                const sortedUnpaidData = [...unpaidData.data].sort((a, b) => {
+                                    return b.outstandingAmount - a.outstandingAmount;
+                                });
+                                
+                                // Pagination logic for Unpaid Memos
+                                const totalUnpaidPages = Math.ceil(sortedUnpaidData.length / unpaidItemsPerPage);
+                                const startIndex = (unpaidCurrentPage - 1) * unpaidItemsPerPage;
+                                const endIndex = startIndex + unpaidItemsPerPage;
+                                const paginatedUnpaidData = sortedUnpaidData.slice(startIndex, endIndex);
+                                const showUnpaidPagination = totalUnpaidPages > 1;
+                                
+                                return (
+                                    <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h2 className="text-base font-semibold text-gray-900">Unpaid Memo Details</h2>
+                                            <p className="text-sm text-gray-500">{sortedUnpaidData.length} memos</p>
+                                        </div>
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-sm border" style={{ borderColor: '#9ca3af' }}>
+                                                <thead className="bg-[#f4f5f5] border-b" style={{ borderColor: '#9ca3af', borderBottomWidth: '1.5px' }}>
+                                                    <tr>
+                                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Memo #</th>
+                                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Manufacturer</th>
+                                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Pharmacy</th>
+                                                        <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Requested</th>
+                                                        <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Received</th>
+                                                        <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Outstanding</th>
+                                                        <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Days</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y" style={{ borderColor: '#d1d5db' }}>
+                                                    {paginatedUnpaidData.map((item) => (
+                                                        <tr key={item.id} className="hover:bg-[#e9ebec] transition-colors" style={{ borderColor: '#d1d5db' }}>
+                                                            <td className="px-3 py-3 text-sm font-mono">{item.memoNumber}</td>
+                                                            <td className="px-3 py-3 text-sm">{item.labelerName}</td>
+                                                            <td className="px-3 py-3 text-sm">{item.pharmacyName}</td>
+                                                            <td className="px-3 py-3 text-sm text-right">{formatCurrency(item.amountRequested)}</td>
+                                                            <td className="px-3 py-3 text-sm text-right text-green-600">{formatCurrency(item.amountReceived)}</td>
+                                                            <td className="px-3 py-3 text-sm text-right text-red-600 font-medium">{formatCurrency(item.outstandingAmount)}</td>
+                                                            <td className="px-3 py-3 text-sm text-right">
+                                                                <span className={`${item.daysOutstanding > 180 ? 'text-red-600 font-bold' : item.daysOutstanding > 90 ? 'text-orange-600' : ''}`}>
+                                                                    {item.daysOutstanding}
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                            {paginatedUnpaidData.length === 0 && (
+                                                <p className="text-center text-xs text-gray-500 py-6">No unpaid memos found</p>
+                                            )}
+                                        </div>
+                                        
+                                        {/* Pagination Controls */}
+                                        {showUnpaidPagination && (
+                                            <div className="flex items-center justify-between pt-4 mt-4 border-t border-gray-200">
+                                                <p className="text-sm text-gray-500">
+                                                    Showing {startIndex + 1}–{Math.min(endIndex, sortedUnpaidData.length)} of {sortedUnpaidData.length}
+                                                </p>
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => setUnpaidCurrentPage(prev => Math.max(1, prev - 1))}
+                                                        disabled={unpaidCurrentPage === 1}
+                                                        className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                                                    >
+                                                        <ChevronLeft className="w-4 h-4" /> Previous
+                                                    </button>
+                                                    <span className="text-sm text-gray-600 tabular-nums">
+                                                        Page {unpaidCurrentPage} of {totalUnpaidPages}
+                                                    </span>
+                                                    <button
+                                                        onClick={() => setUnpaidCurrentPage(prev => Math.min(totalUnpaidPages, prev + 1))}
+                                                        disabled={unpaidCurrentPage === totalUnpaidPages}
+                                                        className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                                                    >
+                                                        Next <ChevronRight className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })()}
                         </div>
                     ) : null}
                 </>

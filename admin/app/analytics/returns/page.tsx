@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { TrendingUp, TrendingDown, Package, DollarSign, Building2, BarChart3 } from 'lucide-react';
+import { TrendingUp, TrendingDown, Package, DollarSign, Building2, BarChart3, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatCurrency, formatNumber } from '@/lib/utils';
 import {
     LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -24,6 +24,10 @@ export default function ReturnsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [groupBy, setGroupBy] = useState('month');
+    
+    // Status Breakdown pagination
+    const [statusCurrentPage, setStatusCurrentPage] = useState(1);
+    const statusItemsPerPage = 10;
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -42,6 +46,11 @@ export default function ReturnsPage() {
     }, [groupBy]);
 
     useEffect(() => { fetchData(); }, [fetchData]);
+
+    // Reset pagination when data changes
+    useEffect(() => {
+        setStatusCurrentPage(1);
+    }, [data]);
 
 if (loading) {
         return (
@@ -215,40 +224,88 @@ if (loading) {
             </div>
 
             {/* Status Table */}
-            {byStatus && byStatus.length > 0 && (
-                <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
-                    <h2 className="text-base font-semibold text-gray-900 mb-4">Status Breakdown</h2>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm border" style={{ borderColor: '#9ca3af' }}>
-                            <thead className="bg-[#f4f5f5] border-b" style={{ borderColor: '#9ca3af', borderBottomWidth: '1.5px' }}>
-                                <tr>
-                                    <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Status</th>
-                                    <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Count</th>
-                                    <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Total Value</th>
-                                    <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">% of Total</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y" style={{ borderColor: '#d1d5db' }}>
-                                {byStatus.map((row) => (
-                                    <tr key={row.status} className="hover:bg-[#e9ebec] transition-colors" style={{ borderColor: '#d1d5db' }}>
-                                        <td className="px-3 py-3 text-sm">
-                                            <span className="inline-flex items-center gap-2">
-                                                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: STATUS_COLORS[row.status] || '#6b7280' }} />
-                                                {row.status.replace(/_/g, ' ')}
-                                            </span>
-                                        </td>
-                                        <td className="px-3 py-3 text-sm text-right font-medium">{formatNumber(row.count)}</td>
-                                        <td className="px-3 py-3 text-sm text-right">{formatCurrency(row.totalReturnableValue)}</td>
-                                        <td className="px-3 py-3 text-sm text-right">
-                                            {overall.totalReturns > 0 ? ((row.count / overall.totalReturns) * 100).toFixed(1) : 0}%
-                                        </td>
+            {byStatus && byStatus.length > 0 && (() => {
+                // Sort by totalReturnableValue in descending order, then by count
+                const sortedByStatus = [...byStatus].sort((a, b) => {
+                    const valueA = a.totalReturnableValue || 0;
+                    const valueB = b.totalReturnableValue || 0;
+                    if (valueB !== valueA) return valueB - valueA; // Sort by value (descending)
+                    return b.count - a.count; // Then by count (descending)
+                });
+                
+                // Pagination logic for Status Breakdown
+                const totalStatusPages = Math.ceil(sortedByStatus.length / statusItemsPerPage);
+                const startIndex = (statusCurrentPage - 1) * statusItemsPerPage;
+                const endIndex = startIndex + statusItemsPerPage;
+                const paginatedStatuses = sortedByStatus.slice(startIndex, endIndex);
+                const showStatusPagination = totalStatusPages > 1;
+                
+                return (
+                    <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-base font-semibold text-gray-900">Status Breakdown</h2>
+                            <p className="text-sm text-gray-500">{sortedByStatus.length} statuses</p>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm border" style={{ borderColor: '#9ca3af' }}>
+                                <thead className="bg-[#f4f5f5] border-b" style={{ borderColor: '#9ca3af', borderBottomWidth: '1.5px' }}>
+                                    <tr>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Status</th>
+                                        <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Count</th>
+                                        <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Total Value</th>
+                                        <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">% of Total</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody className="divide-y" style={{ borderColor: '#d1d5db' }}>
+                                    {paginatedStatuses.map((row) => (
+                                        <tr key={row.status} className="hover:bg-[#e9ebec] transition-colors" style={{ borderColor: '#d1d5db' }}>
+                                            <td className="px-3 py-3 text-sm">
+                                                <span className="inline-flex items-center gap-2">
+                                                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: STATUS_COLORS[row.status] || '#6b7280' }} />
+                                                    {row.status.replace(/_/g, ' ')}
+                                                </span>
+                                            </td>
+                                            <td className="px-3 py-3 text-sm text-right font-medium">{formatNumber(row.count)}</td>
+                                            <td className="px-3 py-3 text-sm text-right">{formatCurrency(row.totalReturnableValue)}</td>
+                                            <td className="px-3 py-3 text-sm text-right">
+                                                {overall.totalReturns > 0 ? ((row.count / overall.totalReturns) * 100).toFixed(1) : 0}%
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        {/* Pagination Controls */}
+                        {showStatusPagination && (
+                            <div className="flex items-center justify-between pt-4 mt-4 border-t border-gray-200">
+                                <p className="text-sm text-gray-500">
+                                    Showing {startIndex + 1}–{Math.min(endIndex, sortedByStatus.length)} of {sortedByStatus.length}
+                                </p>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => setStatusCurrentPage(prev => Math.max(1, prev - 1))}
+                                        disabled={statusCurrentPage === 1}
+                                        className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                                    >
+                                        <ChevronLeft className="w-4 h-4" /> Previous
+                                    </button>
+                                    <span className="text-sm text-gray-600 tabular-nums">
+                                        Page {statusCurrentPage} of {totalStatusPages}
+                                    </span>
+                                    <button
+                                        onClick={() => setStatusCurrentPage(prev => Math.min(totalStatusPages, prev + 1))}
+                                        disabled={statusCurrentPage === totalStatusPages}
+                                        className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                                    >
+                                        Next <ChevronRight className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
-                </div>
-            )}
+                );
+            })()}
         </div>
     );
 }

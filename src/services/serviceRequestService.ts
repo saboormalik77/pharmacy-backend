@@ -128,10 +128,10 @@ export const listPharmacyServiceRequests = async (
     p_pharmacy_id: pharmacyId,
     p_status_filter: params.status ?? null,
     p_page: params.page ?? 1,
-    p_limit: params.limit ?? 20,
+    p_limit: params.limit ?? 10,
   });
   if (error) throw mapRpcError(error);
-  return data ?? { items: [], total: 0, page: 1, limit: 20 };
+  return data ?? { items: [], total: 0, page: 1, limit: 10 };
 };
 
 export const cancelPharmacyServiceRequest = async (
@@ -162,10 +162,10 @@ export const listProcessorServiceRequests = async (
     p_processor_id: processorId,
     p_status_filter: params.status ?? null,
     p_page: params.page ?? 1,
-    p_limit: params.limit ?? 20,
+    p_limit: params.limit ?? 10,
   });
   if (error) throw mapRpcError(error);
-  return data ?? { items: [], total: 0, page: 1, limit: 20 };
+  return data ?? { items: [], total: 0, page: 1, limit: 10 };
 };
 
 export const claimServiceRequest = async (input: ClaimInput): Promise<any> => {
@@ -203,10 +203,10 @@ export const listAdminServiceRequests = async (
     p_status_filter: params.status ?? null,
     p_search: params.search ?? null,
     p_page: params.page ?? 1,
-    p_limit: params.limit ?? 20,
+    p_limit: params.limit ?? 10,
   });
   if (error) throw mapRpcError(error);
-  return data ?? { items: [], total: 0, page: 1, limit: 20 };
+  return data ?? { items: [], total: 0, page: 1, limit: 10 };
 };
 
 export const adminReassignServiceRequest = async (

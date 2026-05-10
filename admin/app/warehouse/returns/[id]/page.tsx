@@ -39,7 +39,7 @@ import {
 } from '@/lib/constants/nonReturnableReasons';
 
 /** Products table on return detail — rows per page */
-const RETURN_DETAIL_ITEMS_PAGE_SIZE = 6;
+const RETURN_DETAIL_ITEMS_PAGE_SIZE = 10;
 
 // ── Helpers ────────────────────────────────────────────────────
 
@@ -251,7 +251,7 @@ export default function ReturnDetailPage() {
         (state) => state.returnTransactions
     );
 
-    const { items, itemsSummary, isItemsLoading, isItemActionLoading } = useAppSelector(
+    const { items, itemsPagination, itemsSummary, isItemsLoading, isItemActionLoading } = useAppSelector(
         (state) => state.returnTransactions
     );
 
@@ -372,19 +372,15 @@ export default function ReturnDetailPage() {
                 transactionId: id,
                 returnStatus: itemStatusFilter || undefined,
                 search: debouncedItemSearch || undefined,
+                page: itemsTablePage,
+                limit: RETURN_DETAIL_ITEMS_PAGE_SIZE,
             }));
         }
-    }, [dispatch, id, itemStatusFilter, debouncedItemSearch]);
+    }, [dispatch, id, itemStatusFilter, debouncedItemSearch, itemsTablePage]);
 
     useEffect(() => {
         setItemsTablePage(1);
     }, [debouncedItemSearch, itemStatusFilter]);
-
-    useEffect(() => {
-        const nonWcCount = items.filter((i) => !i.wineCellarId).length;
-        const maxPage = Math.max(1, Math.ceil(nonWcCount / RETURN_DETAIL_ITEMS_PAGE_SIZE));
-        setItemsTablePage((p) => Math.min(p, maxPage));
-    }, [items]);
 
     useEffect(() => {
         if (editModal && tx) {
@@ -464,6 +460,8 @@ export default function ReturnDetailPage() {
         transactionId: id,
         returnStatus: itemStatusFilter || undefined,
         search: debouncedItemSearch || undefined,
+        page: itemsTablePage,
+        limit: RETURN_DETAIL_ITEMS_PAGE_SIZE,
     }));
 
     useEffect(() => {
@@ -624,21 +622,19 @@ export default function ReturnDetailPage() {
 
     // ── Finalize & Document helpers ─────────────────────────────
 
-    const nonWcItems = items.filter(i => !i.wineCellarId);
-    const nonWcItemsTableTotalPages = Math.max(1, Math.ceil(nonWcItems.length / RETURN_DETAIL_ITEMS_PAGE_SIZE));
-    const paginatedNonWcItems = nonWcItems.slice(
-        (itemsTablePage - 1) * RETURN_DETAIL_ITEMS_PAGE_SIZE,
-        itemsTablePage * RETURN_DETAIL_ITEMS_PAGE_SIZE
-    );
-    const nonWcItemsTableRangeStart = nonWcItems.length === 0
+    // Server-side pagination: items are already paginated from API
+    const paginatedNonWcItems = items.filter(i => !i.wineCellarId);
+    const nonWcItemsTableTotalPages = itemsPagination?.totalPages || 1;
+    const totalItemsCount = itemsPagination?.totalItems || 0;
+    const nonWcItemsTableRangeStart = totalItemsCount === 0
         ? 0
-        : (itemsTablePage - 1) * RETURN_DETAIL_ITEMS_PAGE_SIZE + 1;
+        : ((itemsPagination?.page || 1) - 1) * (itemsPagination?.limit || RETURN_DETAIL_ITEMS_PAGE_SIZE) + 1;
     const nonWcItemsTableRangeEnd = Math.min(
-        itemsTablePage * RETURN_DETAIL_ITEMS_PAGE_SIZE,
-        nonWcItems.length
+        ((itemsPagination?.page || 1) * (itemsPagination?.limit || RETURN_DETAIL_ITEMS_PAGE_SIZE)),
+        totalItemsCount
     );
-    const nonWcReturnableAndTbdItemsCount = nonWcItems.filter(i => i.returnStatus === 'returnable' || i.returnStatus === 'tbd').length;
-    const nonWcReturnableValue = nonWcItems
+    const nonWcReturnableAndTbdItemsCount = paginatedNonWcItems.filter(i => i.returnStatus === 'returnable' || i.returnStatus === 'tbd').length;
+    const nonWcReturnableValue = paginatedNonWcItems
         .filter(i => i.returnStatus === 'returnable')
         .reduce((sum, i) => sum + (i.estimatedValue ?? 0), 0);
     const nonWcTotalValue = nonWcReturnableValue;
@@ -1059,7 +1055,7 @@ export default function ReturnDetailPage() {
             <div className="bg-white rounded-[4px] shadow px-4 py-3">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2">
                     <h2 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
-                        <ScanLine className="w-3.5 h-3.5" /> Products ({nonWcItems.length})
+                        <ScanLine className="w-3.5 h-3.5" /> Products ({totalItemsCount})
                     </h2>
                     {isProcessor && canAddDeleteItems && (
                         <div className="flex gap-1.5">
@@ -1132,7 +1128,7 @@ export default function ReturnDetailPage() {
                     <div className="flex justify-center py-6">
                         <Loader2 className="w-5 h-5 animate-spin text-primary-600" />
                     </div>
-                ) : nonWcItems.length === 0 ? (
+                ) : totalItemsCount === 0 ? (
                     <div className="text-center py-6">
                         <Package className="w-10 h-10 text-gray-300 mx-auto mb-2" />
                         <p className="text-gray-500 text-xs font-medium">No items yet</p>
@@ -1251,10 +1247,10 @@ export default function ReturnDetailPage() {
                                 })}
                             </tbody>
                         </table>
-                        {nonWcItems.length > 0 && nonWcItemsTableTotalPages > 1 && (
+                        {totalItemsCount > 0 && nonWcItemsTableTotalPages > 1 && (
                             <div className="flex items-center justify-between px-3 py-2 border-t gap-2 bg-[#fafbfb]" style={{ borderColor: '#d1d5db' }}>
                                 <p className="text-[10px] text-gray-500">
-                                    Showing {nonWcItemsTableRangeStart}–{nonWcItemsTableRangeEnd} of {nonWcItems.length}
+                                    Showing {nonWcItemsTableRangeStart}–{nonWcItemsTableRangeEnd} of {totalItemsCount}
                                 </p>
                                 <div className="flex items-center gap-2">
                                     <button

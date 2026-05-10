@@ -142,7 +142,7 @@ export const getPharmaciesList = async (
   search?: string,
   status: string = 'all',
   page: number = 1,
-  limit: number = 20,
+  limit: number = 10,
   buyingGroupId?: string | null
 ): Promise<PharmaciesListResponse> => {
   if (!supabaseAdmin) {

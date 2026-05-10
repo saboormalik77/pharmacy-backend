@@ -91,6 +91,12 @@ export interface AddItemData {
 
 export interface ItemsListResponse {
   items: ReturnTransactionItem[];
+  pagination: {
+    page: number;
+    limit: number;
+    totalItems: number;
+    totalPages: number;
+  };
   summary: {
     totalItems: number;
     totalReturnableValue: number;
@@ -147,6 +153,8 @@ export const listItems = async (
   transactionId: string,
   returnStatus?: string,
   search?: string,
+  page: number = 1,
+  limit: number = 10,
 ): Promise<ItemsListResponse> => {
   const sb = ensureAdmin();
 
@@ -154,6 +162,8 @@ export const listItems = async (
     p_transaction_id: transactionId,
     p_return_status: returnStatus || null,
     p_search: search || null,
+    p_page: page,
+    p_limit: limit,
   });
 
   handleRpcError(data, error, 'Failed to list items');

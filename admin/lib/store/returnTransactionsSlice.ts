@@ -36,6 +36,12 @@ export interface ReturnTransactionsState {
     };
     // Items
     items: ReturnTransactionItem[];
+    itemsPagination: {
+        page: number;
+        limit: number;
+        totalItems: number;
+        totalPages: number;
+    } | null;
     itemsSummary: {
         totalItems: number;
         totalReturnableValue: number;
@@ -59,6 +65,7 @@ const initialState: ReturnTransactionsState = {
     pagination: null,
     filters: { search: '', status: '', pharmacyId: '', dateFrom: '', dateTo: '' },
     items: [],
+    itemsPagination: null,
     itemsSummary: null,
     isItemsLoading: false,
     isItemActionLoading: false,
@@ -420,7 +427,13 @@ export const scanBarcode = createAsyncThunk(
 
 export const fetchTransactionItems = createAsyncThunk(
     'returnTransactions/fetchItems',
-    async ({ transactionId, returnStatus, search }: { transactionId: string; returnStatus?: string; search?: string }, { rejectWithValue }) => {
+    async ({ transactionId, returnStatus, search, page, limit }: { 
+        transactionId: string; 
+        returnStatus?: string; 
+        search?: string;
+        page?: number;
+        limit?: number;
+    }, { rejectWithValue }) => {
         try {
             const { apiClient } = await import('@/lib/api/apiClient');
             const { cookieUtils } = await import('@/lib/utils/cookies');
@@ -429,6 +442,8 @@ export const fetchTransactionItems = createAsyncThunk(
             const query: Record<string, string | undefined> = {};
             if (returnStatus) query.return_status = returnStatus;
             if (search) query.search = search;
+            if (page) query.page = page.toString();
+            if (limit) query.limit = limit.toString();
 
             const response = await apiClient.get<{ status: string; data: ReturnTransactionItemsListResponse }>(
                 `/return-transactions/${transactionId}/items`,
@@ -599,6 +614,7 @@ const returnTransactionsSlice = createSlice({
         },
         clearItems: (state) => {
             state.items = [];
+            state.itemsPagination = null;
             state.itemsSummary = null;
         },
     },
@@ -760,6 +776,7 @@ const returnTransactionsSlice = createSlice({
             .addCase(fetchTransactionItems.fulfilled, (state, action) => {
                 state.isItemsLoading = false;
                 state.items = action.payload.items || [];
+                state.itemsPagination = action.payload.pagination || null;
                 state.itemsSummary = action.payload.summary || null;
             })
             .addCase(fetchTransactionItems.rejected, (state, action) => { state.isItemsLoading = false; state.error = action.payload as string; })

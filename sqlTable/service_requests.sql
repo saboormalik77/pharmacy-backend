@@ -262,7 +262,7 @@ DECLARE
     v_offset INTEGER;
     v_total  INTEGER;
     v_items  JSONB;
-    v_limit  INTEGER := GREATEST(1, LEAST(COALESCE(p_limit, 20), 100));
+    v_limit  INTEGER := GREATEST(1, LEAST(COALESCE(p_limit, 10), 100));
     v_page   INTEGER := GREATEST(1, COALESCE(p_page, 1));
 BEGIN
     v_offset := (v_page - 1) * v_limit;
@@ -393,7 +393,7 @@ DECLARE
     v_offset INTEGER;
     v_total  INTEGER;
     v_items  JSONB;
-    v_limit  INTEGER := GREATEST(1, LEAST(COALESCE(p_limit, 20), 100));
+    v_limit  INTEGER := GREATEST(1, LEAST(COALESCE(p_limit, 10), 100));
     v_page   INTEGER := GREATEST(1, COALESCE(p_page, 1));
 BEGIN
     v_offset := (v_page - 1) * v_limit;
@@ -693,7 +693,7 @@ DECLARE
     v_offset INTEGER;
     v_total  INTEGER;
     v_items  JSONB;
-    v_limit  INTEGER := GREATEST(1, LEAST(COALESCE(p_limit, 20), 100));
+    v_limit  INTEGER := GREATEST(1, LEAST(COALESCE(p_limit, 10), 100));
     v_page   INTEGER := GREATEST(1, COALESCE(p_page, 1));
     v_search TEXT    := NULLIF(TRIM(COALESCE(p_search, '')), '');
 BEGIN

@@ -176,10 +176,24 @@ export const createReturnTransaction = async (
   return attachPharmacyStoreDetails(sb, data.data as ReturnTransaction);
 };
 
+function sortReturnTransactionsNewestFirst(
+  rows: ReturnTransaction[]
+): ReturnTransaction[] {
+  if (!rows?.length) return rows;
+  return [...rows].sort(
+    (a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+}
+
 export const listReturnTransactions = async (
   filters: ListFilters
 ): Promise<ReturnTransactionListResponse> => {
   const sb = ensureAdmin();
+
+  const page = filters.page && filters.page > 0 ? filters.page : 1;
+  const limit =
+    filters.limit && filters.limit > 0 ? Math.min(filters.limit, 100) : 10;
 
   const { data, error } = await sb.rpc('list_return_transactions', {
     p_pharmacy_id:  filters.pharmacyId || null,
@@ -188,12 +202,16 @@ export const listReturnTransactions = async (
     p_date_from:    filters.dateFrom || null,
     p_date_to:      filters.dateTo || null,
     p_search:       filters.search || null,
-    p_page:         filters.page || 1,
-    p_limit:        filters.limit || 20,
+    p_page:         page,
+    p_limit:        limit,
   });
 
   handleRpcError(data, error, 'Failed to list return transactions');
-  return data as ReturnTransactionListResponse;
+  const result = data as ReturnTransactionListResponse;
+  if (result?.transactions?.length) {
+    result.transactions = sortReturnTransactionsNewestFirst(result.transactions);
+  }
+  return result;
 };
 
 export const getReturnTransactionById = async (

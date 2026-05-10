@@ -53,7 +53,7 @@ export const listHandler = catchAsync(
       dateTo,
       search,
       page = '1',
-      limit = '20',
+      limit = '10',
     } = req.query as Record<string, string>;
 
     // If caller is a processor, restrict to their assigned stores

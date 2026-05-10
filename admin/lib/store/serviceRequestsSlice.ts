@@ -74,7 +74,7 @@ const initialState: ServiceRequestsState = {
   items: [],
   total: 0,
   page: 1,
-  limit: 20,
+  limit: 10,
   statusFilter: 'all',
   search: '',
   isLoading: false,
@@ -261,7 +261,7 @@ const slice = createSlice({
         s.items = a.payload.items || [];
         s.total = a.payload.total || 0;
         s.page  = a.payload.page  || 1;
-        s.limit = a.payload.limit || 20;
+        s.limit = a.payload.limit || 10;
       })
       .addCase(fetchServiceRequests.rejected, (s, a) => {
         s.isLoading = false; s.error = (a.payload as string) || (a.error?.message ?? 'Fetch failed');

@@ -67,7 +67,7 @@ function PharmaciesPageContent() {
     useEffect(() => {
         dispatch(fetchPharmacies({
             page: currentPage,
-            limit: 20,
+            limit: 10,
             search: debouncedSearch || undefined,
             status: statusFilter,
         }));
@@ -175,7 +175,7 @@ function PharmaciesPageContent() {
             // Refresh the list
             dispatch(fetchPharmacies({
                 page: currentPage,
-                limit: 20,
+                limit: 10,
                 search: debouncedSearch || undefined,
                 status: statusFilter,
             }));
@@ -192,7 +192,7 @@ function PharmaciesPageContent() {
             // Refresh the list
             dispatch(fetchPharmacies({
                 page: currentPage,
-                limit: 20,
+                limit: 10,
                 search: debouncedSearch || undefined,
                 status: statusFilter,
             }));
@@ -215,7 +215,7 @@ function PharmaciesPageContent() {
                 setCreateModal(false);
                 setCreateForm({ ...INITIAL_CREATE_FORM });
                 setCreateSuccess(null);
-                dispatch(fetchPharmacies({ page: 1, limit: 20, status: statusFilter }));
+                dispatch(fetchPharmacies({ page: 1, limit: 10, status: statusFilter }));
                 dispatch(fetchPendingInvites()); // Refresh invites list
             }, 2000);
         } else {
@@ -260,7 +260,7 @@ function PharmaciesPageContent() {
             // Refresh the list
             dispatch(fetchPharmacies({
                 page: currentPage,
-                limit: 20,
+                limit: 10,
                 search: debouncedSearch || undefined,
                 status: statusFilter,
             }));
@@ -278,7 +278,7 @@ function PharmaciesPageContent() {
             // Refresh the list
             dispatch(fetchPharmacies({
                 page: currentPage,
-                limit: 20,
+                limit: 10,
                 search: debouncedSearch || undefined,
                 status: statusFilter,
             }));

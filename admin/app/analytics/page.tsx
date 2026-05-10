@@ -3,7 +3,7 @@
 import { Fragment } from 'react';
 import { PermissionGate } from '@/components/auth/PermissionGate';
 import { useEffect, useState } from 'react';
-import { DollarSign, TrendingUp, Package, Building2, TrendingDown } from 'lucide-react';
+import { DollarSign, TrendingUp, Package, Building2, TrendingDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatCurrency, formatNumber } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { fetchAnalytics } from '@/lib/store/analyticsSlice';
@@ -15,6 +15,10 @@ export default function AnalyticsPage() {
     const dispatch = useAppDispatch();
     const { data, isLoading, error } = useAppSelector((state) => state.analytics);
     const [isMobile, setIsMobile] = useState(false);
+    
+    // State Breakdown pagination
+    const [stateCurrentPage, setStateCurrentPage] = useState(1);
+    const stateItemsPerPage = 10;
 
     useEffect(() => {
         dispatch(fetchAnalytics());
@@ -29,6 +33,11 @@ export default function AnalyticsPage() {
         
         return () => window.removeEventListener('resize', checkMobile);
     }, [dispatch]);
+
+    // Reset pagination when data changes
+    useEffect(() => {
+        setStateCurrentPage(1);
+    }, [data]);
 
     // Transform returns value trend data for chart
     const returnsValueTrendData = data?.charts.returnsValueTrend.map(item => ({
@@ -304,35 +313,75 @@ export default function AnalyticsPage() {
                     )}
 
                     {/* State Breakdown Table */}
-                    {data.stateBreakdown && data.stateBreakdown.length > 0 && (
-                        <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-4">
-                            <h2 className="text-base font-semibold text-gray-900 mb-4">State Breakdown</h2>
-                            <div className="overflow-x-auto lg:overflow-x-visible">
-                                <table className="w-full text-sm border" style={{ borderColor: '#9ca3af' }}>
-                                    <thead className="bg-[#f4f5f5] border-b" style={{ borderColor: '#9ca3af', borderBottomWidth: '1.5px' }}>
-                                        <tr className="bg-[#f4f5f5]">
-                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">State</th>
-                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Pharmacies</th>
-                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Total Returns</th>
-                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Avg Return Value</th>
-                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Total Value</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y" style={{ borderColor: '#d1d5db' }}>
-                                        {data.stateBreakdown.map((state) => (
-                                            <tr key={state.state} className="hover:bg-[#e9ebec] transition-colors" style={{ borderColor: '#d1d5db' }}>
-                                                <td className="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{state.state}</td>
-                                                <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{state.pharmacies}</td>
-                                                <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{formatNumber(state.totalReturns)}</td>
-                                                <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{formatCurrency(state.avgReturnValue)}</td>
-                                                <td className="px-3 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">{formatCurrency(state.totalValue)}</td>
+                    {data.stateBreakdown && data.stateBreakdown.length > 0 && (() => {
+                        // Pagination logic for State Breakdown
+                        const totalStatePages = Math.ceil(data.stateBreakdown.length / stateItemsPerPage);
+                        const startIndex = (stateCurrentPage - 1) * stateItemsPerPage;
+                        const endIndex = startIndex + stateItemsPerPage;
+                        const paginatedStates = data.stateBreakdown.slice(startIndex, endIndex);
+                        const showStatePagination = totalStatePages > 1;
+                        
+                        return (
+                            <div className="bg-white rounded-[4px] shadow border border-[#e2e2e2] p-4">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-base font-semibold text-gray-900">State Breakdown</h2>
+                                    <p className="text-sm text-gray-500">{data.stateBreakdown.length} states</p>
+                                </div>
+                                <div className="overflow-x-auto lg:overflow-x-visible">
+                                    <table className="w-full text-sm border" style={{ borderColor: '#9ca3af' }}>
+                                        <thead className="bg-[#f4f5f5] border-b" style={{ borderColor: '#9ca3af', borderBottomWidth: '1.5px' }}>
+                                            <tr className="bg-[#f4f5f5]">
+                                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">State</th>
+                                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Pharmacies</th>
+                                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Total Returns</th>
+                                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Avg Return Value</th>
+                                                <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-gray-600">Total Value</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody className="divide-y" style={{ borderColor: '#d1d5db' }}>
+                                            {paginatedStates.map((state) => (
+                                                <tr key={state.state} className="hover:bg-[#e9ebec] transition-colors" style={{ borderColor: '#d1d5db' }}>
+                                                    <td className="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{state.state}</td>
+                                                    <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{state.pharmacies}</td>
+                                                    <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{formatNumber(state.totalReturns)}</td>
+                                                    <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{formatCurrency(state.avgReturnValue)}</td>
+                                                    <td className="px-3 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">{formatCurrency(state.totalValue)}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                {/* Pagination Controls */}
+                                {showStatePagination && (
+                                    <div className="flex items-center justify-between pt-3 mt-3 border-t border-gray-200">
+                                        <p className="text-sm text-gray-500">
+                                            Showing {startIndex + 1}–{Math.min(endIndex, data.stateBreakdown.length)} of {data.stateBreakdown.length}
+                                        </p>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => setStateCurrentPage(prev => Math.max(1, prev - 1))}
+                                                disabled={stateCurrentPage === 1}
+                                                className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                                            >
+                                                <ChevronLeft className="w-4 h-4" /> Previous
+                                            </button>
+                                            <span className="text-sm text-gray-600 tabular-nums">
+                                                Page {stateCurrentPage} of {totalStatePages}
+                                            </span>
+                                            <button
+                                                onClick={() => setStateCurrentPage(prev => Math.min(totalStatePages, prev + 1))}
+                                                disabled={stateCurrentPage === totalStatePages}
+                                                className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                                            >
+                                                Next <ChevronRight className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                        </div>
-                    )}
+                        );
+                    })()}
 
                     {/* Top Products Table */}
                 </Fragment>

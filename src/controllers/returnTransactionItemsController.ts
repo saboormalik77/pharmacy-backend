@@ -297,12 +297,18 @@ export const addItemHandler = catchAsync(
 export const listItemsHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const transactionId = req.params.id;
-    const { return_status, returnStatus, search } = req.query as Record<string, string>;
+    const { return_status, returnStatus, search, page, limit } = req.query as Record<string, string>;
+
+    // Parse pagination parameters with defaults
+    const pageNumber = parseInt(page, 10) || 1;
+    const limitNumber = parseInt(limit, 10) || 10;
 
     const result = await itemsService.listItems(
       transactionId,
       return_status || returnStatus,
       search,
+      pageNumber,
+      limitNumber,
     );
 
     const filteredItems = (result.items || []).filter((item: any) => {

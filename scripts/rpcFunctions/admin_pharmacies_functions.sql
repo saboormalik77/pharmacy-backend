@@ -105,7 +105,7 @@ CREATE OR REPLACE FUNCTION get_admin_pharmacies_list(
     p_search TEXT DEFAULT NULL,
     p_status TEXT DEFAULT 'all',
     p_page INTEGER DEFAULT 1,
-    p_limit INTEGER DEFAULT 20,
+    p_limit INTEGER DEFAULT 10,
     p_buying_group_id UUID DEFAULT NULL
 )
 RETURNS JSONB
