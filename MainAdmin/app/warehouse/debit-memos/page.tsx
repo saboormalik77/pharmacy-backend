@@ -1,7 +1,7 @@
 'use client';
 
 import { PermissionGate } from '@/components/auth/PermissionGate';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -43,12 +43,23 @@ function formatCurrency(v: number) {
 }
 
 function getPaymentBadge(s: string): { variant: 'success' | 'warning' | 'danger' | 'default' } {
-    switch (s) {
-        case 'paid': return { variant: 'success' };
-        case 'partial': return { variant: 'warning' };
-        case 'disputed': return { variant: 'danger' };
-        default: return { variant: 'default' };
+    switch ((s || '').toLowerCase()) {
+        case 'paid':
+        case 'partial':
+            return { variant: 'success' };
+        case 'disputed':
+            return { variant: 'danger' };
+        default:
+            return { variant: 'default' };
     }
+}
+
+/** Table / read-only UI only: partial + paid → "Paid", pending → "Pending"; other values unchanged */
+function formatDebitMemoPaymentLabel(raw: string): string {
+    const v = (raw || '').toLowerCase();
+    if (v === 'partial' || v === 'paid') return 'Paid';
+    if (v === 'pending') return 'Pending';
+    return raw || '';
 }
 
 function pillStyle(kind: 'success' | 'warning' | 'danger' | 'info' | 'default') {
@@ -100,6 +111,7 @@ export default function DebitMemosPage() {
     const [editing, setEditing] = useState(false);
     const [editForm, setEditForm] = useState<Record<string, any>>({});
     const [downloadingMemoId, setDownloadingMemoId] = useState<string | null>(null);
+    const expandedRowRef = useRef<HTMLDivElement | null>(null);
 
     const addToast = useCallback((msg: string, type: Toast['type']) => {
         setToasts(prev => [...prev, { id: Date.now().toString(), message: msg, type }]);
@@ -124,6 +136,14 @@ export default function DebitMemosPage() {
             dispatch(fetchDebitMemoDetail(highlightId));
         }
     }, [highlightId, debitMemos, dispatch]);
+
+    /** Keep the opened row in view when expanding and again after detail loads (taller panel). */
+    useLayoutEffect(() => {
+        if (!expandedMemoId) return;
+        const el = expandedRowRef.current;
+        if (!el) return;
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+    }, [expandedMemoId, currentMemo?.id]);
 
     const toggleExpand = (memoId: string) => {
         if (expandedMemoId === memoId) {
@@ -291,6 +311,7 @@ export default function DebitMemosPage() {
                             return (
                                 <div
                                     key={memo.id}
+                                    ref={isExpanded ? expandedRowRef : undefined}
                                     className="border-b last:border-b-0"
                                     style={{
                                         borderColor: 'var(--outline-variant)',
@@ -338,7 +359,7 @@ export default function DebitMemosPage() {
                                             </div>
                                             <div>
                                                 <p className="text-[10px] uppercase" style={{ color: 'var(--on-surface-variant)' }}>Payment</p>
-                                                <span style={pillStyle(pb.variant)}>{memo.paymentStatus}</span>
+                                                <span style={pillStyle(pb.variant)}>{formatDebitMemoPaymentLabel(memo.paymentStatus)}</span>
                                             </div>
                                         </div>
                                         {isExpanded
@@ -521,7 +542,7 @@ export default function DebitMemosPage() {
                                                                 <div className="space-y-1.5">
                                                                     <div className="flex justify-between">
                                                                         <span className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>Status</span>
-                                                                        <span style={pillStyle(pb.variant)}>{currentMemo.paymentStatus}</span>
+                                                                        <span style={pillStyle(pb.variant)}>{formatDebitMemoPaymentLabel(currentMemo.paymentStatus)}</span>
                                                                     </div>
                                                                     <div className="flex justify-between"><span className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>Requested</span><span className="text-[11px] font-medium" style={{ color: 'var(--foreground)' }}>{formatCurrency(currentMemo.amountRequested)}</span></div>
                                                                     <div className="flex justify-between"><span className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>Received</span><span className="text-[11px] font-medium" style={{ color: 'var(--foreground)' }}>{formatCurrency(currentMemo.amountReceived)}</span></div>

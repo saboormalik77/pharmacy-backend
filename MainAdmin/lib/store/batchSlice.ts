@@ -430,9 +430,13 @@ const batchSlice = createSlice({
             .addCase(fetchDebitMemos.fulfilled, (state, action) => { state.isLoading = false; state.debitMemos = action.payload.data; state.memoPagination = action.payload.pagination; })
             .addCase(fetchDebitMemos.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; })
 
-            .addCase(fetchDebitMemoDetail.pending, (state) => { state.isLoading = true; state.error = null; })
-            .addCase(fetchDebitMemoDetail.fulfilled, (state, action) => { state.isLoading = false; state.currentMemo = action.payload.memo; state.memoItems = action.payload.items; })
-            .addCase(fetchDebitMemoDetail.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; })
+            // Detail fetch: do not toggle isLoading — that replaces the whole debit memo list UI and resets scroll.
+            .addCase(fetchDebitMemoDetail.pending, (state) => { state.error = null; })
+            .addCase(fetchDebitMemoDetail.fulfilled, (state, action) => {
+                state.currentMemo = action.payload.memo;
+                state.memoItems = action.payload.items;
+            })
+            .addCase(fetchDebitMemoDetail.rejected, (state, action) => { state.error = action.payload as string; })
 
             .addCase(updateDebitMemo.pending, (state) => { state.isActionLoading = true; state.error = null; })
             .addCase(updateDebitMemo.fulfilled, (state, action) => {
