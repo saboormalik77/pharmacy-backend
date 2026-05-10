@@ -6,7 +6,7 @@ import { useRouter, useParams } from 'next/navigation';
 import {
     ArrowLeft, Loader2, ScanLine, Keyboard, CheckCircle,
     AlertTriangle, RotateCcw, X, Camera, Archive, ShieldCheck,
-    FileText, Ban, Info, Trash2,
+    FileText, Ban, Info, Trash2, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
@@ -39,6 +39,9 @@ const RETURN_REASONS = [
 const DEA_SCHEDULE_OPTIONS = [
     '', 'CI', 'CII', 'CIII', 'CIV', 'CV', 'Non-Controlled'
 ];
+
+/** Session product list tab: items per page */
+const PRODUCTS_LIST_PAGE_SIZE = 6;
 
 const EMPTY_FORM = {
     ndc: '', ndc10: '', gtin: '', proprietaryName: '', genericName: '',
@@ -97,6 +100,7 @@ export default function AddItemsPage() {
     const [toasts, setToasts] = useState<Toast[]>([]);
     const [itemCount, setItemCount] = useState(0);
     const [recentlyAddedItems, setRecentlyAddedItems] = useState<ReturnTransactionItem[]>([]);
+    const [productsListPage, setProductsListPage] = useState(1);
     const [activeTab, setActiveTab] = useState<'list' | 'form'>('form');
     const [lastWarning, setLastWarning] = useState('');
     const [lastClassification, setLastClassification] = useState<{ item: string; status: string; policyCheck?: ReturnabilityCheckResult; wineCellarItem?: any } | null>(null);
@@ -151,6 +155,11 @@ export default function AddItemsPage() {
             setItemCount(items.length);
         }
     }, [items]);
+
+    useEffect(() => {
+        const maxPage = Math.max(1, Math.ceil(recentlyAddedItems.length / PRODUCTS_LIST_PAGE_SIZE));
+        setProductsListPage((p) => Math.min(p, maxPage));
+    }, [recentlyAddedItems.length]);
 
     useEffect(() => {
         if (mode === 'usb') scanInputRef.current?.focus();
@@ -523,6 +532,7 @@ export default function AddItemsPage() {
             setScannedPrices(null);
             setScanError('');
             setScanInput('');
+            setManualNdc('');
             setPreCheckResult(null);
             setPolicyAutoCheck(null);
             setIsPolicyChecking(false);
@@ -549,6 +559,8 @@ export default function AddItemsPage() {
         setNonReturnableRoute('destruction');
         setScannedPrices(null);
         setScanError('');
+        setScanInput('');
+        setManualNdc('');
         setLastWarning('');
         setLastClassification(null);
         setPreCheckResult(null);
@@ -584,6 +596,19 @@ export default function AddItemsPage() {
 
     /** While barcode/NDC lookup API runs — lock scan inputs + product form */
     const scanFetching = isScanLoading;
+
+    const productsListTotalPages = Math.max(1, Math.ceil(recentlyAddedItems.length / PRODUCTS_LIST_PAGE_SIZE));
+    const paginatedSessionProducts = recentlyAddedItems.slice(
+        (productsListPage - 1) * PRODUCTS_LIST_PAGE_SIZE,
+        productsListPage * PRODUCTS_LIST_PAGE_SIZE
+    );
+    const productsListRangeStart = recentlyAddedItems.length === 0
+        ? 0
+        : (productsListPage - 1) * PRODUCTS_LIST_PAGE_SIZE + 1;
+    const productsListRangeEnd = Math.min(
+        productsListPage * PRODUCTS_LIST_PAGE_SIZE,
+        recentlyAddedItems.length
+    );
 
     return (
         <div className="space-y-3">
@@ -676,10 +701,15 @@ export default function AddItemsPage() {
                 <div className="bg-white rounded-[4px] shadow px-4 py-3">
                     <div className="flex items-center justify-between mb-3">
                         <h2 className="text-xs font-semibold text-gray-700">Products Added in This Session</h2>
-                        <p className="text-[10px] text-gray-500">{recentlyAddedItems.length} item{recentlyAddedItems.length !== 1 ? 's' : ''}</p>
+                        <p className="text-[10px] text-gray-500">
+                            {recentlyAddedItems.length} item{recentlyAddedItems.length !== 1 ? 's' : ''}
+                            {productsListTotalPages > 1 && (
+                                <span className="text-gray-400"> · Showing {productsListRangeStart}–{productsListRangeEnd}</span>
+                            )}
+                        </p>
                     </div>
                     <div className="space-y-2 max-h-[500px] overflow-y-auto">
-                        {recentlyAddedItems.map((item) => (
+                        {paginatedSessionProducts.map((item) => (
                             <div key={item.id} className="flex items-start gap-2 p-3 border border-gray-200 rounded-[4px] hover:border-primary-300 hover:bg-primary-50/30 transition-all">
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1.5">
@@ -727,6 +757,29 @@ export default function AddItemsPage() {
                             </div>
                         ))}
                     </div>
+                    {productsListTotalPages > 1 && (
+                        <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setProductsListPage((p) => Math.max(1, p - 1))}
+                                disabled={productsListPage <= 1}
+                                className="inline-flex items-center gap-0.5 px-2 py-1 text-[10px] font-medium rounded border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                                <ChevronLeft className="w-3.5 h-3.5" /> Previous
+                            </button>
+                            <span className="text-[10px] text-gray-600 tabular-nums">
+                                Page {productsListPage} of {productsListTotalPages}
+                            </span>
+                            <button
+                                type="button"
+                                onClick={() => setProductsListPage((p) => Math.min(productsListTotalPages, p + 1))}
+                                disabled={productsListPage >= productsListTotalPages}
+                                className="inline-flex items-center gap-0.5 px-2 py-1 text-[10px] font-medium rounded border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                                Next <ChevronRight className="w-3.5 h-3.5" />
+                            </button>
+                        </div>
+                    )}
                 </div>
             )}
 
