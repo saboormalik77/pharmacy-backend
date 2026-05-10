@@ -21,12 +21,12 @@ export function TopBar({ onMenuClick }: TopBarProps) {
   const { cartItems, toggleCart } = useMarketplaceStore()
 
   return (
-    <header className="flex h-14 items-center justify-between border-b border-[#e2e2e2] bg-white px-4 sm:px-6">
+    <header className="flex h-14 items-center justify-between border-b border-border bg-card px-4 sm:px-6">
       <div className="flex items-center gap-2 sm:gap-4">
         <Button
           variant="ghost"
           size="sm"
-          className="lg:hidden"
+          className="lg:hidden hover:bg-primary/10 hover:text-primary"
           onClick={onMenuClick}
           aria-label="Open menu"
         >

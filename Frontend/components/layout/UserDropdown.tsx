@@ -96,20 +96,24 @@ export function UserDropdown() {
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 sm:gap-3 rounded-[4px] px-2 sm:px-3 py-1.5 sm:py-2 hover:bg-accent transition-colors"
+          className="group flex items-center gap-2 sm:gap-3 rounded-[4px] px-2 sm:px-3 py-1.5 sm:py-2 transition-colors hover:bg-primary/10"
           aria-label="User menu"
           disabled={isLoggingOut}
         >
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-medium">{userData?.name || 'User'}</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm font-medium text-foreground transition-colors group-hover:text-primary">
+              {userData?.name || 'User'}
+            </p>
+            <p className="text-xs text-muted-foreground transition-colors group-hover:text-primary/80">
               {userData?.pharmacy_name || 'Pharmacy'}
             </p>
           </div>
-          <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#516057] text-white">
+          <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-primary text-primary-foreground ring-0 transition-shadow group-hover:ring-2 group-hover:ring-primary/35">
             <User className="h-4 w-4 sm:h-5 sm:w-5" />
           </div>
-          <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown
+            className={`h-4 w-4 text-muted-foreground transition-all group-hover:text-primary ${isOpen ? 'rotate-180' : ''}`}
+          />
         </button>
 
         {isOpen && !isLoggingOut && (
@@ -127,14 +131,14 @@ export function UserDropdown() {
                   router.push('/settings')
                   // Add settings navigation if needed
                 }}
-                className="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-accent transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-foreground transition-colors hover:bg-primary/10 hover:text-primary"
               >
                 <Settings className="h-4 w-4" />
                 Settings
               </button>
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 transition-colors hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/40"
               >
                 <LogOut className="h-4 w-4" />
                 Logout
