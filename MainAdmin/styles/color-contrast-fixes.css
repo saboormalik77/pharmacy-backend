@@ -1,0 +1,96 @@
+/* ============================================================
+ * Color Contrast Fixes
+ * ============================================================
+ * Fixes poor contrast issues across the application, especially
+ * with error container color schemes where text is not visible.
+ */
+
+/* Fix error container text contrast */
+.error-container-text-fix,
+[style*="color: var(--on-error-container)"],
+[style*="color:var(--on-error-container)"] {
+    color: #000000 !important; /* Force black text for better contrast */
+}
+
+/* Specific overrides for elements with error container background */
+[style*="background-color: var(--error-container)"] *,
+[style*="backgroundColor: var(--error-container)"] * {
+    color: #000000 !important;
+}
+
+/* More targeted fixes for common patterns */
+.bg-error-container,
+.bg-\[var\(--error-container\)\] {
+    color: #000000 !important;
+}
+
+/* Fix for text inside error container backgrounds */
+[style*="--error-container"] p,
+[style*="--error-container"] span,
+[style*="--error-container"] div,
+[style*="--error-container"] button {
+    color: #000000 !important;
+}
+
+/* Ensure icons in error containers are also visible */
+[style*="--error-container"] svg {
+    color: #dc2626 !important; /* Use a darker red for error icons */
+}
+
+/* Fix for badges and pills with error styling */
+.badge-danger,
+.pill-danger,
+[class*="error-container"] {
+    color: #000000 !important;
+}
+
+/* Override for specific UI patterns */
+.text-on-error-container {
+    color: #000000 !important;
+}
+
+/* Fix for form elements and inputs in error containers */
+[style*="--error-container"] input,
+[style*="--error-container"] select,
+[style*="--error-container"] textarea {
+    color: #000000 !important;
+}
+
+/* Ensure button text in error containers is readable */
+[style*="--error-container"] button {
+    color: #000000 !important;
+}
+
+/* Fix for any text that uses the CSS variable directly */
+.text-\[var\(--on-error-container\)\] {
+    color: #000000 !important;
+}
+
+/* Additional safety net for common text classes */
+.text-xs[style*="--on-error-container"],
+.text-sm[style*="--on-error-container"],
+.text-lg[style*="--on-error-container"],
+.font-medium[style*="--on-error-container"],
+.font-bold[style*="--on-error-container"] {
+    color: #000000 !important;
+}
+
+/* Fix for any remaining instances */
+*[style*="color: var(--on-error-container)"] {
+    color: #000000 !important;
+}
+
+/* Ensure sufficient contrast for error state indicators */
+.status-error,
+.status-non-returnable,
+.route-destruction {
+    background-color: #fef2f2 !important; /* Light red background */
+    color: #000000 !important; /* Black text */
+    border-color: #fca5a5 !important; /* Light red border */
+}
+
+/* Fix for specific component patterns identified */
+div[style*="--error-container"] p.text-xs,
+div[style*="--error-container"] p.text-lg {
+    color: #000000 !important;
+}

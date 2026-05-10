@@ -44,12 +44,12 @@ function toastAppearance(type: ToastType): {
         case 'error':
             return {
                 panel: {
-                    backgroundColor: 'var(--status-danger-bg)',
-                    borderColor: 'var(--error)',
-                    color: 'var(--on-surface)',
-                    boxShadow: '0 10px 40px color-mix(in srgb, var(--error) 18%, transparent)',
+                    backgroundColor: 'var(--error-bg)',
+                    borderColor: 'var(--error-text)',
+                    color: 'var(--error-text)',
+                    boxShadow: '0 10px 40px color-mix(in srgb, var(--error-text) 18%, transparent)',
                 },
-                iconColor: 'var(--error)',
+                iconColor: 'var(--error-text)',
             };
         case 'info':
             return {

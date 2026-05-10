@@ -766,8 +766,8 @@ export default function VerificationSessionPage() {
                                 <p className="text-lg font-bold" style={{ color: 'var(--on-secondary-container)' }}>{v2Summary ? policyCounts.returnable : completedSummary.correctItems ?? 0}</p>
                             </div>
                             <div className="p-3 rounded-[4px] border col-span-2 sm:col-span-1" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--error-container)' }}>
-                                <p className="text-xs font-medium" style={{ color: 'var(--on-error-container)' }}>Non-Returnable</p>
-                                <p className="text-lg font-bold" style={{ color: 'var(--on-error-container)' }}>{v2Summary ? (policyCounts.nonReturnable + policyCounts.wineCellar + policyCounts.destruction) : ((completedSummary.damagedItems ?? 0) + (completedSummary.missingItems ?? 0) + (completedSummary.wrongItems ?? 0))}</p>
+                                <p className="text-xs font-medium" style={{ color: '#000000' }}>Non-Returnable</p>
+                                <p className="text-lg font-bold" style={{ color: '#000000' }}>{v2Summary ? (policyCounts.nonReturnable + policyCounts.wineCellar + policyCounts.destruction) : ((completedSummary.damagedItems ?? 0) + (completedSummary.missingItems ?? 0) + (completedSummary.wrongItems ?? 0))}</p>
                             </div>
                         </div>
                         {/* Hidden verification stats - showing only routing-focused summary now
@@ -805,14 +805,27 @@ export default function VerificationSessionPage() {
                                 <span>{completedSummary.openDiscrepancies} open discrepancies remain.</span>
                             </div>
                         )}
-                        <button 
-                            type="button"
-                            onClick={handleOpenBatchModal}
-                            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium rounded-[4px] mt-2 transition text-white"
-                            style={{ backgroundColor: 'var(--primary)' }}
-                        >
-                            <Layers className="w-4 h-4" /> Create Batch
-                        </button>
+                        <div className="mt-2 flex flex-col sm:flex-row gap-2">
+                            <Link
+                                href="/warehouse/batches"
+                                className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium rounded-[4px] border transition"
+                                style={{
+                                    borderColor: 'var(--outline-variant)',
+                                    backgroundColor: 'var(--surface-container-low)',
+                                    color: 'var(--foreground)',
+                                }}
+                            >
+                                <Package className="w-4 h-4" /> Batches
+                            </Link>
+                            <button
+                                type="button"
+                                onClick={handleOpenBatchModal}
+                                className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium rounded-[4px] transition text-white"
+                                style={{ backgroundColor: 'var(--primary)' }}
+                            >
+                                <Layers className="w-4 h-4" /> Create/assign batch
+                            </button>
+                        </div>
                     </div>
                 </div>
 

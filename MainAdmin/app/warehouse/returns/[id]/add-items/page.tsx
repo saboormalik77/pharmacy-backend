@@ -1005,8 +1005,8 @@ export default function AddItemsPage() {
                                 <p className={`text-xs font-bold ${
                                     lastClassification.wineCellarItem ? 'text-[var(--on-tertiary-container)]' :
                                     lastClassification.status === 'returnable' ? 'text-green-800' :
-                                    lastClassification.status === 'non_returnable' ? 'text-[var(--on-error-container)]' : 'text-yellow-800'
-                                }`}>
+                                    lastClassification.status === 'non_returnable' ? '' : 'text-yellow-800'
+                                }`} style={lastClassification.status === 'non_returnable' ? { color: '#000000' } : {}}>
                                     {lastClassification.item} — {
                                         lastClassification.wineCellarItem ? 'MOVED TO WINE CELLAR' :
                                         lastClassification.status === 'returnable' ? 'RETURNABLE' :
@@ -1190,7 +1190,7 @@ export default function AddItemsPage() {
                 {!isPolicyChecking && policyAutoCheck && (
                     <div className={`mb-2 flex items-start gap-1.5 text-xs rounded px-2.5 py-1.5 border ${
                         policyAutoCheck.status === 'returnable' ? 'bg-green-50 border-green-200 text-green-800' :
-                        policyAutoCheck.status === 'non_returnable' ? 'bg-[var(--error-container)] border-red-200 text-[var(--on-error-container)]' :
+                        policyAutoCheck.status === 'non_returnable' ? 'bg-[var(--error-container)] border-red-200' :
                         'bg-yellow-50 border-yellow-200 text-yellow-800'
                     }`}>
                         {policyAutoCheck.status === 'returnable' ? <CheckCircle className="w-3 h-3 mt-0.5 flex-shrink-0" /> :
@@ -1266,7 +1266,7 @@ export default function AddItemsPage() {
                 {/* Non-returnable route selector */}
                 {form.returnStatus === 'non_returnable' && (
                     <div className="mt-2 p-2.5 bg-[var(--error-container)] border border-red-200 rounded-[4px]">
-                        <p className="text-[10px] font-semibold text-[var(--on-error-container)] mb-1.5">Non-Returnable Route</p>
+                        <p className="text-[10px] font-semibold mb-1.5" style={{ color: '#000000' }}>Non-Returnable Route</p>
                         <div className="grid grid-cols-2 gap-2">
                             <label className={`flex items-center gap-2 px-2 py-1.5 border rounded cursor-pointer ${nonReturnableRoute === 'wine_cellar' ? 'border-[var(--tertiary)] bg-[var(--tertiary-container)]' : 'border-[var(--outline-variant)] bg-[var(--surface-container-lowest)]'}`}>
                                 <input
@@ -1284,7 +1284,7 @@ export default function AddItemsPage() {
                                     onChange={() => setNonReturnableRoute('destruction')}
                                 />
                                 <Ban className="w-3.5 h-3.5 text-[var(--error)]" />
-                                <span className="text-xs font-medium text-[var(--on-error-container)]">Destruction</span>
+                                <span className="text-xs font-medium" style={{ color: '#000000' }}>Destruction</span>
                             </label>
                         </div>
                     </div>
@@ -1357,7 +1357,7 @@ export default function AddItemsPage() {
                                         <div className="flex items-start gap-1.5">
                                             <Ban className="w-3.5 h-3.5 text-[var(--error)] mt-0.5 flex-shrink-0" />
                                             <div>
-                                                <p className="text-xs font-semibold text-[var(--on-error-container)]">Destruction route selected</p>
+                                                <p className="text-xs font-semibold" style={{ color: '#000000' }}>Destruction route selected</p>
                                                 <p className="text-[10px] text-red-700 mt-0.5">
                                                     Item will be saved as non-returnable and routed to destruction workflow.
                                                 </p>
@@ -1461,8 +1461,8 @@ export default function AddItemsPage() {
                                         <div>
                                             <p className={`text-xs font-bold ${
                                                 policyAutoCheck.status === 'returnable' ? 'text-green-800' :
-                                                policyAutoCheck.status === 'non_returnable' ? 'text-[var(--on-error-container)]' : 'text-yellow-800'
-                                            }`}>
+                                                policyAutoCheck.status === 'non_returnable' ? '' : 'text-yellow-800'
+                                            }`} style={policyAutoCheck.status === 'non_returnable' ? { color: '#000000' } : {}}>
                                                 {policyAutoCheck.status === 'returnable' ? 'RETURNABLE' : policyAutoCheck.status === 'non_returnable' ? 'NON-RETURNABLE' : 'TBD — No Policy Found'}
                                             </p>
                                             {policyAutoCheck.reason && <p className="text-[10px] text-[var(--on-primary-container)] mt-0.5 capitalize">{policyAutoCheck.reason.replace(/_/g, ' ')}</p>}

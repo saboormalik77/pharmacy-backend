@@ -82,7 +82,7 @@ export default function DashboardPage() {
         <div className="rounded-[4px] shadow-sm p-6 border" style={{ backgroundColor: 'var(--error-container)', borderColor: 'var(--error)' }}>
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-5 h-5" style={{ color: 'var(--error)' }} />
-            <p className="text-sm" style={{ color: 'var(--on-error-container)' }}>
+            <p className="text-sm" style={{ color: '#000000' }}>
               Unable to load warehouse statistics: {warehouseStats.error}
             </p>
           </div>

@@ -183,3 +183,36 @@ export const checkReturnabilityHandler = catchAsync(
     res.status(200).json({ status: 'success', data: result });
   }
 );
+
+// ============================================================
+// API Name Updates
+// ============================================================
+
+export const updatePoliciesWithApiNamesHandler = catchAsync(
+  async (req: Request, res: Response) => {
+    const limit = req.body.limit || req.query.limit || 50;
+    const result = await policiesService.updateAllPoliciesWithApiNames(Number(limit));
+    res.status(200).json({ 
+      status: 'success', 
+      data: result,
+      message: `Processed ${result.processed} policies, updated ${result.updated} with correct API names`
+    });
+  }
+);
+
+export const ensureManufacturerPolicyHandler = catchAsync(
+  async (req: Request, res: Response) => {
+    const { labelerId } = req.body;
+    
+    if (!labelerId) {
+      throw new AppError('labelerId is required', 400);
+    }
+    
+    const policyId = await policiesService.ensureManufacturerPolicy(labelerId);
+    res.status(200).json({ 
+      status: 'success', 
+      data: { policyId, labelerId },
+      message: `Manufacturer policy ensured for labeler ${labelerId}`
+    });
+  }
+);

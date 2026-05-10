@@ -70,17 +70,24 @@ export default function BatchesPage() {
 
     useEffect(() => { if (error) { addToast(error, 'error'); dispatch(clearError()); } }, [error, addToast, dispatch]);
 
-    useEffect(() => {
-        if (!showCreate) return;
-        let cancelled = false;
+    const loadUsedMonthsForModal = useCallback(async () => {
         setUsedMonthsLoading(true);
-        dispatch(fetchUsedBatchMonths())
-            .unwrap()
-            .then((months) => { if (!cancelled) setUsedBatchMonths(months); })
-            .catch(() => { if (!cancelled) setUsedBatchMonths([]); })
-            .finally(() => { if (!cancelled) setUsedMonthsLoading(false); });
-        return () => { cancelled = true; };
-    }, [showCreate, dispatch]);
+        try {
+            const months = await dispatch(fetchUsedBatchMonths()).unwrap();
+            setUsedBatchMonths(months);
+        } catch {
+            setUsedBatchMonths([]);
+            addToast('Could not load batch months. Try again.', 'error');
+        } finally {
+            setUsedMonthsLoading(false);
+        }
+    }, [dispatch, addToast]);
+
+    const openCreateBatchModal = useCallback(() => {
+        setNewBatch({ batchMonth: '', batchName: '' });
+        setShowCreate(true);
+        void loadUsedMonthsForModal();
+    }, [loadUsedMonthsForModal]);
 
     const availableBatchMonths = useMemo(
         () => buildAvailableBatchMonthOptions(usedBatchMonths),
@@ -145,10 +152,8 @@ export default function BatchesPage() {
                     <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>Manage return batches and close-outs</p>
                 </div>
                 <button
-                    onClick={() => {
-                        setNewBatch({ batchMonth: '', batchName: '' });
-                        setShowCreate(true);
-                    }}
+                    type="button"
+                    onClick={openCreateBatchModal}
                     className="inline-flex items-center gap-1 px-3 py-1.5 rounded-[4px] text-xs font-medium transition-colors"
                     style={{ backgroundColor: 'var(--primary)', color: 'var(--on-primary)' }}
                 >
