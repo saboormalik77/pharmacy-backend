@@ -154,7 +154,6 @@ export const allShippingLabelsHandler = catchAsync(
   .pkg-info { text-align:center; font-size:9pt; color:#555; margin-bottom:8px; }
   @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } .label { max-width:none; } }
 </style>
-<script>window.onload=function(){setTimeout(()=>window.print(),500)}</script>
 </head>
 <body>
 ${bodyContents.join('\n')}

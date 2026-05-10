@@ -710,12 +710,41 @@ export default function ReturnDetailPage() {
                 printWindow.document.write(htmlContent);
                 printWindow.document.close();
                 
-                // Wait for content to load, then print
-                printWindow.onload = () => {
+                // For single labels, the HTML includes auto-print script
+                // For combined labels (shipping-labels endpoint), we handle printing here
+                if (endpoint === 'shipping-labels') {
+                    // Wait for content and images to load, then print all labels
+                    printWindow.onload = () => {
+                        // Additional wait for images and resources to load
+                        setTimeout(() => {
+                            printWindow.print();
+                            // Close the window after printing
+                            setTimeout(() => {
+                                printWindow.close();
+                            }, 1500);
+                        }, 800);
+                    };
+                    
+                    // Fallback if onload doesn't fire
                     setTimeout(() => {
-                        printWindow.print();
-                    }, 500);
-                };
+                        if (printWindow && !printWindow.closed) {
+                            printWindow.print();
+                            setTimeout(() => {
+                                printWindow.close();
+                            }, 1500);
+                        }
+                    }, 2500);
+                } else {
+                    // For individual labels, just ensure window closes after the auto-print completes
+                    printWindow.onload = () => {
+                        setTimeout(() => {
+                            // Individual labels auto-print, so we just close after delay
+                            if (printWindow && !printWindow.closed) {
+                                printWindow.close();
+                            }
+                        }, 2000);
+                    };
+                }
             } else {
                 throw new Error('Unable to open print window. Please check popup blockers.');
             }
