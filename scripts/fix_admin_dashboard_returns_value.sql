@@ -176,29 +176,29 @@ BEGIN
     END IF;
 
     -- ============================================================
-    -- STAT 4: Total Returns (FIXED - use uploaded_at instead of report_date)
+    -- STAT 4: Total Returns (FIXED - count return_transactions to match value calculation)
     -- ============================================================
 
     SELECT COUNT(*)::INTEGER
     INTO v_total_returns
-    FROM uploaded_documents ud
-    JOIN pharmacy p ON p.id = ud.pharmacy_id
+    FROM return_transactions rt
+    JOIN pharmacy p ON p.id = rt.pharmacy_id
     WHERE (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
 
     SELECT COUNT(*)::INTEGER
     INTO v_returns_this_month
-    FROM uploaded_documents ud
-    JOIN pharmacy p ON p.id = ud.pharmacy_id
-    WHERE ud.uploaded_at >= v_current_month_start
-      AND ud.uploaded_at <  v_next_month_start
+    FROM return_transactions rt
+    JOIN pharmacy p ON p.id = rt.pharmacy_id
+    WHERE rt.created_at >= v_current_month_start
+      AND rt.created_at <  v_next_month_start
       AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
 
     SELECT COUNT(*)::INTEGER
     INTO v_returns_last_month
-    FROM uploaded_documents ud
-    JOIN pharmacy p ON p.id = ud.pharmacy_id
-    WHERE ud.uploaded_at >= v_last_month_start
-      AND ud.uploaded_at <  v_current_month_start
+    FROM return_transactions rt
+    JOIN pharmacy p ON p.id = rt.pharmacy_id
+    WHERE rt.created_at >= v_last_month_start
+      AND rt.created_at <  v_current_month_start
       AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
 
     IF v_returns_last_month > 0 THEN
