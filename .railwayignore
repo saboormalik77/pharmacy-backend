@@ -1,55 +1,41 @@
-# Ignore frontend apps (deploy separately if needed)
-Frontend
-Frontend/
-admin
-admin/
-MainAdmin
-MainAdmin/
+# Python virtual environments
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
 
-# Node modules (Railway installs fresh)
-node_modules
+# Node modules and build artifacts
 node_modules/
+.next/
+out/
+build/
+dist/
 
-# Dev/test files
-*.test.ts
-*.spec.ts
-__tests__/
-coverage/
+# Cache directories
+.turbo/
+.cache/
 
-# Local configs
-.env
+# Development files
 .env.local
-.env.development
-nodemon.json
-
-# IDE
-.vscode/
-.idea/
-.cursor/
-
-# Logs
 *.log
-logs/
+.DS_Store
 
 # Git
-.git
 .git/
+.gitignore
 
-# Local supabase (if any)
-supabase/.branches/
-supabase/.temp/
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
 
-# Large/unnecessary files
-*.zip
-*.tar.gz
-*.tgz
+# Test files
+coverage/
+.nyc_output/
 
-# Additional large directories
-files
-files/
-screenshots
-screenshots/
-pahrmacy data
-pahrmacy data/
-dist
-dist/
+# Temporary files
+tmp/
+temp/

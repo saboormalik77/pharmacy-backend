@@ -7,6 +7,14 @@ supabase/edge-secrets.env
 *.log
 .DS_Store
 
+# Python virtual environments
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+
 # Next.js build outputs and cache
 .next/
 out/
