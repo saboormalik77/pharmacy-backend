@@ -181,7 +181,8 @@ export default function AddItemsPage() {
     const fetchItems = useCallback(async () => {
         if (!transactionId) return;
         try {
-            const res = await apiClient.get<any>(`/return-transactions/${transactionId}/items`, {}, true);
+            // Fetch all items for the add-items page by setting a high limit
+            const res = await apiClient.get<any>(`/return-transactions/${transactionId}/items`, { limit: 1000 }, true);
             if (res.status === 'success') {
                 const fetched = res.data.items || [];
                 setRecentlyAddedItems(fetched);
