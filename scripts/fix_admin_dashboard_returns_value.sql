@@ -1,7 +1,9 @@
 -- ============================================================
 -- Fix admin dashboard returns value calculation
 -- Problem: Returns value shows 0 even though return count is correct
--- Solution: Sum actual return transaction values instead of just document totals
+-- Solution: Sum return_transactions.total_returnable_value + total_non_returnable_value
+--          (these aggregate fields are kept up-to-date by item triggers)
+-- Note: total_returns COUNT remains unchanged (still from uploaded_documents)
 -- ============================================================
 
 CREATE OR REPLACE FUNCTION get_admin_dashboard_stats(
@@ -82,8 +84,6 @@ BEGIN
 
     -- ============================================================
     -- STAT 2: Active Distributors used by this buying group's pharmacies
-    -- When p_buying_group_id is NULL (MainAdmin) → all active distributors
-    -- When scoped → distinct active distributors referenced in their documents
     -- ============================================================
 
     IF p_buying_group_id IS NULL THEN
@@ -106,7 +106,6 @@ BEGIN
           AND created_at >= v_last_month_start
           AND created_at <  v_current_month_start;
     ELSE
-        -- Count distinct active distributors actually used by this tenant's pharmacies
         SELECT COUNT(DISTINCT ud.reverse_distributor_id)::INTEGER
         INTO v_active_distributors
         FROM uploaded_documents ud
@@ -143,36 +142,31 @@ BEGIN
     END IF;
 
     -- ============================================================
-    -- STAT 3: Returns Value (FIXED - now sums return transaction item values)
+    -- STAT 3: Returns Value (FIXED - sums return_transactions aggregates)
+    -- Sums total_returnable_value + total_non_returnable_value from return_transactions
+    -- These columns are auto-maintained by RPC functions when items are added/updated
     -- ============================================================
 
-    -- Sum return transaction item values (ask_value) instead of just document totals
-    SELECT COALESCE(SUM(rti.ask_value), 0)::NUMERIC
+    SELECT COALESCE(SUM(COALESCE(rt.total_returnable_value, 0) + COALESCE(rt.total_non_returnable_value, 0)), 0)::NUMERIC
     INTO v_returns_value
-    FROM return_transaction_items rti
-    JOIN return_transactions rt ON rt.id = rti.transaction_id
+    FROM return_transactions rt
     JOIN pharmacy p ON p.id = rt.pharmacy_id
-    WHERE rti.ask_value IS NOT NULL
-      AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
+    WHERE (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
 
-    SELECT COALESCE(SUM(rti.ask_value), 0)::NUMERIC
+    SELECT COALESCE(SUM(COALESCE(rt.total_returnable_value, 0) + COALESCE(rt.total_non_returnable_value, 0)), 0)::NUMERIC
     INTO v_returns_value_this_month
-    FROM return_transaction_items rti
-    JOIN return_transactions rt ON rt.id = rti.transaction_id
+    FROM return_transactions rt
     JOIN pharmacy p ON p.id = rt.pharmacy_id
     WHERE rt.created_at >= v_current_month_start
       AND rt.created_at <  v_next_month_start
-      AND rti.ask_value IS NOT NULL
       AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
 
-    SELECT COALESCE(SUM(rti.ask_value), 0)::NUMERIC
+    SELECT COALESCE(SUM(COALESCE(rt.total_returnable_value, 0) + COALESCE(rt.total_non_returnable_value, 0)), 0)::NUMERIC
     INTO v_returns_value_last_month
-    FROM return_transaction_items rti
-    JOIN return_transactions rt ON rt.id = rti.transaction_id
+    FROM return_transactions rt
     JOIN pharmacy p ON p.id = rt.pharmacy_id
     WHERE rt.created_at >= v_last_month_start
       AND rt.created_at <  v_current_month_start
-      AND rti.ask_value IS NOT NULL
       AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
 
     IF v_returns_value_last_month > 0 THEN
@@ -182,29 +176,29 @@ BEGIN
     END IF;
 
     -- ============================================================
-    -- STAT 4: Total Returns (count of return transactions, not documents)
+    -- STAT 4: Total Returns (UNCHANGED - keeps original uploaded_documents count)
     -- ============================================================
 
     SELECT COUNT(*)::INTEGER
     INTO v_total_returns
-    FROM return_transactions rt
-    JOIN pharmacy p ON p.id = rt.pharmacy_id
+    FROM uploaded_documents ud
+    JOIN pharmacy p ON p.id = ud.pharmacy_id
     WHERE (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
 
     SELECT COUNT(*)::INTEGER
     INTO v_returns_this_month
-    FROM return_transactions rt
-    JOIN pharmacy p ON p.id = rt.pharmacy_id
-    WHERE rt.created_at >= v_current_month_start
-      AND rt.created_at <  v_next_month_start
+    FROM uploaded_documents ud
+    JOIN pharmacy p ON p.id = ud.pharmacy_id
+    WHERE ud.report_date >= v_current_month_start
+      AND ud.report_date <  v_next_month_start
       AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
 
     SELECT COUNT(*)::INTEGER
     INTO v_returns_last_month
-    FROM return_transactions rt
-    JOIN pharmacy p ON p.id = rt.pharmacy_id
-    WHERE rt.created_at >= v_last_month_start
-      AND rt.created_at <  v_current_month_start
+    FROM uploaded_documents ud
+    JOIN pharmacy p ON p.id = ud.pharmacy_id
+    WHERE ud.report_date >= v_last_month_start
+      AND ud.report_date <  v_current_month_start
       AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
 
     IF v_returns_last_month > 0 THEN
@@ -226,7 +220,7 @@ BEGIN
     WHERE (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
     -- ============================================================
-    -- STAT 6: Returns Value Trend (FIXED - now uses return transaction values)
+    -- STAT 6: Returns Value Trend (FIXED - uses return_transactions aggregates)
     -- ============================================================
 
     IF p_period_type = 'yearly' THEN
@@ -238,15 +232,13 @@ BEGIN
         ),
         earnings AS (
             SELECT
-                EXTRACT(YEAR FROM rt.created_at)::INTEGER         AS year,
-                ROUND(SUM(rti.ask_value)::NUMERIC, 2)             AS value,
-                COUNT(DISTINCT rt.id)::INTEGER                    AS documents_count
-            FROM return_transaction_items rti
-            JOIN return_transactions rt ON rt.id = rti.transaction_id
+                EXTRACT(YEAR FROM rt.created_at)::INTEGER AS year,
+                ROUND(SUM(COALESCE(rt.total_returnable_value, 0) + COALESCE(rt.total_non_returnable_value, 0))::NUMERIC, 2) AS value,
+                COUNT(*)::INTEGER AS documents_count
+            FROM return_transactions rt
             JOIN pharmacy p ON p.id = rt.pharmacy_id
             WHERE rt.created_at >= v_start_date
               AND rt.created_at <= v_end_date
-              AND rti.ask_value IS NOT NULL
               AND (p_pharmacy_id     IS NULL OR rt.pharmacy_id  = p_pharmacy_id)
               AND (p_buying_group_id IS NULL OR p.created_by    = p_buying_group_id)
             GROUP BY EXTRACT(YEAR FROM rt.created_at)
@@ -276,15 +268,13 @@ BEGIN
         ),
         earnings AS (
             SELECT
-                TO_CHAR(rt.created_at, 'YYYY-MM')             AS period,
-                ROUND(SUM(rti.ask_value)::NUMERIC, 2)         AS value,
-                COUNT(DISTINCT rt.id)::INTEGER                AS documents_count
-            FROM return_transaction_items rti
-            JOIN return_transactions rt ON rt.id = rti.transaction_id
+                TO_CHAR(rt.created_at, 'YYYY-MM') AS period,
+                ROUND(SUM(COALESCE(rt.total_returnable_value, 0) + COALESCE(rt.total_non_returnable_value, 0))::NUMERIC, 2) AS value,
+                COUNT(*)::INTEGER AS documents_count
+            FROM return_transactions rt
             JOIN pharmacy p ON p.id = rt.pharmacy_id
             WHERE rt.created_at >= v_start_date
               AND rt.created_at <= v_end_date
-              AND rti.ask_value IS NOT NULL
               AND (p_pharmacy_id     IS NULL OR rt.pharmacy_id  = p_pharmacy_id)
               AND (p_buying_group_id IS NULL OR p.created_by    = p_buying_group_id)
             GROUP BY TO_CHAR(rt.created_at, 'YYYY-MM')
@@ -345,9 +335,5 @@ BEGIN
 END;
 $$;
 
--- Grant execute permissions
 GRANT EXECUTE ON FUNCTION get_admin_dashboard_stats(UUID, TEXT, INTEGER, UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION get_admin_dashboard_stats(UUID, TEXT, INTEGER, UUID) TO service_role;
-
--- Test the function
-SELECT 'Fixed admin dashboard returns value calculation - now sums return_transaction_items.ask_value instead of uploaded_documents.total_credit_amount' AS message;
