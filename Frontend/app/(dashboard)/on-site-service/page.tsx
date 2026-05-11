@@ -26,6 +26,9 @@ import {
   CalendarClock,
   ChevronLeft,
   ChevronRight,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react';
 import { formatDate } from '@/lib/utils/format';
 import {
@@ -44,6 +47,13 @@ const STATUS_FILTERS: Array<{ value: string; label: string }> = [
   { value: 'scheduled', label: 'Scheduled' },
   { value: 'completed', label: 'Completed' },
   { value: 'cancelled', label: 'Cancelled' },
+];
+
+const SORT_OPTIONS: Array<{ value: string; label: string }> = [
+  { value: 'created_at', label: 'Date Created' },
+  { value: 'requested_date', label: 'Requested Date' },
+  { value: 'scheduled_date', label: 'Scheduled Date' },
+  { value: 'status', label: 'Status' },
 ];
 
 function getStatusBadge(status: ServiceRequestStatus) {
@@ -97,8 +107,10 @@ export default function OnSiteServicePage() {
   const [items, setItems] = useState<ServiceRequestListItem[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [limit] = useState(20);
+  const [limit] = useState(10);
   const [statusFilter, setStatusFilter] = useState('');
+  const [sortBy, setSortBy] = useState('created_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -148,6 +160,8 @@ export default function OnSiteServicePage() {
         status: statusFilter || undefined,
         page,
         limit,
+        sort: sortBy,
+        order: sortOrder,
       });
       setItems(data.items);
       setTotal(data.total);
@@ -162,7 +176,7 @@ export default function OnSiteServicePage() {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, page, limit, hasViewPermission, mounted, isLoaded, isSigningOut]);
+  }, [statusFilter, page, limit, sortBy, sortOrder, hasViewPermission, mounted, isLoaded, isSigningOut]);
 
   useEffect(() => {
     if (mounted && isLoaded && hasViewPermission && !isSigningOut) {
@@ -316,7 +330,7 @@ export default function OnSiteServicePage() {
           </CardContent>
         </Card>
 
-        {/* Filters */}
+        {/* Filters and Sorting */}
         <Card>
           <CardContent className="p-4 flex flex-wrap gap-3 items-center">
             <div className="flex items-center gap-2">
@@ -334,6 +348,34 @@ export default function OnSiteServicePage() {
                 ))}
               </select>
             </div>
+            
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-medium text-muted-foreground">Sort by:</label>
+              <select
+                value={sortBy}
+                onChange={(e) => {
+                  setSortBy(e.target.value);
+                  setPage(1);
+                }}
+                className="h-9 rounded-[4px] border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#516057]"
+              >
+                {SORT_OPTIONS.map((s) => (
+                  <option key={s.value} value={s.value}>{s.label}</option>
+                ))}
+              </select>
+              <button
+                onClick={() => {
+                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                  setPage(1);
+                }}
+                className="flex items-center gap-1 px-3 py-2 text-sm border border-input rounded-[4px] bg-background hover:bg-accent transition-colors focus:outline-none focus:ring-2 focus:ring-[#516057]"
+                title={`Sort ${sortOrder === 'asc' ? 'ascending' : 'descending'}`}
+              >
+                {sortOrder === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
+                <span className="hidden sm:inline">{sortOrder === 'asc' ? 'Asc' : 'Desc'}</span>
+              </button>
+            </div>
+            
             <div className="text-xs text-muted-foreground ml-auto">
               {loading ? 'Loading...' : `${total} request${total === 1 ? '' : 's'}`}
             </div>
@@ -417,24 +459,85 @@ export default function OnSiteServicePage() {
             )}
 
             {!loading && totalPages > 1 && (
-              <div className="flex items-center justify-between px-4 py-3 border-t border-[#f3f4f6] bg-[#f5f2f1]">
-                <span className="text-sm text-[#505454] font-medium">
-                  Page {page} of {totalPages}
-                </span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                    className="p-1.5 text-[#9ca3af] hover:text-[#516057] hover:bg-[#f5f2f1] rounded transition-colors disabled:opacity-50"
+              <div className="flex items-center justify-between px-4 py-3 border-t border-[#e2e2e2] bg-white">
+                <p className="text-sm text-[#6b7280] font-medium">
+                  Page <span className="font-bold text-[#000000]">{page}</span> of <span className="font-bold text-[#000000]">{totalPages}</span> (<span className="font-bold text-[#000000]">{total}</span> total)
+                </p>
+                <div className="flex items-center gap-1">
+                  {/* Previous Button */}
+                  <button 
+                    onClick={() => setPage(p => Math.max(1, p - 1))} 
+                    disabled={page <= 1} 
+                    className="p-1.5 border border-[#e2e2e2] rounded-[4px] disabled:opacity-40 hover:bg-[#f5f2f1] transition-colors"
+                    title="Previous page"
                   >
-                    <ChevronLeft className="w-4 h-4" />
+                    <ChevronLeft className="w-4 h-4 text-[#505454]" />
                   </button>
-                  <button
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={page >= totalPages}
-                    className="p-1.5 text-[#9ca3af] hover:text-[#516057] hover:bg-[#f5f2f1] rounded transition-colors disabled:opacity-50"
+
+                  {/* Page Numbers */}
+                  {(() => {
+                    const pages = [];
+                    
+                    if (totalPages <= 7) {
+                      // Show all pages if 7 or fewer
+                      for (let i = 1; i <= totalPages; i++) {
+                        pages.push(i);
+                      }
+                    } else {
+                      // Always show first page
+                      pages.push(1);
+                      
+                      if (page <= 4) {
+                        // Show pages 1,2,3,4,5...last
+                        for (let i = 2; i <= 5; i++) {
+                          pages.push(i);
+                        }
+                        if (totalPages > 6) pages.push('...');
+                        pages.push(totalPages);
+                      } else if (page >= totalPages - 3) {
+                        // Show pages 1...last-4,last-3,last-2,last-1,last
+                        if (totalPages > 6) pages.push('...');
+                        for (let i = totalPages - 4; i <= totalPages; i++) {
+                          pages.push(i);
+                        }
+                      } else {
+                        // Show pages 1...current-1,current,current+1...last
+                        pages.push('...');
+                        for (let i = page - 1; i <= page + 1; i++) {
+                          pages.push(i);
+                        }
+                        pages.push('...');
+                        pages.push(totalPages);
+                      }
+                    }
+                    
+                    return pages.map((pageNum, index) => 
+                      pageNum === '...' ? (
+                        <span key={`ellipsis-${index}`} className="px-2 py-1.5 text-sm text-[#9ca3af]">...</span>
+                      ) : (
+                        <button
+                          key={pageNum}
+                          onClick={() => setPage(pageNum as number)}
+                          className={`px-3 py-1.5 text-sm border rounded-[4px] transition-colors ${
+                            pageNum === page
+                              ? 'border-[#516057] bg-[#516057] text-white font-semibold'
+                              : 'border-[#e2e2e2] text-[#505454] hover:bg-[#f5f2f1]'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      )
+                    );
+                  })()}
+
+                  {/* Next Button */}
+                  <button 
+                    onClick={() => setPage(p => Math.min(totalPages, p + 1))} 
+                    disabled={page >= totalPages} 
+                    className="p-1.5 border border-[#e2e2e2] rounded-[4px] disabled:opacity-40 hover:bg-[#f5f2f1] transition-colors"
+                    title="Next page"
                   >
-                    <ChevronRight className="w-4 h-4" />
+                    <ChevronRight className="w-4 h-4 text-[#505454]" />
                   </button>
                 </div>
               </div>

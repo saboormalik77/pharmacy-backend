@@ -28,6 +28,8 @@ export const pharmacyPaymentService = {
     endDate?: string;
     page?: number;
     limit?: number;
+    sort?: string;
+    order?: 'asc' | 'desc';
   }): Promise<PharmacyPaymentListResponse> {
     const response = await apiClient.get<any>('/pharmacy-payments/my-payments', params);
     if (response.status === 'success') {

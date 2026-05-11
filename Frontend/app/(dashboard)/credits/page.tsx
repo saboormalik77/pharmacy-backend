@@ -23,6 +23,11 @@ import {
   FileText,
   Banknote,
   Receipt,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils/format'
 import Link from 'next/link'
@@ -31,12 +36,23 @@ import type { PharmacyPayment, PharmacyPaymentSummary } from '@/types'
 import { DateRangeFilter } from '@/components/checks/DateRangeFilter'
 import { ChecksTable } from '@/components/checks/ChecksTable'
 
+const SORT_OPTIONS = [
+  { value: 'createdAt', label: 'Date Created' },
+  { value: 'paidAt', label: 'Date Paid' },
+  { value: 'totalCreditReceived', label: 'Credit Amount' },
+  { value: 'pharmacyPayout', label: 'Payout Amount' },
+  { value: 'status', label: 'Status' },
+  { value: 'batchName', label: 'Batch Name' },
+];
+
 export default function CreditsPage() {
   const [payments, setPayments] = useState<PharmacyPayment[]>([]);
   const [summary, setSummary] = useState<PharmacyPaymentSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('');
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
@@ -56,7 +72,9 @@ export default function CreditsPage() {
       
       const params: any = {
         page,
-        limit: 20,
+        limit: 10,
+        sort: sortBy,
+        order: sortOrder,
       };
       
       if (activeTab === 'credits') {
@@ -81,11 +99,11 @@ export default function CreditsPage() {
 
   useEffect(() => {
     loadPayments();
-  }, [filterStatus, page, activeTab, dateFilters]);
+  }, [filterStatus, page, activeTab, dateFilters, sortBy, sortOrder]);
 
   useEffect(() => {
     setPage(1);
-  }, [filterStatus, activeTab, dateFilters]);
+  }, [filterStatus, activeTab, dateFilters, sortBy, sortOrder]);
 
   const handleDateFilter = (filters: {
     dateRange?: string;
@@ -269,28 +287,53 @@ export default function CreditsPage() {
           </>
         ) : null}
 
-        {/* Filters */}
+        {/* Filters and Sorting */}
         <Card className="border border-[#e2e2e2] bg-white rounded-[4px]">
           <CardContent className="p-3">
-            <div className="flex gap-2 flex-wrap">
-              {[
-                { value: '', label: 'All', color: 'bg-gray-100 text-gray-700 border-gray-300' },
-                { value: 'pending', label: 'Pending', color: 'bg-[#ad916a]/20 text-[#6b5a3f] border-[#ad916a]/30' },
-                { value: 'processing', label: 'Processing', color: 'bg-blue-100 text-blue-700 border-blue-300' },
-                { value: 'paid', label: 'Paid', color: 'bg-[#516057]/10 text-[#516057] border-[#516057]/20' },
-                { value: 'failed', label: 'Failed', color: 'bg-red-100 text-red-700 border-red-300' },
-                { value: 'disputed', label: 'Disputed', color: 'bg-red-100 text-red-700 border-red-300' },
-              ].map((status) => (
-                <Button
-                  key={status.value}
-                  variant={filterStatus === status.value ? 'primary' : 'outline'}
-                  size="sm"
-                  className={`h-7 text-xs px-3 rounded-[4px] ${filterStatus === status.value ? status.color : 'border-[#e2e2e2] text-[#505454]'}`}
-                  onClick={() => setFilterStatus(status.value)}
+            <div className="flex flex-wrap gap-3 items-center">
+              {/* Status Filters */}
+              <div className="flex gap-2 flex-wrap">
+                {[
+                  { value: '', label: 'All', color: 'bg-gray-100 text-gray-700 border-gray-300' },
+                  { value: 'pending', label: 'Pending', color: 'bg-[#ad916a]/20 text-[#6b5a3f] border-[#ad916a]/30' },
+                  { value: 'processing', label: 'Processing', color: 'bg-blue-100 text-blue-700 border-blue-300' },
+                  { value: 'paid', label: 'Paid', color: 'bg-[#516057]/10 text-[#516057] border-[#516057]/20' },
+                  { value: 'failed', label: 'Failed', color: 'bg-red-100 text-red-700 border-red-300' },
+                  { value: 'disputed', label: 'Disputed', color: 'bg-red-100 text-red-700 border-red-300' },
+                ].map((status) => (
+                  <Button
+                    key={status.value}
+                    variant={filterStatus === status.value ? 'primary' : 'outline'}
+                    size="sm"
+                    className={`h-7 text-xs px-3 rounded-[4px] ${filterStatus === status.value ? status.color : 'border-[#e2e2e2] text-[#505454]'}`}
+                    onClick={() => setFilterStatus(status.value)}
+                  >
+                    {status.label}
+                  </Button>
+                ))}
+              </div>
+
+              {/* Sorting Controls */}
+              <div className="flex items-center gap-2 ml-auto">
+                <label className="text-xs font-medium text-[#6b7280]">Sort by:</label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="px-2 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] bg-white"
                 >
-                  {status.label}
-                </Button>
-              ))}
+                  {SORT_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+                <button
+                  onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                  className="flex items-center gap-1 px-2 py-1 text-xs border border-[#e2e2e2] rounded-[4px] bg-white hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#516057]"
+                  title={`Sort ${sortOrder === 'asc' ? 'ascending' : 'descending'}`}
+                >
+                  {sortOrder === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
+                  <span className="hidden sm:inline">{sortOrder === 'asc' ? 'Asc' : 'Desc'}</span>
+                </button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -415,27 +458,84 @@ export default function CreditsPage() {
                 {totalPages > 1 && (
                   <div className="flex items-center justify-between px-4 py-3 border-t border-[#e2e2e2] bg-white mt-4 rounded-b-[4px]">
                     <p className="text-sm text-[#6b7280] font-medium">
-                      Page {page} of {totalPages} ({total} total)
+                      Page <span className="font-bold text-[#000000]">{page}</span> of <span className="font-bold text-[#000000]">{totalPages}</span> (<span className="font-bold text-[#000000]">{total}</span> total)
                     </p>
-                    <div className="flex gap-1">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-7 text-xs border-[#e2e2e2] rounded-[4px]"
-                        disabled={page <= 1}
-                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                    <div className="flex items-center gap-1">
+                      {/* Previous Button */}
+                      <button 
+                        onClick={() => setPage(p => Math.max(1, p - 1))} 
+                        disabled={page <= 1} 
+                        className="p-1.5 border border-[#e2e2e2] rounded-[4px] disabled:opacity-40 hover:bg-[#f5f2f1] transition-colors"
+                        title="Previous page"
                       >
-                        Previous
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-7 text-xs border-[#e2e2e2] rounded-[4px]"
-                        disabled={page >= totalPages}
-                        onClick={() => setPage(p => p + 1)}
+                        <ChevronLeft className="w-4 h-4 text-[#505454]" />
+                      </button>
+
+                      {/* Page Numbers */}
+                      {(() => {
+                        const pages = [];
+                        
+                        if (totalPages <= 7) {
+                          // Show all pages if 7 or fewer
+                          for (let i = 1; i <= totalPages; i++) {
+                            pages.push(i);
+                          }
+                        } else {
+                          // Always show first page
+                          pages.push(1);
+                          
+                          if (page <= 4) {
+                            // Show pages 1,2,3,4,5...last
+                            for (let i = 2; i <= 5; i++) {
+                              pages.push(i);
+                            }
+                            if (totalPages > 6) pages.push('...');
+                            pages.push(totalPages);
+                          } else if (page >= totalPages - 3) {
+                            // Show pages 1...last-4,last-3,last-2,last-1,last
+                            if (totalPages > 6) pages.push('...');
+                            for (let i = totalPages - 4; i <= totalPages; i++) {
+                              pages.push(i);
+                            }
+                          } else {
+                            // Show pages 1...current-1,current,current+1...last
+                            pages.push('...');
+                            for (let i = page - 1; i <= page + 1; i++) {
+                              pages.push(i);
+                            }
+                            pages.push('...');
+                            pages.push(totalPages);
+                          }
+                        }
+                        
+                        return pages.map((pageNum, index) => 
+                          pageNum === '...' ? (
+                            <span key={`ellipsis-${index}`} className="px-2 py-1.5 text-sm text-[#9ca3af]">...</span>
+                          ) : (
+                            <button
+                              key={pageNum}
+                              onClick={() => setPage(pageNum as number)}
+                              className={`px-3 py-1.5 text-sm border rounded-[4px] transition-colors ${
+                                pageNum === page
+                                  ? 'border-[#516057] bg-[#516057] text-white font-semibold'
+                                  : 'border-[#e2e2e2] text-[#505454] hover:bg-[#f5f2f1]'
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          )
+                        );
+                      })()}
+
+                      {/* Next Button */}
+                      <button 
+                        onClick={() => setPage(p => Math.min(totalPages, p + 1))} 
+                        disabled={page >= totalPages} 
+                        className="p-1.5 border border-[#e2e2e2] rounded-[4px] disabled:opacity-40 hover:bg-[#f5f2f1] transition-colors"
+                        title="Next page"
                       >
-                        Next
-                      </Button>
+                        <ChevronRight className="w-4 h-4 text-[#505454]" />
+                      </button>
                     </div>
                   </div>
                 )}

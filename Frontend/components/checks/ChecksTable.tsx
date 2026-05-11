@@ -329,60 +329,85 @@ export function ChecksTable({
             {pagination && pagination.totalPages > 1 && (
               <div className="flex items-center justify-between p-4 border-t border-[#e2e2e2] bg-white">
                 <div className="text-sm text-[#6b7280]">
-                  Showing {(pagination.page - 1) * 20 + 1} to {Math.min(pagination.page * 20, pagination.total)} of {pagination.total} entries
+                  Showing {(pagination.page - 1) * 10 + 1} to {Math.min(pagination.page * 10, pagination.total)} of {pagination.total} entries
                 </div>
                 
                 <div className="flex items-center gap-1">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onPageChange?.(pagination.page - 1)}
-                    disabled={pagination.page <= 1}
-                    className="h-8 px-3 text-sm border-[#e2e2e2]"
+                  {/* Previous Button */}
+                  <button 
+                    onClick={() => onPageChange?.(pagination.page - 1)} 
+                    disabled={pagination.page <= 1} 
+                    className="p-1.5 border border-[#e2e2e2] rounded-[4px] disabled:opacity-40 hover:bg-[#f5f2f1] transition-colors"
+                    title="Previous page"
                   >
-                    <ChevronLeft className="h-4 w-4 mr-1" />
-                    Previous
-                  </Button>
-                  
-                  {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                    let pageNum;
-                    if (pagination.totalPages <= 5) {
-                      pageNum = i + 1;
-                    } else if (pagination.page <= 3) {
-                      pageNum = i + 1;
-                    } else if (pagination.page >= pagination.totalPages - 2) {
-                      pageNum = pagination.totalPages - 4 + i;
+                    <ChevronLeft className="w-4 h-4 text-[#505454]" />
+                  </button>
+
+                  {/* Page Numbers */}
+                  {(() => {
+                    const pages = [];
+                    
+                    if (pagination.totalPages <= 7) {
+                      // Show all pages if 7 or fewer
+                      for (let i = 1; i <= pagination.totalPages; i++) {
+                        pages.push(i);
+                      }
                     } else {
-                      pageNum = pagination.page - 2 + i;
+                      // Always show first page
+                      pages.push(1);
+                      
+                      if (pagination.page <= 4) {
+                        // Show pages 1,2,3,4,5...last
+                        for (let i = 2; i <= 5; i++) {
+                          pages.push(i);
+                        }
+                        if (pagination.totalPages > 6) pages.push('...');
+                        pages.push(pagination.totalPages);
+                      } else if (pagination.page >= pagination.totalPages - 3) {
+                        // Show pages 1...last-4,last-3,last-2,last-1,last
+                        if (pagination.totalPages > 6) pages.push('...');
+                        for (let i = pagination.totalPages - 4; i <= pagination.totalPages; i++) {
+                          pages.push(i);
+                        }
+                      } else {
+                        // Show pages 1...current-1,current,current+1...last
+                        pages.push('...');
+                        for (let i = pagination.page - 1; i <= pagination.page + 1; i++) {
+                          pages.push(i);
+                        }
+                        pages.push('...');
+                        pages.push(pagination.totalPages);
+                      }
                     }
                     
-                    return (
-                      <Button
-                        key={pageNum}
-                        variant={pageNum === pagination.page ? "primary" : "outline"}
-                        size="sm"
-                        onClick={() => onPageChange?.(pageNum)}
-                        className={`h-8 w-8 p-0 text-sm rounded-[4px] ${
-                          pageNum === pagination.page 
-                            ? 'bg-[#516057] text-white border-[#516057]' 
-                            : 'border-[#e2e2e2]'
-                        }`}
-                      >
-                        {pageNum}
-                      </Button>
+                    return pages.map((pageNum, index) => 
+                      pageNum === '...' ? (
+                        <span key={`ellipsis-${index}`} className="px-2 py-1.5 text-sm text-[#9ca3af]">...</span>
+                      ) : (
+                        <button
+                          key={pageNum}
+                          onClick={() => onPageChange?.(pageNum as number)}
+                          className={`px-3 py-1.5 text-sm border rounded-[4px] transition-colors ${
+                            pageNum === pagination.page
+                              ? 'border-[#516057] bg-[#516057] text-white font-semibold'
+                              : 'border-[#e2e2e2] text-[#505454] hover:bg-[#f5f2f1]'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      )
                     );
-                  })}
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onPageChange?.(pagination.page + 1)}
-                    disabled={pagination.page >= pagination.totalPages}
-                    className="h-8 px-3 text-sm border-[#e2e2e2]"
+                  })()}
+
+                  {/* Next Button */}
+                  <button 
+                    onClick={() => onPageChange?.(pagination.page + 1)} 
+                    disabled={pagination.page >= pagination.totalPages} 
+                    className="p-1.5 border border-[#e2e2e2] rounded-[4px] disabled:opacity-40 hover:bg-[#f5f2f1] transition-colors"
+                    title="Next page"
                   >
-                    Next
-                    <ChevronRight className="h-4 w-4 ml-1" />
-                  </Button>
+                    <ChevronRight className="w-4 h-4 text-[#505454]" />
+                  </button>
                 </div>
               </div>
             )}
