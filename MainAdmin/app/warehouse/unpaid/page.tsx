@@ -1181,7 +1181,7 @@ export default function UnpaidMemosPage() {
                                                 }}
                                                 className="flex-shrink-0 transition-colors"
                                                 style={{ color: 'var(--outline)' }}
-                                            >
+                                            > 
                                                 <X className="w-3.5 h-3.5" />
                                             </button>
                                         </>
