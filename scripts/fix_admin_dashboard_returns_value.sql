@@ -176,7 +176,7 @@ BEGIN
     END IF;
 
     -- ============================================================
-    -- STAT 4: Total Returns (UNCHANGED - keeps original uploaded_documents count)
+    -- STAT 4: Total Returns (FIXED - use uploaded_at instead of report_date)
     -- ============================================================
 
     SELECT COUNT(*)::INTEGER
@@ -189,16 +189,16 @@ BEGIN
     INTO v_returns_this_month
     FROM uploaded_documents ud
     JOIN pharmacy p ON p.id = ud.pharmacy_id
-    WHERE ud.report_date >= v_current_month_start
-      AND ud.report_date <  v_next_month_start
+    WHERE ud.uploaded_at >= v_current_month_start
+      AND ud.uploaded_at <  v_next_month_start
       AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
 
     SELECT COUNT(*)::INTEGER
     INTO v_returns_last_month
     FROM uploaded_documents ud
     JOIN pharmacy p ON p.id = ud.pharmacy_id
-    WHERE ud.report_date >= v_last_month_start
-      AND ud.report_date <  v_current_month_start
+    WHERE ud.uploaded_at >= v_last_month_start
+      AND ud.uploaded_at <  v_current_month_start
       AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
 
     IF v_returns_last_month > 0 THEN
