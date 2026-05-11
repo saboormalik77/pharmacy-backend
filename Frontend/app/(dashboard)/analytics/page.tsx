@@ -20,6 +20,10 @@ import {
   Calendar,
   BarChart3,
   AlertCircle,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils/format';
 import {
@@ -53,12 +57,26 @@ const STATUS_LABELS: Record<string, string> = {
   cancelled: 'Cancelled',
 };
 
+const PRODUCT_SORT_OPTIONS = [
+  { value: 'totalValue', label: 'Total Value' },
+  { value: 'totalQuantity', label: 'Quantity' },
+  { value: 'returnCount', label: 'Return Count' },
+  { value: 'productName', label: 'Product Name' },
+  { value: 'manufacturer', label: 'Manufacturer' },
+];
+
 export default function AnalyticsPage() {
   const [data, setData] = useState<PharmacyDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<'30d' | '90d' | '6m' | '1y' | 'all'>('1y');
   const [activeTab, setActiveTab] = useState<'overview' | 'financial' | 'performance' | 'products' | 'recent'>('overview');
+  
+  // Products table pagination and sorting
+  const [productsSortBy, setProductsSortBy] = useState('totalValue');
+  const [productsSortOrder, setProductsSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [productsPage, setProductsPage] = useState(1);
+  const [productsPerPage] = useState(10);
 
   const getDateParams = useCallback(() => {
     const now = new Date();
@@ -119,6 +137,70 @@ export default function AnalyticsPage() {
       );
     }
     return null;
+  };
+
+  // Products sorting and pagination logic
+  const getSortedAndPaginatedProducts = () => {
+    if (!data?.topProducts) return { paginatedProducts: [], totalPages: 0, total: 0 };
+    
+    // Sort products
+    const sortedProducts = [...data.topProducts].sort((a, b) => {
+      let aValue, bValue;
+      
+      switch (productsSortBy) {
+        case 'totalValue':
+          aValue = a.totalValue;
+          bValue = b.totalValue;
+          break;
+        case 'totalQuantity':
+          aValue = a.totalQuantity;
+          bValue = b.totalQuantity;
+          break;
+        case 'returnCount':
+          aValue = a.returnCount;
+          bValue = b.returnCount;
+          break;
+        case 'productName':
+          aValue = a.productName.toLowerCase();
+          bValue = b.productName.toLowerCase();
+          break;
+        case 'manufacturer':
+          aValue = a.manufacturer.toLowerCase();
+          bValue = b.manufacturer.toLowerCase();
+          break;
+        default:
+          aValue = a.totalValue;
+          bValue = b.totalValue;
+      }
+      
+      if (typeof aValue === 'string') {
+        return productsSortOrder === 'asc' 
+          ? aValue.localeCompare(bValue as string)
+          : (bValue as string).localeCompare(aValue);
+      }
+      
+      return productsSortOrder === 'asc' 
+        ? (aValue as number) - (bValue as number)
+        : (bValue as number) - (aValue as number);
+    });
+
+    // Paginate
+    const total = sortedProducts.length;
+    const totalPages = Math.ceil(total / productsPerPage);
+    const startIndex = (productsPage - 1) * productsPerPage;
+    const paginatedProducts = sortedProducts.slice(startIndex, startIndex + productsPerPage);
+    
+    return { paginatedProducts, totalPages, total };
+  };
+
+  const handleProductsSortChange = (newSortBy: string) => {
+    setProductsSortBy(newSortBy);
+    setProductsPage(1); // Reset to first page
+  };
+
+  const handleProductsSortOrderToggle = () => {
+    setProductsSortOrder(productsSortOrder === 'asc' ? 'desc' : 'asc');
+    setProductsPage(1); // Reset to first page
   };
 
   const tabs = [
@@ -653,68 +735,193 @@ export default function AnalyticsPage() {
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Top Returned Products</CardTitle>
-                    <CardDescription>Highest value products returned (top 10)</CardDescription>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                      <div>
+                        <CardTitle>Top Returned Products</CardTitle>
+                        <CardDescription>
+                          {(() => {
+                            const { total } = getSortedAndPaginatedProducts();
+                            return `${total} products with return data`;
+                          })()}
+                        </CardDescription>
+                      </div>
+                      
+                      {/* Sorting Controls */}
+                      <div className="flex items-center gap-2">
+                        <label className="text-xs font-medium text-muted-foreground">Sort by:</label>
+                        <select
+                          value={productsSortBy}
+                          onChange={(e) => handleProductsSortChange(e.target.value)}
+                          className="px-2 py-1 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] bg-white"
+                        >
+                          {PRODUCT_SORT_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </select>
+                        <button
+                          onClick={handleProductsSortOrderToggle}
+                          className="flex items-center gap-1 px-2 py-1 text-xs border border-[#e2e2e2] rounded-[4px] bg-white hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#516057]"
+                          title={`Sort ${productsSortOrder === 'asc' ? 'ascending' : 'descending'}`}
+                        >
+                          {productsSortOrder === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
+                          <span className="hidden sm:inline">{productsSortOrder === 'asc' ? 'Asc' : 'Desc'}</span>
+                        </button>
+                      </div>
+                    </div>
                   </CardHeader>
                   <CardContent>
-                    {data.topProducts.length > 0 ? (
-                      <>
-                        {/* Products Bar Chart */}
-                        <ResponsiveContainer width="100%" height={350}>
-                          <BarChart data={data.topProducts} layout="vertical">
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                            <XAxis
-                              type="number"
-                              stroke="#6b7280"
-                              style={{ fontSize: '12px' }}
-                              tickFormatter={(value) => `$${(value / 1000).toFixed(1)}k`}
-                            />
-                            <YAxis
-                              dataKey="productName"
-                              type="category"
-                              width={160}
-                              stroke="#6b7280"
-                              style={{ fontSize: '11px' }}
-                              tickFormatter={(v) => v.length > 22 ? v.substring(0, 22) + '...' : v}
-                            />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Bar dataKey="totalValue" fill="#516057" name="Total Value" radius={[0, 4, 4, 0]} />
-                          </BarChart>
-                        </ResponsiveContainer>
+                    {(() => {
+                      const { paginatedProducts, totalPages, total } = getSortedAndPaginatedProducts();
+                      
+                      if (total === 0) {
+                        return (
+                          <div className="h-64 flex items-center justify-center text-muted-foreground">
+                            No product data available
+                          </div>
+                        );
+                      }
 
-                        {/* Products Table */}
-                        <div className="mt-6 overflow-x-auto">
-                          <table className="w-full table-auto">
-                            <thead>
-                              <tr className="bg-[#516057] border-b-2 border-[#516057]">
-                                <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Product</th>
-                                <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">NDC</th>
-                                <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Manufacturer</th>
-                                <th className="text-right px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Qty</th>
-                                <th className="text-right px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Value</th>
-                                <th className="text-right px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Returns</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {data.topProducts.map((product, idx) => (
-                                <tr key={idx} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]/40'} hover:bg-[#f5f2f1] transition-colors border-b border-[#f3f4f6]`}>
-                                  <td className="px-4 py-3"><span className="text-sm text-[#000000] font-medium">{product.productName}</span></td>
-                                  <td className="px-4 py-3"><span className="text-sm text-[#505454] font-mono">{product.ndc}</span></td>
-                                  <td className="px-4 py-3"><span className="text-sm text-[#505454]">{product.manufacturer}</span></td>
-                                  <td className="px-4 py-3 text-right"><span className="text-sm text-[#000000]">{product.totalQuantity}</span></td>
-                                  <td className="px-4 py-3 text-right"><span className="text-sm text-[#000000] font-semibold text-[#516057]">{formatCurrency(product.totalValue)}</span></td>
-                                  <td className="px-4 py-3 text-right"><span className="text-sm text-[#000000]">{product.returnCount}</span></td>
+                      return (
+                        <>
+                          {/* Products Bar Chart - Show top 10 for chart */}
+                          <ResponsiveContainer width="100%" height={350}>
+                            <BarChart data={data.topProducts.slice(0, 10)} layout="vertical">
+                              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                              <XAxis
+                                type="number"
+                                stroke="#6b7280"
+                                style={{ fontSize: '12px' }}
+                                tickFormatter={(value) => `$${(value / 1000).toFixed(1)}k`}
+                              />
+                              <YAxis
+                                dataKey="productName"
+                                type="category"
+                                width={160}
+                                stroke="#6b7280"
+                                style={{ fontSize: '11px' }}
+                                tickFormatter={(v) => v.length > 22 ? v.substring(0, 22) + '...' : v}
+                              />
+                              <Tooltip content={<CustomTooltip />} />
+                              <Bar dataKey="totalValue" fill="#516057" name="Total Value" radius={[0, 4, 4, 0]} />
+                            </BarChart>
+                          </ResponsiveContainer>
+
+                          {/* Products Table */}
+                          <div className="mt-6 overflow-x-auto">
+                            <table className="w-full table-auto">
+                              <thead>
+                                <tr className="bg-[#516057] border-b-2 border-[#516057]">
+                                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Product</th>
+                                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">NDC</th>
+                                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Manufacturer</th>
+                                  <th className="text-right px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Qty</th>
+                                  <th className="text-right px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Value</th>
+                                  <th className="text-right px-4 py-3.5 text-xs font-semibold text-white uppercase tracking-wider">Returns</th>
                                 </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="h-64 flex items-center justify-center text-muted-foreground">
-                        No product data available
-                      </div>
-                    )}
+                              </thead>
+                              <tbody>
+                                {paginatedProducts.map((product, idx) => (
+                                  <tr key={`${product.ndc}-${idx}`} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]/40'} hover:bg-[#f5f2f1] transition-colors border-b border-[#f3f4f6]`}>
+                                    <td className="px-4 py-3"><span className="text-sm text-[#000000] font-medium">{product.productName}</span></td>
+                                    <td className="px-4 py-3"><span className="text-sm text-[#505454] font-mono">{product.ndc}</span></td>
+                                    <td className="px-4 py-3"><span className="text-sm text-[#505454]">{product.manufacturer}</span></td>
+                                    <td className="px-4 py-3 text-right"><span className="text-sm text-[#000000]">{product.totalQuantity}</span></td>
+                                    <td className="px-4 py-3 text-right"><span className="text-sm text-[#000000] font-semibold text-[#516057]">{formatCurrency(product.totalValue)}</span></td>
+                                    <td className="px-4 py-3 text-right"><span className="text-sm text-[#000000]">{product.returnCount}</span></td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+
+                          {/* Pagination */}
+                          {totalPages > 1 && (
+                            <div className="flex items-center justify-between mt-4 px-4 py-3 border-t border-[#e2e2e2] bg-white rounded-b-[4px]">
+                              <p className="text-sm text-[#6b7280] font-medium">
+                                Page <span className="font-bold text-[#000000]">{productsPage}</span> of <span className="font-bold text-[#000000]">{totalPages}</span> (<span className="font-bold text-[#000000]">{total}</span> total)
+                              </p>
+                              <div className="flex items-center gap-1">
+                                {/* Previous Button */}
+                                <button 
+                                  onClick={() => setProductsPage(p => Math.max(1, p - 1))} 
+                                  disabled={productsPage <= 1} 
+                                  className="p-1.5 border border-[#e2e2e2] rounded-[4px] disabled:opacity-40 hover:bg-[#f5f2f1] transition-colors"
+                                  title="Previous page"
+                                >
+                                  <ChevronLeft className="w-4 h-4 text-[#505454]" />
+                                </button>
+
+                                {/* Page Numbers */}
+                                {(() => {
+                                  const pages = [];
+                                  
+                                  if (totalPages <= 7) {
+                                    // Show all pages if 7 or fewer
+                                    for (let i = 1; i <= totalPages; i++) {
+                                      pages.push(i);
+                                    }
+                                  } else {
+                                    // Always show first page
+                                    pages.push(1);
+                                    
+                                    if (productsPage <= 4) {
+                                      // Show pages 1,2,3,4,5...last
+                                      for (let i = 2; i <= 5; i++) {
+                                        pages.push(i);
+                                      }
+                                      if (totalPages > 6) pages.push('...');
+                                      pages.push(totalPages);
+                                    } else if (productsPage >= totalPages - 3) {
+                                      // Show pages 1...last-4,last-3,last-2,last-1,last
+                                      if (totalPages > 6) pages.push('...');
+                                      for (let i = totalPages - 4; i <= totalPages; i++) {
+                                        pages.push(i);
+                                      }
+                                    } else {
+                                      // Show pages 1...current-1,current,current+1...last
+                                      pages.push('...');
+                                      for (let i = productsPage - 1; i <= productsPage + 1; i++) {
+                                        pages.push(i);
+                                      }
+                                      pages.push('...');
+                                      pages.push(totalPages);
+                                    }
+                                  }
+                                  
+                                  return pages.map((pageNum, index) => 
+                                    pageNum === '...' ? (
+                                      <span key={`ellipsis-${index}`} className="px-2 py-1.5 text-sm text-[#9ca3af]">...</span>
+                                    ) : (
+                                      <button
+                                        key={pageNum}
+                                        onClick={() => setProductsPage(pageNum as number)}
+                                        className={`px-3 py-1.5 text-sm border rounded-[4px] transition-colors ${
+                                          pageNum === productsPage
+                                            ? 'border-[#516057] bg-[#516057] text-white font-semibold'
+                                            : 'border-[#e2e2e2] text-[#505454] hover:bg-[#f5f2f1]'
+                                        }`}
+                                      >
+                                        {pageNum}
+                                      </button>
+                                    )
+                                  );
+                                })()}
+
+                                {/* Next Button */}
+                                <button 
+                                  onClick={() => setProductsPage(p => Math.min(totalPages, p + 1))} 
+                                  disabled={productsPage >= totalPages} 
+                                  className="p-1.5 border border-[#e2e2e2] rounded-[4px] disabled:opacity-40 hover:bg-[#f5f2f1] transition-colors"
+                                  title="Next page"
+                                >
+                                  <ChevronRight className="w-4 h-4 text-[#505454]" />
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
                   </CardContent>
                 </Card>
               </div>

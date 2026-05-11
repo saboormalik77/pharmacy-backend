@@ -18,11 +18,24 @@ import {
   FileText,
   Banknote,
   Receipt,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils/format'
 import Link from 'next/link'
 import { pharmacyPaymentService } from '@/lib/api/services'
 import type { PharmacyPayment, PharmacyPaymentSummary } from '@/types'
+
+const SORT_OPTIONS = [
+  { value: 'createdAt', label: 'Date Created' },
+  { value: 'paidAt', label: 'Date Paid' },
+  { value: 'batchName', label: 'Batch Name' },
+  { value: 'totalCreditReceived', label: 'Credit Amount' },
+  { value: 'pharmacyPayout', label: 'Payout Amount' },
+  { value: 'status', label: 'Status' },
+];
 
 export default function CreditStatementPage() {
   const [payments, setPayments] = useState<PharmacyPayment[]>([]);
@@ -31,6 +44,8 @@ export default function CreditStatementPage() {
   const [error, setError] = useState<string | null>(null);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
@@ -39,9 +54,14 @@ export default function CreditStatementPage() {
     try {
       setLoading(true);
       setError(null);
-      const params: Record<string, any> = { page, limit: 25 };
-      if (startDate) params.start_date = startDate;
-      if (endDate) params.end_date = endDate;
+      const params: Record<string, any> = { 
+        page, 
+        limit: 10,
+        sort: sortBy,
+        order: sortOrder,
+      };
+      if (startDate) params.startDate = startDate;
+      if (endDate) params.endDate = endDate;
       const result = await pharmacyPaymentService.getMyPayments(params);
       setPayments(result.data);
       setSummary(result.summary);
@@ -56,7 +76,7 @@ export default function CreditStatementPage() {
 
   useEffect(() => {
     loadPayments();
-  }, [page]);
+  }, [page, sortBy, sortOrder]);
 
   // Reset page and reload when date filters change
   const applyDateFilter = () => {
@@ -69,6 +89,17 @@ export default function CreditStatementPage() {
     setEndDate('');
     setPage(1);
     // loadPayments will be triggered by page change effect
+  };
+
+  // Reset page when sorting changes
+  const handleSortChange = (newSortBy: string) => {
+    setSortBy(newSortBy);
+    setPage(1);
+  };
+
+  const handleSortOrderToggle = () => {
+    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    setPage(1);
   };
 
   const getStatusColor = (status: string) => {
@@ -184,10 +215,11 @@ export default function CreditStatementPage() {
           </div>
         )}
 
-        {/* Date Filters */}
+        {/* Filters and Sorting */}
         <Card className="border-2 border-[#e2e2e2] bg-[#f5f2f1]">
           <CardContent className="p-3">
             <div className="flex flex-wrap items-end gap-3">
+              {/* Date Filters */}
               <div>
                 <label className="block text-xs font-medium text-[#505454] mb-1">Start Date</label>
                 <Input
@@ -215,6 +247,30 @@ export default function CreditStatementPage() {
                   Clear
                 </Button>
               )}
+
+              {/* Sorting Controls */}
+              <div className="flex items-end gap-2 ml-auto">
+                <div>
+                  <label className="block text-xs font-medium text-[#505454] mb-1">Sort by</label>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => handleSortChange(e.target.value)}
+                    className="h-8 px-2 text-xs border border-[#e2e2e2] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-[#516057] bg-white"
+                  >
+                    {SORT_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  onClick={handleSortOrderToggle}
+                  className="flex items-center gap-1 h-8 px-2 text-xs border border-[#e2e2e2] rounded-[4px] bg-white hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#516057]"
+                  title={`Sort ${sortOrder === 'asc' ? 'ascending' : 'descending'}`}
+                >
+                  {sortOrder === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
+                  <span className="hidden sm:inline">{sortOrder === 'asc' ? 'Asc' : 'Desc'}</span>
+                </button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -280,7 +336,7 @@ export default function CreditStatementPage() {
                           key={payment.id}
                           className={`border-b border-[#f3f4f6] ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f5f2f1]/40'} hover:bg-[#f5f2f1] transition-colors`}
                         >
-                          <td className="px-4 py-3 text-sm text-[#9ca3af]">{(page - 1) * 25 + idx + 1}</td>
+                          <td className="px-4 py-3 text-sm text-[#9ca3af]">{(page - 1) * 10 + idx + 1}</td>
                           <td className="px-4 py-3 text-sm">{formatDate(payment.createdAt)}</td>
                           <td className="px-4 py-3 text-sm font-medium">{payment.batchName || '—'}</td>
                           <td className="px-4 py-3 text-sm">{payment.batchMonth || '—'}</td>
@@ -316,16 +372,13 @@ export default function CreditStatementPage() {
                     <tfoot className="bg-[#f5f2f1] border-t-2 border-[#e2e2e2]">
                       <tr className="font-bold">
                         <td className="px-4 py-3 text-sm" colSpan={4}>Statement Total</td>
-                        <td className="px-4 py-3 text-sm text-right text-[#505454]">
+                        <td className="px-4 py-3 text-sm text-right text-[#516057]">
                           {formatCurrency(payments.reduce((s, p) => s + p.totalCreditReceived, 0))}
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-amber-800">
                           {formatCurrency(payments.reduce((s, p) => s + p.companyFee, 0))}
                         </td>
-                        <td className="px-4 py-3 text-sm text-right text-[#505454]">
-                          {formatCurrency(payments.reduce((s, p) => s + p.gpoShare, 0))}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-right text-[#505454]">
+                        <td className="px-4 py-3 text-sm text-right text-[#516057]">
                           {formatCurrency(payments.reduce((s, p) => s + p.pharmacyPayout, 0))}
                         </td>
                         <td className="px-4 py-3 text-sm" colSpan={4}></td>
@@ -336,29 +389,86 @@ export default function CreditStatementPage() {
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-between mt-4">
-                    <p className="text-xs text-[#6b7280]">
-                      Page {page} of {totalPages} ({total} total records)
+                  <div className="flex items-center justify-between mt-4 px-4 py-3 border-t border-[#e2e2e2] bg-white rounded-b-[4px]">
+                    <p className="text-sm text-[#6b7280] font-medium">
+                      Page <span className="font-bold text-[#000000]">{page}</span> of <span className="font-bold text-[#000000]">{totalPages}</span> (<span className="font-bold text-[#000000]">{total}</span> total)
                     </p>
-                    <div className="flex gap-1">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-7 text-xs"
-                        disabled={page <= 1}
-                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                    <div className="flex items-center gap-1">
+                      {/* Previous Button */}
+                      <button 
+                        onClick={() => setPage(p => Math.max(1, p - 1))} 
+                        disabled={page <= 1} 
+                        className="p-1.5 border border-[#e2e2e2] rounded-[4px] disabled:opacity-40 hover:bg-[#f5f2f1] transition-colors"
+                        title="Previous page"
                       >
-                        Previous
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-7 text-xs"
-                        disabled={page >= totalPages}
-                        onClick={() => setPage(p => p + 1)}
+                        <ChevronLeft className="w-4 h-4 text-[#505454]" />
+                      </button>
+
+                      {/* Page Numbers */}
+                      {(() => {
+                        const pages = [];
+                        
+                        if (totalPages <= 7) {
+                          // Show all pages if 7 or fewer
+                          for (let i = 1; i <= totalPages; i++) {
+                            pages.push(i);
+                          }
+                        } else {
+                          // Always show first page
+                          pages.push(1);
+                          
+                          if (page <= 4) {
+                            // Show pages 1,2,3,4,5...last
+                            for (let i = 2; i <= 5; i++) {
+                              pages.push(i);
+                            }
+                            if (totalPages > 6) pages.push('...');
+                            pages.push(totalPages);
+                          } else if (page >= totalPages - 3) {
+                            // Show pages 1...last-4,last-3,last-2,last-1,last
+                            if (totalPages > 6) pages.push('...');
+                            for (let i = totalPages - 4; i <= totalPages; i++) {
+                              pages.push(i);
+                            }
+                          } else {
+                            // Show pages 1...current-1,current,current+1...last
+                            pages.push('...');
+                            for (let i = page - 1; i <= page + 1; i++) {
+                              pages.push(i);
+                            }
+                            pages.push('...');
+                            pages.push(totalPages);
+                          }
+                        }
+                        
+                        return pages.map((pageNum, index) => 
+                          pageNum === '...' ? (
+                            <span key={`ellipsis-${index}`} className="px-2 py-1.5 text-sm text-[#9ca3af]">...</span>
+                          ) : (
+                            <button
+                              key={pageNum}
+                              onClick={() => setPage(pageNum as number)}
+                              className={`px-3 py-1.5 text-sm border rounded-[4px] transition-colors ${
+                                pageNum === page
+                                  ? 'border-[#516057] bg-[#516057] text-white font-semibold'
+                                  : 'border-[#e2e2e2] text-[#505454] hover:bg-[#f5f2f1]'
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          )
+                        );
+                      })()}
+
+                      {/* Next Button */}
+                      <button 
+                        onClick={() => setPage(p => Math.min(totalPages, p + 1))} 
+                        disabled={page >= totalPages} 
+                        className="p-1.5 border border-[#e2e2e2] rounded-[4px] disabled:opacity-40 hover:bg-[#f5f2f1] transition-colors"
+                        title="Next page"
                       >
-                        Next
-                      </Button>
+                        <ChevronRight className="w-4 h-4 text-[#505454]" />
+                      </button>
                     </div>
                   </div>
                 )}

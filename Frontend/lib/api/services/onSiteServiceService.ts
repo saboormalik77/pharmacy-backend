@@ -90,6 +90,8 @@ export interface ListFilters {
   status?: string;
   page?: number;
   limit?: number;
+  sort?: string;
+  order?: 'asc' | 'desc';
 }
 
 const buildQuery = (params: Record<string, string | number | undefined>): string => {
@@ -107,6 +109,8 @@ export const onSiteServiceService = {
         status: filters.status,
         page: filters.page,
         limit: filters.limit,
+        sort: filters.sort,
+        order: filters.order,
       });
       const res = await apiClient.get<ServiceRequestListResponse>(`/on-site-service${qs}`);
       if (res.status !== 'success' || !res.data) {
