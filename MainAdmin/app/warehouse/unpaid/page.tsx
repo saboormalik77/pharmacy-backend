@@ -1183,7 +1183,7 @@ export default function UnpaidMemosPage() {
                                                 style={{ color: 'var(--outline)' }}
                                             > 
                                                 <X className="w-3.5 h-3.5" />
-                                            </button>
+                                            </button> 
                                         </>
                                     ) : (
                                         <>
