@@ -1090,7 +1090,7 @@ export default function ReturnDetailPage() {
                     <div className="flex items-center justify-between px-4 py-3 border-b border-[#e2e2e2]">
                         <h2 className="text-sm font-semibold text-[#000000] flex items-center gap-2">
                             <Package className="w-4 h-4 text-[#6b7280]" />
-                            Products ({itemsSummary?.totalItems ?? items.length})
+                            Products ({totalItemsCount})
                         </h2>
                         {canDoAction(tx, 'add_items') && (
                             <button
