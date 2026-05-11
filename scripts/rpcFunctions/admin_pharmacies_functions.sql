@@ -178,8 +178,8 @@ BEGIN
             p.last_visit_date AS "lastVisitDate",
             p.next_visit_date AS "nextVisitDate",
             p.created_at AS "createdAt",
-            -- Count total returns (documents) for this pharmacy
-            (SELECT COUNT(*)::INTEGER FROM uploaded_documents ud WHERE ud.pharmacy_id = p.id) AS "totalReturns"
+            -- Count total returns (transactions) for this pharmacy
+            (SELECT COUNT(*)::INTEGER FROM return_transactions rt WHERE rt.pharmacy_id = p.id) AS "totalReturns"
         FROM pharmacy p
         WHERE 
             -- Status filter
@@ -314,8 +314,8 @@ BEGIN
         'daysBetweenVisits', p.days_between_visits,
         'lastVisitDate', p.last_visit_date,
         'nextVisitDate', p.next_visit_date,
-        'totalReturns', (SELECT COUNT(*)::INTEGER FROM uploaded_documents ud WHERE ud.pharmacy_id = p.id),
-        'totalReturnsValue', (SELECT COALESCE(SUM(total_credit_amount), 0)::NUMERIC FROM uploaded_documents ud WHERE ud.pharmacy_id = p.id AND total_credit_amount IS NOT NULL),
+        'totalReturns', (SELECT COUNT(*)::INTEGER FROM return_transactions rt WHERE rt.pharmacy_id = p.id),
+        'totalReturnsValue', (SELECT COALESCE(SUM(total_returnable_value), 0)::NUMERIC FROM return_transactions rt WHERE rt.pharmacy_id = p.id),
         'physicalAddress', p.physical_address,
         'billingAddress', p.billing_address,
         'secondaryWholesaler', p.secondary_wholesaler,
