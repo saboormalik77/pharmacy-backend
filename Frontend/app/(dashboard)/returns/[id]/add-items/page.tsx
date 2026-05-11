@@ -77,7 +77,7 @@ const DEA_SCHEDULE_OPTIONS = [
 ];
 
 /** Session product list tab: items per page */
-const PRODUCTS_LIST_PAGE_SIZE = 6;
+const PRODUCTS_LIST_PAGE_SIZE = 10;
 
 const EMPTY_FORM = {
     ndc: '', ndc10: '', gtin: '', proprietaryName: '', genericName: '',
