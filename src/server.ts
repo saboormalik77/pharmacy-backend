@@ -76,8 +76,21 @@ if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
   dotenv.config({ path: '.env.local' });
 }
 
+// Startup diagnostics for Railway deployment debugging
+console.log('🚀 Starting server...');
+console.log('📝 Environment check:');
+console.log('- NODE_ENV:', process.env.NODE_ENV);
+console.log('- PORT:', process.env.PORT || 'not set');
+console.log('- SUPABASE_URL:', process.env.SUPABASE_URL ? 'configured' : 'MISSING');
+console.log('- SUPABASE_ANON_KEY:', process.env.SUPABASE_ANON_KEY ? 'configured' : 'MISSING');
+console.log('- SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'configured' : 'MISSING');
+
 // Initialize Firebase Admin SDK for push notifications
-initializeFirebase();
+try {
+  initializeFirebase();
+} catch (error: any) {
+  console.error('❌ Firebase initialization error:', error.message);
+}
 
 
 
@@ -287,7 +300,8 @@ export default app;
 
 // Only start server if not running on Vercels
 if (process.env.VERCEL !== '1') {
-  app.listen(Number(PORT), '0.0.0.0', () => {
+  try {
+    app.listen(Number(PORT), '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
     console.log(`Swagger documentation available at http://localhost:${PORT}/api-docs`);
     
@@ -334,5 +348,22 @@ if (process.env.VERCEL !== '1') {
     
     console.log('🔔 Wine cellar cron scheduled to run daily at 2:00 AM');
   });
+  } catch (error: any) {
+    console.error('❌ Server startup failed:', error.message);
+    console.error('Stack trace:', error.stack);
+    process.exit(1);
+  }
 }
+
+// Handle uncaught errors
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error.message);
+  console.error('Stack trace:', error.stack);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
 
