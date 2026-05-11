@@ -63,7 +63,8 @@
     "stripe": "^20.0.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",
-    "ws": "^8.18.3"
+    "ws": "^8.18.3",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -82,7 +83,6 @@
     "nodemon": "^3.0.2",
     "supabase": "^2.80.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3",
-    "xlsx": "^0.18.5"
+    "typescript": "^5.3.3"
   }
 }
