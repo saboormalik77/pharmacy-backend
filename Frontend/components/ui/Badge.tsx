@@ -13,8 +13,8 @@ export function Badge({ className, variant = 'default', ...props }: BadgeProps) 
         {
           // Default: Primary sage color
           'bg-[#516057]/10 text-[#516057]': variant === 'default',
-          // Success: Sage green with background
-          'bg-[#516057]/10 text-[#516057]': variant === 'success',
+          // Success: Green
+          'bg-green-100 text-green-800': variant === 'success',
           // Warning: Tan/gold
           'bg-[#ad916a]/20 text-[#6b5a3f]': variant === 'warning',
           // Error: Red
