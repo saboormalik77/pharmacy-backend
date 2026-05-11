@@ -436,3 +436,47 @@ export const generateReminderEmail = async (
   handleRpcError(data, error, 'Failed to generate reminder email');
   return data.data as RAReminderTemplate;
 };
+
+// ============================================================
+// RA Tracking Grouped by Return
+// ============================================================
+
+export interface ReturnWithMemosRA {
+  returnId: string;
+  licensePlate: string;
+  pharmacyId: string;
+  pharmacyName: string;
+  status: string;
+  returnCreatedAt: string;
+  totalMemos: number;
+  totalItems: number;
+  totalAskValue: number;
+  memos: any[];
+}
+
+export const listRATrackingGroupedByReturn = async (filters: {
+  raStatus?: string;
+  destination?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+}): Promise<{ data: ReturnWithMemosRA[]; pagination: any; summary: RATrackingSummary }> => {
+  const sb = ensureAdmin();
+  const { data, error } = await sb.rpc('ra_list_tracking_grouped_by_return', {
+    p_ra_status: filters.raStatus || null,
+    p_destination: filters.destination || null,
+    p_date_from: filters.dateFrom || null,
+    p_date_to: filters.dateTo || null,
+    p_search: filters.search || null,
+    p_page: filters.page || 1,
+    p_limit: filters.limit || 10,
+  });
+  handleRpcError(data, error, 'Failed to list RA tracking grouped by return');
+  return {
+    data: data.data as ReturnWithMemosRA[],
+    pagination: data.pagination,
+    summary: data.summary as RATrackingSummary,
+  };
+};

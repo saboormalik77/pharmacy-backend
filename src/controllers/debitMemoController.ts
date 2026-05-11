@@ -32,6 +32,30 @@ export const listDebitMemosHandler = catchAsync(
 );
 
 // ============================================================
+// GET /api/admin/debit-memos/grouped-by-return — List debit memos grouped by return
+// ============================================================
+export const listDebitMemosGroupedByReturnHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { destination, payment_status, search, page, limit } =
+      req.query as Record<string, string>;
+
+    const result = await batchService.listDebitMemosGroupedByReturn({
+      destination,
+      paymentStatus: payment_status,
+      search,
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: result.data,
+      pagination: result.pagination,
+    });
+  }
+);
+
+// ============================================================
 // GET /api/admin/debit-memos/:id — Get debit memo with items
 // ============================================================
 export const getDebitMemoHandler = catchAsync(

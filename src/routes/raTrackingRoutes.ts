@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authenticateAdmin, requirePermission } from '../middleware/adminAuth';
 import {
   raTrackingDashboardHandler,
+  raTrackingGroupedByReturnHandler,
   raOutstandingHandler,
   raOverdueHandler,
 } from '../controllers/raController';
@@ -53,6 +54,42 @@ router.use(requirePermission('warehouse'));
  *         description: RA tracking dashboard with summary counts
  */
 router.get('/', raTrackingDashboardHandler);
+
+/**
+ * @swagger
+ * /api/admin/ra-tracking/grouped-by-return:
+ *   get:
+ *     summary: RA tracking grouped by return transaction
+ *     tags: [RA Tracking]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: ra_status
+ *         schema: { type: string, enum: [pending, requested, received, shipped, overdue] }
+ *       - in: query
+ *         name: destination
+ *         schema: { type: string }
+ *       - in: query
+ *         name: date_from
+ *         schema: { type: string, format: date }
+ *       - in: query
+ *         name: date_to
+ *         schema: { type: string, format: date }
+ *       - in: query
+ *         name: search
+ *         schema: { type: string }
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 10 }
+ *     responses:
+ *       200:
+ *         description: RA tracking data grouped by return transaction
+ */
+router.get('/grouped-by-return', raTrackingGroupedByReturnHandler);
 
 /**
  * @swagger

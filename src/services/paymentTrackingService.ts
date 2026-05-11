@@ -281,3 +281,82 @@ export const manufacturerPaymentSummary = async (
   handleRpcError(data, error, 'Failed to get manufacturer payment summary');
   return { data: data.data as ManufacturerPaymentSummary[], pagination: data.pagination };
 };
+
+// ============================================================
+// List unpaid memos grouped by return
+// ============================================================
+
+export interface ReturnWithUnpaidMemos {
+  returnId: string;
+  licensePlate: string;
+  pharmacyId: string;
+  pharmacyName: string;
+  status: string;
+  returnCreatedAt: string;
+  totalMemos: number;
+  totalItems: number;
+  totalAskValue: number;
+  totalOutstanding: number;
+  memos: UnpaidMemo[];
+}
+
+export const listUnpaidGroupedByReturn = async (filters: {
+  manufacturer?: string;
+  destination?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+}): Promise<{ data: ReturnWithUnpaidMemos[]; pagination: any; summary: UnpaidSummary }> => {
+  const sb = ensureAdmin();
+  const { data, error } = await sb.rpc('payment_list_unpaid_grouped_by_return', {
+    p_manufacturer: filters.manufacturer || null,
+    p_destination: filters.destination || null,
+    p_search: filters.search || null,
+    p_page: filters.page || 1,
+    p_limit: filters.limit || 10,
+  });
+  handleRpcError(data, error, 'Failed to list unpaid debit memos grouped by return');
+  return {
+    data: data.data as ReturnWithUnpaidMemos[],
+    pagination: data.pagination,
+    summary: data.summary as UnpaidSummary,
+  };
+};
+
+// ============================================================
+// List paid memos grouped by return
+// ============================================================
+
+export interface ReturnWithPaidMemos {
+  returnId: string;
+  licensePlate: string;
+  pharmacyId: string;
+  pharmacyName: string;
+  status: string;
+  returnCreatedAt: string;
+  totalMemos: number;
+  totalItems: number;
+  totalAskValue: number;
+  totalReceived: number;
+  memos: any[];
+}
+
+export const listPaidGroupedByReturn = async (filters: {
+  destination?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+}): Promise<{ data: ReturnWithPaidMemos[]; pagination: any }> => {
+  const sb = ensureAdmin();
+  const { data, error } = await sb.rpc('payment_list_paid_grouped_by_return', {
+    p_destination: filters.destination || null,
+    p_search: filters.search || null,
+    p_page: filters.page || 1,
+    p_limit: filters.limit || 10,
+  });
+  handleRpcError(data, error, 'Failed to list paid debit memos grouped by return');
+  return {
+    data: data.data as ReturnWithPaidMemos[],
+    pagination: data.pagination,
+  };
+};

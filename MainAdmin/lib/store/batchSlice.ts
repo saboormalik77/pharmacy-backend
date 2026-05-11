@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { ReturnBatch, ReturnTransaction, DebitMemo, DebitMemoItem } from '@/lib/types';
+import { ReturnBatch, ReturnTransaction, DebitMemo, DebitMemoItem, ReturnWithMemos } from '@/lib/types';
 
 // ── Workflow state type ───────────────────────────────────────
 
@@ -20,6 +20,8 @@ export interface BatchState {
     batchMemos: DebitMemo[];
     debitMemos: DebitMemo[];
     memoPagination: { page: number; limit: number; total: number; totalPages: number } | null;
+    groupedReturns: ReturnWithMemos[];
+    groupedPagination: { page: number; limit: number; total: number; totalPages: number } | null;
     currentMemo: DebitMemo | null;
     memoItems: DebitMemoItem[];
     workflowState: BatchWorkflowState | null;
@@ -36,6 +38,8 @@ const initialState: BatchState = {
     batchMemos: [],
     debitMemos: [],
     memoPagination: null,
+    groupedReturns: [],
+    groupedPagination: null,
     currentMemo: null,
     memoItems: [],
     workflowState: null,
@@ -379,6 +383,28 @@ export const updateDebitMemo = createAsyncThunk<
     }
 });
 
+export const fetchDebitMemosGroupedByReturn = createAsyncThunk<
+    { data: ReturnWithMemos[]; pagination: any },
+    { destination?: string; paymentStatus?: string; search?: string; page?: number; limit?: number } | void,
+    { rejectValue: string }
+>('batch/fetchDebitMemosGroupedByReturn', async (params, { rejectWithValue }) => {
+    try {
+        const { apiClient } = await import('@/lib/api/apiClient');
+        const q: Record<string, string> = {};
+        if (params?.destination) q.destination = params.destination;
+        if (params?.paymentStatus) q.payment_status = params.paymentStatus;
+        if (params?.search) q.search = params.search;
+        if (params?.page) q.page = String(params.page);
+        if (params?.limit) q.limit = String(params.limit);
+        const res = await apiClient.get<{ status: string; data: ReturnWithMemos[]; pagination: any }>(
+            '/admin/debit-memos/grouped-by-return', true, q
+        );
+        return { data: res.data, pagination: res.pagination };
+    } catch (err: any) {
+        return rejectWithValue(err?.message || 'Failed to fetch debit memos grouped by return');
+    }
+});
+
 // ── Slice ─────────────────────────────────────────────────────
 
 const batchSlice = createSlice({
@@ -429,6 +455,10 @@ const batchSlice = createSlice({
             .addCase(fetchDebitMemos.pending, (state) => { state.isLoading = true; state.error = null; })
             .addCase(fetchDebitMemos.fulfilled, (state, action) => { state.isLoading = false; state.debitMemos = action.payload.data; state.memoPagination = action.payload.pagination; })
             .addCase(fetchDebitMemos.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; })
+
+            .addCase(fetchDebitMemosGroupedByReturn.pending, (state) => { state.isLoading = true; state.error = null; })
+            .addCase(fetchDebitMemosGroupedByReturn.fulfilled, (state, action) => { state.isLoading = false; state.groupedReturns = action.payload.data; state.groupedPagination = action.payload.pagination; })
+            .addCase(fetchDebitMemosGroupedByReturn.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; })
 
             // Detail fetch: do not toggle isLoading — that replaces the whole debit memo list UI and resets scroll.
             .addCase(fetchDebitMemoDetail.pending, (state) => { state.error = null; })

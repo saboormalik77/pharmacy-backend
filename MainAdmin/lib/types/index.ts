@@ -1261,6 +1261,10 @@ export interface ReturnBatch {
 export interface DebitMemo {
     id: string;
     batchId: string;
+    /** Batch name for the return batch this memo belongs to (joined from return_batches). */
+    batchName?: string | null;
+    /** Batch month (YYYY-MM-01) for the return batch this memo belongs to. */
+    batchMonth?: string | null;
     pharmacyId: string;
     pharmacyName: string;
     memoNumber: string;
@@ -1289,6 +1293,19 @@ export interface DebitMemo {
     shipmentGroupId: string | null;
     createdAt: string;
     updatedAt: string;
+}
+
+export interface ReturnWithMemos {
+    returnId: string;
+    licensePlate: string;
+    pharmacyId: string;
+    pharmacyName: string;
+    status: string;
+    returnCreatedAt: string;
+    totalMemos: number;
+    totalItems: number;
+    totalAskValue: number;
+    memos: DebitMemo[];
 }
 
 export interface DebitMemoItem {

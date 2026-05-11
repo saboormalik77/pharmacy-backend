@@ -306,3 +306,51 @@ export const manufacturerPaymentsHandler = catchAsync(
     });
   }
 );
+
+// ============================================================
+// GET /api/admin/debit-memos/unpaid/grouped-by-return — List unpaid memos grouped by return
+// ============================================================
+export const listUnpaidGroupedByReturnHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { manufacturer, destination, search, page, limit } =
+      req.query as Record<string, string>;
+
+    const result = await paymentTrackingService.listUnpaidGroupedByReturn({
+      manufacturer,
+      destination,
+      search,
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: result.data,
+      pagination: result.pagination,
+      summary: result.summary,
+    });
+  }
+);
+
+// ============================================================
+// GET /api/admin/debit-memos/paid/grouped-by-return — List paid memos grouped by return
+// ============================================================
+export const listPaidGroupedByReturnHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { destination, search, page, limit } =
+      req.query as Record<string, string>;
+
+    const result = await paymentTrackingService.listPaidGroupedByReturn({
+      destination,
+      search,
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: result.data,
+      pagination: result.pagination,
+    });
+  }
+);

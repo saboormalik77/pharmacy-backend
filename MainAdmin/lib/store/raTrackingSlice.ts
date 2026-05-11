@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { DebitMemo, RARequest, RAEmailTemplate, RATrackingSummary } from '@/lib/types';
+import { DebitMemo, RARequest, RAEmailTemplate, RATrackingSummary, ReturnWithMemos } from '@/lib/types';
 
 // ── State ─────────────────────────────────────────────────────
 
@@ -7,6 +7,8 @@ export interface RATrackingState {
     memos: DebitMemo[];
     pagination: { page: number; limit: number; total: number; totalPages: number } | null;
     summary: RATrackingSummary | null;
+    groupedReturns: ReturnWithMemos[];
+    groupedPagination: { page: number; limit: number; total: number; totalPages: number } | null;
     emailPreview: RAEmailTemplate | null;
     isLoading: boolean;
     isActionLoading: boolean;
@@ -18,6 +20,8 @@ const initialState: RATrackingState = {
     memos: [],
     pagination: null,
     summary: null,
+    groupedReturns: [],
+    groupedPagination: null,
     emailPreview: null,
     isLoading: false,
     isActionLoading: false,
@@ -48,6 +52,30 @@ export const fetchRATracking = createAsyncThunk<
         return { data: res.data, pagination: res.pagination, summary: res.summary };
     } catch (err: any) {
         return rejectWithValue(err?.message || 'Failed to fetch RA tracking');
+    }
+});
+
+export const fetchRATrackingGroupedByReturn = createAsyncThunk<
+    { data: ReturnWithMemos[]; pagination: any; summary: RATrackingSummary },
+    { raStatus?: string; destination?: string; dateFrom?: string; dateTo?: string; search?: string; page?: number; limit?: number } | void,
+    { rejectValue: string }
+>('raTracking/fetchGroupedByReturn', async (params, { rejectWithValue }) => {
+    try {
+        const { apiClient } = await import('@/lib/api/apiClient');
+        const q: Record<string, string> = {};
+        if (params?.raStatus) q.ra_status = params.raStatus;
+        if (params?.destination) q.destination = params.destination;
+        if (params?.dateFrom) q.date_from = params.dateFrom;
+        if (params?.dateTo) q.date_to = params.dateTo;
+        if (params?.search) q.search = params.search;
+        if (params?.page) q.page = String(params.page);
+        if (params?.limit) q.limit = String(params.limit);
+        const res = await apiClient.get<{ status: string; data: ReturnWithMemos[]; pagination: any; summary: RATrackingSummary }>(
+            '/admin/ra-tracking/grouped-by-return', true, q
+        );
+        return { data: res.data, pagination: res.pagination, summary: res.summary };
+    } catch (err: any) {
+        return rejectWithValue(err?.message || 'Failed to fetch RA tracking grouped by return');
     }
 });
 
@@ -250,6 +278,15 @@ const raTrackingSlice = createSlice({
                 state.summary = action.payload.summary;
             })
             .addCase(fetchRATracking.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; })
+
+            .addCase(fetchRATrackingGroupedByReturn.pending, (state) => { state.isLoading = true; state.error = null; })
+            .addCase(fetchRATrackingGroupedByReturn.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.groupedReturns = action.payload.data;
+                state.groupedPagination = action.payload.pagination;
+                state.summary = action.payload.summary;
+            })
+            .addCase(fetchRATrackingGroupedByReturn.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; })
 
             .addCase(fetchOutstandingRAs.pending, (state) => { state.isLoading = true; state.error = null; })
             .addCase(fetchOutstandingRAs.fulfilled, (state, action) => { state.isLoading = false; state.memos = action.payload.data; state.pagination = action.payload.pagination; })

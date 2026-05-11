@@ -335,6 +335,33 @@ export const raTrackingDashboardHandler = catchAsync(
 );
 
 // ============================================================
+// GET /api/admin/ra-tracking/grouped-by-return
+// ============================================================
+export const raTrackingGroupedByReturnHandler = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { ra_status, destination, date_from, date_to, search, page, limit } =
+      req.query as Record<string, string>;
+
+    const result = await raService.listRATrackingGroupedByReturn({
+      raStatus: ra_status,
+      destination,
+      dateFrom: date_from,
+      dateTo: date_to,
+      search,
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: result.data,
+      pagination: result.pagination,
+      summary: result.summary,
+    });
+  }
+);
+
+// ============================================================
 // GET /api/admin/ra-tracking/outstanding
 // ============================================================
 export const raOutstandingHandler = catchAsync(

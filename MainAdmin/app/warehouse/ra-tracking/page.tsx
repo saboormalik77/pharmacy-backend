@@ -15,7 +15,7 @@ import { formatDate } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { useDebounce } from '@/lib/hooks/useDebounce';
 import {
-    fetchRATracking, sendRARequest, receiveRA, resendRA, shipMemo,
+    fetchRATracking, fetchRATrackingGroupedByReturn, sendRARequest, receiveRA, resendRA, shipMemo,
     createDebitMemoFedexShipment, scheduleDebitMemoPickup,
     fetchEmailPreview, clearError, clearEmailPreview,
 } from '@/lib/store/raTrackingSlice';
@@ -24,7 +24,7 @@ import {
     createGroupFedexShipment, fetchShippedShipmentGroups, scheduleShipmentGroupPickup,
     clearError as clearGroupError,
 } from '@/lib/store/shipmentGroupSlice';
-import { DebitMemo, RAEmailTemplate } from '@/lib/types';
+import { DebitMemo, RAEmailTemplate, ReturnWithMemos } from '@/lib/types';
 
 // ── Helpers ────────────────────────────────────────────────────
 
@@ -90,7 +90,7 @@ type ModalType = null | 'request' | 'receive' | 'resend' | 'ship' | 'preview';
 
 export default function RATrackingPage() {
     const dispatch = useAppDispatch();
-    const { memos, pagination, summary, emailPreview, isLoading, isActionLoading, isPreviewLoading, error } =
+    const { memos, pagination, summary, groupedReturns, groupedPagination, emailPreview, isLoading, isActionLoading, isPreviewLoading, error } =
         useAppSelector(s => s.raTracking);
     const {
         availableMemos,
@@ -356,7 +356,7 @@ export default function RATrackingPage() {
     }, []);
 
     const loadData = useCallback(() => {
-        dispatch(fetchRATracking({
+        dispatch(fetchRATrackingGroupedByReturn({
             raStatus: raStatus || undefined,
             destination: destination || undefined,
             dateFrom: dateFrom || undefined,
@@ -586,7 +586,7 @@ export default function RATrackingPage() {
           )
         : [];
 
-    const totalPages = pagination?.totalPages || 1;
+    const totalPages = groupedPagination?.totalPages || 1;
 
     // ── Row action buttons based on RA status ──────────────────
 
@@ -737,135 +737,180 @@ export default function RATrackingPage() {
                 </div>
             </div>
 
-            {/* Table */}
+            {/* Table grouped by return */}
             <div className="rounded-[4px] shadow overflow-hidden border" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                 {isLoading ? (
                     <div className="flex items-center justify-center py-12">
                         <Loader2 className="w-6 h-6 animate-spin text-primary-500" />
                     </div>
-                ) : memos.length === 0 ? (
+                ) : groupedReturns.length === 0 ? (
                     <div className="text-center py-12" style={{ color: 'var(--on-surface-variant)' }}>
                         <MailCheck className="w-10 h-10 mx-auto mb-2" style={{ color: 'var(--outline-variant)' }} />
                         <p className="text-sm font-medium">No RA records found</p>
                         <p className="text-xs mt-1">RA tracking entries appear after batches are closed and debit memos generated.</p>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full text-sm border" style={{ borderColor: 'var(--outline)' }}>
-                            <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
-                                <tr className="bg-[var(--surface-container-low)]">
-                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Memo #</th>
-                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Pharmacy</th>
-                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Dest.</th>
-                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Labeler</th>
-                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Ask</th>
-                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Requested</th>
-                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Tickler</th>
-                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">RA #</th>
-                                    <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Status</th>
-                                    <th className="px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
-                                {memos.map(memo => {
-                                    const eff = effectiveRaStatus(memo);
-                                    const sb = getRAStatusBadge(eff);
-                                    const overdue = isOverdue(memo);
-                                    return (
-                                        <tr
-                                            key={memo.id}
-                                            className="transition-colors hover:bg-[var(--surface-container)]"
-                                            style={{ backgroundColor: overdue ? 'var(--error-container)' : undefined, borderColor: 'var(--outline-variant)' }}
-                                        >
-                                            <td className="px-3 py-3 text-sm font-semibold whitespace-nowrap" style={{ color: 'var(--primary)' }}>{memo.memoNumber}</td>
-                                            <td className="px-3 py-3 text-sm max-w-[130px] truncate" style={{ color: 'var(--on-surface)' }}>{memo.pharmacyName}</td>
-                                            <td className="px-3 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>{memo.destination || '—'}</td>
-                                            <td className="px-3 py-3 text-sm max-w-[120px] truncate" style={{ color: 'var(--on-surface-variant)' }}>{memo.labelerName || '—'}</td>
-                                            <td className="px-3 py-3 text-sm font-medium whitespace-nowrap">{formatCurrency(memo.totalAskValue)}</td>
-                                            <td className="px-3 py-3 text-sm whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>
-                                                {memo.raRequestedAt ? formatDate(memo.raRequestedAt) : '—'}
-                                            </td>
-                                            <td className="px-3 py-3 text-sm whitespace-nowrap">
-                                                {memo.ticklerDate ? (
-                                                    <span style={{ color: overdue ? 'var(--error)' : 'var(--on-surface-variant)', fontWeight: overdue ? 600 : 400 }}>
-                                                        {formatDate(memo.ticklerDate)}{overdue && ' ⚠'}
-                                                    </span>
-                                                ) : '—'}
-                                            </td>
-                                            <td className="px-3 py-3 text-sm font-medium whitespace-nowrap" style={{ color: 'var(--foreground)' }}>{memo.raNumber || '—'}</td>
-                                            <td className="px-3 py-3">
-                                                <Badge variant={sb.variant}><span className="text-[10px]">{sb.label}</span></Badge>
-                                            </td>
-                                            <td className="px-3 py-3 text-right">
-                                                <div className="flex items-center justify-end gap-1">
-                                                    {eff === 'pending' && (
-                                                        <button
-                                                            onClick={e => { e.stopPropagation(); openRequest(memo); }}
-                                                            title="Send RA Request"
-                                                            className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-primary-50 text-primary-700 hover:bg-primary-100 border border-primary-200 transition-colors whitespace-nowrap cursor-pointer"
-                                                        >
-                                                            <Mail className="w-3 h-3" /> Request
-                                                        </button>
-                                                    )}
-                                                    {(eff === 'requested' || eff === 'overdue') && (
-                                                        <>
-                                                            <button
-                                                                onClick={e => { e.stopPropagation(); openResend(memo); }}
-                                                                title="Resend Reminder"
-                                                            className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium border transition-colors whitespace-nowrap hover:opacity-95 cursor-pointer"
-                                                            style={{ backgroundColor: 'var(--tertiary)', color: 'var(--on-tertiary)', borderColor: 'var(--outline-variant)' }}
-                                                            >
-                                                                <RefreshCw className="w-3 h-3" /> Resend
-                                                            </button>
-                                                            <button
-                                                                onClick={e => { e.stopPropagation(); openReceive(memo); }}
-                                                                title="Record RA Received"
-                                                            className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium border transition-colors whitespace-nowrap hover:bg-primary-50/40 cursor-pointer"
-                                                            style={{ backgroundColor: 'var(--secondary-container)', color: 'var(--on-secondary-container)', borderColor: 'var(--outline-variant)' }}
-                                                            >
-                                                                <CheckCircle className="w-3 h-3" /> Record
-                                                            </button>
-                                                        </>
-                                                    )}
-                                                    {eff === 'received' && (
-                                                        <button
-                                                            onClick={e => { e.stopPropagation(); openShip(memo); }}
-                                                            title="Record Shipment"
-                                                        className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium border transition-colors whitespace-nowrap hover:opacity-95 cursor-pointer"
-                                                        style={{ backgroundColor: 'var(--tertiary)', color: 'var(--on-tertiary)', borderColor: 'var(--outline-variant)' }}
-                                                        >
-                                                            <Truck className="w-3 h-3" /> Ship
-                                                        </button>
-                                                    )}
-                                                    {eff === 'shipped' && memo.outboundTracking && (
-                                                        <button
-                                                            onClick={e => { e.stopPropagation(); printDebitMemoLabel(memo.id); }}
-                                                            disabled={printLabelLoading === memo.id}
-                                                            title="Print shipping label"
-                                                        className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium border transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary-50/40 cursor-pointer"
-                                                        style={{ backgroundColor: 'var(--secondary-container)', color: 'var(--on-secondary-container)', borderColor: 'var(--outline-variant)' }}
-                                                        >
-                                                            {printLabelLoading === memo.id
-                                                                ? <Loader2 className="w-3 h-3 animate-spin" />
-                                                                : <Printer className="w-3 h-3" />
-                                                            }
-                                                            Print Labels
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
+                    <div>
+                        {groupedReturns.map((returnGroup) => (
+                            <div
+                                key={returnGroup.returnId}
+                                className="border-b last:border-b-0"
+                                style={{ borderColor: 'var(--outline-variant)' }}
+                            >
+                                {/* Return group header */}
+                                <div
+                                    className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 border-b"
+                                    style={{
+                                        backgroundColor: 'var(--surface-container-low)',
+                                        borderColor: 'var(--outline-variant)',
+                                    }}
+                                >
+                                    <div className="flex items-center gap-1.5 min-w-0">
+                                        <Package className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--primary)' }} />
+                                        <span className="text-[10px] uppercase tracking-wide font-semibold" style={{ color: 'var(--on-surface-variant)' }}>
+                                            Return
+                                        </span>
+                                        <span className="text-xs font-semibold truncate" style={{ color: 'var(--primary)' }}>
+                                            {returnGroup.licensePlate}
+                                        </span>
+                                        <span className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>
+                                            · {returnGroup.pharmacyName}
+                                        </span>
+                                        <span className="text-[10px]" style={{ color: 'var(--outline)' }}>
+                                            · {formatDate(returnGroup.returnCreatedAt)}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-3 ml-auto text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>
+                                        <span>
+                                            {returnGroup.totalMemos} memo{returnGroup.totalMemos === 1 ? '' : 's'}
+                                        </span>
+                                        <span>·</span>
+                                        <span>{returnGroup.totalItems} items</span>
+                                        <span>·</span>
+                                        <span className="font-medium" style={{ color: 'var(--foreground)' }}>
+                                            {formatCurrency(returnGroup.totalAskValue)} ask
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Memo table within return group */}
+                                <div className="overflow-x-auto">
+                                    <table className="min-w-full text-sm">
+                                        <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline-variant)' }}>
+                                            <tr>
+                                                <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Memo #</th>
+                                                <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Dest.</th>
+                                                <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Labeler</th>
+                                                <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Ask</th>
+                                                <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Requested</th>
+                                                <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Tickler</th>
+                                                <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">RA #</th>
+                                                <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Status</th>
+                                                <th className="px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--on-surface-variant)] whitespace-nowrap">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
+                                            {returnGroup.memos.map(memo => {
+                                                const eff = effectiveRaStatus(memo);
+                                                const sb = getRAStatusBadge(eff);
+                                                const overdue = isOverdue(memo);
+                                                return (
+                                                    <tr
+                                                        key={memo.id}
+                                                        className="transition-colors hover:bg-[var(--surface-container)]"
+                                                        style={{ backgroundColor: overdue ? 'var(--error-container)' : undefined, borderColor: 'var(--outline-variant)' }}
+                                                    >
+                                                        <td className="px-3 py-2 text-xs font-semibold whitespace-nowrap" style={{ color: 'var(--primary)' }}>{memo.memoNumber}</td>
+                                                        <td className="px-3 py-2 text-xs whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>{memo.destination || '—'}</td>
+                                                        <td className="px-3 py-2 text-xs max-w-[120px] truncate" style={{ color: 'var(--on-surface-variant)' }}>{memo.labelerName || '—'}</td>
+                                                        <td className="px-3 py-2 text-xs font-medium whitespace-nowrap">{formatCurrency(memo.totalAskValue)}</td>
+                                                        <td className="px-3 py-2 text-xs whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }}>
+                                                            {memo.raRequestedAt ? formatDate(memo.raRequestedAt) : '—'}
+                                                        </td>
+                                                        <td className="px-3 py-2 text-xs whitespace-nowrap">
+                                                            {memo.ticklerDate ? (
+                                                                <span style={{ color: overdue ? 'var(--error)' : 'var(--on-surface-variant)', fontWeight: overdue ? 600 : 400 }}>
+                                                                    {formatDate(memo.ticklerDate)}{overdue && ' ⚠'}
+                                                                </span>
+                                                            ) : '—'}
+                                                        </td>
+                                                        <td className="px-3 py-2 text-xs font-medium whitespace-nowrap" style={{ color: 'var(--foreground)' }}>{memo.raNumber || '—'}</td>
+                                                        <td className="px-3 py-2">
+                                                            <Badge variant={sb.variant}><span className="text-[10px]">{sb.label}</span></Badge>
+                                                        </td>
+                                                        <td className="px-3 py-2 text-right">
+                                                            <div className="flex items-center justify-end gap-1">
+                                                                {eff === 'pending' && (
+                                                                    <button
+                                                                        onClick={e => { e.stopPropagation(); openRequest(memo); }}
+                                                                        title="Send RA Request"
+                                                                        className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium bg-primary-50 text-primary-700 hover:bg-primary-100 border border-primary-200 transition-colors whitespace-nowrap cursor-pointer"
+                                                                    >
+                                                                        <Mail className="w-3 h-3" /> Request
+                                                                    </button>
+                                                                )}
+                                                                {(eff === 'requested' || eff === 'overdue') && (
+                                                                    <>
+                                                                        <button
+                                                                            onClick={e => { e.stopPropagation(); openResend(memo); }}
+                                                                            title="Resend Reminder"
+                                                                        className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium border transition-colors whitespace-nowrap hover:opacity-95 cursor-pointer"
+                                                                        style={{ backgroundColor: 'var(--tertiary)', color: 'var(--on-tertiary)', borderColor: 'var(--outline-variant)' }}
+                                                                        >
+                                                                            <RefreshCw className="w-3 h-3" /> Resend
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={e => { e.stopPropagation(); openReceive(memo); }}
+                                                                            title="Record RA Received"
+                                                                        className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium border transition-colors whitespace-nowrap hover:bg-primary-50/40 cursor-pointer"
+                                                                        style={{ backgroundColor: 'var(--secondary-container)', color: 'var(--on-secondary-container)', borderColor: 'var(--outline-variant)' }}
+                                                                        >
+                                                                            <CheckCircle className="w-3 h-3" /> Record
+                                                                        </button>
+                                                                    </>
+                                                                )}
+                                                                {eff === 'received' && (
+                                                                    <button
+                                                                        onClick={e => { e.stopPropagation(); openShip(memo); }}
+                                                                        title="Record Shipment"
+                                                                    className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium border transition-colors whitespace-nowrap hover:opacity-95 cursor-pointer"
+                                                                    style={{ backgroundColor: 'var(--tertiary)', color: 'var(--on-tertiary)', borderColor: 'var(--outline-variant)' }}
+                                                                    >
+                                                                        <Truck className="w-3 h-3" /> Ship
+                                                                    </button>
+                                                                )}
+                                                                {eff === 'shipped' && memo.outboundTracking && (
+                                                                    <button
+                                                                        onClick={e => { e.stopPropagation(); printDebitMemoLabel(memo.id); }}
+                                                                        disabled={printLabelLoading === memo.id}
+                                                                        title="Print shipping label"
+                                                                    className="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-medium border transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary-50/40 cursor-pointer"
+                                                                    style={{ backgroundColor: 'var(--secondary-container)', color: 'var(--on-secondary-container)', borderColor: 'var(--outline-variant)' }}
+                                                                    >
+                                                                        {printLabelLoading === memo.id
+                                                                            ? <Loader2 className="w-3 h-3 animate-spin" />
+                                                                            : <Printer className="w-3 h-3" />
+                                                                        }
+                                                                        Print Labels
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 )}
 
                 {totalPages > 1 && (
                     <div className="flex items-center justify-between px-4 py-2 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                         <p className="text-xs" style={{ color: 'var(--on-surface-variant)' }}>
-                            Page {currentPage} of {totalPages}{pagination?.total != null && ` · ${pagination.total} memos`}
+                            Page {currentPage} of {totalPages}{groupedPagination?.total != null && ` · ${groupedPagination.total} returns`}
                         </p>
                         <div className="flex items-center gap-1.5">
                             <Button variant="outline" size="sm" disabled={currentPage <= 1} onClick={() => setCurrentPage(p => p - 1)}>

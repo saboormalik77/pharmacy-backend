@@ -357,6 +357,38 @@ export const listDebitMemos = async (filters: {
   return { data: data.data as DebitMemo[], pagination: data.pagination };
 };
 
+export interface ReturnWithMemos {
+  returnId: string;
+  licensePlate: string;
+  pharmacyId: string;
+  pharmacyName: string;
+  status: string;
+  returnCreatedAt: string;
+  totalMemos: number;
+  totalItems: number;
+  totalAskValue: number;
+  memos: DebitMemo[];
+}
+
+export const listDebitMemosGroupedByReturn = async (filters: {
+  destination?: string;
+  paymentStatus?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+}): Promise<{ data: ReturnWithMemos[]; pagination: any }> => {
+  const sb = ensureAdmin();
+  const { data, error } = await sb.rpc('list_debit_memos_grouped_by_return', {
+    p_destination: filters.destination || null,
+    p_payment_status: filters.paymentStatus || null,
+    p_search: filters.search || null,
+    p_page: filters.page || 1,
+    p_limit: filters.limit || 10,
+  });
+  handleRpcError(data, error, 'Failed to list debit memos grouped by return');
+  return { data: data.data as ReturnWithMemos[], pagination: data.pagination };
+};
+
 export const getDebitMemo = async (
   memoId: string
 ): Promise<{ memo: DebitMemo; items: DebitMemoItem[] }> => {

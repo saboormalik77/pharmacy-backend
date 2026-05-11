@@ -3,6 +3,7 @@ import { authenticateAdmin, requirePermission } from '../middleware/adminAuth';
 import { upload } from '../middleware/upload';
 import {
   listDebitMemosHandler,
+  listDebitMemosGroupedByReturnHandler,
   getDebitMemoHandler,
   updateDebitMemoHandler,
   downloadDebitMemoPdfHandler,
@@ -21,6 +22,8 @@ import {
 } from '../controllers/raController';
 import {
   listUnpaidHandler,
+  listUnpaidGroupedByReturnHandler,
+  listPaidGroupedByReturnHandler,
   recordPaymentHandler,
   updatePaymentHandler,
   sendReminderHandler,
@@ -74,6 +77,63 @@ router.get('/unpaid', listUnpaidHandler);
 
 /**
  * @swagger
+ * /api/admin/debit-memos/unpaid/grouped-by-return:
+ *   get:
+ *     summary: List unpaid debit memos grouped by return transaction
+ *     tags: [Payment Tracking]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: manufacturer
+ *         schema: { type: string }
+ *       - in: query
+ *         name: destination
+ *         schema: { type: string }
+ *       - in: query
+ *         name: search
+ *         schema: { type: string }
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 10 }
+ *     responses:
+ *       200:
+ *         description: Unpaid memos grouped by return transaction
+ */
+router.get('/unpaid/grouped-by-return', listUnpaidGroupedByReturnHandler);
+
+/**
+ * @swagger
+ * /api/admin/debit-memos/paid/grouped-by-return:
+ *   get:
+ *     summary: List paid debit memos grouped by return transaction
+ *     tags: [Payment Tracking]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: destination
+ *         schema: { type: string }
+ *       - in: query
+ *         name: search
+ *         schema: { type: string }
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 10 }
+ *     responses:
+ *       200:
+ *         description: Paid memos grouped by return transaction
+ */
+router.get('/paid/grouped-by-return', listPaidGroupedByReturnHandler);
+
+/**
+ * @swagger
  * /api/admin/debit-memos:
  *   get:
  *     summary: List debit memos with filters
@@ -108,6 +168,38 @@ router.get('/unpaid', listUnpaidHandler);
  *         description: Paginated list of debit memos
  */
 router.get('/', listDebitMemosHandler);
+
+/**
+ * @swagger
+ * /api/admin/debit-memos/grouped-by-return:
+ *   get:
+ *     summary: List debit memos grouped by return transaction (return-based pagination)
+ *     tags: [Debit Memos]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: destination
+ *         schema: { type: string }
+ *       - in: query
+ *         name: payment_status
+ *         schema: { type: string, enum: [pending, partial, paid, disputed] }
+ *       - in: query
+ *         name: search
+ *         schema: { type: string }
+ *         description: Search by memo number, labeler name, RA number, license plate, or pharmacy name
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 10 }
+ *         description: Number of returns per page
+ *     responses:
+ *       200:
+ *         description: Returns with their nested debit memos, paginated by return
+ */
+router.get('/grouped-by-return', listDebitMemosGroupedByReturnHandler);
 
 /**
  * @swagger

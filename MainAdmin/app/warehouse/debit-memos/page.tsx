@@ -7,7 +7,7 @@ import Link from 'next/link';
 import {
     Search, Loader2, ChevronLeft, ChevronRight, X, Edit,
     Receipt, FileText, DollarSign, Truck, AlertCircle,
-    ChevronDown, ChevronUp, Save, Download,
+    ChevronDown, ChevronUp, Save, Download, Package,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -17,10 +17,10 @@ import { cookieUtils } from '@/lib/utils/cookies';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { useDebounce } from '@/lib/hooks/useDebounce';
 import {
-    fetchDebitMemos, fetchDebitMemoDetail, updateDebitMemo,
+    fetchDebitMemosGroupedByReturn, fetchDebitMemoDetail, updateDebitMemo,
     clearError, clearCurrentMemo,
 } from '@/lib/store/batchSlice';
-import { DebitMemo, DebitMemoItem } from '@/lib/types';
+import { DebitMemo, DebitMemoItem, ReturnWithMemos } from '@/lib/types';
 
 const PAYMENT_OPTIONS = [
     { value: '', label: 'All Payments' },
@@ -41,6 +41,7 @@ const DESTINATION_OPTIONS = [
 function formatCurrency(v: number) {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(v);
 }
+
 
 function getPaymentBadge(s: string): { variant: 'success' | 'warning' | 'danger' | 'default' } {
     switch ((s || '').toLowerCase()) {
@@ -97,7 +98,7 @@ export default function DebitMemosPage() {
     const searchParams = useSearchParams();
     const highlightId = searchParams.get('highlight');
 
-    const { debitMemos, memoPagination, currentMemo, memoItems, isLoading, isActionLoading, error } =
+    const { groupedReturns, groupedPagination, currentMemo, memoItems, isLoading, isActionLoading, error } =
         useAppSelector(s => s.batch);
 
     const [search, setSearch] = useState('');
@@ -118,7 +119,7 @@ export default function DebitMemosPage() {
     }, []);
 
     const loadMemos = useCallback(() => {
-        dispatch(fetchDebitMemos({
+        dispatch(fetchDebitMemosGroupedByReturn({
             search: debouncedSearch || undefined,
             destination: destination || undefined,
             paymentStatus: paymentStatus || undefined,
@@ -131,11 +132,11 @@ export default function DebitMemosPage() {
     useEffect(() => { if (error) { addToast(error, 'error'); dispatch(clearError()); } }, [error, addToast, dispatch]);
 
     useEffect(() => {
-        if (highlightId && debitMemos.length > 0) {
+        if (highlightId && groupedReturns.length > 0) {
             setExpandedMemoId(highlightId);
             dispatch(fetchDebitMemoDetail(highlightId));
         }
-    }, [highlightId, debitMemos, dispatch]);
+    }, [highlightId, groupedReturns, dispatch]);
 
     /** Keep the opened row in view when expanding and again after detail loads (taller panel). */
     useLayoutEffect(() => {
@@ -237,7 +238,7 @@ export default function DebitMemosPage() {
         }
     };
 
-    const totalPages = memoPagination?.totalPages || 1;
+    const totalPages = groupedPagination?.totalPages || 1;
 
     return (
         <PermissionGate permission="warehouse">
@@ -296,7 +297,7 @@ export default function DebitMemosPage() {
                     <div className="flex items-center justify-center py-14">
                         <Loader2 className="w-6 h-6 animate-spin text-primary-500" />
                     </div>
-                ) : debitMemos.length === 0 ? (
+                ) : groupedReturns.length === 0 ? (
                     <div className="text-center py-14" style={{ color: 'var(--on-surface-variant)' }}>
                         <Receipt className="w-10 h-10 mx-auto mb-2" style={{ color: 'var(--outline-variant)' }} />
                         <p className="text-sm font-medium">No debit memos found</p>
@@ -304,7 +305,49 @@ export default function DebitMemosPage() {
                     </div>
                 ) : (
                     <div>
-                        {debitMemos.map(memo => {
+                        {groupedReturns.map((returnGroup) => (
+                            <div
+                                key={returnGroup.returnId}
+                                className="border-b last:border-b-0"
+                                style={{ borderColor: 'var(--outline-variant)' }}
+                            >
+                                {/* Return group header */}
+                                <div
+                                    className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 border-b"
+                                    style={{
+                                        backgroundColor: 'var(--surface-container-low)',
+                                        borderColor: 'var(--outline-variant)',
+                                    }}
+                                >
+                                    <div className="flex items-center gap-1.5 min-w-0">
+                                        <Package className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--primary)' }} />
+                                        <span className="text-[10px] uppercase tracking-wide font-semibold" style={{ color: 'var(--on-surface-variant)' }}>
+                                            Return
+                                        </span>
+                                        <span className="text-xs font-semibold truncate" style={{ color: 'var(--primary)' }}>
+                                            {returnGroup.licensePlate}
+                                        </span>
+                                        <span className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>
+                                            · {returnGroup.pharmacyName}
+                                        </span>
+                                        <span className="text-[10px]" style={{ color: 'var(--outline)' }}>
+                                            · {formatDate(returnGroup.returnCreatedAt)}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-3 ml-auto text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>
+                                        <span>
+                                            {returnGroup.totalMemos} memo{returnGroup.totalMemos === 1 ? '' : 's'}
+                                        </span>
+                                        <span>·</span>
+                                        <span>{returnGroup.totalItems} items</span>
+                                        <span>·</span>
+                                        <span className="font-medium" style={{ color: 'var(--foreground)' }}>
+                                            {formatCurrency(returnGroup.totalAskValue)} ask
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {returnGroup.memos.map(memo => {
                             const isExpanded = expandedMemoId === memo.id;
                             const pb = getPaymentBadge(memo.paymentStatus);
 
@@ -625,7 +668,9 @@ export default function DebitMemosPage() {
                                     )}
                                 </div>
                             );
-                        })}
+                                })}
+                            </div>
+                        ))}
                     </div>
                 )}
 
@@ -633,7 +678,7 @@ export default function DebitMemosPage() {
                 {totalPages > 1 && (
                     <div className="flex items-center justify-between px-3 py-2 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                         <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>
-                            Page {currentPage} of {totalPages}{memoPagination?.total != null && ` · ${memoPagination.total} memos`}
+                            Page {currentPage} of {totalPages}{groupedPagination?.total != null && ` · ${groupedPagination.total} returns`}
                         </p>
                         <div className="flex items-center gap-1.5">
                             <button

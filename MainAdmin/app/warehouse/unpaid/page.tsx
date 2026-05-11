@@ -6,17 +6,18 @@ import {
     Search, Loader2, ChevronLeft, ChevronRight, X,
     DollarSign, Clock, AlertCircle, Send, CreditCard,
     TrendingUp, TrendingDown, BarChart3, CheckCircle, FileText, Upload,
-    Sparkles, AlertTriangle, Info,
+    Sparkles, AlertTriangle, Info, Package,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { ToastContainer, Toast } from '@/components/ui/Toast';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { useDebounce } from '@/lib/hooks/useDebounce';
 import {
-    fetchUnpaidMemos, recordPayment, updatePayment, sendPaymentReminder,
-    fetchAskVsReceived, fetchManufacturerSummary, fetchPaidMemos, clearError, clearAiAnalysis,
+    fetchUnpaidMemos, fetchUnpaidGroupedByReturn, recordPayment, updatePayment, sendPaymentReminder,
+    fetchAskVsReceived, fetchManufacturerSummary, fetchPaidMemos, fetchPaidGroupedByReturn, clearError, clearAiAnalysis,
 } from '@/lib/store/paymentTrackingSlice';
-import { DebitMemo, AskVsReceivedRow, ManufacturerPaymentSummary } from '@/lib/types';
+import { DebitMemo, AskVsReceivedRow, ManufacturerPaymentSummary, ReturnWithMemos } from '@/lib/types';
+import { formatDate } from '@/lib/utils';
 import { apiClient } from '@/lib/api/apiClient';
 
 const PAGE_SIZE = 10;
@@ -52,7 +53,9 @@ export default function UnpaidMemosPage() {
     const dispatch = useAppDispatch();
     const {
         unpaidMemos, unpaidPagination, unpaidSummary,
+        unpaidGroupedReturns, unpaidGroupedPagination,
         paidMemos, paidPagination,
+        paidGroupedReturns, paidGroupedPagination,
         askVsReceived, askVsReceivedTotals, askVsReceivedPagination,
         manufacturerSummary, manufacturerPagination,
         isLoading, isActionLoading, error,
@@ -101,10 +104,10 @@ export default function UnpaidMemosPage() {
         setToasts(prev => prev.filter(t => t.id !== id));
     }, []);
 
-    // Fetch unpaid on tab + filter changes
+    // Fetch unpaid on tab + filter changes (grouped by return)
     useEffect(() => {
         if (activeTab === 'unpaid') {
-            dispatch(fetchUnpaidMemos({
+            dispatch(fetchUnpaidGroupedByReturn({
                 search: debouncedSearch || undefined,
                 destination: destination || undefined,
                 page,
@@ -113,10 +116,10 @@ export default function UnpaidMemosPage() {
         }
     }, [dispatch, activeTab, debouncedSearch, destination, page]);
 
-    // Fetch paid memos
+    // Fetch paid memos (grouped by return)
     useEffect(() => {
         if (activeTab === 'paid') {
-            dispatch(fetchPaidMemos({
+            dispatch(fetchPaidGroupedByReturn({
                 search: debouncedPaidSearch || undefined,
                 destination: paidDestination || undefined,
                 page: paidPage,
@@ -444,99 +447,142 @@ export default function UnpaidMemosPage() {
                         </select>
                     </div>
 
-                    {/* Table */}
+                    {/* Table grouped by return */}
                     <div className="rounded-[4px] border overflow-hidden" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         {isLoading ? (
                             <div className="flex items-center justify-center py-14">
                                 <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
                             </div>
-                        ) : unpaidMemos.length === 0 ? (
+                        ) : unpaidGroupedReturns.length === 0 ? (
                             <div className="text-center py-14 text-gray-500">
                                 <DollarSign className="w-10 h-10 mx-auto mb-2 text-gray-300" />
                                 <p className="text-sm font-medium">No unpaid memos found</p>
                                 <p className="text-xs mt-0.5">All debit memos have been paid.</p>
                             </div>
                         ) : (
-                            <div className="overflow-x-auto">
-                                <table className="w-full border" style={{ borderColor: 'var(--outline)' }}>
-                                    <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
-                                        <tr className="bg-[var(--surface-container-low)]">
-                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Memo #</th>
-                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Manufacturer</th>
-                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Pharmacy</th>
-                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Destination</th>
-                                            <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Asked</th>
-                                            <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Received</th>
-                                            <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Outstanding</th>
-                                            <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Days</th>
-                                            <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Status</th>
-                                            <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
-                                        {unpaidMemos.map(memo => {
-                                            const outstanding = (memo as any).outstandingAmount ?? (memo.amountRequested - memo.amountReceived);
-                                            const days = (memo as any).daysOutstanding ?? 0;
-                                            return (
-                                                <tr key={memo.id} className="hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
-                                                    <td className="px-3 py-3 text-sm font-medium" style={{ color: 'var(--foreground)' }}>{memo.memoNumber}</td>
-                                                    <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{memo.labelerName || '—'}</td>
-                                                    <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{(memo as any).pharmacyName || '—'}</td>
-                                                    <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{memo.destination || '—'}</td>
-                                                    <td className="px-3 py-3 text-sm text-right font-medium">{fmt(memo.amountRequested)}</td>
-                                                    <td className="px-3 py-3 text-sm text-right">{fmt(memo.amountReceived)}</td>
-                                                    <td className="px-3 py-3 text-sm text-right font-semibold" style={{ color: 'var(--error)' }}>{fmt(outstanding)}</td>
-                                                    <td className="px-3 py-3 text-center">
-                                                        <span
-                                                            className="inline-flex items-center gap-0.5 text-sm"
-                                                            style={{
-                                                                color: days > 30 ? 'var(--error)' : days > 14 ? 'var(--tertiary)' : 'var(--on-surface-variant)',
-                                                                fontWeight: days > 30 ? 600 : undefined,
-                                                            }}
-                                                        >
-                                                            <Clock className="w-3 h-3" />{days}d
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-3 py-3 text-center">
-                                                        <Badge variant={getPaymentBadge(memo.paymentStatus).variant}>
-                                                            <span className="text-[10px]">{memo.paymentStatus}</span>
-                                                        </Badge>
-                                                    </td>
-                                                    <td className="px-3 py-3">
-                                                        <div className="flex items-center justify-end gap-1">
-                                                            {isDebitMemoShipped(memo) ? (
-                                                                <>
-                                                                    <button onClick={() => openPaymentModal(memo)} className="inline-flex items-center gap-0.5 px-2 py-1 rounded text-[11px] font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors whitespace-nowrap">
-                                                                        <CreditCard className="w-3 h-3" /> Pay
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() => setReminderMemo(memo)}
-                                                                        className="inline-flex items-center gap-0.5 px-2 py-1 rounded text-[11px] font-medium border transition-colors whitespace-nowrap hover:bg-primary-50/40"
-                                                                        style={{ backgroundColor: 'var(--tertiary-fixed)', color: 'var(--on-tertiary-container)', borderColor: 'var(--outline-variant)' }}
+                            <div>
+                                {unpaidGroupedReturns.map((returnGroup) => (
+                                    <div
+                                        key={returnGroup.returnId}
+                                        className="border-b last:border-b-0"
+                                        style={{ borderColor: 'var(--outline-variant)' }}
+                                    >
+                                        {/* Return group header */}
+                                        <div
+                                            className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 border-b"
+                                            style={{
+                                                backgroundColor: 'var(--surface-container-low)',
+                                                borderColor: 'var(--outline-variant)',
+                                            }}
+                                        >
+                                            <div className="flex items-center gap-1.5 min-w-0">
+                                                <Package className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--primary)' }} />
+                                                <span className="text-[10px] uppercase tracking-wide font-semibold" style={{ color: 'var(--on-surface-variant)' }}>
+                                                    Return
+                                                </span>
+                                                <span className="text-xs font-semibold truncate" style={{ color: 'var(--primary)' }}>
+                                                    {returnGroup.licensePlate}
+                                                </span>
+                                                <span className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>
+                                                    · {returnGroup.pharmacyName}
+                                                </span>
+                                                <span className="text-[10px]" style={{ color: 'var(--outline)' }}>
+                                                    · {formatDate(returnGroup.returnCreatedAt)}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-3 ml-auto text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>
+                                                <span>
+                                                    {returnGroup.totalMemos} memo{returnGroup.totalMemos === 1 ? '' : 's'}
+                                                </span>
+                                                <span>·</span>
+                                                <span className="font-medium" style={{ color: 'var(--error)' }}>
+                                                    {fmt((returnGroup as any).totalOutstanding)} outstanding
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Memo table within return group */}
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full">
+                                                <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline-variant)' }}>
+                                                    <tr>
+                                                        <th className="text-left px-3 py-2 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Memo #</th>
+                                                        <th className="text-left px-3 py-2 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Manufacturer</th>
+                                                        <th className="text-left px-3 py-2 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Dest.</th>
+                                                        <th className="text-right px-3 py-2 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Asked</th>
+                                                        <th className="text-right px-3 py-2 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Received</th>
+                                                        <th className="text-right px-3 py-2 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Outstanding</th>
+                                                        <th className="text-center px-3 py-2 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Days</th>
+                                                        <th className="text-center px-3 py-2 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Status</th>
+                                                        <th className="text-right px-3 py-2 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
+                                                    {returnGroup.memos.map(memo => {
+                                                        const outstanding = (memo as any).outstandingAmount ?? (memo.amountRequested - memo.amountReceived);
+                                                        const days = (memo as any).daysOutstanding ?? 0;
+                                                        return (
+                                                            <tr key={memo.id} className="hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
+                                                                <td className="px-3 py-2 text-xs font-medium" style={{ color: 'var(--foreground)' }}>{memo.memoNumber}</td>
+                                                                <td className="px-3 py-2 text-xs" style={{ color: 'var(--on-surface-variant)' }}>{memo.labelerName || '—'}</td>
+                                                                <td className="px-3 py-2 text-xs" style={{ color: 'var(--on-surface-variant)' }}>{memo.destination || '—'}</td>
+                                                                <td className="px-3 py-2 text-xs text-right font-medium">{fmt(memo.amountRequested)}</td>
+                                                                <td className="px-3 py-2 text-xs text-right">{fmt(memo.amountReceived)}</td>
+                                                                <td className="px-3 py-2 text-xs text-right font-semibold" style={{ color: 'var(--error)' }}>{fmt(outstanding)}</td>
+                                                                <td className="px-3 py-2 text-center">
+                                                                    <span
+                                                                        className="inline-flex items-center gap-0.5 text-xs"
+                                                                        style={{
+                                                                            color: days > 30 ? 'var(--error)' : days > 14 ? 'var(--tertiary)' : 'var(--on-surface-variant)',
+                                                                            fontWeight: days > 30 ? 600 : undefined,
+                                                                        }}
                                                                     >
-                                                                        <Send className="w-3 h-3" /> Remind
-                                                                    </button>
-                                                                </>
-                                                            ) : (
-                                                                <span className="text-[10px] whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }} title="Record outbound shipment in RA Tracking before payment actions">
-                                                                    Ship first
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                </table>
+                                                                        <Clock className="w-3 h-3" />{days}d
+                                                                    </span>
+                                                                </td>
+                                                                <td className="px-3 py-2 text-center">
+                                                                    <Badge variant={getPaymentBadge(memo.paymentStatus).variant}>
+                                                                        <span className="text-[10px]">{memo.paymentStatus}</span>
+                                                                    </Badge>
+                                                                </td>
+                                                                <td className="px-3 py-2">
+                                                                    <div className="flex items-center justify-end gap-1">
+                                                                        {isDebitMemoShipped(memo) ? (
+                                                                            <>
+                                                                                <button onClick={() => openPaymentModal(memo)} className="inline-flex items-center gap-0.5 px-2 py-1 rounded text-[11px] font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors whitespace-nowrap">
+                                                                                    <CreditCard className="w-3 h-3" /> Pay
+                                                                                </button>
+                                                                                <button
+                                                                                    onClick={() => setReminderMemo(memo)}
+                                                                                    className="inline-flex items-center gap-0.5 px-2 py-1 rounded text-[11px] font-medium border transition-colors whitespace-nowrap hover:bg-primary-50/40"
+                                                                                    style={{ backgroundColor: 'var(--tertiary-fixed)', color: 'var(--on-tertiary-container)', borderColor: 'var(--outline-variant)' }}
+                                                                                >
+                                                                                    <Send className="w-3 h-3" /> Remind
+                                                                                </button>
+                                                                            </>
+                                                                        ) : (
+                                                                            <span className="text-[10px] whitespace-nowrap" style={{ color: 'var(--on-surface-variant)' }} title="Record outbound shipment in RA Tracking before payment actions">
+                                                                                Ship first
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         )}
 
                         {/* Pagination */}
-                        {unpaidPagination && unpaidPagination.totalPages > 1 && (
+                        {unpaidGroupedPagination && unpaidGroupedPagination.totalPages > 1 && (
                             <div className="flex items-center justify-between px-3 py-2 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                                 <span className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>
-                                    Page {unpaidPagination.page} of {unpaidPagination.totalPages} ({unpaidPagination.total} memos)
+                                    Page {unpaidGroupedPagination.page} of {unpaidGroupedPagination.totalPages} ({unpaidGroupedPagination.total} returns)
                                 </span>
                                 <div className="flex gap-1.5">
                                     <button
@@ -548,7 +594,7 @@ export default function UnpaidMemosPage() {
                                         <ChevronLeft className="w-3.5 h-3.5" style={{ color: 'var(--on-surface-variant)' }} />
                                     </button>
                                     <button
-                                        disabled={page >= unpaidPagination.totalPages}
+                                        disabled={page >= unpaidGroupedPagination.totalPages}
                                         onClick={() => setPage(p => p + 1)}
                                         className="p-1 rounded border disabled:opacity-40 hover:bg-primary-50 transition-colors"
                                         style={{ borderColor: 'var(--outline-variant)' }}
@@ -566,14 +612,14 @@ export default function UnpaidMemosPage() {
             {activeTab === 'paid' && (
                 <div className="space-y-2">
                     {/* Summary card */}
-                    {paidPagination && (
+                    {paidGroupedPagination && (
                         <div className="rounded-[4px] border px-4 py-2.5 flex items-center gap-3 max-w-xs" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                             <div className="p-2 rounded-[4px] flex-shrink-0" style={{ backgroundColor: 'var(--secondary-container)' }}>
                                 <CheckCircle className="w-4 h-4" style={{ color: 'var(--secondary)' }} />
                             </div>
                             <div>
-                                <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Total Paid Memos</p>
-                                <p className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>{paidPagination.total}</p>
+                                <p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Returns with Paid Memos</p>
+                                <p className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>{paidGroupedPagination.total}</p>
                             </div>
                         </div>
                     )}
@@ -604,71 +650,114 @@ export default function UnpaidMemosPage() {
                         </select>
                     </div>
 
-                    {/* Table */}
+                    {/* Table grouped by return */}
                     <div className="rounded-[4px] border overflow-hidden" style={{ backgroundColor: 'var(--surface-container-lowest)', borderColor: 'var(--outline-variant)' }}>
                         {isLoading ? (
                             <div className="flex items-center justify-center py-14">
                                 <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
                             </div>
-                        ) : (paidMemos ?? []).length === 0 ? (
+                        ) : paidGroupedReturns.length === 0 ? (
                             <div className="text-center py-14 text-gray-500">
                                 <CheckCircle className="w-10 h-10 mx-auto mb-2 text-gray-300" />
                                 <p className="text-sm font-medium">No paid memos found</p>
                                 <p className="text-xs mt-0.5">No debit memos have been marked as paid yet.</p>
                             </div>
                         ) : (
-                            <div className="overflow-x-auto">
-                                <table className="w-full border" style={{ borderColor: 'var(--outline)' }}>
-                                    <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline)', borderBottomWidth: '1.5px' }}>
-                                        <tr className="bg-[var(--surface-container-low)]">
-                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Memo #</th>
-                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Manufacturer</th>
-                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Pharmacy</th>
-                                            <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Destination</th>
-                                            <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Asked</th>
-                                            <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Received</th>
-                                            <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Status</th>
-                                            <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
-                                        {(paidMemos ?? []).map(memo => (
-                                            <tr key={memo.id} className="hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
-                                                <td className="px-3 py-3 text-sm font-medium" style={{ color: 'var(--foreground)' }}>{memo.memoNumber}</td>
-                                                <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{memo.labelerName || '—'}</td>
-                                                <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{memo.pharmacyName || '—'}</td>
-                                                <td className="px-3 py-3 text-sm" style={{ color: 'var(--on-surface-variant)' }}>{memo.destination || '—'}</td>
-                                                <td className="px-3 py-3 text-sm text-right font-medium">{fmt(memo.amountRequested)}</td>
-                                                <td className="px-3 py-3 text-sm text-right font-semibold" style={{ color: 'var(--secondary)' }}>{fmt(memo.amountReceived)}</td>
-                                                <td className="px-3 py-3 text-center">
-                                                    <Badge variant="success">
-                                                        <span className="text-[10px]">paid</span>
-                                                    </Badge>
-                                                </td>
-                                                <td className="px-3 py-3">
-                                                    <div className="flex items-center justify-end">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => openEditModal(memo)}
-                                                            className="inline-flex items-center gap-0.5 px-2 py-1 rounded text-[11px] font-medium border transition-colors whitespace-nowrap hover:bg-primary-50/40"
-                                                            style={{ backgroundColor: 'var(--primary-container)', color: 'white', borderColor: 'var(--outline-variant)' }}
-                                                        >
-                                                            <FileText className="w-3 h-3" /> Edit
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                            <div>
+                                {paidGroupedReturns.map((returnGroup) => (
+                                    <div
+                                        key={returnGroup.returnId}
+                                        className="border-b last:border-b-0"
+                                        style={{ borderColor: 'var(--outline-variant)' }}
+                                    >
+                                        {/* Return group header */}
+                                        <div
+                                            className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 border-b"
+                                            style={{
+                                                backgroundColor: 'var(--surface-container-low)',
+                                                borderColor: 'var(--outline-variant)',
+                                            }}
+                                        >
+                                            <div className="flex items-center gap-1.5 min-w-0">
+                                                <Package className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--primary)' }} />
+                                                <span className="text-[10px] uppercase tracking-wide font-semibold" style={{ color: 'var(--on-surface-variant)' }}>
+                                                    Return
+                                                </span>
+                                                <span className="text-xs font-semibold truncate" style={{ color: 'var(--primary)' }}>
+                                                    {returnGroup.licensePlate}
+                                                </span>
+                                                <span className="text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>
+                                                    · {returnGroup.pharmacyName}
+                                                </span>
+                                                <span className="text-[10px]" style={{ color: 'var(--outline)' }}>
+                                                    · {formatDate(returnGroup.returnCreatedAt)}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-3 ml-auto text-[11px]" style={{ color: 'var(--on-surface-variant)' }}>
+                                                <span>
+                                                    {returnGroup.totalMemos} memo{returnGroup.totalMemos === 1 ? '' : 's'}
+                                                </span>
+                                                <span>·</span>
+                                                <span className="font-medium" style={{ color: 'var(--secondary)' }}>
+                                                    {fmt((returnGroup as any).totalReceived)} received
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Memo table within return group */}
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full">
+                                                <thead className="bg-[var(--surface-container-low)] border-b" style={{ borderColor: 'var(--outline-variant)' }}>
+                                                    <tr>
+                                                        <th className="text-left px-3 py-2 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Memo #</th>
+                                                        <th className="text-left px-3 py-2 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Manufacturer</th>
+                                                        <th className="text-left px-3 py-2 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Dest.</th>
+                                                        <th className="text-right px-3 py-2 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Asked</th>
+                                                        <th className="text-right px-3 py-2 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Received</th>
+                                                        <th className="text-center px-3 py-2 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Status</th>
+                                                        <th className="text-right px-3 py-2 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)]">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y" style={{ borderColor: 'var(--outline-variant)' }}>
+                                                    {returnGroup.memos.map(memo => (
+                                                        <tr key={memo.id} className="hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
+                                                            <td className="px-3 py-2 text-xs font-medium" style={{ color: 'var(--foreground)' }}>{memo.memoNumber}</td>
+                                                            <td className="px-3 py-2 text-xs" style={{ color: 'var(--on-surface-variant)' }}>{memo.labelerName || '—'}</td>
+                                                            <td className="px-3 py-2 text-xs" style={{ color: 'var(--on-surface-variant)' }}>{memo.destination || '—'}</td>
+                                                            <td className="px-3 py-2 text-xs text-right font-medium">{fmt(memo.amountRequested)}</td>
+                                                            <td className="px-3 py-2 text-xs text-right font-semibold" style={{ color: 'var(--secondary)' }}>{fmt(memo.amountReceived)}</td>
+                                                            <td className="px-3 py-2 text-center">
+                                                                <Badge variant="success">
+                                                                    <span className="text-[10px]">paid</span>
+                                                                </Badge>
+                                                            </td>
+                                                            <td className="px-3 py-2">
+                                                                <div className="flex items-center justify-end">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => openEditModal(memo)}
+                                                                        className="inline-flex items-center gap-0.5 px-2 py-1 rounded text-[11px] font-medium border transition-colors whitespace-nowrap hover:bg-primary-50/40"
+                                                                        style={{ backgroundColor: 'var(--primary-container)', color: 'white', borderColor: 'var(--outline-variant)' }}
+                                                                    >
+                                                                        <FileText className="w-3 h-3" /> Edit
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         )}
 
                         {/* Pagination */}
-                        {paidPagination && paidPagination.totalPages > 1 && (
+                        {paidGroupedPagination && paidGroupedPagination.totalPages > 1 && (
                             <div className="flex items-center justify-between px-3 py-2 border-t" style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}>
                                 <span className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>
-                                    Page {paidPagination.page} of {paidPagination.totalPages} ({paidPagination.total} memos)
+                                    Page {paidGroupedPagination.page} of {paidGroupedPagination.totalPages} ({paidGroupedPagination.total} returns)
                                 </span>
                                 <div className="flex gap-1.5">
                                     <button
@@ -680,7 +769,7 @@ export default function UnpaidMemosPage() {
                                         <ChevronLeft className="w-3.5 h-3.5" style={{ color: 'var(--on-surface-variant)' }} />
                                     </button>
                                     <button
-                                        disabled={paidPage >= paidPagination.totalPages}
+                                        disabled={paidPage >= paidGroupedPagination.totalPages}
                                         onClick={() => setPaidPage(p => p + 1)}
                                         className="p-1 rounded border disabled:opacity-40 hover:bg-primary-50 transition-colors"
                                         style={{ borderColor: 'var(--outline-variant)' }}
@@ -956,7 +1045,7 @@ export default function UnpaidMemosPage() {
                             {!isEditMode ? (
                                 <div className="grid grid-cols-3 gap-2 p-2.5 rounded text-center border" style={{ backgroundColor: 'var(--surface-container-low)', borderColor: 'var(--outline-variant)' }}>
                                     <div><p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Asked</p><p className="text-xs font-semibold">{fmt(paymentMemo.amountRequested)}</p></div>
-                                    <div><p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Received So Far</p><p className="text-xs font-semibold" style={{ color: 'var(--secondary)' }}>{fmt(paymentMemo.amountReceived)}</p></div>
+                                    <div><p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Received</p><p className="text-xs font-semibold" style={{ color: 'var(--secondary)' }}>{fmt(paymentMemo.amountReceived)}</p></div>
                                     <div><p className="text-[10px]" style={{ color: 'var(--on-surface-variant)' }}>Outstanding</p><p className="text-xs font-semibold" style={{ color: 'var(--error)' }}>{fmt(paymentMemo.amountRequested - paymentMemo.amountReceived)}</p></div>
                                 </div>
                             ) : (

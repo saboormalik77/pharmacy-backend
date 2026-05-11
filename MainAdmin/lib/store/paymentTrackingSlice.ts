@@ -1,5 +1,14 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { DebitMemo, UnpaidSummary, AskVsReceivedRow, ManufacturerPaymentSummary, CreditMemoAnalysisResult } from '@/lib/types';
+import { DebitMemo, UnpaidSummary, AskVsReceivedRow, ManufacturerPaymentSummary, CreditMemoAnalysisResult, ReturnWithMemos } from '@/lib/types';
+
+// ── Return with payment memos interface ─────────────────────────
+export interface ReturnWithUnpaidMemos extends ReturnWithMemos {
+    totalOutstanding: number;
+}
+
+export interface ReturnWithPaidMemos extends ReturnWithMemos {
+    totalReceived: number;
+}
 
 // ── State ─────────────────────────────────────────────────────
 
@@ -7,8 +16,12 @@ export interface PaymentTrackingState {
     unpaidMemos: (DebitMemo & { daysOutstanding?: number; outstandingAmount?: number })[];
     unpaidPagination: { page: number; limit: number; total: number; totalPages: number } | null;
     unpaidSummary: UnpaidSummary | null;
+    unpaidGroupedReturns: ReturnWithUnpaidMemos[];
+    unpaidGroupedPagination: { page: number; limit: number; total: number; totalPages: number } | null;
     paidMemos: DebitMemo[];
     paidPagination: { page: number; limit: number; total: number; totalPages: number } | null;
+    paidGroupedReturns: ReturnWithPaidMemos[];
+    paidGroupedPagination: { page: number; limit: number; total: number; totalPages: number } | null;
     askVsReceived: AskVsReceivedRow[];
     askVsReceivedTotals: Record<string, any> | null;
     askVsReceivedPagination: { page: number; limit: number; total: number; totalPages: number } | null;
@@ -25,8 +38,12 @@ const initialState: PaymentTrackingState = {
     unpaidMemos: [],
     unpaidPagination: null,
     unpaidSummary: null,
+    unpaidGroupedReturns: [],
+    unpaidGroupedPagination: null,
     paidMemos: [],
     paidPagination: null,
+    paidGroupedReturns: [],
+    paidGroupedPagination: null,
     askVsReceived: [],
     askVsReceivedTotals: null,
     askVsReceivedPagination: null,
@@ -59,6 +76,49 @@ export const fetchUnpaidMemos = createAsyncThunk<
         return { data: res.data, pagination: res.pagination, summary: res.summary };
     } catch (err: any) {
         return rejectWithValue(err?.message || 'Failed to fetch unpaid memos');
+    }
+});
+
+export const fetchUnpaidGroupedByReturn = createAsyncThunk<
+    { data: ReturnWithUnpaidMemos[]; pagination: any; summary: UnpaidSummary },
+    { manufacturer?: string; destination?: string; search?: string; page?: number; limit?: number } | void,
+    { rejectValue: string }
+>('paymentTracking/fetchUnpaidGroupedByReturn', async (params, { rejectWithValue }) => {
+    try {
+        const { apiClient } = await import('@/lib/api/apiClient');
+        const q: Record<string, string> = {};
+        if (params?.manufacturer) q.manufacturer = params.manufacturer;
+        if (params?.destination) q.destination = params.destination;
+        if (params?.search) q.search = params.search;
+        if (params?.page) q.page = String(params.page);
+        if (params?.limit) q.limit = String(params.limit);
+        const res = await apiClient.get<{
+            status: string; data: ReturnWithUnpaidMemos[]; pagination: any; summary: UnpaidSummary;
+        }>('/admin/debit-memos/unpaid/grouped-by-return', true, q);
+        return { data: res.data, pagination: res.pagination, summary: res.summary };
+    } catch (err: any) {
+        return rejectWithValue(err?.message || 'Failed to fetch unpaid memos grouped by return');
+    }
+});
+
+export const fetchPaidGroupedByReturn = createAsyncThunk<
+    { data: ReturnWithPaidMemos[]; pagination: any },
+    { destination?: string; search?: string; page?: number; limit?: number } | void,
+    { rejectValue: string }
+>('paymentTracking/fetchPaidGroupedByReturn', async (params, { rejectWithValue }) => {
+    try {
+        const { apiClient } = await import('@/lib/api/apiClient');
+        const q: Record<string, string> = {};
+        if (params?.destination) q.destination = params.destination;
+        if (params?.search) q.search = params.search;
+        if (params?.page) q.page = String(params.page);
+        if (params?.limit) q.limit = String(params.limit);
+        const res = await apiClient.get<{
+            status: string; data: ReturnWithPaidMemos[]; pagination: any;
+        }>('/admin/debit-memos/paid/grouped-by-return', true, q);
+        return { data: res.data, pagination: res.pagination };
+    } catch (err: any) {
+        return rejectWithValue(err?.message || 'Failed to fetch paid memos grouped by return');
     }
 });
 
@@ -206,6 +266,15 @@ const paymentTrackingSlice = createSlice({
             })
             .addCase(fetchUnpaidMemos.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; })
 
+            .addCase(fetchUnpaidGroupedByReturn.pending, (state) => { state.isLoading = true; state.error = null; })
+            .addCase(fetchUnpaidGroupedByReturn.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.unpaidGroupedReturns = action.payload.data;
+                state.unpaidGroupedPagination = action.payload.pagination;
+                state.unpaidSummary = action.payload.summary;
+            })
+            .addCase(fetchUnpaidGroupedByReturn.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; })
+
             .addCase(fetchPaidMemos.pending, (state) => { state.isLoading = true; state.error = null; })
             .addCase(fetchPaidMemos.fulfilled, (state, action) => {
                 state.isLoading = false;
@@ -213,6 +282,14 @@ const paymentTrackingSlice = createSlice({
                 state.paidPagination = action.payload.pagination ?? null;
             })
             .addCase(fetchPaidMemos.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; })
+
+            .addCase(fetchPaidGroupedByReturn.pending, (state) => { state.isLoading = true; state.error = null; })
+            .addCase(fetchPaidGroupedByReturn.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.paidGroupedReturns = action.payload.data;
+                state.paidGroupedPagination = action.payload.pagination;
+            })
+            .addCase(fetchPaidGroupedByReturn.rejected, (state, action) => { state.isLoading = false; state.error = action.payload as string; })
 
             .addCase(recordPayment.pending, (state) => { state.isActionLoading = true; state.error = null; state.lastAiAnalysis = null; })
             .addCase(recordPayment.fulfilled, (state, action) => {
