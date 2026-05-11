@@ -18,7 +18,7 @@ cmds = ["npm install --legacy-peer-deps --include=dev"]
 cmds = ["npx tsc"]
 
 [start]
-cmd = "node dist/src/server.js"
+cmd = "node dist/server.js"
 
 [variables]
 PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "true"

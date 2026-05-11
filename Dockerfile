@@ -52,4 +52,4 @@ EXPOSE 8080
 USER node
 
 # Start the application
-CMD ["node", "dist/src/server.js"]
+CMD ["node", "dist/server.js"]
