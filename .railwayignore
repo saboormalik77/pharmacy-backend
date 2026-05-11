@@ -8,21 +8,36 @@ __pycache__/
 
 # Node modules and build artifacts
 node_modules/
+**/node_modules/
 .next/
+**/.next/
 out/
+**/out/
 build/
+**/build/
 dist/
+**/dist/
+
+# Large development files (exclude frontend folders)
+Frontend/
+MainAdmin/
+admin/
+files/
+*.xls
+*.xlsx
 
 # Cache directories
 .turbo/
 .cache/
+**/.turbo/
+**/.cache/
 
 # Development files
 .env.local
 *.log
 .DS_Store
 
-# Git
+# Git (exclude large pack files)
 .git/
 .gitignore
 
@@ -39,3 +54,12 @@ coverage/
 # Temporary files
 tmp/
 temp/
+
+# Large binaries
+*.so
+*.so.*
+*.node
+chrome
+chrome-*
+puppeteer/
+supabase/bin/
