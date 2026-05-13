@@ -221,8 +221,8 @@ BEGIN
     FROM return_transaction_items rti
     INNER JOIN return_transactions rt ON rt.id = rti.transaction_id
     INNER JOIN pharmacy p ON p.id = rt.pharmacy_id
-    WHERE (rti.proprietary_name IS NOT NULL AND TRIM(rti.proprietary_name) != '')
-       OR (rti.generic_name IS NOT NULL AND TRIM(rti.generic_name) != '')
+    WHERE ((rti.proprietary_name IS NOT NULL AND TRIM(rti.proprietary_name) != '')
+       OR (rti.generic_name IS NOT NULL AND TRIM(rti.generic_name) != ''))
       AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id)
     GROUP BY COALESCE(
       NULLIF(TRIM(rti.proprietary_name), ''), 

@@ -21,6 +21,7 @@ export const getReturnsSummary = async (filters: {
   periodEnd?: string;
   pharmacyId?: string;
   groupBy?: string;
+  buyingGroupId?: string;
 }) => {
   const sb = ensureAdmin();
   const { data, error } = await sb.rpc('analytics_returns_summary', {
@@ -28,6 +29,7 @@ export const getReturnsSummary = async (filters: {
     p_period_end: filters.periodEnd || null,
     p_pharmacy_id: filters.pharmacyId || null,
     p_group_by: filters.groupBy || 'month',
+    p_buying_group_id: filters.buyingGroupId || null,
   });
   handleRpcError(data, error, 'Failed to fetch returns summary');
   return data.data;
@@ -43,6 +45,7 @@ export const getAskVsReceived = async (filters: {
   period?: string;
   page?: number;
   limit?: number;
+  buyingGroupId?: string;
 }) => {
   const sb = ensureAdmin();
   const { data, error } = await sb.rpc('analytics_ask_vs_received', {
@@ -51,6 +54,7 @@ export const getAskVsReceived = async (filters: {
     p_period: filters.period || null,
     p_page: filters.page || 1,
     p_limit: filters.limit || 50,
+    p_buying_group_id: filters.buyingGroupId || null,
   });
   handleRpcError(data, error, 'Failed to fetch ask vs received analytics');
   return { data: data.data, totals: data.totals, pagination: data.pagination };
@@ -65,6 +69,7 @@ export const getAgingInventory = async (filters: {
   status?: string;
   page?: number;
   limit?: number;
+  buyingGroupId?: string;
 }) => {
   const sb = ensureAdmin();
   const { data, error } = await sb.rpc('analytics_aging_inventory', {
@@ -72,6 +77,7 @@ export const getAgingInventory = async (filters: {
     p_status: filters.status || null,
     p_page: filters.page || 1,
     p_limit: filters.limit || 20,
+    p_buying_group_id: filters.buyingGroupId || null,
   });
   handleRpcError(data, error, 'Failed to fetch aging inventory report');
   return {
@@ -91,6 +97,7 @@ export const getOutstandingRA = async (filters: {
   search?: string;
   page?: number;
   limit?: number;
+  buyingGroupId?: string;
 }) => {
   const sb = ensureAdmin();
   const { data, error } = await sb.rpc('analytics_outstanding_ra', {
@@ -98,6 +105,7 @@ export const getOutstandingRA = async (filters: {
     p_search: filters.search || null,
     p_page: filters.page || 1,
     p_limit: filters.limit || 20,
+    p_buying_group_id: filters.buyingGroupId || null,
   });
   handleRpcError(data, error, 'Failed to fetch outstanding RA report');
   return {
@@ -118,6 +126,7 @@ export const getUnpaidMemos = async (filters: {
   search?: string;
   page?: number;
   limit?: number;
+  buyingGroupId?: string;
 }) => {
   const sb = ensureAdmin();
   const { data, error } = await sb.rpc('analytics_unpaid_memos', {
@@ -126,6 +135,7 @@ export const getUnpaidMemos = async (filters: {
     p_search: filters.search || null,
     p_page: filters.page || 1,
     p_limit: filters.limit || 20,
+    p_buying_group_id: filters.buyingGroupId || null,
   });
   handleRpcError(data, error, 'Failed to fetch unpaid memos report');
   return {
@@ -146,6 +156,7 @@ export const getPriceAudit = async (filters: {
   search?: string;
   page?: number;
   limit?: number;
+  buyingGroupId?: string;
 }) => {
   const sb = ensureAdmin();
   const { data, error } = await sb.rpc('analytics_price_audit', {
@@ -154,6 +165,7 @@ export const getPriceAudit = async (filters: {
     p_search: filters.search || null,
     p_page: filters.page || 1,
     p_limit: filters.limit || 50,
+    p_buying_group_id: filters.buyingGroupId || null,
   });
   handleRpcError(data, error, 'Failed to fetch price audit trail');
   return { data: data.data, summary: data.summary, pagination: data.pagination };
@@ -169,6 +181,7 @@ export const getPharmacyPerformance = async (filters: {
   sortDir?: string;
   page?: number;
   limit?: number;
+  buyingGroupId?: string;
 }) => {
   const sb = ensureAdmin();
   const { data, error } = await sb.rpc('analytics_pharmacy_performance', {
@@ -177,6 +190,7 @@ export const getPharmacyPerformance = async (filters: {
     p_sort_dir: filters.sortDir || 'desc',
     p_page: filters.page || 1,
     p_limit: filters.limit || 20,
+    p_buying_group_id: filters.buyingGroupId || null,
   });
   handleRpcError(data, error, 'Failed to fetch pharmacy performance report');
   return { data: data.data, overall: data.overall, pagination: data.pagination };
@@ -190,12 +204,14 @@ export const getGpoSummary = async (filters: {
   search?: string;
   page?: number;
   limit?: number;
+  buyingGroupId?: string;
 }) => {
   const sb = ensureAdmin();
   const { data, error } = await sb.rpc('analytics_gpo_summary', {
     p_search: filters.search || null,
     p_page: filters.page || 1,
     p_limit: filters.limit || 20,
+    p_buying_group_id: filters.buyingGroupId || null,
   });
   handleRpcError(data, error, 'Failed to fetch GPO summary');
   return { data: data.data, pagination: data.pagination };

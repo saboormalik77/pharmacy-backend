@@ -274,7 +274,8 @@ export const askVsReceivedHandler = catchAsync(
       group_by, 
       period,
       page ? Number(page) : undefined,
-      limit ? Number(limit) : undefined
+      limit ? Number(limit) : undefined,
+      req.adminBuyingGroupId ?? undefined
     );
 
     res.status(200).json({
@@ -296,7 +297,8 @@ export const manufacturerPaymentsHandler = catchAsync(
     const result = await paymentTrackingService.manufacturerPaymentSummary(
       search,
       page ? Number(page) : undefined,
-      limit ? Number(limit) : undefined
+      limit ? Number(limit) : undefined,
+      req.adminBuyingGroupId ?? undefined
     );
 
     res.status(200).json({

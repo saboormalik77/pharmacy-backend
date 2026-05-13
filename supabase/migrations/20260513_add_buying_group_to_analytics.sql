@@ -1,24 +1,32 @@
--- ────────────────────────────────────────────────────────────
--- Reporting & Analytics RPC Functions
--- Multi-tenant scoped: p_buying_group_id NULL => global,
--- otherwise restricted to pharmacies where pharmacy.created_by = p_buying_group_id
--- ────────────────────────────────────────────────────────────
+-- ============================================================
+-- Migration: Add p_buying_group_id filter to all analytics RPCs
+-- When p_buying_group_id IS NULL  → show all data (MainAdmin view)
+-- When set                        → filter to pharmacies created by that buying group
+-- Also fixes get_admin_analytics topProducts OR-precedence bug
+-- ============================================================
+
+-- Drop old function signatures (without p_buying_group_id) to avoid overload ambiguity
+DROP FUNCTION IF EXISTS analytics_returns_summary(DATE, DATE, UUID, TEXT);
+DROP FUNCTION IF EXISTS analytics_ask_vs_received(TEXT, UUID, TEXT, INTEGER, INTEGER);
+DROP FUNCTION IF EXISTS analytics_aging_inventory(UUID, TEXT, INTEGER, INTEGER);
+DROP FUNCTION IF EXISTS analytics_outstanding_ra(TEXT, TEXT, INTEGER, INTEGER);
+DROP FUNCTION IF EXISTS analytics_unpaid_memos(TEXT, TEXT, TEXT, INTEGER, INTEGER);
+DROP FUNCTION IF EXISTS analytics_price_audit(TEXT, TEXT, TEXT, INTEGER, INTEGER);
+DROP FUNCTION IF EXISTS analytics_pharmacy_performance(TEXT, TEXT, TEXT, INTEGER, INTEGER);
+DROP FUNCTION IF EXISTS analytics_gpo_summary(TEXT, INTEGER, INTEGER);
+DROP FUNCTION IF EXISTS payment_ask_vs_received(TEXT, TEXT, INTEGER, INTEGER);
+DROP FUNCTION IF EXISTS payment_manufacturer_summary(TEXT, INTEGER, INTEGER);
+
 
 -- ────────────────────────────────────────────────────────────
--- 1. Helper: pharmacy dashboard (unchanged)
--- ────────────────────────────────────────────────────────────
-
--- (see analytics_pharmacy_dashboard at bottom — pharmacy-facing, no buying-group filter needed)
-
--- ────────────────────────────────────────────────────────────
--- 2. RPC: analytics_returns_summary
+-- 1. analytics_returns_summary
 -- ────────────────────────────────────────────────────────────
 
 CREATE OR REPLACE FUNCTION analytics_returns_summary(
-  p_period_start    DATE DEFAULT NULL,
-  p_period_end      DATE DEFAULT NULL,
-  p_pharmacy_id     UUID DEFAULT NULL,
-  p_group_by        TEXT DEFAULT 'month',
+  p_period_start  DATE DEFAULT NULL,
+  p_period_end    DATE DEFAULT NULL,
+  p_pharmacy_id   UUID DEFAULT NULL,
+  p_group_by      TEXT DEFAULT 'month',
   p_buying_group_id UUID DEFAULT NULL
 )
 RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
@@ -32,6 +40,7 @@ BEGIN
   v_start := COALESCE(p_period_start, CURRENT_DATE - INTERVAL '12 months');
   v_end   := COALESCE(p_period_end,   CURRENT_DATE);
 
+  -- Overall summary
   SELECT jsonb_build_object(
     'totalReturns',           COUNT(*),
     'totalReturnableValue',   COALESCE(SUM(rt.total_returnable_value), 0),
@@ -48,6 +57,7 @@ BEGIN
     AND (p_pharmacy_id IS NULL OR rt.pharmacy_id = p_pharmacy_id)
     AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
+  -- By status
   SELECT COALESCE(jsonb_agg(
     jsonb_build_object(
       'status',  status_data,
@@ -69,6 +79,7 @@ BEGIN
     GROUP BY rt.status
   ) status_summary;
 
+  -- Trend by period
   IF p_group_by = 'week' THEN
     SELECT COALESCE(jsonb_agg(
       jsonb_build_object(
@@ -120,6 +131,7 @@ BEGIN
       GROUP BY rt.service_type
     ) trend_data;
   ELSE
+    -- Default: month
     SELECT COALESCE(jsonb_agg(
       jsonb_build_object(
         'period',     period_data,
@@ -162,15 +174,15 @@ $$;
 
 
 -- ────────────────────────────────────────────────────────────
--- 3. RPC: analytics_ask_vs_received
+-- 2. analytics_ask_vs_received
 -- ────────────────────────────────────────────────────────────
 
 CREATE OR REPLACE FUNCTION analytics_ask_vs_received(
-  p_group_by        TEXT DEFAULT 'manufacturer',
-  p_batch_id        UUID DEFAULT NULL,
-  p_period          TEXT DEFAULT NULL,
-  p_page            INTEGER DEFAULT 1,
-  p_limit           INTEGER DEFAULT 50,
+  p_group_by   TEXT DEFAULT 'manufacturer',
+  p_batch_id   UUID DEFAULT NULL,
+  p_period     TEXT DEFAULT NULL,
+  p_page       INTEGER DEFAULT 1,
+  p_limit      INTEGER DEFAULT 50,
   p_buying_group_id UUID DEFAULT NULL
 )
 RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
@@ -183,6 +195,7 @@ DECLARE
 BEGIN
   v_offset := (GREATEST(p_page, 1) - 1) * p_limit;
 
+  -- Overall totals
   SELECT jsonb_build_object(
     'totalMemos',       COUNT(*),
     'totalAskValue',    COALESCE(SUM(dm.amount_requested), 0),
@@ -201,6 +214,7 @@ BEGIN
     AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
   IF p_group_by = 'ndc' THEN
+    -- Group by NDC
     SELECT COUNT(DISTINCT dmi.ndc) INTO v_total
     FROM debit_memo_items dmi
     JOIN debit_memos dm ON dm.id = dmi.debit_memo_id
@@ -240,6 +254,7 @@ BEGIN
     ) sub;
 
   ELSIF p_group_by = 'destination' THEN
+    -- Group by destination
     SELECT COUNT(DISTINCT dm.destination) INTO v_total
     FROM debit_memos dm
     JOIN pharmacy ph ON ph.id = dm.pharmacy_id
@@ -275,6 +290,7 @@ BEGIN
     ) sub;
 
   ELSE
+    -- Default: group by manufacturer
     SELECT COUNT(DISTINCT dm.labeler_name) INTO v_total
     FROM debit_memos dm
     JOIN pharmacy ph ON ph.id = dm.pharmacy_id
@@ -327,14 +343,14 @@ $$;
 
 
 -- ────────────────────────────────────────────────────────────
--- 4. RPC: analytics_aging_inventory
+-- 3. analytics_aging_inventory
 -- ────────────────────────────────────────────────────────────
 
 CREATE OR REPLACE FUNCTION analytics_aging_inventory(
-  p_pharmacy_id     UUID DEFAULT NULL,
-  p_status          TEXT DEFAULT NULL,
-  p_page            INTEGER DEFAULT 1,
-  p_limit           INTEGER DEFAULT 20,
+  p_pharmacy_id  UUID DEFAULT NULL,
+  p_status       TEXT DEFAULT NULL,
+  p_page         INTEGER DEFAULT 1,
+  p_limit        INTEGER DEFAULT 20,
   p_buying_group_id UUID DEFAULT NULL
 )
 RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
@@ -347,6 +363,7 @@ DECLARE
 BEGIN
   v_offset := (GREATEST(p_page, 1) - 1) * p_limit;
 
+  -- Summary stats
   SELECT jsonb_build_object(
     'totalItems',      COUNT(*),
     'totalValue',      COALESCE(SUM(wc.estimated_value), 0),
@@ -367,6 +384,7 @@ BEGIN
     AND (p_status IS NULL OR wc.status = p_status)
     AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
+  -- Aging buckets (for shelved items only)
   SELECT jsonb_build_object(
     'under30Days',  jsonb_build_object(
       'count', COUNT(*) FILTER (WHERE EXTRACT(DAY FROM (NOW() - wc.date_shelved)) < 30),
@@ -392,6 +410,7 @@ BEGIN
     AND (p_pharmacy_id IS NULL OR wc.pharmacy_id = p_pharmacy_id)
     AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
+  -- Count for pagination
   SELECT COUNT(*) INTO v_total
   FROM wine_cellar wc
   JOIN pharmacy ph ON ph.id = wc.pharmacy_id
@@ -399,6 +418,7 @@ BEGIN
     AND (p_status IS NULL OR wc.status = p_status)
     AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
+  -- Data rows
   SELECT COALESCE(jsonb_agg(row_data ORDER BY days_shelved DESC), '[]'::jsonb)
   INTO v_rows
   FROM (
@@ -422,7 +442,7 @@ BEGIN
     ) AS row_data,
     EXTRACT(DAY FROM (NOW() - wc.date_shelved))::integer AS days_shelved
     FROM wine_cellar wc
-    JOIN pharmacy ph ON ph.id = wc.pharmacy_id
+    LEFT JOIN pharmacy ph ON ph.id = wc.pharmacy_id
     WHERE (p_pharmacy_id IS NULL OR wc.pharmacy_id = p_pharmacy_id)
       AND (p_status IS NULL OR wc.status = p_status)
       AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id)
@@ -445,14 +465,14 @@ $$;
 
 
 -- ────────────────────────────────────────────────────────────
--- 5. RPC: analytics_outstanding_ra
+-- 4. analytics_outstanding_ra
 -- ────────────────────────────────────────────────────────────
 
 CREATE OR REPLACE FUNCTION analytics_outstanding_ra(
-  p_destination     TEXT DEFAULT NULL,
-  p_search          TEXT DEFAULT NULL,
-  p_page            INTEGER DEFAULT 1,
-  p_limit           INTEGER DEFAULT 20,
+  p_destination TEXT DEFAULT NULL,
+  p_search      TEXT DEFAULT NULL,
+  p_page        INTEGER DEFAULT 1,
+  p_limit       INTEGER DEFAULT 20,
   p_buying_group_id UUID DEFAULT NULL
 )
 RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
@@ -465,6 +485,7 @@ DECLARE
 BEGIN
   v_offset := (GREATEST(p_page, 1) - 1) * p_limit;
 
+  -- Summary
   SELECT jsonb_build_object(
     'totalOutstanding',   COUNT(*),
     'totalAskValue',      COALESCE(SUM(dm.amount_requested), 0),
@@ -485,6 +506,7 @@ BEGIN
     ))
     AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
+  -- Aging buckets
   SELECT jsonb_build_object(
     'under30Days', jsonb_build_object(
       'count', COUNT(*) FILTER (WHERE EXTRACT(DAY FROM (NOW() - dm.ra_requested_at)) < 30),
@@ -515,6 +537,7 @@ BEGIN
     ))
     AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
+  -- Count
   SELECT COUNT(*) INTO v_total
   FROM debit_memos dm
   JOIN pharmacy ph ON ph.id = dm.pharmacy_id
@@ -527,6 +550,7 @@ BEGIN
     ))
     AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
+  -- Data rows
   SELECT COALESCE(jsonb_agg(row_data ORDER BY days_waiting DESC), '[]'::jsonb)
   INTO v_rows
   FROM (
@@ -575,15 +599,15 @@ $$;
 
 
 -- ────────────────────────────────────────────────────────────
--- 6. RPC: analytics_unpaid_memos
+-- 5. analytics_unpaid_memos
 -- ────────────────────────────────────────────────────────────
 
 CREATE OR REPLACE FUNCTION analytics_unpaid_memos(
-  p_manufacturer    TEXT DEFAULT NULL,
-  p_destination     TEXT DEFAULT NULL,
-  p_search          TEXT DEFAULT NULL,
-  p_page            INTEGER DEFAULT 1,
-  p_limit           INTEGER DEFAULT 20,
+  p_manufacturer TEXT DEFAULT NULL,
+  p_destination  TEXT DEFAULT NULL,
+  p_search       TEXT DEFAULT NULL,
+  p_page         INTEGER DEFAULT 1,
+  p_limit        INTEGER DEFAULT 20,
   p_buying_group_id UUID DEFAULT NULL
 )
 RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
@@ -596,6 +620,7 @@ DECLARE
 BEGIN
   v_offset := (GREATEST(p_page, 1) - 1) * p_limit;
 
+  -- Summary
   SELECT jsonb_build_object(
     'totalUnpaidMemos',     COUNT(*),
     'totalAmountRequested', COALESCE(SUM(dm.amount_requested), 0),
@@ -617,6 +642,7 @@ BEGIN
     ))
     AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
+  -- Aging buckets
   SELECT jsonb_build_object(
     'under30Days', jsonb_build_object(
       'count', COUNT(*) FILTER (WHERE EXTRACT(DAY FROM (NOW() - dm.created_at)) < 30),
@@ -651,6 +677,7 @@ BEGIN
     ))
     AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
+  -- Count
   SELECT COUNT(*) INTO v_total
   FROM debit_memos dm
   JOIN pharmacy ph ON ph.id = dm.pharmacy_id
@@ -663,6 +690,7 @@ BEGIN
     ))
     AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
+  -- Data rows
   SELECT COALESCE(jsonb_agg(row_data ORDER BY days_outstanding DESC), '[]'::jsonb)
   INTO v_rows
   FROM (
@@ -713,15 +741,15 @@ $$;
 
 
 -- ────────────────────────────────────────────────────────────
--- 7. RPC: analytics_price_audit (global data, no pharmacy link)
+-- 6. analytics_price_audit  (global data — param accepted but not filtered)
 -- ────────────────────────────────────────────────────────────
 
 CREATE OR REPLACE FUNCTION analytics_price_audit(
-  p_ndc             TEXT DEFAULT NULL,
-  p_source          TEXT DEFAULT NULL,
-  p_search          TEXT DEFAULT NULL,
-  p_page            INTEGER DEFAULT 1,
-  p_limit           INTEGER DEFAULT 50,
+  p_ndc     TEXT DEFAULT NULL,
+  p_source  TEXT DEFAULT NULL,
+  p_search  TEXT DEFAULT NULL,
+  p_page    INTEGER DEFAULT 1,
+  p_limit   INTEGER DEFAULT 50,
   p_buying_group_id UUID DEFAULT NULL
 )
 RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
@@ -733,6 +761,7 @@ DECLARE
 BEGIN
   v_offset := (GREATEST(p_page, 1) - 1) * p_limit;
 
+  -- Summary
   SELECT jsonb_build_object(
     'totalChanges',     COUNT(*),
     'uniqueNdcs',       COUNT(DISTINCT nph.ndc),
@@ -752,6 +781,7 @@ BEGIN
       OR LOWER(COALESCE(nph.price_source, '')) LIKE '%' || LOWER(p_search) || '%'
     ));
 
+  -- Count
   SELECT COUNT(*) INTO v_total
   FROM ndc_price_history nph
   WHERE (p_ndc IS NULL OR nph.ndc = p_ndc)
@@ -761,6 +791,7 @@ BEGIN
       OR LOWER(COALESCE(nph.price_source, '')) LIKE '%' || LOWER(p_search) || '%'
     ));
 
+  -- Data rows
   SELECT COALESCE(jsonb_agg(row_data ORDER BY changed_at DESC), '[]'::jsonb)
   INTO v_rows
   FROM (
@@ -803,15 +834,15 @@ $$;
 
 
 -- ────────────────────────────────────────────────────────────
--- 8. RPC: analytics_pharmacy_performance
+-- 7. analytics_pharmacy_performance
 -- ────────────────────────────────────────────────────────────
 
 CREATE OR REPLACE FUNCTION analytics_pharmacy_performance(
-  p_search          TEXT DEFAULT NULL,
-  p_sort_by         TEXT DEFAULT 'totalValue',
-  p_sort_dir        TEXT DEFAULT 'desc',
-  p_page            INTEGER DEFAULT 1,
-  p_limit           INTEGER DEFAULT 20,
+  p_search TEXT DEFAULT NULL,
+  p_sort_by TEXT DEFAULT 'totalValue',
+  p_sort_dir TEXT DEFAULT 'desc',
+  p_page   INTEGER DEFAULT 1,
+  p_limit  INTEGER DEFAULT 20,
   p_buying_group_id UUID DEFAULT NULL
 )
 RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
@@ -823,16 +854,18 @@ DECLARE
 BEGIN
   v_offset := (GREATEST(p_page, 1) - 1) * p_limit;
 
+  -- Overall totals
   SELECT jsonb_build_object(
     'totalPharmacies',      COUNT(DISTINCT rt.pharmacy_id),
     'totalReturns',         COUNT(*),
     'totalReturnableValue', COALESCE(SUM(rt.total_returnable_value), 0),
     'totalItems',           COALESCE(SUM(rt.total_items), 0),
     'totalPayout',          COALESCE((
-      SELECT SUM(pp.pharmacy_payout) FROM pharmacy_payments pp
-      JOIN pharmacy p2 ON p2.id = pp.pharmacy_id
+      SELECT SUM(pp.pharmacy_payout)
+      FROM pharmacy_payments pp
+      JOIN pharmacy ph2 ON ph2.id = pp.pharmacy_id
       WHERE pp.status = 'paid'
-        AND (p_buying_group_id IS NULL OR p2.created_by = p_buying_group_id)
+        AND (p_buying_group_id IS NULL OR ph2.created_by = p_buying_group_id)
     ), 0)
   )
   INTO v_overall
@@ -840,6 +873,7 @@ BEGIN
   JOIN pharmacy ph ON ph.id = rt.pharmacy_id
   WHERE (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
+  -- Count pharmacies with returns
   SELECT COUNT(DISTINCT sub.pharmacy_id) INTO v_total
   FROM (
     SELECT rt.pharmacy_id
@@ -849,10 +883,11 @@ BEGIN
       LOWER(ph.pharmacy_name) LIKE '%' || LOWER(p_search) || '%'
       OR ph.store_number = p_search
     ))
-    AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id)
+      AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id)
     GROUP BY rt.pharmacy_id
   ) sub;
 
+  -- Data rows
   SELECT COALESCE(jsonb_agg(row_data), '[]'::jsonb)
   INTO v_rows
   FROM (
@@ -903,7 +938,7 @@ BEGIN
         LOWER(ph.pharmacy_name) LIKE '%' || LOWER(p_search) || '%'
         OR ph.store_number = p_search
       ))
-      AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id)
+        AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id)
       GROUP BY rt.pharmacy_id
     ) agg
     ORDER BY
@@ -931,13 +966,13 @@ $$;
 
 
 -- ────────────────────────────────────────────────────────────
--- 9. RPC: analytics_gpo_summary
+-- 8. analytics_gpo_summary
 -- ────────────────────────────────────────────────────────────
 
 CREATE OR REPLACE FUNCTION analytics_gpo_summary(
-  p_search          TEXT DEFAULT NULL,
-  p_page            INTEGER DEFAULT 1,
-  p_limit           INTEGER DEFAULT 20,
+  p_search TEXT DEFAULT NULL,
+  p_page   INTEGER DEFAULT 1,
+  p_limit  INTEGER DEFAULT 20,
   p_buying_group_id UUID DEFAULT NULL
 )
 RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
@@ -948,6 +983,7 @@ DECLARE
 BEGIN
   v_offset := (GREATEST(p_page, 1) - 1) * p_limit;
 
+  -- Count distinct GPOs
   SELECT COUNT(DISTINCT COALESCE(ph.gpo_affiliation, 'No GPO')) INTO v_total
   FROM pharmacy ph
   WHERE EXISTS (SELECT 1 FROM return_transactions rt WHERE rt.pharmacy_id = ph.id)
@@ -956,6 +992,7 @@ BEGIN
     ))
     AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
+  -- Data rows grouped by GPO
   SELECT COALESCE(jsonb_agg(row_data ORDER BY total_value DESC), '[]'::jsonb)
   INTO v_rows
   FROM (
@@ -986,7 +1023,7 @@ BEGIN
     WHERE (p_search IS NULL OR (
       LOWER(COALESCE(ph.gpo_affiliation, '')) LIKE '%' || LOWER(p_search) || '%'
     ))
-    AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id)
+      AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id)
     GROUP BY COALESCE(ph.gpo_affiliation, 'No GPO')
     ORDER BY total_value DESC
     LIMIT p_limit OFFSET v_offset
@@ -1005,150 +1042,494 @@ $$;
 
 
 -- ────────────────────────────────────────────────────────────
--- 10. RPC: analytics_pharmacy_dashboard (pharmacy-facing, no change needed)
+-- 9. Fix get_admin_analytics topProducts OR-precedence bug
+--    Wrap the OR condition in parentheses so the buying group
+--    filter applies to BOTH proprietary_name and generic_name branches.
 -- ────────────────────────────────────────────────────────────
 
-CREATE OR REPLACE FUNCTION analytics_pharmacy_dashboard(
-  p_pharmacy_id   UUID,
-  p_period_start  DATE DEFAULT NULL,
-  p_period_end    DATE DEFAULT NULL
+CREATE OR REPLACE FUNCTION get_admin_analytics(
+  p_buying_group_id UUID DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_result JSONB;
+
+  v_total_returns_value NUMERIC;
+  v_total_returns INTEGER;
+  v_avg_return_value NUMERIC;
+  v_active_pharmacies INTEGER;
+
+  v_current_month_value NUMERIC;
+  v_current_month_returns INTEGER;
+  v_current_month_pharmacies INTEGER;
+
+  v_last_month_returns_value NUMERIC;
+  v_last_month_returns INTEGER;
+  v_last_month_pharmacies INTEGER;
+
+  v_returns_value_change NUMERIC;
+  v_total_returns_change NUMERIC;
+  v_avg_value_change NUMERIC;
+  v_pharmacies_change NUMERIC;
+
+  v_returns_value_trend JSONB;
+  v_top_products JSONB;
+  v_distributor_breakdown JSONB;
+  v_state_breakdown JSONB;
+
+  v_current_month_start DATE;
+  v_last_month_start DATE;
+  v_last_month_end DATE;
+  v_twelve_months_ago DATE;
+BEGIN
+  v_current_month_start := DATE_TRUNC('month', CURRENT_DATE)::DATE;
+  v_last_month_start    := (DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month')::DATE;
+  v_last_month_end      := (DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 day')::DATE;
+  v_twelve_months_ago   := (DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '11 months')::DATE;
+
+  -- 1. ALL-TIME key metrics
+  SELECT
+    COALESCE(SUM(COALESCE(rt.total_returnable_value, 0) + COALESCE(rt.total_non_returnable_value, 0)), 0),
+    COUNT(rt.id)::INTEGER,
+    CASE WHEN COUNT(rt.id) > 0
+         THEN ROUND(SUM(COALESCE(rt.total_returnable_value, 0) + COALESCE(rt.total_non_returnable_value, 0)) / COUNT(rt.id), 2)
+         ELSE 0 END
+  INTO v_total_returns_value, v_total_returns, v_avg_return_value
+  FROM return_transactions rt
+  INNER JOIN pharmacy p ON p.id = rt.pharmacy_id
+  WHERE (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
+
+  SELECT COUNT(DISTINCT p.id)::INTEGER
+  INTO v_active_pharmacies
+  FROM pharmacy p
+  WHERE (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
+
+  -- 2. CURRENT MONTH metrics
+  SELECT
+    COALESCE(SUM(COALESCE(rt.total_returnable_value, 0) + COALESCE(rt.total_non_returnable_value, 0)), 0),
+    COUNT(rt.id)::INTEGER,
+    COUNT(DISTINCT rt.pharmacy_id)::INTEGER
+  INTO v_current_month_value, v_current_month_returns, v_current_month_pharmacies
+  FROM return_transactions rt
+  INNER JOIN pharmacy p ON p.id = rt.pharmacy_id
+  WHERE rt.created_at >= v_current_month_start
+    AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
+
+  -- 3. LAST MONTH metrics
+  SELECT
+    COALESCE(SUM(COALESCE(rt.total_returnable_value, 0) + COALESCE(rt.total_non_returnable_value, 0)), 0),
+    COUNT(rt.id)::INTEGER,
+    COUNT(DISTINCT rt.pharmacy_id)::INTEGER
+  INTO v_last_month_returns_value, v_last_month_returns, v_last_month_pharmacies
+  FROM return_transactions rt
+  INNER JOIN pharmacy p ON p.id = rt.pharmacy_id
+  WHERE rt.created_at >= v_last_month_start
+    AND rt.created_at < v_current_month_start
+    AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id);
+
+  -- 4. PERCENTAGE CHANGES
+  v_returns_value_change := CASE
+    WHEN v_last_month_returns_value > 0
+    THEN ROUND(((v_current_month_value - v_last_month_returns_value) / v_last_month_returns_value) * 100, 1)
+    WHEN v_current_month_value > 0 THEN 100
+    ELSE 0 END;
+
+  v_total_returns_change := CASE
+    WHEN v_last_month_returns > 0
+    THEN ROUND(((v_current_month_returns - v_last_month_returns)::NUMERIC / v_last_month_returns) * 100, 1)
+    WHEN v_current_month_returns > 0 THEN 100
+    ELSE 0 END;
+
+  v_avg_value_change := CASE
+    WHEN v_last_month_returns > 0 AND v_last_month_returns_value > 0
+    THEN ROUND((
+      ((v_current_month_value / GREATEST(v_current_month_returns, 1)) -
+       (v_last_month_returns_value / v_last_month_returns)) /
+      (v_last_month_returns_value / v_last_month_returns)
+    ) * 100, 1)
+    ELSE 0 END;
+
+  v_pharmacies_change := CASE
+    WHEN v_last_month_pharmacies > 0
+    THEN ROUND(((v_current_month_pharmacies - v_last_month_pharmacies)::NUMERIC / v_last_month_pharmacies) * 100, 1)
+    WHEN v_current_month_pharmacies > 0 THEN 100
+    ELSE 0 END;
+
+  -- 5. RETURNS VALUE TREND (last 12 months)
+  WITH months AS (
+    SELECT generate_series(
+      v_twelve_months_ago,
+      v_current_month_start,
+      '1 month'::INTERVAL
+    )::DATE AS month_start
+  ),
+  monthly_data AS (
+    SELECT
+      DATE_TRUNC('month', rt.created_at)::DATE AS month_start,
+      COUNT(rt.id)::INTEGER AS returns_count,
+      COALESCE(SUM(COALESCE(rt.total_returnable_value, 0) + COALESCE(rt.total_non_returnable_value, 0)), 0) AS total_value,
+      COUNT(DISTINCT rt.pharmacy_id)::INTEGER AS pharmacies_count,
+      COALESCE(SUM(rt.total_items), 0)::INTEGER AS items_count
+    FROM return_transactions rt
+    INNER JOIN pharmacy p ON p.id = rt.pharmacy_id
+    WHERE rt.created_at >= v_twelve_months_ago
+      AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id)
+    GROUP BY DATE_TRUNC('month', rt.created_at)::DATE
+  )
+  SELECT COALESCE(jsonb_agg(
+    jsonb_build_object(
+      'month', TO_CHAR(m.month_start, 'Mon YYYY'),
+      'monthKey', TO_CHAR(m.month_start, 'YYYY-MM'),
+      'returnsCount', COALESCE(md.returns_count, 0),
+      'totalValue', COALESCE(md.total_value, 0),
+      'pharmaciesCount', COALESCE(md.pharmacies_count, 0),
+      'itemsCount', COALESCE(md.items_count, 0)
+    ) ORDER BY m.month_start
+  ), '[]'::jsonb)
+  INTO v_returns_value_trend
+  FROM months m
+  LEFT JOIN monthly_data md ON m.month_start = md.month_start;
+
+  -- 6. TOP 5 PRODUCTS BY RETURNS VALUE (with OR-precedence fix)
+  WITH product_returns AS (
+    SELECT
+      COALESCE(
+        NULLIF(TRIM(rti.proprietary_name), ''),
+        NULLIF(TRIM(rti.generic_name), ''),
+        'Unknown Product'
+      ) AS product_name,
+      SUM(COALESCE(rti.estimated_value, 0)) AS total_value,
+      SUM(COALESCE(rti.quantity, 1)) AS total_quantity,
+      COUNT(*) AS return_count
+    FROM return_transaction_items rti
+    INNER JOIN return_transactions rt ON rt.id = rti.transaction_id
+    INNER JOIN pharmacy p ON p.id = rt.pharmacy_id
+    WHERE ((rti.proprietary_name IS NOT NULL AND TRIM(rti.proprietary_name) != '')
+       OR (rti.generic_name IS NOT NULL AND TRIM(rti.generic_name) != ''))
+      AND (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id)
+    GROUP BY COALESCE(
+      NULLIF(TRIM(rti.proprietary_name), ''),
+      NULLIF(TRIM(rti.generic_name), ''),
+      'Unknown Product'
+    )
+    ORDER BY total_value DESC
+    LIMIT 5
+  )
+  SELECT COALESCE(jsonb_agg(
+    jsonb_build_object(
+      'productName', pr.product_name,
+      'totalValue', ROUND(pr.total_value, 2),
+      'totalQuantity', pr.total_quantity,
+      'returnCount', pr.return_count
+    ) ORDER BY pr.total_value DESC
+  ), '[]'::jsonb)
+  INTO v_top_products
+  FROM product_returns pr;
+
+  -- 7. DISTRIBUTOR BREAKDOWN
+  WITH distributor_stats AS (
+    SELECT
+      rd.id AS distributor_id,
+      rd.name AS distributor_name,
+      COUNT(DISTINCT rt.pharmacy_id)::INTEGER AS pharmacies_count,
+      COUNT(rt.id)::INTEGER AS total_returns,
+      COALESCE(SUM(COALESCE(rt.total_returnable_value, 0) + COALESCE(rt.total_non_returnable_value, 0)), 0) AS total_value
+    FROM reverse_distributors rd
+    INNER JOIN uploaded_documents ud ON ud.reverse_distributor_id = rd.id
+    INNER JOIN return_transactions rt ON rt.pharmacy_id = ud.pharmacy_id
+    INNER JOIN pharmacy p ON p.id = rt.pharmacy_id
+    WHERE (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id)
+    GROUP BY rd.id, rd.name
+  )
+  SELECT COALESCE(jsonb_agg(
+    jsonb_build_object(
+      'distributorId', ds.distributor_id,
+      'distributorName', ds.distributor_name,
+      'pharmaciesCount', ds.pharmacies_count,
+      'totalReturns', ds.total_returns,
+      'totalValue', ROUND(ds.total_value, 2)
+    ) ORDER BY ds.total_value DESC
+  ), '[]'::jsonb)
+  INTO v_distributor_breakdown
+  FROM distributor_stats ds;
+
+  -- 8. STATE BREAKDOWN
+  WITH state_stats AS (
+    SELECT
+      CASE 
+        WHEN p.physical_address IS NULL THEN 'Unknown'
+        WHEN p.physical_address->>'state' IS NULL THEN 'Unknown'
+        WHEN TRIM(p.physical_address->>'state') = '' THEN 'Unknown'
+        ELSE UPPER(TRIM(p.physical_address->>'state'))
+      END AS state_code,
+      COUNT(DISTINCT p.id)::INTEGER AS pharmacies_count,
+      COUNT(rt.id)::INTEGER AS total_returns,
+      COALESCE(SUM(COALESCE(rt.total_returnable_value, 0) + COALESCE(rt.total_non_returnable_value, 0)), 0) AS total_value
+    FROM pharmacy p
+    INNER JOIN return_transactions rt ON rt.pharmacy_id = p.id
+    WHERE (p_buying_group_id IS NULL OR p.created_by = p_buying_group_id)
+    GROUP BY CASE 
+      WHEN p.physical_address IS NULL THEN 'Unknown'
+      WHEN p.physical_address->>'state' IS NULL THEN 'Unknown'
+      WHEN TRIM(p.physical_address->>'state') = '' THEN 'Unknown'
+      ELSE UPPER(TRIM(p.physical_address->>'state'))
+    END
+  )
+  SELECT COALESCE(jsonb_agg(
+    jsonb_build_object(
+      'state', ss.state_code,
+      'pharmaciesCount', ss.pharmacies_count,
+      'totalReturns', ss.total_returns,
+      'totalValue', ROUND(ss.total_value, 2)
+    ) ORDER BY ss.total_value DESC
+  ), '[]'::jsonb)
+  INTO v_state_breakdown
+  FROM state_stats ss;
+
+  -- BUILD RESULT
+  v_result := jsonb_build_object(
+    'keyMetrics', jsonb_build_object(
+      'totalReturnsValue', jsonb_build_object(
+        'value', ROUND(v_total_returns_value, 2),
+        'change', v_returns_value_change,
+        'changeLabel', 'vs last month'
+      ),
+      'totalReturns', jsonb_build_object(
+        'value', v_total_returns,
+        'change', v_total_returns_change,
+        'changeLabel', 'vs last month'
+      ),
+      'avgReturnValue', jsonb_build_object(
+        'value', v_avg_return_value,
+        'change', v_avg_value_change,
+        'changeLabel', 'vs last month'
+      ),
+      'activePharmacies', jsonb_build_object(
+        'value', v_active_pharmacies,
+        'change', v_pharmacies_change,
+        'changeLabel', 'vs last month'
+      )
+    ),
+    'charts', jsonb_build_object(
+      'returnsValueTrend', v_returns_value_trend,
+      'topProducts', v_top_products
+    ),
+    'distributorBreakdown', v_distributor_breakdown,
+    'stateBreakdown', v_state_breakdown,
+    'scope', jsonb_build_object(
+      'buyingGroupId', p_buying_group_id,
+      'isGlobal', p_buying_group_id IS NULL
+    ),
+    'generatedAt', NOW()
+  );
+
+  RETURN v_result;
+END;
+$$;
+
+
+-- ────────────────────────────────────────────────────────────
+-- 10. payment_ask_vs_received
+-- ────────────────────────────────────────────────────────────
+
+CREATE OR REPLACE FUNCTION payment_ask_vs_received(
+  p_group_by        TEXT DEFAULT 'manufacturer',
+  p_period          TEXT DEFAULT NULL,
+  p_page            INTEGER DEFAULT 1,
+  p_limit           INTEGER DEFAULT 20,
+  p_buying_group_id UUID DEFAULT NULL
 )
 RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
 DECLARE
-  v_start   DATE;
-  v_end     DATE;
-  v_overview jsonb;
-  v_returns_trend jsonb;
-  v_credits_summary jsonb;
-  v_top_products jsonb;
-  v_recent_returns jsonb;
+  v_rows jsonb;
+  v_totals jsonb;
+  v_total_count INTEGER;
+  v_offset INTEGER;
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pharmacy WHERE id = p_pharmacy_id) THEN
-    RETURN jsonb_build_object('error', true, 'code', 404, 'message', 'Pharmacy not found');
+  v_offset := (p_page - 1) * p_limit;
+
+  IF p_group_by = 'manufacturer' THEN
+    SELECT COUNT(*) INTO v_total_count
+    FROM (
+      SELECT d.labeler_id, d.labeler_name
+      FROM debit_memos d
+      JOIN pharmacy ph ON ph.id = d.pharmacy_id
+      WHERE (p_period IS NULL OR TO_CHAR(d.created_at, 'YYYY-MM') = p_period)
+        AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id)
+      GROUP BY d.labeler_id, d.labeler_name
+    ) sub;
+
+    SELECT COALESCE(jsonb_agg(row_data ORDER BY (row_data->>'totalAskValue')::decimal DESC), '[]'::jsonb)
+    INTO v_rows
+    FROM (
+      SELECT jsonb_build_object(
+        'labelerId',      d.labeler_id,
+        'labelerName',    COALESCE(d.labeler_name, ''),
+        'memoCount',      COUNT(*),
+        'totalItems',     SUM(d.total_items),
+        'totalAskValue',  SUM(d.amount_requested),
+        'totalReceived',  SUM(d.amount_received),
+        'difference',     SUM(d.amount_requested) - SUM(d.amount_received),
+        'payPercent',     CASE WHEN SUM(d.amount_requested) > 0
+                            THEN ROUND(SUM(d.amount_received) / SUM(d.amount_requested) * 100, 2)
+                            ELSE 0 END,
+        'paidCount',      SUM(CASE WHEN d.payment_status = 'paid' THEN 1 ELSE 0 END),
+        'unpaidCount',    SUM(CASE WHEN d.payment_status IN ('pending', 'partial') THEN 1 ELSE 0 END)
+      ) AS row_data
+      FROM debit_memos d
+      JOIN pharmacy ph ON ph.id = d.pharmacy_id
+      WHERE (p_period IS NULL OR TO_CHAR(d.created_at, 'YYYY-MM') = p_period)
+        AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id)
+      GROUP BY d.labeler_id, d.labeler_name
+      ORDER BY SUM(d.amount_requested) DESC
+      LIMIT p_limit OFFSET v_offset
+    ) sub;
+  ELSE
+    SELECT COUNT(*) INTO v_total_count
+    FROM (
+      SELECT TO_CHAR(d.created_at, 'YYYY-MM')
+      FROM debit_memos d
+      JOIN pharmacy ph ON ph.id = d.pharmacy_id
+      WHERE (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id)
+      GROUP BY TO_CHAR(d.created_at, 'YYYY-MM')
+    ) sub;
+
+    SELECT COALESCE(jsonb_agg(row_data ORDER BY row_data->>'period'), '[]'::jsonb)
+    INTO v_rows
+    FROM (
+      SELECT jsonb_build_object(
+        'period',         TO_CHAR(d.created_at, 'YYYY-MM'),
+        'memoCount',      COUNT(*),
+        'totalAskValue',  SUM(d.amount_requested),
+        'totalReceived',  SUM(d.amount_received),
+        'difference',     SUM(d.amount_requested) - SUM(d.amount_received),
+        'payPercent',     CASE WHEN SUM(d.amount_requested) > 0
+                            THEN ROUND(SUM(d.amount_received) / SUM(d.amount_requested) * 100, 2)
+                            ELSE 0 END
+      ) AS row_data
+      FROM debit_memos d
+      JOIN pharmacy ph ON ph.id = d.pharmacy_id
+      WHERE (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id)
+      GROUP BY TO_CHAR(d.created_at, 'YYYY-MM')
+      ORDER BY TO_CHAR(d.created_at, 'YYYY-MM') DESC
+      LIMIT p_limit OFFSET v_offset
+    ) sub;
   END IF;
 
-  v_start := COALESCE(p_period_start, CURRENT_DATE - INTERVAL '12 months');
-  v_end   := COALESCE(p_period_end,   CURRENT_DATE);
-
   SELECT jsonb_build_object(
-    'totalReturns',          COUNT(*),
-    'totalItems',            COALESCE(SUM(rt.total_items), 0),
-    'totalReturnableValue',  COALESCE(SUM(rt.total_returnable_value), 0),
-    'totalNonReturnableValue', COALESCE(SUM(rt.total_non_returnable_value), 0),
-    'inProgressReturns',     COUNT(*) FILTER (WHERE rt.status = 'in_progress'),
-    'completedReturns',      COUNT(*) FILTER (WHERE rt.status IN ('completed','finalized','received','closed_out')),
-    'avgItemsPerReturn',     ROUND(COALESCE(AVG(rt.total_items), 0), 1)
-  )
-  INTO v_overview
-  FROM return_transactions rt
-  WHERE rt.pharmacy_id = p_pharmacy_id
-    AND rt.created_at::date BETWEEN v_start AND v_end;
+    'totalMemos',      COUNT(*),
+    'totalAskValue',   COALESCE(SUM(d.amount_requested), 0),
+    'totalReceived',   COALESCE(SUM(d.amount_received), 0),
+    'totalDifference', COALESCE(SUM(d.amount_requested) - SUM(d.amount_received), 0),
+    'overallPayPercent', CASE WHEN SUM(d.amount_requested) > 0
+                           THEN ROUND(SUM(d.amount_received) / SUM(d.amount_requested) * 100, 2)
+                           ELSE 0 END
+  ) INTO v_totals
+  FROM debit_memos d
+  JOIN pharmacy ph ON ph.id = d.pharmacy_id
+  WHERE (p_period IS NULL OR TO_CHAR(d.created_at, 'YYYY-MM') = p_period)
+    AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
 
-  SELECT COALESCE(jsonb_agg(row_data ORDER BY period_key), '[]'::jsonb)
-  INTO v_returns_trend
-  FROM (
-    SELECT jsonb_build_object(
-      'period',     TO_CHAR(DATE_TRUNC('month', rt.created_at), 'Mon YYYY'),
-      'periodKey',  TO_CHAR(DATE_TRUNC('month', rt.created_at), 'YYYY-MM'),
-      'returns',    COUNT(*),
-      'totalValue', COALESCE(SUM(rt.total_returnable_value), 0),
-      'totalItems', COALESCE(SUM(rt.total_items), 0)
-    ) AS row_data,
-    TO_CHAR(DATE_TRUNC('month', rt.created_at), 'YYYY-MM') AS period_key
-    FROM return_transactions rt
-    WHERE rt.pharmacy_id = p_pharmacy_id
-      AND rt.created_at::date BETWEEN v_start AND v_end
-    GROUP BY DATE_TRUNC('month', rt.created_at)
-  ) sub;
-
-  SELECT jsonb_build_object(
-    'totalCreditsReceived',  COALESCE(SUM(pp.total_credit_received), 0),
-    'totalCompanyFee',       COALESCE(SUM(pp.company_fee), 0),
-    'totalGpoShare',         COALESCE(SUM(pp.gpo_share), 0),
-    'totalPayout',           COALESCE(SUM(pp.pharmacy_payout), 0),
-    'paidPayout',            COALESCE(SUM(pp.pharmacy_payout) FILTER (WHERE pp.status = 'paid'), 0),
-    'pendingPayout',         COALESCE(SUM(pp.pharmacy_payout) FILTER (WHERE pp.status IN ('pending', 'processing')), 0),
-    'totalPayments',         COUNT(*),
-    'estimatedVsActual',     CASE WHEN (
-      SELECT SUM(rti.estimated_value) FROM return_transaction_items rti
-      JOIN return_transactions rt ON rt.id = rti.transaction_id
-      WHERE rt.pharmacy_id = p_pharmacy_id
-    ) > 0 THEN jsonb_build_object(
-      'estimatedValue', (
-        SELECT COALESCE(SUM(rti.estimated_value), 0) FROM return_transaction_items rti
-        JOIN return_transactions rt ON rt.id = rti.transaction_id
-        WHERE rt.pharmacy_id = p_pharmacy_id
-      ),
-      'actualReceived', COALESCE(SUM(pp.total_credit_received), 0),
-      'recoveryPercent', ROUND(
-        COALESCE(SUM(pp.total_credit_received), 0) /
-        GREATEST((
-          SELECT COALESCE(SUM(rti.estimated_value), 0) FROM return_transaction_items rti
-          JOIN return_transactions rt ON rt.id = rti.transaction_id
-          WHERE rt.pharmacy_id = p_pharmacy_id
-        ), 1) * 100, 1
-      )
+  RETURN jsonb_build_object(
+    'error', false,
+    'data', v_rows,
+    'totals', v_totals,
+    'pagination', jsonb_build_object(
+      'page', p_page,
+      'limit', p_limit,
+      'total', v_total_count,
+      'totalPages', CEIL(v_total_count::decimal / p_limit)
     )
-    ELSE jsonb_build_object(
-      'estimatedValue', 0,
-      'actualReceived', 0,
-      'recoveryPercent', 0
-    ) END
-  )
-  INTO v_credits_summary
-  FROM pharmacy_payments pp
-  WHERE pp.pharmacy_id = p_pharmacy_id;
+  );
+END;
+$$;
 
-  SELECT COALESCE(jsonb_agg(row_data ORDER BY total_value DESC), '[]'::jsonb)
-  INTO v_top_products
+
+-- ────────────────────────────────────────────────────────────
+-- 11. payment_manufacturer_summary
+-- ────────────────────────────────────────────────────────────
+
+CREATE OR REPLACE FUNCTION payment_manufacturer_summary(
+  p_search          TEXT DEFAULT NULL,
+  p_page            INTEGER DEFAULT 1,
+  p_limit           INTEGER DEFAULT 20,
+  p_buying_group_id UUID DEFAULT NULL
+)
+RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
+DECLARE
+  v_offset INTEGER;
+  v_total  INTEGER;
+  v_rows   jsonb;
+BEGIN
+  v_offset := (GREATEST(p_page, 1) - 1) * p_limit;
+
+  SELECT COUNT(DISTINCT d.labeler_id) INTO v_total
+  FROM debit_memos d
+  JOIN pharmacy ph ON ph.id = d.pharmacy_id
+  WHERE (p_search IS NULL OR (
+    LOWER(COALESCE(d.labeler_name, '')) LIKE '%' || LOWER(p_search) || '%'
+    OR d.labeler_id LIKE '%' || p_search || '%'
+  ))
+  AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id);
+
+  SELECT COALESCE(jsonb_agg(row_data ORDER BY (row_data->>'outstandingAmount')::decimal DESC), '[]'::jsonb)
+  INTO v_rows
   FROM (
     SELECT jsonb_build_object(
-      'ndc',            rti.ndc,
-      'productName',    COALESCE(rti.proprietary_name, rti.generic_name, 'Unknown'),
-      'manufacturer',   rti.manufacturer,
-      'totalQuantity',  SUM(rti.quantity),
-      'totalValue',     COALESCE(SUM(rti.estimated_value), 0),
-      'returnCount',    COUNT(*)
-    ) AS row_data,
-    COALESCE(SUM(rti.estimated_value), 0) AS total_value
-    FROM return_transaction_items rti
-    JOIN return_transactions rt ON rt.id = rti.transaction_id
-    WHERE rt.pharmacy_id = p_pharmacy_id
-      AND rt.created_at::date BETWEEN v_start AND v_end
-    GROUP BY rti.ndc, COALESCE(rti.proprietary_name, rti.generic_name, 'Unknown'), rti.manufacturer
-    ORDER BY total_value DESC
-    LIMIT 10
-  ) sub;
-
-  SELECT COALESCE(jsonb_agg(row_data ORDER BY created_at DESC), '[]'::jsonb)
-  INTO v_recent_returns
-  FROM (
-    SELECT jsonb_build_object(
-      'id',             rt.id,
-      'licensePlate',   rt.license_plate,
-      'status',         rt.status,
-      'totalItems',     rt.total_items,
-      'returnableValue',rt.total_returnable_value,
-      'serviceType',    rt.service_type,
-      'createdAt',      rt.created_at
-    ) AS row_data,
-    rt.created_at
-    FROM return_transactions rt
-    WHERE rt.pharmacy_id = p_pharmacy_id
-    ORDER BY rt.created_at DESC
-    LIMIT 5
+      'labelerId',         d.labeler_id,
+      'labelerName',       COALESCE(MAX(d.labeler_name), ''),
+      'totalMemos',        COUNT(*),
+      'unpaidMemos',       SUM(CASE WHEN d.payment_status IN ('pending', 'partial') THEN 1 ELSE 0 END),
+      'paidMemos',         SUM(CASE WHEN d.payment_status = 'paid' THEN 1 ELSE 0 END),
+      'disputedMemos',     SUM(CASE WHEN d.payment_status = 'disputed' THEN 1 ELSE 0 END),
+      'totalAskValue',     SUM(d.amount_requested),
+      'totalPaidAmount',   SUM(d.amount_received),
+      'outstandingAmount', SUM(d.amount_requested) - SUM(d.amount_received),
+      'averagePayPercent', CASE WHEN SUM(d.amount_requested) > 0
+                             THEN ROUND(SUM(d.amount_received) / SUM(d.amount_requested) * 100, 2)
+                             ELSE 0 END,
+      'averageDaysToPay',  COALESCE(
+        ROUND(AVG(
+          CASE WHEN d.payment_received_at IS NOT NULL AND d.ra_requested_at IS NOT NULL
+            THEN EXTRACT(DAY FROM d.payment_received_at - d.ra_requested_at)
+            ELSE NULL END
+        )::numeric, 0)::integer,
+        0
+      ),
+      'policyAvgPayPercent', (
+        SELECT mp.average_pay_percent
+        FROM manufacturer_policies mp
+        WHERE mp.labeler_id = d.labeler_id
+        LIMIT 1
+      ),
+      'policyAvgDaysToPay', (
+        SELECT mp.average_days_to_pay
+        FROM manufacturer_policies mp
+        WHERE mp.labeler_id = d.labeler_id
+        LIMIT 1
+      )
+    ) AS row_data
+    FROM debit_memos d
+    JOIN pharmacy ph ON ph.id = d.pharmacy_id
+    WHERE (p_search IS NULL OR (
+      LOWER(COALESCE(d.labeler_name, '')) LIKE '%' || LOWER(p_search) || '%'
+      OR d.labeler_id LIKE '%' || p_search || '%'
+    ))
+    AND (p_buying_group_id IS NULL OR ph.created_by = p_buying_group_id)
+    GROUP BY d.labeler_id
+    ORDER BY SUM(d.amount_requested) - SUM(d.amount_received) DESC
+    LIMIT p_limit OFFSET v_offset
   ) sub;
 
   RETURN jsonb_build_object(
     'error', false,
-    'data', jsonb_build_object(
-      'periodStart',    v_start,
-      'periodEnd',      v_end,
-      'overview',       v_overview,
-      'returnsTrend',   v_returns_trend,
-      'creditsSummary', v_credits_summary,
-      'topProducts',    v_top_products,
-      'recentReturns',  v_recent_returns
+    'data', v_rows,
+    'pagination', jsonb_build_object(
+      'page', p_page, 'limit', p_limit, 'total', v_total,
+      'totalPages', CEIL(v_total::float / p_limit)::integer
     )
   );
 END;
@@ -1167,4 +1548,6 @@ GRANT EXECUTE ON FUNCTION analytics_unpaid_memos(TEXT, TEXT, TEXT, INTEGER, INTE
 GRANT EXECUTE ON FUNCTION analytics_price_audit(TEXT, TEXT, TEXT, INTEGER, INTEGER, UUID)     TO authenticated, service_role;
 GRANT EXECUTE ON FUNCTION analytics_pharmacy_performance(TEXT, TEXT, TEXT, INTEGER, INTEGER, UUID) TO authenticated, service_role;
 GRANT EXECUTE ON FUNCTION analytics_gpo_summary(TEXT, INTEGER, INTEGER, UUID)                TO authenticated, service_role;
-GRANT EXECUTE ON FUNCTION analytics_pharmacy_dashboard(UUID, DATE, DATE)                     TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION get_admin_analytics(UUID)                                          TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION payment_ask_vs_received(TEXT, TEXT, INTEGER, INTEGER, UUID)         TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION payment_manufacturer_summary(TEXT, INTEGER, INTEGER, UUID)          TO authenticated, service_role;

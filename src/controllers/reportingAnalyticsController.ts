@@ -15,6 +15,7 @@ export const returnsSummaryHandler = catchAsync(
       periodEnd: period_end,
       pharmacyId: pharmacy_id,
       groupBy: group_by,
+      buyingGroupId: req.adminBuyingGroupId ?? undefined,
     });
 
     res.status(200).json({ status: 'success', data: result });
@@ -35,6 +36,7 @@ export const fcrAskVsReceivedHandler = catchAsync(
       period,
       page: page ? Number(page) : undefined,
       limit: limit ? Number(limit) : undefined,
+      buyingGroupId: req.adminBuyingGroupId ?? undefined,
     });
 
     res.status(200).json({
@@ -59,6 +61,7 @@ export const agingInventoryHandler = catchAsync(
       status,
       page: page ? Number(page) : undefined,
       limit: limit ? Number(limit) : undefined,
+      buyingGroupId: req.adminBuyingGroupId ?? undefined,
     });
 
     res.status(200).json({
@@ -84,6 +87,7 @@ export const outstandingRaHandler = catchAsync(
       search,
       page: page ? Number(page) : undefined,
       limit: limit ? Number(limit) : undefined,
+      buyingGroupId: req.adminBuyingGroupId ?? undefined,
     });
 
     res.status(200).json({
@@ -110,6 +114,7 @@ export const unpaidMemosHandler = catchAsync(
       search,
       page: page ? Number(page) : undefined,
       limit: limit ? Number(limit) : undefined,
+      buyingGroupId: req.adminBuyingGroupId ?? undefined,
     });
 
     res.status(200).json({
@@ -136,6 +141,7 @@ export const priceAuditHandler = catchAsync(
       search,
       page: page ? Number(page) : undefined,
       limit: limit ? Number(limit) : undefined,
+      buyingGroupId: req.adminBuyingGroupId ?? undefined,
     });
 
     res.status(200).json({
@@ -161,6 +167,7 @@ export const pharmacyPerformanceHandler = catchAsync(
       sortDir: sort_dir,
       page: page ? Number(page) : undefined,
       limit: limit ? Number(limit) : undefined,
+      buyingGroupId: req.adminBuyingGroupId ?? undefined,
     });
 
     res.status(200).json({
@@ -183,6 +190,7 @@ export const gpoSummaryHandler = catchAsync(
       search,
       page: page ? Number(page) : undefined,
       limit: limit ? Number(limit) : undefined,
+      buyingGroupId: req.adminBuyingGroupId ?? undefined,
     });
 
     res.status(200).json({

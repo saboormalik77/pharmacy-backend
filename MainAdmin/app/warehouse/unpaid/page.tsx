@@ -265,8 +265,18 @@ export default function UnpaidMemosPage() {
                 addToast(`Payment of ${fmt(amt)} recorded for ${paymentMemo.memoNumber}`, 'success');
                 setPaymentMemo(null);
                 setCreditMemoFile(null);
-                dispatch(fetchUnpaidMemos({ search: debouncedSearch || undefined, destination: destination || undefined, page, limit: PAGE_SIZE }));
-                dispatch(fetchPaidMemos({ search: debouncedPaidSearch || undefined, destination: paidDestination || undefined, page: paidPage, limit: PAGE_SIZE }));
+                dispatch(fetchUnpaidGroupedByReturn({
+                    search: debouncedSearch || undefined,
+                    destination: destination || undefined,
+                    page,
+                    limit: PAGE_SIZE,
+                }));
+                dispatch(fetchPaidGroupedByReturn({
+                    search: debouncedPaidSearch || undefined,
+                    destination: paidDestination || undefined,
+                    page: paidPage,
+                    limit: PAGE_SIZE,
+                }));
             }
         }
     };

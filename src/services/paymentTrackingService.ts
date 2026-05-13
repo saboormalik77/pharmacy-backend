@@ -250,7 +250,8 @@ export const askVsReceived = async (
   groupBy?: string,
   period?: string,
   page?: number,
-  limit?: number
+  limit?: number,
+  buyingGroupId?: string
 ): Promise<{ data: AskVsReceivedRow[]; totals: any; pagination?: any }> => {
   const sb = ensureAdmin();
   const { data, error } = await sb.rpc('payment_ask_vs_received', {
@@ -258,6 +259,7 @@ export const askVsReceived = async (
     p_period: period || null,
     p_page: page || 1,
     p_limit: limit || 20,
+    p_buying_group_id: buyingGroupId || null,
   });
   handleRpcError(data, error, 'Failed to get ask vs received analytics');
   return { data: data.data as AskVsReceivedRow[], totals: data.totals, pagination: data.pagination };
@@ -270,13 +272,15 @@ export const askVsReceived = async (
 export const manufacturerPaymentSummary = async (
   search?: string,
   page?: number,
-  limit?: number
+  limit?: number,
+  buyingGroupId?: string
 ): Promise<{ data: ManufacturerPaymentSummary[]; pagination: any }> => {
   const sb = ensureAdmin();
   const { data, error } = await sb.rpc('payment_manufacturer_summary', {
     p_search: search || null,
     p_page: page || 1,
     p_limit: limit || 20,
+    p_buying_group_id: buyingGroupId || null,
   });
   handleRpcError(data, error, 'Failed to get manufacturer payment summary');
   return { data: data.data as ManufacturerPaymentSummary[], pagination: data.pagination };

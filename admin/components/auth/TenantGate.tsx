@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { DomainNotRecognizedScreen } from '@/components/auth/DomainNotRecognizedScreen';
 import { TenantInfoLoadingScreen } from '@/components/auth/TenantInfoLoadingScreen';
 import { useAdminPortalTenant } from '@/lib/hooks/useAdminPortalTenant';
@@ -18,6 +19,16 @@ export default function TenantGate({
   children: React.ReactNode;
 }) {
   const { tenantChecked, tenantError, isLocalHost } = useAdminPortalTenant();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Show loading until client mounts to avoid hydration mismatch
+  if (!mounted) {
+    return <TenantInfoLoadingScreen />;
+  }
 
   if (!isLocalHost && !tenantChecked) {
     return <TenantInfoLoadingScreen />;

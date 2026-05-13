@@ -83,24 +83,6 @@ function payRateColor(ratio: number | null | undefined): string {
     return 'var(--error)';
 }
 
-function reliabilityBadgeColors(r: ManufacturerReliability | undefined | null): {
-    bg: string;
-    fg: string;
-} {
-    switch (r) {
-        case 'excellent':
-            return { bg: 'var(--secondary-container)', fg: 'var(--secondary)' };
-        case 'good':
-            return { bg: 'var(--secondary-container)', fg: 'var(--secondary)' };
-        case 'average':
-            return { bg: 'var(--tertiary-fixed)', fg: 'var(--tertiary)' };
-        case 'poor':
-            return { bg: 'var(--error-container)', fg: 'var(--error)' };
-        default:
-            return { bg: 'var(--surface-container-low)', fg: 'var(--on-surface-variant)' };
-    }
-}
-
 export default function NDCPricingPage() {
     const dispatch = useAppDispatch();
     const { items, pagination, isLoading, isActionLoading, error } = useAppSelector(s => s.ndcPricing);
@@ -376,7 +358,6 @@ export default function NDCPricingPage() {
                                 <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap" title="Average received / credited price across observed credit memos">Avg Recv</th>
                                 <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap" title="Historical pay rate = avg received / avg ask">Pay %</th>
                                 <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap" title="Number of historical ask/received observations">Samples</th>
-                                <th className="text-center px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap" title="Manufacturer reliability bucket derived from pay rate + sample size">Reliability</th>
                                 {/* <th className="text-right px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Est. Store Price</th> */}
                                 <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Source</th>
                                 <th className="text-left px-3 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap text-[var(--on-surface-variant)] whitespace-nowrap">Destination</th>
@@ -400,8 +381,6 @@ export default function NDCPricingPage() {
                             ) : items.map(row => {
                                 const samples = row.paymentSampleCount ?? 0;
                                 const ratio = row.askReceivedRatio ?? null;
-                                const reliab = (row.manufacturerReliability ?? 'unknown') as ManufacturerReliability;
-                                const reliabColors = reliabilityBadgeColors(reliab);
                                 return (
                                 <tr key={row.id} className="hover:bg-[var(--surface-container)]" style={{ borderColor: 'var(--outline-variant)' }}>
                                     <td className="px-3 py-3">
@@ -422,14 +401,6 @@ export default function NDCPricingPage() {
                                     </td>
                                     <td className="px-3 py-3 text-center text-xs" style={{ color: samples > 0 ? 'var(--foreground)' : 'var(--on-surface-variant)' }}>
                                         {samples}
-                                    </td>
-                                    <td className="px-3 py-3 text-center">
-                                        <span
-                                            className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium capitalize"
-                                            style={{ backgroundColor: reliabColors.bg, color: reliabColors.fg }}
-                                        >
-                                            {reliab}
-                                        </span>
                                     </td>
                                     {/* <td className="px-3 py-3 text-right font-mono text-sm" style={{ color: 'var(--foreground)' }}>{fmt(row.estimatedStorePrice)}</td> */}
                                     <td className="px-3 py-3">
