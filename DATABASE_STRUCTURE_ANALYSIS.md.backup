@@ -1,0 +1,481 @@
+# Database Structure Analysis for Multi-Database Migration
+
+**Last Updated:** May 13, 2026  
+**Purpose:** Complete analysis of which database resources (tables, RPCs, policies) are used by each portal for the multi-tenant database migration.
+
+---
+
+## Table of Contents
+
+1. [Executive Summary](#executive-summary)
+2. [Database Categorization](#database-categorization)
+3. [Portal-to-Database Mapping Summary](#portal-to-database-mapping-summary)
+4. [Migration Critical Considerations](#migration-critical-considerations)
+
+---
+
+## Executive Summary
+
+### Current State
+- Single Supabase database serves ALL portals (MainAdmin, Admin, Pharmacy, Processor)
+- ~70+ tables, ~300+ RPC functions, multiple RLS policies
+
+### Target State
+- **Main Admin Database**: Central database with warehouse operations + MainAdmin management
+- **Buying Group Databases**: Cloned databases (one per buying group) for business operations
+
+### Key Architecture Decision
+**MainAdmin operates the centralized warehouse** - all warehouse tables stay in MainAdmin DB. Buying groups send returns to the central warehouse for processing.
+
+---
+
+4. [MainAdmin Portal Deep Analysis](#mainadmin-portal-deep-analysis)
+5. [Admin (Buying Group) Portal Deep Analysis](#admin-buying-group-portal-deep-analysis)
+6. [Pharmacy Portal Deep Analysis](#pharmacy-portal-deep-analysis)
+7. [Processor Portal Deep Analysis](#processor-portal-deep-analysis)
+## Database Categorization
+
+### MAIN ADMIN DATABASE (Central Warehouse + Platform Management)
+
+| Table | Description |
+|-------|-------------|
+| `main_admin` | Main admin user accounts |
+| `sub_main_admin` | Sub-admin accounts under main admin |
+| `buying_group_domains` | Domain mappings for tenant resolution |
+| **BUYING GROUP ADMIN ACCOUNTS** | |
+| `admin` | Buying group admin accounts (created by MainAdmin; used for BG portal login against Main Admin DB) |
+| **WAREHOUSE OPERATIONS** | |
+| `warehouses` | Warehouse locations |
+| `return_transactions` | Main return transaction records |
+| `return_transaction_items` | Line items within returns |
+| `return_batches` | Batched returns for processing |
+| `batch_workflow_steps` | Workflow state for batches |
+| `warehouse_discrepancies` | Discrepancy tracking |
+| `debit_memos` | Debit memos for returns |
+| `debit_memo_items` | Line items in debit memos |
+| `ra_requests` | Return Authorization requests |
+| `shipment_groups` | Shipment groupings |
+| `wine_cellar_items` | Items in wine cellar (aging) |
+| `destruction_records` | Destruction tracking |
+| **REFERENCE DATA** | |
+| `reverse_distributors` | Reverse distributor partners |
+| `manufacturer_policies` | Manufacturer return policies |
+| `manufacturer_return_policies` | Detailed return policy rules |
+| `manufacturer_policy_notes` | Policy notes |
+| `non_returnable_products` | Products excluded from returns |
+| `ndc_pricing` | NDC pricing book |
+| `distributors` | Distributor records |
+
+---
+
+### BUYING GROUP DATABASE (Business Operations - Cloned per Buying Group)
+
+| Table | Description |
+|-------|-------------|
+| **CORE IDENTITY** | |
+| `admin_settings` | Buying group settings (logo, business name, etc.) |
+| `admin_users` | Admin user records |
+| `pharmacy` | Pharmacies under the buying group |
+| `pharmacy_branches` | Pharmacy branch locations |
+| `pharmacy_invites` | Pending pharmacy invitations |
+| `processors` | Processor users for the buying group |
+| `processor_store_assignments` | Processor-to-pharmacy assignments |
+| `processor_notifications` | Processor notifications |
+| **SERVICE OPERATIONS** | |
+| `service_requests` | On-site service requests |
+| `service_request_assignments` | Service request assignments |
+| **BUSINESS OPERATIONS** | |
+| `marketplace_deals` | Marketplace listings |
+| `marketplace_orders` | Marketplace orders |
+| `marketplace_cart_items` | Shopping cart |
+| `pharmacy_payments` | Payments to pharmacies |
+| **INVENTORY & PRODUCTS** | |
+| `pharmacy_inventory_items` | Pharmacy inventory analysis |
+| `pharmacy_inventory_uploads` | Inventory upload records |
+| `inventory_items` | Pharmacy inventory |
+| `inventory_reminders` | Inventory reminders |
+| `products` | Product catalog |
+| `custom_packages` | Custom package definitions |
+| `custom_package_items` | Items in custom packages |
+| `product_list_items` | Product list items |
+| **SUBSCRIPTIONS & BILLING** | |
+| `subscriptions` | Pharmacy subscriptions |
+| `subscription_plans` | Available subscription plans |
+| **DOCUMENTS & REPORTS** | |
+| `uploaded_documents` | Document storage records |
+| `return_reports` | Uploaded return reports |
+| `returns` | Legacy return records |
+| `return_items` | Legacy return items |
+| **NOTIFICATIONS & AUTH** | |
+| `pharmacy_notifications` | Pharmacy notifications |
+| `refresh_tokens` | Auth refresh tokens |
+| `settings` | General settings |
+| **EMAIL & LOGS** | |
+| `email_logs` | Email logs |
+| `email_logs_with_memo_info` | Email logs with memo information |
+
+---
+
+## Portal-to-Database Mapping Summary
+
+---
+
+## MainAdmin Portal Deep Analysis
+
+### Pages (34 total)
+
+| Route | APIs Called | Key Tables | Key RPCs |
+|-------|-------------|------------|----------|
+| `/` (Dashboard) | `GET /main-admin/buying-groups`, `GET /admin/warehouse/received`, `GET /admin/batches` | - | `get_buying_groups_list`, `warehouse_list_received`, `list_batches` |
+| `/login` | `POST /main-admin/auth/login` | `main_admin`, `sub_main_admin` | `get_main_admin_by_email`, `get_sub_main_admin_by_email` |
+| `/setup-account` | `GET /main-admin/sub-admins/invite/validate`, `POST .../accept` | `sub_main_admin` | `validate_sub_admin_invite_token`, `accept_sub_admin_invite` |
+| `/buying-groups` | `GET/POST/PUT/DELETE /main-admin/buying-groups`, `GET .../domains` | `admin` (Main Admin DB), `admin_settings` (BG DB), `buying_group_domains` (Main Admin DB) | `get_buying_groups_list`, `create_buying_group`, `update_buying_group` |
+| `/sub-admins` | `GET/POST/PUT/DELETE /main-admin/sub-admins` | `sub_main_admin` | `get_sub_main_admins_list`, `create_sub_main_admin`, `update_sub_main_admin` |
+| `/settings` | `GET/PATCH /admin/settings`, `POST .../upload-logo`, `POST .../reset-password` | `admin_settings`, `warehouses` | `get_admin_settings`, `update_admin_settings`, `get_default_warehouse` |
+| `/distributors` | `GET/POST/PUT/DELETE /admin/distributors` | `distributors` | `get_admin_distributors_list`, `create_admin_distributor` |
+| `/policies` | `GET/POST/PATCH/DELETE /admin/policies` | `manufacturer_policies`, `manufacturer_return_policies` | Direct table access |
+| `/ndc-pricing` | `GET /admin/ndc-pricing/search`, `POST/DELETE /admin/ndc-pricing` | `ndc_pricing` | `search_ndc_pricing_book`, `upsert_ndc_pricing` |
+| `/pharmacy-payments` | `GET /admin/pharmacy-payments`, `POST .../calculate` | `pharmacy_payments` | `pharmacy_payment_list`, `pharmacy_payment_calculate` |
+| `/warehouse/receiving` | `GET /admin/warehouse/pending`, `POST /admin/warehouse/scan-box` | `return_transactions` | `warehouse_list_pending`, `warehouse_scan_box` |
+| `/warehouse/verification` | `GET /admin/warehouse/received` | `return_transactions` | `warehouse_list_received` |
+| `/warehouse/verification/[id]` | `POST .../start-verification`, `PATCH .../verify-v2` | `return_transactions`, `warehouse_discrepancies` | `warehouse_start_verification`, `warehouse_verify_item_v2` |
+| `/warehouse/batches` | `GET /admin/batches`, `POST /admin/batches` | `return_batches` | `list_batches`, `create_batch` |
+| `/warehouse/returns` | `GET /return-transactions`, `POST .../pause`, `POST .../complete` | `return_transactions` | `list_return_transactions`, `change_return_transaction_status` |
+| `/warehouse/debit-memos` | `GET /admin/debit-memos/grouped-by-return` | `debit_memos` | `list_debit_memos_grouped_by_return` |
+| `/warehouse/ra-tracking` | `GET /admin/ra-tracking`, `POST .../request-ra` | `ra_requests` | `ra_list_tracking`, `ra_send_request` |
+
+---
+
+## Admin (Buying Group) Portal Deep Analysis
+
+### Pages (46 total)
+
+| Route | APIs Called | Key Tables | Key RPCs |
+|-------|-------------|------------|----------|
+| `/` (Dashboard) | `GET /admin/dashboard`, `GET /admin/recent-activity` | - | `get_admin_dashboard_stats`, `get_admin_recent_activity` |
+| `/login` | `GET /auth/tenant-info`, `POST /auth/login` | `admin` (Main Admin DB), `buying_group_domains` (Main Admin DB) | `resolve_domain_to_buying_group`, `validate_admin_tenant_access` |
+| `/admins` | `GET/POST/PATCH/DELETE /admin/users` | `admin` | `get_admin_users_list`, `create_admin_user`, `update_admin_user` |
+| `/pharmacies` | `GET/POST/PUT /admin/pharmacies` | `pharmacy`, `pharmacy_invites` | `get_admin_pharmacies_list`, `admin_create_pharmacy` |
+| `/distributors` | `GET/POST/PUT/DELETE /admin/distributors` | `distributors` | `get_admin_distributors_list`, `create_admin_distributor` |
+| `/processors` | `GET/POST/PUT/DELETE /admin/processors` | `processors`, `processor_store_assignments` | Direct table access |
+| `/documents` | `GET/DELETE /admin/documents` | `uploaded_documents` | `get_admin_documents_list`, `delete_admin_document` |
+| `/payments` | `GET /admin/payments` | `pharmacy_payments` | `get_admin_payments_list` |
+| `/marketplace` | `GET/POST/PATCH/DELETE /admin/marketplace` | `marketplace_deals` | `get_marketplace_deals_list`, `create_marketplace_deal` |
+| `/policies` | `GET/POST/PATCH/DELETE /admin/policies` | `manufacturer_policies` | Direct table access |
+| `/settings` | `GET/PATCH /admin/settings` | `admin_settings` | `get_admin_settings`, `update_admin_settings` |
+| `/analytics/*` | `GET /admin/analytics/*` | - | `get_admin_analytics`, `analytics_*` RPCs |
+| `/service-requests` | `GET /admin/service-requests` | `service_requests` | `list_admin_service_requests` |
+
+---
+
+## Pharmacy Portal Deep Analysis
+
+### Pages (67 total)
+
+| Route | APIs Called | Key Tables | Key RPCs |
+|-------|-------------|------------|----------|
+| `/login`, `/register` | `POST /auth/signin`, `POST /auth/signup` | `pharmacy`, `refresh_tokens` | `validate_pharmacy_tenant_access` |
+| `/setup-account` | `POST /auth/verify-invite` | `pharmacy_invites` | `verify_pharmacy_invite`, `complete_pharmacy_setup` |
+| `/dashboard` | `GET /dashboard/return-stats` | `return_transactions`, `pharmacy_payments` | `get_return_credit_summary` |
+| `/analytics` | `GET /analytics/pharmacy-dashboard` | - | `analytics_pharmacy_dashboard` |
+| `/inventory` | `GET/POST/PATCH/DELETE /inventory` | `inventory_items` | Direct table access |
+| `/inventory-analysis` | `GET .../summary`, `POST .../upload` | `pharmacy_inventory_items` | Direct table access |
+| `/products` | `GET /products/search`, `POST /products` | `products` | Direct table access |
+| `/returns` | `GET /return-transactions`, `DELETE .../` | `return_transactions` | `list_return_transactions`, `delete_return_transaction` |
+| `/returns/create` | `POST /return-transactions` | `return_transactions` | `create_return_transaction` |
+| `/returns/[id]` | `GET /return-transactions/:id`, lifecycle actions | `return_transactions`, `return_transaction_items` | `get_return_transaction_by_id`, `change_return_transaction_status` |
+| `/returns/[id]/add-items` | `POST .../items`, `POST /barcode/scan` | `return_transaction_items` | `add_return_transaction_item_with_validation` |
+| `/returns/[id]/finalize` | `PATCH .../finalize-steps`, `POST .../create-shipment` | `return_transactions` | `update_finalize_steps`, `save_fedex_shipment_data` |
+| `/marketplace` | `GET /marketplace`, `GET .../cart` | `marketplace_deals`, `marketplace_cart_items` | `get_pharmacy_marketplace_deals`, `get_pharmacy_cart` |
+| `/marketplace/checkout` | `POST /marketplace/checkout` | `marketplace_orders` | `create_marketplace_order_from_cart` |
+| `/credits` | `GET /pharmacy-payments/my-payments` | `pharmacy_payments` | `pharmacy_payment_my_payments` |
+| `/subscription` | `GET/POST /subscriptions/*` | `subscriptions`, `subscription_plans` | Direct table access |
+| `/settings` | `GET/PATCH /settings` | `pharmacy` | Direct table access |
+| `/branches` | `GET/POST /pharmacy-branches` | `pharmacy_branches` | `get_pharmacy_branches`, `pharmacy_admin_create_branch` |
+| `/roles` | `GET/POST/DELETE /pharmacy-roles` | - | `create_pharmacy_role`, `update_pharmacy_role` |
+| `/on-site-service` | `GET/POST /on-site-service` | `service_requests` | `create_service_request`, `list_pharmacy_service_requests` |
+
+---
+
+## Processor Portal Deep Analysis
+
+### Pages (via Admin app with role='processor')
+
+| Route | APIs Called | Key Tables | Key RPCs |
+|-------|-------------|------------|----------|
+| `/` (Dashboard) | `GET /processors/my-stores` | `processor_store_assignments`, `pharmacy` | Direct table access |
+| `/warehouse/returns` | `GET /return-transactions` | `return_transactions` | `list_return_transactions` |
+| `/warehouse/returns/create` | `POST /return-transactions` | `return_transactions` | `create_return_transaction` |
+| `/warehouse/returns/[id]` | Full return lifecycle | `return_transactions`, `return_transaction_items` | All return transaction RPCs |
+| `/service-requests` | `GET/POST /processors/service-requests` | `service_requests` | `list_processor_service_requests`, `claim_service_request` |
+
+### Processor-Only APIs
+
+| Endpoint | Tables | RPCs |
+|----------|--------|------|
+| `GET /processors/my-stores` | `processor_store_assignments`, `pharmacy` | Direct table access |
+| `GET /processors/notifications` | - | `list_processor_notifications` |
+| `POST /processors/notifications/mark-all-read` | - | `mark_all_processor_notifications_read` |
+| `POST /processors/service-requests/:id/schedule` | `service_request_assignments` | `claim_service_request` |
+
+| Portal | Primary DB | Notes |
+|--------|-----------|-------|
+| **MainAdmin** | Main Admin DB | All MainAdmin tables + warehouse operations + `admin` (buying group accounts) |
+| **Admin / Pharmacy / Processor** (combined BG portals) | Main Admin DB (login) → **BG DB** (all operations) | All three portals authenticate via `admin` in Main Admin DB; all operational tables live in the BG DB |
+
+---
+
+## Main Admin Database Tables:
+- `main_admin`
+- `sub_main_admin`
+- `buying_group_domains`
+- `admin`
+- `warehouses`
+- `return_transactions`
+- `return_transaction_items`
+- `return_batches`
+- `batch_workflow_steps`
+- `warehouse_discrepancies`
+- `debit_memos`
+- `debit_memo_items`
+- `ra_requests`
+- `shipment_groups`
+- `wine_cellar_items`
+- `destruction_records`
+- `reverse_distributors`
+- `manufacturer_policies`
+- `manufacturer_return_policies`
+- `manufacturer_policy_notes`
+- `non_returnable_products`
+- `ndc_pricing`
+- `distributors`
+
+## Buying Group Database Tables:
+- `admin_settings`
+- `admin_users`
+- `pharmacy`
+- `pharmacy_branches`
+- `pharmacy_invites`
+- `pharmacy_inventory_items`
+- `pharmacy_inventory_uploads`
+- `pharmacy_notifications`
+- `pharmacy_payments`
+- `processors`
+- `processor_store_assignments`
+- `processor_notifications`
+- `service_requests`
+- `service_request_assignments`
+- `marketplace_deals`
+- `marketplace_orders`
+- `marketplace_cart_items`
+- `custom_packages`
+- `custom_package_items`
+- `product_list_items`
+- `products`
+- `inventory_items`
+- `inventory_reminders`
+- `subscriptions`
+- `subscription_plans`
+- `uploaded_documents`
+- `refresh_tokens`
+- `settings`
+- `returns`
+- `return_items`
+- `return_reports`
+- `email_logs`
+- `email_logs_with_memo_info`
+
+## Main Admin RPC Functions:
+- `get_main_admin_by_email`
+- `get_main_admin_by_id`
+- `update_main_admin_last_login`
+- `create_sub_main_admin`
+- `get_sub_main_admins_list`
+- `get_sub_main_admin_by_id`
+- `get_sub_main_admin_by_email`
+- `update_sub_main_admin`
+- `delete_sub_main_admin`
+- `update_sub_main_admin_last_login`
+- `accept_sub_admin_invite`
+- `validate_sub_admin_invite_token`
+- `resend_sub_admin_invite`
+- `get_buying_groups_list`
+- `get_buying_group_by_id`
+- `create_buying_group`
+- `update_buying_group`
+- `delete_buying_group`
+- `get_buying_group_domains`
+- `upsert_buying_group_domain`
+- `delete_buying_group_domain`
+- `resolve_domain_to_buying_group`
+- `warehouse_scan_box`, `warehouse_list_pending`, `warehouse_list_received`, `warehouse_verify_return`, `warehouse_verify_item`, `warehouse_verify_item_v2`, `warehouse_start_verification`, `warehouse_complete_verification`, `warehouse_get_verification_summary`, `warehouse_add_surplus`, `warehouse_list_surplus`, `warehouse_list_all_surplus`, `warehouse_report_discrepancy`, `warehouse_list_discrepancies`, `warehouse_resolve_discrepancy`
+- `create_batch`, `list_batches`, `get_batch`, `assign_returns_to_batch`, `close_batch`, `generate_debit_memos_for_batch`, `submit_cardinal`, `fix_batch_destinations`, `delete_batch`, `unassign_returns_from_batch`, `unassign_single_return`, `get_batch_permissions`
+- `ra_send_request`, `ra_update_request_status`, `ra_receive`, `ra_resend_request`, `ra_list_tracking`, `ra_list_outstanding`, `ra_list_overdue`, `ra_ship_debit_memo`, `ra_list_outbound_shipments`, `ra_generate_request_email`, `ra_generate_reminder_email`, `ra_list_tracking_grouped_by_return`
+- `payment_record`, `payment_list_unpaid`, `payment_send_reminder`, `payment_ask_vs_received`, `payment_manufacturer_summary`, `payment_list_unpaid_grouped_by_return`, `payment_list_paid_grouped_by_return`, `list_debit_memos`, `list_debit_memos_grouped_by_return`, `get_debit_memo`, `update_debit_memo`
+- `add_to_wine_cellar`, `list_wine_cellar_items`, `get_wine_cellar_item`, `update_wine_cellar_item`, `mark_wine_cellar_returned`, `check_and_surface_ready_items`, `get_wine_cellar_stats`
+- `create_destruction_record_for_transaction_item`
+- (manufacturer policies accessed via direct table queries in policiesService)
+- `upsert_ndc_pricing`, `get_ndc_pricing`, `search_ndc_pricing_book`, `delete_ndc_pricing`, `resolve_ndc_price`, `import_ndc_pricing_from_reports`, `get_ndc_pricing_intelligence`, `resolve_ndc_price_with_intelligence`, `record_credit_memo_analysis`, `search_ndc_pricing_fixed`, `get_ndc_pricing_index`
+- `get_admin_distributors_list`, `get_admin_distributor_by_id`, `create_admin_distributor`, `update_admin_distributor`, `update_admin_distributor_status`, `delete_admin_distributor`, `get_distributor_unique_products`
+
+## Buying Group RPC Functions:
+- `get_admin_pharmacies_list`, `get_admin_pharmacy_by_id`, `admin_create_pharmacy`, `update_admin_pharmacy`, `update_admin_pharmacy_status`, `pharmacy_admin_create_branch`, `get_pharmacy_branches`, `get_branch_pharmacy_detail`, `update_branch_pharmacy_status`, `get_pending_branch_invites`, `resend_branch_invite`
+- `list_processor_notifications`, `mark_processor_notification_read`, `mark_all_processor_notifications_read`, `list_processor_service_requests`, `claim_service_request`
+- `create_service_request`, `list_pharmacy_service_requests`, `cancel_pharmacy_service_request`, `list_processor_service_requests`, `claim_service_request`, `list_admin_service_requests`, `admin_reassign_service_request`, `get_service_request_detail`
+- `get_pharmacy_marketplace_deals`, `get_pharmacy_marketplace_deal_by_id`, `get_manual_featured_deal`, `get_all_manual_featured_deals`, `get_pharmacy_marketplace_categories`, `add_to_pharmacy_cart`, `get_pharmacy_cart`, `update_pharmacy_cart_item`, `remove_from_pharmacy_cart`, `clear_pharmacy_cart`, `get_pharmacy_cart_count`, `validate_pharmacy_cart`, `create_marketplace_order_from_cart`, `get_pharmacy_marketplace_orders`, `get_marketplace_order_by_id`, `cancel_marketplace_order`, `update_marketplace_order_payment`
+- `analytics_pharmacy_dashboard`, `get_admin_analytics`, `get_admin_dashboard_stats`, `analytics_returns_summary`, `analytics_ask_vs_received`, `analytics_aging_inventory`, `analytics_outstanding_ra`, `analytics_unpaid_memos`, `analytics_price_audit`, `analytics_pharmacy_performance`, `analytics_gpo_summary`
+- (inventory managed via direct table access - no specific inventory RPCs)
+- (subscriptions managed via direct table access - no specific subscription RPCs)
+- `validate_pharmacy_tenant_access`, `validate_pharmacy_switch_access`, `validate_admin_tenant_access`, `verify_pharmacy_invite`, `complete_pharmacy_setup`, `verify_branch_invite`, `complete_branch_setup`
+- `list_pharmacy_notifications`, `mark_pharmacy_notification_read`, `mark_all_pharmacy_notifications_read`, `list_processor_notifications`, `mark_processor_notification_read`, `mark_all_processor_notifications_read`
+- `get_admin_documents_list`, `get_admin_document_by_id`, `delete_admin_document`
+
+---
+
+---
+
+## Cross-Database Access Analysis
+
+### Admin Portal → MainAdmin DB Access
+
+| Page Route | API Calls | MainAdmin Tables Accessed | Solution Needed |
+|-----------|-----------|---------------------------|----------------|
+| `/login` | `POST /auth/login` | `admin`, `buying_group_domains` | **RESOLVED** — `admin` is now in Main Admin DB; login validates directly against Main Admin DB, then session is scoped to BG DB |
+| `/warehouse/receiving` | `POST /admin/warehouse/scan-box`, `GET /admin/warehouse/pending`, `GET /admin/warehouse/received` | `return_transactions` | Cross-DB query or API gateway |
+| `/warehouse/verification` | `GET /admin/warehouse/received` | `return_transactions` | Cross-DB query or API gateway |
+| `/warehouse/verification/[id]` | `GET .../verification-summary`, `POST .../start-verification`, `PATCH .../verify-v2`, `POST .../surplus`, `POST .../complete-verification` | `return_transactions`, `return_transaction_items`, `warehouse_discrepancies` | **HIGH PRIORITY** - Core verification operations |
+| `/warehouse/batches` | `GET/POST/DELETE /admin/batches`, `.../generate-memos` | `return_batches`, `batch_workflow_steps`, `debit_memos` | Cross-DB query or API gateway |
+| `/warehouse/debit-memos` | `GET/PATCH /admin/debit-memos` | `debit_memos`, `debit_memo_items` | Cross-DB query or API gateway |
+| `/warehouse/ra-tracking` | `GET /admin/ra-tracking`, `POST /admin/debit-memos/.../request-ra` | `debit_memos`, `ra_requests`, `shipment_groups` | Cross-DB query or API gateway |
+| `/warehouse/wine-cellar` | `GET/PATCH/POST /admin/wine-cellar` | `wine_cellar_items` | Cross-DB query or API gateway |
+| `/warehouse/destruction` | `GET/PATCH /admin/destruction` | `destruction_records` | Cross-DB query or API gateway |
+| `/warehouse/returns/*` | `GET/POST/PATCH/DELETE /return-transactions`, `GET /admin/reverse-distributors` | `return_transactions`, `return_transaction_items`, `reverse_distributors`, `wine_cellar_items` | **CRITICAL** - Full return lifecycle management |
+| `/policies`, `/ndc-pricing` | `GET/POST/PATCH/DELETE /admin/policies`, `/admin/ndc-pricing` | `manufacturer_policies`, `manufacturer_return_policies`, `ndc_pricing` | Cross-DB query or API gateway |
+
+### Pharmacy Portal → MainAdmin DB Access
+
+| Page Route | API Calls | MainAdmin Tables Accessed | Solution Needed |
+|-----------|-----------|---------------------------|----------------|
+| `/returns/*` | `GET/POST/PATCH/DELETE /return-transactions`, `POST /policies/check`, `POST /barcode/scan` | `return_transactions`, `return_transaction_items`, `manufacturer_policies`, `ndc_pricing` | **CRITICAL** - Core pharmacy return operations |
+| `/wine-cellar` | `GET /wine-cellar`, `GET /wine-cellar/stats` | `wine_cellar_items` | Cross-DB query or API gateway |
+| `/returns/destruction` | `GET/PATCH /destruction` | `destruction_records` | Cross-DB query or API gateway |
+| `/warehouse/verification` | `GET /admin/warehouse/received` | `return_transactions` | **AUTH ISSUE** - Pharmacy calling admin APIs |
+| `/warehouse/verification/[id]` | `GET/POST/PATCH /admin/warehouse/...` (summary, start, verify-v2, surplus, complete) | `return_transactions`, `return_transaction_items`, `warehouse_discrepancies` | **AUTH ISSUE** - Pharmacy calling admin APIs |
+| `/warehouse/surplus` | `GET /admin/warehouse/surplus` | Surplus data from verification | **AUTH ISSUE** - Pharmacy calling admin APIs |
+
+### Processor Portal → MainAdmin DB Access
+
+| Operation | API Calls | MainAdmin Tables Accessed | Solution Needed |
+|-----------|-----------|---------------------------|----------------|
+| Return Management | `GET/POST/PATCH/DELETE /return-transactions`, `POST /barcode/scan`, `POST /policies/check` | `return_transactions`, `return_transaction_items`, `manufacturer_policies`, `ndc_pricing` | **CRITICAL** - Processor return operations |
+| Service Requests | `GET/POST /processors/service-requests` | `service_requests` (in BG DB) | No cross-DB access needed |
+
+### RPC Functions Requiring Cross-DB Access
+
+| RPC Function | Called From BG Context | MainAdmin Tables Used | Migration Impact |
+|-------------|----------------------|---------------------|------------------|
+| **Warehouse RPCs** | | | |
+| `warehouse_scan_box` | Admin, Pharmacy verification | `return_transactions` | **HIGH** - Core receiving |
+| `warehouse_verify_item_v2` | Admin, Pharmacy verification | `return_transactions`, `return_transaction_items`, `warehouse_discrepancies` | **HIGH** - Core verification |
+| `warehouse_start_verification` | Admin, Pharmacy | `return_transactions` | **HIGH** |
+| `warehouse_complete_verification` | Admin, Pharmacy | `return_transactions`, `return_transaction_items` | **HIGH** |
+| **Return Transaction RPCs** | | | |
+| `create_return_transaction` | All portals | `return_transactions` | **CRITICAL** - Return creation |
+| `list_return_transactions` | All portals | `return_transactions` | **CRITICAL** - Return listing |
+| `get_return_transaction_by_id` | All portals | `return_transactions` | **CRITICAL** - Return details |
+| `update_return_transaction` | All portals | `return_transactions` | **CRITICAL** - Return updates |
+| `add_return_transaction_item_with_validation` | All portals | `return_transaction_items` | **CRITICAL** - Item management |
+| `list_return_transaction_items` | All portals | `return_transaction_items` | **CRITICAL** - Item listing |
+| **Batch & Financial RPCs** | | | |
+| `create_batch`, `list_batches`, `get_batch` | Admin portal | `return_batches`, `batch_workflow_steps` | **HIGH** - Batch processing |
+| `generate_debit_memos_for_batch` | Admin portal | `debit_memos`, `debit_memo_items` | **HIGH** - Financial processing |
+| **Wine Cellar RPCs** | | | |
+| `add_to_wine_cellar`, `list_wine_cellar_items` | Admin, Pharmacy | `wine_cellar_items` | **MEDIUM** - Specialty storage |
+| **Policy & Pricing RPCs** | | | |
+| Policy check operations | All portals via barcode/validation | `manufacturer_policies`, `manufacturer_return_policies`, `ndc_pricing` | **HIGH** - Every return item validation |
+
+### Critical Migration Issues
+
+0. **Buying Group Admin Account Location (RESOLVED)**
+   - `admin` table moved to Main Admin DB
+   - MainAdmin creates buying group accounts; BG portal login authenticates against Main Admin DB
+   - After login, session is scoped to the buying group's BG DB for all operational data
+   - `get_buying_groups_list` RPC no longer requires cross-DB access for `admin` — only `admin_settings` (BG DB) may still require a cross-DB read for display purposes
+
+1. **Pharmacy Portal Cross-Database Auth Violation**
+   - Pharmacy pages call `/admin/warehouse/*` APIs directly
+   - These are admin-scoped routes requiring admin permissions
+   - **Solution**: Create pharmacy-specific warehouse APIs or MainAdmin BFF
+
+2. **Return Transaction Shared Pipeline**
+   - Single return pipeline shared by all portals (`authenticateAny`)
+   - All portals create/update returns in MainAdmin warehouse tables
+   - **Solution**: Maintain single source of truth OR implement synchronous cross-service calls
+
+3. **High-Frequency Warehouse Operations**
+   - Verification, receiving, batching are core operations
+   - Multiple portals performing writes to MainAdmin warehouse tables
+   - **Solution**: API gateway with proper tenant isolation
+
+4. **Financial Chain Dependencies**
+   - Returns → Batches → Debit Memos → RA → Shipments spans multiple MainAdmin tables
+   - Partial migration breaks financial processing
+   - **Solution**: Keep entire financial chain in MainAdmin or implement distributed transactions
+
+5. **Policy/NDC Validation on Every Item**
+   - Every barcode scan and item addition requires policy/NDC validation
+   - High call volume to MainAdmin for validation
+   - **Solution**: Cache policy snapshots in BG DB or high-performance MainAdmin API
+## Migration Critical Considerations
+
+### 1. Warehouse Architecture (RESOLVED)
+**MainAdmin operates centralized warehouse** - all warehouse tables remain in MainAdmin DB. Buying groups create returns that are processed at the central warehouse.
+
+### 2. Cross-Database Access Patterns
+- **Buying Group → MainAdmin**: Submit returns to central warehouse
+- **MainAdmin → Buying Group**: Read pharmacy/processor info for warehouse operations
+- **Shared Reference Data**: Policies, NDC pricing in MainAdmin DB, accessed by buying groups
+
+### 3. Authentication Flow
+- MainAdmin auth uses `main_admin`/`sub_main_admin` tables (Main Admin DB)
+- Buying group auth uses `admin` table (Main Admin DB) — accounts are created by MainAdmin and login is validated against Main Admin DB; after successful login, the session is scoped to the buying group's BG DB
+- Pharmacy auth uses `pharmacy` table (BG DB)
+- Tenant resolution via `buying_group_domains` (Main Admin DB)
+
+### 4. Data Flow
+1. Pharmacies create returns in BG portal
+2. Returns are sent to central warehouse (MainAdmin DB)
+3. MainAdmin processes returns through warehouse workflow
+4. Results flow back to buying group for credits/payments
+
+---
+
+## Quick Reference: Portal → Primary Tables
+
+### Main Admin Database Tables
+
+| Portal | Primary Tables |
+|--------|---------------|
+| **MainAdmin** | `main_admin`, `sub_main_admin`, `buying_group_domains`, `admin`, `warehouses`, `return_batches`, `batch_workflow_steps`, `warehouse_discrepancies`, `debit_memos`, `debit_memo_items`, `ra_requests`, `shipment_groups`, `wine_cellar_items`, `destruction_records`, `reverse_distributors`, `manufacturer_policies`, `manufacturer_return_policies`, `manufacturer_policy_notes`, `non_returnable_products`, `ndc_pricing`, `distributors` |
+
+> `return_transactions` and `return_transaction_items` are also in Main Admin DB but shared across all portals — see note below.
+
+---
+
+### Buying Group (BG) Database Tables
+
+All three BG portals — **Admin, Pharmacy, and Processor** — share the same BG DB per buying group. They login via Main Admin DB (`admin` table) and then operate against their BG DB.
+
+| Portal | Primary Tables |
+|--------|---------------|
+| **Admin + Pharmacy + Processor (shared BG DB)** | `admin_settings`, `pharmacy`, `pharmacy_branches`, `pharmacy_invites`, `pharmacy_inventory_items`, `pharmacy_inventory_uploads`, `pharmacy_notifications`, `pharmacy_payments`, `processors`, `processor_store_assignments`, `processor_notifications`, `service_requests`, `service_request_assignments`, `marketplace_deals`, `marketplace_orders`, `marketplace_cart_items`, `products`, `custom_packages`, `custom_package_items`, `product_list_items`, `inventory_items`, `inventory_reminders`, `subscriptions`, `subscription_plans`, `uploaded_documents`, `refresh_tokens`, `settings`, `returns`, `return_items`, `return_reports`, `email_logs`, `email_logs_with_memo_info` |
+
+---
+
+### Cross-DB Note: `return_transactions` & `return_transaction_items`
+
+These two tables live in **Main Admin DB** (central warehouse) but are accessed by **all portals** (Admin, Pharmacy, Processor) as part of the return submission and lifecycle flow. They are the primary cross-DB access point for BG portals.
+
+---
+
+*Document reflects the centralized warehouse architecture where MainAdmin operates warehouse operations for all buying groups.*
