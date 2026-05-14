@@ -357,14 +357,27 @@ export interface ReturnDetailResponse {
 }
 
 /**
- * Get list of all return transactions for dropdown (id, license plate, date)
+ * Map DB / RPC row to ReturnListItem (camelCase for API).
  */
-export const getReturnsList = async (pharmacyId: string): Promise<ReturnListItem[]> => {
-  if (!supabaseAdmin) {
-    throw new AppError('Supabase admin client not configured', 500);
-  }
+function mapReturnListRows(rows: any[] | null | undefined): ReturnListItem[] {
+  return (rows || []).map((rt: any) => ({
+    id: rt.id,
+    licensePlate: rt.license_plate ?? rt.licensePlate,
+    createdAt: rt.created_at ?? rt.createdAt,
+    status: rt.status,
+    totalReturnableValue: Number(rt.total_returnable_value ?? rt.totalReturnableValue) || 0,
+    totalNonReturnableValue: Number(rt.total_non_returnable_value ?? rt.totalNonReturnableValue) || 0,
+  }));
+}
 
-  const { data, error } = await supabaseAdmin
+/**
+ * Same eligibility rules as list_pharmacy_dashboard_returns RPC, implemented in JS
+ * when the RPC is not deployed yet.
+ */
+async function getReturnsListFilteredFallback(pharmacyId: string): Promise<ReturnListItem[]> {
+  const db = supabaseAdmin!;
+
+  const { data: rows, error } = await db
     .from('return_transactions')
     .select('id, license_plate, created_at, status, total_returnable_value, total_non_returnable_value')
     .eq('pharmacy_id', pharmacyId)
@@ -373,15 +386,108 @@ export const getReturnsList = async (pharmacyId: string): Promise<ReturnListItem
   if (error) {
     throw new AppError(`Failed to fetch returns list: ${error.message}`, 400);
   }
+  if (!rows?.length) return [];
 
-  return (data || []).map((rt: any) => ({
-    id: rt.id,
-    licensePlate: rt.license_plate,
-    createdAt: rt.created_at,
-    status: rt.status,
-    totalReturnableValue: Number(rt.total_returnable_value) || 0,
-    totalNonReturnableValue: Number(rt.total_non_returnable_value) || 0,
-  }));
+  const txIds = rows.map((r: any) => r.id);
+
+  const { data: items, error: itemsErr } = await db
+    .from('return_transaction_items')
+    .select('id, transaction_id, return_status, non_returnable_reason')
+    .in('transaction_id', txIds);
+
+  if (itemsErr || !items?.length) {
+    return [];
+  }
+
+  const itemIds = items.map((i: any) => i.id).filter(Boolean);
+  const itemsWithAsk = new Set<string>();
+
+  const chunkSize = 300;
+  for (let i = 0; i < itemIds.length; i += chunkSize) {
+    const chunk = itemIds.slice(i, i + chunkSize);
+    const { data: dmiChunk, error: dmiErr } = await db
+      .from('debit_memo_items')
+      .select('transaction_item_id')
+      .in('transaction_item_id', chunk)
+      .not('ask_price', 'is', null);
+
+    if (dmiErr) {
+      console.warn('getReturnsList fallback debit_memo_items query failed:', dmiErr.message);
+      continue;
+    }
+    (dmiChunk || []).forEach((d: any) => {
+      if (d.transaction_item_id) itemsWithAsk.add(d.transaction_item_id);
+    });
+  }
+
+  const txHasDebitAsk = new Set<string>();
+  const txBadNonReturnableReason = new Set<string>();
+
+  for (const it of items as any[]) {
+    if (itemsWithAsk.has(it.id)) {
+      txHasDebitAsk.add(it.transaction_id);
+    }
+    if (
+      it.return_status === 'non_returnable' &&
+      (!it.non_returnable_reason || String(it.non_returnable_reason).trim() === '')
+    ) {
+      txBadNonReturnableReason.add(it.transaction_id);
+    }
+  }
+
+  const filtered = rows.filter(
+    (r: any) => txHasDebitAsk.has(r.id) && !txBadNonReturnableReason.has(r.id)
+  );
+  return mapReturnListRows(filtered);
+}
+
+/**
+ * Returns eligible for pharmacy dashboard dropdown:
+ * - At least one debit_memo_item with ask_price for this return's line items
+ * - No non_returnable line item missing non_returnable_reason
+ */
+export const getReturnsList = async (pharmacyId: string): Promise<ReturnListItem[]> => {
+  if (!supabaseAdmin) {
+    throw new AppError('Supabase admin client not configured', 500);
+  }
+
+  const { data: rpcData, error: rpcError } = await supabaseAdmin.rpc('list_pharmacy_dashboard_returns', {
+    p_pharmacy_id: pharmacyId,
+  });
+
+  if (!rpcError && rpcData != null) {
+    let arr: any[] = [];
+    if (Array.isArray(rpcData)) {
+      arr = rpcData;
+    } else if (typeof rpcData === 'string') {
+      try {
+        arr = JSON.parse(rpcData);
+      } catch {
+        arr = [];
+      }
+    } else if (typeof rpcData === 'object') {
+      arr = Object.values(rpcData as object);
+    }
+    if (Array.isArray(arr)) {
+      return arr.map((rt: any) => ({
+        id: rt.id,
+        licensePlate: rt.licensePlate ?? rt.license_plate,
+        createdAt: rt.createdAt ?? rt.created_at,
+        status: rt.status,
+        totalReturnableValue: Number(rt.totalReturnableValue ?? rt.total_returnable_value) || 0,
+        totalNonReturnableValue: Number(rt.totalNonReturnableValue ?? rt.total_non_returnable_value) || 0,
+      }));
+    }
+  }
+
+  if (rpcError) {
+    console.warn(
+      'list_pharmacy_dashboard_returns RPC unavailable (run migration 20260515_list_pharmacy_dashboard_returns.sql); using JS fallback:',
+      rpcError.message
+    );
+  }
+
+  return getReturnsListFilteredFallback(pharmacyId);
 };
 
 /**

@@ -66,7 +66,20 @@ export const getBuyingGroupByIdHandler = catchAsync(
 
 export const createBuyingGroupHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
-    const { name, contactEmail, contactPhone, address, notes, adminEmail, adminPassword, adminName } = req.body;
+    const {
+      name,
+      contactEmail,
+      contactPhone,
+      address,
+      notes,
+      adminEmail,
+      adminPassword,
+      adminName,
+      supabaseUrl,
+      supabaseAnonKey,
+      supabaseServiceRoleKey,
+      supabaseEnabled,
+    } = req.body;
 
     if (!name) {
       throw new AppError('Buying group name is required', 400);
@@ -85,6 +98,10 @@ export const createBuyingGroupHandler = catchAsync(
       adminEmail,
       adminPassword,
       adminName,
+      supabaseUrl,
+      supabaseAnonKey,
+      supabaseServiceRoleKey,
+      supabaseEnabled: typeof supabaseEnabled === 'boolean' ? supabaseEnabled : Boolean(supabaseEnabled),
     });
 
     res.status(201).json(result);
@@ -94,7 +111,18 @@ export const createBuyingGroupHandler = catchAsync(
 export const updateBuyingGroupHandler = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const { id } = req.params;
-    const { name, contactEmail, contactPhone, address, status, notes } = req.body;
+    const {
+      name,
+      contactEmail,
+      contactPhone,
+      address,
+      status,
+      notes,
+      supabaseUrl,
+      supabaseAnonKey,
+      supabaseServiceRoleKey,
+      supabaseEnabled,
+    } = req.body;
 
     if (!id) {
       throw new AppError('Buying group ID is required', 400);
@@ -107,6 +135,11 @@ export const updateBuyingGroupHandler = catchAsync(
       address,
       status,
       notes,
+      supabaseUrl,
+      supabaseAnonKey,
+      supabaseServiceRoleKey,
+      supabaseEnabled:
+        typeof supabaseEnabled === 'boolean' ? supabaseEnabled : supabaseEnabled === undefined ? undefined : Boolean(supabaseEnabled),
     });
 
     res.status(200).json(result);

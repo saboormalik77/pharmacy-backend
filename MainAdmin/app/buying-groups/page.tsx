@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Plus, Search, Users, Eye, EyeOff, Pencil, Trash2, X, ChevronLeft, ChevronRight,
-  CheckCircle, XCircle, AlertTriangle, Loader2, Globe,
+  CheckCircle, XCircle, AlertTriangle, Loader2, Globe, Copy,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn, formatDate } from '@/lib/utils';
@@ -53,9 +53,14 @@ export default function BuyingGroupsPage() {
     adminEmail: '',
     adminPassword: '',
     adminName: '',
+    supabaseUrl: '',
+    supabaseAnonKey: '',
+    supabaseServiceRoleKey: '',
+    supabaseEnabled: false,
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [showSupabaseKeys, setShowSupabaseKeys] = useState({ anonKey: false, serviceKey: false });
 
   const [domainForm, setDomainForm] = useState({
     domain: '',
@@ -68,6 +73,10 @@ export default function BuyingGroupsPage() {
   const [localDomains, setLocalDomains] = useState<Array<{ domain: string; adminHostname: string; pharmacyHostname: string }>>([]);
   const [localDomainForm, setLocalDomainForm] = useState({ domain: '', adminHostname: '', pharmacyHostname: '' });
   const [localDomainError, setLocalDomainError] = useState('');
+
+  /** Which Supabase view-modal copy button just succeeded (shows check briefly). */
+  const [supabaseViewCopiedKey, setSupabaseViewCopiedKey] = useState<'url' | 'anon' | 'service' | null>(null);
+  const supabaseViewCopyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (modalMode !== 'edit') return;
@@ -112,9 +121,50 @@ export default function BuyingGroupsPage() {
     }));
   }, [dispatch, page, search, statusFilter]);
 
+  const copySupabaseViewField = useCallback(async (value: string | null | undefined, key: 'url' | 'anon' | 'service') => {
+    const text = (value || '').trim();
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      if (supabaseViewCopyTimerRef.current) {
+        clearTimeout(supabaseViewCopyTimerRef.current);
+        supabaseViewCopyTimerRef.current = null;
+      }
+      setSupabaseViewCopiedKey(key);
+      supabaseViewCopyTimerRef.current = setTimeout(() => {
+        setSupabaseViewCopiedKey(null);
+        supabaseViewCopyTimerRef.current = null;
+      }, 2000);
+    } catch {
+      /* clipboard blocked — no toast behind modal */
+    }
+  }, []);
+
   useEffect(() => {
     loadGroups();
   }, [loadGroups]);
+
+  // After GET /buying-groups/:id completes, merge server row into the edit form (Supabase + contact fields).
+  useEffect(() => {
+    if (modalMode !== 'edit' || !editingGroup || isLoadingDetail) return;
+    if (!selectedGroup || selectedGroup.id !== editingGroup.id) return;
+    setFormData((prev) => ({
+      ...prev,
+      name: selectedGroup.name || '',
+      contactEmail: selectedGroup.contactEmail || '',
+      contactPhone: selectedGroup.contactPhone || '',
+      address: selectedGroup.address || '',
+      notes: selectedGroup.notes || '',
+      status: selectedGroup.status || 'active',
+      supabaseUrl: selectedGroup.supabaseUrl || '',
+      supabaseAnonKey: selectedGroup.supabaseAnonKey || '',
+      supabaseServiceRoleKey: selectedGroup.supabaseServiceRoleKey || '',
+      supabaseEnabled: Boolean(selectedGroup.supabaseEnabled),
+      adminEmail: '',
+      adminPassword: '',
+      adminName: '',
+    }));
+  }, [modalMode, editingGroup?.id, selectedGroup, isLoadingDetail]);
 
   useEffect(() => {
     if (successMsg) {
@@ -127,12 +177,14 @@ export default function BuyingGroupsPage() {
     setFormData({
       name: '', contactEmail: '', contactPhone: '', address: '', notes: '',
       status: 'active', adminEmail: '', adminPassword: '', adminName: '',
+      supabaseUrl: '', supabaseAnonKey: '', supabaseServiceRoleKey: '', supabaseEnabled: false,
     });
     setFormError('');
     setShowPassword(false);
     setLocalDomains([]);
     setLocalDomainForm({ domain: '', adminHostname: '', pharmacyHostname: '' });
     setLocalDomainError('');
+    setShowSupabaseKeys({ anonKey: false, serviceKey: false });
   };
 
   const openCreateModal = () => {
@@ -154,10 +206,15 @@ export default function BuyingGroupsPage() {
       adminEmail: '',
       adminPassword: '',
       adminName: '',
+      supabaseUrl: group.supabaseUrl || '',
+      supabaseAnonKey: group.supabaseAnonKey || '',
+      supabaseServiceRoleKey: group.supabaseServiceRoleKey || '',
+      supabaseEnabled: Boolean(group.supabaseEnabled),
     });
     setFormError('');
     setDomainForm({ domain: '', adminHostname: '', pharmacyHostname: '' });
     setDomainError('');
+    dispatch(fetchBuyingGroupById(group.id));
     dispatch(fetchBuyingGroupDomains(group.id));
     setModalMode('edit');
   };
@@ -249,6 +306,11 @@ export default function BuyingGroupsPage() {
   };
 
   const closeModal = () => {
+    if (supabaseViewCopyTimerRef.current) {
+      clearTimeout(supabaseViewCopyTimerRef.current);
+      supabaseViewCopyTimerRef.current = null;
+    }
+    setSupabaseViewCopiedKey(null);
     setModalMode(null);
     setEditingGroup(null);
     dispatch(clearSelectedGroup());
@@ -277,6 +339,10 @@ export default function BuyingGroupsPage() {
         adminEmail: formData.adminEmail.trim() || undefined,
         adminPassword: formData.adminPassword || undefined,
         adminName: formData.adminName.trim() || undefined,
+        supabaseUrl: formData.supabaseUrl.trim() || undefined,
+        supabaseAnonKey: formData.supabaseAnonKey.trim() || undefined,
+        supabaseServiceRoleKey: formData.supabaseServiceRoleKey.trim() || undefined,
+        supabaseEnabled: formData.supabaseEnabled,
       })).unwrap();
 
       const newGroupId =
@@ -326,6 +392,10 @@ export default function BuyingGroupsPage() {
         address: formData.address.trim() || undefined,
         status: formData.status,
         notes: formData.notes.trim() || undefined,
+        supabaseUrl: formData.supabaseUrl.trim() || undefined,
+        supabaseAnonKey: formData.supabaseAnonKey.trim() || undefined,
+        supabaseServiceRoleKey: formData.supabaseServiceRoleKey.trim() || undefined,
+        supabaseEnabled: formData.supabaseEnabled,
       })).unwrap();
 
       setSuccessMsg('Buying group updated successfully');
@@ -432,11 +502,18 @@ export default function BuyingGroupsPage() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--outline)]" />
             <input
-              type="text"
+              type="search"
+              name="buying_groups_list_query"
+              id="buying-groups-list-query"
               placeholder="Search by name or email..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              data-lpignore="true"
+              data-1p-ignore="true"
+              data-form-type="other"
               className="w-full pl-9 pr-4 py-2 text-sm border rounded-[4px] focus:outline-none focus:ring-2 focus:ring-primary-500"
               style={{ borderColor: 'var(--outline-variant)', backgroundColor: 'var(--surface-container-low)' }}
             />
@@ -704,6 +781,88 @@ export default function BuyingGroupsPage() {
                 </div>
               </div>
 
+              {/* Section: Supabase Credentials (Edit mode) */}
+              {modalMode === 'edit' && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <div className="h-px flex-1 bg-[var(--surface-container)]" />
+                    <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wider px-2 bg-indigo-50 rounded-full py-0.5">Supabase Credentials</span>
+                    <div className="h-px flex-1 bg-[var(--surface-container)]" />
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="supabaseEnabledEdit"
+                      checked={formData.supabaseEnabled}
+                      onChange={(e) => setFormData({ ...formData, supabaseEnabled: e.target.checked })}
+                      className="w-4 h-4 rounded border-[var(--outline-variant)] text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <label htmlFor="supabaseEnabledEdit" className="text-sm text-[var(--on-surface)]">
+                      Enable Supabase Connection
+                    </label>
+                  </div>
+
+                  {formData.supabaseEnabled && (
+                    <>
+                      <div>
+                        <label className="block text-xs font-semibold text-[var(--on-primary-container)] mb-1.5 uppercase tracking-wide">Supabase URL</label>
+                        <input
+                          type="url"
+                          value={formData.supabaseUrl}
+                          onChange={(e) => setFormData({ ...formData, supabaseUrl: e.target.value })}
+                          autoComplete="off"
+                          className="w-full px-3 py-2.5 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-[var(--surface-container-low)] focus:bg-white transition-colors"
+                          placeholder="https://your-project.supabase.co"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-[var(--on-primary-container)] mb-1.5 uppercase tracking-wide">Supabase Anon Key</label>
+                        <div className="relative">
+                          <input
+                            type={showSupabaseKeys.anonKey ? "text" : "password"}
+                            value={formData.supabaseAnonKey}
+                            onChange={(e) => setFormData({ ...formData, supabaseAnonKey: e.target.value })}
+                            autoComplete="off"
+                            className="w-full px-3 py-2.5 pr-10 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-[var(--surface-container-low)] focus:bg-white transition-colors"
+                            placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowSupabaseKeys((prev) => ({ ...prev, anonKey: !prev.anonKey }))}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--outline)] hover:text-[var(--on-primary-container)] focus:outline-none cursor-pointer"
+                          >
+                            {showSupabaseKeys.anonKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-[var(--on-primary-container)] mb-1.5 uppercase tracking-wide">Supabase Service Role Key</label>
+                        <div className="relative">
+                          <input
+                            type={showSupabaseKeys.serviceKey ? "text" : "password"}
+                            value={formData.supabaseServiceRoleKey}
+                            onChange={(e) => setFormData({ ...formData, supabaseServiceRoleKey: e.target.value })}
+                            autoComplete="off"
+                            className="w-full px-3 py-2.5 pr-10 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-[var(--surface-container-low)] focus:bg-white transition-colors"
+                            placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowSupabaseKeys((prev) => ({ ...prev, serviceKey: !prev.serviceKey }))}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--outline)] hover:text-[var(--on-primary-container)] focus:outline-none cursor-pointer"
+                          >
+                            {showSupabaseKeys.serviceKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
               {/* Section: Domains (Edit mode) */}
               {modalMode === 'edit' && editingGroup && (
                 <div className="space-y-3">
@@ -806,72 +965,162 @@ export default function BuyingGroupsPage() {
                 </div>
               )}
 
-              {/* Section: Admin Credentials + Domains (Create mode) */}
-              {modalMode === 'create' && (
-                <>
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                      <div className="h-px flex-1 bg-[var(--surface-container)]" />
-                      <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wider px-2 bg-indigo-50 rounded-full py-0.5">Buying Group Admin Credentials</span>
-                      <div className="h-px flex-1 bg-[var(--surface-container)]" />
-                    </div>
-                    <p
-                      className="text-xs -mt-1 rounded-[4px] px-3 py-2 border leading-snug"
-                      style={{
-                        backgroundColor: 'var(--secondary-container)',
-                        borderColor: 'var(--outline-variant)',
-                        color: 'var(--on-secondary-container)',
-                      }}
-                    >
-                      These credentials will be used by the buying group admin to log in to the Buying Group Portal.
-                    </p>
+{/* Section: Admin Credentials + Domains (Create mode) */}
+                  {modalMode === 'create' && (
+                    <>
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                          <div className="h-px flex-1 bg-[var(--surface-container)]" />
+                          <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wider px-2 bg-indigo-50 rounded-full py-0.5">Buying Group Admin Credentials</span>
+                          <div className="h-px flex-1 bg-[var(--surface-container)]" />
+                        </div>
+                        <p
+                          className="text-xs -mt-1 rounded-[4px] px-3 py-2 border leading-snug"
+                          style={{
+                            backgroundColor: 'var(--secondary-container)',
+                            borderColor: 'var(--outline-variant)',
+                            color: 'var(--on-secondary-container)',
+                          }}
+                        >
+                          These credentials will be used by the buying group admin to log in to the Buying Group Portal.
+                        </p>
 
-                    <div>
-                      <label className="block text-xs font-semibold text-[var(--on-primary-container)] mb-1.5 uppercase tracking-wide">Admin Name</label>
-                      <input
-                        type="text" value={formData.adminName}
-                        onChange={(e) => setFormData({ ...formData, adminName: e.target.value })}
-                        autoComplete="off"
-                        className="w-full px-3 py-2.5 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-[var(--surface-container-low)] focus:bg-white transition-colors"
-                        placeholder="Admin user display name"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-semibold text-[var(--on-primary-container)] mb-1.5 uppercase tracking-wide">Admin Email</label>
-                        <input
-                          type="email" value={formData.adminEmail}
-                          onChange={(e) => setFormData({ ...formData, adminEmail: e.target.value })}
-                          autoComplete="off"
-                          className="w-full px-3 py-2.5 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-[var(--surface-container-low)] focus:bg-white transition-colors"
-                          placeholder="admin@buyinggroup.com"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-[var(--on-primary-container)] mb-1.5 uppercase tracking-wide">Admin Password</label>
-                        <div className="relative">
+                        <div>
+                          <label className="block text-xs font-semibold text-[var(--on-primary-container)] mb-1.5 uppercase tracking-wide">Admin Name</label>
                           <input
-                            type={showPassword ? "text" : "password"}
-                            value={formData.adminPassword}
-                            onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
-                            autoComplete="new-password"
-                            className="w-full px-3 py-2.5 pr-10 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-[var(--surface-container-low)] focus:bg-white transition-colors"
-                            placeholder="Min 8 characters"
+                            type="text" value={formData.adminName}
+                            onChange={(e) => setFormData({ ...formData, adminName: e.target.value })}
+                            autoComplete="off"
+                            className="w-full px-3 py-2.5 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-[var(--surface-container-low)] focus:bg-white transition-colors"
+                            placeholder="Admin user display name"
                           />
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--outline)] hover:text-[var(--on-primary-container)] focus:outline-none cursor-pointer"
-                          >
-                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-semibold text-[var(--on-primary-container)] mb-1.5 uppercase tracking-wide">Admin Email</label>
+                            <input
+                              type="email" value={formData.adminEmail}
+                              onChange={(e) => setFormData({ ...formData, adminEmail: e.target.value })}
+                              autoComplete="off"
+                              className="w-full px-3 py-2.5 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-[var(--surface-container-low)] focus:bg-white transition-colors"
+                              placeholder="admin@buyinggroup.com"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-[var(--on-primary-container)] mb-1.5 uppercase tracking-wide">Admin Password</label>
+                            <div className="relative">
+                              <input
+                                type={showPassword ? "text" : "password"}
+                                value={formData.adminPassword}
+                                onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
+                                autoComplete="new-password"
+                                className="w-full px-3 py-2.5 pr-10 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-[var(--surface-container-low)] focus:bg-white transition-colors"
+                                placeholder="Min 8 characters"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--outline)] hover:text-[var(--on-primary-container)] focus:outline-none cursor-pointer"
+                              >
+                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
 
-                  {/* Domains (Create) */}
+                      {/* Supabase Credentials (Create) */}
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                          <div className="h-px flex-1 bg-[var(--surface-container)]" />
+                          <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wider px-2 bg-indigo-50 rounded-full py-0.5">Supabase Credentials</span>
+                          <div className="h-px flex-1 bg-[var(--surface-container)]" />
+                        </div>
+                        <p
+                          className="text-xs -mt-1 rounded-[4px] px-3 py-2 border leading-snug"
+                          style={{
+                            backgroundColor: 'var(--surface-container-low)',
+                            borderColor: 'var(--outline-variant)',
+                            color: 'var(--on-surface)',
+                          }}
+                        >
+                          Configure Supabase connection to enable the buying group to connect with their own database.
+                        </p>
+
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            id="supabaseEnabledCreate"
+                            checked={formData.supabaseEnabled}
+                            onChange={(e) => setFormData({ ...formData, supabaseEnabled: e.target.checked })}
+                            className="w-4 h-4 rounded border-[var(--outline-variant)] text-indigo-600 focus:ring-indigo-500"
+                          />
+                          <label htmlFor="supabaseEnabledCreate" className="text-sm text-[var(--on-surface)]">
+                            Enable Supabase Connection
+                          </label>
+                        </div>
+
+                        {formData.supabaseEnabled && (
+                          <>
+                            <div>
+                              <label className="block text-xs font-semibold text-[var(--on-primary-container)] mb-1.5 uppercase tracking-wide">Supabase URL</label>
+                              <input
+                                type="url"
+                                value={formData.supabaseUrl}
+                                onChange={(e) => setFormData({ ...formData, supabaseUrl: e.target.value })}
+                                autoComplete="off"
+                                className="w-full px-3 py-2.5 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-[var(--surface-container-low)] focus:bg-white transition-colors"
+                                placeholder="https://your-project.supabase.co"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-semibold text-[var(--on-primary-container)] mb-1.5 uppercase tracking-wide">Supabase Anon Key</label>
+                              <div className="relative">
+                                <input
+                                  type={showSupabaseKeys.anonKey ? "text" : "password"}
+                                  value={formData.supabaseAnonKey}
+                                  onChange={(e) => setFormData({ ...formData, supabaseAnonKey: e.target.value })}
+                                  autoComplete="off"
+                                  className="w-full px-3 py-2.5 pr-10 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-[var(--surface-container-low)] focus:bg-white transition-colors"
+                                  placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setShowSupabaseKeys((prev) => ({ ...prev, anonKey: !prev.anonKey }))}
+                                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--outline)] hover:text-[var(--on-primary-container)] focus:outline-none cursor-pointer"
+                                >
+                                  {showSupabaseKeys.anonKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                </button>
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-semibold text-[var(--on-primary-container)] mb-1.5 uppercase tracking-wide">Supabase Service Role Key</label>
+                              <div className="relative">
+                                <input
+                                  type={showSupabaseKeys.serviceKey ? "text" : "password"}
+                                  value={formData.supabaseServiceRoleKey}
+                                  onChange={(e) => setFormData({ ...formData, supabaseServiceRoleKey: e.target.value })}
+                                  autoComplete="off"
+                                  className="w-full px-3 py-2.5 pr-10 text-sm border border-[var(--outline-variant)] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-[var(--surface-container-low)] focus:bg-white transition-colors"
+                                  placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setShowSupabaseKeys((prev) => ({ ...prev, serviceKey: !prev.serviceKey }))}
+                                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--outline)] hover:text-[var(--on-primary-container)] focus:outline-none cursor-pointer"
+                                >
+                                  {showSupabaseKeys.serviceKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                </button>
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      {/* Domains (Create) */}
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
                       <div className="h-px flex-1 bg-[var(--surface-container)]" />
@@ -1070,6 +1319,117 @@ export default function BuyingGroupsPage() {
                     </div>
                   ))}
                 </div>
+
+                {/* Supabase Credentials Section */}
+                {(selectedGroup.supabaseEnabled ||
+                  (selectedGroup.supabaseUrl && selectedGroup.supabaseUrl.trim()) ||
+                  (selectedGroup.supabaseAnonKey && selectedGroup.supabaseAnonKey.trim()) ||
+                  (selectedGroup.supabaseServiceRoleKey && selectedGroup.supabaseServiceRoleKey.trim())) && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <div className="h-px flex-1 bg-[var(--surface-container)]" />
+                      <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wider px-2 bg-indigo-50 rounded-full py-0.5">Supabase Credentials</span>
+                      <div className="h-px flex-1 bg-[var(--surface-container)]" />
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-3">
+                      <div className="bg-white rounded-[4px] border border-[var(--outline-variant)] px-3.5 py-3">
+                        <p className="text-[10px] uppercase tracking-widest font-semibold mb-1" style={{ color: 'var(--on-surface-variant)' }}>Status</p>
+                        <p className="text-sm" style={{ color: selectedGroup.supabaseEnabled ? 'green' : 'var(--foreground)' }}>
+                          {selectedGroup.supabaseEnabled ? 'Enabled' : 'Disabled'}
+                        </p>
+                      </div>
+                      {selectedGroup.supabaseUrl && selectedGroup.supabaseUrl.trim() && (
+                        <div className="bg-white rounded-[4px] border border-[var(--outline-variant)] px-3.5 py-3">
+                          <p className="text-[10px] uppercase tracking-widest font-semibold mb-1.5" style={{ color: 'var(--on-surface-variant)' }}>Supabase URL</p>
+                          <div className="flex items-center gap-2 min-w-0">
+                            <p
+                              className="text-sm font-mono truncate flex-1 min-w-0"
+                              style={{ color: 'var(--foreground)' }}
+                              title={selectedGroup.supabaseUrl}
+                            >
+                              {selectedGroup.supabaseUrl}
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => copySupabaseViewField(selectedGroup.supabaseUrl, 'url')}
+                              className="shrink-0 p-1.5 rounded-[4px] border border-[var(--outline-variant)] hover:bg-[var(--surface-container-low)] text-[var(--on-surface-variant)] transition-colors"
+                              title={supabaseViewCopiedKey === 'url' ? 'Copied' : 'Copy URL'}
+                              aria-label="Copy Supabase URL"
+                            >
+                              {supabaseViewCopiedKey === 'url' ? (
+                                <CheckCircle className="w-4 h-4 text-green-600" aria-hidden />
+                              ) : (
+                                <Copy className="w-4 h-4" aria-hidden />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                      {(selectedGroup.supabaseAnonKey?.trim() || selectedGroup.supabaseServiceRoleKey?.trim()) && (
+                        <div className="bg-white rounded-[4px] border border-[var(--outline-variant)] px-3.5 py-3">
+                          <p className="text-[10px] uppercase tracking-widest font-semibold mb-2" style={{ color: 'var(--on-surface-variant)' }}>
+                            API keys
+                          </p>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 min-w-0">
+                            <div className="flex items-center gap-2 min-w-0 flex-1 sm:min-w-0">
+                              <span className="text-[10px] font-bold uppercase shrink-0 w-14 text-[var(--on-surface-variant)]">Anon</span>
+                              <code
+                                className="text-xs font-mono truncate flex-1 min-w-0 block"
+                                style={{ color: 'var(--foreground)' }}
+                                title={selectedGroup.supabaseAnonKey || undefined}
+                              >
+                                {selectedGroup.supabaseAnonKey?.trim() || '—'}
+                              </code>
+                              <button
+                                type="button"
+                                disabled={!selectedGroup.supabaseAnonKey?.trim()}
+                                onClick={() => copySupabaseViewField(selectedGroup.supabaseAnonKey, 'anon')}
+                                className="shrink-0 p-1.5 rounded-[4px] border border-[var(--outline-variant)] hover:bg-[var(--surface-container-low)] text-[var(--on-surface-variant)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                title={supabaseViewCopiedKey === 'anon' ? 'Copied' : 'Copy anon key'}
+                                aria-label="Copy Supabase anon key"
+                              >
+                                {supabaseViewCopiedKey === 'anon' ? (
+                                  <CheckCircle className="w-4 h-4 text-green-600" aria-hidden />
+                                ) : (
+                                  <Copy className="w-4 h-4" aria-hidden />
+                                )}
+                              </button>
+                            </div>
+                            <div className="hidden sm:block shrink-0 w-px h-8 bg-[var(--outline-variant)]" aria-hidden />
+                            <div className="flex items-center gap-2 min-w-0 flex-1 sm:min-w-0">
+                              <span className="text-[10px] font-bold uppercase shrink-0 w-14 text-[var(--on-surface-variant)]">Service</span>
+                              <code
+                                className="text-xs font-mono truncate flex-1 min-w-0 block"
+                                style={{ color: 'var(--foreground)' }}
+                                title={selectedGroup.supabaseServiceRoleKey || undefined}
+                              >
+                                {selectedGroup.supabaseServiceRoleKey?.trim() || '—'}
+                              </code>
+                              <button
+                                type="button"
+                                disabled={!selectedGroup.supabaseServiceRoleKey?.trim()}
+                                onClick={() => copySupabaseViewField(selectedGroup.supabaseServiceRoleKey, 'service')}
+                                className="shrink-0 p-1.5 rounded-[4px] border border-[var(--outline-variant)] hover:bg-[var(--surface-container-low)] text-[var(--on-surface-variant)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                title={supabaseViewCopiedKey === 'service' ? 'Copied' : 'Copy service role key'}
+                                aria-label="Copy Supabase service role key"
+                              >
+                                {supabaseViewCopiedKey === 'service' ? (
+                                  <CheckCircle className="w-4 h-4 text-green-600" aria-hidden />
+                                ) : (
+                                  <Copy className="w-4 h-4" aria-hidden />
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                          <p className="text-[10px] mt-2 leading-snug" style={{ color: 'var(--on-surface-variant)' }}>
+                            Hover a value to see the full key. Copy always uses the full string.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : null}
 

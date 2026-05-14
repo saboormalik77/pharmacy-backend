@@ -302,6 +302,10 @@ export const createBuyingGroup = async (params: {
   adminEmail?: string;
   adminPassword?: string;
   adminName?: string;
+  supabaseUrl?: string;
+  supabaseAnonKey?: string;
+  supabaseServiceRoleKey?: string;
+  supabaseEnabled?: boolean;
 }) => {
   if (!db) throw new AppError('Database connection not configured', 500);
 
@@ -320,6 +324,10 @@ export const createBuyingGroup = async (params: {
     p_admin_email: params.adminEmail || null,
     p_admin_password_hash: adminPasswordHash,
     p_admin_name: params.adminName || null,
+    p_supabase_url: params.supabaseUrl || null,
+    p_supabase_anon_key: params.supabaseAnonKey || null,
+    p_supabase_service_role_key: params.supabaseServiceRoleKey || null,
+    p_supabase_enabled: params.supabaseEnabled || false,
   });
 
   if (error) throw new AppError(`Failed to create buying group: ${error.message}`, 500);
@@ -337,6 +345,10 @@ export const updateBuyingGroup = async (groupId: string, params: {
   address?: string;
   status?: string;
   notes?: string;
+  supabaseUrl?: string;
+  supabaseAnonKey?: string;
+  supabaseServiceRoleKey?: string;
+  supabaseEnabled?: boolean;
 }) => {
   if (!db) throw new AppError('Database connection not configured', 500);
 
@@ -348,6 +360,10 @@ export const updateBuyingGroup = async (groupId: string, params: {
     p_address: params.address || null,
     p_status: params.status || null,
     p_notes: params.notes || null,
+    p_supabase_url: params.supabaseUrl || null,
+    p_supabase_anon_key: params.supabaseAnonKey || null,
+    p_supabase_service_role_key: params.supabaseServiceRoleKey || null,
+    p_supabase_enabled: params.supabaseEnabled ?? null,
   });
 
   if (error) throw new AppError(`Failed to update buying group: ${error.message}`, 500);

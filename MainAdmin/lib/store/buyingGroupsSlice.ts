@@ -11,6 +11,10 @@ export interface BuyingGroup {
   createdAt: string;
   updatedAt: string;
   adminCount: number;
+  supabaseUrl: string | null;
+  supabaseAnonKey: string | null;
+  supabaseServiceRoleKey: string | null;
+  supabaseEnabled: boolean | null;
 }
 
 export interface BuyingGroupAdmin {
@@ -121,6 +125,10 @@ export const createBuyingGroup = createAsyncThunk(
     adminEmail?: string;
     adminPassword?: string;
     adminName?: string;
+    supabaseUrl?: string;
+    supabaseAnonKey?: string;
+    supabaseServiceRoleKey?: string;
+    supabaseEnabled?: boolean;
   }, { rejectWithValue }) => {
     try {
       const { apiClient } = await import('@/lib/api/apiClient');
@@ -142,6 +150,10 @@ export const updateBuyingGroup = createAsyncThunk(
     address?: string;
     status?: string;
     notes?: string;
+    supabaseUrl?: string;
+    supabaseAnonKey?: string;
+    supabaseServiceRoleKey?: string;
+    supabaseEnabled?: boolean;
   }, { rejectWithValue }) => {
     try {
       const { apiClient } = await import('@/lib/api/apiClient');

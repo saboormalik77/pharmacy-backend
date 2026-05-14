@@ -122,9 +122,13 @@ export function NewDashboardUI({ pharmacyName = "" }: { pharmacyName?: string })
         setIsLoadingList(true);
         const response = await apiClient.get<ReturnListItem[]>('/dashboard/returns-list');
         if (response.status === 'success' && response.data) {
-          setReturnsList(response.data);
-          if (response.data.length > 0) {
-            setSelectedReturnId(response.data[0].id);
+          const list = response.data;
+          setReturnsList(list);
+          if (list.length > 0) {
+            setSelectedReturnId(list[0].id);
+          } else {
+            setSelectedReturnId("");
+            setReturnDetail(null);
           }
         }
       } catch (error: any) {
@@ -306,7 +310,13 @@ export function NewDashboardUI({ pharmacyName = "" }: { pharmacyName?: string })
             {isLoadingList ? (
               <div className="px-4 py-3.5 text-sm text-[#9ca3af]">Loading returns...</div>
             ) : returnsList.length === 0 ? (
-              <div className="px-4 py-3.5 text-sm text-[#9ca3af]">No returns found</div>
+              <div className="px-4 py-3.5 text-sm text-[#6b7280] space-y-1">
+                <p className="font-medium text-[#374151]">No returns ready for this view yet</p>
+                <p className="text-xs leading-relaxed">
+                  Only returns with generated debit memos, calculated ask prices, and complete non-returnable reasons
+                  are listed here. Other returns appear after processing finishes.
+                </p>
+              </div>
             ) : (
               <select
                 value={selectedReturnId}
